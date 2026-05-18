@@ -1,0 +1,481 @@
+import { apiClient } from "@/lib/apiClient";
+import type { Product, Order, Payout, Suggestion, CategoryItem } from "@pharmabag/utils";
+import type { ProductPayload } from "@pharmabag/utils";
+
+export async function getSellerDashboard(params: { dateFrom?: string; dateTo?: string } = {}) {
+  const qs = new URLSearchParams();
+  if (params.dateFrom) qs.set("dateFrom", params.dateFrom);
+  if (params.dateTo) qs.set("dateTo", params.dateTo);
+  const { data } = await apiClient.get<{ data: any }>(`/sellers/dashboard?${qs}`);
+  return data.data;
+}
+
+export async function getSellerProfile() {
+  const { data } = await apiClient.get<any>("/sellers/profile");
+  return data.data ?? data.profile ?? data;
+}
+
+export async function updateSellerProfile(payload: Partial<any>) {
+  const { data } = await apiClient.patch<any>("/sellers/profile", payload);
+  return data.data ?? data.profile ?? data;
+}
+
+export async function getSellerProducts(params: { page?: number; limit?: number; search?: string } = {}) {
+  const qs = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => { if (v) qs.set(k, String(v)); });
+  const { data } = await apiClient.get<any>(`/products/seller/own?${qs}`);
+  
+  const products = (data.data?.products ?? data.products ?? []).map((p: any) => {
+    let categoryName: string | undefined = p.category as any;
+    if (typeof p.category === 'object' && p.category) {
+      categoryName = (p.category as any).name || (p.category as any).id || 'Unknown';
+    }
+    return {
+      ...p,
+      category: categoryName,
+    };
+  });
+
+  return { ...data, data: products }; // Return standardized paginated object
+}
+
+export async function createSellerProduct(input: ProductPayload | Record<string, any>) {
+  const { data } = await apiClient.post<{ data: Product }>("/products", input);
+  const product = data.data;
+  return {
+    ...product,
+    category: typeof product?.category === 'object' && product?.category ? (product.category as any).name || (product.category as any).id : product?.category,
+  };
+}
+
+export async function updateSellerProduct(productId: string, input: Partial<ProductPayload>) {
+  const { data } = await apiClient.patch<{ data: Product }>(`/products/${productId}`, input);
+  const product = data.data;
+  return {
+    ...product,
+    category: typeof product?.category === 'object' && product?.category ? (product.category as any).name || (product.category as any).id : product?.category,
+  };
+}
+
+export async function getSellerProductById(productId: string) {
+  const { data } = await apiClient.get<{ data: Product }>(`/products/${productId}`);
+  const product = data.data;
+  return {
+    ...product,
+    category: typeof product?.category === 'object' && product?.category ? (product.category as any).name || (product.category as any).id : product?.category,
+  };
+}
+
+export async function getCategories() {
+  try {
+    const { data } = await apiClient.get<{ data: any[] }>("/products/categories");
+    const categories = data.data || [];
+    // Normalize and filter to ensure { id, name } structure
+    return Array.isArray(categories) 
+      ? categories
+          .filter(c => c && typeof c === 'object' && c.id && c.name)
+          .map(c => ({ id: c.id, name: c.name }))
+      : [];
+  } catch (error) {
+    console.warn("Failed to fetch categories, using fallback", error);
+    return [
+      { id: "cat-1", name: "Tablets" },
+      { id: "cat-2", name: "Syrups" },
+      { id: "cat-3", name: "Injections" },
+      { id: "cat-4", name: "Drops" },
+    ];
+  }
+}
+
+export async function deleteSellerProduct(productId: string) {
+  const { data } = await apiClient.delete<{ message: string }>(`/products/${productId}`);
+  return data;
+}
+
+export async function getSellerOrders(params: { dateFrom?: string; dateTo?: string } = {}) {
+  const qs = new URLSearchParams();
+  if (params.dateFrom) qs.set("dateFrom", params.dateFrom);
+  if (params.dateTo) qs.set("dateTo", params.dateTo);
+  const { data } = await apiClient.get<any>(`/orders/seller?${qs}`);
+  const raw = data.data ?? data;
+  return Array.isArray(raw) ? raw : (raw.orders ?? raw.data ?? []);
+}
+
+export async function updateSellerOrderStatus(orderId: string, status: string) {
+  const { data } = await apiClient.patch<{ order: Order }>(`/orders/${orderId}/status`, { status });
+  return data.order;
+}
+
+export async function getSellerSettlements(params: { dateFrom?: string; dateTo?: string } = {}) {
+  const qs = new URLSearchParams();
+  if (params.dateFrom) qs.set("dateFrom", params.dateFrom);
+  if (params.dateTo) qs.set("dateTo", params.dateTo);
+  const { data } = await apiClient.get<any>(`/settlements/seller?${qs}`);
+  return data.data ?? [];
+}
+
+export async function getSellerSettlementSummary() {
+  const { data } = await apiClient.get<any>("/settlements/summary");
+  return data.data ?? data;
+}
+
+export async function requestSellerPayout() {
+  const { data } = await apiClient.post<{ data: any }>("/settlements/request");
+  return data.data ?? data;
+}
+
+export async function toggleVacationMode(isVacation: boolean) {
+  const { data } = await apiClient.patch<any>("/sellers/profile", { isVacation });
+  return data.data ?? data.profile ?? data;
+}
+
+// ─── Orders (extended) ────────────────────────────────
+export async function getSellerOrderById(orderId: string) {
+  const { data } = await apiClient.get<any>(`/orders/${orderId}`);
+  const raw = data.data ?? data;
+  return raw.order || raw.data || raw;
+}
+
+export async function acceptSellerOrder(orderId: string) {
+  const { data } = await apiClient.patch<any>(`/orders/${orderId}/status`, { status: "ACCEPTED" });
+  return data.data ?? data.order ?? data;
+}
+
+export async function rejectSellerOrder(orderId: string, reason: string) {
+  const { data } = await apiClient.patch<any>(`/orders/${orderId}/status`, { status: "CANCELLED", reason });
+  return data.data ?? data.order ?? data;
+}
+
+export async function uploadOrderInvoice(orderId: string, formData: FormData) {
+  const { data } = await apiClient.post<any>(`/orders/${orderId}/invoice`, formData);
+
+  return data.data ?? data;
+}
+
+export async function getSellerCustomOrders() {
+  const { data } = await apiClient.get<any>("/orders/seller?type=custom");
+  const raw = data.data ?? data;
+  return Array.isArray(raw) ? raw : (raw.orders ?? []);
+}
+
+export async function getSellerCancelledOrders() {
+  const { data } = await apiClient.get<any>("/orders/seller?status=CANCELLED");
+  const raw = data.data ?? data;
+  return Array.isArray(raw) ? raw : (raw.orders ?? []);
+}
+
+// ─── Notifications ────────────────────────────────────
+export async function getSellerNotifications() {
+  const { data } = await apiClient.get<any>("/notifications");
+  return data.data ?? data;
+}
+
+// ─── Suggestion / Autocomplete Search ─────────────────
+
+const MOCK_SUGGESTIONS: Suggestion[] = [
+  { id: "sug-1", productName: "Paracetamol 500mg", companyName: "Cipla", chemicalCombination: "Paracetamol", category: "Tablets", categoryId: "cat-1", subCategoryId: "sub-1", mrp: 40, gstPercent: 12 },
+  { id: "sug-2", productName: "Amoxicillin 250mg", companyName: "Sun Pharma", chemicalCombination: "Amoxicillin", category: "Capsules", categoryId: "cat-5", mrp: 120, gstPercent: 12 },
+  { id: "sug-3", productName: "Cetirizine 10mg", companyName: "Dr. Reddy's", chemicalCombination: "Cetirizine Hydrochloride", category: "Tablets", categoryId: "cat-1", subCategoryId: "sub-1", mrp: 25, gstPercent: 12 },
+  { id: "sug-4", productName: "Azithromycin 500mg", companyName: "Zydus", chemicalCombination: "Azithromycin", category: "Tablets", categoryId: "cat-1", subCategoryId: "sub-2", mrp: 150, gstPercent: 12 },
+  { id: "sug-5", productName: "Dolo 650", companyName: "Micro Labs", chemicalCombination: "Paracetamol 650mg", category: "Tablets", categoryId: "cat-1", subCategoryId: "sub-1", mrp: 30, gstPercent: 12 },
+  { id: "sug-6", productName: "Pantoprazole 40mg", companyName: "Alkem", chemicalCombination: "Pantoprazole", category: "Tablets", categoryId: "cat-1", mrp: 110, gstPercent: 5 },
+  { id: "sug-7", productName: "Metformin 500mg", companyName: "USV", chemicalCombination: "Metformin Hydrochloride", category: "Tablets", categoryId: "cat-1", mrp: 60, gstPercent: 5 },
+  { id: "sug-8", productName: "Cough Syrup", companyName: "Dabur", chemicalCombination: "Honey, Tulsi, Mulethi", category: "Syrups", categoryId: "cat-2", subCategoryId: "sub-3", mrp: 95, gstPercent: 18 },
+  { id: "sug-9", productName: "ORS Powder", companyName: "Electral", chemicalCombination: "Sodium Chloride, Potassium Chloride", category: "Sachets", categoryId: "cat-6", mrp: 20, gstPercent: 0 },
+  { id: "sug-10", productName: "Vitamin D3 60K", companyName: "USV", chemicalCombination: "Cholecalciferol", category: "Capsules", categoryId: "cat-5", mrp: 85, gstPercent: 12 },
+];
+
+
+export async function searchSuggestions(query: string, type: 'product' | 'master' = 'master'): Promise<Suggestion[]> {
+  try {
+    const { data } = await apiClient.get<{ data: Suggestion[] }>("/products/suggestions", {
+      params: { search: query, type },
+    });
+    return data.data ?? [];
+  } catch {
+    if (!query || query.length < 2) return [];
+    const q = query.toLowerCase();
+    return MOCK_SUGGESTIONS.filter(
+      (s) =>
+        s.productName.toLowerCase().includes(q) ||
+        s.companyName.toLowerCase().includes(q) ||
+        (s.chemicalCombination?.toLowerCase().includes(q) ?? false)
+    );
+  }
+}
+
+// ─── Categories with Subcategories ────────────────────
+
+export async function getCategoriesWithSubs(): Promise<CategoryItem[]> {
+  try {
+    const { data } = await apiClient.get<{ data: CategoryItem[] }>("/products/categories?includeSubs=true");
+    const categories = data.data ?? [];
+    console.log("Raw categories response:", categories);
+    // Normalize and filter to ensure correct structure, handling both camelCase and lowercase field names
+    return Array.isArray(categories)
+      ? categories
+          .filter(c => c && typeof c === 'object' && c.id && c.name)
+          .map(c => {
+            // Handle both subCategories (camelCase) and subcategories (lowercase)
+            const subs = (c as any).subCategories || (c as any).subcategories || [];
+            
+            // Extract category name, handling object structures
+            let categoryName: string = 'Unknown';
+            if (typeof c.name === 'string') {
+              categoryName = c.name;
+            } else if (c.name && typeof c.name === 'object') {
+              categoryName = String((c.name as any).name || (c.name as any).id || c.name);
+            }
+            
+            return {
+              id: c.id,
+              name: categoryName,
+              subcategories: Array.isArray(subs)
+                ? subs.map((sc: any) => {
+                    const scId = sc?.id || sc?._id;
+                    // Extract subcategory name, handling object structures
+                    let scName: string = 'Unknown';
+                    if (typeof sc?.name === 'string') {
+                      scName = sc.name;
+                    } else if (sc?.name && typeof sc.name === 'object') {
+                      scName = String((sc.name as any).name || (sc.name as any).id || sc.name);
+                    }
+                    return { id: scId, name: scName, categoryId: c.id };
+                  }).filter((sc: any) => sc && sc.id && sc.name && sc.categoryId)
+                : [],
+            };
+          })
+      : [];
+  } catch (error) {
+    console.warn("Failed to fetch categories with subs, using fallback", error);
+    return [
+      { id: "cat-1", name: "Tablets", subcategories: [{ id: "sub-1", name: "Pain Relief", categoryId: "cat-1" }, { id: "sub-2", name: "Antibiotics", categoryId: "cat-1" }] },
+      { id: "cat-2", name: "Syrups", subcategories: [{ id: "sub-3", name: "Cough", categoryId: "cat-2" }, { id: "sub-4", name: "Digestive", categoryId: "cat-2" }] },
+      { id: "cat-3", name: "Injections", subcategories: [] },
+      { id: "cat-4", name: "Drops", subcategories: [{ id: "sub-5", name: "Eye Drops", categoryId: "cat-4" }, { id: "sub-6", name: "Ear Drops", categoryId: "cat-4" }] },
+      { id: "cat-5", name: "Capsules", subcategories: [] },
+      { id: "cat-6", name: "Sachets", subcategories: [] },
+    ];
+  }
+}
+
+export async function markNotificationRead(notificationId: string) {
+  const { data } = await apiClient.patch<any>(`/notifications/${notificationId}/read`);
+  return data.data ?? data;
+}
+
+export async function markAllNotificationsRead() {
+  const { data } = await apiClient.patch<any>("/notifications/read-all");
+  return data.data ?? data;
+}
+
+// ─── Profile (extended) ───────────────────────────────
+export async function getSellerFullProfile() {
+  const { data } = await apiClient.get<any>("/sellers/profile");
+  return data.data ?? data.profile ?? data;
+}
+
+// ─── Product Requests ─────────────────────────────────
+export async function getProductRequests() {
+  const { data } = await apiClient.get<any>("/products/my-requests");
+  return data.data ?? data;
+}
+
+export async function createProductRequest(payload: { productName: string; manufacturer?: string; description?: string }) {
+  const { data } = await apiClient.post<any>("/products/requests", payload);
+  return data.data ?? data;
+}
+
+// ─── Analytics ────────────────────────────────────────
+export async function getSellerAnalytics(params: { dateFrom?: string; dateTo?: string } = {}) {
+  const qs = new URLSearchParams();
+  if (params.dateFrom) qs.set("dateFrom", params.dateFrom);
+  if (params.dateTo) qs.set("dateTo", params.dateTo);
+  const { data } = await apiClient.get<any>(`/sellers/analytics?${qs}`);
+  return data.data ?? data;
+}
+
+// ─── Support Tickets ─────────────────────────────────
+const sellerTicketEndpoints = {
+  list: "/sellers/tickets",
+  listFallback: "/tickets",
+  detail: (id: string) => `/sellers/tickets/${id}`,
+  detailFallback: (id: string) => `/tickets/${id}`,
+  create: "/sellers/tickets",
+  createFallback: "/tickets",
+  addMessage: (id: string) => `/sellers/tickets/${id}/messages`,
+  addMessageFallback: (id: string) => `/tickets/${id}/messages`,
+};
+
+function isFallbackStatus(error: any) {
+  return [404, 405].includes(error?.response?.status);
+}
+
+function normalizeTicket(ticket: any) {
+  if (!ticket || typeof ticket !== 'object') return null;
+  if (!ticket.description && ticket.message) ticket.description = ticket.message;
+  if (!ticket.id && ticket._id) ticket.id = ticket._id;
+  if (!ticket.id && ticket.ticketId) ticket.id = ticket.ticketId;
+  if (!ticket.id && ticket.ticket_id) ticket.id = ticket.ticket_id;
+  if (!ticket.messages) ticket.messages = [];
+  return ticket;
+}
+
+function extractTicket(response: any) {
+  return normalizeTicket(response?.data?.ticket ?? response?.ticket ?? response?.data ?? response ?? null);
+}
+
+function extractTicketList(response: any) {
+  const raw = response?.data ?? response;
+  let tickets: any[] = [];
+
+  if (Array.isArray(raw)) {
+    tickets = raw;
+  } else if (Array.isArray(raw?.tickets)) {
+    tickets = raw.tickets;
+  } else if (Array.isArray(response?.data)) {
+    tickets = response.data;
+  }
+
+  return tickets.map(normalizeTicket).filter(Boolean);
+}
+
+export async function getSellerTickets() {
+  try {
+    const { data } = await apiClient.get<any>(sellerTicketEndpoints.list);
+    return extractTicketList(data);
+  } catch (error: any) {
+    if (isFallbackStatus(error)) {
+      const { data } = await apiClient.get<any>(sellerTicketEndpoints.listFallback);
+      return extractTicketList(data);
+    }
+    throw error;
+  }
+}
+
+export async function getSellerTicketById(ticketId: string) {
+  try {
+    const { data } = await apiClient.get<any>(sellerTicketEndpoints.detail(ticketId));
+    const ticket = extractTicket(data);
+    if (ticket) return ticket;
+  } catch (error: any) {
+    console.error('[Seller Ticket API] getSellerTicketById failed for ticketId:', ticketId, error?.response?.data ?? error?.message ?? error);
+    if (!isFallbackStatus(error)) throw error;
+  }
+
+  try {
+    const { data } = await apiClient.get<any>(sellerTicketEndpoints.detailFallback(ticketId));
+    return extractTicket(data);
+  } catch (error: any) {
+    console.error('[Seller Ticket API] getSellerTicketById fallback failed for ticketId:', ticketId, error?.response?.data ?? error?.message ?? error);
+    throw error;
+  }
+}
+
+export async function createSellerTicket(payload: { subject: string; message: string }) {
+  try {
+    const { data } = await apiClient.post<any>(sellerTicketEndpoints.create, payload);
+    const ticket = extractTicket(data);
+    if (ticket) return ticket;
+  } catch (error: any) {
+    if (!isFallbackStatus(error)) throw error;
+  }
+
+  const { data } = await apiClient.post<any>(sellerTicketEndpoints.createFallback, payload);
+  return extractTicket(data);
+}
+
+export async function addTicketMessage(ticketId: string, message: string) {
+  try {
+    const { data } = await apiClient.post<any>(sellerTicketEndpoints.addMessage(ticketId), { message });
+    const ticket = extractTicket(data);
+    if (ticket) return ticket;
+  } catch (error: any) {
+    if (!isFallbackStatus(error)) throw error;
+  }
+
+  const { data } = await apiClient.post<any>(sellerTicketEndpoints.addMessageFallback(ticketId), { message });
+  return extractTicket(data);
+}
+// ─── Buyer Onboarding (Seller Portal) ─────────────────
+/**
+ * Verify GST or PAN number via IDFY verification service
+ */
+export async function verifyGstOrPan(type: 'GST' | 'PAN', value: string) {
+  const { data } = await apiClient.post<any>('/verification/pangst', { type, value });
+  return data.data ?? data;
+}
+
+/**
+ * Upload KYC document for buyer profile (licence, bank statement, etc.)
+ */
+export async function uploadKycDocument(formData: FormData) {
+  const { data } = await apiClient.post<any>('/storage/kyc', formData);
+
+  return data.data ?? data;
+}
+
+/**
+ * Upload product image to S3
+ */
+export async function uploadProductImage(formData: FormData) {
+  const { data } = await apiClient.post<any>('/storage/product-image', formData);
+
+  return data.data ?? data;
+}
+
+/**
+ * Upload drug license document during seller onboarding
+ */
+export async function uploadDrugLicense(formData: FormData) {
+  const { data } = await apiClient.post<any>('/storage/drug-license', formData);
+
+  return data.data ?? data;
+}
+
+/**
+ * Seller onboards a buyer with complete profile
+ */
+export async function onboardBuyer(payload: {
+  phone: string;
+  name: string;
+  email?: string;
+  legalName: string;
+  gstNumber?: string;
+  panNumber?: string;
+  licence?: any[];
+  bankAccount?: any;
+  cancelCheck?: string;
+  document?: string;
+  inviteCode?: string;
+  address?: any;
+  city?: string;
+  state?: string;
+  pincode?: string;
+  latitude?: number;
+  longitude?: number;
+  drugLicenseNumber?: string;
+  drugLicenseUrl?: string;
+  gstPanResponse: any; // Pre-verified via verifyGstOrPan
+}) {
+  const { data } = await apiClient.post<any>('/buyers/onboard', payload);
+  return data.data ?? data;
+}
+
+/**
+ * Get all buyers onboarded by seller (for status tracking)
+ */
+export async function getSellerBuyers(page = 1, limit = 20) {
+  const { data } = await apiClient.get<any>('/buyers/all', {
+    params: { page, limit },
+  });
+  return data.data ?? data;
+}
+
+/**
+ * Get a specific buyer's profile details
+ */
+export async function getBuyerProfile(buyerId: string) {
+  const { data } = await apiClient.get<any>(`/buyers/${buyerId}`);
+  return data.data ?? data;
+}

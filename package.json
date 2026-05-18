@@ -1,0 +1,39 @@
+{
+  "name": "pharmabag-web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter buyer dev",
+    "dev:seller": "pnpm --filter seller dev",
+    "dev:admin": "pnpm --filter admin dev",
+    "dev:blog": "pnpm --filter blog dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "clean": "pnpm -r exec rm -rf .next node_modules .turbo",
+    "test:journey": "node test-product-journey.js",
+    "test:journey:local": "BACKEND_URL=http://localhost:3000 node test-product-journey.js",
+    "test:journey:production": "BACKEND_URL=https://pharmabag-api.onrender.com node test-product-journey.js"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react": "^7.34.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "prettier": "^3.2.0",
+    "prettier-plugin-tailwindcss": "^0.5.0",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.4.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@10.32.1",
+  "dependencies": {
+    "pnpm": "^10.33.0"
+  }
+}

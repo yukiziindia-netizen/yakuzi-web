@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html 
+    <html
       lang="en"
       style={{
         backgroundImage: "url('/Pharma_ui.png')",
@@ -29,7 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div style={{ flex: 1 }}>
               {children}
             </div>
-            <Footer />
+
           </div>
         </Providers>
       </body>

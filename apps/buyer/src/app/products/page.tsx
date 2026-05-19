@@ -7,7 +7,7 @@ import { X, Search, Filter, SlidersHorizontal, ChevronRight, LayoutGrid, List, T
 import Image from 'next/image';
 import Navbar from '@/components/landing/Navbar';
 import LoginModal from '@/components/landing/LoginModal';
-import PremiumProductCard from '@/components/shared/PremiumProductCard';
+import ProductCard from '@/components/shared/ProductCard';
 import { QuickViewModal } from '@/components/products/QuickViewModal';
 import { SkeletonCard } from '@/components/shared/LoaderSkeleton';
 import EmptyState from '@/components/shared/EmptyState';
@@ -456,22 +456,18 @@ function ProductsPageContent() {
 
                     return (
                       <div key={product.id}>
-                        <PremiumProductCard
+                        <ProductCard
                           name={product.name}
                           price={computedSellingPrice}
-                          mrp={product.mrp}
+                          originalPrice={product.mrp || product.price || computedSellingPrice * 1.2}
                           image={image}
                           stock={product.stock ?? 999}
-                          moq={product.moq || product.minimumOrderQuantity || 1}
-                          ptr={product.ptr}
-                          discountTag={computedDiscountTag}
+                          discount={computedDiscountTag || '15% off'}
                           cartQuantity={cartQuantityMap.get(product.id) ?? null}
                           productId={product.id}
-                          product={product}
                           isBookmarked={wishlistSet.has(product.id)}
                           onBookmark={handleBookmark}
                           isLoadingCart={pendingCartProducts.has(product.id)}
-                          onQuickView={() => setQuickViewProduct(product)}
                           onClick={() => router.push(`/products/${generateProductSlug(product.name, product.id)}`)}
                           onCartChange={handleCartChange}
                         />

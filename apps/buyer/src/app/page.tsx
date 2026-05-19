@@ -13,19 +13,19 @@ export default function HomePage() {
   };
 
   return (
-    <main className="w-full bg-gradient-to-br from-[#8deaffe] via-[#e0ffc7e6] to-[#f4ffede6] min-h-screen relative">
+    <main className="w-full bg-white min-h-screen relative pb-24 sm:pb-32">
       <Navbar showUserActions={true} onLoginClick={handleLoginClick} />
-      <section className="flex-1 overflow-hidden flex flex-col bg-transparent pt-16 lg:pt-24">
-        <div className="w-full flex-shrink-0 lg:pt-10 bg-transparent flex flex-col mb-10 lg:mb-8">
-          <HeroSection />
-        </div>
-        <div className="flex-1 lg:pt-10 min-h-[300px] overflow-hidden bg-transparent">
-          <ProductCarousel />
-        </div>
-      </section>
-
-      <TrustSection />
-      <Testimonials />
+      
+      <div className="w-full max-w-[1600px] mx-auto bg-white overflow-hidden flex flex-col relative min-h-screen">
+        <section className="flex-1 flex flex-col w-full">
+          <div className="w-full flex-shrink-0 flex flex-col">
+            <HeroSection />
+          </div>
+          <div className="flex-1 min-h-[300px] overflow-hidden bg-transparent mt-4 sm:mt-6">
+            <ProductCarousel />
+          </div>
+        </section>
+      </div>
     </main>
   );
 }

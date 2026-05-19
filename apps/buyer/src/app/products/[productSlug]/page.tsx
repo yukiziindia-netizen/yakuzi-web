@@ -261,6 +261,16 @@ export default function ProductDetailPage({ params }: { params: { productSlug: s
               whileHover={{ scale: 1.02 }}
               className="relative bg-white/40 backdrop-blur-xl rounded-2xl sm:rounded-3xl md:rounded-[40px] border border-white/40 shadow-xl overflow-hidden flex items-center justify-center aspect-square lg:col-span-1"
             >
+              {/* Bookmark Ribbon */}
+              <button
+                type="button"
+                onClick={handleToggleWishlist}
+                className="absolute right-[-1px] top-[10%] sm:top-[15%] z-20 outline-none w-[34px] sm:w-[44px] h-[34px] sm:h-[44px] flex items-center justify-end hover:scale-105 transition-transform group/ribbon"
+              >
+                <svg viewBox="0 0 24 36" preserveAspectRatio="none" className="w-[80%] h-[70%] drop-shadow-md transition-colors" fill={isWishlisted ? "#854cbc" : "white"} stroke={isWishlisted ? "#854cbc" : "#cbd5e1"} strokeWidth="1.5">
+                  <path d="M24 0 H0 L8 18 L0 36 H24 Z" strokeLinejoin="round" />
+                </svg>
+              </button>
               {(() => {
                 const imgs = product.images || (product as any).image_list || (product as any).imageList || (product as any).product_images || [];
                 const rawImg = (imgs && imgs.length > 0) ? (typeof imgs[0] === 'string' ? imgs[0] : imgs[0]?.url) : null;

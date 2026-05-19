@@ -16,6 +16,14 @@ const nextConfig = {
     { source: '/blog', destination: '/blogs' },
     { source: '/blog/:path*', destination: '/blogs/:path*' },
   ],
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "cdn.worldvectorlogo.com",
+      },
+    ],
+  },
 };
 
 module.exports = nextConfig;

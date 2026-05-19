@@ -125,7 +125,7 @@ export default function Navbar({
     <>
       {/* Navbar Fixed at Bottom */}
       <nav className="fixed bottom-4 sm:bottom-6 md:bottom-4 left-0 right-0 z-[60] flex justify-center items-end sm:items-center pointer-events-none px-2 sm:px-6 w-full">
-        <div className="flex items-center gap-2 sm:gap-6 md:gap-10 pointer-events-auto flex-wrap sm:flex-nowrap justify-center w-full max-w-[1100px] px-1 sm:px-4">
+        <div className="flex items-center gap-2 sm:gap-6 md:gap-2 pointer-events-auto flex-wrap sm:flex-nowrap justify-center w-full max-w-[1200px] px-1 sm:px-4">
 
           {/* Left Segment: Logo, Profile, Notifications, Search */}
           <div className="flex items-center bg-[#562996] rounded-[1.25rem] md:rounded-[1.5rem] px-3 xs:px-4 sm:px-6 md:px-8 py-2 sm:py-3.5 md:py-4 gap-2 xs:gap-3 sm:gap-5 md:gap-8 shadow-2xl text-white flex-1 justify-between max-w-[800px]">
@@ -307,7 +307,7 @@ export default function Navbar({
                   }}
                   className="text-gray-500 text-sm hover:text-gray-800 transition-colors"
                 >
-                  Sign in
+                  Sign out
                 </button>
               )}
             </div>

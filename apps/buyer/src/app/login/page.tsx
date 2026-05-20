@@ -1,27 +1,22 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
-import { motion } from 'framer-motion';
-import { Loader2 } from 'lucide-react';
+import { User, Lock, Eye, EyeOff, Loader2, Phone, KeyRound } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import Navbar from '@/components/landing/Navbar';
 import { useAuth } from '@pharmabag/api-client';
 import { useToast } from '@/components/shared/Toast';
-import ProductCarousel from '@/components/landing/ProductCarousel';
-
-const TRUST_HIGHLIGHTS = [
-  { label: 'STRICTLY AUTHENTIC', icon: <Image src="/authentic_icon.png" alt="S" width={80} height={80} className="w-14 h-14 md:w-20 md:h-20 object-contain" /> },
-  { label: 'FASTEST SHIPPING', icon: <Image src="/shipping_icon.png" alt="F" width={80} height={80} className="w-14 h-14 md:w-20 md:h-20 object-contain" /> },
-  { label: 'ONLY B2B PRICES', icon: <Image src="/b2b_icon.png" alt="B" width={80} height={80} className="w-14 h-14 md:w-20 md:h-20 object-contain" /> },
-  { label: 'SECURE CHECKOUT', icon: <Image src="/secure_checkout_icon.png" alt="Se" width={80} height={80} className="w-14 h-14 md:w-20 md:h-20 object-contain" /> }
-];
 
 export default function LoginPage() {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isOtpMode, setIsOtpMode] = useState(false);
+  
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const [isLoading, setIsLoading] = useState(false);
+  
   const router = useRouter();
   const { toast } = useToast();
   const { sendOtp, verifyOtp, isAuthenticated, isLoading: authLoading } = useAuth();
@@ -29,6 +24,16 @@ export default function LoginPage() {
   useEffect(() => {
     if (!authLoading && isAuthenticated) router.push('/products');
   }, [isAuthenticated, authLoading, router]);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    // Since there's no password login in useAuth, just mock it or show error
+    setTimeout(() => {
+      setIsLoading(false);
+      toast('Password login not available yet. Please use OTP.', 'error');
+    }, 1000);
+  };
 
   const sanitizePhone = (input: string) => {
     let cleaned = input.replace(/\D/g, '');
@@ -44,7 +49,7 @@ export default function LoginPage() {
       await sendOtp(cleanPhone);
       setStep('otp');
       toast('OTP sent!', 'success');
-    } catch (e: any) { toast('Failed', 'error'); } finally { setIsLoading(false); }
+    } catch (e: any) { toast('Failed to send OTP', 'error'); } finally { setIsLoading(false); }
   };
 
   const handleVerifyOtp = async () => {
@@ -58,102 +63,166 @@ export default function LoginPage() {
     } catch (e: any) { toast('Invalid OTP', 'error'); } finally { setIsLoading(false); }
   };
 
-  if (authLoading) return <main className="h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-emerald-500" /></main>;
+  if (authLoading) return <main className="h-screen flex items-center justify-center bg-[#252525]"><Loader2 className="w-8 h-8 animate-spin text-[#8B5CF6]" /></main>;
 
   return (
-    <>
-      <Navbar />
+    <main className="min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-b from-[#e4e4e4] via-[#757575] to-[#252525] relative overflow-hidden px-6 py-12 font-sans">
+      {/* Noise Overlay */}
+      <div className="absolute inset-0 opacity-20 pointer-events-none mix-blend-overlay" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }}></div>
 
-      <main className="h-screen w-screen overflow-hidden relative bg-[#f8fbfa] flex flex-col items-center">
-        <div className="fixed inset-0 bg-gradient-to-b from-[#E0F7FA] to-[#B2EBF2] z-0 md:hidden" />
-        <div className="absolute top-0 left-0 w-full h-full pointer-events-none hidden md:block">
-          <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[40%] bg-lime-200/20 blur-[120px] rounded-full" />
-          <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[40%] bg-sky-200/20 blur-[120px] rounded-full" />
-        </div>
+      <div className="z-10 w-full max-w-sm flex flex-col items-center mt-[-10vh]">
+        
+        {/* Logo */}
+        <h1 className="text-[60px] font-black tracking-tighter text-[#8e44ad] mb-20 uppercase" style={{ fontFamily: 'Impact, Arial Black, sans-serif' }}>
+          YUKiZi
+        </h1>
 
-        <div className="flex-1 w-full pt-6 pb-32 sm:pt-32 sm:pb-4 px-0 flex flex-col items-center justify-start sm:justify-center relative z-10 overflow-hidden">
-
-          {/* Badges removed per request */}
-          <div className="container max-w-7xl mx-auto flex-1 flex flex-col items-center justify-center w-full px-0">
-            <div className="flex flex-col lg:flex-row items-center justify-between gap-0 lg:gap-16 xl:gap-24 w-full h-fit px-0">
-
-              {/* FORM SECTION (Desktop Right, Mobile Top) */}
-              <motion.div initial={{ opacity: 0, scale: 0.98, y: 15 }} animate={{ opacity: 1, scale: 1, y: 0 }} className="w-full lg:w-[45%] max-w-lg mx-auto order-1 lg:order-2 px-0 lg:px-0">
-                <div className="bg-transparent md:bg-white md:backdrop-blur-3xl md:border md:border-white/60 md:rounded-[48px] p-0 sm:p-4 md:p-10 xl:p-12 md:shadow-2xl md:shadow-lime-900/5 transition-all w-full flex flex-col items-center">
-
-                  <div className="flex flex-col items-center justify-center text-center mb-3 md:mb-10 w-full px-4">
-                    <h2 className="text-[36px] md:text-[52px] font-black text-[#1A1A1A] md:text-black mb-0 tracking-tighter leading-none uppercase md:normal-case">Express Login!</h2>
-                    <p className="text-[14px] md:text-xl text-[#1A1A1A] md:text-black/50 font-bold uppercase tracking-widest  md:pt-0 mt-1 md:mt-2 text-center">NO SIGNUP REQUIRED</p>
-                  </div>
-
-                  <form onSubmit={(e) => { e.preventDefault(); step === 'phone' ? handleSendOtp() : handleVerifyOtp(); }} className="space-y-4 md:space-y-8 flex flex-col items-center w-full px-0">
-                    {step === 'phone' ? (
-                      <div className="space-y-2 w-full flex flex-col items-center px-6">
-                        <label className="block text-[11px] md:text-xs font-bold text-[#999999] md:text-gray-400 uppercase tracking-[0.2em] text-center mb-0">PHONE NUMBER</label>
-                        <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="00000 00000" autoFocus className="w-full h-[72px] md:h-16 bg-white md:bg-white/80 rounded-full md:rounded-2xl shadow-[0_10px_30px_-10px_rgba(0,0,0,0.1)] md:shadow-none text-[22px] md:text-2xl px-6 text-center focus:ring-4 focus:ring-lime-300 focus:bg-white outline-none border border-white/50 font-black" />
-                      </div>
-                    ) : (
-                      <div className="space-y-2 w-full flex flex-col items-center px-6">
-                        <label className="block text-[11px] md:text-xs font-bold text-[#999999] md:text-gray-400 uppercase tracking-[0.2em] text-center mb-0">ENTER CODE</label>
-                        <input type="text" value={otp} onChange={(e) => setOtp(e.target.value)} placeholder="••••••" maxLength={6} autoFocus className="w-full h-[72px] md:h-16 bg-white md:bg-white/80 rounded-full md:rounded-2xl shadow-[0_10px_30px_-10px_rgba(0,0,0,0.1)] md:shadow-none text-[24px] md:text-2xl px-6 text-center focus:ring-4 focus:ring-lime-300 focus:bg-white outline-none border border-white/50 font-black tracking-[0.5em]" />
-                      </div>
-                    )}
-
-                    <div className="w-full px-6 pt-1">
-                      <button type="submit" disabled={isLoading} className="w-full h-[72px] md:h-16 bg-[#C4FF4B] md:bg-lime-300 hover:bg-[#B3F23A] md:hover:bg-lime-400 text-black md:text-gray-900 rounded-full md:rounded-2xl text-[20px] md:text-xl font-black shadow-[0_10px_25px_-5px_rgba(196,255,75,0.4)] md:shadow-xl shadow-lime-300/20 transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-70">
-                        {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : <span className="tracking-tight uppercase">{step === 'phone' ? 'Send OTP' : 'Continue'}</span>}
-                      </button>
-
-                      <div className="mt-6 flex flex-col items-center gap-4">
-                        <a
-                          href="https://seller.pharmabag.in"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="group flex flex-col items-center gap-1 bg-white/40 hover:bg-white/60 p-4 rounded-3xl border border-white/60 transition-all hover:scale-[1.02] shadow-sm w-full"
-                        >
-                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">Business Owner?</span>
-                          <span className="text-sm font-black text-gray-900 flex items-center gap-2">
-                            Become a Seller <span className="text-lime-600 group-hover:translate-x-1 transition-transform">→</span>
-                          </span>
-                        </a>
-                      </div>
-
-                      {step === 'otp' && (
-                        <button type="button" onClick={() => { setStep('phone'); setOtp(''); }} className="w-full mt-4 text-[13px] md:text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors text-center uppercase tracking-widest">
-                          ← Change Phone Number
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Badges removed from desktop per request */}
-                  </form>
-                </div>
-              </motion.div>
-
-              {/* CONTENT SECTION (Desktop Left, Mobile Bottom) */}
-              <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} className="w-full lg:flex-1 flex flex-col items-center justify-center order-2 lg:order-1 px-0 mt-3 md:mt-0">
-                <div className="grid grid-cols-4 gap-0 w-full mx-auto md:mb-12 px-0 bg-transparent">
-                  {TRUST_HIGHLIGHTS.map((item, idx) => (
-                    <motion.div key={item.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 * idx }} className="flex flex-col items-center justify-start text-center gap-1">
-                      <div className="flex-shrink-0 scale-75 sm:scale-100">{item.icon}</div>
-                      <p className="text-[8px] sm:text-xs font-bold text-gray-500 uppercase tracking-tight leading-none max-w-[70px]">{item.label}</p>
-                    </motion.div>
-                  ))}
-                </div>
-
-                <div className="hidden lg:block w-full border-t border-gray-200/40 pt-10">
-                  <ProductCarousel slot="LOGIN_CAROUSEL" />
-                </div>
-              </motion.div>
+        {/* Form */}
+        {!isOtpMode ? (
+          <form onSubmit={handleLogin} className="w-full space-y-4">
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                <User className="h-[22px] w-[22px] text-gray-400" strokeWidth={2.5} />
+              </div>
+              <input
+                type="text"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full pl-14 pr-4 py-[18px] rounded-full bg-white text-gray-800 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-[#8e44ad] shadow-lg font-bold text-lg"
+              />
             </div>
+
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                <Lock className="h-[22px] w-[22px] text-gray-400" strokeWidth={2.5} />
+              </div>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full pl-14 pr-14 py-[18px] rounded-full bg-white text-gray-800 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-[#8e44ad] shadow-lg font-bold text-lg"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-5 flex items-center text-gray-400 hover:text-gray-600"
+              >
+                {showPassword ? <EyeOff className="h-[22px] w-[22px]" /> : <Eye className="h-[22px] w-[22px]" />}
+              </button>
+            </div>
+
+            <div className="flex justify-center items-center text-[13px] md:text-sm mt-5 text-[#d1d5db] font-semibold tracking-wide">
+              <button type="button" className="underline underline-offset-2 hover:text-white transition-colors mr-1">Forgot Password ?</button>
+              <span className="opacity-90">Login through </span>
+              <button type="button" onClick={() => setIsOtpMode(true)} className="underline underline-offset-2 ml-1 hover:text-white transition-colors">OTP</button>
+            </div>
+          </form>
+        ) : (
+          <form onSubmit={(e) => { e.preventDefault(); step === 'phone' ? handleSendOtp() : handleVerifyOtp(); }} className="w-full space-y-4">
+            {step === 'phone' ? (
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                  <Phone className="h-[22px] w-[22px] text-gray-400" strokeWidth={2.5} />
+                </div>
+                <input
+                  type="tel"
+                  placeholder="Phone Number"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full pl-14 pr-4 py-[18px] rounded-full bg-white text-gray-800 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-[#8e44ad] shadow-lg font-bold text-lg"
+                />
+              </div>
+            ) : (
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                  <KeyRound className="h-[22px] w-[22px] text-gray-400" strokeWidth={2.5} />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Enter 6-digit OTP"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  maxLength={6}
+                  className="w-full pl-14 pr-4 py-[18px] rounded-full bg-white text-gray-800 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-[#8e44ad] shadow-lg font-bold text-lg tracking-[0.2em]"
+                />
+              </div>
+            )}
+
+            <div className="flex justify-center items-center text-[13px] md:text-sm mt-5 text-[#d1d5db] font-semibold tracking-wide">
+              <button type="button" onClick={() => setIsOtpMode(false)} className="underline underline-offset-2 hover:text-white transition-colors mr-1">Use Password ?</button>
+              {step === 'otp' && (
+                <>
+                  <span className="opacity-90">or </span>
+                  <button type="button" onClick={() => { setStep('phone'); setOtp(''); }} className="underline underline-offset-2 ml-1 hover:text-white transition-colors">Change Number</button>
+                </>
+              )}
+            </div>
+            
+            {/* Action button for OTP */}
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full py-4 rounded-full text-white font-bold text-lg shadow-[0_0_25px_rgba(232,160,223,0.5)] bg-gradient-to-r from-[#b98df2] to-[#f4aae2] hover:opacity-90 transition-opacity flex justify-center items-center"
+              >
+                {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : (step === 'phone' ? 'Send OTP' : 'Verify OTP')}
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* Separator & Social Login - Always visible */}
+        <div className="w-full flex flex-col items-center">
+          <div className="flex items-center justify-center space-x-4 mt-8 mb-6 w-full">
+            <div className="h-px w-12 bg-gray-400/60"></div>
+            <span className="text-gray-400 font-medium text-lg">or</span>
+            <div className="h-px w-12 bg-gray-400/60"></div>
           </div>
 
-          {/* BOTTOM CAROUSEL MOBILE */}
-          <div className="lg:hidden w-full pt-1 flex-shrink-0 border-none pb-4">
-            <ProductCarousel slot="LOGIN_CAROUSEL" />
+          <div className="flex justify-center space-x-6 mb-12">
+            {/* Google Icon */}
+            <button type="button" className="w-11 h-11 rounded-full bg-transparent flex items-center justify-center hover:scale-110 transition-transform">
+              <svg viewBox="0 0 24 24" width="28" height="28" xmlns="http://www.w3.org/2000/svg">
+                <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
+                  <path fill="#4285F4" d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z"/>
+                  <path fill="#34A853" d="M -14.754 63.239 C -11.514 63.239 -8.804 62.159 -6.824 60.329 L -10.684 57.329 C -11.764 58.049 -13.134 58.489 -14.754 58.489 C -17.884 58.489 -20.534 56.379 -21.484 53.529 L -25.464 53.529 L -25.464 56.619 C -23.494 60.539 -19.444 63.239 -14.754 63.239 Z"/>
+                  <path fill="#FBBC05" d="M -21.484 53.529 C -21.734 52.809 -21.864 52.039 -21.864 51.239 C -21.864 50.439 -21.724 49.669 -21.484 48.949 L -21.484 45.859 L -25.464 45.859 C -26.284 47.479 -26.754 49.299 -26.754 51.239 C -26.754 53.179 -26.284 54.999 -25.464 56.619 L -21.484 53.529 Z"/>
+                  <path fill="#EA4335" d="M -14.754 43.989 C -12.984 43.989 -11.404 44.599 -10.154 45.789 L -6.734 42.369 C -8.804 40.429 -11.514 39.239 -14.754 39.239 C -19.444 39.239 -23.494 41.939 -25.464 45.859 L -21.484 48.949 C -20.534 46.099 -17.884 43.989 -14.754 43.989 Z"/>
+                </g>
+              </svg>
+            </button>
+
+            {/* Facebook Icon */}
+            <button type="button" className="w-11 h-11 rounded-full bg-transparent flex items-center justify-center hover:scale-110 transition-transform">
+              <svg viewBox="0 0 24 24" width="28" height="28" xmlns="http://www.w3.org/2000/svg">
+                <path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+              </svg>
+            </button>
+
+            {/* Apple Icon */}
+            <button type="button" className="w-11 h-11 rounded-full bg-transparent flex items-center justify-center hover:scale-110 transition-transform">
+              <svg viewBox="0 0 24 24" width="30" height="30" xmlns="http://www.w3.org/2000/svg">
+                <path fill="#a3a3a3" d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.19 2.31-.88 3.5-.8 1.55.06 2.85.74 3.65 1.88-3.13 1.82-2.6 5.98.54 7.22-.72 1.76-1.64 3.12-2.77 3.87zm-2.45-13.8c.63-1.64-.17-3.32-1.63-4.15-1.57-.65-3.32.22-3.86 1.95-.57 1.81.4 3.44 1.93 4.04 1.48.59 3.01-.27 3.56-1.84z"/>
+              </svg>
+            </button>
           </div>
+
+          {!isOtpMode && (
+            <div className="w-full">
+              <button
+                type="button"
+                className="w-full py-[18px] rounded-full text-white font-bold text-lg shadow-[0_0_30px_rgba(232,160,223,0.4)] bg-gradient-to-r from-[#b98df2] to-[#f4aae2] hover:opacity-90 transition-opacity flex justify-center items-center tracking-wide"
+              >
+                Create YUKiZi account
+              </button>
+            </div>
+          )}
         </div>
-      </main>
-    </>
+
+      </div>
+    </main>
   );
 }
+

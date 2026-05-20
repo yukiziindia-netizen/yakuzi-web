@@ -8,10 +8,10 @@ export default function HeroSection() {
     <div className="w-full bg-white flex flex-col relative z-10">
 
       {/* Top Main Section */}
-      <div className="flex flex-col md:flex-row h-auto md:h-[400px]">
+      <div className="flex flex-col md:flex-row h-auto md:h-[300px]">
 
         {/* Left Side: Slanted Banners */}
-        <div className="w-full md:w-[55%] relative h-[250px] md:h-full overflow-hidden bg-white">
+        <div className="w-full md:w-[50%] relative h-[250px] md:h-full overflow-hidden bg-white">
           <div className="flex w-[120%] h-full -ml-[10%] gap-1.5 bg-white">
 
             {/* Left Image */}
@@ -52,12 +52,12 @@ export default function HeroSection() {
         </div>
 
         {/* Right Side: Text & Tags */}
-        <div className="hidden md:flex w-full md:w-[45%] flex-col justify-center items-center py-8 px-6 bg-white relative z-10 border-t md:border-t-0 border-gray-100">
-          <h1 className="text-6xl  md:text-[5.5rem] font-black text-[#854cbc] tracking-tighter mb-4 md:mb-6 uppercase" style={{ fontFamily: 'Impact, Arial Black, sans-serif' }}>
+        <div className="hidden md:flex w-full md:w-[50%] flex-col justify-center items-center py-8 px-6 bg-white relative z-10 border-t md:border-t-0 border-gray-100">
+          <h1 className="text-7xl  md:text-[5.5rem] font-black text-[#854cbc] tracking-tighter mb-4 md:mb-6 uppercase" style={{ fontFamily: 'Impact, Arial Black, sans-serif' }}>
             YUKIZI
           </h1>
 
-          <div className="flex flex-wrap justify-center gap-x-2.5 gap-y-2 text-[12px] md:text-[13px] text-gray-500 text-center font-medium max-w-[320px] mb-10">
+          <div className="flex flex-wrap justify-center gap-x-1 gap-y-2 text-[16px] md:text-[16px] text-gray-500 text-center font-semibold max-w-[400px] mb-10">
             <span className="cursor-pointer hover:text-gray-800 transition-colors">Comic stores</span>
             <span className="cursor-pointer hover:text-gray-800 transition-colors">Manga</span>
             <span className="bg-[#a379cf] text-white px-2.5 py-0.5 rounded-full cursor-pointer hover:bg-[#854cbc] transition-colors shadow-sm">Merch</span>
@@ -91,19 +91,16 @@ export default function HeroSection() {
             <ChevronLeft size={24} strokeWidth={3} />
           </button>
 
-
-
-
           {/* Logos */}
-          <div className="flex items-center justify-center gap-4 md:gap-8 flex-wrap">
+          <div className="flex items-center justify-center gap-4  md:gap-10 flex-wrap">
 
-            {/* <Image
+            <Image
               src="https://cdn.worldvectorlogo.com/logos/netflix-3.svg"
               alt="Netflix"
               width={100}
               height={40}
               className="h-6 md:h-8 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity cursor-pointer"
-            /> */}
+            />
 
             <Image
               src="https://cdn.worldvectorlogo.com/logos/spotify-2.svg"

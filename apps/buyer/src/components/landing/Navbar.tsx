@@ -29,6 +29,7 @@ import CartDrawer from "@/components/cart/CartDrawer";
 import WishlistDrawer from "@/components/wishlist/WishlistDrawer";
 import NotificationDrawer from "@/components/notifications/NotificationDrawer";
 import SearchBar from "@/components/shared/SearchBar";
+import { SidebarSheet, type SidebarView } from "@/components/landing/SidebarSheet";
 
 import { useAuth, type Category } from "@pharmabag/api-client";
 import { useCart } from "@/hooks/useCart";
@@ -67,6 +68,7 @@ export default function Navbar({
     useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] =
     useState(false);
+  const [sidebarView, setSidebarView] = useState<SidebarView>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -109,7 +111,8 @@ export default function Navbar({
     isMobileMenuOpen ||
     isCartOpen ||
     isWishlistOpen ||
-    isNotificationsOpen;
+    isNotificationsOpen ||
+    sidebarView !== null;
 
   useScrollLock(isAnyDrawerOpen);
 
@@ -248,7 +251,10 @@ export default function Navbar({
             </Link>
 
             {/* Filter - Visible everywhere */}
-            <button onClick={() => onFilterClick?.()} className="p-0.5 sm:p-1 md:p-1.5 hover:text-sky-300 transition-colors">
+            <button onClick={() => {
+              setSidebarView("filters");
+              onFilterClick?.();
+            }} className="p-0.5 sm:p-1 md:p-1.5 hover:text-sky-300 transition-colors">
               <Filter className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" />
             </button>
 
@@ -349,6 +355,12 @@ export default function Navbar({
       <WishlistDrawer
         isOpen={isWishlistOpen}
         onClose={() => setIsWishlistOpen(false)}
+      />
+
+      <SidebarSheet
+        view={sidebarView}
+        onClose={() => setSidebarView(null)}
+        onViewChange={setSidebarView}
       />
 
       <NotificationDrawer

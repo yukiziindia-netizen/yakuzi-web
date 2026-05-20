@@ -355,7 +355,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100]"
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
           />
           
           <motion.div
@@ -364,7 +364,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed top-0 right-0 bottom-0 w-[85%] max-w-[400px] bg-white z-[101] shadow-2xl rounded-l-3xl flex flex-col overflow-hidden"
+            className="fixed top-0 right-0 bottom-0 w-[85%] max-w-[400px] bg-white z-50 shadow-2xl rounded-l-3xl flex flex-col overflow-hidden"
           >
             {view === "filters" ? renderFiltersView() : renderShoppingView()}
           </motion.div>

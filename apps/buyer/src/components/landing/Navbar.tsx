@@ -200,15 +200,13 @@ export default function Navbar({
                 </>
               )}
 
-              {/* Notification: Visible if logged in, or always visible? The images show it when logged in. */}
-              {isAuthenticated && (
-                <button onClick={() => setIsNotificationsOpen(true)} className="relative p-0.5 sm:p-1 hover:text-sky-300 transition-colors shrink-0">
-                  <Bell className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6" />
-                  {unreadNotificationCount > 0 && (
-                    <span className="absolute top-0 right-0 w-2 h-2 xs:w-2.5 xs:h-2.5 bg-[#f7941d] rounded-full border-2 border-[#562996]" />
-                  )}
-                </button>
-              )}
+              {/* Notification: Always visible */}
+              <button onClick={() => setIsNotificationsOpen(true)} className="relative p-0.5 sm:p-1 hover:text-sky-300 transition-colors shrink-0">
+                <Bell className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6" />
+                {unreadNotificationCount > 0 && (
+                  <span className="absolute top-0 right-0 w-2 h-2 xs:w-2.5 xs:h-2.5 bg-[#f7941d] rounded-full border-2 border-[#562996]" />
+                )}
+              </button>
             </div>
 
             {/* Search Box - Visible everywhere, smaller on mobile */}

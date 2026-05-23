@@ -79,6 +79,7 @@ export default function Navbar({
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isSearchChatOpen, setIsSearchChatOpen] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -221,7 +222,12 @@ export default function Navbar({
               <input
                 type="text"
                 placeholder="Search"
-                className="pl-2 pr-5 py-0.5 sm:pl-3 sm:pr-8 sm:py-1.5 md:py-2 rounded-[4px] sm:rounded-lg text-black text-[9px] sm:text-sm w-[60px] xs:w-[80px] sm:w-[150px] md:w-[280px] focus:outline-none placeholder-gray-400"
+                readOnly
+                onClick={() => {
+                  setIsSearchChatOpen(!isSearchChatOpen);
+                  setIsChatOpen(false);
+                }}
+                className="pl-2 pr-5 py-0.5 sm:pl-3 sm:pr-8 sm:py-1.5 md:py-2 rounded-[4px] sm:rounded-lg text-black text-[9px] sm:text-sm w-[60px] xs:w-[80px] sm:w-[150px] md:w-[280px] focus:outline-none placeholder-gray-400 cursor-pointer"
               />
               <Search className="w-2.5 h-2.5 sm:w-4 sm:h-4 md:w-5 md:h-5 text-gray-400 absolute right-1 sm:right-2.5 top-1 sm:top-2 md:top-2.5" />
             </div>
@@ -229,7 +235,10 @@ export default function Navbar({
 
           {/* Center Mascot */}
           <div 
-            onClick={() => setIsChatOpen(!isChatOpen)}
+            onClick={() => {
+              setIsChatOpen(!isChatOpen);
+              setIsSearchChatOpen(false);
+            }}
             className="relative -mt-6 sm:-mt-8 md:-mt-10 z-20 w-14 h-14 xs:w-16 xs:h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-[#ffb040] rounded-xl sm:rounded-2xl md:rounded-[1.5rem] flex items-center justify-center shadow-lg hover:-translate-y-2 transition-transform cursor-pointer border-2 sm:border-4 border-white shrink-0 mx-1 sm:mx-2 md:mx-4"
           >
             <Image src="/yukizi.jpg" alt="Mascot" width={96} height={96} className="w-full h-full object-cover rounded-xl sm:rounded-2xl md:rounded-[1.25rem] drop-shadow-lg" />
@@ -276,7 +285,7 @@ export default function Navbar({
             </button>
           </div>
           
-          {/* Chat Box Popup */}
+          {/* Chat Box Popup (Mascot) */}
           <AnimatePresence>
             {isChatOpen && (
               <motion.div
@@ -319,6 +328,54 @@ export default function Navbar({
                       </button>
                       <button className="w-12 h-12 bg-white rounded-xl flex items-center justify-center hover:bg-gray-100 transition-colors shadow-sm ml-2">
                         <Send className="w-6 h-6 text-black -ml-1" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Search Box Popup (White) */}
+          <AnimatePresence>
+            {isSearchChatOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                className="absolute bottom-full mb-6 left-0 right-0 w-full z-0 pointer-events-auto px-1 sm:px-4"
+              >
+                <div className="w-full bg-white rounded-2xl md:rounded-[1.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 p-4 sm:p-6 flex flex-col h-[180px] sm:h-[220px] md:h-[250px]">
+                  {/* Chat Box Header / Input Area */}
+                  <div className="flex-1">
+                    <textarea 
+                      placeholder="Start typing ..."
+                      className="w-full h-full bg-transparent text-gray-800 text-sm sm:text-base placeholder-gray-400 outline-none resize-none font-medium"
+                    />
+                  </div>
+                  
+                  {/* Chat Box Footer */}
+                  <div className="flex items-center justify-between mt-2">
+                    {/* Left Icons */}
+                    <div className="flex items-center text-gray-600">
+                      <button className="p-2 hover:text-black hover:bg-gray-50 rounded-lg transition-colors">
+                        <Clock className="w-5 h-5" />
+                      </button>
+                    </div>
+                    
+                    {/* Right Icons */}
+                    <div className="flex items-center gap-1 sm:gap-2 text-gray-600">
+                      <button className="p-2 hover:text-black hover:bg-gray-50 rounded-lg transition-colors">
+                        <RotateCw className="w-5 h-5" />
+                      </button>
+                      <button className="p-2 hover:text-black hover:bg-gray-50 rounded-lg transition-colors">
+                        <Plus className="w-5 h-5" />
+                      </button>
+                      <button className="p-2 hover:text-black hover:bg-gray-50 rounded-lg transition-colors">
+                        <AudioLines className="w-5 h-5" />
+                      </button>
+                      <button className="ml-1 sm:ml-2 bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-colors p-2.5 sm:p-3">
+                        <Send className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-900" />
                       </button>
                     </div>
                   </div>

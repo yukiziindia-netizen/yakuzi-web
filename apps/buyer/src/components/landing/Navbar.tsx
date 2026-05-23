@@ -22,6 +22,12 @@ import {
   Search,
   Package,
   ChevronUp,
+  Share2,
+  Clock,
+  RotateCw,
+  Plus,
+  AudioLines,
+  Send,
 } from "lucide-react";
 
 import CategoryMegaMenu from "@/components/landing/CategoryMegaMenu";
@@ -72,6 +78,7 @@ export default function Navbar({
   const [isMounted, setIsMounted] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -128,7 +135,7 @@ export default function Navbar({
     <>
       {/* Navbar Fixed at Bottom */}
       <nav className="fixed bottom-4 sm:bottom-6 md:bottom-4 left-0 right-0 z-[60] flex justify-center items-end sm:items-center pointer-events-none px-2 sm:px-6 w-full">
-        <div className="flex items-center gap-2 sm:gap-6 md:gap-2 pointer-events-auto flex-wrap sm:flex-nowrap justify-center w-full max-w-[1200px] px-1 sm:px-4">
+        <div className="flex items-center gap-2 sm:gap-6 md:gap-2 pointer-events-auto flex-wrap sm:flex-nowrap justify-center w-full max-w-[1200px] px-1 sm:px-4 relative">
 
           {/* Left Segment: Logo, Profile, Notifications, Search */}
           <div className="flex items-center bg-[#562996] rounded-[1.25rem] md:rounded-[1.5rem] px-3 xs:px-4 sm:px-6 md:px-8 py-2 sm:py-3.5 md:py-4 gap-2 xs:gap-3 sm:gap-5 md:gap-8 shadow-2xl text-white flex-1 justify-between max-w-[800px]">
@@ -221,12 +228,15 @@ export default function Navbar({
           </div>
 
           {/* Center Mascot */}
-          <div className="relative -mt-6 sm:-mt-8 md:-mt-10 z-10 w-14 h-14 xs:w-16 xs:h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gradient-to-br from-[#ffd97d] to-[#ff9e40] rounded-xl sm:rounded-2xl md:rounded-[1.5rem] flex items-center justify-center shadow-lg hover:-translate-y-2 transition-transform cursor-pointer border-2 sm:border-4 border-white shrink-0 mx-1 sm:mx-2 md:mx-4">
-            <img src="https://api.dicebear.com/7.x/bottts/svg?seed=cube&backgroundColor=transparent" alt="Mascot" className="w-10 h-10 xs:w-12 xs:h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 drop-shadow-lg" />
+          <div 
+            onClick={() => setIsChatOpen(!isChatOpen)}
+            className="relative -mt-6 sm:-mt-8 md:-mt-10 z-20 w-14 h-14 xs:w-16 xs:h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-[#ffb040] rounded-xl sm:rounded-2xl md:rounded-[1.5rem] flex items-center justify-center shadow-lg hover:-translate-y-2 transition-transform cursor-pointer border-2 sm:border-4 border-white shrink-0 mx-1 sm:mx-2 md:mx-4"
+          >
+            <Image src="/yukizi.jpg" alt="Mascot" width={96} height={96} className="w-full h-full object-cover rounded-xl sm:rounded-2xl md:rounded-[1.25rem] drop-shadow-lg" />
           </div>
 
           {/* Right Segment: Cart, Wishlist, Filter, Menu */}
-          <div className="flex items-center justify-end bg-[#562996] rounded-[1.25rem] md:rounded-[1.5rem] px-3 xs:px-4 sm:px-6 md:px-8 py-2 sm:py-3.5 md:py-4 gap-2 xs:gap-3 sm:gap-6 md:gap-8 shadow-2xl text-white shrink-0 flex-1 max-w-[800px]">
+          <div className="flex items-center justify-end bg-[#562996] rounded-[1.25rem] md:rounded-[1.5rem] px-3 xs:px-4 sm:px-6 md:px-8 py-2 sm:py-3.5 md:py-4 gap-2 xs:gap-3 sm:gap-6 md:gap-8 shadow-2xl text-white shrink-0 flex-1 max-w-[800px] z-10">
 
             {/* Wishlist */}
             <button onClick={() => setIsWishlistOpen(true)} className="relative p-0.5 sm:p-1 hover:text-sky-300 transition-colors">
@@ -265,6 +275,57 @@ export default function Navbar({
               )}
             </button>
           </div>
+          
+          {/* Chat Box Popup */}
+          <AnimatePresence>
+            {isChatOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                className="absolute bottom-full mb-4 left-2 right-2 sm:left-6 sm:right-6 md:left-4 md:right-4 z-0 pointer-events-auto"
+              >
+                <div className="w-full bg-gradient-to-br from-[#a656f2] to-[#8d3ce1] rounded-[1.5rem] md:rounded-[2rem] shadow-2xl p-6 sm:p-8 flex flex-col h-[250px] sm:h-[300px] md:h-[400px]">
+                  {/* Chat Box Header / Input Area */}
+                  <div className="flex-1">
+                    <textarea 
+                      placeholder="Start typing ..."
+                      className="w-full h-full bg-transparent text-white text-lg sm:text-2xl placeholder-white/70 outline-none resize-none font-medium"
+                    />
+                  </div>
+                  
+                  {/* Chat Box Footer */}
+                  <div className="flex items-center justify-between mt-4">
+                    {/* Left Icons */}
+                    <div className="flex items-center gap-4 text-white">
+                      <button className="hover:text-white/80 transition-colors">
+                        <Share2 className="w-6 h-6" />
+                      </button>
+                      <button className="hover:text-white/80 transition-colors">
+                        <Clock className="w-6 h-6" />
+                      </button>
+                    </div>
+                    
+                    {/* Right Icons */}
+                    <div className="flex items-center gap-4 text-white">
+                      <button className="hover:text-white/80 transition-colors">
+                        <RotateCw className="w-6 h-6" />
+                      </button>
+                      <button className="hover:text-white/80 transition-colors">
+                        <Plus className="w-6 h-6" />
+                      </button>
+                      <button className="hover:text-white/80 transition-colors">
+                        <AudioLines className="w-6 h-6" />
+                      </button>
+                      <button className="w-12 h-12 bg-white rounded-xl flex items-center justify-center hover:bg-gray-100 transition-colors shadow-sm ml-2">
+                        <Send className="w-6 h-6 text-black -ml-1" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </nav>
 

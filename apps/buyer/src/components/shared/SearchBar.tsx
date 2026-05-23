@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, Package, Clock, ArrowRight } from 'lucide-react';
+import { Search, X, Package, Clock, ArrowRight, RotateCw, Plus, AudioLines, Send } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
@@ -26,9 +26,13 @@ function saveRecentSearch(query: string) {
   localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(recent.slice(0, MAX_RECENT)));
 }
 
-export default function SearchBar() {
+interface SearchBarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export default function SearchBar({ isOpen = false, onClose }: SearchBarProps) {
   const [query, setQuery] = useState('');
-  const [isFocused, setIsFocused] = useState(false);
   const debouncedQuery = useDebounce(query, 400);
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -42,146 +46,164 @@ export default function SearchBar() {
 
   const products = results?.data ?? [];
   const recentSearches = getRecentSearches();
-  const showDropdown = isFocused && (query.length > 0 || recentSearches.length > 0);
 
   useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setIsFocused(false);
-      }
+    if (isOpen && inputRef.current) {
+      setTimeout(() => inputRef.current?.focus(), 100);
     }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [isOpen]);
 
   const handleSelect = (product: any) => {
     if (query.trim()) saveRecentSearch(query.trim());
-    setIsFocused(false);
     setQuery('');
+    onClose?.();
     router.push(`/products/${product.slug || product.id}`);
   };
 
   const handleFullSearch = (searchQuery: string) => {
     if (!searchQuery.trim()) return;
     saveRecentSearch(searchQuery.trim());
-    setIsFocused(false);
     setQuery('');
+    onClose?.();
     router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
   };
 
-  const handleSearchSubmit = (searchQuery: string) => {
-    if (searchQuery.trim()) {
-      saveRecentSearch(searchQuery.trim());
-      setQuery(searchQuery);
-    }
-  };
-
   return (
-    <div ref={containerRef} className="relative flex-1 max-w-[200px] xs:max-w-[280px] sm:max-w-md lg:max-w-none">
-      <div className={`flex items-center gap-1.5 xs:gap-2 px-2.5 xs:px-4 py-1.5 xs:py-2 rounded-full border transition-all ${
-        isFocused ? 'bg-white border-lime-300 shadow-lg shadow-lime-100/50 w-full' : 'bg-white/60 border-transparent w-full'
-      }`}>
-        <Search className="w-4 h-4 text-gray-400 flex-shrink-0" />
-        <input
-          ref={inputRef}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => setIsFocused(true)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              handleFullSearch(query);
-            }
-          }}
-          placeholder="Search products..."
-          className="w-full bg-transparent text-sm font-medium text-gray-900 placeholder:text-gray-400 focus:outline-none"
-        />
-        {query && (
-          <button onClick={() => setQuery('')} className="text-gray-400 hover:text-gray-600">
-            <X className="w-3.5 h-3.5" />
-          </button>
-        )}
-      </div>
-
-      <AnimatePresence>
-        {showDropdown && (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
           <motion.div
-            initial={{ opacity: 0, y: 8, scale: 0.98 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] bg-black/10 backdrop-blur-[1px]"
+            onClick={onClose}
+          />
+          
+          {/* Modal */}
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 8, scale: 0.98 }}
-            transition={{ duration: 0.15 }}
-            className="absolute top-full mt-2 left-0 right-0 bg-white/95 backdrop-blur-xl rounded-2xl border border-gray-100 shadow-2xl overflow-hidden z-50"
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="fixed bottom-[85px] sm:bottom-[100px] md:bottom-[110px] left-1/2 -translate-x-1/2 w-[90%] max-w-[600px] z-[70] bg-white rounded-3xl shadow-2xl p-4 sm:p-6 flex flex-col shadow-purple-900/10"
           >
-            {/* Recent Searches */}
-            {query.length < 2 && recentSearches.length > 0 && (
-              <div className="p-3">
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 mb-2">Recent</p>
-                {recentSearches.map((search) => (
-                  <button
-                    key={search}
-                    onClick={() => handleFullSearch(search)}
-                    className="flex items-center gap-3 w-full px-3 py-2 rounded-xl hover:bg-gray-50 transition-colors"
-                  >
-                    <Clock className="w-3.5 h-3.5 text-gray-300" />
-                    <span className="text-sm font-medium text-gray-600">{search}</span>
-                  </button>
-                ))}
-              </div>
-            )}
+            {/* Input Area */}
+            <div className="relative mb-2 sm:mb-4">
+              <input
+                ref={inputRef}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleFullSearch(query);
+                  }
+                }}
+                placeholder="Start typing ..."
+                className="w-full bg-transparent text-xl sm:text-2xl font-medium text-gray-800 placeholder:text-[#b096c4] focus:outline-none"
+              />
+            </div>
 
-            {/* Search Results */}
-            {debouncedQuery.length >= 2 && (
-              <div className="p-3">
-                {isLoading ? (
-                  <div className="px-3 py-4 space-y-3">
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className="flex items-center gap-3 animate-pulse">
-                        <div className="w-10 h-10 bg-gray-100 rounded-xl" />
-                        <div className="flex-1 space-y-1.5">
-                          <div className="h-3.5 bg-gray-100 rounded-full w-3/4" />
-                          <div className="h-3 bg-gray-100 rounded-full w-1/3" />
+            {/* Results Area */}
+            <div className="flex-1 max-h-[40vh] overflow-y-auto scrollbar-hide">
+              {/* Recent Searches (Show when no query) */}
+              {query.length < 2 && recentSearches.length > 0 && (
+                <div className="py-2">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Recent</p>
+                  {recentSearches.map((search) => (
+                    <button
+                      key={search}
+                      onClick={() => handleFullSearch(search)}
+                      className="flex items-center gap-3 w-full px-2 py-2 rounded-xl hover:bg-gray-50 transition-colors"
+                    >
+                      <Clock className="w-4 h-4 text-gray-400" />
+                      <span className="text-sm font-medium text-gray-600">{search}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Search Results */}
+              {debouncedQuery.length >= 2 && (
+                <div className="py-2">
+                  {isLoading ? (
+                    <div className="space-y-3">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="flex items-center gap-3 animate-pulse px-2 py-1">
+                          <div className="w-10 h-10 bg-gray-100 rounded-xl" />
+                          <div className="flex-1 space-y-1.5">
+                            <div className="h-3.5 bg-gray-100 rounded-full w-3/4" />
+                            <div className="h-3 bg-gray-100 rounded-full w-1/3" />
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : products.length === 0 ? (
-                  <div className="px-3 py-6 text-center">
-                    <p className="text-sm font-bold text-gray-400">No products found</p>
-                    <p className="text-xs text-gray-400 mt-1">Try a different search term</p>
-                  </div>
-                ) : (
-                  <>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 mb-2">Products</p>
-                    {products.map((product) => (
-                      <button
-                        key={product.id}
-                        onClick={() => handleSelect(product)}
-                        className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl hover:bg-gray-50 transition-colors group"
-                      >
-                        <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                          {product.images?.[0] ? (
-                            <img 
-                              src={typeof product.images[0] === 'string' ? product.images[0] : (product.images[0] as any)?.url || '/products/pharma_bottle.png'} 
-                              alt="" 
-                              className="w-full h-full object-contain rounded-xl" 
-                            />
-                          ) : (
-                            <Package className="w-4 h-4 text-gray-300" />
-                          )}
-                        </div>
-                        <div className="flex-1 text-left">
-                          <p className="text-sm font-bold text-gray-900 truncate">{product.name}</p>
-                          <p className="text-xs text-gray-400 font-medium">₹{product.price.toLocaleString('en-IN')}</p>
-                        </div>
-                        <ArrowRight className="w-4 h-4 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </button>
-                    ))}
-                  </>
-                )}
+                      ))}
+                    </div>
+                  ) : products.length === 0 ? (
+                    <div className="py-6 text-center">
+                      <p className="text-sm font-bold text-gray-400">No products found</p>
+                      <p className="text-xs text-gray-400 mt-1">Try a different search term</p>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Products</p>
+                      {products.map((product: any) => (
+                        <button
+                          key={product.id}
+                          onClick={() => handleSelect(product)}
+                          className="flex items-center gap-3 w-full px-2 py-2 rounded-xl hover:bg-gray-50 transition-colors group"
+                        >
+                          <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                            {product.images?.[0] ? (
+                              <img 
+                                src={typeof product.images[0] === 'string' ? product.images[0] : (product.images[0] as any)?.url || '/products/pharma_bottle.png'} 
+                                alt="" 
+                                className="w-full h-full object-contain rounded-xl" 
+                              />
+                            ) : (
+                              <Package className="w-4 h-4 text-gray-300" />
+                            )}
+                          </div>
+                          <div className="flex-1 text-left">
+                            <p className="text-sm font-bold text-gray-900 truncate">{product.name}</p>
+                            <p className="text-xs text-gray-400 font-medium">₹{product.price.toLocaleString('en-IN')}</p>
+                          </div>
+                          <ArrowRight className="w-4 h-4 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </button>
+                      ))}
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Bottom Toolbar */}
+            <div className="flex justify-between items-center pt-3 mt-2 border-t border-gray-100/50">
+              <button className="p-2 hover:bg-gray-50 rounded-full transition-colors">
+                <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-gray-900" />
+              </button>
+              
+              <div className="flex items-center gap-1 sm:gap-2">
+                <button onClick={() => setQuery('')} className="p-2 hover:bg-gray-50 rounded-full transition-colors">
+                  <RotateCw className="w-5 h-5 sm:w-6 sm:h-6 text-gray-900" />
+                </button>
+                <button className="p-2 hover:bg-gray-50 rounded-full transition-colors">
+                  <Plus className="w-5 h-5 sm:w-6 sm:h-6 text-gray-900" />
+                </button>
+                <button className="p-2 hover:bg-gray-50 rounded-full transition-colors">
+                  <AudioLines className="w-5 h-5 sm:w-6 sm:h-6 text-gray-900" />
+                </button>
+                <button 
+                  onClick={() => handleFullSearch(query)}
+                  className="p-2 hover:bg-gray-50 rounded-full transition-colors ml-1"
+                >
+                  <Send className="w-5 h-5 sm:w-6 sm:h-6 text-gray-900" />
+                </button>
               </div>
-            )}
+            </div>
           </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+        </>
+      )}
+    </AnimatePresence>
   );
 }

@@ -1,13 +1,14 @@
 import type { Metadata } from 'next';
 import { Open_Sans } from 'next/font/google';
-import '@/styles/globals.css';
+// @ts-ignore
+import '../styles/globals.css';
 import { Providers } from './providers';
-import Footer from '@/components/landing/Footer';
+
 
 const openSans = Open_Sans({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'PharmaBag - B2B Pharma Platform',
+  title: 'Yukizi',
   description: 'India\'s Only Trusted B2B Pharma Platform for Wholesalers',
 };
 

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Loader2, Share2, Plus, ArrowRightCircle, Star, Truck } from 'lucide-react';
+import Link from 'next/link';
 import { getFeaturedProducts } from '@pharmabag/api-client';
 
 interface ProductCarouselProps {
@@ -23,7 +24,7 @@ function GridProductCard({ product, index }: { product: any; index: number }) {
   const imageUrl = product.images?.[0]?.url || product.image || defaultImages[index % 3];
 
   return (
-    <div className={`relative bg-white rounded-[1rem] border ${isYukiziChoice ? 'border-[#e2cbf5] shadow-[0_4px_25px_rgba(133,76,188,0.15)]' : 'border-gray-100 shadow-sm'} p-2.5 sm:p-3 flex flex-col hover:shadow-lg transition-all duration-300 w-full group overflow-hidden`}>
+    <Link href={`/products/${product.id || 'prod-' + index}`} className={`relative bg-white rounded-[1rem] border ${isYukiziChoice ? 'border-[#e2cbf5] shadow-[0_4px_25px_rgba(133,76,188,0.15)]' : 'border-gray-100 shadow-sm'} p-2.5 sm:p-3 flex flex-col hover:shadow-lg transition-all duration-300 w-full group overflow-hidden block`}>
       
       {/* Top Badges */}
       <div className="flex justify-between items-start mb-1 relative z-10">
@@ -87,7 +88,7 @@ function GridProductCard({ product, index }: { product: any; index: number }) {
             </div>
          </div>
       </div>
-    </div>
+    </Link>
   );
 }
 

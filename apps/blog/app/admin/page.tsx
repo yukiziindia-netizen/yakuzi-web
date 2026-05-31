@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -7,7 +7,7 @@ import {
   deleteBlogPost, 
   getProfile,
   BlogPost
-} from "@pharmabag/api-client";
+} from "@yukizi/api-client";
 import { 
   Plus, 
   Trash2, 
@@ -87,8 +87,8 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-8">
             <Link href="/admin" className="flex-shrink-0">
               <Image
-                src="/pharmabag_logo.png"
-                alt="PharmaBag Logo"
+                src="/yukizi_logo.png"
+                alt="Yukizi Logo"
                 width={150}
                 height={40}
                 className="h-8 sm:h-10 w-auto"

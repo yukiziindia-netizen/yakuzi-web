@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+﻿#!/usr/bin/env node
 
 /**
  * Complete Product Journey Test Script
@@ -10,13 +10,13 @@
  * 4. Buyer creates an order for the product
  * 
  * Usage: node test-product-journey.js
- * Requires: BACKEND_URL environment variable (default: https://pharmabag-api.onrender.com)
+ * Requires: BACKEND_URL environment variable (default: https://yukizi-api.onrender.com)
  */
 
 const axios = require('axios');
 const readline = require('readline');
 
-const API_BASE_URL = process.env.BACKEND_URL || 'https://pharmabag-api.onrender.com';
+const API_BASE_URL = process.env.BACKEND_URL || 'https://yukizi-api.onrender.com';
 const API_URL = `${API_BASE_URL}/api`;
 
 // Readline interface for user input

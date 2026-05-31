@@ -1,4 +1,4 @@
----
+﻿---
 title: "The Future of Pharma Technology"
 description: "Exploring how digital tools are transforming the pharmaceutical landscape in 2026."
 date: "2026-04-10"
@@ -13,4 +13,4 @@ In this post, we discuss:
 - Real-time inventory tracking and its impact on drug availability.
 - The role of AI in supply chain optimization.
 
-These technologies are at the heart of the PharmaBag mission to streamline operations and ensure medicines reach those in need efficiently.
+These technologies are at the heart of the Yukizi mission to streamline operations and ensure medicines reach those in need efficiently.

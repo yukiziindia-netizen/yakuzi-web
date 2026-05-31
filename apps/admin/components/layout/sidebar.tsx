@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -41,7 +41,7 @@ export function AdminSidebar() {
             {open && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="min-w-0">
                 <div className="font-semibold text-sm text-foreground">Admin Panel</div>
-                <div className="text-xs text-muted-foreground">PharmaBag</div>
+                <div className="text-xs text-muted-foreground">Yukizi</div>
               </motion.div>
             )}
           </AnimatePresence>

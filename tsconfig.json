@@ -15,12 +15,12 @@
     "incremental": true,
     "baseUrl": ".",
     "paths": {
-      "@pharmabag/ui": ["packages/ui/src"],
-      "@pharmabag/ui/*": ["packages/ui/src/*"],
-      "@pharmabag/api-client": ["packages/api-client/src"],
-      "@pharmabag/api-client/*": ["packages/api-client/src/*"],
-      "@pharmabag/utils": ["packages/utils/src"],
-      "@pharmabag/utils/*": ["packages/utils/src/*"]
+      "@yukizi/ui": ["packages/ui/src"],
+      "@yukizi/ui/*": ["packages/ui/src/*"],
+      "@yukizi/api-client": ["packages/api-client/src"],
+      "@yukizi/api-client/*": ["packages/api-client/src/*"],
+      "@yukizi/utils": ["packages/utils/src"],
+      "@yukizi/utils/*": ["packages/utils/src/*"]
     }
   },
   "exclude": ["node_modules"]

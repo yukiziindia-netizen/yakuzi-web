@@ -1,10 +1,10 @@
-
+﻿
 // test-idfy-flow.js
 // Mocking the API client to verify the new IDFY verification payload and response mapping.
 
 const mockApiResponse = {
   status: true,
-  legalName: "PHARMABAG SOLUTIONS PVT LTD",
+  legalName: "YUKIZI SOLUTIONS PVT LTD",
   address: "Plot No. 12, Hitech City, Hyderabad, Telangana - 500081",
   message: "GST Number is valid"
 };

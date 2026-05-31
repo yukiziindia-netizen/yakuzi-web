@@ -1,9 +1,9 @@
-'use client';
+﻿'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, TrendingUp, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import { Category } from '@pharmabag/api-client';
+import { Category } from '@yukizi/api-client';
 
 interface PremiumCategoriesMegaMenuProps {
   isOpen: boolean;

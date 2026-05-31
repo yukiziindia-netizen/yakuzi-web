@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -35,7 +35,7 @@ export function SellerSidebar() {
       <div className="h-16 flex items-center justify-between px-4 border-b border-white/20 flex-shrink-0">
         <Link href="/dashboard" className="flex items-center gap-2.5 min-w-0">
           <div className="h-8 w-8 rounded-xl bg-primary flex items-center justify-center flex-shrink-0"><Store className="h-4 w-4 text-white"/></div>
-          <AnimatePresence>{open&&<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="min-w-0"><div className="font-semibold text-sm text-foreground truncate">Seller Portal</div><div className="text-xs text-muted-foreground truncate">{user?.storeName ?? "PharmaBag"}</div></motion.div>}</AnimatePresence>
+          <AnimatePresence>{open&&<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="min-w-0"><div className="font-semibold text-sm text-foreground truncate">Seller Portal</div><div className="text-xs text-muted-foreground truncate">{user?.storeName ?? "Yukizi"}</div></motion.div>}</AnimatePresence>
         </Link>
         <button onClick={()=>setOpen(!open)} className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-accent/60 transition-colors flex-shrink-0" aria-label={open?"Collapse":"Expand"}>
           <motion.div animate={{rotate:open?0:180}} transition={{duration:0.2}}><ChevronLeft className="h-4 w-4"/></motion.div>

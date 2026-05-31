@@ -1,9 +1,9 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import { User, Lock, Eye, EyeOff, Loader2, Phone, KeyRound, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@pharmabag/api-client';
+import { useAuth } from '@yukizi/api-client';
 import { useToast } from '@/components/shared/Toast';
 import { useScrollLock } from '@/hooks/useScrollLock';
 

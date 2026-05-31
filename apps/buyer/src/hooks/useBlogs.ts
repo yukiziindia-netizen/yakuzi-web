@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { getBlogs, getBlogById, getBlogBySlug } from '@pharmabag/api-client';
+import { getBlogs, getBlogById, getBlogBySlug } from '@yukizi/api-client';
 
 export function useBlogs(params?: {
   page?: number;

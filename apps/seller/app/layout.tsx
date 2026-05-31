@@ -1,4 +1,4 @@
-import type { Metadata, Viewport } from "next";
+﻿import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "react-hot-toast";
@@ -9,8 +9,8 @@ import { SellerGuard } from "@/components/layout/seller-guard";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 
 export const metadata: Metadata = {
-  title: { default: "PharmaBag Seller Portal", template: "%s | PharmaBag Seller" },
-  description: "Manage your pharma products, orders, inventory, and payouts on PharmaBag.",
+  title: { default: "Yukizi Seller Portal", template: "%s | Yukizi Seller" },
+  description: "Manage your pharma products, orders, inventory, and payouts on Yukizi.",
 };
 export const viewport: Viewport = { width: "device-width", initialScale: 1 };
 

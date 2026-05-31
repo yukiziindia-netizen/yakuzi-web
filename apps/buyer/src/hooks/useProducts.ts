@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { getProducts, getProductById, getCategories, getManufacturers, getCities, getDiscountDetails } from '@pharmabag/api-client';
+import { getProducts, getProductById, getCategories, getManufacturers, getCities, getDiscountDetails } from '@yukizi/api-client';
 
 export function useProducts(params?: {
   page?: number;

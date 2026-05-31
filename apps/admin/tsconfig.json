@@ -11,10 +11,10 @@
       "@/*": [
         "./*"
       ],
-      "@pharmabag/api-client": ["../../packages/api-client/src"],
-      "@pharmabag/api-client/*": ["../../packages/api-client/src/*"],
-      "@pharmabag/utils": ["../../packages/utils/src"],
-      "@pharmabag/utils/*": ["../../packages/utils/src/*"]
+      "@yukizi/api-client": ["../../packages/api-client/src"],
+      "@yukizi/api-client/*": ["../../packages/api-client/src/*"],
+      "@yukizi/utils": ["../../packages/utils/src"],
+      "@yukizi/utils/*": ["../../packages/utils/src/*"]
     },
     "jsx": "preserve"
   },

@@ -1,7 +1,7 @@
-"use client";
+﻿"use client";
 import React, { useMemo } from "react";
 import { Select, Input, Badge } from "@/components/ui";
-import type { DiscountFormDetails, DiscountType } from "@pharmabag/utils";
+import type { DiscountFormDetails, DiscountType } from "@yukizi/utils";
 import {
   calculatePricing,
   requiresDiscountPercent,
@@ -9,7 +9,7 @@ import {
   requiresBonusProductName,
   isSpecialPriceType,
   formatCurrency,
-} from "@pharmabag/utils";
+} from "@yukizi/utils";
 
 interface Props {
   value: DiscountFormDetails;

@@ -1,7 +1,7 @@
-"use client";
+﻿"use client";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { User } from "@pharmabag/utils";
+import type { User } from "@yukizi/utils";
 
 interface AdminAuth { user: User | null; isAuth: boolean; setUser: (u: User | null) => void; logout: () => void; }
 export const useAdminAuth = create<AdminAuth>()(persist((set) => ({

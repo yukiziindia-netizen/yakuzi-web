@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Shield, Bell, Globe, Key } from "lucide-react";
@@ -17,8 +17,8 @@ export default function AdminSettingsPage() {
     if (settingsData) {
       const s = typeof settingsData === "object" ? settingsData : {};
       setForm({
-        platformName: s.platformName ?? "PharmaBag",
-        supportEmail: s.supportEmail ?? "support@pharmabag.in",
+        platformName: s.platformName ?? "Yukizi",
+        supportEmail: s.supportEmail ?? "support@yukizi.in",
         supportPhone: s.supportPhone ?? "+91 1800-XXX-XXXX",
         sessionTimeout: s.sessionTimeout ?? 60,
         maxLoginAttempts: s.maxLoginAttempts ?? 5,

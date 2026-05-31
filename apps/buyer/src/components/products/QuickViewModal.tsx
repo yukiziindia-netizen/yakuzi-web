@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Share2, Loader2, Bookmark, Truck, CheckCircle, Plus, Star, Bell, Package } from 'lucide-react';
@@ -12,8 +12,8 @@ import { NotifyStockAlertModal } from '@/components/shared/NotifyStockAlertModal
 import { CustomOrderModal } from '@/components/shared/CustomOrderModal';
 import { useAddToCart, useCart } from '@/hooks/useCart';
 import { useProductById } from '@/hooks/useProducts';
-import { calculatePricing, getSellingPrice, getEffectiveDiscountPercent, generateProductSlug } from '@pharmabag/utils';
-import type { Product } from '@pharmabag/utils';
+import { calculatePricing, getSellingPrice, getEffectiveDiscountPercent, generateProductSlug } from '@yukizi/utils';
+import type { Product } from '@yukizi/utils';
 import { usePlatformConfig } from '@/hooks/usePlatformConfig';
 
 interface QuickViewModalProps {

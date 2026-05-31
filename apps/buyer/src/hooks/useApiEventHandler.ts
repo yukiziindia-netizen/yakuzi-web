@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { onApiEvent } from '@pharmabag/api-client';
+import { onApiEvent } from '@yukizi/api-client';
 import { useToast } from '@/components/shared/Toast';
 import { localCart } from '@/lib/local-cart';
 import { useQueryClient } from '@tanstack/react-query';

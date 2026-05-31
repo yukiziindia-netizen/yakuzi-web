@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 import { forwardRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { Loader2, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { OrderStatus, ApprovalStatus, ProductStatus } from "@pharmabag/utils";
+import type { OrderStatus, ApprovalStatus, ProductStatus } from "@yukizi/utils";
 
 export const Button = forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "primary"|"secondary"|"ghost"|"outline"|"danger"|"warning";

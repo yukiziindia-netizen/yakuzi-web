@@ -25,8 +25,18 @@ const ROUTE_PERMISSIONS: Record<string, string> = {
   "/admins": "x",
 };
 
-function hasPermission(permissions: string | undefined, route: string): boolean {
-  if (permissions?.includes("x")) return true; // Super admin always allowed
+function hasPermission(permissions: string | undefined, route: string, role?: string, department?: string): boolean {
+  if (
+    role === "SUPER_ADMIN" || 
+    role === "SUPERADMIN" || 
+    permissions?.includes("x") || 
+    permissions === "*" || 
+    permissions?.toLowerCase() === "all" || 
+    permissions?.toLowerCase() === "superadmin" ||
+    department?.toLowerCase() === "super admin" ||
+    department?.toLowerCase() === "superadmin" ||
+    (!permissions && role === "ADMIN") // Fallback for root admin if permissions are null/undefined in DB
+  ) return true; // Super admin always allowed
 
   const requiredPerm = Object.entries(ROUTE_PERMISSIONS).find(
     ([prefix]) => route === prefix || route.startsWith(prefix + "/")
@@ -102,8 +112,10 @@ export function AdminGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
+  const department = (user as any)?.adminProfile?.department || (user as any)?.department;
+
   // Check route-level permissions
-  if (!hasPermission(permissions, pathname)) {
+  if (!hasPermission(permissions, pathname, (user as any)?.role, department)) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="text-center space-y-4 p-6 glass-card max-w-sm rounded-2xl border border-destructive/20 shadow-2xl">

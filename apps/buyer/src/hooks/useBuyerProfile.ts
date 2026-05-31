@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -9,7 +9,7 @@ import {
   getBuyerInvoices,
   type CreateBuyerProfileInput,
   type UpdateBuyerProfileInput,
-} from '@pharmabag/api-client';
+} from '@yukizi/api-client';
 
 export function useBuyerProfile() {
   return useQuery({

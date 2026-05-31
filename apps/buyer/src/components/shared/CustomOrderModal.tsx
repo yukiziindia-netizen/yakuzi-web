@@ -1,10 +1,10 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, CheckCircle2, Loader2, MessageSquare } from 'lucide-react';
 import { useToast } from '@/components/shared/Toast';
-import { createCustomOrder } from '@pharmabag/api-client';
+import { createCustomOrder } from '@yukizi/api-client';
 
 interface CustomOrderModalProps {
   isOpen: boolean;

@@ -1,6 +1,6 @@
-import { type Wishlist, type WishlistItem } from '@pharmabag/api-client';
+﻿import { type Wishlist, type WishlistItem } from '@yukizi/api-client';
 
-const STORAGE_KEY = 'pharmabag_local_wishlist';
+const STORAGE_KEY = 'yukizi_local_wishlist';
 
 export const localWishlist = {
   get: (): Wishlist => {

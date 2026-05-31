@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import Image from 'next/image';
@@ -12,7 +12,7 @@ export default function Footer() {
     { label: 'Contact', href: '#' },
     // { label: 'Support', href: '#' },
     { label: 'About', href: '#' },
-    { label: 'blog.pharmabag.in', href: '/blogs' },
+    { label: 'blog.yukizi.in', href: '/blogs' },
   ];
 
   return (

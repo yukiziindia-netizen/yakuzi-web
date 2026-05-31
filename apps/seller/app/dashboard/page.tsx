@@ -1,9 +1,9 @@
-"use client";
+﻿"use client";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Package, ShoppingBag, TrendingUp, CreditCard, Star, AlertTriangle, Bell, BarChart3, Palmtree, Eye } from "lucide-react";
 import { StatCard, Button, OrderStatusBadge } from "@/components/ui";
-import { formatCurrency, formatDate } from "@pharmabag/utils";
+import { formatCurrency, formatDate } from "@yukizi/utils";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
 import { useSellerDashboard, useToggleVacationMode, useSellerProfile, useSellerNotifications } from "@/hooks/useSeller";
 import { useSellerAuth } from "@/store";

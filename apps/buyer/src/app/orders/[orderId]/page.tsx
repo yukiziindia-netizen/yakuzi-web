@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { motion } from 'framer-motion';
 import { Package, Truck, ChevronLeft, Calendar, FileText, Loader2, AlertCircle, XCircle, CheckCircle2, CreditCard } from 'lucide-react';
@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { useOrderById, useCancelOrder } from '@/hooks/useOrders';
 import { useClearCart } from '@/hooks/useCart';
 import AuthGuard from '@/components/shared/AuthGuard';
-import { generateProductSlug } from '@pharmabag/utils';
+import { generateProductSlug } from '@yukizi/utils';
 
 const STATUS_ORDER = ['PLACED', 'ACCEPTED', 'PAYMENT_RECEIVED', 'READY_TO_SHIP', 'DISPATCHED_FROM_SELLER', 'RECEIVED_AT_WAREHOUSE', 'SHIPPED', 'OUT_FOR_DELIVERY', 'DELIVERED'];
 

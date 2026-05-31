@@ -1,11 +1,11 @@
-'use client';
+﻿'use client';
 
 import { motion } from 'framer-motion';
 import { User, ShieldCheck, MapPin, CreditCard, AlertCircle, CheckCircle2 } from 'lucide-react';
 import Navbar from '@/components/landing/Navbar';
 import { SkeletonProfileHeader } from '@/components/shared/LoaderSkeleton';
 import { useBuyerProfile } from '@/hooks/useBuyerProfile';
-import { useAuth } from '@pharmabag/api-client';
+import { useAuth } from '@yukizi/api-client';
 import Link from 'next/link';
 import AuthGuard from '@/components/shared/AuthGuard';
 

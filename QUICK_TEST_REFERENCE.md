@@ -1,4 +1,4 @@
-# Quick Test Reference
+﻿# Quick Test Reference
 
 ## Run Complete Product Journey Test
 
@@ -25,7 +25,7 @@ This will automatically:
 
 ## Prerequisites
 
-1. **Backend must be running** at https://pharmabag-api.onrender.com
+1. **Backend must be running** at https://yukizi-api.onrender.com
 2. **Admin account** must exist (default test credentials above)
 3. **At least one category** should exist in database
 4. **OTP system** must allow `000000` as test OTP (typical for dev/test)
@@ -90,7 +90,7 @@ When test succeeds, you'll see:
 **Fix:** 
 ```bash
 # Check backend is running
-curl https://pharmabag-api.onrender.com/api/auth/send-otp
+curl https://yukizi-api.onrender.com/api/auth/send-otp
 
 # Try local backend
 npm run test:journey:local

@@ -1,6 +1,6 @@
-# PharmaBag Complete Product Journey Testing Suite
+﻿# Yukizi Complete Product Journey Testing Suite
 
-Complete automated testing for the PharmaBag platform's product lifecycle: creation → approval → discovery → ordering.
+Complete automated testing for the Yukizi platform's product lifecycle: creation → approval → discovery → ordering.
 
 ## 📚 Documentation Files
 
@@ -51,7 +51,7 @@ Complete automated testing for the PharmaBag platform's product lifecycle: creat
 ### Prerequisites
 
 - **Node.js** >= 18.0.0
-- **Backend API** running (https://pharmabag-api.onrender.com or local)
+- **Backend API** running (https://yukizi-api.onrender.com or local)
 - **OTP System** configured (see [SETUP_OTP_TESTING.md](./SETUP_OTP_TESTING.md))
 
 ### Run Test
@@ -141,7 +141,7 @@ Customizable in script before running.
 🚀 COMPLETE PRODUCT JOURNEY TEST
 ════════════════════════════════════════════════════════════
 
-ℹ Backend: https://pharmabag-api.onrender.com/api
+ℹ Backend: https://yukizi-api.onrender.com/api
 ℹ Timestamp: 2026-03-25T10:30:45.123Z
 
 PHASE 1: SELLER CREATES PRODUCT
@@ -382,7 +382,7 @@ All of these must pass:
 
 ## 📄 License
 
-These test scripts are part of the PharmaBag platform and follow the same license.
+These test scripts are part of the Yukizi platform and follow the same license.
 
 ---
 

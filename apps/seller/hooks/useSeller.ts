@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { sendOtp, verifyOtp, getCurrentUser } from "@/api/auth.api";
 import {
@@ -13,7 +13,7 @@ import {
   searchSuggestions, getCategoriesWithSubs,
   verifyGstOrPan, uploadKycDocument, uploadDrugLicense,
 } from "@/api/seller.api";
-import type { ProductPayload } from "@pharmabag/utils";
+import type { ProductPayload } from "@yukizi/utils";
 import { useSellerAuth } from "@/store";
 
 export function useSendOtp() { return useMutation({ mutationFn: sendOtp }); }

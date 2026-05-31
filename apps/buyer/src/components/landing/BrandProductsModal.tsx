@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { getProducts, type Product } from '@pharmabag/api-client';
+import { getProducts, type Product } from '@yukizi/api-client';
 
 interface BrandProductsModalProps {
   brandName: string;

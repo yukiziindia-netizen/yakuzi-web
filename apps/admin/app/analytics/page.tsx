@@ -1,9 +1,9 @@
-"use client";
+﻿"use client";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { StatCard, Badge, Tabs } from "@/components/ui";
-import { formatCurrency, formatCompact } from "@pharmabag/utils";
+import { formatCurrency, formatCompact } from "@yukizi/utils";
 import { TrendingUp, Users, ShoppingBag, Package, CreditCard, AlertTriangle, Flag, CheckCircle, BarChart3, Trophy } from "lucide-react";
 import { useAdminDashboard, useRevenueChart, useOrdersChart, useTopProducts, useTopSellers } from "@/hooks/useAdmin";
 

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { sendOtp, verifyOtp, getCurrentUser } from "@/api/auth.api";
 import {
@@ -85,7 +85,7 @@ export function useAffirmUserStatus() {
       if (action === "approve") {
         void sendUserNotification(userId, {
           title: "Account Verified!",
-          message: "Your business profile has been verified. You can now place orders on PharmaBag.",
+          message: "Your business profile has been verified. You can now place orders on Yukizi.",
           type: "verification",
         });
       }

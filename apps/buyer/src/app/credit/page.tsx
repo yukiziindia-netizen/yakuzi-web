@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
@@ -14,7 +14,7 @@ import EmptyState from '@/components/shared/EmptyState';
 import { SkeletonCard } from '@/components/shared/LoaderSkeleton';
 import { useBuyerInvoices } from '@/hooks/useBuyerProfile';
 import { useToast } from '@/components/shared/Toast';
-import { formatCurrency, formatDate } from '@pharmabag/utils';
+import { formatCurrency, formatDate } from '@yukizi/utils';
 
 export default function CreditPage() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);

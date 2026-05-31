@@ -18,9 +18,9 @@
     "lucide-react": "^0.414.0",
     "clsx": "^2.1.1",
     "tailwind-merge": "^2.4.0",
-    "@pharmabag/ui": "workspace:*",
-    "@pharmabag/utils": "workspace:*",
-    "@pharmabag/api-client": "workspace:*"
+    "@yukizi/ui": "workspace:*",
+    "@yukizi/utils": "workspace:*",
+    "@yukizi/api-client": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20",

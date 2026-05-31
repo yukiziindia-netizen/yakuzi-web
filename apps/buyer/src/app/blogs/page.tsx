@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
@@ -39,7 +39,7 @@ export default function BlogsPage() {
           >
             <div className="inline-flex items-center gap-2 bg-lime-50 text-lime-700 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4">
               <BookOpen className="w-3.5 h-3.5" />
-              PharmaBag Insights
+              Yukizi Insights
             </div>
             <h1 className="text-3xl sm:text-4xl font-black text-gray-900 tracking-tight mb-3">
               Our Blog

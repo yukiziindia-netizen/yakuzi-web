@@ -1,6 +1,6 @@
-import { apiClient } from "@/lib/apiClient";
-import type { Product, Order, Payout, Suggestion, CategoryItem } from "@pharmabag/utils";
-import type { ProductPayload } from "@pharmabag/utils";
+﻿import { apiClient } from "@/lib/apiClient";
+import type { Product, Order, Payout, Suggestion, CategoryItem } from "@yukizi/utils";
+import type { ProductPayload } from "@yukizi/utils";
 
 export async function getSellerDashboard(params: { dateFrom?: string; dateTo?: string } = {}) {
   const qs = new URLSearchParams();

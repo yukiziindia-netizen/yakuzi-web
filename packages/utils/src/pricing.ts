@@ -1,4 +1,4 @@
-// ─── PharmaBag Centralized Pricing Engine ──────────────
+﻿// ─── Yukizi Centralized Pricing Engine ──────────────
 // All pricing calculations are done here. NO pricing logic in frontend components.
 // Matches legacy PHP/Node system with bug fixes noted inline.
 

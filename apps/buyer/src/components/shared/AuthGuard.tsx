@@ -1,6 +1,6 @@
-'use client';
+﻿'use client';
 
-import { useAuth } from '@pharmabag/api-client';
+import { useAuth } from '@yukizi/api-client';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';

@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, Calendar, Share2, Clock, Loader2, Search } from "lucide-react";
-import { getBlogBySlug, BlogPost } from "@pharmabag/api-client";
+import { getBlogBySlug, BlogPost } from "@yukizi/api-client";
 
 export default function PostPage({ params }: { params: { id: string } }) {
   const [post, setPost] = useState<BlogPost | null>(null);
@@ -50,8 +50,8 @@ export default function PostPage({ params }: { params: { id: string } }) {
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <Link href="/" className="flex-shrink-0 flex items-center gap-2">
             <Image
-              src="/pharmabag_logo.png"
-              alt="PharmaBag Logo"
+              src="/yukizi_logo.png"
+              alt="Yukizi Logo"
               width={140}
               height={36}
               className="h-7 sm:h-9 w-auto"
@@ -134,14 +134,14 @@ export default function PostPage({ params }: { params: { id: string } }) {
       <footer className="border-t border-gray-200/30 px-6 py-12 mt-20">
         <div className="max-w-7xl mx-auto text-center">
           <Image
-            src="/pharmabag_logo.png"
-            alt="PharmaBag Logo"
+            src="/yukizi_logo.png"
+            alt="Yukizi Logo"
             width={120}
             height={30}
             className="opacity-40 grayscale hover:grayscale-0 transition-all mx-auto mb-6"
           />
           <div className="text-gray-400 text-sm font-medium">
-             © 2026 PharmaBag Technologies Inc. All rights reserved.
+             © 2026 Yukizi Technologies Inc. All rights reserved.
           </div>
         </div>
       </footer>

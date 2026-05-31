@@ -1,6 +1,6 @@
-# Setting Up OTP-Based Testing
+﻿# Setting Up OTP-Based Testing
 
-Since PharmaBag uses OTP (One-Time Password) authentication, the test script needs to work with your OTP system.
+Since Yukizi uses OTP (One-Time Password) authentication, the test script needs to work with your OTP system.
 
 ## Understanding the OTP Flow
 
@@ -58,7 +58,7 @@ INSERT INTO otp_records (phone, otp, expiresAt, attempts) VALUES
 
 ```bash
 # 1. Send OTP request
-curl -X POST https://pharmabag-api.onrender.com/api/auth/send-otp \
+curl -X POST https://yukizi-api.onrender.com/api/auth/send-otp \
   -H "Content-Type: application/json" \
   -d '{"phone": "9831864222"}'
 
@@ -72,7 +72,7 @@ curl -X POST https://pharmabag-api.onrender.com/api/auth/send-otp \
 # OTP should arrive via SMS, WhatsApp, or email
 
 # 3. Verify OTP
-curl -X POST https://pharmabag-api.onrender.com/api/auth/verify-otp \
+curl -X POST https://yukizi-api.onrender.com/api/auth/verify-otp \
   -H "Content-Type: application/json" \
   -d '{
 #    "phone": "9831864222",
@@ -266,7 +266,7 @@ npm run test:journey:production
 
 ```
 ✗ Seller authentication failed: Invalid OTP
-ℹ Backend: https://pharmabag-api.onrender.com/api
+ℹ Backend: https://yukizi-api.onrender.com/api
 ℹ Ensure OTP is correct and not expired
 ℹ Check backend TEST_MODE configuration
 ```

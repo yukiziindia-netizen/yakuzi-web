@@ -1,9 +1,9 @@
-'use client';
+﻿'use client';
 
 import { X, Bell, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
-import { useAuth } from '@pharmabag/api-client';
+import { useAuth } from '@yukizi/api-client';
 import { useToast } from './Toast';
 
 interface NotifyStockAlertModalProps {

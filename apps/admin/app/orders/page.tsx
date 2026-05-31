@@ -1,14 +1,14 @@
-"use client";
+﻿"use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Search, Loader2 } from "lucide-react";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { Button, Input, Badge, Pagination, Modal } from "@/components/ui";
-import { formatCurrency } from "@pharmabag/utils";
+import { formatCurrency } from "@yukizi/utils";
 import { cn } from "@/lib/utils";
 import { useAdminOrdersFiltered, useUpdateAdminOrderStatus } from "@/hooks/useAdmin";
-import { getPresignedUrl } from "@pharmabag/api-client";
+import { getPresignedUrl } from "@yukizi/api-client";
 import toast from "react-hot-toast";
 
 const STATUS_FILTERS = [

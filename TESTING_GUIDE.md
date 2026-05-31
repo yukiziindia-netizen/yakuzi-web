@@ -1,6 +1,6 @@
-# PharmaBag Testing Guide
+﻿# Yukizi Testing Guide
 
-Complete guide for testing the PharmaBag platform end-to-end.
+Complete guide for testing the Yukizi platform end-to-end.
 
 ## 🎯 Quick Start
 
@@ -79,7 +79,7 @@ Order confirmed
 🚀 COMPLETE PRODUCT JOURNEY TEST
 ════════════════════════════════════════════════════════════
 
-ℹ Backend: https://pharmabag-api.onrender.com/api
+ℹ Backend: https://yukizi-api.onrender.com/api
 ℹ Timestamp: 2024-03-25T10:30:45.123Z
 
 PHASE 1: SELLER CREATES PRODUCT
@@ -108,7 +108,7 @@ PHASE 2: ADMIN APPROVES PRODUCT
 ════════════════════════════════════════════════════════════
 
 [Step 6] Logging in admin account
-✓ Admin logged in: admin@pharmabag.com
+✓ Admin logged in: admin@yukizi.com
 
 [Step 7] Approving product 65a8c9d3e4f5a6b7c8d9e0f1
 ✓ Product approved
@@ -196,7 +196,7 @@ Summary:
 
 ```bash
 # Check if backend is running
-curl https://pharmabag-api.onrender.com/api/health
+curl https://yukizi-api.onrender.com/api/health
 
 # Try local backend instead
 npm run test:journey:local
@@ -319,7 +319,7 @@ for i in {1..5}; do echo "=== Test Run $i ===" && npm run test:journey || break;
 
 ```bash
 # Add to crontab to run daily
-0 2 * * * cd /path/to/pharmabag-web && npm run test:journey:production >> /var/log/pharmabag-tests.log 2>&1
+0 2 * * * cd /path/to/yukizi-web && npm run test:journey:production >> /var/log/yukizi-tests.log 2>&1
 ```
 
 ### Run in CI/CD (GitHub Actions)

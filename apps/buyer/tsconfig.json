@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "target": "es5",
+    "ignoreDeprecations": "6.0",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
@@ -20,12 +21,12 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@pharmabag/ui": ["../../packages/ui/src"],
-      "@pharmabag/ui/*": ["../../packages/ui/src/*"],
-      "@pharmabag/api-client": ["../../packages/api-client/src"],
-      "@pharmabag/api-client/*": ["../../packages/api-client/src/*"],
-      "@pharmabag/utils": ["../../packages/utils/src"],
-      "@pharmabag/utils/*": ["../../packages/utils/src/*"]
+      "@yukizi/ui": ["../../packages/ui/src"],
+      "@yukizi/ui/*": ["../../packages/ui/src/*"],
+      "@yukizi/api-client": ["../../packages/api-client/src"],
+      "@yukizi/api-client/*": ["../../packages/api-client/src/*"],
+      "@yukizi/utils": ["../../packages/utils/src"],
+      "@yukizi/utils/*": ["../../packages/utils/src/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

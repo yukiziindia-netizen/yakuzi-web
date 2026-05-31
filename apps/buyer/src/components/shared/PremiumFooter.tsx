@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import Image from 'next/image';
@@ -28,8 +28,8 @@ export default function PremiumFooter() {
             <div className="flex items-center gap-6">
               <div className="w-20 h-20 bg-gray-50 rounded-[32px] flex items-center justify-center p-4 border border-gray-100 shadow-xl group hover:scale-105 transition-transform">
                 <Image 
-                  src="/pharmabag_logo.png" 
-                  alt="PharmaBag" 
+                  src="/yukizi_logo.png" 
+                  alt="Yukizi" 
                   width={80} 
                   height={80} 
                   className="w-full h-auto object-contain"
@@ -88,7 +88,7 @@ export default function PremiumFooter() {
 
         <div className="mt-24 pt-12 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-8">
            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em]">
-             &copy; {new Date().getFullYear()} PHARMABAG INTELLIGENCE SYSTEMS. ALL PROTOCOLS RESERVED.
+             &copy; {new Date().getFullYear()} YUKIZI INTELLIGENCE SYSTEMS. ALL PROTOCOLS RESERVED.
            </p>
            <div className="flex items-center gap-10">
               <p className="text-[9px] font-black text-gray-300 uppercase tracking-widest leading-none">ISO 27001:2022</p>

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -6,9 +6,9 @@ import { Search, X, Package, Clock, ArrowRight, RotateCw, Plus, AudioLines, Send
 import { useDebounce } from '@/hooks/useDebounce';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { getProducts } from '@pharmabag/api-client';
+import { getProducts } from '@yukizi/api-client';
 
-const RECENT_SEARCHES_KEY = 'pharmabag_recent_searches';
+const RECENT_SEARCHES_KEY = 'yukizi_recent_searches';
 const MAX_RECENT = 5;
 
 function getRecentSearches(): string[] {

@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Search, CheckCircle, XCircle, Trash2, Eye, ShieldCheck, ShieldX } from "lucide-react";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { Button, Input, Badge, Pagination } from "@/components/ui";
-import { formatCurrency, calculatePricing } from "@pharmabag/utils";
+import { formatCurrency, calculatePricing } from "@yukizi/utils";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { useAdminProducts, useUpdateProductStatus, useDeleteProduct, useApproveProduct, useRejectProduct } from "@/hooks/useAdmin";

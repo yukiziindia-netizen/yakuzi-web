@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { getPlatformConfig, type PlatformConfig } from '@pharmabag/api-client';
+import { getPlatformConfig, type PlatformConfig } from '@yukizi/api-client';
 
 const DEFAULTS: PlatformConfig = {
   gst_rate: 12,

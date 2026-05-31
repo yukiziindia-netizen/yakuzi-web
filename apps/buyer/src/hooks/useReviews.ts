@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -7,7 +7,7 @@ import {
   updateReview,
   deleteReview,
   type CreateReviewInput,
-} from '@pharmabag/api-client';
+} from '@yukizi/api-client';
 
 export function useProductReviews(productId: string, params?: { page?: number; limit?: number }) {
   return useQuery({

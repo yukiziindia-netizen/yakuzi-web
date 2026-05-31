@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Search, Plus, Trash2, Layout, Star, ArrowUp } from "lucide-react";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { Button, Input, Badge, Pagination } from "@/components/ui";
-import { formatCurrency } from "@pharmabag/utils";
+import { formatCurrency } from "@yukizi/utils";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { 

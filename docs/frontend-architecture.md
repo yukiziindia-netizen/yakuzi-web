@@ -1,8 +1,8 @@
-# PharmaBag Frontend Architecture
+﻿# Yukizi Frontend Architecture
 
 ## Overview
 
-PharmaBag is a pharmaceutical B2B marketplace built as a **pnpm monorepo** with **Next.js 14 App Router** applications and shared packages.
+Yukizi is a pharmaceutical B2B marketplace built as a **pnpm monorepo** with **Next.js 14 App Router** applications and shared packages.
 
 The backend (NestJS) exposes a REST API at `http://localhost:3000/api`.
 
@@ -11,7 +11,7 @@ The backend (NestJS) exposes a REST API at `http://localhost:3000/api`.
 ## Monorepo Structure
 
 ```
-pharmabag-web/
+yukizi-web/
 ├── apps/
 │   ├── buyer/          # Buyer marketplace (port 3001)
 │   ├── seller/         # Seller dashboard (port 3002)
@@ -41,13 +41,13 @@ Each app is a standalone Next.js 14 application using the **App Router** with:
 - TypeScript
 - TailwindCSS
 - TanStack React Query
-- Shared packages (`@pharmabag/ui`, `@pharmabag/api-client`, `@pharmabag/utils`)
+- Shared packages (`@yukizi/ui`, `@yukizi/api-client`, `@yukizi/utils`)
 
 ---
 
 ## Shared Packages
 
-### `@pharmabag/ui`
+### `@yukizi/ui`
 
 Reusable UI component library built with TailwindCSS, class-variance-authority, and Shadcn UI patterns.
 
@@ -62,7 +62,7 @@ Reusable UI component library built with TailwindCSS, class-variance-authority, 
 
 **Usage:**
 ```tsx
-import { Button, Card, CardContent, useToast } from '@pharmabag/ui';
+import { Button, Card, CardContent, useToast } from '@yukizi/ui';
 ```
 
 **Utilities:**
@@ -71,7 +71,7 @@ import { Button, Card, CardContent, useToast } from '@pharmabag/ui';
 
 ---
 
-### `@pharmabag/api-client`
+### `@yukizi/api-client`
 
 Centralized API client built with **Axios** and **Zod** for type-safe API communication.
 
@@ -100,7 +100,7 @@ Centralized API client built with **Axios** and **Zod** for type-safe API commun
 
 **Usage:**
 ```tsx
-import { useAuth, getProducts, type Product } from '@pharmabag/api-client';
+import { useAuth, getProducts, type Product } from '@yukizi/api-client';
 
 function MyComponent() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -110,7 +110,7 @@ function MyComponent() {
 
 ---
 
-### `@pharmabag/utils`
+### `@yukizi/utils`
 
 Shared utility functions and validators.
 
@@ -123,7 +123,7 @@ Shared utility functions and validators.
 
 **Usage:**
 ```tsx
-import { formatCurrency, isValidPhone, DEFAULT_PAGINATION } from '@pharmabag/utils';
+import { formatCurrency, isValidPhone, DEFAULT_PAGINATION } from '@yukizi/utils';
 
 formatCurrency(1500);    // "₹1,500.00"
 isValidPhone('9876543210'); // true
@@ -195,7 +195,7 @@ pnpm install
 pnpm --filter buyer add <package>
 
 # To a shared package
-pnpm --filter @pharmabag/ui add <package>
+pnpm --filter @yukizi/ui add <package>
 
 # To the root (dev dependency)
 pnpm add -D -w <package>

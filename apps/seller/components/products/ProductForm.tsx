@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,13 +11,13 @@ import { cn } from "@/lib/utils";
 import { ImageUploader } from "./ImageUploader";
 import { DiscountSelector } from "./DiscountSelector";
 import { CategorySelector } from "./CategorySelector";
-import type { DiscountFormDetails, Suggestion } from "@pharmabag/utils";
+import type { DiscountFormDetails, Suggestion } from "@yukizi/utils";
 import {
   productFormSchema,
   type ProductFormValues,
   calculatePricing,
   VALID_GST_PERCENTAGES,
-} from "@pharmabag/utils";
+} from "@yukizi/utils";
 import { useCreateSellerProduct, useUpdateSellerProduct, useSuggestionSearch } from "@/hooks/useSeller";
 
 type FormValues = ProductFormValues;

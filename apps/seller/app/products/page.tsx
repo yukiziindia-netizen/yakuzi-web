@@ -1,9 +1,9 @@
-"use client";
+﻿"use client";
 import { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Plus, Search, Edit, Trash2, Eye } from "lucide-react";
 import { Button, Input, Badge, ApprovalBadge, Skeleton, Pagination } from "@/components/ui";
-import { formatCurrency } from "@pharmabag/utils";
+import { formatCurrency } from "@yukizi/utils";
 import { cn } from "@/lib/utils";
 import { useSellerProducts, useDeleteSellerProduct } from "@/hooks/useSeller";
 import Link from "next/link";

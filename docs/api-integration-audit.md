@@ -1,4 +1,4 @@
-# PharmaBag Buyer Application — API Integration Audit Report
+﻿# Yukizi Buyer Application — API Integration Audit Report
 
 **Date:** Generated during full audit session  
 **Scope:** Complete buyer application vs. backend API coverage  
@@ -8,7 +8,7 @@
 
 ## 1. Executive Summary
 
-The PharmaBag Buyer Application was audited against the full backend API collection. **Before this audit, every single page used hardcoded/static data with zero API integration.** All critical transactional pages have now been connected to real backend APIs via React Query hooks.
+The Yukizi Buyer Application was audited against the full backend API collection. **Before this audit, every single page used hardcoded/static data with zero API integration.** All critical transactional pages have now been connected to real backend APIs via React Query hooks.
 
 ### Key Metrics
 | Metric | Before | After |

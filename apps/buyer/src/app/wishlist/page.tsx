@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,7 +13,7 @@ import { SkeletonCard } from '@/components/shared/LoaderSkeleton';
 import { useWishlist, useRemoveFromWishlist } from '@/hooks/useWishlist';
 import { useAddToCart } from '@/hooks/useCart';
 import { useToast } from '@/components/shared/Toast';
-import { formatCurrency, generateProductSlug } from '@pharmabag/utils';
+import { formatCurrency, generateProductSlug } from '@yukizi/utils';
 
 export default function WishlistPage() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);

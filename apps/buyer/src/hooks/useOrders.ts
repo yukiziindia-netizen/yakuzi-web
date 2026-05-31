@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getOrders, getOrderById, createOrder, cancelOrder, getOrderMilestones, confirmMilestonePayment, getOrderInvoice, type CreateOrderInput } from '@pharmabag/api-client';
+import { getOrders, getOrderById, createOrder, cancelOrder, getOrderMilestones, confirmMilestonePayment, getOrderInvoice, type CreateOrderInput } from '@yukizi/api-client';
 
 export function useOrders(params?: { page?: number; limit?: number; status?: string }) {
   return useQuery({

@@ -1,11 +1,11 @@
-"use client";
+﻿"use client";
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowLeft, Save, Package, Trash2 } from "lucide-react";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { Button, Badge, Input, Textarea, Select, Skeleton, Modal } from "@/components/ui";
-import { formatCurrency } from "@pharmabag/utils";
+import { formatCurrency } from "@yukizi/utils";
 import { cn } from "@/lib/utils";
 import { useProductById, useUpdateProduct, useDeleteProduct, useCategories } from "@/hooks/useAdmin";
 import toast from "react-hot-toast";

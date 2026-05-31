@@ -1,9 +1,9 @@
-'use client';
+﻿'use client';
 
 import { Share2, Copy, MessageCircle, Mail, Check } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { generateProductSlug } from '@pharmabag/utils';
+import { generateProductSlug } from '@yukizi/utils';
 
 interface ShareButtonProps {
   productName: string;
@@ -49,7 +49,7 @@ export function ShareButton({
   }, [showMenu, onOpenChange]);
 
   const deepLink = `${typeof window !== 'undefined' ? window.location.origin : ''}/products/${generateProductSlug(productName, productId)}`;
-  const shareText = `Check out ${productName} at ₹${productPrice}${discount ? ` (${discount}% OFF)` : ''} on PharmaBag`;
+  const shareText = `Check out ${productName} at ₹${productPrice}${discount ? ` (${discount}% OFF)` : ''} on Yukizi`;
 
   const handleNativeShare = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -58,7 +58,7 @@ export function ShareButton({
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'PharmaBag',
+          title: 'Yukizi',
           text: shareText,
           url: deepLink,
         });

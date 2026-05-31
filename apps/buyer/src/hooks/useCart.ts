@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getCart, addToCart, updateCartItem, removeCartItem, clearCart, useAuth } from '@pharmabag/api-client';
+import { getCart, addToCart, updateCartItem, removeCartItem, clearCart, useAuth } from '@yukizi/api-client';
 import { localCart } from '@/lib/local-cart';
 import { useEffect, useState } from 'react';
 

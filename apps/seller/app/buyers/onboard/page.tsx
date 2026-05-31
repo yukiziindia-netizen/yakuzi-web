@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -395,7 +395,7 @@ export default function BuyerOnboardingPage() {
                     name="inviteCode"
                     value={formData.inviteCode}
                     onChange={handleChange}
-                    placeholder="e.g. PHARMABAG100"
+                    placeholder="e.g. YUKIZI100"
                     className="uppercase"
                   />
                   <p className="text-xs text-muted-foreground">If the buyer was referred by someone, enter the referral code here.</p>

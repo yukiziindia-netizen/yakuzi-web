@@ -1,4 +1,4 @@
-# FULL PLATFORM INTEGRATION AUDIT — PHARMABAG
+﻿# FULL PLATFORM INTEGRATION AUDIT — YUKIZI
 ## Admin + Seller + Buyer — Cross-App Flow Validation
 
 **Date:** June 2025  
@@ -50,11 +50,11 @@ The three apps (Admin, Seller, Buyer) were built with **three completely separat
 
 | Aspect | Buyer App | Seller App | Admin App |
 |--------|-----------|------------|-----------|
-| **API Client** | `@pharmabag/api-client` (shared package) | Local `apiClient.ts` | Local `apiClient.ts` |
+| **API Client** | `@yukizi/api-client` (shared package) | Local `apiClient.ts` | Local `apiClient.ts` |
 | **Token Key** | `pb_access_token` / `pb_refresh_token` | `pb_token` | `pb_token` |
 | **Base URL Env Var** | `NEXT_PUBLIC_API_URL` | `NEXT_PUBLIC_API_BASE_URL` | `NEXT_PUBLIC_API_BASE_URL` |
 | **Timeout** | 30 seconds | 10 seconds | 10 seconds |
-| **Type Source** | Zod schemas (local) | `@pharmabag/utils` types | `@pharmabag/utils` types |
+| **Type Source** | Zod schemas (local) | `@yukizi/utils` types | `@yukizi/utils` types |
 | **Response Unwrap** | `data.data ?? data.profile ?? data` | `data.data` | `data.data` |
 | **State Management** | TanStack React Query | Zustand + TanStack Query | Zustand + TanStack Query |
 | **Auth Pattern** | `AuthProvider` context | Zustand `useSellerAuth` | Zustand `useAdminAuth` |
@@ -75,7 +75,7 @@ Seller creates product → Admin approves → Product goes live → Buyer sees i
 |------|--------|---------|
 | Seller creates product | ⚠️ Partial | `POST /products` works. Product gets `approvalStatus` field. UI defaults to "PENDING". |
 | Admin sees pending products | ❌ Broken | Admin products page has **NO approval queue**. No filter for pending products. No approve/reject buttons. Only enable/disable (isActive toggle). |
-| Admin approves product | ❌ Missing | No `approveProduct()` or `rejectProduct()` API function exists in admin.api.ts. The `ApprovalStatus` type (PENDING/APPROVED/REJECTED) exists in `@pharmabag/utils` but admin has no UI or API to change it. |
+| Admin approves product | ❌ Missing | No `approveProduct()` or `rejectProduct()` API function exists in admin.api.ts. The `ApprovalStatus` type (PENDING/APPROVED/REJECTED) exists in `@yukizi/utils` but admin has no UI or API to change it. |
 | Approved product visible to buyer | ⚠️ Unknown | Buyer calls `GET /products` — whether this returns only approved products depends on backend filtering. Frontend has no client-side filter for approval status. |
 
 **Verdict: ❌ BROKEN** — The entire product approval pipeline is a dead end. Seller sets approval status but admin cannot act on it.
@@ -522,4 +522,4 @@ Cross-app integrations that simply don't exist yet:
 1. Fix P0 items first — they unblock all testing
 2. Standardize status enums and token keys across all apps
 3. Validate all flows with a real backend before proceeding to P1
-4. Consider unifying the API layer into the shared `@pharmabag/api-client` package to prevent future drift
+4. Consider unifying the API layer into the shared `@yukizi/api-client` package to prevent future drift

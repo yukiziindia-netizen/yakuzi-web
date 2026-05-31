@@ -1,8 +1,8 @@
-# Test Suite Summary
+﻿# Test Suite Summary
 
 ## 📦 Complete Product Journey Test Suite
 
-This comprehensive test suite validates the entire PharmaBag product lifecycle from creation to ordering.
+This comprehensive test suite validates the entire Yukizi product lifecycle from creation to ordering.
 
 ---
 
@@ -92,7 +92,7 @@ Features:
 {
   "test:journey": "node test-product-journey.js",
   "test:journey:local": "BACKEND_URL=http://localhost:3000 node test-product-journey.js",
-  "test:journey:production": "BACKEND_URL=https://pharmabag-api.onrender.com node test-product-journey.js"
+  "test:journey:production": "BACKEND_URL=https://yukizi-api.onrender.com node test-product-journey.js"
 }
 ```
 
@@ -172,7 +172,7 @@ npm run test:journey
 ## 📋 File Organization
 
 ```
-pharmabag-web/
+yukizi-web/
 ├── test-product-journey.js          # Main test script
 ├── test-product-journey.ts          # TypeScript version
 ├── README_TESTS.md                  # Master documentation

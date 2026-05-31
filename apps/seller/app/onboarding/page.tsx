@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -373,7 +373,7 @@ export default function SellerOnboardingPage() {
           <div className="h-10 w-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
             <Store className="h-5 w-5 text-white" />
           </div>
-          <span className="font-bold text-xl tracking-tight text-slate-900">PharmaBag <span className="text-primary">Seller</span></span>
+          <span className="font-bold text-xl tracking-tight text-slate-900">Yukizi <span className="text-primary">Seller</span></span>
         </div>
         <Button variant="outline" size="sm" onClick={() => logout()} className="rounded-xl border-slate-200">Sign Out</Button>
       </nav>

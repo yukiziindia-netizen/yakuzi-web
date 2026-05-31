@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -8,7 +8,7 @@ import {
   uploadPaymentProof,
   uploadPaymentProofByOrder,
   type CreatePaymentInput,
-} from '@pharmabag/api-client';
+} from '@yukizi/api-client';
 
 export function usePaymentHistory(params?: { page?: number; limit?: number }) {
   return useQuery({

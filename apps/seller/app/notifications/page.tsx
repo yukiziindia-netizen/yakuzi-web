@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Bell, CheckCheck, Package, CreditCard, AlertTriangle, ShoppingBag, MessageSquare, Info } from "lucide-react";
 import { Button, Badge } from "@/components/ui";
-import { formatDate } from "@pharmabag/utils";
+import { formatDate } from "@yukizi/utils";
 import { useSellerNotifications, useMarkNotificationRead, useMarkAllNotificationsRead } from "@/hooks/useSeller";
 import { cn } from "@/lib/utils";
 import Link from "next/link";

@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { PackagePlus, Send, Clock, CheckCircle2, XCircle } from "lucide-react";
 import { Button, Badge, Input, Textarea } from "@/components/ui";
-import { formatDate } from "@pharmabag/utils";
+import { formatDate } from "@yukizi/utils";
 import { useProductRequests, useCreateProductRequest } from "@/hooks/useSeller";
 import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";

@@ -9,9 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@pharmabag/api-client": "workspace:*",
-    "@pharmabag/ui": "workspace:*",
-    "@pharmabag/utils": "workspace:*",
+    "@yukizi/api-client": "workspace:*",
+    "@yukizi/ui": "workspace:*",
+    "@yukizi/utils": "workspace:*",
     "@tanstack/react-query": "^5.28.0",
     "framer-motion": "^11.18.2",
     "lucide-react": "^0.356.0",

@@ -1,5 +1,5 @@
-import { apiClient } from "@/lib/apiClient";
-import type { User } from "@pharmabag/utils";
+﻿import { apiClient } from "@/lib/apiClient";
+import type { User } from "@yukizi/utils";
 
 export interface SendOtpPayload { phone: string; }
 export interface VerifyOtpPayload { phone: string; otp: string; role: string; }

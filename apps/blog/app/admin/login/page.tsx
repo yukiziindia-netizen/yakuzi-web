@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { loginWithSimplePassword } from "@pharmabag/api-client";
+import { loginWithSimplePassword } from "@yukizi/api-client";
 import { Lock, Loader2, ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -34,8 +34,8 @@ export default function AdminLoginPage() {
         <div className="mb-10 text-center">
           <Link href="/" className="inline-block mb-10">
             <Image
-              src="/pharmabag_logo.png"
-              alt="PharmaBag Logo"
+              src="/yukizi_logo.png"
+              alt="Yukizi Logo"
               width={180}
               height={50}
               className="h-10 w-auto mx-auto"

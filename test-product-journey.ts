@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+﻿#!/usr/bin/env node
 
 /**
  * Complete Product Journey Test Script (TypeScript Version)
@@ -9,7 +9,7 @@
 
 import axios, { AxiosInstance } from 'axios';
 
-const API_BASE_URL = process.env.BACKEND_URL || 'https://pharmabag-api.onrender.com';
+const API_BASE_URL = process.env.BACKEND_URL || 'https://yukizi-api.onrender.com';
 const API_URL = `${API_BASE_URL}/api`;
 
 // Color codes for terminal output
@@ -102,7 +102,7 @@ const testData: TestData = {
     gstNumber: '22AAAAA0000A1Z5',
   },
   admin: {
-    email: 'admin@pharmabag.com',
+    email: 'admin@yukizi.com',
     password: 'Admin@123',
   },
   buyer: {

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,7 +13,7 @@ import { ExpiryPicker } from '@/components/shared/ExpiryPicker';
 import { useCreateBuyerProfile, useUpdateBuyerProfile, useVerifyPanGst, useBuyerProfile } from '@/hooks/useBuyerProfile';
 import { useUploadDrugLicense } from '@/hooks/useStorage';
 import { useToast } from '@/components/shared/Toast';
-import { useAuth } from '@pharmabag/api-client';
+import { useAuth } from '@yukizi/api-client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -642,7 +642,7 @@ export default function OnboardingPage() {
                           type="text"
                           value={form.inviteCode}
                           onChange={(e) => updateField('inviteCode', e.target.value.toUpperCase())}
-                          placeholder="e.g. PHARMABAG_OFFER"
+                          placeholder="e.g. YUKIZI_OFFER"
                           className="w-full pl-12 pr-4 py-4 rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50/30 focus:border-emerald-400 focus:bg-white focus:border-solid outline-none transition-all font-mono font-bold text-gray-700"
                         />
                       </div>

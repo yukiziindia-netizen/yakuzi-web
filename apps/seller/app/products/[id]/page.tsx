@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSellerProduct, useDeleteSellerProduct } from "@/hooks/useSeller";
 import { ArrowLeft, Loader2, Edit, Trash2 } from "lucide-react";
 import { Button, Badge, ApprovalBadge } from "@/components/ui";
-import { formatCurrency, formatDate } from "@pharmabag/utils";
+import { formatCurrency, formatDate } from "@yukizi/utils";
 import toast from "react-hot-toast";
 
 export default function ProductDetailPage() {

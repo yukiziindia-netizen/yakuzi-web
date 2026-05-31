@@ -1,9 +1,9 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { Loader2, Share2, Plus, ArrowUpRight, Star, Truck } from 'lucide-react';
 import Link from 'next/link';
-import { getFeaturedProducts } from '@pharmabag/api-client';
+import { getFeaturedProducts } from '@yukizi/api-client';
 import QuickReviewModal from './QuickReviewModal';
 
 interface ProductCarouselProps {

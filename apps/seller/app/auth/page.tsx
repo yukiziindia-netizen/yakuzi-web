@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -78,7 +78,7 @@ export default function SellerAuthPage() {
             <div className="h-12 w-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center"><Store className="h-7 w-7" /></div>
             <span className="font-semibold text-3xl">Seller Portal</span>
           </div>
-          <h1 className="font-semibold text-4xl leading-tight">Grow Your Pharma Business with PharmaBag</h1>
+          <h1 className="font-semibold text-4xl leading-tight">Grow Your Pharma Business with Yukizi</h1>
           <div className="space-y-3">
             {["List 50,000+ products in minutes", "Reach 10,000+ verified buyers", "Real-time inventory & order management", "Weekly payouts to your bank account"].map(f => (
               <div key={f} className="flex items-center gap-3 bg-white/15 backdrop-blur-sm rounded-xl px-4 py-3">

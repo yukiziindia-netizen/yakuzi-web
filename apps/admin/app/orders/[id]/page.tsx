@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -7,7 +7,7 @@ import { ArrowLeft, Package, Truck, CheckCircle, XCircle, Clock, CreditCard, Fil
 
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { Button, Badge, Modal, Input, Skeleton } from "@/components/ui";
-import { formatCurrency } from "@pharmabag/utils";
+import { formatCurrency } from "@yukizi/utils";
 import { cn } from "@/lib/utils";
 import { useOrderById, useUpdateAdminOrderStatus, useCancelOrder } from "@/hooks/useAdmin";
 import toast from "react-hot-toast";

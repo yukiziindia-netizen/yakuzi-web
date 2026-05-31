@@ -1,4 +1,4 @@
-# PharmaBag System-Wide API Validation & Integration Audit Report
+﻿# Yukizi System-Wide API Validation & Integration Audit Report
 
 **Date:** Generated during full system-wide audit session  
 **Scope:** All 3 frontend apps (Buyer, Seller, Admin) + shared packages vs. backend Postman collection (~104 endpoints)  
@@ -9,7 +9,7 @@
 
 ## 1. Executive Summary
 
-A comprehensive system-wide audit was performed across the entire PharmaBag monorepo, comparing all frontend API calls, types, and integration patterns against the backend Postman collection. **20+ API contract mismatches were identified and fixed**, including incorrect endpoints, missing schema fields, wrong parameter names, and missing shared types/exports.
+A comprehensive system-wide audit was performed across the entire Yukizi monorepo, comparing all frontend API calls, types, and integration patterns against the backend Postman collection. **20+ API contract mismatches were identified and fixed**, including incorrect endpoints, missing schema fields, wrong parameter names, and missing shared types/exports.
 
 ### Key Metrics
 
@@ -25,7 +25,7 @@ A comprehensive system-wide audit was performed across the entire PharmaBag mono
 
 ---
 
-## 2. API Client Fixes (Shared Package: `@pharmabag/api-client`)
+## 2. API Client Fixes (Shared Package: `@yukizi/api-client`)
 
 ### 2.1 Auth API (`packages/api-client/src/modules/auth.api.ts`)
 - **FIXED:** `getProfile()` endpoint from `/auth/profile` → `/auth/me`
@@ -52,7 +52,7 @@ A comprehensive system-wide audit was performed across the entire PharmaBag mono
 
 ---
 
-## 3. Shared Package Fixes (`@pharmabag/utils`)
+## 3. Shared Package Fixes (`@yukizi/utils`)
 
 ### 3.1 New File: `packages/utils/src/types.ts`
 Created comprehensive shared type definitions used across seller and admin apps:
@@ -100,7 +100,7 @@ Created mock data constants for development/fallback use:
 ## 5. Seller App Fixes (`apps/seller`)
 
 ### 5.1 Build Infrastructure
-- **FIXED:** `apps/seller/package.json` — Changed `"@pharmabag/utils": "*"` → `"workspace:*"` (pnpm workspace protocol)
+- **FIXED:** `apps/seller/package.json` — Changed `"@yukizi/utils": "*"` → `"workspace:*"` (pnpm workspace protocol)
 - **FIXED:** `apps/seller/tsconfig.json` — Added `"baseUrl": "."` to fix `@/*` path alias resolution (was inheriting root tsconfig `baseUrl` causing all imports to resolve relative to monorepo root instead of app directory)
 
 ### 5.2 Dashboard Page (`apps/seller/app/dashboard/page.tsx`)
@@ -126,7 +126,7 @@ Created mock data constants for development/fallback use:
 ## 6. Admin App Fixes (`apps/admin`)
 
 ### 6.1 Build Infrastructure
-- **FIXED:** `apps/admin/package.json` — Changed `"@pharmabag/utils": "*"` → `"workspace:*"`
+- **FIXED:** `apps/admin/package.json` — Changed `"@yukizi/utils": "*"` → `"workspace:*"`
 - **FIXED:** `apps/admin/tsconfig.json` — Added `"baseUrl": "."` (same path alias issue as seller)
 
 ### 6.2 Users Page (`apps/admin/app/users/page.tsx`)

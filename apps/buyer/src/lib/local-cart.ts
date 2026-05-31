@@ -1,6 +1,6 @@
-import { type Cart, type CartItem } from '@pharmabag/api-client';
+﻿import { type Cart, type CartItem } from '@yukizi/api-client';
 
-const STORAGE_KEY = 'pharmabag_local_cart';
+const STORAGE_KEY = 'yukizi_local_cart';
 
 export const localCart = {
   get: (): Cart => {

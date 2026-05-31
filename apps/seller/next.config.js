@@ -1,7 +1,7 @@
-/** @type {import('next').NextConfig} */
+﻿/** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: { ignoreDuringBuilds: true },
-  transpilePackages: ["@pharmabag/utils"],
+  transpilePackages: ["@yukizi/utils"],
   compiler: { removeConsole: process.env.NODE_ENV === "production" },
   images: {
     remotePatterns: [

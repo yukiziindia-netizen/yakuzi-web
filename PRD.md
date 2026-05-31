@@ -1,6 +1,6 @@
-# Product Requirements Document (PRD) & Master Task List
+﻿# Product Requirements Document (PRD) & Master Task List
 
-This document consolidates all the remaining tasks, fixes, and required features across the PharmaBag platform (Buyer, Seller, Admin apps) based on the latest system-wide audits and integration tests.
+This document consolidates all the remaining tasks, fixes, and required features across the Yukizi platform (Buyer, Seller, Admin apps) based on the latest system-wide audits and integration tests.
 
 ## 🔴 Priority 0 - Critical Blockers
 *These items must be fixed before any further end-to-end testing can proceed. They block core user flows.*
@@ -47,7 +47,7 @@ This document consolidates all the remaining tasks, fixes, and required features
 - [ ] **Ticket Attachments**: Allow file uploads for support tickets.
 - [ ] **KYC Document Uploads**: Add actual file uploading to seller onboarding instead of just text fields.
 - [ ] **Real-time Updates**: Replace 60s polling with WebSocket or SSE for notifications and ticket replies.
-- [ ] **API Layer Consolidation**: Refactor all three apps to use the single `@pharmabag/api-client` package to fix token and type drift.
+- [ ] **API Layer Consolidation**: Refactor all three apps to use the single `@yukizi/api-client` package to fix token and type drift.
 - [ ] **Date Range Filtering**: Add date pickers to admin orders and analytics pages.
 - [ ] **Review Interactivity**: Implement the "Helpful?" and "Reply" buttons on product reviews.
 - [ ] **Integration Test Suite**: Add automated E2E tests for critical flows (auth, orders, payments).

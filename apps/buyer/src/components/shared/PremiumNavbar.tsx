@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
@@ -10,7 +10,7 @@ import CartDrawer from '@/components/cart/CartDrawer';
 import { useScrollLock } from '@/hooks/useScrollLock';
 import { useCart } from '@/hooks/useCart';
 
-import { useAuth, getCategories, Category } from '@pharmabag/api-client';
+import { useAuth, getCategories, Category } from '@yukizi/api-client';
 
 interface PremiumNavbarProps {
   onLoginClick?: () => void;

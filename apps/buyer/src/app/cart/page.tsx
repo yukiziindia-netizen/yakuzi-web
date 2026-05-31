@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -12,7 +12,7 @@ import EmptyState from '@/components/shared/EmptyState';
 import { useCart, useUpdateCartItem, useRemoveCartItem, useClearCart } from '@/hooks/useCart';
 import { usePlatformConfig } from '@/hooks/usePlatformConfig';
 import { useToast } from '@/components/shared/Toast';
-import { formatCurrency, generateProductSlug } from '@pharmabag/utils';
+import { formatCurrency, generateProductSlug } from '@yukizi/utils';
 
 export default function CartPage() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);

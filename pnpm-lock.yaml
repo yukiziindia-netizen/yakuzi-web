@@ -11,9 +11,6 @@ importers:
       axios:
         specifier: ^1.13.6
         version: 1.13.6
-      pnpm:
-        specifier: ^10.33.0
-        version: 10.33.0
     devDependencies:
       '@typescript-eslint/eslint-plugin':
         specifier: ^7.0.0
@@ -48,15 +45,15 @@ importers:
 
   apps/admin:
     dependencies:
-      '@pharmabag/api-client':
-        specifier: workspace:*
-        version: link:../../packages/api-client
-      '@pharmabag/utils':
-        specifier: workspace:*
-        version: link:../../packages/utils
       '@tanstack/react-query':
         specifier: ^5.51.1
         version: 5.90.21(react@18.3.1)
+      '@yukizi/api-client':
+        specifier: workspace:*
+        version: link:../../packages/api-client
+      '@yukizi/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
       axios:
         specifier: ^1.6.0
         version: 1.13.6
@@ -124,13 +121,13 @@ importers:
 
   apps/blog:
     dependencies:
-      '@pharmabag/api-client':
+      '@yukizi/api-client':
         specifier: workspace:*
         version: link:../../packages/api-client
-      '@pharmabag/ui':
+      '@yukizi/ui':
         specifier: workspace:*
         version: link:../../packages/ui
-      '@pharmabag/utils':
+      '@yukizi/utils':
         specifier: workspace:*
         version: link:../../packages/utils
       clsx:
@@ -179,18 +176,18 @@ importers:
 
   apps/buyer:
     dependencies:
-      '@pharmabag/api-client':
-        specifier: workspace:*
-        version: link:../../packages/api-client
-      '@pharmabag/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
-      '@pharmabag/utils':
-        specifier: workspace:*
-        version: link:../../packages/utils
       '@tanstack/react-query':
         specifier: ^5.28.0
         version: 5.90.21(react@18.3.1)
+      '@yukizi/api-client':
+        specifier: workspace:*
+        version: link:../../packages/api-client
+      '@yukizi/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      '@yukizi/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
       framer-motion:
         specifier: ^11.18.2
         version: 11.18.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -240,12 +237,12 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.71.2(react@18.3.1))
-      '@pharmabag/utils':
-        specifier: workspace:*
-        version: link:../../packages/utils
       '@tanstack/react-query':
         specifier: ^5.51.1
         version: 5.90.21(react@18.3.1)
+      '@yukizi/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
       axios:
         specifier: ^1.6.0
         version: 1.13.6
@@ -319,7 +316,7 @@ importers:
 
   packages/api-client:
     dependencies:
-      '@pharmabag/utils':
+      '@yukizi/utils':
         specifier: workspace:*
         version: link:../utils
       axios:
@@ -2185,11 +2182,6 @@ packages:
   pirates@4.0.7:
     resolution: {integrity: sha512-TfySrs/5nm8fQJDcBDuUng3VOUKsd7S+zqvbOTiGXHfxX4wK31ard+hoNuvkicM/2YFzlpDgABOevKSsB4G/FA==}
     engines: {node: '>= 6'}
-
-  pnpm@10.33.0:
-    resolution: {integrity: sha512-EFaLtKavtYyes2MNqQzJUWQXq+vT+rvmc58K55VyjaFJHp21pUTHatjrdXD1xLs9bGN7LLQb/c20f6gjyGSTGQ==}
-    engines: {node: '>=18.12'}
-    hasBin: true
 
   possible-typed-array-names@1.1.0:
     resolution: {integrity: sha512-/+5VFTchJDoVj3bhoqi6UeymcD00DAwb1nJwamzPvHEszJ4FpF6SNNbUbOS8yI56qHzdV8eK0qEfOSiodkTdxg==}
@@ -4591,8 +4583,6 @@ snapshots:
   pify@2.3.0: {}
 
   pirates@4.0.7: {}
-
-  pnpm@10.33.0: {}
 
   possible-typed-array-names@1.1.0: {}
 

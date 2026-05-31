@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -24,7 +24,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import AuthGuard from '@/components/shared/AuthGuard';
-import { useAuth } from '@pharmabag/api-client';
+import { useAuth } from '@yukizi/api-client';
 
 type PaymentMethod = 'BANK_TRANSFER' | 'UPI' | 'COD' | 'CREDIT';
 
@@ -199,7 +199,7 @@ export default function CheckoutPage() {
               </div>
               <h1 className="text-2xl font-black text-gray-900 mb-4">Complete Verification</h1>
               <p className="text-gray-600 font-medium mb-8">
-                Since it's your first time on our platform, you need to verify your business details to buy items on PharmaBag.
+                Since it's your first time on our platform, you need to verify your business details to buy items on Yukizi.
               </p>
               <Link href="/onboarding" className="inline-flex items-center justify-center w-full h-14 bg-emerald-500 text-white rounded-xl font-bold transition-all hover:bg-emerald-600 gap-2">
                 Verify Now <ChevronRight className="w-5 h-5" />

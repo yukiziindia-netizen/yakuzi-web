@@ -1,11 +1,11 @@
-"use client";
+﻿"use client";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Users, Package, ShoppingBag, TrendingUp, AlertTriangle, CheckCircle, Clock, Flag, Bell, Search } from "lucide-react";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { StatCard, Badge, StatusBadge, Button } from "@/components/ui";
-import { formatCurrency, formatCompact } from "@pharmabag/utils";
+import { formatCurrency, formatCompact } from "@yukizi/utils";
 import { useAdminDashboard } from "@/hooks/useAdmin";
 
 import React from "react";
@@ -62,7 +62,7 @@ export default function AdminDashboardPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="font-semibold text-2xl text-foreground">Platform Overview</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Monitor the entire PharmaBag ecosystem</p>
+          <p className="text-sm text-muted-foreground mt-0.5">Monitor the entire Yukizi ecosystem</p>
         </div>
         <DateRangePicker value={dateRange} onChange={setDateRange} align="end" />
       </div>

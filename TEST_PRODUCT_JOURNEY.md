@@ -1,6 +1,6 @@
-# Complete Product Journey Test Script
+﻿# Complete Product Journey Test Script
 
-This test script validates the complete lifecycle of a product on PharmaBag, from creation to ordering.
+This test script validates the complete lifecycle of a product on Yukizi, from creation to ordering.
 
 ## 🎯 Test Scope
 
@@ -29,7 +29,7 @@ BUYER PHASE
 
 - Node.js >= 18.0.0
 - Backend API running and accessible
-- At least one admin account must exist (default: admin@pharmabag.com / Admin@123)
+- At least one admin account must exist (default: admin@yukizi.com / Admin@123)
 - At least one product category should exist (or test will create fallback data)
 
 ## 🚀 Quick Start
@@ -37,7 +37,7 @@ BUYER PHASE
 ### Default (Production API)
 
 ```bash
-# Run against production backend (https://pharmabag-api.onrender.com)
+# Run against production backend (https://yukizi-api.onrender.com)
 npm run test:journey
 # or
 node test-product-journey.js
@@ -153,7 +153,7 @@ The script provides detailed color-coded output:
 ✓ Found 4 categories
 
 [Step 6] Logging in admin account
-✓ Admin logged in: admin@pharmabag.com
+✓ Admin logged in: admin@yukizi.com
 
 [Step 7] Approving product cm123abc456def
 ✓ Product approved
@@ -214,7 +214,7 @@ testData.admin = {
 **Solution**: 
 ```bash
 # Check backend is running
-curl https://pharmabag-api.onrender.com/api/health
+curl https://yukizi-api.onrender.com/api/health
 
 # Or use local backend
 npm run test:journey:local

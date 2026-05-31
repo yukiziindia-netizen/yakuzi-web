@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -85,10 +85,10 @@ export default function AdminAuthPage() {
             </div>
             <div>
               <div className="font-semibold text-3xl text-amber-900">Admin Panel</div>
-              <div className="text-amber-700 text-sm">PharmaBag Platform</div>
+              <div className="text-amber-700 text-sm">Yukizi Platform</div>
             </div>
           </div>
-          <h1 className="font-semibold text-4xl text-amber-900 leading-tight">Manage the Entire PharmaBag Ecosystem</h1>
+          <h1 className="font-semibold text-4xl text-amber-900 leading-tight">Manage the Entire Yukizi Ecosystem</h1>
           <div className="space-y-3">
             {[
               "Verify sellers and manage approvals",

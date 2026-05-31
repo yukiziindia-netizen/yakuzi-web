@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Send, ArrowLeft, Loader2, User, Shield, Clock } from "lucide-react";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { Button, Input, Badge } from "@/components/ui";
-import { formatDate, formatDateTime } from "@pharmabag/utils";
+import { formatDate, formatDateTime } from "@yukizi/utils";
 import { cn } from "@/lib/utils";
 import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";

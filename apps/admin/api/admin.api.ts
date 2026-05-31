@@ -1,5 +1,5 @@
-import { apiClient } from "@/lib/apiClient";
-import type { Product } from "@pharmabag/utils";
+﻿import { apiClient } from "@/lib/apiClient";
+import type { Product } from "@yukizi/utils";
 
 // ─── Dashboard ───────────────────────────────────────
 export async function getAdminDashboard(params: { dateFrom?: string; dateTo?: string } = {}) {

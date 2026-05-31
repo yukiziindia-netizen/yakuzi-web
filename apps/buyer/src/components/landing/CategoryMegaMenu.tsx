@@ -1,9 +1,9 @@
-'use client';
+﻿'use client';
 
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { type Category } from '@pharmabag/api-client';
+import { type Category } from '@yukizi/api-client';
 import { ArrowRight } from 'lucide-react';
 
 interface CategoryMegaMenuProps {

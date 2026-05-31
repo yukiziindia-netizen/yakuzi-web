@@ -1,4 +1,4 @@
-import type { Metadata, Viewport } from "next";
+﻿import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "react-hot-toast";
@@ -9,8 +9,8 @@ import { AdminGuard } from "@/components/layout/admin-guard";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 
 export const metadata: Metadata = {
-  title: { default: "PharmaBag Admin", template: "%s | Admin" },
-  description: "PharmaBag platform administration dashboard.",
+  title: { default: "Yukizi Admin", template: "%s | Admin" },
+  description: "Yukizi platform administration dashboard.",
   robots: { index: false, follow: false },
 };
 export const viewport: Viewport = { width: "device-width", initialScale: 1 };

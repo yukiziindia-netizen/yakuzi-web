@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 import Link from "next/link";
 import { forwardRef } from "react";
 import { motion } from "framer-motion";
 import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { OrderStatus, ApprovalStatus, ProductStatus } from "@pharmabag/utils";
+import type { OrderStatus, ApprovalStatus, ProductStatus } from "@yukizi/utils";
 export * from "./ExpiryPicker";
 
 /* Button */

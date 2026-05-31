@@ -61,7 +61,7 @@ export default function FullscreenSearch({ isOpen, onClose }: { isOpen: boolean;
     if (!q.trim()) return;
     saveRecentSearch(q.trim());
     onClose();
-    router.push(`/products?search=${encodeURIComponent(q.trim())}`);
+    router.push(`/?search=${encodeURIComponent(q.trim())}`);
   };
 
   return (

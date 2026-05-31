@@ -175,7 +175,7 @@ export default function CheckoutPage() {
               <p className="text-gray-600 font-medium mb-8">
                 Your business documents are currently being reviewed by our Admin team. You will be able to place orders once approved.
               </p>
-              <Link href="/products" className="inline-flex items-center justify-center w-full h-14 bg-gray-900 text-white rounded-xl font-bold transition-all hover:bg-gray-800">
+              <Link href="/" className="inline-flex items-center justify-center w-full h-14 bg-gray-900 text-white rounded-xl font-bold transition-all hover:bg-gray-800">
                 Continue Browsing
               </Link>
             </motion.div>
@@ -219,7 +219,7 @@ export default function CheckoutPage() {
 
       <div className="pt-20 sm:pt-24 md:pt-28 lg:pt-32 pb-12 sm:pb-20 px-[4vw] w-full mx-auto">
         <Link 
-          href="/products" 
+          href="/" 
           className="inline-flex items-center gap-2 text-gray-400 font-bold hover:text-gray-900 transition-colors mb-8 group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />

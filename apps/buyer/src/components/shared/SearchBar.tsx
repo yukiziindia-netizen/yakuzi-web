@@ -65,7 +65,7 @@ export default function SearchBar({ isOpen = false, onClose }: SearchBarProps) {
     saveRecentSearch(searchQuery.trim());
     setQuery('');
     onClose?.();
-    router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+    router.push(`/?search=${encodeURIComponent(searchQuery.trim())}`);
   };
 
   return (

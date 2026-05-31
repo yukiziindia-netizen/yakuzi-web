@@ -37,7 +37,7 @@ export default function PremiumNavbar({ onLoginClick }: PremiumNavbarProps) {
     ...(categories.length > 0
       ? categories.map(c => ({
         label: c.label || c.name,
-        href: `/products?category=${c.id}`,
+        href: `/?category=${c.id}`,
         type: 'link',
         categoryId: c.id,
         subCategories: c.subCategories || (c as any).subcategories || [],
@@ -267,7 +267,7 @@ export default function PremiumNavbar({ onLoginClick }: PremiumNavbarProps) {
                                   {(item as any).subCategories.map((sub: any) => (
                                     <Link
                                       key={sub.id}
-                                      href={`/products?category=${(item as any).categoryId}&subCategory=${sub.id}`}
+                                      href={`/?category=${(item as any).categoryId}&subCategory=${sub.id}`}
                                       onClick={() => setIsMobileMenuOpen(false)}
                                       className="block px-6 py-2 text-[13px] text-gray-600 hover:text-black hover:bg-gray-100"
                                     >

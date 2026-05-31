@@ -1,9 +1,9 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 import { Loader2, Share2, Plus, ArrowUpRight, Star, Truck } from 'lucide-react';
 import Link from 'next/link';
-import { getFeaturedProducts } from '@yukizi/api-client';
+import { getProducts } from '@yukizi/api-client';
 import QuickReviewModal from './QuickReviewModal';
 
 interface ProductCarouselProps {
@@ -17,16 +17,16 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
   const hasAd = isYukiziChoice || isBestSeller;
   const hasBottomRow = index % 3 !== 2;
   
-  // Provide reliable working images
-  const defaultImages = [
-    'https://images.unsplash.com/photo-1542451313056-b7c8e626645f?w=800&q=80',
-    'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=800&q=80',
-    'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=800&q=80'
-  ];
-  const defaultNames = ["Spider Man Fri...", "Madara Uchiha...", "Resident Evil Le..."];
+  const productName = product.name || "Product Name";
+  const getInitials = (name: string) => {
+    if (!name) return 'PR';
+    const words = name.trim().split(/\s+/);
+    if (words.length === 1) return words[0].substring(0, 2).toUpperCase();
+    return (words[0][0] + words[words.length - 1][0]).toUpperCase();
+  };
+  const fallbackImage = `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent(getInitials(productName))}`;
   
-  const imageUrl = product.images?.[0]?.url || product.image || defaultImages[index % 3];
-  const productName = product.name || defaultNames[index % 3];
+  const imageUrl = product.images?.[0]?.url || product.images?.[0] || product.image || fallbackImage;
 
   return (
     <div className="relative mt-3 group">
@@ -127,9 +127,9 @@ export default function ProductCarousel({ slot = 'HOMEPAGE_CAROUSEL' }: ProductC
   useEffect(() => {
     async function load() {
       try {
-        const data = await getFeaturedProducts(slot);
-        if (data && Array.isArray(data)) {
-          setProducts(data);
+        const res = await getProducts({ limit: 24 });
+        if (res && res.data && Array.isArray(res.data)) {
+          setProducts(res.data);
         }
       } catch (err) {
         console.error('Failed to load featured products', err);
@@ -143,16 +143,7 @@ export default function ProductCarousel({ slot = 'HOMEPAGE_CAROUSEL' }: ProductC
   if (loading) return <div className="h-40 flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-[#854cbc]" /></div>;
   
   const displayProducts = [...products];
-  if (displayProducts.length > 0) {
-    while (displayProducts.length < 12) {
-      displayProducts.push(...products);
-    }
-  } else {
-    for (let i = 0; i < 12; i++) displayProducts.push({ id: `mock-${i}` });
-  }
-  
-  // Show 12 items to make two rows in a 6-column grid
-  const slicedProducts = displayProducts.slice(0, 12);
+  const slicedProducts = displayProducts;
 
   return (
     <div className="w-full max-w-[1600px] mx-auto px-2 sm:px-4 lg:px-6 mb-8 sm:mb-12 pt-4">

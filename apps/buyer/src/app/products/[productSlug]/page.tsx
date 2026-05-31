@@ -66,7 +66,7 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
       />
 
       <div className="w-full h-28 flex items-center justify-center mb-2 mt-1 relative group-hover:scale-105 transition-transform z-0">
-         <img src={prod.image || (prod.images && prod.images[0]) || '/products/pharma_bottle.png'} alt={prod.name} className="max-h-full max-w-full object-contain mix-blend-multiply" />
+         <img src={prod.image || (prod.images && prod.images[0]) || `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent((prod.name || 'PR').trim().split(/\s+/).length === 1 ? (prod.name || 'PR').trim().substring(0,2).toUpperCase() : ((prod.name || 'PR').trim().split(/\s+/)[0][0] + (prod.name || 'PR').trim().split(/\s+/)[(prod.name || 'PR').trim().split(/\s+/).length - 1][0]).toUpperCase())}`} alt={prod.name} className="max-h-full max-w-full object-contain mix-blend-multiply" />
       </div>
 
       <div className="mt-auto flex flex-col gap-1">
@@ -155,7 +155,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
     );
   }
 
-  const images = product.images && product.images.length > 0 ? product.images.map((img: any) => img.url || img) : ['/products/pharma_bottle.png'];
+  const images = product.images && product.images.length > 0 ? product.images.map((img: any) => img.url || img) : [`https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent((product.name || 'PR').trim().split(/\s+/).length === 1 ? (product.name || 'PR').trim().substring(0,2).toUpperCase() : ((product.name || 'PR').trim().split(/\s+/)[0][0] + (product.name || 'PR').trim().split(/\s+/)[(product.name || 'PR').trim().split(/\s+/).length - 1][0]).toUpperCase())}`];
   const listings = product.listings || [];
   const relatedProducts = relatedProductsData?.data || [];
 

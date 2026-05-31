@@ -93,7 +93,7 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
       await verifyOtp(cleanPhone, otp);
       toast('Login successful!', 'success');
       handleCloseCleanup();
-      router.push('/products');
+      router.push('/');
     } catch (e: any) { toast('Invalid OTP', 'error'); } finally { setIsLoading(false); }
   };
 

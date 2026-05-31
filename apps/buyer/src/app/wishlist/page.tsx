@@ -75,7 +75,7 @@ export default function WishlistPage() {
               title="Your wishlist is empty"
               description="Save products you love and come back to them later"
               actionLabel="Browse Products"
-              actionHref="/products"
+              actionHref="/"
             />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -313,7 +313,7 @@ export default function OnboardingPage() {
   }, [hasCompletedOnboarding, isApproved, isRejected, refresh]);
 
   if (isApproved) {
-    router.replace('/products');
+    router.replace('/');
     return null;
   }
 
@@ -334,7 +334,7 @@ export default function OnboardingPage() {
               <p className="text-sm text-gray-400 mb-8">
                 Verification typically takes 24–48 hours.
               </p>
-              <Link href="/products" className="inline-flex items-center justify-center w-full h-14 bg-gray-900 text-white rounded-xl font-bold transition-all hover:bg-gray-800">
+              <Link href="/" className="inline-flex items-center justify-center w-full h-14 bg-gray-900 text-white rounded-xl font-bold transition-all hover:bg-gray-800">
                 Continue Browsing
               </Link>
             </motion.div>

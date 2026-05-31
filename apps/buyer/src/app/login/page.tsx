@@ -22,7 +22,7 @@ export default function LoginPage() {
   const { sendOtp, verifyOtp, isAuthenticated, isLoading: authLoading } = useAuth();
 
   useEffect(() => {
-    if (!authLoading && isAuthenticated) router.push('/products');
+    if (!authLoading && isAuthenticated) router.push('/');
   }, [isAuthenticated, authLoading, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -59,7 +59,7 @@ export default function LoginPage() {
     try {
       await verifyOtp(cleanPhone, otp);
       toast('Login successful!', 'success');
-      router.push('/products');
+      router.push('/');
     } catch (e: any) { toast('Invalid OTP', 'error'); } finally { setIsLoading(false); }
   };
 

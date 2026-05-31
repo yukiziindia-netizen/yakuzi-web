@@ -85,7 +85,7 @@ export default function CartPage() {
               title="Your bag is empty"
               description="Browse products and add items to get started"
               actionLabel="Browse Products"
-              actionHref="/products"
+              actionHref="/"
             />
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
@@ -261,7 +261,7 @@ export default function CartPage() {
                   </Link>
 
                   <Link
-                    href="/products"
+                    href="/"
                     className="w-full py-3 text-center text-sm font-medium text-emerald-600 hover:text-emerald-700 block"
                   >
                     Continue Shopping

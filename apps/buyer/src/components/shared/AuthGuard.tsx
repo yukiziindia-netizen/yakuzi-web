@@ -58,7 +58,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       
       // If on onboarding, redirect to products
       if (pathname === '/onboarding') {
-        router.push('/products');
+        router.push('/');
       }
     }
     prevStatusRef.current = currentStatus;

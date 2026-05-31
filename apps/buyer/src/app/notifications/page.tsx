@@ -42,7 +42,7 @@ export default function NotificationsPage() {
   const typeRoutes: Record<string, string> = {
     order: '/orders',
     payment: '/payments',
-    promotion: '/products',
+    promotion: '/',
     verification: '/profile',
   };
 

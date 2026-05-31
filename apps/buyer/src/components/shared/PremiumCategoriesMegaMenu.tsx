@@ -30,7 +30,7 @@ export default function PremiumCategoriesMegaMenu({ isOpen, onMouseEnter, onMous
       title: 'Quick Links',
       icon: Sparkles,
       links: [
-        { label: 'All Products', href: '/products' },
+        { label: 'All Products', href: '/' },
         { label: 'New Arrivals', href: '/products?sort=newest' },
         { label: 'Offers', href: '/products?filter=offers' }
       ]
@@ -38,7 +38,7 @@ export default function PremiumCategoriesMegaMenu({ isOpen, onMouseEnter, onMous
     {
       title: 'Top Categories',
       icon: TrendingUp,
-      links: categories.slice(0, 3).map(c => ({ label: c.name, href: `/products?category=${c.id}` }))
+      links: categories.slice(0, 3).map(c => ({ label: c.name, href: `/?category=${c.id}` }))
     }
   ];
 
@@ -64,7 +64,7 @@ export default function PremiumCategoriesMegaMenu({ isOpen, onMouseEnter, onMous
                   <div key={gIdx} className="space-y-12">
                     {group.map((category) => (
                       <div key={category.id} className="group/item">
-                        <Link href={`/products?category=${category.id}`}>
+                        <Link href={`/?category=${category.id}`}>
                            <h4 className="text-[14px] font-black text-gray-900 mb-6 flex items-center justify-between group-hover/item:text-black transition-colors uppercase tracking-widest cursor-pointer">
                             {category.name}
                             <ArrowRight className="w-3.5 h-3.5 text-gray-300 group-hover/item:translate-x-1 group-hover/item:text-gray-950 transition-all" />
@@ -74,7 +74,7 @@ export default function PremiumCategoriesMegaMenu({ isOpen, onMouseEnter, onMous
                           {category.subCategories?.map((sub) => (
                             <li key={sub.id}>
                               <Link 
-                                href={`/products?category=${category.id}&subcategory=${sub.id}`}
+                                href={`/?category=${category.id}&subcategory=${sub.id}`}
                                 className="text-[13px] font-bold text-gray-400 hover:text-gray-950 transition-all duration-300 flex items-center gap-3"
                               >
                                 <div className="w-1 h-1 rounded-full bg-gray-200 group-hover/item:bg-lime-400 transition-colors" />

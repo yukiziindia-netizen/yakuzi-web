@@ -28,6 +28,7 @@ import {
   Plus,
   AudioLines,
   Send,
+  LayoutGrid,
 } from "lucide-react";
 
 import CategoryMegaMenu from "@/components/landing/CategoryMegaMenu";
@@ -136,100 +137,115 @@ export default function Navbar({
     <>
       {/* Navbar Fixed at Bottom */}
       <nav className="fixed bottom-4 sm:bottom-6 md:bottom-4 left-0 right-0 z-[60] flex justify-center items-end sm:items-center pointer-events-none px-2 sm:px-6 w-full">
-        <div className="flex items-center gap-2 sm:gap-6 md:gap-2 pointer-events-auto flex-wrap sm:flex-nowrap justify-center w-full max-w-[1200px] px-1 sm:px-4 relative">
+        <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-6 md:gap-2 pointer-events-auto flex-nowrap justify-center w-full max-w-[1200px] px-1 sm:px-4 relative">
 
           {/* Left Segment: Logo, Profile, Notifications, Search */}
-          <div className="flex items-center bg-[#562996] rounded-[1.25rem] md:rounded-[1.5rem] px-3 xs:px-4 sm:px-6 md:px-8 py-2 sm:py-3.5 md:py-4 gap-2 xs:gap-3 sm:gap-5 md:gap-8 shadow-2xl text-white flex-1 justify-between max-w-[800px]">
-            {/* Logo */}
-            <Link href="/" className="font-black text-sm xs:text-lg sm:text-2xl tracking-tighter uppercase shrink-0" style={{ fontFamily: 'Impact, Arial Black, sans-serif' }}>
-              YUKIZI
-            </Link>
+          <div className="flex items-center bg-white sm:bg-[#562996] rounded-full sm:rounded-[1.5rem] md:rounded-[2rem] px-2 xs:px-3 sm:px-6 md:px-8 py-1.5 sm:py-3.5 md:py-4 gap-2 sm:gap-5 md:gap-8 shadow-md sm:shadow-2xl flex-1 justify-between max-w-[800px] overflow-hidden min-w-0">
+            
+            {/* DESKTOP VIEW (sm and up) */}
+            <div className="hidden sm:flex items-center w-full justify-between">
+              <div className="flex items-center">
+                <Link href="/" className="font-black text-lg sm:text-2xl tracking-tighter uppercase shrink-0 text-white" style={{ fontFamily: 'Impact, Arial Black, sans-serif' }}>
+                  YUKIZI
+                </Link>
+                
+                <div className="flex items-center gap-3 md:gap-5 ml-4 lg:ml-8 border-l border-white/20 pl-4 lg:pl-8">
+                  {isAuthenticated ? (
+                    <div className="relative" ref={profileDropdownRef}>
+                      <button onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)} className="p-1 text-white hover:text-sky-300 transition-colors">
+                        <User className="w-5 h-5 sm:w-6 sm:h-6" />
+                      </button>
+                      <AnimatePresence>
+                        {isProfileDropdownOpen && (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                            className="absolute left-0 bottom-full mb-3 w-40 sm:w-48 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-[60]"
+                          >
+                            <Link href="/profile" onClick={() => setIsProfileDropdownOpen(false)} className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-sky-600 transition-colors">
+                              <User className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                              My Profile
+                            </Link>
+                            <Link href="/orders" onClick={() => setIsProfileDropdownOpen(false)} className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-sky-600 transition-colors">
+                              <ClipboardList className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                              My Orders
+                            </Link>
+                            <div className="h-px bg-gray-50 my-1 mx-2" />
+                            <button onClick={() => { handleLogout(); setIsProfileDropdownOpen(false); }} className="w-full flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors text-left">
+                              <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                              Logout
+                            </button>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  ) : (
+                    <button onClick={onLoginClick} className="p-1 text-white hover:text-sky-300 transition-colors flex items-center gap-2">
+                      <User className="w-5 h-5 sm:w-6 sm:h-6" />
+                    </button>
+                  )}
 
-            <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-3 border-l border-white/20 pl-1.5 xs:pl-2 sm:pl-3 shrink-0">
-              {/* Profile / Start Now */}
-              {isAuthenticated ? (
-                <div className="hidden md:block relative" ref={profileDropdownRef}>
-                  <button
-                    onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                    className="p-1 text-white hover:text-sky-300 transition-colors"
-                  >
-                    <User className="w-5 h-5 sm:w-6 sm:h-6" />
-                  </button>
-
-                  <AnimatePresence>
-                    {isProfileDropdownOpen && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                        className="absolute left-0 bottom-full mb-3 w-48 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-[60]"
-                      >
-                        <Link
-                          href="/profile"
-                          onClick={() => setIsProfileDropdownOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-sky-600 transition-colors"
-                        >
-                          <User className="w-4 h-4" />
-                          My Profile
-                        </Link>
-                        <Link
-                          href="/orders"
-                          onClick={() => setIsProfileDropdownOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-sky-600 transition-colors"
-                        >
-                          <ClipboardList className="w-4 h-4" />
-                          My Orders
-                        </Link>
-                        <div className="h-px bg-gray-50 my-1 mx-2" />
-                        <button
-                          onClick={() => {
-                            handleLogout();
-                            setIsProfileDropdownOpen(false);
-                          }}
-                          className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors text-left"
-                        >
-                          <LogOut className="w-4 h-4" />
-                          Logout
-                        </button>
-                      </motion.div>
+                  <button onClick={() => setIsNotificationsOpen(true)} className="relative p-1 hover:text-sky-300 transition-colors text-white">
+                    <Bell className="w-5 h-5 sm:w-6 sm:h-6" />
+                    {unreadNotificationCount > 0 && (
+                      <span className="absolute top-0 right-0 w-2 h-2 sm:w-2.5 sm:h-2.5 bg-[#f7941d] rounded-full" />
                     )}
-                  </AnimatePresence>
+                  </button>
                 </div>
-              ) : (
-                <>
-                  {/* Start Now on mobile */}
-                  <button onClick={onLoginClick} className="md:hidden bg-white/20 hover:bg-white/30 px-1.5 xs:px-2 py-0.5 rounded text-[9px] xs:text-[10px] font-bold text-white transition-colors shrink-0">
-                    Start Now
-                  </button>
-                  {/* User icon on desktop */}
-                  <button onClick={onLoginClick} className="hidden md:block p-1 hover:text-sky-300 transition-colors">
-                    <User className="w-5 h-5 sm:w-6 sm:h-6" />
-                  </button>
-                </>
-              )}
+              </div>
 
-              {/* Notification: Always visible */}
-              <button onClick={() => setIsNotificationsOpen(true)} className="relative p-0.5 sm:p-1 hover:text-sky-300 transition-colors shrink-0">
-                <Bell className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6" />
-                {unreadNotificationCount > 0 && (
-                  <span className="absolute top-0 right-0 w-2 h-2 xs:w-2.5 xs:h-2.5 bg-[#f7941d] rounded-full border-2 border-[#562996]" />
-                )}
-              </button>
+              <div className="relative shrink-0 flex items-center justify-end w-[180px] md:w-[240px] lg:w-[280px]">
+                <input
+                  type="text"
+                  placeholder="Search"
+                  readOnly
+                  onClick={() => {
+                    setIsSearchChatOpen(!isSearchChatOpen);
+                    setIsChatOpen(false);
+                  }}
+                  className="w-full h-[32px] md:h-[38px] bg-white rounded-[4px] text-[#333] text-[13px] md:text-[14px] pl-3 md:pl-4 pr-10 focus:outline-none cursor-pointer placeholder-[#a0a0a0] shadow-sm font-medium"
+                />
+                <Search className="w-4 h-4 md:w-[18px] md:h-[18px] text-[#a0a0a0] absolute right-3 md:right-4 top-1/2 -translate-y-1/2 pointer-events-none stroke-2" />
+              </div>
             </div>
 
-            {/* Search Box - Visible everywhere, smaller on mobile */}
-            <div className="relative ml-0.5 xs:ml-1 shrink-0 flex-1 md:flex-none">
-              <input
-                type="text"
-                placeholder="Search"
-                readOnly
-                onClick={() => {
-                  setIsSearchChatOpen(!isSearchChatOpen);
-                  setIsChatOpen(false);
-                }}
-                className="pl-2 pr-5 py-0.5 sm:pl-3 sm:pr-8 sm:py-1.5 md:py-2 rounded-[4px] sm:rounded-lg text-black text-[9px] sm:text-sm w-[60px] xs:w-[80px] sm:w-[150px] md:w-[280px] focus:outline-none placeholder-gray-400 cursor-pointer"
-              />
-              <Search className="w-2.5 h-2.5 sm:w-4 sm:h-4 md:w-5 md:h-5 text-gray-400 absolute right-1 sm:right-2.5 top-1 sm:top-2 md:top-2.5" />
+            {/* MOBILE VIEW (below sm) */}
+            <div className="flex sm:hidden items-center w-full justify-between gap-1">
+              {!isAuthenticated ? (
+                // BEFORE LOGIN (Image 3 layout)
+                <button onClick={onLoginClick} className="flex items-center gap-1.5 bg-[#562996] text-white rounded-full px-3 py-1.5 shrink-0 hover:bg-[#482080] transition-colors">
+                  <span className="font-black text-sm xs:text-base tracking-tighter uppercase" style={{ fontFamily: 'Impact, Arial Black, sans-serif' }}>YUKIZI</span>
+                  <span className="text-[10px] xs:text-xs font-semibold whitespace-nowrap">Start Now</span>
+                </button>
+              ) : (
+                // AFTER LOGIN (Image 2 layout)
+                <div className="flex items-center gap-1.5 xs:gap-2">
+                  <Link href="/" className="font-black text-sm xs:text-base tracking-tighter uppercase shrink-0 text-[#562996]" style={{ fontFamily: 'Impact, Arial Black, sans-serif' }}>
+                    YUKIZI
+                  </Link>
+                  <button onClick={() => setIsNotificationsOpen(true)} className="relative p-1 text-[#562996] hover:text-purple-400 transition-colors shrink-0">
+                    <Bell className="w-4 h-4 xs:w-5 xs:h-5" />
+                    {unreadNotificationCount > 0 && (
+                      <span className="absolute top-0 right-0 w-2 h-2 bg-[#f7941d] rounded-full border border-white" />
+                    )}
+                  </button>
+                </div>
+              )}
+
+              <div className="relative shrink-0 flex items-center w-[110px] xs:w-[130px]"
+                   onClick={() => {
+                     setIsSearchChatOpen(!isSearchChatOpen);
+                     setIsChatOpen(false);
+                   }}>
+                <input
+                  type="text"
+                  placeholder="Search"
+                  readOnly
+                  className="w-full h-[30px] bg-white border border-gray-200 rounded-full text-[#333] text-[12px] pl-3 pr-8 focus:outline-none cursor-pointer placeholder-[#a0a0a0] shadow-sm font-medium"
+                />
+                <Search className="w-[14px] h-[14px] text-[#a0a0a0] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none stroke-2" />
+              </div>
             </div>
           </div>
 
@@ -239,35 +255,31 @@ export default function Navbar({
               setIsChatOpen(!isChatOpen);
               setIsSearchChatOpen(false);
             }}
-            className="relative -mt-6 sm:-mt-8 md:-mt-10 z-20 w-14 h-14 xs:w-16 xs:h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-[#ffb040] rounded-xl sm:rounded-2xl md:rounded-[1.5rem] flex items-center justify-center shadow-lg hover:-translate-y-2 transition-transform cursor-pointer border-2 sm:border-4 border-white shrink-0 mx-1 sm:mx-2 md:mx-4"
+            className="relative -mt-6 sm:-mt-8 md:-mt-10 z-20 w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-[#ffb040] rounded-xl sm:rounded-2xl md:rounded-[1.5rem] flex items-center justify-center shadow-[0_0_15px_rgba(255,176,64,0.4)] sm:shadow-[0_0_20px_rgba(255,176,64,0.5)] hover:-translate-y-1 sm:hover:-translate-y-2 transition-transform cursor-pointer shrink-0 mx-0.5 xs:mx-1 sm:mx-2 md:mx-4"
           >
-            <Image src="/yukizi.jpg" alt="Mascot" width={96} height={96} className="w-full h-full object-cover rounded-xl sm:rounded-2xl md:rounded-[1.25rem] drop-shadow-lg" />
+            <Image src="/yukizi.jpg" alt="Mascot" width={96} height={96} className="w-full h-full object-cover rounded-xl sm:rounded-2xl md:rounded-[1.5rem]" />
           </div>
 
           {/* Right Segment: Cart, Wishlist, Filter, Menu */}
-          <div className="flex items-center justify-end bg-[#562996] rounded-[1.25rem] md:rounded-[1.5rem] px-3 xs:px-4 sm:px-6 md:px-8 py-2 sm:py-3.5 md:py-4 gap-2 xs:gap-3 sm:gap-6 md:gap-8 shadow-2xl text-white shrink-0 flex-1 max-w-[800px] z-10">
+          <div className="flex items-center justify-end bg-white sm:bg-[#562996] rounded-full sm:rounded-[1.5rem] md:rounded-[2rem] px-2 xs:px-3 sm:px-6 md:px-8 py-2 sm:py-3.5 md:py-4 gap-2 xs:gap-3 sm:gap-6 md:gap-8 shadow-md sm:shadow-2xl text-[#562996] sm:text-white shrink-0 flex-1 max-w-[800px] z-10 overflow-hidden min-w-0">
 
-            {/* Wishlist */}
-            <button onClick={() => setIsWishlistOpen(true)} className="relative p-0.5 sm:p-1 hover:text-sky-300 transition-colors">
-              <Bookmark className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6" />
+            <button onClick={() => setSidebarView("wishlist")} className="relative p-0.5 sm:p-1 hover:text-sky-300 transition-colors">
+              <Bookmark className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 rotate-90" />
             </button>
 
-            {/* Cart */}
-            <button onClick={() => setIsCartOpen(true)} className="relative p-0.5 sm:p-1 hover:text-sky-300 transition-colors">
+            <button onClick={() => setSidebarView("cart")} className="relative p-0.5 sm:p-1 hover:text-sky-300 transition-colors">
               <ShoppingCart className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6" />
               {cartData?.items && cartData.items.length > 0 && (
-                <span className="absolute -top-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-[#f7941d] text-white text-[8px] sm:text-[10px] font-bold rounded-full flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-[#f7941d] text-white text-[8px] sm:text-[10px] font-bold rounded-full flex items-center justify-center border border-white sm:border-[#562996]">
                   {cartData.items.length}
                 </span>
               )}
             </button>
 
-            {/* Box / Orders - Hidden on mobile */}
-            <Link href="/orders" className="p-0.5 sm:p-1 hover:text-sky-300 transition-colors hidden md:block">
+            <button className="hidden sm:block p-0.5 sm:p-1 hover:text-sky-300 transition-colors">
               <Package className="w-5 h-5 sm:w-6 sm:h-6" />
-            </Link>
+            </button>
 
-            {/* Filter - Visible everywhere */}
             <button onClick={() => {
               setSidebarView("filters");
               onFilterClick?.();
@@ -275,7 +287,6 @@ export default function Navbar({
               <Filter className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" />
             </button>
 
-            {/* Menu */}
             <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-0.5 sm:p-1 md:p-1.5 hover:text-sky-300 transition-colors">
               {isMobileMenuOpen ? (
                 <X className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" />
@@ -294,40 +305,40 @@ export default function Navbar({
                 exit={{ opacity: 0, y: 20, scale: 0.95 }}
                 className="absolute bottom-full mb-4 left-2 right-2 sm:left-6 sm:right-6 md:left-4 md:right-4 z-0 pointer-events-auto"
               >
-                <div className="w-full bg-gradient-to-br from-[#a656f2] to-[#8d3ce1] rounded-[1.5rem] md:rounded-[2rem] shadow-2xl p-6 sm:p-8 flex flex-col h-[250px] sm:h-[300px] md:h-[400px]">
+                <div className="w-full bg-gradient-to-br from-[#a656f2] to-[#8d3ce1] rounded-[1.25rem] sm:rounded-[1.5rem] md:rounded-[2rem] shadow-2xl p-4 sm:p-6 md:p-8 flex flex-col h-[200px] xs:h-[220px] sm:h-[300px] md:h-[400px]">
                   {/* Chat Box Header / Input Area */}
                   <div className="flex-1">
                     <textarea 
                       placeholder="Start typing ..."
-                      className="w-full h-full bg-transparent text-white text-lg sm:text-2xl placeholder-white/70 outline-none resize-none font-medium"
+                      className="w-full h-full bg-transparent text-white text-base sm:text-xl md:text-2xl placeholder-white/70 outline-none resize-none font-medium"
                     />
                   </div>
                   
                   {/* Chat Box Footer */}
-                  <div className="flex items-center justify-between mt-4">
+                  <div className="flex items-center justify-between mt-2 sm:mt-4">
                     {/* Left Icons */}
-                    <div className="flex items-center gap-4 text-white">
+                    <div className="flex items-center gap-2 sm:gap-4 text-white">
                       <button className="hover:text-white/80 transition-colors">
-                        <Share2 className="w-6 h-6" />
+                        <Share2 className="w-5 h-5 sm:w-6 sm:h-6" />
                       </button>
                       <button className="hover:text-white/80 transition-colors">
-                        <Clock className="w-6 h-6" />
+                        <Clock className="w-5 h-5 sm:w-6 sm:h-6" />
                       </button>
                     </div>
                     
                     {/* Right Icons */}
-                    <div className="flex items-center gap-4 text-white">
+                    <div className="flex items-center gap-2 sm:gap-4 text-white">
                       <button className="hover:text-white/80 transition-colors">
-                        <RotateCw className="w-6 h-6" />
+                        <RotateCw className="w-5 h-5 sm:w-6 sm:h-6" />
                       </button>
                       <button className="hover:text-white/80 transition-colors">
-                        <Plus className="w-6 h-6" />
+                        <Plus className="w-5 h-5 sm:w-6 sm:h-6" />
                       </button>
                       <button className="hover:text-white/80 transition-colors">
-                        <AudioLines className="w-6 h-6" />
+                        <AudioLines className="w-5 h-5 sm:w-6 sm:h-6" />
                       </button>
-                      <button className="w-12 h-12 bg-white rounded-xl flex items-center justify-center hover:bg-gray-100 transition-colors shadow-sm ml-2">
-                        <Send className="w-6 h-6 text-black -ml-1" />
+                      <button className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-white rounded-lg sm:rounded-xl flex items-center justify-center hover:bg-gray-100 transition-colors shadow-sm ml-1 sm:ml-2">
+                        <Send className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-black -ml-0.5 sm:-ml-1" />
                       </button>
                     </div>
                   </div>
@@ -345,7 +356,7 @@ export default function Navbar({
                 exit={{ opacity: 0, y: 20, scale: 0.95 }}
                 className="absolute bottom-full mb-6 left-0 right-0 w-full z-0 pointer-events-auto px-1 sm:px-4"
               >
-                <div className="w-full bg-white rounded-2xl md:rounded-[1.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 p-4 sm:p-6 flex flex-col h-[180px] sm:h-[220px] md:h-[250px]">
+                <div className="w-full bg-white rounded-2xl md:rounded-[1.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 p-3 sm:p-4 md:p-6 flex flex-col h-[160px] xs:h-[180px] sm:h-[220px] md:h-[250px]">
                   {/* Chat Box Header / Input Area */}
                   <div className="flex-1">
                     <textarea 
@@ -358,23 +369,23 @@ export default function Navbar({
                   <div className="flex items-center justify-between mt-2">
                     {/* Left Icons */}
                     <div className="flex items-center text-gray-600">
-                      <button className="p-2 hover:text-black hover:bg-gray-50 rounded-lg transition-colors">
-                        <Clock className="w-5 h-5" />
+                      <button className="p-1 xs:p-1.5 sm:p-2 hover:text-black hover:bg-gray-50 rounded-lg transition-colors">
+                        <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
                       </button>
                     </div>
                     
                     {/* Right Icons */}
-                    <div className="flex items-center gap-1 sm:gap-2 text-gray-600">
-                      <button className="p-2 hover:text-black hover:bg-gray-50 rounded-lg transition-colors">
-                        <RotateCw className="w-5 h-5" />
+                    <div className="flex items-center gap-0.5 xs:gap-1 sm:gap-2 text-gray-600">
+                      <button className="p-1 xs:p-1.5 sm:p-2 hover:text-black hover:bg-gray-50 rounded-lg transition-colors">
+                        <RotateCw className="w-4 h-4 sm:w-5 sm:h-5" />
                       </button>
-                      <button className="p-2 hover:text-black hover:bg-gray-50 rounded-lg transition-colors">
-                        <Plus className="w-5 h-5" />
+                      <button className="p-1 xs:p-1.5 sm:p-2 hover:text-black hover:bg-gray-50 rounded-lg transition-colors">
+                        <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
                       </button>
-                      <button className="p-2 hover:text-black hover:bg-gray-50 rounded-lg transition-colors">
-                        <AudioLines className="w-5 h-5" />
+                      <button className="p-1 xs:p-1.5 sm:p-2 hover:text-black hover:bg-gray-50 rounded-lg transition-colors">
+                        <AudioLines className="w-4 h-4 sm:w-5 sm:h-5" />
                       </button>
-                      <button className="ml-1 sm:ml-2 bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-colors p-2.5 sm:p-3">
+                      <button className="ml-1 sm:ml-2 bg-white rounded-lg sm:rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-colors p-1.5 xs:p-2 sm:p-2.5 md:p-3">
                         <Send className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-900" />
                       </button>
                     </div>

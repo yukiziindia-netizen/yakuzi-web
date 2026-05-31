@@ -19,43 +19,69 @@ interface SidebarSheetProps {
 const MOCK_ITEMS = [
   {
     id: 1,
-    title: "Dragon Ball / Goku action figurine - original edition...",
+    title: "Dragon Ball / Goku action figurine...",
     price: 3345.53,
-    originalPrice: 5000.00,
-    discount: "25% off",
+    originalPrice: 3800.25,
+    discount: "26% off",
     rating: 4.5,
-    quantity: 1,
-    image: "https://api.dicebear.com/7.x/bottts/svg?seed=goku",
+    quantity: null,
+    isYukiziChoice: true,
+    image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=150&q=80",
   },
   {
     id: 2,
-    title: "Dragon Ball / Goku action figurine - original edition...",
+    title: "Dragon Ball / Goku action figurine...",
     price: 3345.53,
-    originalPrice: 5000.00,
-    discount: "25% off",
-    rating: 4.8,
-    quantity: 3,
-    image: "https://api.dicebear.com/7.x/bottts/svg?seed=goku2",
+    originalPrice: 3800.25,
+    discount: "26% off",
+    rating: 4.5,
+    quantity: 1,
+    isYukiziChoice: false,
+    image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=150&q=80",
   },
   {
     id: 3,
-    title: "Dragon Ball / Goku action figurine - original edition...",
+    title: "Dragon Ball / Goku action figurine...",
     price: 3345.53,
-    originalPrice: 5000.00,
-    discount: "25% off",
+    originalPrice: 3800.25,
+    discount: "26% off",
     rating: 4.5,
-    quantity: 1,
-    image: "https://api.dicebear.com/7.x/bottts/svg?seed=goku3",
+    quantity: 3,
+    isYukiziChoice: false,
+    image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=150&q=80",
   },
   {
     id: 4,
-    title: "Dragon Ball / Goku action figurine - original edition...",
+    title: "Dragon Ball / Goku action figurine...",
     price: 3345.53,
-    originalPrice: 5000.00,
-    discount: "25% off",
-    rating: 4.8,
-    quantity: 3,
-    image: "https://api.dicebear.com/7.x/bottts/svg?seed=goku4",
+    originalPrice: 3800.25,
+    discount: "26% off",
+    rating: 4.5,
+    quantity: 2,
+    isYukiziChoice: true,
+    image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=150&q=80",
+  },
+  {
+    id: 5,
+    title: "Dragon Ball / Goku action figurine...",
+    price: 3345.53,
+    originalPrice: 3800.25,
+    discount: "26% off",
+    rating: 4.5,
+    quantity: 5,
+    isYukiziChoice: false,
+    image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=150&q=80",
+  },
+  {
+    id: 6,
+    title: "Dragon Ball / Goku action figurine...",
+    price: 3345.53,
+    originalPrice: 3800.25,
+    discount: "26% off",
+    rating: 4.5,
+    quantity: 1,
+    isYukiziChoice: false,
+    image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=150&q=80",
   }
 ];
 
@@ -63,7 +89,6 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
   const isOpen = view !== null;
 
   // Filter States
-  const [priceRange, setPriceRange] = useState([500, 2500]);
   const [filters, setFilters] = useState({
     newItems: true,
     bestSelling: false,
@@ -86,92 +111,93 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
 
   const renderShoppingView = () => {
     const isCart = view === "cart";
-    
+
     return (
       <div className="flex flex-col h-full bg-white">
         {/* Header */}
-        <div className="p-6 pb-2">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-gray-900">
-              {isCart ? "Cart" : "Saved Items"}
-            </h2>
-            <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-              <X className="w-5 h-5 text-gray-500" />
-            </button>
-          </div>
-          
-          {/* Toggle Tab Bar */}
-          <div className="flex bg-gray-100/50 p-1 rounded-xl">
-            <button 
-              onClick={() => onViewChange("cart")}
-              className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${isCart ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
-            >
-              Cart
-            </button>
-            <button 
-              onClick={() => onViewChange("wishlist")}
-              className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${!isCart ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
-            >
-              Saved Items
-            </button>
-          </div>
+        <div className="p-6 pt-10 pb-4">
+          <h2 className="text-[22px] font-bold text-gray-800">
+            {isCart ? "My Cart" : "Saved"}
+          </h2>
         </div>
 
         {/* Scrollable Items */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-hide">
+        <div className="flex-1 overflow-y-auto px-6 space-y-4 scrollbar-hide pb-24 relative">
+          {/* Subtle purple shadow glow effect on the left container side */}
+          <div className="absolute top-0 bottom-0 left-2 w-[20px] bg-[#854cbc]/10 blur-xl pointer-events-none" />
+
           {MOCK_ITEMS.map((item, idx) => (
-            <div key={`${item.id}-${idx}`} className="bg-white border border-gray-100 rounded-2xl p-3 flex gap-4 shadow-sm hover:shadow-md transition-shadow relative">
-              {/* Product Image & Trash */}
-              <div className="flex flex-col gap-2">
-                <div className="w-20 h-20 bg-[#f8f5fd] rounded-xl flex items-center justify-center overflow-hidden">
-                  <img src={item.image} alt="Product" className="w-16 h-16 object-contain mix-blend-multiply" />
+            <div key={`${item.id}-${idx}`} className="bg-white rounded-[12px] border border-[#e2cbf5] p-2 flex gap-3 shadow-sm hover:shadow-md transition-shadow relative">
+              {item.isYukiziChoice && (
+                <div className="absolute top-0 left-2 px-2 py-[2px] rounded-b-md text-[8px] font-bold bg-[#854cbc] text-white z-20 pointer-events-none">
+                  Yukizi Choice
                 </div>
-                <button className="w-20 py-1.5 flex items-center justify-center bg-orange-100 text-orange-500 hover:bg-orange-500 hover:text-white rounded-lg transition-colors group">
+              )}
+              
+              {/* Left Image & Trash */}
+              <div className="w-[85px] h-[85px] bg-[#f2f2f2] rounded-lg overflow-hidden relative flex-shrink-0 mt-1">
+                <img src={item.image} alt="Product" className="w-full h-full object-cover mix-blend-multiply" />
+                <button className="absolute bottom-1 left-1 w-7 h-7 flex items-center justify-center bg-orange-400 text-white rounded-[6px] hover:bg-orange-500 transition-colors shadow-sm">
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
 
-              {/* Info & Controls */}
-              <div className="flex-1 flex flex-col pt-1">
-                <div className="flex justify-between items-start mb-1">
-                  <span className="text-[10px] font-bold text-white bg-[#6342B4] px-2 py-0.5 rounded-full uppercase tracking-wider">
-                    YUKIZI CHOICE
-                  </span>
-                  
-                  {/* Move Action Badge */}
-                  <button className="flex items-center gap-1.5 text-[11px] font-bold text-[#6342B4] bg-[#6342B4]/10 px-2.5 py-1 rounded-md hover:bg-[#6342B4] hover:text-white transition-colors">
-                    <span>{isCart ? "Move to Saved" : "Move to Cart"}</span>
-                    {isCart ? <Bookmark className="w-3 h-3" /> : <ShoppingCart className="w-3 h-3" />}
+              {/* Middle Info */}
+              <div className="flex-1 flex flex-col justify-center min-w-0 pr-10">
+                {isCart && (
+                  <button className="flex items-center gap-1 bg-[#562996] text-white px-2 py-0.5 rounded text-[9px] font-bold w-fit mb-1 shadow-sm mt-1">
+                    Wishlist <Bookmark className="w-2.5 h-2.5" />
                   </button>
-                </div>
-
-                <h3 className="text-sm font-bold text-gray-800 leading-tight mb-2 pr-8 truncate w-full max-w-[200px]">
+                )}
+                <h3 className="text-[11px] font-medium text-gray-600 truncate mb-0.5 mt-1">
                   {item.title}
                 </h3>
+                <div className="flex items-end gap-1.5 leading-none mb-1">
+                  <span className="text-[15px] font-medium text-gray-800">₹{item.price}</span>
+                  <span className="text-[9px] text-gray-400 line-through pb-0.5">₹{item.originalPrice}</span>
+                </div>
+                <span className="text-[9px] font-bold text-gray-800">
+                  {item.discount}
+                </span>
+              </div>
 
-                <div className="mt-auto flex items-end justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg font-black text-gray-900">₹{item.price}</span>
-                      <span className="text-xs font-bold text-gray-400 line-through">₹{item.originalPrice}</span>
-                    </div>
-                    <span className="text-[10px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded mt-0.5 inline-block">
-                      {item.discount}
-                    </span>
+              {/* Right Column Icons */}
+              <div className="absolute right-2 top-2 bottom-2 flex flex-col items-end justify-between">
+                <div className="flex flex-col items-end gap-1.5 mt-1">
+                   {/* In Cart, we don't have the save icon image, we have quantity at top */}
+                   {!isCart && (
+                     <img src="/save icon.jpg" alt="save" className="w-[18px] h-[18px] object-contain mix-blend-multiply cursor-pointer" />
+                   )}
+                   
+                   <div className="flex items-center gap-1.5">
+                     {/* Share/Network abstract icon */}
+                     <img src="/whislist icon.jpg" alt="network" className="w-[18px] h-[18px] object-contain cursor-pointer opacity-80" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                     
+                     {/* Quantity pill */}
+                     {item.quantity !== null && (
+                       <div className="flex items-center bg-[#562996] text-white rounded-md overflow-hidden h-5 shadow-sm">
+                          <button className="px-1.5 h-full flex items-center justify-center hover:bg-white/20 transition-colors text-[10px]">-</button>
+                          <span className="text-[10px] font-bold px-0.5 tracking-tighter">{String(item.quantity).padStart(2, '0')}</span>
+                          <button className="px-1.5 h-full flex items-center justify-center hover:bg-white/20 transition-colors text-[10px]">+</button>
+                       </div>
+                     )}
+                   </div>
+                </div>
+
+                <div className="flex flex-col items-end gap-0.5">
+                  <div className="flex items-center gap-0.5">
+                    <Star className="w-3 h-3 fill-[#854cbc] text-[#854cbc]" />
+                    <span className="text-[11px] font-bold text-gray-700">{item.rating}</span>
                   </div>
-                </div>
-
-                {/* Star Rating */}
-                <div className="absolute bottom-4 right-4 flex items-center gap-1">
-                  <Star className="w-3.5 h-3.5 fill-[#6342B4] text-[#6342B4]" />
-                  <span className="text-xs font-bold text-gray-700">{item.rating}</span>
-                </div>
-
-                {/* Quantity Block */}
-                <div className="absolute right-[-1px] top-1/2 -translate-y-1/2 flex flex-col items-center justify-between bg-[#6342B4] text-white rounded-l-xl py-2 px-1 h-[80px] shadow-lg">
-                  <button className="text-white/70 hover:text-white pb-1"><ChevronUp className="w-4 h-4" /></button>
-                  <span className="text-sm font-black tracking-tighter">{item.quantity.toString().padStart(2, "0")}</span>
-                  <button className="text-white/70 hover:text-white pt-1"><ChevronDown className="w-4 h-4" /></button>
+                  <div className="flex items-center gap-0.5 bg-gray-100 rounded px-1">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-gray-600">
+                       <path d="M5 18H3c-.6 0-1-.4-1-1V7c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v11"/>
+                       <path d="M14 9h4l4 4v5c0 .6-.4 1-1 1h-2"/>
+                       <circle cx="7" cy="18" r="2"/>
+                       <circle cx="17" cy="18" r="2"/>
+                    </svg>
+                    <span className="text-[8px] font-bold text-gray-600">3 days</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -183,23 +209,20 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
 
   const renderFiltersView = () => {
     return (
-      <div className="flex flex-col h-full bg-white text-[#333] p-6 sm:p-8">
-        <div className="flex justify-between items-center mb-6 pt-4">
-          <h2 className="text-[22px] font-bold">Filters</h2>
-          <button onClick={onClose} className="text-gray-500 text-sm hover:text-gray-800 transition-colors">
-            Close
-          </button>
+      <div className="flex flex-col h-full bg-white text-[#333] p-6 pr-8">
+        <div className="mb-6 pt-2">
+          <h2 className="text-lg font-bold">Filters</h2>
         </div>
 
-        <div className="flex-1 overflow-y-auto space-y-6 scrollbar-hide pb-24">
+        <div className="flex-1 overflow-y-auto scrollbar-hide pb-24 pr-4">
           {/* Price Range */}
-          <div className="space-y-4">
+          <div className="space-y-4 mb-6">
             <button 
               onClick={() => toggleSection("price")}
-              className="flex items-center justify-between w-full font-bold text-gray-900 text-[15px]"
+              className="flex items-center justify-between w-full font-bold text-gray-800 text-[13px]"
             >
               Price
-              {openSections.price ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
+              {openSections.price ? <ChevronUp className="w-4 h-4 text-gray-500" strokeWidth={3} /> : <ChevronDown className="w-4 h-4 text-gray-500" strokeWidth={3} />}
             </button>
             <AnimatePresence>
               {openSections.price && (
@@ -209,14 +232,14 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                   exit={{ height: 0, opacity: 0 }}
                   className="overflow-hidden"
                 >
-                  <div className="px-2 pt-4 pb-2">
+                  <div className="px-1 pt-3 pb-2">
                     {/* Mock Range Slider */}
-                    <div className="relative w-full h-1.5 bg-gray-200 rounded-full">
-                      <div className="absolute left-[20%] right-[20%] h-full bg-[#6342B4] rounded-full" />
-                      <div className="absolute left-[20%] top-1/2 -translate-y-1/2 -translate-x-1/2 w-4 h-4 bg-[#6342B4] rounded-full border-2 border-white shadow-md cursor-pointer" />
-                      <div className="absolute right-[20%] top-1/2 -translate-y-1/2 translate-x-1/2 w-4 h-4 bg-[#6342B4] rounded-full border-2 border-white shadow-md cursor-pointer" />
+                    <div className="relative w-full h-1 bg-gray-200 rounded-full flex items-center">
+                      <div className="absolute left-0 right-0 h-full bg-[#854cbc] rounded-full" />
+                      <div className="absolute left-0 w-3 h-3 bg-[#854cbc] rounded-full -translate-x-1/2 cursor-pointer" />
+                      <div className="absolute right-0 w-3 h-3 bg-[#854cbc] rounded-full translate-x-1/2 cursor-pointer" />
                     </div>
-                    <div className="flex justify-between mt-4 text-sm font-medium text-gray-500">
+                    <div className="flex justify-between mt-2 text-[12px] text-gray-500">
                       <span>$500</span>
                       <span>$2500</span>
                     </div>
@@ -226,34 +249,34 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
             </AnimatePresence>
           </div>
 
-          <div className="border-t border-gray-100" />
+          <div className="border-t border-gray-200 mb-4" />
 
           {/* Checkboxes */}
-          <div className="space-y-3">
+          <div className="space-y-3 mb-6">
             <label className="flex items-center gap-3 cursor-pointer group">
-              <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${filters.newItems ? "bg-[#6342B4] border-[#6342B4]" : "border-gray-300 group-hover:border-[#6342B4]"}`}>
-                {filters.newItems && <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />}
-              </div>
-              <span className="text-gray-700 font-medium">New Items</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-black">
+                 <path d="M4 14v6h6M20 10V4h-6M4 10V4h6M20 14v6h-6" />
+                 <rect x="4" y="4" width="4" height="4" fill="currentColor"/>
+                 <rect x="16" y="16" width="4" height="4" fill="currentColor"/>
+              </svg>
+              <span className="text-gray-700 text-[13px]">New Items</span>
             </label>
             <label className="flex items-center gap-3 cursor-pointer group">
-              <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${filters.bestSelling ? "bg-[#6342B4] border-[#6342B4]" : "border-gray-300 group-hover:border-[#6342B4]"}`}>
-                {filters.bestSelling && <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />}
-              </div>
-              <span className="text-gray-700 font-medium">Best Selling</span>
+              <div className="w-3.5 h-3.5 rounded-[3px] border border-gray-300 flex items-center justify-center bg-white" />
+              <span className="text-gray-700 text-[13px]">Best Selling</span>
             </label>
           </div>
 
-          <div className="border-t border-gray-100" />
+          <div className="border-t border-gray-200 mb-4" />
 
           {/* Discount Accordion */}
-          <div className="space-y-4">
+          <div className="space-y-4 mb-6">
             <button 
               onClick={() => toggleSection("discount")}
-              className="flex items-center justify-between w-full font-bold text-gray-900 text-[15px]"
+              className="flex items-center justify-between w-full font-bold text-gray-800 text-[13px]"
             >
               Discount
-              {openSections.discount ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
+              {openSections.discount ? <ChevronUp className="w-4 h-4 text-gray-500" strokeWidth={3} /> : <ChevronDown className="w-4 h-4 text-gray-500" strokeWidth={3} />}
             </button>
             <AnimatePresence>
               {openSections.discount && (
@@ -263,11 +286,13 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                   exit={{ height: 0, opacity: 0 }}
                   className="overflow-hidden"
                 >
-                  <div className="space-y-3 pt-1">
+                  <div className="space-y-2.5 pt-1">
                     {["<50+", "30-35", "50-90", ">50++"].map(opt => (
-                      <label key={opt} className="flex items-center gap-3 cursor-pointer group">
-                        <div className={`w-5 h-5 rounded-full border-[5px] transition-colors ${filters.discount === opt ? "border-[#6342B4] bg-white" : "border-gray-200 bg-white group-hover:border-[#6342B4]/50"}`} />
-                        <span className="text-gray-600 font-medium">{opt}</span>
+                      <label key={opt} className="flex items-center gap-3 cursor-pointer group" onClick={() => setFilters(f => ({...f, discount: opt}))}>
+                        <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-colors ${filters.discount === opt ? "border-[#854cbc]" : "border-gray-200 group-hover:border-[#854cbc]/50"}`}>
+                           {filters.discount === opt && <div className="w-1.5 h-1.5 rounded-full bg-[#854cbc]" />}
+                        </div>
+                        <span className="text-[13px] text-gray-700">{opt}</span>
                       </label>
                     ))}
                   </div>
@@ -276,16 +301,16 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
             </AnimatePresence>
           </div>
 
-          <div className="border-t border-gray-100" />
+          <div className="border-t border-gray-200 mb-4" />
 
           {/* Location Accordion */}
-          <div className="space-y-4">
+          <div className="space-y-4 mb-6">
             <button 
               onClick={() => toggleSection("location")}
-              className="flex items-center justify-between w-full font-bold text-gray-900 text-[15px]"
+              className="flex items-center justify-between w-full font-bold text-gray-800 text-[13px]"
             >
               Location
-              {openSections.location ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
+              {openSections.location ? <ChevronUp className="w-4 h-4 text-gray-500" strokeWidth={3} /> : <ChevronDown className="w-4 h-4 text-gray-500" strokeWidth={3} />}
             </button>
             <AnimatePresence>
               {openSections.location && (
@@ -295,11 +320,13 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                   exit={{ height: 0, opacity: 0 }}
                   className="overflow-hidden"
                 >
-                  <div className="space-y-3 pt-1">
+                  <div className="space-y-2.5 pt-1">
                     {["All", "Monteria", "Marana", "Pownhon"].map(opt => (
-                      <label key={opt} className="flex items-center gap-3 cursor-pointer group">
-                        <div className={`w-5 h-5 rounded-full border-[5px] transition-colors ${filters.location === opt ? "border-[#6342B4] bg-white" : "border-gray-200 bg-white group-hover:border-[#6342B4]/50"}`} />
-                        <span className="text-gray-600 font-medium">{opt}</span>
+                      <label key={opt} className="flex items-center gap-3 cursor-pointer group" onClick={() => setFilters(f => ({...f, location: opt}))}>
+                        <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-colors ${filters.location === opt ? "border-[#854cbc]" : "border-gray-200 group-hover:border-[#854cbc]/50"}`}>
+                           {filters.location === opt && <div className="w-1.5 h-1.5 rounded-full bg-[#854cbc]" />}
+                        </div>
+                        <span className="text-[13px] text-gray-700">{opt}</span>
                       </label>
                     ))}
                   </div>
@@ -308,16 +335,16 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
             </AnimatePresence>
           </div>
 
-          <div className="border-t border-gray-100" />
+          <div className="border-t border-gray-200 mb-4" />
 
           {/* Discount Type Accordion */}
           <div className="space-y-4">
             <button 
               onClick={() => toggleSection("discountType")}
-              className="flex items-center justify-between w-full font-bold text-gray-900 text-[15px]"
+              className="flex items-center justify-between w-full font-bold text-gray-800 text-[13px]"
             >
               Discount Type
-              {openSections.discountType ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
+              {openSections.discountType ? <ChevronUp className="w-4 h-4 text-gray-500" strokeWidth={3} /> : <ChevronDown className="w-4 h-4 text-gray-500" strokeWidth={3} />}
             </button>
             <AnimatePresence>
               {openSections.discountType && (
@@ -327,11 +354,13 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                   exit={{ height: 0, opacity: 0 }}
                   className="overflow-hidden"
                 >
-                  <div className="space-y-3 pt-1">
+                  <div className="space-y-2.5 pt-1">
                     {["All", "Upclom", "Fuill"].map(opt => (
-                      <label key={opt} className="flex items-center gap-3 cursor-pointer group">
-                        <div className={`w-5 h-5 rounded-full border-[5px] transition-colors ${filters.discountType === opt ? "border-[#6342B4] bg-white" : "border-gray-200 bg-white group-hover:border-[#6342B4]/50"}`} />
-                        <span className="text-gray-600 font-medium">{opt}</span>
+                      <label key={opt} className="flex items-center gap-3 cursor-pointer group" onClick={() => setFilters(f => ({...f, discountType: opt}))}>
+                        <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-colors ${filters.discountType === opt ? "border-[#854cbc]" : "border-gray-200 group-hover:border-[#854cbc]/50"}`}>
+                           {filters.discountType === opt && <div className="w-1.5 h-1.5 rounded-full bg-[#854cbc]" />}
+                        </div>
+                        <span className="text-[13px] text-gray-700">{opt}</span>
                       </label>
                     ))}
                   </div>

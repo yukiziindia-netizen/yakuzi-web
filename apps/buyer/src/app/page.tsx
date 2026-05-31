@@ -2,10 +2,9 @@
 
 import Navbar from '@/components/landing/Navbar';
 import HeroSection from '@/components/landing/HeroSection';
-import BrandsStrip from '@/components/landing/BrandsStrip';
+
 import ProductCarousel from '@/components/landing/ProductCarousel';
-import TrustSection from '@/components/landing/TrustSection';
-import Testimonials from '@/components/landing/Testimonials';
+
 
 export default function HomePage() {
   const handleLoginClick = () => {

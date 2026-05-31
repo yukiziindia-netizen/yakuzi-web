@@ -28,6 +28,7 @@ import {
   Plus,
   AudioLines,
   Send,
+  LayoutGrid,
 } from "lucide-react";
 
 import CategoryMegaMenu from "@/components/landing/CategoryMegaMenu";
@@ -248,12 +249,13 @@ export default function Navbar({
           <div className="flex items-center justify-end bg-[#562996] rounded-[1.25rem] md:rounded-[1.5rem] px-3 xs:px-4 sm:px-6 md:px-8 py-2 sm:py-3.5 md:py-4 gap-2 xs:gap-3 sm:gap-6 md:gap-8 shadow-2xl text-white shrink-0 flex-1 max-w-[800px] z-10">
 
             {/* Wishlist */}
-            <button onClick={() => setIsWishlistOpen(true)} className="relative p-0.5 sm:p-1 hover:text-sky-300 transition-colors">
-              <Bookmark className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6" />
+            <button onClick={() => setSidebarView("wishlist")} className="relative p-0.5 sm:p-1 hover:text-sky-300 transition-colors">
+             {/* <Image src="/wh.jpg" alt="Wishlist" width={24} height={24} className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6" /> */}
+              <Bookmark className="w-4 h-4 transfer rotate-90 xs:w-5 xs:h-5 sm:w-6 sm:h-6" />
             </button>
 
             {/* Cart */}
-            <button onClick={() => setIsCartOpen(true)} className="relative p-0.5 sm:p-1 hover:text-sky-300 transition-colors">
+            <button onClick={() => setSidebarView("cart")} className="relative p-0.5 sm:p-1 hover:text-sky-300 transition-colors">
               <ShoppingCart className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6" />
               {cartData?.items && cartData.items.length > 0 && (
                 <span className="absolute -top-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-[#f7941d] text-white text-[8px] sm:text-[10px] font-bold rounded-full flex items-center justify-center">
@@ -262,10 +264,13 @@ export default function Navbar({
               )}
             </button>
 
-            {/* Box / Orders - Hidden on mobile */}
-            <Link href="/orders" className="p-0.5 sm:p-1 hover:text-sky-300 transition-colors hidden md:block">
-              <Package className="w-5 h-5 sm:w-6 sm:h-6" />
-            </Link>
+            {/* Categories */}
+            <button onClick={() => {
+              // Toggle categories mega menu or similar
+              setSidebarView("categories" as any);
+            }} className="p-0.5 sm:p-1 hover:text-sky-300 transition-colors hidden md:block">
+              <LayoutGrid className="w-5 h-5 sm:w-6 sm:h-6" />
+            </button>
 
             {/* Filter - Visible everywhere */}
             <button onClick={() => {

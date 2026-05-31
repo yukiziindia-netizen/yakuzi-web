@@ -2,25 +2,26 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Share2, Plus, Star, Truck, ChevronDown, ChevronUp, Bell, RotateCcw, Minus, Search, User, Bookmark, ShoppingCart, Package, Filter, Menu, UploadCloud } from 'lucide-react';
+import { Share2, Plus, Star, Truck, ChevronDown, ChevronUp, Bell, RotateCcw, Minus, Search, User, Bookmark, ShoppingCart, Package, Filter, Menu, ArrowUpRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import Navbar from '@/components/landing/Navbar';
 
 // Mock data
 const PRODUCT = {
-  id: 'leon-action-figure',
-  name: 'Resident Evil Leon Action Figure',
+  id: 'goku-action-figure',
+  name: 'Dragon Ball / Goku action figurine',
   price: 3345.53,
   originalPrice: 3800.25,
   discount: 25,
-  rating: 4.6,
+  rating: 4.5,
   deliveryDays: 3,
   images: [
+    'https://images.unsplash.com/photo-1608889175123-8ee362201f81?w=800&q=80',
     'https://images.unsplash.com/photo-1542451313056-b7c8e626645f?w=800&q=80',
-    'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=800&q=80',
-    'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=800&q=80'
+    'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=800&q=80'
   ],
-  description: 'Resident Evil Leon Action Figure is a must-have for any fan of the iconic video game series. This highly detailed collectible captures Leon S. Kennedy in his classic attire.',
+  description: 'Resident Evil Leon Action Figureis a must-have for any fan of the iconic video game series. This highly detailed collectible captures Leon S. Kennedy in his classic attire, ready to take on the undead with his signature stoic determination.',
 };
 
 const VARIATIONS = [
@@ -35,17 +36,18 @@ const VARIATIONS = [
 ];
 
 const RELATED_PRODUCTS = [
-  { id: 'spiderman', name: 'Spider Man Fri...', price: 3345.53, originalPrice: 3800.25, image: 'https://images.unsplash.com/photo-1608889175123-8ee362201f81?w=300&q=80', rating: 4.5 },
-  { id: 'leon', name: 'Resident Evil le...', price: 3345.53, originalPrice: 3800.25, image: 'https://images.unsplash.com/photo-1542451313056-b7c8e626645f?w=300&q=80', rating: 4.5 }
+  { id: 'spiderman', name: 'Spider Man Fri...', price: 3345.53, originalPrice: 3800.25, image: 'https://images.unsplash.com/photo-1542451313056-b7c8e626645f?w=300&q=80', rating: 4.5 },
+  { id: 'goku', name: 'Dragon Ball / G...', price: 3345.53, originalPrice: 3800.25, image: 'https://images.unsplash.com/photo-1608889175123-8ee362201f81?w=300&q=80', rating: 4.5 },
+  { id: 'leon', name: 'Resident Evil Le...', price: 3345.53, originalPrice: 3800.25, image: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=300&q=80', rating: 4.5 }
 ];
 
 function Accordion({ title, content, defaultOpen = false }: { title: string, content?: string, defaultOpen?: boolean }) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   return (
-    <div className="border-b border-gray-100 py-4">
+    <div className="border-b border-gray-100 py-3">
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex justify-between items-center text-left text-[11px] sm:text-xs font-bold text-gray-600 uppercase tracking-widest"
+        className="w-full flex justify-between items-center text-left text-[11px] font-bold text-gray-500 uppercase tracking-wide"
       >
         {title}
         {isOpen ? <Minus size={14} className="text-gray-400" /> : <Plus size={14} className="text-gray-400" />}
@@ -58,9 +60,9 @@ function Accordion({ title, content, defaultOpen = false }: { title: string, con
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden"
           >
-            <p className="pt-3 text-sm text-gray-400 font-medium leading-relaxed">
+            <div className="pt-2 pr-4 text-[10px] sm:text-[11px] text-gray-400 font-medium leading-relaxed max-h-[70px] overflow-y-auto custom-scroll relative">
               {content}
-            </p>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -68,295 +70,318 @@ function Accordion({ title, content, defaultOpen = false }: { title: string, con
   );
 }
 
-function FloatingBottomBar() {
-  return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-4xl z-50">
-      <div className="bg-[#6b3c9b] rounded-2xl h-[60px] flex items-center justify-between px-6 shadow-2xl border border-white/10 relative overflow-hidden">
-        <div className="flex items-center gap-6">
-          <div className="text-white font-black text-xl tracking-tighter hidden sm:block">YUKIZI</div>
-          <div className="flex items-center gap-4">
-             <button className="text-white/80 hover:text-white transition-colors"><User size={20} /></button>
-             <button className="text-white/80 hover:text-white transition-colors"><Bell size={20} /></button>
-          </div>
-          <div className="relative hidden md:block">
-            <input 
-              type="text" 
-              placeholder="Search" 
-              className="bg-white rounded-md pl-3 pr-8 py-1.5 text-xs text-gray-900 w-48 outline-none border-none focus:ring-2 focus:ring-purple-400"
-            />
-            <Search size={14} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
-          </div>
-        </div>
+function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
+  const isYukiziChoice = index === 0;
+  const hasTimer = index === 1;
 
-        <div className="flex items-center gap-4 sm:gap-6 ml-auto">
-           <button className="text-white/80 hover:text-white transition-colors"><Bookmark size={20} /></button>
-           <button className="text-white/80 hover:text-white transition-colors"><ShoppingCart size={20} /></button>
-           <button className="text-white/80 hover:text-white transition-colors"><Package size={20} /></button>
-           <button className="text-white/80 hover:text-white transition-colors"><Filter size={20} /></button>
-           <button className="text-white/80 hover:text-white transition-colors"><Menu size={20} /></button>
-        </div>
+  return (
+    <div className={`relative bg-white rounded-xl border ${isYukiziChoice ? 'border-[#e2cbf5] shadow-[0_2px_15px_rgba(133,76,188,0.12)]' : 'border-gray-200'} p-3 flex flex-col hover:shadow-lg transition-all min-w-[160px] w-[180px]`}>
+      
+      {/* Top Badges */}
+      <div className="flex justify-between items-start mb-1 relative z-10">
+         {isYukiziChoice && <div className="text-[8px] font-bold px-2 py-0.5 rounded-full bg-[#854cbc] text-white pointer-events-none">Yukizi Choice</div>}
+         {hasTimer && <div className="text-[8px] font-bold px-1.5 py-0.5 rounded border border-gray-200 text-gray-500 ml-auto bg-white pointer-events-none">1:52:10</div>}
+      </div>
+      
+      {isYukiziChoice && <div className="absolute -top-2 right-2 text-[9px] text-gray-400 font-medium pointer-events-none">Ad</div>}
+      
+      <div className="absolute top-7 left-2 text-gray-300 z-10 cursor-pointer hover:text-gray-500"><Share2 size={12} strokeWidth={2.5}/></div>
+      {index === 0 && <div className="absolute top-7 right-2 text-orange-400 z-10 cursor-pointer hover:text-orange-500"><Plus size={14} strokeWidth={3}/></div>}
+      {index === 2 && <div className="absolute top-7 right-2 text-red-500 z-10 cursor-pointer hover:text-red-600"><Bell size={12} strokeWidth={3} /></div>}
+
+      {/* Right Edge Ribbon */}
+      <div 
+        className={`absolute top-[45%] right-0 w-2.5 h-4 ${index === 1 ? 'bg-[#854cbc]' : 'bg-[#f4efe9]'} z-10`} 
+        style={{ clipPath: 'polygon(100% 0, 100% 100%, 0 100%, 25% 50%, 0 0)' }} 
+      />
+
+      <div className="w-full h-28 flex items-center justify-center mb-2 mt-1 relative group-hover:scale-105 transition-transform z-0">
+         <img src={prod.image} alt={prod.name} className="max-h-full max-w-full object-contain mix-blend-multiply" />
+      </div>
+
+      <div className="mt-auto flex flex-col gap-1">
+         <div className="flex justify-between items-center gap-1">
+            <h3 className="text-[10px] font-medium text-gray-600 truncate flex-1">{prod.name}</h3>
+            <div className="bg-gray-400 rounded-full p-[2px] flex-shrink-0 cursor-pointer hover:bg-gray-500 transition-colors"><ArrowUpRight size={10} className="text-white" strokeWidth={3} /></div>
+         </div>
+         
+         <div className="flex justify-between items-center">
+            <div className="flex items-baseline gap-1">
+               <span className="text-xs font-bold text-gray-800">₹{prod.price}</span>
+               <span className="text-[8px] text-gray-400 line-through">₹{prod.originalPrice}</span>
+            </div>
+            <div className="flex items-center gap-0.5">
+               <Star size={9} className="fill-[#854cbc] text-[#854cbc]" />
+               <span className="text-[9px] font-bold text-gray-700">{prod.rating}</span>
+            </div>
+         </div>
+
+         {index !== 2 && <div className="text-[8px] font-bold text-gray-400 mt-1">25% off</div>}
       </div>
     </div>
   );
 }
+
+
 
 export default function AnimeProductPage() {
   const [activeImage, setActiveImage] = useState(0);
 
   return (
     <main className="min-h-screen bg-white pb-32">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-8">
+      <style dangerouslySetInnerHTML={{__html: `
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+        .purple-scroll::-webkit-scrollbar { width: 5px; }
+        .purple-scroll::-webkit-scrollbar-track { background: transparent; }
+        .purple-scroll::-webkit-scrollbar-thumb { background: #854cbc; border-radius: 5px; }
+      `}} />
+
+      <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
         
-        {/* Responsive Grid/Flex layout */}
-        <div className="flex flex-col lg:grid lg:grid-cols-2 lg:gap-x-20 gap-y-6">
-          
-          {/* 1. Main Image Block (Mobile: 1, Desktop: Left) */}
-          <div className="order-1 lg:col-start-1 lg:row-start-1 lg:row-end-3">
-             <div className="relative bg-[#ebdcff] rounded-3xl overflow-hidden flex h-[350px] sm:h-[450px]">
-                {/* Purple dashed pattern background */}
-                <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#854cbc 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
-                <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-transparent pointer-events-none"></div>
-
-                {/* Top Share Icon */}
-                <div className="absolute top-4 left-4 z-20 bg-white/80 backdrop-blur-sm p-1.5 rounded-full cursor-pointer hover:bg-white transition-colors">
-                   <Share2 size={16} className="text-gray-600" />
-                </div>
-
-                {/* Special Offer Ribbon */}
-                <div className="absolute top-12 left-0 z-20">
-                   <div className="bg-orange-500 text-white text-xs font-black uppercase italic px-4 py-1.5 transform -skew-x-12 shadow-lg -ml-2">
-                      Special<br/>Offer
-                   </div>
-                </div>
-
-                {/* Thumbnails */}
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 flex flex-col gap-2 z-10">
-                  {PRODUCT.images.map((img, i) => (
-                    <button 
-                      key={i} 
-                      onClick={() => setActiveImage(i)}
-                      className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden border-2 transition-all ${activeImage === i ? 'border-[#854cbc] scale-110' : 'border-transparent hover:border-purple-300'}`}
-                    >
-                      <img src={img} alt="thumb" className="w-full h-full object-cover bg-white" />
-                    </button>
-                  ))}
-                </div>
-
-                {/* Main Image display */}
-                <div className="w-full h-full flex items-center justify-center p-8 pl-16 relative z-0">
-                   <img src={PRODUCT.images[activeImage]} alt="Main Product" className="max-h-full object-contain mix-blend-multiply drop-shadow-2xl hover:scale-105 transition-transform duration-500" />
-                </div>
-                
-                {/* Right Arrow hint */}
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 bg-white/50 backdrop-blur-sm px-1 py-2 rounded-l-md text-gray-500">
-                  <ChevronDown size={16} className="-rotate-90" />
-                </div>
-             </div>
-          </div>
-
-          {/* 2. Title Block (Mobile: 2, Desktop: Right) */}
-          <div className="order-2 lg:col-start-2 lg:row-start-1">
-             <h1 className="text-lg sm:text-2xl font-bold text-gray-600 tracking-tight leading-tight border-b border-gray-100 pb-2">
-               {PRODUCT.name}
-             </h1>
-          </div>
-
-          {/* 3. Variations List (Mobile: 3, Desktop: Right) */}
-          <div className="order-3 lg:col-start-2 lg:row-start-2">
-             <div className="space-y-1.5 sm:space-y-2">
-                {VARIATIONS.map((v, i) => (
-                  <div key={i} className="flex items-center bg-gray-50 hover:bg-gray-100 transition-colors rounded-xl p-2 sm:p-3 px-3 gap-2 sm:gap-4 border border-gray-100/50">
-                    <div className="bg-[#854cbc] text-white text-[8px] sm:text-[9px] font-black px-1.5 py-0.5 rounded shadow-sm shrink-0">
-                      1.99% off
-                    </div>
-                    
-                    <div className="flex flex-col flex-1 min-w-0">
-                      <span className="text-[11px] sm:text-sm font-black text-gray-900 leading-none truncate">₹{PRODUCT.price}</span>
-                      <span className="text-[7px] sm:text-[8px] font-bold text-gray-400 truncate mt-0.5">25% off on purchase of 3</span>
-                    </div>
-
-                    <div className="flex items-center gap-0.5 text-[#854cbc] w-8 sm:w-12 shrink-0">
-                       <Star size={10} fill="currentColor" className="sm:w-3 sm:h-3" />
-                       <span className="text-[10px] sm:text-xs font-extrabold">{PRODUCT.rating}</span>
-                    </div>
-
-                    <div className="flex items-center gap-0.5 text-gray-400 w-10 sm:w-16 justify-center shrink-0">
-                       <Truck size={12} className="sm:w-3.5 sm:h-3.5" />
-                    </div>
-
-                    <div className="flex items-center justify-end gap-1 sm:gap-2 w-[70px] sm:w-[100px] shrink-0">
-                      {v.type === 'qty' && (
-                        <>
-                          <button className="text-gray-400 hover:text-gray-600 p-0.5"><RotateCcw size={10} className="sm:w-3 sm:h-3" strokeWidth={2.5}/></button>
-                          <div className="flex items-center bg-[#462d64] text-white rounded-md h-5 sm:h-6 w-14 sm:w-16">
-                            <button className="px-1.5 sm:px-2 font-bold hover:bg-white/10 rounded-l-md h-full text-[10px] sm:text-xs">-</button>
-                            <span className="flex-1 text-center text-[9px] sm:text-[10px] font-bold">0{v.qty}</span>
-                            <button className="px-1.5 sm:px-2 font-bold hover:bg-white/10 rounded-r-md h-full text-[10px] sm:text-xs">+</button>
-                          </div>
-                        </>
-                      )}
-                      {v.type === 'add' && (
-                        <button className="text-orange-400 w-full flex justify-center py-0.5">
-                          <Plus size={14} className="sm:w-4 sm:h-4" strokeWidth={3} />
-                        </button>
-                      )}
-                      {v.type === 'notify' && (
-                        <button className="text-rose-400 w-full flex justify-center py-0.5">
-                          <Bell size={12} className="sm:w-3.5 sm:h-3.5" strokeWidth={2.5} />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-             </div>
-          </div>
-
-          {/* 4. Accordions (Mobile: 4, Desktop: Left) */}
-          <div className="order-4 lg:col-start-1 lg:row-start-3 lg:pr-4">
-             <Accordion title="OFFERS" />
-             <Accordion title="DESCRIPTION" content={PRODUCT.description} defaultOpen={true} />
-             <Accordion title="SHIPPING & RETURN INFO" />
-             <Accordion title="ADDITIONAL INFO" />
-          </div>
-
+        {/* Top Badges (Desktop layout simulation) */}
+        <div className="flex justify-between items-end mb-3 max-w-[48%]">
+          <div className="bg-[#854cbc] text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-sm tracking-wide">Yukizi Choice</div>
+          <div className="text-[11px] font-semibold text-gray-500">Ad</div>
         </div>
 
-        {/* Bottom Section */}
-        <div className="mt-8 lg:mt-16 grid grid-cols-1 gap-8 lg:gap-12 max-w-2xl mx-auto lg:max-w-none">
+        {/* 2-Column Main Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-x-12 gap-y-8">
           
-          {/* Related Products */}
-          <div>
-             <h2 className="text-sm font-semibold text-gray-600 mb-4 tracking-tight">Related Products</h2>
-             <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:flex lg:flex-row lg:overflow-x-auto hide-scrollbar">
-                {RELATED_PRODUCTS.map((prod, idx) => (
-                   <div key={idx} className="relative bg-white rounded-[1rem] border border-gray-100 p-2 sm:p-3 flex flex-col hover:shadow-lg transition-all shadow-sm lg:min-w-[200px]">
-                      <div className="flex justify-between items-start mb-2 relative z-10">
-                         {idx === 0 && <div className="text-[7px] sm:text-[8px] font-extrabold px-1.5 sm:px-2 py-0.5 rounded-full tracking-tight bg-[#854cbc] text-white">Yukizi Choice</div>}
-                         <div className="flex flex-col items-end gap-0.5 ml-auto">
-                            <span className="text-[7px] sm:text-[8px] text-gray-400 font-medium">Ad</span>
-                            {idx === 0 ? <Plus size={10} className="text-orange-400 sm:w-3 sm:h-3" strokeWidth={3} /> : null}
-                         </div>
-                      </div>
-                      <div className="absolute top-6 sm:top-8 left-2 z-10"><Share2 size={10} className="text-gray-300 sm:w-3 sm:h-3" /></div>
-                      {idx === 0 && <div className="absolute top-2 right-2 z-10"><Bookmark size={12} className="text-gray-300" /></div>}
-                      {idx === 1 && <div className="absolute top-2 right-2 z-10"><Bookmark size={12} className="text-gray-300" /></div>}
-                      
-                      <div className="h-20 sm:h-28 flex items-center justify-center mb-2 sm:mb-3 group relative">
-                         <img src={prod.image} alt={prod.name} className="max-h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform" />
-                      </div>
-                      
-                      <div className="mt-auto">
-                         <div className="flex justify-between items-center mb-0.5 sm:mb-1">
-                            <h3 className="text-[9px] sm:text-[10px] font-semibold text-gray-800 truncate">{prod.name}</h3>
-                            <button><Plus size={10} className="text-gray-400 sm:w-3 sm:h-3" /></button>
-                         </div>
-                         <div className="flex justify-between items-center">
-                            <div className="flex flex-col">
-                               <span className="text-[10px] sm:text-[11px] font-black text-gray-900 leading-none">₹{prod.price}</span>
-                               <span className="text-[7px] sm:text-[8px] text-gray-400 line-through leading-none mt-0.5">₹{prod.originalPrice}</span>
-                            </div>
-                            <div className="flex items-center gap-0.5 text-[#854cbc]">
-                               <Star size={8} className="sm:w-2.5 sm:h-2.5" fill="currentColor" />
-                               <span className="text-[8px] sm:text-[9px] font-extrabold text-gray-700">{prod.rating}</span>
-                            </div>
-                         </div>
-                         <div className="text-[6px] sm:text-[7px] font-bold text-gray-400 mt-1">25% off</div>
-                      </div>
-                   </div>
+          {/* LEFT COLUMN */}
+          <div className="flex flex-col">
+            
+            {/* Image block */}
+            <div className="relative bg-[#cfaaf8] rounded-2xl overflow-hidden h-[340px] sm:h-[420px] mb-6 shadow-inner">
+              {/* Background pattern - abstract radial bursts */}
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-400 to-purple-600 opacity-30 mix-blend-overlay"></div>
+              <div className="absolute inset-0" style={{ backgroundImage: 'repeating-linear-gradient(45deg, rgba(255,255,255,0.1) 0px, rgba(255,255,255,0.1) 2px, transparent 2px, transparent 8px)', backgroundSize: '100% 100%' }}></div>
+              <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at center, transparent 30%, rgba(133,76,188,0.4) 100%)' }}></div>
+              
+              {/* Share icon */}
+              <div className="absolute top-4 left-4 z-20 bg-white/95 p-2 rounded-full shadow-md cursor-pointer hover:bg-white transition-colors">
+                  <Share2 size={16} className="text-gray-500" />
+              </div>
+
+              {/* Right ribbon */}
+              <div 
+                className="absolute top-[25%] right-0 w-6 h-8 bg-white border-l-[3px] border-[#854cbc] z-20 shadow-sm" 
+                style={{ clipPath: 'polygon(100% 0, 100% 100%, 0 100%, 40% 50%, 0 0)' }} 
+              />
+
+              {/* Thumbnails */}
+              <div className="absolute left-4 top-[55%] -translate-y-1/2 flex flex-col gap-3 z-20">
+                {PRODUCT.images.map((img, i) => (
+                  <button 
+                    key={i} 
+                    onClick={() => setActiveImage(i)}
+                    className={`w-12 h-12 rounded-lg overflow-hidden bg-[#ffb74d] border-2 transition-all ${activeImage === i ? 'border-orange-500 shadow-md scale-105' : 'border-transparent hover:scale-105'}`}
+                  >
+                    <img src={img} alt="thumb" className="w-full h-full object-contain mix-blend-multiply opacity-90" />
+                  </button>
                 ))}
-             </div>
+              </div>
+
+              {/* Main Image display */}
+              <div className="w-full h-full flex items-center justify-center p-6 relative z-10">
+                  <img src={PRODUCT.images[activeImage]} alt="Main Product" className="max-h-full max-w-full object-contain drop-shadow-[0_20px_30px_rgba(0,0,0,0.4)]" />
+              </div>
+            </div>
+
+            {/* Accordions */}
+            <div className="pr-4 lg:pr-10">
+                <Accordion title="DESCRIPTION" content={PRODUCT.description} defaultOpen={true} />
+                <Accordion title="PRODUCT SPECIFICATIONS" />
+                <Accordion title="SHIPPING & RETURN INFO" />
+                <Accordion title="ADDITIONAL INFO" />
+            </div>
           </div>
 
-          {/* Reviews Block */}
-          <div>
-            <h2 className="text-sm font-semibold text-gray-600 mb-4 tracking-tight">Reviews</h2>
-            <div className="flex items-end gap-2 mb-2">
-              <div className="flex text-[#854cbc] gap-0.5">
-                {[1,2,3,4].map(i => <Star key={i} size={16} fill="currentColor" />)}
-                <div className="relative overflow-hidden w-4 h-4">
-                  <Star size={16} fill="none" stroke="currentColor" className="absolute text-[#854cbc]" />
-                  <div className="absolute inset-0 overflow-hidden w-1/2">
-                    <Star size={16} fill="currentColor" className="text-[#854cbc]" />
-                  </div>
-                </div>
-              </div>
-              <span className="text-lg sm:text-2xl font-black text-gray-800 leading-none">4.6</span>
-            </div>
+          {/* RIGHT COLUMN */}
+          <div className="flex flex-col pt-1">
             
-            <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
-              <p className="text-[10px] sm:text-xs text-gray-500 font-medium">4.6 out of 5 stars (based on 6 reviews)</p>
-              <button className="bg-[#854cbc] hover:bg-purple-800 text-white font-bold text-[10px] sm:text-xs px-3 sm:px-5 py-1.5 sm:py-2.5 rounded-md sm:rounded-lg transition-colors">
-                See all reviews
+            {/* Breadcrumbs */}
+            <div className="text-[11px] text-gray-500 font-semibold mb-4 tracking-wide">
+              Home &gt; Catagory &gt; Figurine &gt;
+            </div>
+
+            {/* Title block */}
+            <div className="flex justify-between items-start mb-2 gap-4">
+              <h1 className="text-2xl sm:text-[26px] font-bold text-gray-500 tracking-tight leading-tight">
+                {PRODUCT.name}
+              </h1>
+              <button className="text-[#fca5a5] hover:text-orange-400 mt-1 shrink-0 transition-colors">
+                 <Plus size={32} strokeWidth={2.5} />
               </button>
             </div>
 
-            <div className="flex gap-3 overflow-x-auto pb-2 hide-scrollbar">
-              {/* Review Card 1 */}
-              <div className="min-w-[200px] sm:min-w-[280px] border border-gray-200 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-sm bg-white">
-                 <p className="text-[10px] sm:text-xs text-gray-500 mb-3 sm:mb-4 h-10 sm:h-16 leading-relaxed">I gifted this shirt to my friend and he love it so much ! Thank you CS 💖?</p>
-                 <div className="flex text-[#854cbc] mb-1.5 sm:mb-2 gap-0.5">
-                   {[1,2,3,4,5].map(i => <Star key={i} size={8} className="sm:w-2.5 sm:h-2.5" fill="currentColor" />)}
-                 </div>
-                 <p className="text-[8px] sm:text-[9px] text-gray-400 font-semibold">- Kshitij, January 24, 2024</p>
-              </div>
+            {/* Price Row */}
+            <div className="flex items-end gap-3 mb-4">
+              <span className="text-[26px] sm:text-3xl font-extrabold text-gray-700 leading-none tracking-tighter">₹{PRODUCT.price}</span>
+              <span className="text-[13px] font-bold text-gray-400 line-through leading-none mb-1">₹{PRODUCT.originalPrice}</span>
+            </div>
 
-              {/* Review Card 2 */}
-              <div className="min-w-[240px] sm:min-w-[280px] border border-gray-200 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-sm bg-white flex gap-3">
-                 <div className="flex-1 flex flex-col">
-                   <p className="text-[10px] sm:text-xs text-gray-500 mb-3 sm:mb-4 h-10 sm:h-16 leading-relaxed">nice printing excellent product, but fade as get washed ... <span className="font-bold text-gray-800 cursor-pointer">See more</span></p>
-                   <div className="flex text-[#854cbc] mb-1.5 sm:mb-2 gap-0.5">
-                     {[1,2,3,4,5].map(i => <Star key={i} size={8} className="sm:w-2.5 sm:h-2.5" fill="currentColor" />)}
+            {/* Discount & Rating row */}
+            <div className="flex items-center justify-between mb-8 pr-2">
+              <span className="text-sm font-black text-gray-700">25% off</span>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1 bg-gray-400 text-white rounded px-2 py-0.5 relative">
+                  <Truck size={14} strokeWidth={2.5} className="text-gray-200" />
+                  <span className="text-[11px] font-bold italic tracking-wide">3 days</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-[#854cbc]">
+                  <Star size={18} fill="currentColor" />
+                  <span className="text-lg font-black text-gray-700 leading-none">4.5</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Variations List */}
+            <div className="relative">
+              <div className="space-y-2.5 pr-4 max-h-[360px] overflow-y-auto purple-scroll">
+                 {VARIATIONS.map((v, i) => (
+                    <div key={i} className="flex items-center bg-[#e8e8e8] rounded-xl p-2.5 px-3.5 gap-2 sm:gap-4 shadow-sm">
+                      
+                      {/* Left Badge */}
+                      <div className="bg-[#854cbc] text-white text-[8px] font-bold px-2 py-0.5 rounded shadow-sm shrink-0">
+                        1.99% off
+                      </div>
+                      
+                      {/* Center-left Text */}
+                      <div className="flex flex-col flex-1 min-w-[80px]">
+                        <span className="text-[13px] sm:text-sm font-bold text-gray-800 leading-none">₹{PRODUCT.price}</span>
+                        <span className="text-[7px] sm:text-[8px] font-semibold text-gray-400 mt-1">25% off on purchase of 3</span>
+                      </div>
+
+                      {/* Center Rating */}
+                      <div className="flex items-center gap-1 text-[#854cbc] shrink-0 w-10 sm:w-12">
+                          <Star size={12} fill="currentColor" />
+                          <span className="text-[11px] sm:text-xs font-bold text-gray-700">4.5</span>
+                      </div>
+
+                      {/* Center-right Delivery */}
+                      <div className="flex items-center shrink-0 w-12 sm:w-16">
+                          <div className="flex items-center gap-0.5 bg-[#d1d1d1] rounded px-1.5 py-0.5 relative">
+                            <Truck size={10} className="text-gray-500" strokeWidth={3} />
+                            <span className="text-[7px] sm:text-[8px] font-bold text-gray-600 italic tracking-wide">3 days</span>
+                          </div>
+                      </div>
+
+                      {/* Right Action */}
+                      <div className="flex items-center justify-end gap-2 w-[70px] sm:w-[90px] shrink-0">
+                        {v.type === 'qty' && (
+                          <>
+                            <button className="text-gray-600 hover:text-gray-800 transition-colors">
+                               <RotateCcw size={14} strokeWidth={2.5}/>
+                            </button>
+                            <div className="flex items-center bg-[#462d64] text-white rounded-[4px] h-6 w-[52px]">
+                              <button className="px-1.5 font-black hover:bg-white/10 rounded-l h-full text-[10px] leading-none">-</button>
+                              <span className="flex-1 text-center text-[10px] font-bold leading-none">0{v.qty}</span>
+                              <button className="px-1.5 font-black hover:bg-white/10 rounded-r h-full text-[10px] leading-none">+</button>
+                            </div>
+                          </>
+                        )}
+                        {v.type === 'add' && (
+                          <button className="text-orange-400 hover:text-orange-500 w-full flex justify-center py-0.5 transition-colors">
+                            <Plus size={20} strokeWidth={3} />
+                          </button>
+                        )}
+                        {v.type === 'notify' && (
+                          <button className="text-red-400 hover:text-red-500 w-full flex justify-center py-0.5 transition-colors">
+                            <Bell size={18} strokeWidth={2} fill="none" />
+                          </button>
+                        )}
+                      </div>
+
+                    </div>
+                 ))}
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {/* BOTTOM SECTION: Related Products & Reviews */}
+        <div className="mt-12 flex flex-col lg:flex-row gap-8 lg:gap-10 pt-8 border-t border-gray-100">
+          
+          {/* Left: Related Products */}
+          <div className="flex-1 lg:max-w-[45%] lg:pr-8 lg:border-r border-gray-100">
+            <h2 className="text-xl font-bold text-gray-500 mb-5">Related Products</h2>
+            <div className="flex gap-4 overflow-x-auto pb-4 hide-scrollbar">
+               {RELATED_PRODUCTS.map((prod, idx) => (
+                  <RelatedProductCard key={prod.id} prod={prod} index={idx} />
+               ))}
+            </div>
+          </div>
+
+          {/* Right: Reviews */}
+          <div className="flex-[1.2] lg:pl-2">
+            <h2 className="text-xl font-bold text-gray-500 mb-5">Reviews</h2>
+            
+            {/* Review Header */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+               <div>
+                 <div className="flex items-center gap-3 mb-1">
+                   <div className="flex text-[#854cbc] gap-1">
+                     {[1,2,3,4,5].map((_, i) => (
+                        <div key={i} className="relative w-6 h-6">
+                           {i < 4 ? <Star size={24} fill="currentColor" /> : (
+                             <>
+                               <Star size={24} fill="none" stroke="currentColor" className="absolute text-[#854cbc]" />
+                               <div className="absolute inset-0 overflow-hidden w-[80%]">
+                                 <Star size={24} fill="currentColor" className="text-[#854cbc]" />
+                               </div>
+                             </>
+                           )}
+                        </div>
+                     ))}
                    </div>
-                   <p className="text-[8px] sm:text-[9px] text-gray-400 font-semibold">- DJD, April 29, 2023</p>
+                   <span className="text-[28px] font-black text-gray-800 leading-none">4.5</span>
                  </div>
-                 <div className="w-12 h-16 sm:w-16 sm:h-24 rounded-md overflow-hidden shrink-0">
-                   <img src="https://images.unsplash.com/photo-1542451313056-b7c8e626645f?w=150&q=80" alt="review" className="w-full h-full object-cover" />
-                 </div>
-              </div>
+                 <p className="text-[13px] font-medium text-gray-400">4.8 out of 5 stars (based on 6 reviews)</p>
+               </div>
+               <button className="bg-[#854cbc] hover:bg-purple-800 text-white font-medium text-sm px-6 py-2.5 rounded-lg transition-colors shadow-sm">
+                 See all reviews
+               </button>
             </div>
 
-            {/* Write Review Form */}
-            <div className="mt-8 border border-gray-200 rounded-2xl p-5 shadow-sm bg-white">
-              <h3 className="text-gray-500 font-semibold text-sm mb-3 tracking-tight">Your overall rating</h3>
-              <div className="flex gap-1.5 text-gray-300 mb-6">
-                {[1,2,3,4,5].map(i => <Star key={i} size={24} fill="currentColor" className="cursor-pointer hover:text-yellow-400 transition-colors" />)}
-              </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-[11px] font-bold text-gray-800 mb-1.5">Title of your review</label>
-                  <input type="text" placeholder="Summarize your experience or highlight an interesting detail" className="w-full text-xs p-3 rounded-lg border border-gray-200 outline-none focus:ring-2 focus:ring-purple-400 placeholder:text-gray-300 font-medium" />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-bold text-gray-800 mb-1.5">Your review</label>
-                  <textarea rows={3} placeholder="Tell us how you liked the product. What did you like or dislike?" className="w-full text-xs p-3 rounded-lg border border-gray-200 outline-none focus:ring-2 focus:ring-purple-400 resize-none placeholder:text-gray-300 font-medium"></textarea>
-                </div>
-                <div>
-                  <label className="block text-[11px] font-bold text-gray-800 mb-1.5">Do you have photos to share?</label>
-                  <button className="w-full py-4 bg-[#a5a5a5] hover:bg-gray-500 transition-colors text-white text-xs font-bold rounded-lg flex flex-col items-center justify-center gap-1">
-                    Drag & Drop your photos or Browse
-                  </button>
-                </div>
-                
-                <div className="flex items-center gap-2 mt-2">
-                  <div className="w-8 h-4 bg-[#d8c5ea] rounded-full relative cursor-pointer flex items-center shadow-inner">
-                    <div className="w-4 h-4 bg-[#854cbc] rounded-full absolute right-0 shadow-sm border border-white"></div>
-                  </div>
-                  <span className="text-[9px] text-gray-800 font-bold tracking-tight">This review is based on my own experience and is my genuine opinion.</span>
-                </div>
-                
-                <button className="bg-[#854cbc] hover:bg-purple-800 transition-colors text-white font-bold text-xs px-6 py-2.5 rounded-lg mt-2">
-                  Submit review
-                </button>
-              </div>
-            </div>
+            {/* Review Cards */}
+            <div className="flex flex-col sm:flex-row gap-4 overflow-x-auto hide-scrollbar pb-2">
+               {/* Card 1 */}
+               <div className="min-w-[200px] flex-1 border border-gray-200 rounded-xl p-4 bg-white shadow-sm flex flex-col justify-between">
+                 <p className="text-[11px] text-gray-400 font-medium mb-4 leading-relaxed">I gifted this shirt to my friend and he love it so much ! Thank you CS 💖?</p>
+                 <div>
+                    <div className="flex text-[#854cbc] mb-1.5 gap-0.5">
+                      {[1,2,3,4,5].map(i => <Star key={i} size={12} fill="currentColor" />)}
+                    </div>
+                    <p className="text-[10px] text-gray-300 font-semibold">- Kshitij, January 24, 2024</p>
+                 </div>
+               </div>
 
+               {/* Card 2 */}
+               <div className="min-w-[280px] flex-[1.5] border border-gray-200 rounded-xl p-4 bg-white shadow-sm flex gap-4">
+                 <div className="flex flex-col justify-between flex-1">
+                   <p className="text-[11px] text-gray-400 font-medium mb-4 leading-relaxed pr-2">
+                     nice printing excellent product, but fade as get washed ... <span className="font-bold text-gray-600 cursor-pointer hover:text-gray-800">See more</span>
+                   </p>
+                   <div>
+                      <div className="flex text-[#854cbc] mb-1.5 gap-0.5">
+                        {[1,2,3,4,5].map(i => <Star key={i} size={12} fill="currentColor" />)}
+                      </div>
+                      <p className="text-[10px] text-gray-300 font-semibold">- DJD, April 29, 2023</p>
+                   </div>
+                 </div>
+                 <div className="w-16 h-20 sm:w-[72px] sm:h-[88px] rounded-lg overflow-hidden shrink-0 border border-gray-100">
+                    <img src={PRODUCT.images[2]} alt="review" className="w-full h-full object-cover" />
+                 </div>
+               </div>
+            </div>
           </div>
         </div>
 
       </div>
-      
-      <FloatingBottomBar />
+      <Navbar />
     </main>
   );
 }

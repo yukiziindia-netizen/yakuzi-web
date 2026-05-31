@@ -85,7 +85,7 @@ export default function BrandProductsModal({
                   </h3>
                   <div className="space-y-1">
                     <p className="text-sm font-bold text-gray-900">
-                      ₹{Math.round(product.price)}
+                      ₹{Math.round(product.price ?? product.mrp ?? 0)}
                     </p>
                     {product.mrp && (
                       <p className="text-xs text-gray-500 line-through">

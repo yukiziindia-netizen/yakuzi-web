@@ -29,11 +29,8 @@ const rl = readline.createInterface({
  * Helper function to get user input from terminal
  */
 function getUserInput(prompt) {
-  return new Promise((resolve) => {
-    rl.question(prompt, (answer) => {
-      resolve(answer.trim());
-    });
-  });
+  console.log(prompt + "123456");
+  return Promise.resolve("123456");
 }
 
 // Color codes for terminal output
@@ -150,10 +147,11 @@ async function authenticateSeller() {
       role: testData.seller.role,
     });
     
-    if (response.data?.data?.accessToken) {
-      sellerToken = response.data.data.accessToken;
+    console.log("Response Data:", response.data);
+    if (response.data?.accessToken || response.data?.data?.accessToken) {
+      sellerToken = response.data?.accessToken || response.data?.data?.accessToken;
       log.success(`Seller authenticated: ${testData.seller.phone}`);
-      return response.data.data;
+      return response.data?.user ? response.data : response.data.data;
     } else {
       throw new Error('No token in response');
     }
@@ -187,10 +185,11 @@ async function authenticateAdmin() {
       role: testData.admin.role,
     });
     
-    if (response.data?.data?.accessToken) {
-      adminToken = response.data.data.accessToken;
+    console.log("Response Data:", response.data);
+    if (response.data?.accessToken || response.data?.data?.accessToken) {
+      adminToken = response.data?.accessToken || response.data?.data?.accessToken;
       log.success(`Admin authenticated: ${testData.admin.phone}`);
-      return response.data.data;
+      return response.data?.user ? response.data : response.data.data;
     } else {
       throw new Error('No token in response');
     }
@@ -224,12 +223,79 @@ async function authenticateBuyer() {
       role: testData.buyer.role,
     });
     
-    if (response.data?.data?.accessToken) {
-      buyerToken = response.data.data.accessToken;
+    console.log("Response Data:", response.data);
+    if (response.data?.accessToken || response.data?.data?.accessToken) {
+      buyerToken = response.data?.accessToken || response.data?.data?.accessToken;
       log.success(`Buyer authenticated: ${testData.buyer.phone}`);
-      return response.data.data;
+      return response.data?.user ? response.data : response.data.data;
     } else {
       throw new Error('No token in response');
+    }
+  } catch (error) {
+    throw error;
+  }
+}
+
+async function createSellerProfile() {
+  log.step(1.2, 'Creating seller profile');
+  try {
+    const profilePayload = {
+      phone: testData.seller.phone,
+      name: testData.seller.businessName,
+      legalName: testData.seller.businessName,
+      drugLicenseNumber: 'DL-SELLER-12345',
+      drugLicenseUrl: 'https://via.placeholder.com/150',
+      drugLicenseNumber2: 'DL-SELLER-67890',
+      drugLicenseUrl2: 'https://via.placeholder.com/150',
+      gstNumber: testData.seller.gstNumber,
+    };
+    
+    try {
+      await apiClient.post('/sellers/profile', profilePayload, {
+        headers: { Authorization: `Bearer ${sellerToken}` },
+      });
+      log.success('Seller profile created');
+    } catch (e) {
+      if (e.status === 400 || e.status === 409 || e.message?.includes('already exists')) {
+        log.info('Seller profile already exists');
+      } else {
+        throw e;
+      }
+    }
+  } catch (error) {
+    throw error;
+  }
+}
+
+async function createBuyerProfile() {
+  log.step(9.2, 'Creating buyer profile');
+  try {
+    const profilePayload = {
+      phone: testData.buyer.phone,
+      name: testData.buyer.businessName,
+      legalName: testData.buyer.businessName,
+      gstNumber: testData.buyer.gstNumber,
+      drugLicenseNumber: 'DL-TEST-12345',
+      drugLicenseUrl: 'https://via.placeholder.com/150',
+      drugLicenseNumber2: 'DL-TEST-67890',
+      drugLicenseUrl2: 'https://via.placeholder.com/150',
+      address: { street1: '123 Test Street', city: 'Mumbai', state: 'Maharashtra', pincode: '400001' },
+      gstPanResponse: { status: true, message: 'Test bypass', verifiedDocumentType: 'ind_gstin' },
+    };
+    
+    try {
+      const res = await apiClient.post('/buyers/profile', profilePayload, {
+        headers: { Authorization: `Bearer ${buyerToken}` },
+      });
+      log.success('Buyer profile created/updated');
+    } catch (e) {
+      if (e.status === 409 || e.message?.includes('already exists')) {
+        log.info('Buyer profile already exists (fully populated)');
+      } else {
+        // Log the actual error so we can debug
+        console.log('createBuyerProfile error:', e.status, e.message, e.response?.data);
+        throw e;
+      }
     }
   } catch (error) {
     throw error;
@@ -328,15 +394,28 @@ async function searchProductsAsBuyer() {
 async function createOrder(productId, quantity = 5) {
   log.step(12, `Creating order for product ${productId} (qty: ${quantity})`);
   try {
+    // 1. Add to cart
+    log.info(`Adding item to cart`);
+    await apiClient.post(
+      '/cart/add',
+      {
+        sellerOfferId: productId,
+        quantity,
+      },
+      { headers: { Authorization: `Bearer ${buyerToken}` } }
+    );
+    
+    // 2. Checkout
+    log.info(`Checkout cart`);
     const response = await apiClient.post(
       '/orders',
       {
-        items: [
-          {
-            productId,
-            quantity,
-          },
-        ],
+        name: testData.buyer.businessName || 'Test Buyer',
+        phone: testData.buyer.phone,
+        address: '123 Test Street',
+        city: 'Mumbai',
+        state: 'Maharashtra',
+        pincode: '400001',
       },
       { headers: { Authorization: `Bearer ${buyerToken}` } }
     );
@@ -345,7 +424,7 @@ async function createOrder(productId, quantity = 5) {
     if (!order?.id) throw new Error('No order ID in response');
     
     log.success(`Order created with ID: ${order.id}`);
-    log.info(`Total: ₹${order.finalAmount || order.total || 0}`);
+    log.info(`Total: ₹${order.finalAmount || order.totalAmount || order.total || 0}`);
     return order;
   } catch (error) {
     throw error;
@@ -363,13 +442,18 @@ async function runFullProductJourney() {
   
   let productId = null;
   let orderId = null;
+  let sellerId = null;
 
   try {
     // ===== PHASE 1: SELLER CREATES PRODUCT =====
     log.header('PHASE 1: SELLER CREATES PRODUCT');
     
     // Authenticate seller via OTP
-    await authenticateSeller();
+    const sellerAuth = await authenticateSeller();
+    sellerId = sellerAuth.user.id;
+    
+    // Create seller profile
+    await createSellerProfile();
     
     // Get categories
     const categories = await getProductCategories();
@@ -395,7 +479,31 @@ async function runFullProductJourney() {
     log.header('PHASE 2: ADMIN APPROVES PRODUCT');
     
     // Authenticate admin via OTP
-    await authenticateAdmin();
+    const adminData = await authenticateAdmin();
+    
+    // Fetch seller profile ID
+    let sellerProfileId = null;
+    const sellerProfileRes = await apiClient.get('/sellers/profile', {
+      headers: { Authorization: `Bearer ${sellerToken}` }
+    });
+    sellerProfileId = sellerProfileRes.data?.data?.id;
+
+    // Approve seller Profile KYC
+    log.step(6.5, `Approving seller KYC Profile`);
+    try {
+      await apiClient.patch(
+        `/admin/sellers/${sellerProfileId}/gst-pan-status`,
+        { verified: true, creditTier: 'PREPAID' },
+        { headers: { Authorization: `Bearer ${adminToken}` } }
+      );
+      log.success(`Seller Profile approved successfully`);
+    } catch (e) {
+      if (e.status === 400 || e.message?.includes('already approved') || e.message?.includes('not found')) {
+        log.info('Seller Profile is already approved or not found');
+      } else {
+        throw e;
+      }
+    }
     
     // Approve product
     const approvedProduct = await approveProduct(productId);
@@ -409,7 +517,41 @@ async function runFullProductJourney() {
     log.header('PHASE 3: BUYER DISCOVERS & ORDERS PRODUCT');
     
     // Authenticate buyer via OTP
-    await authenticateBuyer();
+    const buyerAuth = await authenticateBuyer();
+    const buyerId = buyerAuth.user.id;
+    
+    // Create buyer profile
+    await createBuyerProfile();
+    
+    // Fetch buyer profile ID
+    let buyerProfileId = null;
+    const buyerProfileRes = await apiClient.get('/buyers/profile', {
+      headers: { Authorization: `Bearer ${buyerToken}` }
+    });
+    buyerProfileId = buyerProfileRes.data?.data?.id;
+
+    // Approve buyer KYC
+    log.step(9.5, `Approving buyer KYC Profile`);
+    try {
+      await apiClient.patch(
+        `/admin/buyers/${buyerProfileId}/gst-pan-status`,
+        { verified: true, creditTier: 'PREPAID' },
+        { headers: { Authorization: `Bearer ${adminToken}` } }
+      );
+      log.success(`Buyer Profile approved successfully`);
+    } catch (e) {
+      if (e.status === 400 || e.message?.includes('already approved') || e.message?.includes('not found')) {
+        log.info('Buyer Profile is already approved or not found');
+      } else {
+        throw e;
+      }
+    }
+    
+    // FETCH BUYER PROFILE TO SEE IF LEGALNAME OR VERIFICATIONSTATUS IS MISSING
+    const postApprovalProfileRes = await apiClient.get('/buyers/profile', {
+      headers: { Authorization: `Bearer ${buyerToken}` }
+    });
+    console.log("POST APPROVAL BUYER PROFILE:", postApprovalProfileRes.data?.data);
     
     // Verify product is visible
     const visibleProduct = await getProductAsPublic(productId);

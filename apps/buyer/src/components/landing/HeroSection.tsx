@@ -2,8 +2,15 @@
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
+import { Faster_One } from 'next/font/google';
 
-export default function HeroSection() {
+const fasterOne = Faster_One({ subsets: ['latin'], weight: '400' });
+
+interface HeroSectionProps {
+  title?: string;
+}
+
+export default function HeroSection({ title = 'YUKiZi' }: HeroSectionProps) {
   return (
     <div className="w-full bg-white flex flex-col relative z-10">
 
@@ -18,7 +25,7 @@ export default function HeroSection() {
             <div className="flex-1 relative overflow-hidden -skew-x-[15deg]">
               <div className="absolute inset-0 bg-red-600/10 z-10 mix-blend-color"></div>
               <img
-                src="https://images.unsplash.com/photo-1578632767115-351597cf2477?w=500&q=80"
+                src="/hero1.jpg"
                 alt="Anime character"
                 className="w-[150%] h-full object-cover origin-center skew-x-[15deg] -ml-[25%]"
               />
@@ -28,7 +35,7 @@ export default function HeroSection() {
             <div className="flex-[1.3] relative overflow-hidden -skew-x-[15deg] border-4 border-[#854cbc] z-20 shadow-xl bg-white mx-1">
               <div className="absolute inset-0 bg-yellow-400/10 z-10 mix-blend-color"></div>
               <img
-                src="https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=800&q=80"
+                src="/hero2.jpg"
                 alt="Group of characters"
                 className="w-[150%] h-full object-cover origin-center skew-x-[15deg] -ml-[25%]"
               />
@@ -43,7 +50,7 @@ export default function HeroSection() {
             <div className="flex-1 relative overflow-hidden -skew-x-[15deg] z-10">
               <div className="absolute inset-0 bg-red-600/10 z-10 mix-blend-color"></div>
               <img
-                src="https://images.unsplash.com/photo-1542451313056-b7c8e626645f?w=500&q=80"
+                src="/hero3.jpg"
                 alt="Character"
                 className="w-[150%] h-full object-cover origin-center skew-x-[15deg] -ml-[25%]"
               />
@@ -56,10 +63,9 @@ export default function HeroSection() {
           
           {/* Text-based Logo Replica */}
           <h1 
-            className="text-7xl md:text-[6rem] font-black tracking-[-0.08em] mb-4 bg-gradient-to-b from-[#a459d1] to-[#723b9e] bg-clip-text text-transparent leading-none"
-            style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
+            className={`text-7xl md:text-[6rem] font-black tracking-[-0.08em] mb-4 bg-gradient-to-b from-[#a459d1] to-[#723b9e] bg-clip-text text-transparent leading-none ${fasterOne.className}`}
           >
-            YUKiZi
+            {title}
           </h1>
 
           <div className="flex flex-wrap justify-center gap-x-3 gap-y-2 text-[13.5px] text-gray-500 text-center font-medium max-w-[380px] mb-4">
@@ -99,36 +105,28 @@ export default function HeroSection() {
           {/* Logos */}
           <div className="flex items-center justify-center gap-6 md:gap-12 flex-wrap">
 
-            <Image
+            <img
               src="https://upload.wikimedia.org/wikipedia/commons/c/c9/Naruto_logo.svg"
               alt="Naruto"
-              width={80}
-              height={32}
-              className="h-5 md:h-8 w-auto object-contain cursor-pointer mix-blend-multiply"
+              className="h-8 md:h-12 w-auto object-contain cursor-pointer mix-blend-multiply"
             />
 
-            <Image
+            <img
               src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Shingeki_no_Kyojin_logo.svg"
               alt="Attack on Titan"
-              width={100}
-              height={40}
-              className="h-5 md:h-8 w-auto object-contain cursor-pointer mix-blend-multiply filter contrast-125"
+              className="h-8 md:h-12 w-auto object-contain cursor-pointer mix-blend-multiply filter contrast-125"
             />
 
-            <Image
+            <img
               src="https://upload.wikimedia.org/wikipedia/commons/2/29/One_Piece_Logo.svg"
               alt="One Piece"
-              width={90}
-              height={36}
-              className="h-5 md:h-8 w-auto object-contain cursor-pointer mix-blend-multiply"
+              className="h-8 md:h-12 w-auto object-contain cursor-pointer mix-blend-multiply"
             />
 
-            <Image
+            <img
               src="https://upload.wikimedia.org/wikipedia/commons/0/05/Bleach_logo.svg"
               alt="Bleach"
-              width={75}
-              height={32}
-              className="h-5 md:h-8 w-auto object-contain cursor-pointer mix-blend-multiply"
+              className="h-8 md:h-12 w-auto object-contain cursor-pointer mix-blend-multiply"
             />
           </div>
 

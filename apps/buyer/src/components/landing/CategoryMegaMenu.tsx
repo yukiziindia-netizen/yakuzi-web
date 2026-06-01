@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import Image from 'next/image';
 import Link from 'next/link';
@@ -55,7 +55,7 @@ export default function CategoryMegaMenu({ category, isOpen, onMouseEnter, onMou
                       {subCategories.map((sub) => (
                         <li key={sub.id}>
                           <Link 
-                            href={`/?categoryId=${category.id}&subCategoryId=${sub.id}`}
+                            href={`/category/${category.id}?subCategoryId=${sub.id}`}
                             className="text-[14px] text-gray-500 hover:text-sky-600 transition-colors duration-200"
                           >
                             {sub.name}
@@ -96,7 +96,7 @@ export default function CategoryMegaMenu({ category, isOpen, onMouseEnter, onMou
               <div className="w-[400px] flex flex-col gap-8">
                 <div className="flex justify-between items-center">
                   <h3 className="text-[15px] font-bold text-[#800080]">Featured Products</h3>
-                  <Link href={`/?categoryId=${category.id}`} className="text-[12px] font-bold text-sky-600 hover:text-sky-700 flex items-center gap-1">
+                  <Link href={`/category/${category.id}`} className="text-[12px] font-bold text-sky-600 hover:text-sky-700 flex items-center gap-1">
                     View All <ArrowRight className="w-3 h-3" />
                   </Link>
                 </div>

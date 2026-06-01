@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react';
 import { Loader2, Share2, Plus, ArrowUpRight, Star, Truck } from 'lucide-react';
 import Link from 'next/link';
 import { getProducts } from '@yukizi/api-client';
+import { generateProductSlug } from '@yukizi/utils';
 import QuickReviewModal from './QuickReviewModal';
 
 interface ProductCarouselProps {
   reverse?: boolean;
   slot?: 'HOMEPAGE_CAROUSEL' | 'LOGIN_CAROUSEL';
+  categoryId?: string;
 }
 
 function GridProductCard({ product, index, onOpenReview }: { product: any; index: number; onOpenReview: (p: any) => void }) {
@@ -51,7 +53,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
         />
 
         {/* Image Container */}
-        <Link href={`/products/${product.id || 'prod-' + index}`} className="w-full h-[120px] sm:h-[140px] flex items-center justify-center mb-4 mt-1 relative group-hover:scale-105 transition-transform duration-500 block z-10">
+        <Link href={`/products/${generateProductSlug(productName, product.id || 'prod-' + index)}`} className="w-full h-[120px] sm:h-[140px] flex items-center justify-center mb-4 mt-1 relative group-hover:scale-105 transition-transform duration-500 block z-10">
            <img src={imageUrl} alt={productName} className="max-h-full max-w-full object-contain mix-blend-multiply" />
         </Link>
 
@@ -119,7 +121,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
   );
 }
 
-export default function ProductCarousel({ slot = 'HOMEPAGE_CAROUSEL' }: ProductCarouselProps) {
+export default function ProductCarousel({ slot = 'HOMEPAGE_CAROUSEL', categoryId }: ProductCarouselProps) {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [reviewProduct, setReviewProduct] = useState<any | null>(null);
@@ -127,7 +129,7 @@ export default function ProductCarousel({ slot = 'HOMEPAGE_CAROUSEL' }: ProductC
   useEffect(() => {
     async function load() {
       try {
-        const res = await getProducts({ limit: 24 });
+        const res = await getProducts({ limit: 24, categoryId });
         if (res && res.data && Array.isArray(res.data)) {
           setProducts(res.data);
         }
@@ -138,7 +140,7 @@ export default function ProductCarousel({ slot = 'HOMEPAGE_CAROUSEL' }: ProductC
       }
     }
     load();
-  }, [slot]);
+  }, [slot, categoryId]);
 
   if (loading) return <div className="h-40 flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-[#854cbc]" /></div>;
   

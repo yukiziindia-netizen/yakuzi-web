@@ -10,6 +10,7 @@ import { useAddToCart, useCart, useUpdateCartItem, useRemoveCartItem } from '@/h
 import { useToast } from '@/components/shared/Toast';
 import { useWishlist, useAddToWishlist, useRemoveFromWishlist } from '@/hooks/useWishlist';
 import Navbar from '@/components/landing/Navbar';
+import { generateProductSlug, parseProductIdFromSlug } from '@yukizi/utils';
 
 function Accordion({ title, content, defaultOpen = false }: { title: string, content?: string, defaultOpen?: boolean }) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
@@ -65,9 +66,9 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
         style={{ clipPath: 'polygon(100% 0, 100% 100%, 0 100%, 25% 50%, 0 0)' }} 
       />
 
-      <div className="w-full h-28 flex items-center justify-center mb-2 mt-1 relative group-hover:scale-105 transition-transform z-0">
+      <Link href={`/products/${generateProductSlug(prod.name || 'Product', prod.id || 'prod-' + index)}`} className="w-full h-28 flex items-center justify-center mb-2 mt-1 relative group-hover:scale-105 transition-transform z-0">
          <img src={prod.image || (prod.images && prod.images[0]) || `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent((prod.name || 'PR').trim().split(/\s+/).length === 1 ? (prod.name || 'PR').trim().substring(0,2).toUpperCase() : ((prod.name || 'PR').trim().split(/\s+/)[0][0] + (prod.name || 'PR').trim().split(/\s+/)[(prod.name || 'PR').trim().split(/\s+/).length - 1][0]).toUpperCase())}`} alt={prod.name} className="max-h-full max-w-full object-contain mix-blend-multiply" />
-      </div>
+      </Link>
 
       <div className="mt-auto flex flex-col gap-1">
          <div className="flex justify-between items-center gap-1">
@@ -98,8 +99,8 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
   const [activeImage, setActiveImage] = useState(0);
   const [pendingCartProducts, setPendingCartProducts] = useState<Set<string>>(new Set());
 
-  // Extract ID from slug if it contains one (e.g. resident-evil-leon-12345)
-  const productSlugOrId = params.productSlug.split('-').pop() || params.productSlug;
+  // Extract ID from slug
+  const productSlugOrId = parseProductIdFromSlug(params.productSlug);
   
   const { data: productData, isLoading, isError } = useProductById(productSlugOrId);
   const { data: cartData } = useCart();

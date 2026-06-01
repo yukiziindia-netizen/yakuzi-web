@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import Image from "next/image";
@@ -195,7 +195,7 @@ export default function Navbar({
                 </div>
               </div>
 
-              <div className="relative shrink-0 flex items-center justify-end w-[180px] md:w-[240px] lg:w-[280px]">
+              <div className="relative shrink-0 flex items-center justify-end w-[220px] md:w-[320px] lg:w-[380px] xl:w-[460px]">
                 <input
                   type="text"
                   placeholder="Search"
@@ -447,24 +447,14 @@ export default function Navbar({
 
             {/* Links List */}
             <div className="flex-1 overflow-y-auto space-y-6 scrollbar-hide mt-16 sm:mt-24 pb-24">
-              {[
-                'Comic Books',
-                'Manga',
-                'Merch',
-                'Events',
-                'Cosplay',
-                'Bookstores',
-                'Animation',
-                'Art institutes',
-                'Others',
-              ].map((item, i) => (
+              {categories.map((category: Category) => (
                 <Link
-                  key={i}
-                  href="#"
+                  key={category.id}
+                  href={`/category/${category.id}`}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="flex justify-between items-center text-gray-700 hover:text-black transition-colors group"
                 >
-                  <span className="text-[15px] font-medium tracking-wide">{item}</span>
+                  <span className="text-[15px] font-medium tracking-wide">{category.name}</span>
                   <ChevronUp className="w-6 h-6 text-gray-400 group-hover:text-gray-600 transition-colors" strokeWidth={2.5} />
                 </Link>
               ))}

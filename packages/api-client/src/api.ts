@@ -64,17 +64,23 @@ export function getRefreshToken(): string | null {
 // Determine base URL dynamically
 function getBaseURL(): string {
   const env = (typeof process !== 'undefined' ? process.env : {}) as any;
-  const url = env.NEXT_PUBLIC_API_BASE_URL || env.NEXT_PUBLIC_API_URL;
+  const baseUrl = env.NEXT_PUBLIC_API_BASE_URL;
+  const apiUrl = env.NEXT_PUBLIC_API_URL;
 
   if (typeof window !== 'undefined') {
-    // If we have an explicit URL in env, use it (Client-side)
-    if (url) return url;
-    // Otherwise use relative /api to leverage Next.js rewrites
+    // Client-side: use baseUrl which might be relative (e.g. /api for proxy)
+    if (baseUrl) return baseUrl;
+    if (apiUrl) return apiUrl;
     return '/api';
   }
 
-  // Server-side: fallback to the environment variable or localhost
-  return url || 'http://localhost:3000/api';
+  // Server-side: must use an absolute URL. 
+  // If baseUrl is relative, fallback to apiUrl which should be absolute.
+  const serverUrl = (baseUrl && baseUrl.startsWith('http')) 
+    ? baseUrl 
+    : (apiUrl || 'http://localhost:3000/api');
+    
+  return serverUrl;
 }
 
 export function setBaseURL(url: string) {

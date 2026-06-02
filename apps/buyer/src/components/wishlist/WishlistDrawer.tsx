@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trash2, Loader2, Star, ArrowUpRight, Plus, ShoppingBag } from 'lucide-react';
@@ -10,74 +10,7 @@ import { useAuth } from '@yukizi/api-client';
 import { useRouter } from 'next/navigation';
 import { useScrollLock } from '@/hooks/useScrollLock';
 
-const MOCK_WISH_ITEMS = [
-  {
-    id: 'm1',
-    name: 'Dragon Ball / Goku action figurine - original edition...',
-    price: 3345.53,
-    originalPrice: 5000.00,
-    discount: '25% off',
-    rating: 4.6,
-    quantity: 0,
-    isYukiziChoice: true,
-    image: 'https://api.dicebear.com/7.x/bottts/svg?seed=goku',
-  },
-  {
-    id: 'm2',
-    name: 'Dragon Ball / Goku action figurine - original edition...',
-    price: 3345.53,
-    originalPrice: 5000.00,
-    discount: '25% off',
-    rating: 4.6,
-    quantity: 1,
-    isYukiziChoice: false,
-    image: 'https://api.dicebear.com/7.x/bottts/svg?seed=goku2',
-  },
-  {
-    id: 'm3',
-    name: 'Dragon Ball / Goku action figurine - original edition...',
-    price: 3345.53,
-    originalPrice: 5000.00,
-    discount: '25% off',
-    rating: 4.6,
-    quantity: 3,
-    isYukiziChoice: false,
-    image: 'https://api.dicebear.com/7.x/bottts/svg?seed=goku3',
-  },
-  {
-    id: 'm4',
-    name: 'Dragon Ball / Goku action figurine - original edition...',
-    price: 3345.53,
-    originalPrice: 5000.00,
-    discount: '25% off',
-    rating: 4.6,
-    quantity: 2,
-    isYukiziChoice: true,
-    image: 'https://api.dicebear.com/7.x/bottts/svg?seed=goku4',
-  },
-  {
-    id: 'm5',
-    name: 'Dragon Ball / Goku action figurine - original edition...',
-    price: 3345.53,
-    originalPrice: 5000.00,
-    discount: '25% off',
-    rating: 4.6,
-    quantity: 5,
-    isYukiziChoice: false,
-    image: 'https://api.dicebear.com/7.x/bottts/svg?seed=goku5',
-  },
-  {
-    id: 'm6',
-    name: 'Dragon Ball / Goku action figurine - original edition...',
-    price: 3345.53,
-    originalPrice: 5000.00,
-    discount: '25% off',
-    rating: 4.6,
-    quantity: 1,
-    isYukiziChoice: false,
-    image: 'https://api.dicebear.com/7.x/bottts/svg?seed=goku6',
-  },
-];
+
 
 export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const { data: wishlist, isLoading, isError } = useWishlist();
@@ -89,8 +22,7 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
 
   useScrollLock(isOpen);
 
-  const realItems = wishlist?.items ?? [];
-  const items = realItems.length > 0 ? realItems : MOCK_WISH_ITEMS;
+  const items = wishlist?.items ?? [];
 
   const handleAddToCart = (item: any) => {
     if (!isAuthenticated) {
@@ -157,21 +89,33 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
 
             {/* Items */}
             <div className="flex-1 overflow-y-auto custom-scrollbar px-6 pb-24 pt-2 space-y-3">
-              {isLoading && realItems.length === 0 ? (
+              {isLoading && items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full gap-4">
                   <Loader2 className="w-8 h-8 text-gray-300 animate-spin" />
                   <p className="text-sm font-medium text-gray-400">Loading wishlist...</p>
                 </div>
-              ) : isError && realItems.length === 0 ? (
+              ) : isError && items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full gap-4">
                   <p className="text-sm font-medium text-red-400">Failed to load wishlist</p>
+                </div>
+              ) : items.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full gap-4 opacity-50 mt-10">
+                  <Bookmark className="w-16 h-16 text-gray-300" />
+                  <p className="text-sm font-medium text-gray-400">Your saved items list is empty</p>
                 </div>
               ) : (
                 items.map((item: any, idx: number) => {
                   const itemName = item.product?.name ?? item.productName ?? item.name ?? 'Product';
                   const itemPrice = item.product?.price ?? item.price ?? 3345.53;
                   const itemOriginalPrice = item.product?.originalPrice ?? item.originalPrice ?? 5000.00;
-                  const itemImage = item.product?.images?.[0] || item.imageUrl || item.image || '/product_placeholder.png';
+                  const itemImageRaw = item.product?.images?.[0] || item.imageUrl || item.image;
+                  const titleWords = itemName.trim().split(' ').filter(Boolean);
+                  const initials = titleWords.length === 1 
+                    ? itemName.trim().substring(0,2).toUpperCase() 
+                    : (titleWords[0][0] + titleWords[titleWords.length - 1][0]).toUpperCase();
+                  const itemImage = (!itemImageRaw || itemImageRaw === '/products/pharma_bottle.png')
+                    ? `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent(initials)}`
+                    : itemImageRaw;
                   const isYukiziChoice = item.isYukiziChoice ?? (idx % 3 === 0);
                   const quantity = item.quantity ?? 1;
 
@@ -198,7 +142,7 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                             onSuccess: () => toast('Removed from saved items', 'info'),
                           })}
                           disabled={removeFromWishlist.isPending}
-                          className="absolute bottom-0 left-0 bg-[#f7941d] text-white p-1 rounded-tr-lg hover:bg-orange-500 transition-colors z-10 disabled:opacity-50"
+                          className="absolute bottom-0 left-0 bg-secondary text-white p-1 rounded-tr-lg hover:bg-secondary/90 transition-colors z-10 disabled:opacity-50"
                         >
                           <Trash2 className="w-[14px] h-[14px]" />
                         </button>
@@ -242,7 +186,7 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                           ) : (
                             <button 
                               onClick={() => handleAddToCart(item)}
-                              className="text-orange-400 hover:text-orange-500 mt-1 mr-1"
+                              className="text-secondary hover:text-secondary/80 mt-1 mr-1"
                             >
                               <Plus className="w-4 h-4" />
                             </button>

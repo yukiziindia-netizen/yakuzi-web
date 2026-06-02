@@ -28,7 +28,7 @@ export default function PremiumBrandsMegaMenu({ isOpen, onMouseEnter, onMouseLea
     },
     {
       title: 'Indian Market Leaders',
-      headerCls: 'text-indigo-600 bg-indigo-50',
+      headerCls: 'text-primary bg-primary/10',
       subgroups: [
         {
           name: 'Tier 1 Manufacturers',
@@ -42,7 +42,7 @@ export default function PremiumBrandsMegaMenu({ isOpen, onMouseEnter, onMouseLea
     },
     {
       title: 'Strategic Partners',
-      headerCls: 'text-emerald-600 bg-emerald-50',
+      headerCls: 'text-secondary bg-secondary/10',
       subgroups: [
         {
           name: 'General Formulations',
@@ -111,7 +111,7 @@ export default function PremiumBrandsMegaMenu({ isOpen, onMouseEnter, onMouseLea
                               {sub.links.map((link, lIdx) => (
                                 <li key={lIdx}>
                                   <a href="#" className="text-[13px] font-bold text-gray-400 hover:text-gray-950 transition-all duration-300 flex items-center gap-3">
-                                    <div className="w-1 h-1 rounded-full bg-gray-200 group-hover/item:bg-lime-400 transition-colors" />
+                                    <div className="w-1 h-1 rounded-full bg-gray-200 group-hover/item:bg-secondary transition-colors" />
                                     {link}
                                   </a>
                                 </li>
@@ -158,7 +158,7 @@ export default function PremiumBrandsMegaMenu({ isOpen, onMouseEnter, onMouseLea
                       whileHover={{ y: -5 }}
                       className="bg-white rounded-[32px] p-6 flex flex-col items-center group/card cursor-pointer shadow-xl hover:shadow-[0_24px_48px_-12px_rgba(0,0,0,0.1)] transition-all duration-500 border border-gray-50 relative overflow-hidden"
                     >
-                      <span className="absolute top-4 right-4 text-[8px] font-black uppercase tracking-[0.2em] px-2 py-1 bg-lime-400 rounded-lg shadow-sm z-10">{product.tag}</span>
+                      <span className="absolute top-4 right-4 text-[8px] font-black uppercase tracking-[0.2em] px-2 py-1 bg-secondary text-white rounded-lg shadow-sm z-10">{product.tag}</span>
                       <div className="relative w-full aspect-[1/1] mb-6 overflow-hidden rounded-2xl bg-gray-50 border border-gray-100/50 p-4">
                         <Image
                           src={product.image}
@@ -169,7 +169,7 @@ export default function PremiumBrandsMegaMenu({ isOpen, onMouseEnter, onMouseLea
                       </div>
                       <div className="text-center">
                          <p className="text-[13px] font-black text-gray-900 mb-1 uppercase tracking-tight">{product.name}</p>
-                         <p className="text-[12px] font-black text-lime-600">{product.price}</p>
+                         <p className="text-[12px] font-black text-secondary">{product.price}</p>
                       </div>
                     </motion.div>
                   ))}
@@ -181,7 +181,7 @@ export default function PremiumBrandsMegaMenu({ isOpen, onMouseEnter, onMouseLea
             <div className="bg-gray-950 p-6 flex items-center justify-center gap-8">
                <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.4em]">Official Fulfillment Partner for 12,000+ Pharmacies</p>
                <div className="h-1 w-1 rounded-full bg-white/20" />
-               <p className="text-[10px] font-black text-lime-400 uppercase tracking-[0.4em]">99.8% SLA COMPLIANCE</p>
+               <p className="text-[10px] font-black text-secondary uppercase tracking-[0.4em]">99.8% SLA COMPLIANCE</p>
             </div>
           </div>
         </motion.div>

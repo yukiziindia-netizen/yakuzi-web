@@ -101,7 +101,7 @@ export default function ProductCard({
         ) : (
           <button 
             onClick={handlePlusClick} 
-            className="text-orange-400 hover:text-orange-500 transition-colors p-1"
+            className="text-secondary hover:text-secondary/80 transition-colors p-1"
             disabled={isLoadingCart || isOutOfStock}
           >
             {isLoadingCart ? <Loader2 className="w-5 h-5 animate-spin" strokeWidth={1.5} /> : <Plus className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={1.5} />}
@@ -116,7 +116,7 @@ export default function ProductCard({
         onClick={handleBookmarkClick}
         className="absolute right-[-1px] top-[38%] -translate-y-1/2 z-20 outline-none w-[26px] sm:w-[34px] h-[26px] sm:h-[30px] flex items-center justify-end hover:scale-105 transition-transform group/ribbon"
       >
-        <svg viewBox="0 0 24 36" preserveAspectRatio="none" className="w-[80%] h-[70%] drop-shadow-sm transition-colors" fill={isBookmarked ? "#854cbc" : "white"} stroke={isBookmarked ? "#854cbc" : "#cbd5e1"} strokeWidth="1.5">
+        <svg viewBox="0 0 24 36" preserveAspectRatio="none" className="w-[80%] h-[70%] drop-shadow-sm transition-colors" fill={isBookmarked ? "hsl(var(--primary))" : "white"} stroke={isBookmarked ? "hsl(var(--primary))" : "#cbd5e1"} strokeWidth="1.5">
           <path d="M24 0 H0 L8 18 L0 36 H24 Z" strokeLinejoin="round" />
         </svg>
       </button>

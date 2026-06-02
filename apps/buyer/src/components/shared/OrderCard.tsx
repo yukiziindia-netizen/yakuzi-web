@@ -20,7 +20,7 @@ export default function OrderCard({ orderId, date, status, total, itemCount }: O
       case 'CONFIRMED':
         return { cls: 'bg-emerald-100 text-emerald-700 border-emerald-200', icon: CheckCircle2 };
       case 'PAYMENT_RECEIVED':
-        return { cls: 'bg-purple-100 text-purple-700 border-purple-200', icon: Package };
+        return { cls: 'bg-primary/10 text-primary border-primary/20', icon: Package };
       case 'READY_TO_SHIP':
         return { cls: 'bg-sky-100 text-sky-700 border-sky-200', icon: Package };
       case 'PENDING': 
@@ -70,8 +70,8 @@ export default function OrderCard({ orderId, date, status, total, itemCount }: O
             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 font-sans">Total Bill</p>
             <span className="text-lg sm:text-xl md:text-2xl font-black text-gray-950 tracking-tighter">{total}</span>
           </div>
-          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-50 group-hover:bg-lime-300 rounded-lg sm:rounded-xl flex items-center justify-center transition-colors">
-            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-gray-900 transition-colors" />
+          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-50 group-hover:bg-primary/10 rounded-lg sm:rounded-xl flex items-center justify-center transition-colors">
+            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-primary transition-colors" />
           </div>
         </div>
       </div>

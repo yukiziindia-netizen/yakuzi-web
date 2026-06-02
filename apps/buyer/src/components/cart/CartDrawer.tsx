@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trash2, Loader2, Star, ArrowUpRight, Bookmark } from 'lucide-react';
@@ -9,63 +9,7 @@ import { useAuth } from '@yukizi/api-client';
 import { useRouter } from 'next/navigation';
 import { useScrollLock } from '@/hooks/useScrollLock';
 
-const MOCK_CART_ITEMS = [
-  {
-    id: 'm1',
-    name: 'Dragon Ball / Goku action figurine - original edition...',
-    price: 3345.53,
-    originalPrice: 5000.00,
-    discount: '25% off',
-    rating: 4.5,
-    quantity: 2,
-    isYukiziChoice: true,
-    image: 'https://api.dicebear.com/7.x/bottts/svg?seed=goku',
-  },
-  {
-    id: 'm2',
-    name: 'Dragon Ball / Goku action figurine - original edition...',
-    price: 3345.53,
-    originalPrice: 5000.00,
-    discount: '25% off',
-    rating: 4.5,
-    quantity: 1,
-    isYukiziChoice: false,
-    image: 'https://api.dicebear.com/7.x/bottts/svg?seed=goku2',
-  },
-  {
-    id: 'm3',
-    name: 'Dragon Ball / Goku action figurine - original edition...',
-    price: 3345.53,
-    originalPrice: 5000.00,
-    discount: '25% off',
-    rating: 4.5,
-    quantity: 2,
-    isYukiziChoice: false,
-    image: 'https://api.dicebear.com/7.x/bottts/svg?seed=goku3',
-  },
-  {
-    id: 'm4',
-    name: 'Dragon Ball / Goku action figurine - original edition...',
-    price: 3345.53,
-    originalPrice: 5000.00,
-    discount: '25% off',
-    rating: 4.5,
-    quantity: 1,
-    isYukiziChoice: true,
-    image: 'https://api.dicebear.com/7.x/bottts/svg?seed=goku4',
-  },
-  {
-    id: 'm5',
-    name: 'Dragon Ball / Goku action figurine - original edition...',
-    price: 3345.53,
-    originalPrice: 5000.00,
-    discount: '25% off',
-    rating: 4.5,
-    quantity: 5,
-    isYukiziChoice: false,
-    image: 'https://api.dicebear.com/7.x/bottts/svg?seed=goku5',
-  },
-];
+
 
 export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const { data: cart, isLoading, isError } = useCart();
@@ -79,13 +23,12 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
 
   useScrollLock(isOpen);
 
-  const realItems = cart?.items ?? [];
-  const items = realItems.length > 0 ? realItems : MOCK_CART_ITEMS;
+  const items = cart?.items ?? [];
 
   const handleCheckout = async () => {
     if (isAuthenticated) {
       try {
-        if (realItems.length > 0) {
+        if (items.length > 0) {
           await syncCart.mutateAsync();
         }
         onClose();
@@ -147,21 +90,33 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
 
             {/* Items */}
             <div className="flex-1 overflow-y-auto custom-scrollbar px-6 pb-4 pt-2 space-y-3">
-              {(isLoading || syncCart.isPending) && realItems.length === 0 ? (
+              {(isLoading || syncCart.isPending) && items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full gap-4">
                   <Loader2 className="w-8 h-8 text-gray-300 animate-spin" />
                   <p className="text-sm font-medium text-gray-400">Loading bag...</p>
                 </div>
-              ) : isError && realItems.length === 0 ? (
+              ) : isError && items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full gap-4">
                   <p className="text-sm font-medium text-red-400">Failed to load bag</p>
+                </div>
+              ) : items.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full gap-4 opacity-50 mt-10">
+                  <ShoppingBag className="w-16 h-16 text-gray-300" />
+                  <p className="text-sm font-medium text-gray-400">Your cart is empty</p>
                 </div>
               ) : (
                 items.map((item: any, idx: number) => {
                   const itemName = item.product?.name ?? item.productName ?? item.name ?? 'Product';
                   const itemPrice = item.product?.price ?? item.price ?? 3345.53;
                   const itemOriginalPrice = item.product?.originalPrice ?? item.originalPrice ?? 5000.00;
-                  const itemImage = item.product?.images?.[0] || item.imageUrl || item.image || '/products/pharma_bottle.png';
+                  const itemImageRaw = item.product?.images?.[0] || item.imageUrl || item.image;
+                  const titleWords = itemName.trim().split(' ').filter(Boolean);
+                  const initials = titleWords.length === 1 
+                    ? itemName.trim().substring(0,2).toUpperCase() 
+                    : (titleWords[0][0] + titleWords[titleWords.length - 1][0]).toUpperCase();
+                  const itemImage = (!itemImageRaw || itemImageRaw === '/products/pharma_bottle.png')
+                    ? `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent(initials)}`
+                    : itemImageRaw;
                   const isYukiziChoice = item.isYukiziChoice ?? (idx % 3 === 0);
                   const quantity = item.quantity ?? 1;
 

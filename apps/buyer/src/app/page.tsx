@@ -1,19 +1,28 @@
-'use client';
-
-import Navbar from '@/components/landing/Navbar';
+import HomeNavbar from '@/components/landing/HomeNavbar';
 import HeroSection from '@/components/landing/HeroSection';
-
 import ProductCarousel from '@/components/landing/ProductCarousel';
+import { getProducts } from '@yukizi/api-client';
 
-
-export default function HomePage() {
-  const handleLoginClick = () => {
-    window.dispatchEvent(new CustomEvent('open-login'));
-  };
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: { search?: string; category?: string };
+}) {
+  let initialProducts = [];
+  try {
+    const search = searchParams?.search;
+    const res = await getProducts({ limit: 100, search });
+    if (res && res.data && Array.isArray(res.data)) {
+      initialProducts = res.data;
+    }
+    console.log("[HomePage] Fetched products count:", initialProducts.length);
+  } catch (error) {
+    console.error("[HomePage] Failed to load initial products:", error);
+  }
 
   return (
     <main className="w-full bg-white min-h-screen relative pb-24 sm:pb-32">
-      <Navbar showUserActions={true} onLoginClick={handleLoginClick} />
+      <HomeNavbar />
       
       <div className="w-full max-w-[1600px] mx-auto bg-white overflow-hidden flex flex-col relative min-h-screen">
         <section className="flex-1 flex flex-col w-full">
@@ -21,7 +30,7 @@ export default function HomePage() {
             <HeroSection />
           </div>
           <div className="flex-1 min-h-[300px] overflow-hidden bg-transparent mt-4 sm:mt-6">
-            <ProductCarousel />
+            <ProductCarousel initialProducts={initialProducts} />
           </div>
         </section>
       </div>

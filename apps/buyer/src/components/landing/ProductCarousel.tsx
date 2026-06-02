@@ -11,6 +11,7 @@ interface ProductCarouselProps {
   reverse?: boolean;
   slot?: 'HOMEPAGE_CAROUSEL' | 'LOGIN_CAROUSEL';
   categoryId?: string;
+  initialProducts?: any[];
 }
 
 function GridProductCard({ product, index, onOpenReview }: { product: any; index: number; onOpenReview: (p: any) => void }) {
@@ -121,12 +122,18 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
   );
 }
 
-export default function ProductCarousel({ slot = 'HOMEPAGE_CAROUSEL', categoryId }: ProductCarouselProps) {
-  const [products, setProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function ProductCarousel({ slot = 'HOMEPAGE_CAROUSEL', categoryId, initialProducts }: ProductCarouselProps) {
+  const [products, setProducts] = useState<any[]>(initialProducts || []);
+  const [loading, setLoading] = useState(!initialProducts);
   const [reviewProduct, setReviewProduct] = useState<any | null>(null);
 
   useEffect(() => {
+    if (initialProducts) {
+      setProducts(initialProducts);
+      setLoading(false);
+      return;
+    }
+    
     async function load() {
       try {
         const res = await getProducts({ limit: 24, categoryId });
@@ -140,7 +147,7 @@ export default function ProductCarousel({ slot = 'HOMEPAGE_CAROUSEL', categoryId
       }
     }
     load();
-  }, [slot, categoryId]);
+  }, [slot, categoryId, initialProducts]);
 
   if (loading) return <div className="h-40 flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-[#854cbc]" /></div>;
   

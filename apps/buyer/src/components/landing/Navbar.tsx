@@ -1,5 +1,7 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
@@ -38,7 +40,7 @@ import NotificationDrawer from "@/components/notifications/NotificationDrawer";
 import SearchBar from "@/components/shared/SearchBar";
 import { SidebarSheet, type SidebarView } from "@/components/landing/SidebarSheet";
 
-import { useAuth, type Category } from "@yukizi/api-client";
+import { useAuth, type Category, sendChatMessage, type ChatMessage } from "@yukizi/api-client";
 import { useCart } from "@/hooks/useCart";
 import { localCart } from "@/lib/local-cart";
 import { useQueryClient } from "@tanstack/react-query";
@@ -81,6 +83,11 @@ export default function Navbar({
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isSearchChatOpen, setIsSearchChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState("");
+  const [isChatLoading, setIsChatLoading] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
+  const router = useRouter();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -116,6 +123,32 @@ export default function Navbar({
     };
   }, []);
 
+  const handleChatSubmit = async () => {
+    if (!chatInput.trim() || isChatLoading) return;
+
+    const userMessage: ChatMessage = { role: 'user', content: chatInput.trim() };
+    setChatMessages((prev) => [...prev, userMessage]);
+    setChatInput('');
+    setIsChatLoading(true);
+
+    try {
+      const response = await sendChatMessage(userMessage.content, chatMessages);
+      setChatMessages((prev) => [...prev, { role: 'assistant', content: response }]);
+    } catch (error) {
+      console.error('Chat error:', error);
+      setChatMessages((prev) => [...prev, { role: 'assistant', content: 'Sorry, I encountered an error processing your request.' }]);
+    } finally {
+      setIsChatLoading(false);
+    }
+  };
+
+  const handleSearchSubmit = () => {
+    if (!searchInput.trim()) return;
+    router.push(`/?search=${encodeURIComponent(searchInput.trim())}`);
+    setIsSearchChatOpen(false);
+    setSearchInput('');
+  };
+
   const isAnyDrawerOpen =
     isMobileMenuOpen ||
     isCartOpen ||
@@ -140,16 +173,16 @@ export default function Navbar({
         <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-6 md:gap-2 pointer-events-auto flex-nowrap justify-center w-full max-w-[1200px] px-1 sm:px-4 relative">
 
           {/* Left Segment: Logo, Profile, Notifications, Search */}
-          <div className="flex items-center bg-white sm:bg-[#562996] rounded-full sm:rounded-[1.5rem] md:rounded-[2rem] px-2 xs:px-3 sm:px-6 md:px-8 py-1.5 sm:py-3.5 md:py-4 gap-2 sm:gap-5 md:gap-8 shadow-md sm:shadow-2xl flex-1 justify-between max-w-[800px] overflow-hidden min-w-0">
+          <div className="flex items-center bg-white sm:bg-[#562996] rounded-xl sm:rounded-xl md:rounded-xl px-2 xs:px-3 sm:px-4 md:px-6 py-1.5 sm:py-3 md:py-3.5 shadow-md sm:shadow-2xl flex-1 max-w-[480px] justify-between overflow-hidden min-w-0">
             
             {/* DESKTOP VIEW (sm and up) */}
             <div className="hidden sm:flex items-center w-full justify-between">
               <div className="flex items-center">
-                <Link href="/" className="font-black text-lg sm:text-2xl tracking-tighter uppercase shrink-0 text-white" style={{ fontFamily: 'Impact, Arial Black, sans-serif' }}>
+                <Link href="/" className="font-black text-xl sm:text-3xl tracking-tighter uppercase shrink-0 text-white" style={{ fontFamily: 'Impact, Arial Black, sans-serif' }}>
                   YUKIZI
                 </Link>
                 
-                <div className="flex items-center gap-3 md:gap-5 ml-4 lg:ml-8 border-l border-white/20 pl-4 lg:pl-8">
+                <div className="flex items-center gap-2 md:gap-3 ml-4 md:ml-6 lg:ml-8">
                   {isAuthenticated ? (
                     <div className="relative" ref={profileDropdownRef}>
                       <button onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)} className="p-1 text-white hover:text-sky-300 transition-colors">
@@ -186,6 +219,9 @@ export default function Navbar({
                     </button>
                   )}
 
+                  {/* Vertical Divider between User and Bell */}
+                  <div className="h-5 w-px bg-white/30 mx-1 md:mx-2" />
+
                   <button onClick={() => setIsNotificationsOpen(true)} className="relative p-1 hover:text-sky-300 transition-colors text-white">
                     <Bell className="w-5 h-5 sm:w-6 sm:h-6" />
                     {unreadNotificationCount > 0 && (
@@ -195,7 +231,7 @@ export default function Navbar({
                 </div>
               </div>
 
-              <div className="relative shrink-0 flex items-center justify-end w-[220px] md:w-[320px] lg:w-[380px] xl:w-[460px]">
+              <div className="relative flex items-center justify-end w-[150px] md:w-[180px] lg:w-[220px] xl:w-[240px]">
                 <input
                   type="text"
                   placeholder="Search"
@@ -204,9 +240,9 @@ export default function Navbar({
                     setIsSearchChatOpen(!isSearchChatOpen);
                     setIsChatOpen(false);
                   }}
-                  className="w-full h-[32px] md:h-[38px] bg-white rounded-[4px] text-[#333] text-[13px] md:text-[14px] pl-3 md:pl-4 pr-10 focus:outline-none cursor-pointer placeholder-[#a0a0a0] shadow-sm font-medium"
+                  className="w-full h-[32px] md:h-[36px] bg-white rounded-md text-[#562996] text-[13px] md:text-[14px] pl-3 md:pl-4 pr-10 focus:outline-none cursor-pointer placeholder-[#562996]/60 shadow-sm font-medium"
                 />
-                <Search className="w-4 h-4 md:w-[18px] md:h-[18px] text-[#a0a0a0] absolute right-3 md:right-4 top-1/2 -translate-y-1/2 pointer-events-none stroke-2" />
+                <Search className="w-4 h-4 md:w-[16px] md:h-[16px] text-[#562996]/60 absolute right-3 md:right-4 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2.5]" />
               </div>
             </div>
 
@@ -261,10 +297,10 @@ export default function Navbar({
           </div>
 
           {/* Right Segment: Cart, Wishlist, Filter, Menu */}
-          <div className="flex items-center justify-end bg-white sm:bg-[#562996] rounded-full sm:rounded-[1.5rem] md:rounded-[2rem] px-2 xs:px-3 sm:px-6 md:px-8 py-2 sm:py-3.5 md:py-4 gap-2 xs:gap-3 sm:gap-6 md:gap-8 shadow-md sm:shadow-2xl text-[#562996] sm:text-white shrink-0 flex-1 max-w-[800px] z-10 overflow-hidden min-w-0">
+          <div className="flex items-center justify-between bg-white sm:bg-[#562996] rounded-xl sm:rounded-xl md:rounded-xl px-4 xs:px-6 sm:px-8 md:px-10 py-2 sm:py-3 md:py-3.5 shadow-md sm:shadow-2xl text-[#562996] sm:text-white shrink-0 flex-1 max-w-[480px] z-10 overflow-hidden min-w-0">
 
             <button onClick={() => setSidebarView("wishlist")} className="relative p-0.5 sm:p-1 hover:text-sky-300 transition-colors">
-              <Bookmark className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 rotate-90" />
+              <Bookmark className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6" />
             </button>
 
             <button onClick={() => setSidebarView("cart")} className="relative p-0.5 sm:p-1 hover:text-sky-300 transition-colors">
@@ -300,45 +336,79 @@ export default function Navbar({
           <AnimatePresence>
             {isChatOpen && (
               <motion.div
-                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                initial={{ opacity: 0, y: 50, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                className="absolute bottom-full mb-4 left-2 right-2 sm:left-6 sm:right-6 md:left-4 md:right-4 z-0 pointer-events-auto"
+                exit={{ opacity: 0, y: 50, scale: 0.95 }}
+                className="absolute bottom-[-16px] md:bottom-[-24px] left-0 right-0 z-[-1] pointer-events-auto h-[75vh] max-h-[850px]"
               >
-                <div className="w-full bg-gradient-to-br from-[#a656f2] to-[#8d3ce1] rounded-[1.25rem] sm:rounded-[1.5rem] md:rounded-[2rem] shadow-2xl p-4 sm:p-6 md:p-8 flex flex-col h-[200px] xs:h-[220px] sm:h-[300px] md:h-[400px]">
+                <div className="w-full h-full bg-gradient-to-br from-[#9b49e6] to-[#7f26d9] rounded-[2rem] md:rounded-[2.5rem] shadow-[0_0_60px_rgba(155,73,230,0.5)] p-6 sm:p-8 md:p-10 flex flex-col">
+                  {/* Chat Messages Area */}
+                  <div className="flex-1 overflow-y-auto mb-4 flex flex-col gap-4 scrollbar-hide">
+                    {chatMessages.length === 0 ? (
+                      <div className="flex-1 flex flex-col justify-end">
+                         {/* Placeholder space when empty */}
+                      </div>
+                    ) : (
+                      chatMessages.map((msg, idx) => (
+                        <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                          <div className={`max-w-[80%] rounded-2xl px-4 py-2 ${msg.role === 'user' ? 'bg-white text-[#7f26d9]' : 'bg-[#562996] text-white border border-white/20'}`}>
+                            {msg.content}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                  
                   {/* Chat Box Header / Input Area */}
-                  <div className="flex-1">
+                  <div className={`${chatMessages.length > 0 ? 'h-16 shrink-0' : 'flex-1'} transition-all duration-300 pb-4`}>
                     <textarea 
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          handleChatSubmit();
+                        }
+                      }}
                       placeholder="Start typing ..."
                       className="w-full h-full bg-transparent text-white text-base sm:text-xl md:text-2xl placeholder-white/70 outline-none resize-none font-medium"
+                      disabled={isChatLoading}
                     />
                   </div>
                   
-                  {/* Chat Box Footer */}
-                  <div className="flex items-center justify-between mt-2 sm:mt-4">
+                  {/* Chat Box Footer (Positioned above the navbar) */}
+                  <div className="flex items-center justify-between pb-[70px] md:pb-[80px] px-2 md:px-4">
                     {/* Left Icons */}
-                    <div className="flex items-center gap-2 sm:gap-4 text-white">
+                    <div className="flex items-center gap-5 sm:gap-7 text-white ml-2 md:ml-4">
                       <button className="hover:text-white/80 transition-colors">
-                        <Share2 className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <Share2 className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2]" />
                       </button>
                       <button className="hover:text-white/80 transition-colors">
-                        <Clock className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <Clock className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2]" />
                       </button>
                     </div>
                     
                     {/* Right Icons */}
-                    <div className="flex items-center gap-2 sm:gap-4 text-white">
+                    <div className="flex items-center gap-5 sm:gap-7 text-white mr-2 md:mr-4">
                       <button className="hover:text-white/80 transition-colors">
-                        <RotateCw className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <RotateCw className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.5]" />
                       </button>
                       <button className="hover:text-white/80 transition-colors">
-                        <Plus className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <Plus className="w-6 h-6 sm:w-7 sm:h-7 stroke-[3]" />
                       </button>
                       <button className="hover:text-white/80 transition-colors">
-                        <AudioLines className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <AudioLines className="w-6 h-6 sm:w-8 sm:h-8 stroke-[2]" />
                       </button>
-                      <button className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-white rounded-lg sm:rounded-xl flex items-center justify-center hover:bg-gray-100 transition-colors shadow-sm ml-1 sm:ml-2">
-                        <Send className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-black -ml-0.5 sm:-ml-1" />
+                      <button 
+                        onClick={handleChatSubmit}
+                        disabled={isChatLoading}
+                        className={`w-12 h-10 sm:w-16 sm:h-12 bg-white rounded-xl flex items-center justify-center transition-colors shadow-lg ml-2 ${isChatLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'}`}
+                      >
+                        {isChatLoading ? (
+                           <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-[#562996] border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <Send className="w-5 h-5 sm:w-6 sm:h-6 text-[#562996] fill-[#562996]" />
+                        )}
                       </button>
                     </div>
                   </div>
@@ -351,44 +421,40 @@ export default function Navbar({
           <AnimatePresence>
             {isSearchChatOpen && (
               <motion.div
-                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                initial={{ opacity: 0, y: 50, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                className="absolute bottom-full mb-6 left-0 right-0 w-full z-0 pointer-events-auto px-1 sm:px-4"
+                exit={{ opacity: 0, y: 50, scale: 0.95 }}
+                className="absolute bottom-[-16px] md:bottom-[-24px] left-0 right-0 z-[-2] pointer-events-auto h-[60vh] max-h-[600px]"
               >
-                <div className="w-full bg-white rounded-2xl md:rounded-[1.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 p-3 sm:p-4 md:p-6 flex flex-col h-[160px] xs:h-[180px] sm:h-[220px] md:h-[250px]">
+                <div className="w-full h-full bg-white rounded-[2rem] md:rounded-[2.5rem] shadow-[0_0_40px_rgba(0,0,0,0.1)] border border-gray-100 p-6 sm:p-8 md:p-10 flex flex-col relative overflow-hidden">
+                  
+                  {/* Subtle pink/purple glow behind the mascot area */}
+                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[300px] h-[150px] bg-pink-500/10 blur-[50px] pointer-events-none rounded-full" />
+
                   {/* Chat Box Header / Input Area */}
-                  <div className="flex-1">
+                  <div className="flex-1 pb-4 z-10">
                     <textarea 
+                      value={searchInput}
+                      onChange={(e) => setSearchInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          handleSearchSubmit();
+                        }
+                      }}
                       placeholder="Start typing ..."
-                      className="w-full h-full bg-transparent text-gray-800 text-sm sm:text-base placeholder-gray-400 outline-none resize-none font-medium"
+                      className="w-full h-full bg-transparent text-[#562996] text-base sm:text-xl md:text-2xl placeholder-[#a66ee8] outline-none resize-none font-medium"
                     />
                   </div>
                   
                   {/* Chat Box Footer */}
-                  <div className="flex items-center justify-between mt-2">
-                    {/* Left Icons */}
-                    <div className="flex items-center text-gray-600">
-                      <button className="p-1 xs:p-1.5 sm:p-2 hover:text-black hover:bg-gray-50 rounded-lg transition-colors">
-                        <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
-                      </button>
-                    </div>
-                    
-                    {/* Right Icons */}
-                    <div className="flex items-center gap-0.5 xs:gap-1 sm:gap-2 text-gray-600">
-                      <button className="p-1 xs:p-1.5 sm:p-2 hover:text-black hover:bg-gray-50 rounded-lg transition-colors">
-                        <RotateCw className="w-4 h-4 sm:w-5 sm:h-5" />
-                      </button>
-                      <button className="p-1 xs:p-1.5 sm:p-2 hover:text-black hover:bg-gray-50 rounded-lg transition-colors">
-                        <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
-                      </button>
-                      <button className="p-1 xs:p-1.5 sm:p-2 hover:text-black hover:bg-gray-50 rounded-lg transition-colors">
-                        <AudioLines className="w-4 h-4 sm:w-5 sm:h-5" />
-                      </button>
-                      <button className="ml-1 sm:ml-2 bg-white rounded-lg sm:rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-colors p-1.5 xs:p-2 sm:p-2.5 md:p-3">
-                        <Send className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-900" />
-                      </button>
-                    </div>
+                  <div className="flex items-center justify-end pb-[70px] md:pb-[80px] px-2 md:px-4 z-10">
+                    <button 
+                      onClick={handleSearchSubmit}
+                      className="w-12 h-10 sm:w-16 sm:h-12 bg-white rounded-xl flex items-center justify-center hover:bg-gray-50 transition-colors shadow-md border border-gray-100"
+                    >
+                      <Send className="w-5 h-5 sm:w-6 sm:h-6 text-[#562996] fill-[#562996]" />
+                    </button>
                   </div>
                 </div>
               </motion.div>
@@ -450,7 +516,7 @@ export default function Navbar({
               {categories.map((category: Category) => (
                 <Link
                   key={category.id}
-                  href={`/category/${category.id}`}
+                  href={`/category/${category.slug || category.id}`}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="flex justify-between items-center text-gray-700 hover:text-black transition-colors group"
                 >

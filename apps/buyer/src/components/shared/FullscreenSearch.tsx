@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -94,7 +94,7 @@ export default function FullscreenSearch({ isOpen, onClose }: { isOpen: boolean;
                       if (e.key === 'Escape') onClose();
                     }}
                     placeholder="Start typing ..."
-                    className="w-full text-4xl sm:text-5xl md:text-6xl font-light text-[#8b5cf6] placeholder:text-[#c4b5fd] focus:outline-none bg-transparent"
+                    className="w-full text-4xl sm:text-5xl md:text-6xl font-light text-primary placeholder:text-primary/50 focus:outline-none bg-transparent"
                   />
                 </div>
 
@@ -110,7 +110,7 @@ export default function FullscreenSearch({ isOpen, onClose }: { isOpen: boolean;
                     <AudioLines className="w-6 h-6 sm:w-8 sm:h-8 text-gray-600" strokeWidth={1.5} />
                   </button>
                   <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                    <Play className="w-6 h-6 sm:w-8 sm:h-8 text-[#8b5cf6] fill-[#8b5cf6]" strokeWidth={1.5} />
+                    <Play className="w-6 h-6 sm:w-8 sm:h-8 text-primary fill-primary" strokeWidth={1.5} />
                   </button>
                 </div>
               </div>
@@ -129,10 +129,10 @@ export default function FullscreenSearch({ isOpen, onClose }: { isOpen: boolean;
                         <button
                           key={r}
                           onClick={() => handleFullSearch(r)}
-                          className="p-4 rounded-2xl bg-gradient-to-br from-purple-50 to-transparent border border-purple-100 hover:border-purple-300 transition-all"
+                          className="p-4 rounded-2xl bg-gradient-to-br from-primary/5 to-transparent border border-primary/10 hover:border-primary/30 transition-all"
                         >
                           <div className="flex items-start gap-2 mb-2">
-                            <Clock className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" />
+                            <Clock className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
                             <span className="text-sm font-medium text-gray-700 text-left line-clamp-2">{r}</span>
                           </div>
                         </button>
@@ -159,7 +159,7 @@ export default function FullscreenSearch({ isOpen, onClose }: { isOpen: boolean;
                           <button
                             key={p.id}
                             onClick={() => handleSelect(p)}
-                            className="p-4 rounded-2xl bg-white border border-gray-200 hover:border-purple-300 hover:shadow-lg transition-all group"
+                            className="p-4 rounded-2xl bg-white border border-gray-200 hover:border-primary/50 hover:shadow-lg transition-all group"
                           >
                             <div className="w-full h-32 bg-gray-50 rounded-xl flex items-center justify-center mb-3 overflow-hidden">
                               {p.images?.[0] ? (
@@ -176,7 +176,7 @@ export default function FullscreenSearch({ isOpen, onClose }: { isOpen: boolean;
                             <p className="text-sm font-bold text-gray-900 truncate mb-1">{p.name}</p>
                             <p className="text-xs text-gray-500 mb-2">₹{p.price?.toLocaleString?.('en-IN') ?? p.price}</p>
                             <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <ArrowRight className="w-3 h-3 text-purple-500" />
+                              <ArrowRight className="w-3 h-3 text-primary" />
                             </div>
                           </button>
                         ))

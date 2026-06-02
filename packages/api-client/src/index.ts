@@ -170,3 +170,11 @@ export {
   getAdminCustomOrders,
   updateCustomOrderStatus,
 } from './modules/custom-orders.api';
+
+// Chatbot
+export {
+  sendChatMessage,
+  type ChatMessage,
+  type ChatRequest,
+  type ChatResponse,
+} from './modules/chatbot.api';

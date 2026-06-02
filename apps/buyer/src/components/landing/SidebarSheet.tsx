@@ -4,8 +4,11 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   X, Trash2, Bookmark, ShoppingCart, Star, 
-  ChevronDown, ChevronUp, Check
+  ChevronDown, ChevronUp, Check,
+  ShoppingBag, Loader2
 } from "lucide-react";
+import { useCart, useUpdateCartItem, useRemoveCartItem } from "@/hooks/useCart";
+import { useToast } from "@/components/shared/Toast";
 
 export type SidebarView = "cart" | "wishlist" | "filters" | null;
 
@@ -15,75 +18,7 @@ interface SidebarSheetProps {
   onViewChange: (view: SidebarView) => void;
 }
 
-// Mock Data
-const MOCK_ITEMS = [
-  {
-    id: 1,
-    title: "Dragon Ball / Goku action figurine...",
-    price: 3345.53,
-    originalPrice: 3800.25,
-    discount: "26% off",
-    rating: 4.5,
-    quantity: null,
-    isYukiziChoice: true,
-    image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=150&q=80",
-  },
-  {
-    id: 2,
-    title: "Dragon Ball / Goku action figurine...",
-    price: 3345.53,
-    originalPrice: 3800.25,
-    discount: "26% off",
-    rating: 4.5,
-    quantity: 1,
-    isYukiziChoice: false,
-    image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=150&q=80",
-  },
-  {
-    id: 3,
-    title: "Dragon Ball / Goku action figurine...",
-    price: 3345.53,
-    originalPrice: 3800.25,
-    discount: "26% off",
-    rating: 4.5,
-    quantity: 3,
-    isYukiziChoice: false,
-    image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=150&q=80",
-  },
-  {
-    id: 4,
-    title: "Dragon Ball / Goku action figurine...",
-    price: 3345.53,
-    originalPrice: 3800.25,
-    discount: "26% off",
-    rating: 4.5,
-    quantity: 2,
-    isYukiziChoice: true,
-    image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=150&q=80",
-  },
-  {
-    id: 5,
-    title: "Dragon Ball / Goku action figurine...",
-    price: 3345.53,
-    originalPrice: 3800.25,
-    discount: "26% off",
-    rating: 4.5,
-    quantity: 5,
-    isYukiziChoice: false,
-    image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=150&q=80",
-  },
-  {
-    id: 6,
-    title: "Dragon Ball / Goku action figurine...",
-    price: 3345.53,
-    originalPrice: 3800.25,
-    discount: "26% off",
-    rating: 4.5,
-    quantity: 1,
-    isYukiziChoice: false,
-    image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=150&q=80",
-  }
-];
+
 
 export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps) {
   const isOpen = view !== null;
@@ -109,8 +44,36 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
     setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
+  const { data: cart, isLoading, isError } = useCart();
+  const updateItem = useUpdateCartItem();
+  const removeItem = useRemoveCartItem();
+  const { toast } = useToast();
+
   const renderShoppingView = () => {
     const isCart = view === "cart";
+    
+    // For now we only hook up cart items dynamically
+    const displayItems = isCart ? (cart?.items ?? []) : [];
+    
+    if (isCart && isLoading) {
+      return (
+        <div className="flex flex-col h-full bg-white items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-gray-300" />
+        </div>
+      );
+    }
+    
+    if (isCart && displayItems.length === 0) {
+      return (
+        <div className="flex flex-col h-full bg-white p-6 pt-10">
+          <h2 className="text-[22px] font-bold text-gray-800 mb-20">My Cart</h2>
+          <div className="flex flex-col items-center justify-center flex-1 opacity-50 pb-20">
+            <ShoppingBag className="w-16 h-16 text-gray-300 mb-4" />
+            <p className="text-sm font-medium text-gray-400">Your cart is empty</p>
+          </div>
+        </div>
+      );
+    }
 
     return (
       <div className="flex flex-col h-full bg-white">
@@ -126,9 +89,26 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
           {/* Subtle purple shadow glow effect on the left container side */}
           <div className="absolute top-0 bottom-0 left-2 w-[20px] bg-[#854cbc]/10 blur-xl pointer-events-none" />
 
-          {MOCK_ITEMS.map((item, idx) => (
+          {displayItems.map((item: any, idx: number) => {
+            const title = isCart ? (item.product?.name ?? item.productName ?? item.name ?? "Product") : item.title;
+            const price = isCart ? (item.product?.price ?? item.price ?? 3345.53) : item.price;
+            const originalPrice = isCart ? (item.product?.originalPrice ?? item.originalPrice ?? 5000.00) : item.originalPrice;
+            const discount = isCart ? (item.discount || "25% off") : item.discount;
+            const rating = isCart ? (item.rating || 4.5) : item.rating;
+            const quantity = isCart ? (item.quantity ?? 1) : item.quantity;
+            const isYukiziChoice = isCart ? (item.isYukiziChoice ?? (idx % 3 === 0)) : item.isYukiziChoice;
+            const imageRaw = isCart ? (item.product?.images?.[0] || item.imageUrl || item.image) : item.image;
+            const titleWords = title.trim().split(' ').filter(Boolean);
+            const initials = titleWords.length === 1 
+              ? title.trim().substring(0,2).toUpperCase() 
+              : (titleWords[0][0] + titleWords[titleWords.length - 1][0]).toUpperCase();
+            const image = (!imageRaw || imageRaw === '/products/pharma_bottle.png')
+              ? `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent(initials)}`
+              : imageRaw;
+
+            return (
             <div key={`${item.id}-${idx}`} className="bg-white rounded-[12px] border border-[#e2cbf5] p-2 flex gap-3 shadow-sm hover:shadow-md transition-shadow relative">
-              {item.isYukiziChoice && (
+              {isYukiziChoice && (
                 <div className="absolute top-0 left-2 px-2 py-[2px] rounded-b-md text-[8px] font-bold bg-[#854cbc] text-white z-20 pointer-events-none">
                   Yukizi Choice
                 </div>
@@ -136,10 +116,20 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
               
               {/* Left Image & Trash */}
               <div className="w-[85px] h-[85px] bg-[#f2f2f2] rounded-lg overflow-hidden relative flex-shrink-0 mt-1">
-                <img src={item.image} alt="Product" className="w-full h-full object-cover mix-blend-multiply" />
-                <button className="absolute bottom-1 left-1 w-7 h-7 flex items-center justify-center bg-orange-400 text-white rounded-[6px] hover:bg-orange-500 transition-colors shadow-sm">
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                <img src={image} alt="Product" className="w-full h-full object-cover mix-blend-multiply" />
+                {isCart && (
+                  <button 
+                    onClick={() => {
+                      removeItem.mutate(item.id, {
+                        onSuccess: () => toast('Item removed from bag', 'info'),
+                      });
+                    }}
+                    disabled={removeItem.isPending}
+                    className="absolute bottom-1 left-1 w-7 h-7 flex items-center justify-center bg-orange-400 text-white rounded-[6px] hover:bg-orange-500 transition-colors shadow-sm disabled:opacity-50"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
               </div>
 
               {/* Middle Info */}
@@ -150,14 +140,14 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                   </button>
                 )}
                 <h3 className="text-[11px] font-medium text-gray-600 truncate mb-0.5 mt-1">
-                  {item.title}
+                  {title}
                 </h3>
                 <div className="flex items-end gap-1.5 leading-none mb-1">
-                  <span className="text-[15px] font-medium text-gray-800">₹{item.price}</span>
-                  <span className="text-[9px] text-gray-400 line-through pb-0.5">₹{item.originalPrice}</span>
+                  <span className="text-[15px] font-medium text-gray-800">₹{price.toLocaleString('en-IN')}</span>
+                  <span className="text-[9px] text-gray-400 line-through pb-0.5">₹{originalPrice.toLocaleString('en-IN')}</span>
                 </div>
                 <span className="text-[9px] font-bold text-gray-800">
-                  {item.discount}
+                  {discount}
                 </span>
               </div>
 
@@ -174,11 +164,25 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                      <img src="/whislist icon.jpg" alt="network" className="w-[18px] h-[18px] object-contain cursor-pointer opacity-80" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                      
                      {/* Quantity pill */}
-                     {item.quantity !== null && (
+                     {quantity !== null && (
                        <div className="flex items-center bg-[#562996] text-white rounded-md overflow-hidden h-5 shadow-sm">
-                          <button className="px-1.5 h-full flex items-center justify-center hover:bg-white/20 transition-colors text-[10px]">-</button>
-                          <span className="text-[10px] font-bold px-0.5 tracking-tighter">{String(item.quantity).padStart(2, '0')}</span>
-                          <button className="px-1.5 h-full flex items-center justify-center hover:bg-white/20 transition-colors text-[10px]">+</button>
+                          <button 
+                            onClick={() => {
+                              if (quantity > 1) {
+                                updateItem.mutate({ itemId: item.id, quantity: quantity - 1 });
+                              }
+                            }}
+                            disabled={updateItem.isPending}
+                            className="px-1.5 h-full flex items-center justify-center hover:bg-white/20 transition-colors text-[10px]"
+                          >-</button>
+                          <span className="text-[10px] font-bold px-0.5 tracking-tighter">{String(quantity).padStart(2, '0')}</span>
+                          <button 
+                            onClick={() => {
+                              updateItem.mutate({ itemId: item.id, quantity: quantity + 1 });
+                            }}
+                            disabled={updateItem.isPending}
+                            className="px-1.5 h-full flex items-center justify-center hover:bg-white/20 transition-colors text-[10px]"
+                          >+</button>
                        </div>
                      )}
                    </div>
@@ -187,7 +191,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                 <div className="flex flex-col items-end gap-0.5">
                   <div className="flex items-center gap-0.5">
                     <Star className="w-3 h-3 fill-[#854cbc] text-[#854cbc]" />
-                    <span className="text-[11px] font-bold text-gray-700">{item.rating}</span>
+                    <span className="text-[11px] font-bold text-gray-700">{rating}</span>
                   </div>
                   <div className="flex items-center gap-0.5 bg-gray-100 rounded px-1">
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-gray-600">
@@ -201,7 +205,8 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     );

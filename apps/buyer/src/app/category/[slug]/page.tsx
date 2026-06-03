@@ -21,7 +21,7 @@ export default async function CategoryPage({ params }: { params: { slug: string 
     console.error("Failed to fetch categories on server", error);
   }
 
-  let initialProducts = [];
+  let initialProducts: any[] = [];
   try {
     const res = await getProducts({ categoryId, limit: 100 });
     if (res && res.data && Array.isArray(res.data)) {

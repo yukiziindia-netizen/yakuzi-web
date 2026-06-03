@@ -8,7 +8,7 @@ export default async function HomePage({
 }: {
   searchParams: { search?: string; category?: string };
 }) {
-  let initialProducts = [];
+  let initialProducts: any[] = [];
   try {
     const search = searchParams?.search;
     const res = await getProducts({ limit: 100, search });

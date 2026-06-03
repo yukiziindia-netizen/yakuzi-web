@@ -31,7 +31,10 @@ import {
   AudioLines,
   Send,
   LayoutGrid,
+
 } from "lucide-react";
+
+
 
 import CategoryMegaMenu from "@/components/landing/CategoryMegaMenu";
 import CartDrawer from "@/components/cart/CartDrawer";
@@ -177,16 +180,16 @@ export default function Navbar({
             
             {/* DESKTOP VIEW (sm and up) */}
             <div className="hidden sm:flex items-center w-full justify-between">
-              <div className="flex items-center">
-                <Link href="/" className="font-black text-xl sm:text-3xl tracking-tighter uppercase shrink-0 text-white" style={{ fontFamily: 'Impact, Arial Black, sans-serif' }}>
+              <div className="flex items-center h-full">
+                <Link href="/" className="font-black text-xl md:text-2xl tracking-tighter uppercase shrink-0 text-white" style={{ fontFamily: 'Impact, Arial Black, sans-serif' }}>
                   YUKIZI
                 </Link>
                 
-                <div className="flex items-center gap-2 md:gap-3 ml-4 md:ml-6 lg:ml-8">
+                <div className="flex items-center gap-4 ml-6 md:ml-8 lg:ml-10">
                   {isAuthenticated ? (
                     <div className="relative" ref={profileDropdownRef}>
-                      <button onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)} className="p-1 text-white hover:text-sky-300 transition-colors">
-                        <User className="w-5 h-5 sm:w-6 sm:h-6" />
+                      <button onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)} className="text-white hover:text-purple-300 transition-colors flex items-center">
+                        <User className="w-5 h-5 md:w-6 md:h-6 stroke-[2]" />
                       </button>
                       <AnimatePresence>
                         {isProfileDropdownOpen && (
@@ -214,24 +217,26 @@ export default function Navbar({
                       </AnimatePresence>
                     </div>
                   ) : (
-                    <button onClick={onLoginClick} className="p-1 text-white hover:text-sky-300 transition-colors flex items-center gap-2">
-                      <User className="w-5 h-5 sm:w-6 sm:h-6" />
+                    <button onClick={onLoginClick} className="text-white hover:text-purple-300 transition-colors flex items-center">
+                      <User className="w-5 h-5 md:w-6 md:h-6 stroke-[2]" />
                     </button>
                   )}
 
                   {/* Vertical Divider between User and Bell */}
-                  <div className="h-5 w-px bg-white/30 mx-1 md:mx-2" />
+                  <div className="h-5 w-[1px] bg-white/20 mx-1" />
 
-                  <button onClick={() => setIsNotificationsOpen(true)} className="relative p-1 hover:text-sky-300 transition-colors text-white">
-                    <Bell className="w-5 h-5 sm:w-6 sm:h-6" />
+                  <button onClick={() => setIsNotificationsOpen(true)} className="relative text-white hover:text-purple-300 transition-colors flex items-center">
+                    <Bell className="w-5 h-5 md:w-6 md:h-6 stroke-[2]" />
                     {unreadNotificationCount > 0 && (
-                      <span className="absolute top-0 right-0 w-2 h-2 sm:w-2.5 sm:h-2.5 bg-[#f7941d] rounded-full" />
+                      <span className="absolute -top-1 -right-1 w-3.5 h-3.5 md:w-4 md:h-4 bg-[#f7941d] text-white text-[9px] md:text-[10px] font-bold rounded-full flex items-center justify-center border border-[#562996]">
+                        {unreadNotificationCount}
+                      </span>
                     )}
                   </button>
                 </div>
               </div>
 
-              <div className="relative flex items-center justify-end w-[150px] md:w-[180px] lg:w-[220px] xl:w-[240px]">
+              <div className="relative flex items-center justify-end w-[160px] md:w-[200px] lg:w-[220px]">
                 <input
                   type="text"
                   placeholder="Search"
@@ -240,9 +245,9 @@ export default function Navbar({
                     setIsSearchChatOpen(!isSearchChatOpen);
                     setIsChatOpen(false);
                   }}
-                  className="w-full h-[32px] md:h-[36px] bg-white rounded-md text-[#562996] text-[13px] md:text-[14px] pl-3 md:pl-4 pr-10 focus:outline-none cursor-pointer placeholder-[#562996]/60 shadow-sm font-medium"
+                  className="w-full h-8 md:h-[34px] bg-white rounded-md text-gray-800 text-[13px] md:text-[14px] pl-3 md:pl-4 pr-10 focus:outline-none cursor-pointer placeholder-gray-400 shadow-sm font-medium"
                 />
-                <Search className="w-4 h-4 md:w-[16px] md:h-[16px] text-[#562996]/60 absolute right-3 md:right-4 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2.5]" />
+                <Search className="w-4 h-4 text-gray-400 absolute right-3 md:right-4 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2]" />
               </div>
             </div>
 
@@ -296,38 +301,48 @@ export default function Navbar({
             <Image src="/yukizi.jpg" alt="Mascot" width={96} height={96} className="w-full h-full object-cover rounded-xl sm:rounded-2xl md:rounded-[1.5rem]" />
           </div>
 
-          {/* Right Segment: Cart, Wishlist, Filter, Menu */}
-          <div className="flex items-center justify-between bg-white sm:bg-[#562996] rounded-xl sm:rounded-xl md:rounded-xl px-4 xs:px-6 sm:px-8 md:px-10 py-2 sm:py-3 md:py-3.5 shadow-md sm:shadow-2xl text-[#562996] sm:text-white shrink-0 flex-1 max-w-[480px] z-10 overflow-hidden min-w-0">
 
-            <button onClick={() => setSidebarView("wishlist")} className="relative p-0.5 sm:p-1 hover:text-sky-300 transition-colors">
-              <Bookmark className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6" />
+
+          {/* Right Segment: Cart, Wishlist, Filter, Menu */}
+          <div className="flex items-center justify-between bg-white sm:bg-[#562996] rounded-xl sm:rounded-xl md:rounded-xl px-4 xs:px-6 sm:px-8 md:px-12 lg:px-16 py-2 sm:py-3 md:py-3.5 shadow-md sm:shadow-2xl text-[#562996] sm:text-white shrink-0 flex-1 max-w-[480px] z-10 overflow-hidden min-w-0">
+
+            <button onClick={() => setSidebarView("wishlist")} className="relative hover:text-purple-300 transition-colors">
+              <svg xmlns="http://w3.org" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7221c4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M4 4h16v16H4l4-8Z" />
+</svg>
+
+              {wishlistCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 sm:w-4 sm:h-4 bg-[#f7941d] text-white text-[9px] sm:text-[10px] font-bold rounded-full flex items-center justify-center border border-white sm:border-[#562996]">
+                  {wishlistCount}
+                </span>
+              )}
             </button>
 
-            <button onClick={() => setSidebarView("cart")} className="relative p-0.5 sm:p-1 hover:text-sky-300 transition-colors">
-              <ShoppingCart className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6" />
+            <button onClick={() => setSidebarView("cart")} className="relative hover:text-purple-300 transition-colors">
+              <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2]" />
               {cartData?.items && cartData.items.length > 0 && (
-                <span className="absolute -top-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-[#f7941d] text-white text-[8px] sm:text-[10px] font-bold rounded-full flex items-center justify-center border border-white sm:border-[#562996]">
+                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 sm:w-4 sm:h-4 bg-[#f7941d] text-white text-[9px] sm:text-[10px] font-bold rounded-full flex items-center justify-center border border-white sm:border-[#562996]">
                   {cartData.items.length}
                 </span>
               )}
             </button>
 
-            <button className="hidden sm:block p-0.5 sm:p-1 hover:text-sky-300 transition-colors">
-              <Package className="w-5 h-5 sm:w-6 sm:h-6" />
+            <button className="hidden sm:block hover:text-purple-300 transition-colors">
+              <Package className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2]" />
             </button>
 
             <button onClick={() => {
               setSidebarView("filters");
               onFilterClick?.();
-            }} className="p-0.5 sm:p-1 md:p-1.5 hover:text-sky-300 transition-colors">
-              <Filter className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" />
+            }} className="hover:text-purple-300 transition-colors">
+              <Filter className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2]" />
             </button>
 
-            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-0.5 sm:p-1 md:p-1.5 hover:text-sky-300 transition-colors">
+            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="hover:text-purple-300 transition-colors">
               {isMobileMenuOpen ? (
-                <X className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" />
+                <X className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2]" />
               ) : (
-                <Menu className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" />
+                <Menu className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2]" />
               )}
             </button>
           </div>

@@ -1,8 +1,9 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Trash2, Loader2, Star, ArrowUpRight, Plus, ShoppingBag } from 'lucide-react';
+import { X, Trash2, Loader2, Star, ArrowUpRight, Plus, RefreshCw } from 'lucide-react';
 import EmptyState from '@/components/shared/EmptyState';
+import WishlistIcon from '@/components/shared/WishlistIcon';
 import { useWishlist, useRemoveFromWishlist } from '@/hooks/useWishlist';
 import { useToast } from '@/components/shared/Toast';
 import { useAddToCart } from '@/hooks/useCart';
@@ -100,12 +101,13 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                 </div>
               ) : items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full gap-4 opacity-50 mt-10">
-                  <Bookmark className="w-16 h-16 text-gray-300" />
+                  <WishlistIcon className="w-16 h-16 text-gray-300" />
                   <p className="text-sm font-medium text-gray-400">Your saved items list is empty</p>
                 </div>
               ) : (
-                items.map((item: any, idx: number) => {
-                  const itemName = item.product?.name ?? item.productName ?? item.name ?? 'Product';
+                <AnimatePresence initial={false}>
+                  {items.map((item: any, idx: number) => {
+                    const itemName = item.product?.name ?? item.productName ?? item.name ?? 'Product';
                   const itemPrice = item.product?.price ?? item.price ?? 3345.53;
                   const itemOriginalPrice = item.product?.originalPrice ?? item.originalPrice ?? 5000.00;
                   const itemImageRaw = item.product?.images?.[0] || item.imageUrl || item.image;
@@ -142,7 +144,7 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                             onSuccess: () => toast('Removed from saved items', 'info'),
                           })}
                           disabled={removeFromWishlist.isPending}
-                          className="absolute bottom-0 left-0 bg-secondary text-white p-1 rounded-tr-lg hover:bg-secondary/90 transition-colors z-10 disabled:opacity-50"
+                          className="absolute bottom-0 left-0 bg-[#f7941d] text-white p-1 rounded-tr-lg hover:bg-orange-500 transition-colors z-10 disabled:opacity-50"
                         >
                           <Trash2 className="w-[14px] h-[14px]" />
                         </button>
@@ -171,34 +173,33 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                         {/* Top Right Actions */}
                         <div className="absolute top-2 right-2 flex flex-col items-end gap-1.5">
                           {quantity > 0 ? (
-                            <div className="flex items-center bg-[#562996] rounded-full text-white overflow-hidden shadow-sm h-5">
-                               <button 
-                                 onClick={() => handleAddToCart(item)}
-                                 className="px-1.5 h-full hover:bg-black/20 flex items-center justify-center transition-colors"
-                               >
-                                 <ShoppingBag className="w-2.5 h-2.5" />
-                               </button>
-                               <div className="w-px h-full bg-white/20" />
-                               <button className="px-1.5 h-full hover:bg-black/20 flex items-center justify-center font-bold text-[10px] transition-colors">-</button>
-                               <span className="text-[9px] font-black px-0.5 tracking-tighter">{quantity.toString().padStart(2, '0')}</span>
-                               <button className="px-1.5 h-full hover:bg-black/20 flex items-center justify-center font-bold text-[10px] transition-colors">+</button>
+                            <div className="flex items-center gap-1.5">
+                              <button className="text-gray-400 hover:text-gray-600 transition-colors">
+                                 <RefreshCw className="w-3.5 h-3.5" />
+                              </button>
+                              <div className="flex items-center bg-[#562996] rounded-full text-white shadow-sm h-[22px] px-1">
+                                 <button className="px-1.5 h-full hover:bg-black/20 flex items-center justify-center font-bold text-[11px] transition-colors">-</button>
+                                 <span className="text-[10px] font-black px-0.5 tracking-tighter">{quantity.toString().padStart(2, '0')}</span>
+                                 <button className="px-1.5 h-full hover:bg-black/20 flex items-center justify-center font-bold text-[11px] transition-colors">+</button>
+                              </div>
                             </div>
                           ) : (
                             <button 
                               onClick={() => handleAddToCart(item)}
-                              className="text-secondary hover:text-secondary/80 mt-1 mr-1"
+                              className="text-[#f7941d]/50 hover:text-[#f7941d] mt-1 mr-1 transition-colors"
                             >
                               <Plus className="w-4 h-4" />
                             </button>
                           )}
-                          <button className="text-gray-400 hover:text-gray-600 mr-1">
+                          <button className="text-gray-400 hover:text-gray-600 mr-1 mt-0.5">
                             <ArrowUpRight className="w-4 h-4 bg-gray-100 rounded-full p-0.5" />
                           </button>
                         </div>
                       </div>
                     </motion.div>
                   );
-                })
+                })}
+                </AnimatePresence>
               )}
             </div>
           </motion.div>

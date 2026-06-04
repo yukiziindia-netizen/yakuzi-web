@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Share2, Plus, Minus, Star, Truck, Loader2, ArrowUpRight } from 'lucide-react';
 import { useState } from 'react';
 import { ShareButton } from './ShareButton';
+import WishlistIcon from '@/components/shared/WishlistIcon';
 
 interface ProductCardProps {
   name: string;
@@ -114,11 +115,9 @@ export default function ProductCard({
         type="button"
         onPointerDown={(e) => e.stopPropagation()}
         onClick={handleBookmarkClick}
-        className="absolute right-[-1px] top-[38%] -translate-y-1/2 z-20 outline-none w-[26px] sm:w-[34px] h-[26px] sm:h-[30px] flex items-center justify-end hover:scale-105 transition-transform group/ribbon"
+        className="absolute right-3 top-4 z-20 outline-none w-[32px] h-[32px] bg-white shadow-sm border border-gray-100 rounded-full flex items-center justify-center hover:scale-105 transition-transform"
       >
-        <svg viewBox="0 0 24 36" preserveAspectRatio="none" className="w-[80%] h-[70%] drop-shadow-sm transition-colors" fill={isBookmarked ? "hsl(var(--primary))" : "white"} stroke={isBookmarked ? "hsl(var(--primary))" : "#cbd5e1"} strokeWidth="1.5">
-          <path d="M24 0 H0 L8 18 L0 36 H24 Z" strokeLinejoin="round" />
-        </svg>
+        <WishlistIcon isFilled={isBookmarked} className="w-[18px] h-[18px] text-[#8b5cf6]" />
       </button>
 
       <div className="relative w-full aspect-[4/5] mb-2 sm:mb-4 mt-6 overflow-hidden bg-white flex justify-center items-center">

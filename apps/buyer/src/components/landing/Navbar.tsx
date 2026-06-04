@@ -42,6 +42,7 @@ import WishlistDrawer from "@/components/wishlist/WishlistDrawer";
 import NotificationDrawer from "@/components/notifications/NotificationDrawer";
 import SearchBar from "@/components/shared/SearchBar";
 import { SidebarSheet, type SidebarView } from "@/components/landing/SidebarSheet";
+import WishlistIcon from "@/components/shared/WishlistIcon";
 
 import { useAuth, type Category, sendChatMessage, type ChatMessage } from "@yukizi/api-client";
 import { useCart } from "@/hooks/useCart";
@@ -306,11 +307,8 @@ export default function Navbar({
           {/* Right Segment: Cart, Wishlist, Filter, Menu */}
           <div className="flex items-center justify-between bg-white sm:bg-[#562996] rounded-xl sm:rounded-xl md:rounded-xl px-4 xs:px-6 sm:px-8 md:px-12 lg:px-16 py-2 sm:py-3 md:py-3.5 shadow-md sm:shadow-2xl text-[#562996] sm:text-white shrink-0 flex-1 max-w-[480px] z-10 overflow-hidden min-w-0">
 
-            <button onClick={() => setSidebarView("wishlist")} className="relative hover:text-purple-300 transition-colors">
-              <svg xmlns="http://w3.org" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7221c4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M4 4h16v16H4l4-8Z" />
-</svg>
-
+            <button onClick={() => setIsWishlistOpen(true)} className="relative hover:text-purple-300 transition-colors">
+              <WishlistIcon className="w-5 h-5 sm:w-6 sm:h-6 text-[#8b5cf6] sm:text-white" />
               {wishlistCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-3.5 h-3.5 sm:w-4 sm:h-4 bg-[#f7941d] text-white text-[9px] sm:text-[10px] font-bold rounded-full flex items-center justify-center border border-white sm:border-[#562996]">
                   {wishlistCount}
@@ -318,7 +316,7 @@ export default function Navbar({
               )}
             </button>
 
-            <button onClick={() => setSidebarView("cart")} className="relative hover:text-purple-300 transition-colors">
+            <button onClick={() => setIsCartOpen(true)} className="relative hover:text-purple-300 transition-colors">
               <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2]" />
               {cartData?.items && cartData.items.length > 0 && (
                 <span className="absolute -top-1 -right-1 w-3.5 h-3.5 sm:w-4 sm:h-4 bg-[#f7941d] text-white text-[9px] sm:text-[10px] font-bold rounded-full flex items-center justify-center border border-white sm:border-[#562996]">

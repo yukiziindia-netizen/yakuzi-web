@@ -10,6 +10,7 @@ import { useToast } from '@/components/shared/Toast';
 import { ShareButton } from '@/components/shared/ShareButton';
 import { NotifyStockAlertModal } from '@/components/shared/NotifyStockAlertModal';
 import { CustomOrderModal } from '@/components/shared/CustomOrderModal';
+import WishlistIcon from '@/components/shared/WishlistIcon';
 import { useAddToCart, useCart } from '@/hooks/useCart';
 import { useProductById } from '@/hooks/useProducts';
 import { calculatePricing, getSellingPrice, getEffectiveDiscountPercent, generateProductSlug } from '@yukizi/utils';
@@ -86,16 +87,9 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                 {/* Ribbon Bookmark */}
                 <button
                   onClick={() => setIsBookmarked(!isBookmarked)}
-                  className="absolute right-0 top-8 transition-all hover:opacity-80"
+                  className="absolute right-4 top-16 md:top-8 md:right-20 z-20 w-[40px] h-[40px] bg-white shadow-md border border-gray-100 rounded-full flex items-center justify-center hover:scale-105 transition-transform"
                 >
-                  <svg width="60" height="42" viewBox="0 0 60 42">
-                    <path 
-                      d="M 0 0 L 60 0 L 60 42 L 0 42 L 18 21 Z" 
-                      fill={isBookmarked ? "#10b981" : "#f3f4f6"} 
-                      stroke={isBookmarked ? "#059669" : "#e5e7eb"}
-                      strokeWidth="2"
-                    />
-                  </svg>
+                  <WishlistIcon isFilled={isBookmarked} className="w-[20px] h-[20px] text-[#8b5cf6]" />
                 </button>
                 
                 <button

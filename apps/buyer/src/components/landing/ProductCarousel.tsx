@@ -1,11 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Loader2, Share2, Plus, ArrowUpRight, Star, Truck } from 'lucide-react';
+import { Loader2, Share2, Plus, ArrowUpRight, Star, Truck, Bookmark } from 'lucide-react';
 import Link from 'next/link';
+import { useToast } from '@/components/shared/Toast';
 import { getProducts } from '@yukizi/api-client';
 import { generateProductSlug } from '@yukizi/utils';
 import QuickReviewModal from './QuickReviewModal';
+import { useAddToCart } from '@/hooks/useCart';
+import { useAddToWishlist, useWishlist } from '@/hooks/useWishlist';
+import WishlistIcon from '@/components/shared/WishlistIcon';
 
 interface ProductCarouselProps {
   reverse?: boolean;
@@ -15,6 +19,11 @@ interface ProductCarouselProps {
 }
 
 function GridProductCard({ product, index, onOpenReview }: { product: any; index: number; onOpenReview: (p: any) => void }) {
+  const { toast } = useToast();
+  const addToCart = useAddToCart();
+  const addToWishlist = useAddToWishlist();
+  const { data: wishlistData } = useWishlist();
+  
   const isYukiziChoice = index % 3 === 0;
   const isBestSeller = index % 3 === 1;
   const hasAd = isYukiziChoice || isBestSeller;
@@ -30,6 +39,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
   const fallbackImage = `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent(getInitials(productName))}`;
   
   const imageUrl = product.images?.[0]?.url || product.images?.[0] || product.image || fallbackImage;
+  const isBookmarked = wishlistData?.items?.some((item: any) => item.id === product.id || item.productId === product.id);
 
   return (
     <div className="relative mt-3 group">
@@ -42,16 +52,49 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
           <button className="text-gray-400 hover:text-gray-600 transition-colors z-10" onClick={(e) => e.preventDefault()}>
              <Share2 size={16} strokeWidth={2} />
           </button>
-          <button className="text-orange-400 hover:text-orange-500 transition-colors z-10" onClick={(e) => e.preventDefault()}>
-             <Plus size={20} strokeWidth={2.5} />
+          <button className="text-orange-400 hover:text-orange-500 transition-colors z-10 disabled:opacity-50" disabled={addToCart.isPending} onClick={async (e) => {
+             e.preventDefault();
+             await addToCart.mutateAsync({
+               productId: product.id || 'prod-' + index,
+               name: productName,
+               price: product.price || 3345.53,
+               image: imageUrl,
+               product
+             });
+             toast('Added to cart', 'success');
+          }}>
+             {addToCart.isPending ? <Loader2 size={20} className="animate-spin" /> : <Plus size={20} strokeWidth={2.5} />}
           </button>
         </div>
 
-        {/* Right Edge Ribbon */}
-        <div 
-          className={`absolute top-[45%] right-0 w-3 h-5 ${isBestSeller ? 'bg-[#854cbc]' : 'bg-[#f4efe9]'} z-10`} 
-          style={{ clipPath: 'polygon(100% 0, 100% 100%, 0 100%, 25% 50%, 0 0)' }} 
-        />
+        {/* Wishlist Button */}
+        <button 
+          className="absolute top-[45%] right-[-1px] z-20 transition-all duration-300 disabled:opacity-50 hover:-translate-x-1"
+          disabled={addToWishlist.isPending}
+          onClick={async (e) => {
+             e.preventDefault();
+             await addToWishlist.mutateAsync({
+               ...product,
+               id: product.id || 'prod-' + index,
+               name: productName,
+               price: product.price || 3345.53,
+               image: imageUrl
+             });
+             toast(isBookmarked ? 'Removed from wishlist' : 'Added to wishlist', 'success');
+          }}
+        >
+          {addToWishlist.isPending ? (
+            <div className="bg-white rounded-l-md border border-r-0 border-gray-200 p-1 shadow-sm">
+              <Loader2 size={16} className="animate-spin text-[#8b5cf6]" />
+            </div>
+          ) : (
+            <Bookmark 
+              size={28} 
+              strokeWidth={1.5}
+              className={`-rotate-90 transition-colors duration-300 ${isBookmarked ? 'fill-[#854cbc] text-[#854cbc]' : 'fill-[#fbf9f4] text-[#e2d5c1]'}`} 
+            />
+          )}
+        </button>
 
         {/* Image Container */}
         <Link href={`/products/${generateProductSlug(productName, product.id || 'prod-' + index)}`} className="w-full h-[120px] sm:h-[140px] flex items-center justify-center mb-4 mt-1 relative group-hover:scale-105 transition-transform duration-500 block z-10">

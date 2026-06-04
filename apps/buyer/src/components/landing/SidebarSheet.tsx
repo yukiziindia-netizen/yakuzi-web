@@ -3,10 +3,11 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  X, Trash2, Bookmark, ShoppingCart, Star, 
+  X, Trash2, ShoppingCart, Star, 
   ChevronDown, ChevronUp, Check,
   ShoppingBag, Loader2
 } from "lucide-react";
+import WishlistIcon from "@/components/shared/WishlistIcon";
 import { useCart, useUpdateCartItem, useRemoveCartItem } from "@/hooks/useCart";
 import { useToast } from "@/components/shared/Toast";
 
@@ -136,7 +137,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
               <div className="flex-1 flex flex-col justify-center min-w-0 pr-10">
                 {isCart && (
                   <button className="flex items-center gap-1 bg-[#562996] text-white px-2 py-0.5 rounded text-[9px] font-bold w-fit mb-1 shadow-sm mt-1">
-                    Wishlist <Bookmark className="w-2.5 h-2.5" />
+                    Wishlist <WishlistIcon className="w-2.5 h-2.5 text-white" />
                   </button>
                 )}
                 <h3 className="text-[11px] font-medium text-gray-600 truncate mb-0.5 mt-1">

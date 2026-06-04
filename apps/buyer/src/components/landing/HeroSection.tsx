@@ -2,15 +2,16 @@
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
-import { Faster_One } from 'next/font/google';
-
-const fasterOne = Faster_One({ subsets: ['latin'], weight: '400' });
+import { useCategories } from "@/hooks/useProducts";
 
 interface HeroSectionProps {
   title?: string;
 }
 
 export default function HeroSection({ title = 'YUKiZi' }: HeroSectionProps) {
+  const { data: categoriesData } = useCategories();
+  const categories = Array.isArray(categoriesData) ? categoriesData : (categoriesData as any)?.data ?? [];
+
   return (
     <div className="w-full bg-white flex flex-col relative z-10">
 
@@ -63,31 +64,27 @@ export default function HeroSection({ title = 'YUKiZi' }: HeroSectionProps) {
           
           {/* Text-based Logo Replica */}
           <h1 
-            className={`text-5xl xs:text-6xl md:text-[6rem] font-black tracking-[-0.08em] mb-4 bg-gradient-to-b from-[#a459d1] to-[#723b9e] bg-clip-text text-transparent leading-none text-center ${fasterOne.className}`}
+            className="text-5xl xs:text-6xl md:text-[6rem] font-black tracking-tighter mb-4 bg-gradient-to-b from-[#a955e8] to-[#6a2ba8] bg-clip-text text-transparent leading-none text-center drop-shadow-sm"
+            style={{ fontFamily: '"Faster", Impact, sans-serif', letterSpacing: '-0.05em' }}
           >
             {title}
           </h1>
 
           <div className="flex flex-wrap justify-center gap-x-3 gap-y-2 text-[13.5px] text-gray-500 text-center font-medium max-w-[380px] mb-4">
-            <span className="cursor-pointer hover:text-gray-800 transition-colors">Comic stores</span>
-            <span className="cursor-pointer hover:text-gray-800 transition-colors">Manga</span>
-            <span className="bg-[#a379cf] text-white px-2.5 py-0.5 rounded-full cursor-pointer hover:bg-[#854cbc] transition-colors shadow-sm">Merch</span>
-            <span className="cursor-pointer hover:text-gray-800 transition-colors">Comic books</span>
-
-            <span className="cursor-pointer hover:text-gray-800 transition-colors">Events</span>
-            <span className="bg-[#a379cf] text-white px-2.5 py-0.5 rounded-full cursor-pointer hover:bg-[#854cbc] transition-colors shadow-sm">Cosplay</span>
-            <span className="cursor-pointer hover:text-gray-800 transition-colors">Bookstores</span>
-            <span className="cursor-pointer hover:text-gray-800 transition-colors">MangStores</span>
-
-            <span className="cursor-pointer hover:text-gray-800 transition-colors">Animation</span>
-            <span className="cursor-pointer hover:text-gray-800 transition-colors">Art institutes</span>
-            <span className="cursor-pointer hover:text-gray-800 transition-colors">posters</span>
-            <span className="cursor-pointer hover:text-gray-800 transition-colors">Others</span>
-
-            <span className="cursor-pointer hover:text-gray-800 transition-colors">Comic stores</span>
-            <span className="cursor-pointer hover:text-gray-800 transition-colors">Manga</span>
-            <span className="cursor-pointer hover:text-gray-800 transition-colors">Merch</span>
-            <span className="cursor-pointer hover:text-gray-800 transition-colors">Comic books</span>
+            {categories.map((category: any, index: number) => {
+              const isHighlighted = index % 4 === 2;
+              return (
+                <span 
+                  key={category.id || index} 
+                  className={isHighlighted ? "bg-[#a379cf] text-white px-2.5 py-0.5 rounded-full cursor-pointer hover:bg-[#854cbc] transition-colors shadow-sm" : "cursor-pointer hover:text-gray-800 transition-colors"}
+                >
+                  {category.name}
+                </span>
+              );
+            })}
+            {categories.length === 0 && (
+               <span className="text-gray-400 italic">Loading categories...</span>
+            )}
           </div>
         </div>
       </div>

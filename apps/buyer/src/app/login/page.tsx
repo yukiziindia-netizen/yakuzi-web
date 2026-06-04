@@ -1,16 +1,18 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { User, Lock, Eye, EyeOff, Loader2, Phone, KeyRound } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@yukizi/api-client';
 import { useToast } from '@/components/shared/Toast';
+import ForgotPasswordFlow from './ForgotPasswordFlow';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isOtpMode, setIsOtpMode] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
@@ -114,7 +116,7 @@ export default function LoginPage() {
             </div>
 
             <div className="flex justify-center items-center text-[13px] md:text-sm mt-5 text-[#d1d5db] font-semibold tracking-wide">
-              <button type="button" className="underline underline-offset-2 hover:text-white transition-colors mr-1">Forgot Password ?</button>
+              <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowForgotPassword(true); }} className="underline underline-offset-2 hover:text-white transition-colors mr-1">Forgot Password ?</button>
               <span className="opacity-90">Login through </span>
               <button type="button" onClick={() => setIsOtpMode(true)} className="underline underline-offset-2 ml-1 hover:text-white transition-colors">OTP</button>
             </div>
@@ -222,6 +224,10 @@ export default function LoginPage() {
         </div>
 
       </div>
+
+      {showForgotPassword && (
+        <ForgotPasswordFlow onClose={() => setShowForgotPassword(false)} />
+      )}
     </main>
   );
 }

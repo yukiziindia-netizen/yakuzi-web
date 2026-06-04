@@ -1,5 +1,5 @@
 import HomeNavbar from '@/components/landing/HomeNavbar';
-import HeroSection from '@/components/landing/HeroSection';
+import CategoryBanner from '@/components/landing/CategoryBanner';
 import ProductCarousel from '@/components/landing/ProductCarousel';
 import { getCategories, getProducts } from '@yukizi/api-client';
 
@@ -21,7 +21,7 @@ export default async function CategoryPage({ params }: { params: { slug: string 
     console.error("Failed to fetch categories on server", error);
   }
 
-  let initialProducts = [];
+  let initialProducts: any[] = [];
   try {
     const res = await getProducts({ categoryId, limit: 100 });
     if (res && res.data && Array.isArray(res.data)) {
@@ -38,7 +38,7 @@ export default async function CategoryPage({ params }: { params: { slug: string 
       <div className="w-full max-w-[1600px] mx-auto bg-white overflow-hidden flex flex-col relative min-h-screen">
         <section className="flex-1 flex flex-col w-full">
           <div className="w-full flex-shrink-0 flex flex-col">
-            <HeroSection title={categoryName} />
+            <CategoryBanner title={categoryName} />
           </div>
           <div className="flex-1 min-h-[300px] overflow-hidden bg-transparent mt-4 sm:mt-6">
             <ProductCarousel categoryId={categoryId} initialProducts={initialProducts} />

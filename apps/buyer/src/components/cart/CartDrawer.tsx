@@ -1,9 +1,13 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Trash2, Loader2, Star, ArrowUpRight, Bookmark } from 'lucide-react';
-import { useCart, useUpdateCartItem, useRemoveCartItem, useSyncCart } from '@/hooks/useCart';
+import { X, Trash2, Loader2, Star, ArrowUpRight, Bookmark, ShoppingBag } from 'lucide-react';
+import WishlistIcon from '@/components/shared/WishlistIcon';
+import { useCart, useUpdateCartItem, useRemoveCartItem, useSyncCart, useClearCart } from '@/hooks/useCart';
 import { usePlatformConfig } from '@/hooks/usePlatformConfig';
+import { useCreateOrder } from '@/hooks/useOrders';
+import { useBuyerProfile } from '@/hooks/useBuyerProfile';
+import { useAddToWishlist } from '@/hooks/useWishlist';
 import { useToast } from '@/components/shared/Toast';
 import { useAuth } from '@yukizi/api-client';
 import { useRouter } from 'next/navigation';
@@ -17,8 +21,12 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
   const updateItem = useUpdateCartItem();
   const removeItem = useRemoveCartItem();
   const syncCart = useSyncCart();
+  const clearCart = useClearCart();
+  const createOrder = useCreateOrder();
+  const addToWishlist = useAddToWishlist();
+  const { data: profileData } = useBuyerProfile();
   const { toast } = useToast();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const router = useRouter();
 
   useScrollLock(isOpen);
@@ -31,8 +39,32 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
         if (items.length > 0) {
           await syncCart.mutateAsync();
         }
-        onClose();
-        router.push('/checkout');
+        
+        const profile = (profileData as any)?.data || profileData;
+        const address = {
+          name: profile?.legalName || profile?.name || user?.name || 'Customer',
+          phone: profile?.phone || user?.phone || user?.mobile || '0000000000',
+          address: profile?.address?.street1 || (typeof profile?.address === 'string' ? profile.address : 'Default Address'),
+          city: profile?.address?.city || profile?.city || 'Default City',
+          state: profile?.address?.state || profile?.state || 'Default State',
+          pincode: profile?.address?.pincode || profile?.pincode || '000000',
+        };
+
+        createOrder.mutate(address, {
+          onSuccess: (data: any) => {
+            const orderId = data?.data?.id || data?.id;
+            clearCart.mutate(undefined, {
+              onSuccess: () => {
+                toast('Order placed successfully!', 'success');
+                onClose();
+                router.push(`/orders/${orderId}?success=true`);
+              }
+            });
+          },
+          onError: (error: any) => {
+            toast(error?.message || 'Failed to place order', 'error');
+          }
+        });
       } catch (e: any) {
         toast(e.message || 'Failed to sync bag with backend', 'error');
       }
@@ -105,8 +137,9 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                   <p className="text-sm font-medium text-gray-400">Your cart is empty</p>
                 </div>
               ) : (
-                items.map((item: any, idx: number) => {
-                  const itemName = item.product?.name ?? item.productName ?? item.name ?? 'Product';
+                <AnimatePresence initial={false}>
+                  {items.map((item: any, idx: number) => {
+                    const itemName = item.product?.name ?? item.productName ?? item.name ?? 'Product';
                   const itemPrice = item.product?.price ?? item.price ?? 3345.53;
                   const itemOriginalPrice = item.product?.originalPrice ?? item.originalPrice ?? 5000.00;
                   const itemImageRaw = item.product?.images?.[0] || item.imageUrl || item.image;
@@ -139,7 +172,7 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                       <div className="w-[72px] h-[72px] bg-[#f8f5fd] rounded-xl flex items-center justify-center relative flex-shrink-0 mt-3 overflow-hidden">
                         <img src={itemImage} alt={itemName} className="w-12 h-12 object-contain mix-blend-multiply" />
                         <button 
-                          onMouseDown={(e) => {
+                          onClick={(e) => {
                             e.preventDefault();
                             removeItem.mutate(item.id, {
                               onSuccess: () => toast('Item removed from bag', 'info'),
@@ -156,17 +189,31 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                       <div className="flex-1 min-w-0 pr-1 mt-1 relative">
                         {/* Wishlist Button Badge */}
                         <div className="mb-1.5 inline-block">
-                          <button className="flex items-center gap-1 bg-[#562996] text-white px-2 py-[3px] rounded hover:bg-[#432075] transition-colors shadow-sm">
-                            <span className="text-[8px] font-bold tracking-wider">Wishlist</span>
-                            <Bookmark className="w-[10px] h-[10px] stroke-[3]" />
+                          <button 
+                            onClick={async (e) => {
+                              e.preventDefault();
+                              await addToWishlist.mutateAsync({
+                                ...item,
+                                id: item.product?.id || item.productId || item.id,
+                                name: itemName,
+                                price: itemPrice,
+                                originalPrice: itemOriginalPrice,
+                                image: itemImage,
+                              });
+                              toast('Added to wishlist', 'success');
+                            }}
+                            className="flex items-center gap-1 bg-[#562996] text-white px-2 py-[3px] rounded hover:bg-[#432075] transition-colors shadow-sm"
+                          >
+                            <span className="text-[10px] font-bold tracking-wider">Wishlist1</span>
+                            <Bookmark className="w-3 h-3 text-white" />
                           </button>
                         </div>
 
                         <h3 className="text-[11px] font-bold text-gray-800 leading-snug truncate pr-6">{itemName}</h3>
                         
                         <div className="flex items-center gap-1.5 mb-1 mt-0.5">
-                          <span className="text-[13px] font-black text-gray-900">₹{itemPrice.toLocaleString('en-IN')}</span>
-                          <span className="text-[9px] font-bold text-gray-400 line-through">₹{itemOriginalPrice.toLocaleString('en-IN')}</span>
+                          <span className="text-[13px] font-black text-gray-900">₹{(itemPrice * quantity).toLocaleString('en-IN')}</span>
+                          <span className="text-[9px] font-bold text-gray-400 line-through">₹{(itemOriginalPrice * quantity).toLocaleString('en-IN')}</span>
                         </div>
                         
                         <span className="text-[9px] font-bold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded inline-block">
@@ -222,18 +269,23 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                       </div>
                     </motion.div>
                   );
-                })
+                })}
+                </AnimatePresence>
               )}
             </div>
 
             {/* Footer */}
             <div className="px-6 pb-24 pt-4">
+              <div className="flex items-center justify-between mb-4 border-t border-gray-100 pt-4">
+                <span className="text-[13px] font-bold text-gray-400 uppercase tracking-widest">Subtotal</span>
+                <span className="text-xl font-black text-gray-900">₹{Math.round(cart?.total ?? 0).toLocaleString('en-IN')}</span>
+              </div>
               <button
                 onClick={handleCheckout}
-                disabled={syncCart.isPending}
-                className="w-full bg-[#8A4AF3] hover:bg-[#7a38e8] text-white rounded-xl py-3.5 text-sm font-bold shadow-[0_4px_14px_0_rgba(138,74,243,0.39)] transition-all flex justify-center items-center disabled:opacity-50"
+                disabled={syncCart.isPending || createOrder.isPending || items.length === 0}
+                className="w-full bg-[#854cbc] hover:bg-[#733ea3] text-white rounded-xl py-3.5 text-[15px] font-bold shadow-md transition-all flex justify-center items-center disabled:opacity-50"
               >
-                {syncCart.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Order Now'}
+                {(syncCart.isPending || createOrder.isPending) ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Order Now'}
               </button>
             </div>
           </motion.div>

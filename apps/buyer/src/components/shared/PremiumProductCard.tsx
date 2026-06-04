@@ -6,6 +6,7 @@ import { Plus, Minus, ArrowUpRight, Trash2, Share2, RotateCw } from 'lucide-reac
 import { useState, useRef, useEffect } from 'react';
 import { ShareButton } from './ShareButton';
 import { StockBasedButton } from './StockBasedButton';
+import WishlistIcon from '@/components/shared/WishlistIcon';
 
 interface PremiumProductCardProps {
   name: string;
@@ -319,11 +320,9 @@ export default function PremiumProductCard({
         type="button"
         onPointerDown={(e) => e.stopPropagation()}
         onClick={toggleBookmark}
-        className="absolute right-[-1px] top-[38%] -translate-y-1/2 z-20 outline-none w-[26px] sm:w-[34px] h-[26px] sm:h-[30px] flex items-center justify-end hover:scale-105 transition-transform group/ribbon"
+        className="absolute right-3 top-4 z-20 outline-none w-[32px] h-[32px] bg-white shadow-sm border border-gray-100 rounded-full flex items-center justify-center hover:scale-105 transition-transform"
       >
-        <svg viewBox="0 0 24 36" preserveAspectRatio="none" className="w-[80%] h-[70%] drop-shadow-sm transition-colors" fill={bookmarked ? "#1bd1d4" : "white"} stroke={bookmarked ? "#1bd1d4" : "#cbd5e1"} strokeWidth="1.5">
-          <path d="M24 0 H0 L8 18 L0 36 H24 Z" strokeLinejoin="round" />
-        </svg>
+        <WishlistIcon isFilled={bookmarked} className="w-[18px] h-[18px] text-[#8b5cf6]" />
       </button>
 
       {/* Info Section */}

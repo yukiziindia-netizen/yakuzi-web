@@ -1,4 +1,4 @@
-﻿import { apiClient } from "@/lib/apiClient";
+import { apiClient } from "@/lib/apiClient";
 import type { Product } from "@yukizi/utils";
 
 // ─── Dashboard ───────────────────────────────────────
@@ -514,6 +514,32 @@ export async function uploadSettlementProof(file: File) {
   const { data } = await apiClient.post<{ data: { url: string } }>("/storage/settlement-proof", formData);
 
   return data.data.url;
+}
+
+export async function uploadProductMedia(file: File) {
+  // 1. Get presigned URL from backend
+  const { data } = await apiClient.post<{ data: { presigned_url: string; key: string; cdn_url: string } }>("/storage/upload-url", {
+    filename: file.name,
+    content_type: file.type
+  });
+  
+  const { presigned_url, cdn_url } = data.data;
+
+  // 2. Upload directly to S3 using the presigned URL
+  const uploadResponse = await fetch(presigned_url, {
+    method: "PUT",
+    body: file,
+    headers: {
+      "Content-Type": file.type
+    }
+  });
+
+  if (!uploadResponse.ok) {
+    throw new Error("Failed to upload file to S3");
+  }
+
+  // 3. Return the CDN URL
+  return cdn_url;
 }
 
 // ─── Custom Orders ───────────────────────────────────

@@ -1,4 +1,4 @@
-﻿/** @type {import('next').NextConfig} */
+/** @type {import('next').NextConfig} */
 console.log('[NextConfig] API URL:', process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'NOT FOUND');
 const nextConfig = {
   eslint: { ignoreDuringBuilds: true },
@@ -22,8 +22,11 @@ const nextConfig = {
         protocol: "https",
         hostname: "cdn.worldvectorlogo.com",
       },
+      { protocol: 'https', hostname: '**' },
+      { protocol: 'http', hostname: 'localhost' },
     ],
   },
+  assetPrefix: process.env.NODE_ENV === 'production' ? process.env.CDN_URL || '' : '',
 };
 
 module.exports = nextConfig;

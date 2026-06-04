@@ -1,11 +1,11 @@
 "use client";
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Search, Plus, Pencil, Trash2, Upload, FileSpreadsheet, Download, Info } from "lucide-react";
+import { Search, Plus, Pencil, Trash2, Info } from "lucide-react";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { Button, Badge, Input, Modal, Textarea, Pagination } from "@/components/ui";
 import toast from "react-hot-toast";
-import { useSuggestions, useCreateSuggestion, useUpdateSuggestion, useDeleteSuggestion, useImportSuggestionsCsv } from "@/hooks/useAdmin";
+import { useSuggestions, useCreateSuggestion, useUpdateSuggestion, useDeleteSuggestion } from "@/hooks/useAdmin";
 
 export default function MasterCatalogPage() {
   const [search, setSearch] = useState("");
@@ -15,8 +15,6 @@ export default function MasterCatalogPage() {
   const createSuggestion = useCreateSuggestion();
   const updateSuggestion = useUpdateSuggestion();
   const deleteSuggestion = useDeleteSuggestion();
-  const importCsv = useImportSuggestionsCsv();
-  const fileRef = useRef<HTMLInputElement>(null);
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState({ name: "", manufacturer: "", composition: "", mrp: "", gstPercent: "", category: "", subCategory: "", description: "" });
@@ -81,71 +79,7 @@ export default function MasterCatalogPage() {
     }
   };
 
-  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    try {
-      const res = await importCsv.mutateAsync(file);
-      if (res?.success) {
-        const errorCount = res.errors?.length || 0;
-        if (errorCount > 0) {
-          toast.success(`Imported ${res.recordsProcessed} records with ${errorCount} errors.`, { duration: 6000 });
-        } else {
-          toast.success(`Master catalog imported successfully (${res.recordsProcessed} records)`);
-        }
-      } else {
-        toast.error(res?.errors?.[0] || "Import failed");
-      }
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to import CSV");
-    }
-    if (fileRef.current) fileRef.current.value = "";
-  };
 
-  const handleExport = async () => {
-    try {
-      toast.loading("Preparing CSV...", { id: "export-csv" });
-      // Fetch all suggestions (using a large limit to get the full catalog)
-      const res = await (require("@/api/admin.api").getSuggestions({ limit: 5000 }));
-      const allSuggestions = Array.isArray(res) ? res : (res?.data ?? []);
-      
-      if (allSuggestions.length === 0) {
-        toast.error("No catalog data to export", { id: "export-csv" });
-        return;
-      }
-
-      const headers = "name,manufacturer,chemicalComposition,mrp,gstPercent,category,subCategory,description\n";
-      const rows = allSuggestions.map((s: any) => {
-        const cat = s.category?.name || s.category || "";
-        const sub = s.subCategory?.name || s.subCategory || "";
-        const comp = s.composition || s.chemicalComposition || "";
-        const desc = (s.description || "").replace(/"/g, '""'); // Escape quotes
-        return `"${s.name}","${s.manufacturer}","${comp}",${s.mrp || 0},${s.gstPercent || 0},"${cat}","${sub}","${desc}"`;
-      }).join("\n");
-
-      const blob = new Blob([headers + rows], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `master_catalog_export_${new Date().toISOString().split('T')[0]}.csv`;
-      a.click();
-      
-      toast.success(`Exported ${allSuggestions.length} products`, { id: "export-csv" });
-    } catch (err) {
-      toast.error("Failed to export catalog", { id: "export-csv" });
-    }
-  };
-
-  const downloadSample = () => {
-    const headers = "name,manufacturer,chemicalComposition,mrp,gstPercent,category,subCategory,description\n";
-    const sample = 'Paracetamol 500mg,Cipla,Paracetamol,15.00,12,Tablets,Pain Relief,"Effective relief from fever and pain."\n';
-    const blob = new Blob([headers + sample], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'master_catalog_sample.csv';
-    a.click();
-  };
 
   if (isLoading) {
     return (
@@ -169,10 +103,6 @@ export default function MasterCatalogPage() {
             <p className="text-sm text-muted-foreground mt-0.5">Manage standardized products for seller lookup</p>
           </div>
           <div className="flex items-center gap-2">
-            <input ref={fileRef} type="file" accept=".csv" onChange={handleImport} className="hidden" />
-            <Button variant="outline" onClick={downloadSample} leftIcon={<Download className="h-4 w-4" />}>Sample CSV</Button>
-            <Button variant="outline" onClick={handleExport} leftIcon={<FileSpreadsheet className="h-4 w-4" />}>Export Full CSV</Button>
-            <Button variant="outline" onClick={() => fileRef.current?.click()} loading={importCsv.isPending} leftIcon={<Upload className="h-4 w-4" />}>Import CSV</Button>
             <Button onClick={openCreate} leftIcon={<Plus className="h-4 w-4" />}>Add Product</Button>
           </div>
         </div>
@@ -236,21 +166,6 @@ export default function MasterCatalogPage() {
           </div>
 
           <div className="space-y-6">
-            <div className="glass-card p-6 rounded-2xl border border-primary/20 bg-primary/5">
-              <div className="flex items-center gap-2 text-primary mb-3">
-                <Info className="h-5 w-5" />
-                <h3 className="font-semibold">Import Instructions</h3>
-              </div>
-              <ul className="text-sm space-y-2 text-muted-foreground list-disc pl-4">
-                <li>Download the sample CSV for correct formatting.</li>
-                <li><strong>MRP</strong> and <strong>GST Percent</strong> should be numbers.</li>
-                <li>Categories and subcategories must exist or will be matched by name.</li>
-                <li><strong>Description</strong> field is optional but highly recommended.</li>
-                <li>Duplicate products (by name + manufacturer) will be updated.</li>
-                <li>Large files (up to 5000 rows) are supported.</li>
-              </ul>
-            </div>
-            
             <div className="glass-card p-6 rounded-2xl border border-border/50">
               <h3 className="font-semibold mb-4 text-foreground">Catalog Stats</h3>
               <div className="grid grid-cols-2 gap-4">

@@ -1,4 +1,4 @@
-﻿/** @type {import('next').NextConfig} */
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: { ignoreDuringBuilds: true },
   transpilePackages: ["@yukizi/utils"],
@@ -14,5 +14,6 @@ const nextConfig = {
       { source: '/api/:path*', destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api'}/:path*` },
     ],
   }),
+  assetPrefix: process.env.NODE_ENV === 'production' ? process.env.CDN_URL || '' : '',
 };
 module.exports = nextConfig;

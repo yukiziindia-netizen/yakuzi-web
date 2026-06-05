@@ -1,72 +1,34 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Plus, Pencil, Trash2, Info } from "lucide-react";
+import { Search, Plus, Pencil, Trash2 } from "lucide-react";
 import { AdminLayout } from "@/components/layout/admin-layout";
-import { Button, Badge, Input, Modal, Textarea, Pagination } from "@/components/ui";
+import { Button, Badge, Input, Pagination } from "@/components/ui";
 import toast from "react-hot-toast";
-import { useSuggestions, useCreateSuggestion, useUpdateSuggestion, useDeleteSuggestion } from "@/hooks/useAdmin";
+import { useSuggestions, useDeleteSuggestion } from "@/hooks/useAdmin";
+import { SuggestionForm } from "@/components/suggestions/suggestion-form";
 
 export default function MasterCatalogPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const limit = 25;
   const { data: suggestionsData, isLoading } = useSuggestions({ page, limit, search: search || undefined });
-  const createSuggestion = useCreateSuggestion();
-  const updateSuggestion = useUpdateSuggestion();
   const deleteSuggestion = useDeleteSuggestion();
-  const [showModal, setShowModal] = useState(false);
+  
+  const [view, setView] = useState<'list' | 'form'>('list');
   const [editing, setEditing] = useState<any>(null);
-  const [form, setForm] = useState({ name: "", manufacturer: "", composition: "", mrp: "", gstPercent: "", category: "", subCategory: "", description: "" });
 
   const suggestions: any[] = Array.isArray(suggestionsData) ? suggestionsData : (suggestionsData?.data ?? []);
   const total = suggestionsData?.total ?? suggestions.length;
 
   const openCreate = () => {
     setEditing(null);
-    setForm({ name: "", manufacturer: "", composition: "", mrp: "", gstPercent: "", category: "", subCategory: "", description: "" });
-    setShowModal(true);
+    setView('form');
   };
 
   const openEdit = (item: any) => {
     setEditing(item);
-    setForm({ 
-      name: item.name ?? "", 
-      manufacturer: item.manufacturer ?? "", 
-      composition: item.chemicalComposition ?? item.composition ?? "", 
-      mrp: String(item.mrp ?? ""), 
-      gstPercent: String(item.gstPercent ?? ""),
-      category: item.categoryId || item.category?.id || item.category?.name || item.category || "",
-      subCategory: item.subCategoryId || item.subCategory?.id || item.subCategory?.name || item.subCategory || "",
-      description: item.description ?? ""
-    });
-    setShowModal(true);
-  };
-
-  const handleSave = async () => {
-    try {
-      const payload = { 
-        name: form.name,
-        manufacturer: form.manufacturer,
-        chemicalComposition: form.composition,
-        mrp: form.mrp ? Number(form.mrp) : undefined,
-        gstPercent: form.gstPercent ? Number(form.gstPercent) : undefined,
-        categoryId: form.category,
-        subCategoryId: form.subCategory,
-        description: form.description
-      };
-      
-      if (editing) {
-        await updateSuggestion.mutateAsync({ id: editing.id, payload });
-        toast.success("Catalog entry updated");
-      } else {
-        await createSuggestion.mutateAsync(payload);
-        toast.success("Catalog entry created");
-      }
-      setShowModal(false);
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || (editing ? "Failed to update" : "Failed to create"));
-    }
+    setView('form');
   };
 
   const handleDelete = async (item: any) => {
@@ -79,8 +41,6 @@ export default function MasterCatalogPage() {
     }
   };
 
-
-
   if (isLoading) {
     return (
       <AdminLayout>
@@ -90,6 +50,17 @@ export default function MasterCatalogPage() {
             <p className="text-sm text-muted-foreground">Loading master catalog…</p>
           </div>
         </div>
+      </AdminLayout>
+    );
+  }
+
+  if (view === 'form') {
+    return (
+      <AdminLayout>
+        <SuggestionForm 
+          initialData={editing} 
+          onClose={() => setView('list')} 
+        />
       </AdminLayout>
     );
   }
@@ -118,14 +89,14 @@ export default function MasterCatalogPage() {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="border-b border-border/50 bg-muted/20">
-                      {["Product Details", "Composition", "MRP", "Category", "Actions"].map(h => (
+                      {["Product Details", "MRP", "Category", "Actions"].map(h => (
                         <th key={h} className="px-5 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/30">
                     {suggestions.length === 0 ? (
-                      <tr><td colSpan={5} className="py-20 text-center text-sm text-muted-foreground">No catalog entries found. Import a CSV to get started.</td></tr>
+                      <tr><td colSpan={4} className="py-20 text-center text-sm text-muted-foreground">No catalog entries found. Import a CSV to get started.</td></tr>
                     ) : suggestions.map((s: any, i: number) => (
                       <motion.tr key={s.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }} className="hover:bg-accent/30 transition-colors group">
                         <td className="px-5 py-4">
@@ -133,11 +104,6 @@ export default function MasterCatalogPage() {
                             <span className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">{s.name}</span>
                             <span className="text-xs text-muted-foreground">{s.manufacturer}</span>
                           </div>
-                        </td>
-                        <td className="px-5 py-4">
-                          <span className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-md max-w-[150px] inline-block truncate" title={s.composition || s.chemicalComposition}>
-                            {s.composition || s.chemicalComposition || "—"}
-                          </span>
                         </td>
                         <td className="px-5 py-4 text-sm font-semibold text-foreground">{s.mrp ? `₹${s.mrp}` : "—"}</td>
                         <td className="px-5 py-4">
@@ -182,34 +148,6 @@ export default function MasterCatalogPage() {
           </div>
         </div>
       </div>
-
-      <Modal open={showModal} onClose={() => setShowModal(false)} title={editing ? "Edit Catalog Product" : "Add Catalog Product"}>
-        <div className="space-y-4 pt-2">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2">
-              <Input label="Product Name" placeholder="e.g. Paracetamol 500mg" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
-            </div>
-            <Input label="Manufacturer" placeholder="e.g. Cipla" value={form.manufacturer} onChange={e => setForm(f => ({ ...f, manufacturer: e.target.value }))} />
-            <Input label="MRP (₹)" type="number" placeholder="0.00" value={form.mrp} onChange={e => setForm(f => ({ ...f, mrp: e.target.value }))} />
-            <Input label="GST (%)" type="number" placeholder="12" value={form.gstPercent} onChange={e => setForm(f => ({ ...f, gstPercent: e.target.value }))} />
-
-            <div className="col-span-2">
-              <Textarea label="Chemical Composition" placeholder="e.g. Paracetamol" value={form.composition} onChange={e => setForm(f => ({ ...f, composition: e.target.value }))} />
-            </div>
-            <Input label="Category" placeholder="e.g. Tablets" value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} />
-            <Input label="Sub-Category" placeholder="e.g. Pain Relief" value={form.subCategory} onChange={e => setForm(f => ({ ...f, subCategory: e.target.value }))} />
-            <div className="col-span-2">
-              <Textarea label="Description" placeholder="Detailed product description..." value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={4} />
-            </div>
-          </div>
-          <div className="flex justify-end gap-3 pt-6">
-            <Button variant="ghost" onClick={() => setShowModal(false)}>Cancel</Button>
-            <Button onClick={handleSave} loading={createSuggestion.isPending || updateSuggestion.isPending}>
-              {editing ? "Update Product" : "Save to Catalog"}
-            </Button>
-          </div>
-        </div>
-      </Modal>
     </AdminLayout>
   );
 }

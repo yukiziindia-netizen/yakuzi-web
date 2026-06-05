@@ -35,8 +35,8 @@ interface VariantBuilderProps {
 function generateCombinations(options: VariantOption[]): string[] {
   const validOptions = options.map(o => ({
     ...o,
-    values: o.values.filter(v => v.trim() !== "")
-  })).filter(o => o.name.trim() !== "" && o.values.length > 0);
+    values: (Array.isArray(o.values) ? o.values : []).filter(v => v && typeof v === 'string' && v.trim() !== "")
+  })).filter(o => o.name && o.name.trim() !== "" && (Array.isArray(o.values) ? o.values : []).length > 0);
 
   if (validOptions.length === 0) return [];
   
@@ -398,8 +398,8 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                           </div>
                           
                           <div className="space-y-2">
-                            {[...option.values, ""].map((val, idx) => {
-                              const isLast = idx === option.values.length;
+                            {[...(Array.isArray(option.values) ? option.values : []), ""].map((val, idx) => {
+                              const isLast = idx === (Array.isArray(option.values) ? option.values : []).length;
                               return (
                                 <div key={idx} className="flex items-center gap-3">
                                   <div className="w-4 h-4 flex items-center justify-center">
@@ -411,8 +411,8 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                                     placeholder={isLast ? "Add another value" : ""}
                                     value={val}
                                     onChange={(e) => {
-                                      const newValues = [...option.values];
-                                      if (idx < option.values.length) {
+                                      const newValues = [...(Array.isArray(option.values) ? option.values : [])];
+                                      if (idx < (Array.isArray(option.values) ? option.values : []).length) {
                                         newValues[idx] = e.target.value;
                                       } else {
                                         if (e.target.value) newValues.push(e.target.value);
@@ -421,8 +421,9 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                                     }}
                                     onBlur={() => {
                                       // Remove empty values on blur
-                                      if (idx < option.values.length && option.values[idx].trim() === "") {
-                                        const newValues = [...option.values];
+                                      const arrValues = Array.isArray(option.values) ? option.values : [];
+                                      if (idx < arrValues.length && arrValues[idx].trim() === "") {
+                                        const newValues = [...arrValues];
                                         newValues.splice(idx, 1);
                                         updateOption(option.id, { values: newValues });
                                       }
@@ -478,7 +479,7 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                         {option.name || "Option"}
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        {option.values.filter(v => v.trim() !== "").map((val, idx) => (
+                        {(Array.isArray(option.values) ? option.values : []).filter(v => v && typeof v === 'string' && v.trim() !== "").map((val, idx) => (
                           <span 
                             key={idx} 
                             className="bg-gray-100 text-gray-800 text-sm px-3 py-1 rounded-md"

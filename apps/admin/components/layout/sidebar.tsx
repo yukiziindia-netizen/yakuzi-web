@@ -12,6 +12,7 @@ const NAV = [
   { icon: Bot, label: "AI Chatbot", href: "/chatbot" },
   { icon: Users, label: "Users", href: "/users" },
   { icon: Package, label: "Products", href: "/products" },
+  { icon: FileSpreadsheet, label: "Suggestions", href: "/suggestions" },
   { icon: Layers, label: "Collections", href: "/collections" },
   { icon: PackagePlus, label: "Product Requests", href: "/product-requests" },
   { icon: ClipboardList, label: "Orders", href: "/orders" },

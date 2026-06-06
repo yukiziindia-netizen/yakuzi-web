@@ -76,36 +76,73 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
       }
 
       // Options
-      if (initialData.options && Array.isArray(initialData.options)) {
-        setOptions(initialData.options.map((o: any) => {
+      let rawOptionsArray = initialData.options;
+      if (typeof rawOptionsArray === 'string') {
+        try { rawOptionsArray = JSON.parse(rawOptionsArray); } catch(e) {}
+      }
+
+      let parsedOptions: any[] = [];
+      if (rawOptionsArray && Array.isArray(rawOptionsArray)) {
+        parsedOptions = rawOptionsArray.map((o: any) => {
+          let optObj = o;
+          if (typeof o === 'string') {
+            try { optObj = JSON.parse(o); } catch(e) { optObj = { name: o, values: [] }; }
+          }
+          if (!optObj || typeof optObj !== 'object') optObj = {};
+
+          const name = optObj.name || optObj.title || optObj.key || optObj.attribute || "";
+          let rawValues = optObj.values || optObj.options || optObj.choices || optObj.value || optObj.list;
+          
           let parsedValues = [];
-          if (Array.isArray(o.values)) {
-            parsedValues = o.values;
-          } else if (typeof o.values === 'string') {
+          if (Array.isArray(rawValues)) {
+            parsedValues = rawValues;
+          } else if (typeof rawValues === 'string') {
             try { 
-              parsedValues = JSON.parse(o.values); 
+              let parsed = JSON.parse(rawValues); 
+              if (Array.isArray(parsed)) parsedValues = parsed;
+              else parsedValues = rawValues.split(',').map((v: string) => v.trim());
             } catch (e) {
-              // Not a JSON array, maybe a comma-separated string?
-              parsedValues = o.values.split(',').map((v: string) => v.trim());
+              parsedValues = rawValues.split(',').map((v: string) => v.trim());
             }
           }
-          if (!Array.isArray(parsedValues)) parsedValues = [];
-          return { name: o.name || "", values: parsedValues };
-        }));
+          
+          if (Array.isArray(parsedValues)) {
+            parsedValues = parsedValues.map(v => {
+              if (typeof v === 'string') return v;
+              if (v && typeof v === 'object') return v.value || v.name || v.val || v.title || v.option || "";
+              return String(v);
+            }).filter(Boolean);
+          } else {
+            parsedValues = [];
+          }
+          
+          return { id: optObj.id || Math.random().toString(36).substring(7), name: name, values: parsedValues };
+        }).filter(o => o.name && o.values.length > 0); // Filter out invalid options like []
       }
 
       // Variants
-      if (initialData.productVariants && Array.isArray(initialData.productVariants)) {
-        setVariants(
-          initialData.productVariants.map((v: any) => ({
-            id: v.id,
-            name: v.name,
-            price: v.options?.price ? String(v.options.price) : "",
-            available: v.options?.available ? String(v.options.available) : "0",
-            image: v.options?.image || undefined
-          }))
-        );
+      const incomingVariants = initialData.variants || initialData.productVariants;
+      let parsedVariants: any[] = [];
+      if (incomingVariants && Array.isArray(incomingVariants)) {
+        parsedVariants = incomingVariants.map((v: any) => ({
+          id: v.id || Math.random().toString(36).substring(7),
+          name: v.name,
+          price: v.price !== undefined ? String(v.price) : (v.options?.price ? String(v.options.price) : ""),
+          available: v.available !== undefined ? String(v.available) : (v.options?.available ? String(v.options.available) : "0"),
+          image: v.image || v.options?.image || undefined
+        }));
+        setVariants(parsedVariants);
       }
+
+      // If options is empty but we have variants, reconstruct options to prevent VariantBuilder from clearing variants!
+      if (parsedOptions.length === 0 && parsedVariants.length > 0) {
+        parsedOptions = [{
+          id: Math.random().toString(36).substring(7),
+          name: "Variant",
+          values: parsedVariants.map(v => v.name).filter(Boolean)
+        }];
+      }
+      setOptions(parsedOptions);
     }
   }, [initialData]);
 

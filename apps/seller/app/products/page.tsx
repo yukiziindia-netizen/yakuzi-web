@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Plus, Search, Edit, Trash2, Eye } from "lucide-react";
@@ -89,16 +89,9 @@ export default function ProductsPage() {
                     ) : products.map((p: any, i: number)=>(
                       <motion.tr key={p.id} initial={{opacity:0,y:6}} animate={{opacity:1,y:0}} transition={{delay:i*0.05}} className="hover:bg-accent/30 transition-colors">
                         <td className="px-5 py-4">
-                          <div className="flex items-center gap-3">
-                            {p.images && p.images.length > 0 ? (
-                              <div className="h-10 w-10 rounded-xl overflow-hidden border border-border flex-shrink-0">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" />
-                              </div>
-                            ) : (
-                              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-xl flex-shrink-0" aria-hidden>{EMOJI[p.category ?? "default"]??EMOJI.default}</div>
-                            )}
-                            <div><div className="text-sm font-semibold text-foreground">{p.name}</div><div className="text-xs text-muted-foreground font-mono">{p.genericName}</div></div>
+                          <div>
+                            <div className="text-sm font-semibold text-foreground">{p.name}</div>
+                            {p.genericName && <div className="text-xs text-muted-foreground font-mono">{p.genericName}</div>}
                           </div>
                         </td>
                         <td className="px-5 py-4"><Badge className="capitalize">{p.category}</Badge></td>

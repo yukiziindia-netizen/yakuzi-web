@@ -10,6 +10,7 @@ import {
 import WishlistIcon from "@/components/shared/WishlistIcon";
 import { useCart, useUpdateCartItem, useRemoveCartItem } from "@/hooks/useCart";
 import { useToast } from "@/components/shared/Toast";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export type SidebarView = "cart" | "wishlist" | "filters" | null;
 
@@ -24,14 +25,34 @@ interface SidebarSheetProps {
 export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps) {
   const isOpen = view !== null;
 
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   // Filter States
   const [filters, setFilters] = useState({
-    newItems: true,
-    bestSelling: false,
-    discount: "<50+",
-    location: "All",
-    discountType: "All",
+    newItems: searchParams.get('isNew') === 'true',
+    bestSelling: searchParams.get('isBestSelling') === 'true',
+    discount: searchParams.get('discountRange') || "All",
+    location: searchParams.get('location') || "All",
+    discountType: searchParams.get('discountType') || "All",
+    minPrice: Number(searchParams.get('minPrice') || 0),
+    maxPrice: Number(searchParams.get('maxPrice') || 10000),
   });
+
+  const handleFilterChange = (key: keyof typeof filters, value: any) => {
+    const updated = { ...filters, [key]: value };
+    setFilters(updated);
+    
+    const params = new URLSearchParams(searchParams.toString());
+    if (updated.newItems) params.set('isNew', 'true'); else params.delete('isNew');
+    if (updated.bestSelling) params.set('isBestSelling', 'true'); else params.delete('isBestSelling');
+    if (updated.discount && updated.discount !== 'All') params.set('discountRange', updated.discount); else params.delete('discountRange');
+    if (updated.location && updated.location !== 'All') params.set('location', updated.location); else params.delete('location');
+    if (updated.discountType && updated.discountType !== 'All') params.set('discountType', updated.discountType); else params.delete('discountType');
+    params.set('minPrice', String(updated.minPrice));
+    params.set('maxPrice', String(updated.maxPrice));
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
 
   // Accordion States
   const [openSections, setOpenSections] = useState({
@@ -238,18 +259,37 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                   exit={{ height: 0, opacity: 0 }}
                   className="overflow-hidden"
                 >
-                  <div className="px-1 pt-3 pb-2">
-                    {/* Mock Range Slider */}
-                    <div className="relative w-full h-1 bg-gray-200 rounded-full flex items-center">
-                      <div className="absolute left-0 right-0 h-full bg-[#854cbc] rounded-full" />
-                      <div className="absolute left-0 w-3 h-3 bg-[#854cbc] rounded-full -translate-x-1/2 cursor-pointer" />
-                      <div className="absolute right-0 w-3 h-3 bg-[#854cbc] rounded-full translate-x-1/2 cursor-pointer" />
+                  <div className="px-1 relative">
+                      <div className="relative w-full h-1 bg-gray-200 rounded-full mt-6 mb-4 flex items-center">
+                        <div 
+                          className="absolute h-full bg-[#854cbc] rounded-full pointer-events-none"
+                          style={{ 
+                            left: `${((filters.minPrice - 0) / (10000 - 0)) * 100}%`, 
+                            width: `${((filters.maxPrice - filters.minPrice) / 10000) * 100}%` 
+                          }}
+                        />
+                        <input 
+                          type="range" min={0} max={10000} step={100} value={filters.minPrice}
+                          onChange={(e) => {
+                            const val = Math.min(Number(e.target.value), filters.maxPrice - 100);
+                            handleFilterChange('minPrice', val);
+                          }}
+                          className="absolute w-full appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-[#854cbc] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:pointer-events-auto z-20"
+                        />
+                        <input 
+                          type="range" min={0} max={10000} step={100} value={filters.maxPrice}
+                          onChange={(e) => {
+                            const val = Math.max(Number(e.target.value), filters.minPrice + 100);
+                            handleFilterChange('maxPrice', val);
+                          }}
+                          className="absolute w-full appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-[#854cbc] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:pointer-events-auto z-10"
+                        />
+                      </div>
+                      <div className="flex justify-between mt-2 text-[12px] text-gray-500">
+                        <span>₹{filters.minPrice}</span>
+                        <span>₹{filters.maxPrice}</span>
+                      </div>
                     </div>
-                    <div className="flex justify-between mt-2 text-[12px] text-gray-500">
-                      <span>$500</span>
-                      <span>$2500</span>
-                    </div>
-                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -259,16 +299,16 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
 
           {/* Checkboxes */}
           <div className="space-y-3 mb-6">
-            <label className="flex items-center gap-3 cursor-pointer group">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-black">
-                 <path d="M4 14v6h6M20 10V4h-6M4 10V4h6M20 14v6h-6" />
-                 <rect x="4" y="4" width="4" height="4" fill="currentColor"/>
-                 <rect x="16" y="16" width="4" height="4" fill="currentColor"/>
-              </svg>
+            <label className="flex items-center gap-3 cursor-pointer group" onClick={() => handleFilterChange('newItems', !filters.newItems)}>
+              <div className={`w-3.5 h-3.5 rounded-[3px] border flex items-center justify-center transition-colors ${filters.newItems ? "bg-[#854cbc] border-[#854cbc] text-white" : "border-gray-300 bg-white"}`}>
+                {filters.newItems && <Check className="w-2.5 h-2.5" strokeWidth={3} />}
+              </div>
               <span className="text-gray-700 text-[13px]">New Items</span>
             </label>
-            <label className="flex items-center gap-3 cursor-pointer group">
-              <div className="w-3.5 h-3.5 rounded-[3px] border border-gray-300 flex items-center justify-center bg-white" />
+            <label className="flex items-center gap-3 cursor-pointer group" onClick={() => handleFilterChange('bestSelling', !filters.bestSelling)}>
+              <div className={`w-3.5 h-3.5 rounded-[3px] border flex items-center justify-center transition-colors ${filters.bestSelling ? "bg-[#854cbc] border-[#854cbc] text-white" : "border-gray-300 bg-white"}`}>
+                {filters.bestSelling && <Check className="w-2.5 h-2.5" strokeWidth={3} />}
+              </div>
               <span className="text-gray-700 text-[13px]">Best Selling</span>
             </label>
           </div>
@@ -294,7 +334,10 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                 >
                   <div className="space-y-2.5 pt-1">
                     {["<50+", "30-35", "50-90", ">50++"].map(opt => (
-                      <label key={opt} className="flex items-center gap-3 cursor-pointer group" onClick={() => setFilters(f => ({...f, discount: opt}))}>
+                      <label key={opt} className="flex items-center gap-3 cursor-pointer group" onClick={(e) => {
+                        e.preventDefault();
+                        handleFilterChange('discount', filters.discount === opt ? "All" : opt);
+                      }}>
                         <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-colors ${filters.discount === opt ? "border-[#854cbc]" : "border-gray-200 group-hover:border-[#854cbc]/50"}`}>
                            {filters.discount === opt && <div className="w-1.5 h-1.5 rounded-full bg-[#854cbc]" />}
                         </div>
@@ -328,7 +371,10 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                 >
                   <div className="space-y-2.5 pt-1">
                     {["All", "Monteria", "Marana", "Pownhon"].map(opt => (
-                      <label key={opt} className="flex items-center gap-3 cursor-pointer group" onClick={() => setFilters(f => ({...f, location: opt}))}>
+                      <label key={opt} className="flex items-center gap-3 cursor-pointer group" onClick={(e) => {
+                        e.preventDefault();
+                        handleFilterChange('location', filters.location === opt && opt !== "All" ? "All" : opt);
+                      }}>
                         <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-colors ${filters.location === opt ? "border-[#854cbc]" : "border-gray-200 group-hover:border-[#854cbc]/50"}`}>
                            {filters.location === opt && <div className="w-1.5 h-1.5 rounded-full bg-[#854cbc]" />}
                         </div>
@@ -362,7 +408,10 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                 >
                   <div className="space-y-2.5 pt-1">
                     {["All", "Upclom", "Fuill"].map(opt => (
-                      <label key={opt} className="flex items-center gap-3 cursor-pointer group" onClick={() => setFilters(f => ({...f, discountType: opt}))}>
+                      <label key={opt} className="flex items-center gap-3 cursor-pointer group" onClick={(e) => {
+                        e.preventDefault();
+                        handleFilterChange('discountType', filters.discountType === opt && opt !== "All" ? "All" : opt);
+                      }}>
                         <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-colors ${filters.discountType === opt ? "border-[#854cbc]" : "border-gray-200 group-hover:border-[#854cbc]/50"}`}>
                            {filters.discountType === opt && <div className="w-1.5 h-1.5 rounded-full bg-[#854cbc]" />}
                         </div>

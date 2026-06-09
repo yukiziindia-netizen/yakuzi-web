@@ -1,6 +1,6 @@
 import { api } from '../api';
 
-export async function createCustomOrder(payload: { message: string; productId?: string }) {
+export async function createCustomOrder(payload: { message: string; catalogProductId?: string }) {
   const { data } = await api.post('/custom-orders', payload);
   return data.data || data;
 }

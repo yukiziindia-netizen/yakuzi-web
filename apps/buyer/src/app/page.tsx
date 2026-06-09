@@ -6,12 +6,22 @@ import { getProducts } from '@yukizi/api-client';
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: { search?: string; category?: string };
+  searchParams: any;
 }) {
   let initialProducts: any[] = [];
   try {
     const search = searchParams?.search;
-    const res = await getProducts({ limit: 100, search });
+    const res = await getProducts({ 
+      limit: 100, 
+      search,
+      minPrice: searchParams?.minPrice ? Number(searchParams.minPrice) : undefined,
+      maxPrice: searchParams?.maxPrice ? Number(searchParams.maxPrice) : undefined,
+      isNew: searchParams?.isNew === 'true' ? true : undefined,
+      isBestSelling: searchParams?.isBestSelling === 'true' ? true : undefined,
+      discountRange: searchParams?.discountRange && searchParams.discountRange !== 'All' ? searchParams.discountRange : undefined,
+      location: searchParams?.location && searchParams.location !== 'All' ? searchParams.location : undefined,
+      discountType: searchParams?.discountType && searchParams.discountType !== 'All' ? searchParams.discountType : undefined,
+    });
     if (res && res.data && Array.isArray(res.data)) {
       initialProducts = res.data;
     }

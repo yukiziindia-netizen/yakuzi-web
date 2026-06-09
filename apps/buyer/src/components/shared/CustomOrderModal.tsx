@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -27,7 +27,7 @@ export function CustomOrderModal({ isOpen, onClose, productName, productId }: Cu
     try {
       await createCustomOrder({
         message: productName ? `Request for ${productName}: ${message}` : message,
-        productId,
+        catalogProductId: productId,
       });
       setIsSuccess(true);
       toast('Custom order request sent successfully!', 'success');

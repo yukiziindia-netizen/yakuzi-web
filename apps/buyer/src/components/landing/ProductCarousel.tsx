@@ -29,6 +29,10 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
   const hasAd = isYukiziChoice || isBestSeller;
   const hasBottomRow = index % 3 !== 2;
   
+  const discountPercent = product.mrp && product.price && product.mrp > product.price
+    ? Math.round(((product.mrp - product.price) / product.mrp) * 100)
+    : 0;
+  
   const productName = product.name || "Product Name";
   const getInitials = (name: string) => {
     if (!name) return 'PR';
@@ -57,7 +61,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
              await addToCart.mutateAsync({
                productId: product.id || 'prod-' + index,
                name: productName,
-               price: product.price || 3345.53,
+               price: product.price || product.mrp || 0,
                image: imageUrl,
                product
              });
@@ -77,7 +81,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
                ...product,
                id: product.id || 'prod-' + index,
                name: productName,
-               price: product.price || 3345.53,
+               price: product.price || product.mrp || 0,
                image: imageUrl
              });
              toast(isBookmarked ? 'Removed from wishlist' : 'Added to wishlist', 'success');
@@ -119,8 +123,10 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
            {/* Price and Rating */}
            <div className="flex justify-between items-center">
               <div className="flex items-baseline gap-1.5">
-                 <span className="text-[14px] font-semibold text-gray-800 tracking-tight">₹3345.53</span>
-                 <span className="text-[10px] text-gray-400 line-through">₹3800.25</span>
+                 <span className="text-[14px] font-semibold text-gray-800 tracking-tight">₹{product.price || 0}</span>
+                 {product.mrp > product.price && (
+                   <span className="text-[10px] text-gray-400 line-through">₹{product.mrp}</span>
+                 )}
               </div>
               <div className="flex items-center gap-0.5">
                  <Star size={12} className="fill-[#854cbc] text-[#854cbc]" />
@@ -132,11 +138,11 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
            {hasBottomRow ? (
              <div className="flex justify-between items-center mt-1">
                 <div className="text-[10px] font-bold text-gray-600">
-                   25% off
+                   {discountPercent > 0 ? `${discountPercent}% off` : ''}
                 </div>
                 <div className="flex items-center gap-1 bg-[#f5f5f5] rounded px-1.5 py-0.5 border border-gray-100">
                    <Truck size={10} strokeWidth={2.5} className="text-gray-500" />
-                   <span className="text-[9px] font-bold text-gray-600">{index % 3 === 1 ? 'Tomorrow' : '3 days'}</span>
+                   <span className="text-[9px] font-bold text-gray-600">{product.deliveryText || (index % 3 === 1 ? 'Tomorrow' : '3 days')}</span>
                 </div>
              </div>
            ) : (

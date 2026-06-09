@@ -95,7 +95,11 @@ export default function QuickReviewModal({ isOpen, onClose, product }: QuickRevi
               const listId = listing.id || String(i);
               const companyName = listing.seller?.companyName || 'Yakuzi';
               const rating = listing.seller?.rating || '4.5';
-              const price = listing.price || listing.mrp || product.price || product.mrp || 3345.53;
+              const price = listing.price || listing.mrp || product.price || product.mrp || 0;
+              const listingMrp = listing.mrp || product.mrp;
+              const discountPercent = listingMrp && price && listingMrp > price 
+                ? Math.round(((listingMrp - price) / listingMrp) * 100) 
+                : 0;
               const isAdded = quantities[listId] > 0;
 
               return (
@@ -107,7 +111,8 @@ export default function QuickReviewModal({ isOpen, onClose, product }: QuickRevi
                     <div>
                       <div className="font-bold text-gray-700 leading-tight">₹{price}</div>
                       <div className="text-[9px] text-gray-400">
-                        {listing.moq ? `MOQ: ${listing.moq}` : '20% off on purchase of 3'}
+                        {listing.moq ? `MOQ: ${listing.moq}` : 'MOQ: 1'}
+                        {discountPercent > 0 && ` • ${discountPercent}% off`}
                       </div>
                     </div>
                   </div>
@@ -119,7 +124,7 @@ export default function QuickReviewModal({ isOpen, onClose, product }: QuickRevi
 
                   <div className="flex items-center gap-1 text-gray-500">
                     <Truck size={14} />
-                    <span className="text-[10px] font-bold">{i === 0 ? 'Tomorrow' : '3 days'}</span>
+                    <span className="text-[10px] font-bold">{listing.deliveryText || (i === 0 ? 'Tomorrow' : '3 days')}</span>
                   </div>
 
                   <div className="w-20 flex justify-end">

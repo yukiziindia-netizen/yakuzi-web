@@ -281,13 +281,10 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
             </div>
 
             {/* Title block */}
-            <div className="flex justify-between items-start mb-2 gap-4">
+            <div className="mb-2">
               <h1 className="text-2xl sm:text-[26px] font-bold text-gray-500 tracking-tight leading-tight">
                 {product.name}
               </h1>
-              <button className="text-orange-400 hover:text-orange-500 mt-1 shrink-0 transition-colors">
-                 <Plus size={32} strokeWidth={2.5} />
-              </button>
             </div>
 
             {/* Price Row */}

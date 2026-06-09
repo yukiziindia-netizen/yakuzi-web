@@ -107,6 +107,9 @@ export async function getProducts(params?: {
   isNew?: boolean;
   isDiscounted?: boolean;
   isBestSelling?: boolean;
+  discountRange?: string;
+  location?: string;
+  discountType?: string;
 }): Promise<ProductListResponse> {
   try {
     const { data } = await api.get('/products', { params });

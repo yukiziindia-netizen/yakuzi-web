@@ -187,6 +187,12 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                                 <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
                              </div>
 
+                             {/* Delivery */}
+                             <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-50 border border-emerald-100">
+                                <Truck className="w-3.5 h-3.5 text-emerald-600" />
+                                <span className="text-emerald-700 font-black text-[11px] uppercase tracking-wide">{listing.deliveryText || '3 days'}</span>
+                             </div>
+
                              {/* Actions */}
                              <div className="flex items-center gap-2">
                                {inStock ? (

@@ -50,8 +50,7 @@ export function ProductForm({ defaultValues, productId }: { defaultValues?: Part
       stock: 0,
       min_order_qty: 1,
       max_order_qty: 100,
-      expire_date: (() => { const d = new Date(); d.setFullYear(d.getFullYear() + 1); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; })(),
-      gst_percent: 12,
+      delivery_text: "",
       image_list: [],
       custom_extra_fields: [],
       discount_form_details: { type: "ptr_discount" } as DiscountFormDetails,
@@ -135,6 +134,14 @@ export function ProductForm({ defaultValues, productId }: { defaultValues?: Part
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isDirty]);
+
+  // Sync variant stock to current stock
+  useEffect(() => {
+    if (variants && variants.length > 0) {
+      const totalStock = variants.reduce((acc, v) => acc + (parseInt(v.available) || 0), 0);
+      setValue("stock", totalStock, { shouldValidate: true, shouldDirty: true });
+    }
+  }, [variants, setValue]);
 
   const handleSuggestionSelect = useCallback(async (suggestion: Suggestion) => {
     setSelectedMasterId(suggestion.id);
@@ -321,22 +328,25 @@ export function ProductForm({ defaultValues, productId }: { defaultValues?: Part
         categoryId: data.categories[0],
         ...(data.sub_categories?.length && { subCategoryId: data.sub_categories[0] }),
         stock: data.stock,
-        expiryDate: new Date(data.expire_date).toISOString(),
+        expiryDate: new Date('2099-12-31').toISOString(),
         minimumOrderQuantity: data.min_order_qty,
         maximumOrderQuantity: data.max_order_qty,
-        gstPercent: data.gst_percent,
+        gstPercent: 0,
+        ...(data.delivery_text && { deliveryText: data.delivery_text }),
         ...(realImages.length > 0 && { images: realImages }),
         ...(Object.keys(extra_fields).length > 0 && { extraFields: extra_fields }),
         ...(mappedDiscountType && { discountType: mappedDiscountType }),
         ...(Object.keys(discountMeta).length > 0 && { discountMeta }),
         ...(selectedMasterId && { masterProductId: selectedMasterId }),
         ...(options.length > 0 && { options: options.map(o => ({ name: o.name, values: o.values })) }),
-        ...(variants.length > 0 && { variants: variants.map(v => ({ 
-          name: v.name, 
-          price: Number(v.price), 
-          available: Number(v.available),
-          image: v.image
-        })) }),
+        ...((variants.filter(v => Number(v.price) > 0)).length > 0 && { 
+          variants: variants.filter(v => Number(v.price) > 0).map(v => ({ 
+            name: v.name, 
+            price: Number(v.price), 
+            available: Number(v.available),
+            image: v.image
+          })) 
+        }),
       };
 
       if (isEditing) {
@@ -465,20 +475,14 @@ export function ProductForm({ defaultValues, productId }: { defaultValues?: Part
               type="number" 
               min={watchMrp > 0 ? Math.ceil(20000 / watchMrp) : 1}
               error={errors.stock?.message} 
+              disabled={variants && variants.length > 0}
               {...register("stock", { valueAsNumber: true })} 
             />
-            <Controller
-              control={control}
-              name="expire_date"
-              render={({ field }) => (
-                <ExpiryPicker 
-                  label="Expiry Date" 
-                  required
-                  value={field.value} 
-                  onChange={field.onChange} 
-                  error={errors.expire_date?.message} 
-                />
-              )}
+            <Input 
+              label="Delivery Time (e.g. 3 days, Tomorrow)" 
+              placeholder="e.g. 3 days, Tomorrow" 
+              error={errors.delivery_text?.message} 
+              {...register("delivery_text")} 
             />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
@@ -502,19 +506,6 @@ export function ProductForm({ defaultValues, productId }: { defaultValues?: Part
               min={watchMinMoq}
               error={errors.max_order_qty?.message} 
               {...register("max_order_qty", { valueAsNumber: true })} 
-            />
-            <Controller
-              control={control}
-              name="gst_percent"
-              render={({ field }) => (
-                <Select
-                  label="GST Percentage *"
-                  options={VALID_GST_PERCENTAGES.map((g) => ({ label: `${g}%`, value: String(g) }))}
-                  value={String(field.value)}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
-                  error={errors.gst_percent?.message}
-                />
-              )}
             />
           </div>
         </div>

@@ -324,7 +324,7 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                     </th>
                     <th scope="col" className="px-6 py-3 font-medium">Variant</th>
                     <th scope="col" className="px-6 py-3 font-medium">Price</th>
-                    <th scope="col" className="px-6 py-3 font-medium">Available</th>
+                    <th scope="col" className="px-6 py-3 font-medium">Stock</th>
                     <th scope="col" className="px-6 py-3 font-medium">Publishing</th>
                   </tr>
                 </thead>

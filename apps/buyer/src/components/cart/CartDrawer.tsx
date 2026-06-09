@@ -147,9 +147,10 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                   const initials = titleWords.length === 1 
                     ? itemName.trim().substring(0,2).toUpperCase() 
                     : (titleWords[0][0] + titleWords[titleWords.length - 1][0]).toUpperCase();
-                  const itemImage = (!itemImageRaw || itemImageRaw === '/products/pharma_bottle.png')
+                  const resolvedImage = typeof itemImageRaw === 'object' && itemImageRaw?.url ? itemImageRaw.url : itemImageRaw;
+                  const itemImage = (!resolvedImage || resolvedImage === '/products/pharma_bottle.png')
                     ? `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent(initials)}`
-                    : itemImageRaw;
+                    : resolvedImage;
                   const isYukiziChoice = item.isYukiziChoice ?? (idx % 3 === 0);
                   const quantity = item.quantity ?? 1;
 

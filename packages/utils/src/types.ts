@@ -126,6 +126,8 @@ export interface Product {
     tag?: string;
   };
   listings?: MarketplaceListing[];
+  options?: any[];
+  variants?: any[];
   sellerCount?: number;
   hasSellers?: boolean;
   minPrice?: number;
@@ -264,6 +266,8 @@ export interface Suggestion {
   mrp?: number;
   images?: string[] | { url: string }[];
   description?: string;
+  options?: any[];
+  variants?: any[];
 }
 
 

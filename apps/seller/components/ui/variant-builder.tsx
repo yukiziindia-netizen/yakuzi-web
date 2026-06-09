@@ -4,9 +4,14 @@ import React, { useState, useEffect, useRef } from "react";
 import { Plus, GripVertical, Image as ImageIcon, Search, ArrowDownUp, Grid2X2, X, UploadCloud, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
-import { uploadProductMedia } from "@/api/admin.api";
-import { MediaItem } from "./media-uploader";
 import { cn } from "@/lib/utils";
+
+export type MediaItem = {
+  id: string;
+  url: string;
+  type: "image" | "video";
+  isLoading?: boolean;
+};
 
 export interface VariantOption {
   id: string;
@@ -55,203 +60,7 @@ function generateCombinations(options: VariantOption[]): string[] {
   return combinations;
 }
 
-const ImageSelectionModal = ({ 
-  isOpen, onClose, onSelect, productMedia = [], onAddProductMedia 
-}: {
-  isOpen: boolean; onClose: () => void; onSelect: (url: string) => void; 
-  productMedia?: MediaItem[]; onAddProductMedia?: (items: MediaItem[]) => void;
-}) => {
-  const [selectedUrl, setSelectedUrl] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  if (!isOpen) return null;
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-
-    const newItems = files.map(file => ({
-      id: Math.random().toString(36).substring(7),
-      url: URL.createObjectURL(file), // Temp preview
-      type: file.type.startsWith('video/') ? 'video' as const : 'image' as const,
-      isLoading: true
-    }));
-
-    if (onAddProductMedia) onAddProductMedia(newItems);
-
-    const uploadedItems = await Promise.all(
-      files.map(async (file, index) => {
-        try {
-          const url = await uploadProductMedia(file);
-          return { ...newItems[index], url, isLoading: false };
-        } catch (error) {
-          toast.error(`Failed to upload ${file.name}`);
-          return null;
-        }
-      })
-    );
-
-    // Filter out failed uploads and pass to parent to replace temp items
-    const successfulUploads = uploadedItems.filter(Boolean) as MediaItem[];
-    if (onAddProductMedia && successfulUploads.length > 0) {
-      // In a real app we'd dispatch an update to replace the isLoading=true item with the real one
-      // For simplicity, we just trigger onAddProductMedia again which will append the real ones.
-      // A better approach is to let the parent handle the actual uploading logic, but since we are mirroring MediaUploader:
-      onAddProductMedia(successfulUploads);
-    }
-
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  };
-
-  const handleDragOverArea = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  const handleDropArea = async (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
-    if (files.length === 0) return;
-
-    const dataTransfer = new DataTransfer();
-    files.forEach(f => dataTransfer.items.add(f));
-    if (fileInputRef.current) {
-      fileInputRef.current.files = dataTransfer.files;
-      const event = new Event('change', { bubbles: true });
-      fileInputRef.current.dispatchEvent(event);
-      handleFileChange({ target: fileInputRef.current } as any);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl h-[80vh] flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Select image</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {/* Controls */}
-          <div className="flex items-center gap-4">
-            <div className="relative flex-1 max-w-lg">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input 
-                type="text" 
-                placeholder="Search files"
-                className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              />
-            </div>
-            <div className="flex items-center gap-2 ml-auto">
-              <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
-                <ArrowDownUp className="w-4 h-4" /> Sort
-              </button>
-              <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
-                <Grid2X2 className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="px-3 py-1.5 border border-gray-200 border-dashed rounded-full text-sm text-gray-600 cursor-pointer hover:bg-gray-50">File size v</span>
-            <span className="px-3 py-1.5 border border-gray-200 border-dashed rounded-full text-sm text-gray-600 cursor-pointer hover:bg-gray-50">Used in v</span>
-            <span className="px-3 py-1.5 border border-gray-200 border-dashed rounded-full text-sm text-gray-600 cursor-pointer hover:bg-gray-50">Product v</span>
-          </div>
-
-          {/* Upload Area */}
-          <div 
-            className="border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center hover:bg-gray-50 transition-colors cursor-pointer"
-            onClick={() => fileInputRef.current?.click()}
-            onDragOver={handleDragOverArea}
-            onDrop={handleDropArea}
-          >
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              className="hidden"
-              multiple
-              accept="image/*,video/*"
-            />
-            <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white mb-2 shadow-sm">
-              <Plus className="w-4 h-4" /> Add files
-            </button>
-            <p className="text-sm text-gray-500">Drag and drop images</p>
-          </div>
-
-          {/* Grid */}
-          <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-4">
-            {productMedia.map((media) => (
-              <div 
-                key={media.id} 
-                className="group relative cursor-pointer"
-                onClick={() => !media.isLoading && setSelectedUrl(media.url)}
-              >
-                <div className={cn(
-                  "aspect-square rounded-xl border overflow-hidden relative",
-                  selectedUrl === media.url ? "border-blue-500 ring-2 ring-blue-500" : "border-gray-200"
-                )}>
-                  {media.isLoading ? (
-                    <div className="w-full h-full flex items-center justify-center bg-gray-50">
-                      <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
-                    </div>
-                  ) : (
-                    <img src={media.url} alt="Media" className="w-full h-full object-cover" />
-                  )}
-                  
-                  {!media.isLoading && (
-                    <div className="absolute top-2 left-2 z-10">
-                      <div className={cn(
-                        "w-5 h-5 rounded border bg-white flex items-center justify-center",
-                        selectedUrl === media.url ? "border-blue-500 bg-blue-500" : "border-gray-300"
-                      )}>
-                        {selectedUrl === media.url && <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>}
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <div className="mt-2 text-center">
-                  <p className="text-xs text-gray-700 truncate px-1">
-                    {media.url.split('/').pop() || 'image'}
-                  </p>
-                  <p className="text-[10px] text-gray-500 uppercase mt-0.5">JPG</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="p-4 border-t border-gray-200 flex items-center justify-end gap-3 bg-white">
-          <button 
-            onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-          >
-            Cancel
-          </button>
-          <button 
-            onClick={() => {
-              if (selectedUrl) {
-                onSelect(selectedUrl);
-                onClose();
-              }
-            }}
-            disabled={!selectedUrl}
-            className="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Done
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
+// ImageSelectionModal removed for seller app
 
 export const VariantBuilder: React.FC<VariantBuilderProps> = ({ 
   options, 
@@ -262,7 +71,6 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
   onAddProductMedia
 }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [imageModalForVariant, setImageModalForVariant] = useState<string | null>(null);
 
   // Sync variants when options change
   useEffect(() => {
@@ -339,18 +147,6 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
 
   return (
     <>
-      <ImageSelectionModal
-        isOpen={!!imageModalForVariant}
-        onClose={() => setImageModalForVariant(null)}
-        productMedia={productMedia}
-        onAddProductMedia={onAddProductMedia}
-        onSelect={(url) => {
-          if (imageModalForVariant) {
-            updateVariant(imageModalForVariant, 'image', url);
-          }
-        }}
-      />
-
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="p-6 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Variants</h2>
@@ -541,16 +337,6 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                         </div>
                       </td>
                       <td className="px-6 py-4 font-medium text-gray-900 flex items-center gap-3">
-                        <button 
-                          onClick={() => setImageModalForVariant(variant.id)}
-                          className="w-10 h-10 border border-gray-200 rounded-md border-dashed overflow-hidden flex items-center justify-center bg-gray-50 text-blue-500 hover:border-blue-500 transition-colors relative"
-                        >
-                          {variant.image ? (
-                            <img src={variant.image} alt="Variant" className="w-full h-full object-cover" />
-                          ) : (
-                            <ImageIcon className="w-5 h-5" />
-                          )}
-                        </button>
                         {variant.name}
                       </td>
                       <td className="px-6 py-4">

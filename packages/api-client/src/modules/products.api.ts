@@ -57,6 +57,8 @@ export const CreateProductSchema = z.object({
   images: z.array(z.string()).optional(),
   discountType: z.string().optional(),
   discountMeta: z.record(z.unknown()).optional(),
+  options: z.array(z.object({ name: z.string(), values: z.array(z.string()) })).optional(),
+  variants: z.array(z.object({ name: z.string(), price: z.number(), available: z.number(), image: z.string().optional() })).optional(),
 });
 
 // ─── Types ──────────────────────────────────────────

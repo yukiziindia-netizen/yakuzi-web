@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -120,7 +120,8 @@ export default function CartPage() {
                     const itemName = item.product?.name ?? item.productName ?? item.name ?? 'Product';
                     const itemPrice = item.product?.price ?? item.price;
                     const itemMrp = item.product?.mrp;
-                    const itemImage = item.product?.images?.[0] ?? item.imageUrl ?? item.image;
+                    const itemImageRaw = item.product?.images?.[0] ?? item.imageUrl ?? item.image;
+                    const itemImage = typeof itemImageRaw === 'object' && itemImageRaw?.url ? itemImageRaw.url : itemImageRaw;
 
                     return (
                       <motion.div

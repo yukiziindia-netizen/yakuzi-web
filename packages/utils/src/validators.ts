@@ -94,14 +94,14 @@ export const discountFormDetailsSchema = z.object({
 
 export const productFormSchema = z.object({
   product_name: z.string().min(2, 'Product name must be at least 2 characters'),
-  product_price: z.number().min(0.01, 'MRP must be greater than 0'),
+  product_price: z.preprocess((val) => Number(val) || 0, z.number()),
   company_name: z.string().min(2, 'Company name is required'),
   chemical_combination: z.string().optional(),
   categories: z.array(z.string()).min(1, 'Select at least one category'),
   sub_categories: z.array(z.string()).optional(),
-  stock: z.number().int().min(0, 'Stock cannot be negative'),
-  min_order_qty: z.number().int().min(1, 'Minimum 1 required'),
-  max_order_qty: z.number().int().min(1, 'Minimum 1 required'),
+  stock: z.preprocess((val) => Number(val) || 0, z.number().int()),
+  min_order_qty: z.preprocess((val) => Number(val) || 0, z.number().int()),
+  max_order_qty: z.preprocess((val) => Number(val) || 0, z.number().int()),
   expire_date: z.string().refine((val) => {
     if (!val) return false;
     // Set selected date to the 1st of the month
@@ -122,13 +122,41 @@ export const productFormSchema = z.object({
   image_list: z.array(z.string()).optional().default([]),
   custom_extra_fields: z.array(z.object({ key: z.string().min(1), value: z.string().min(1) })),
   discount_form_details: discountFormDetailsSchema,
-}).refine((data) => data.min_order_qty <= data.max_order_qty, {
+  options: z.array(z.any()).optional(),
+  variants: z.array(z.any()).optional(),
+}).superRefine((data, ctx) => {
+  const hasVariants = data.variants && data.variants.length > 0;
+  
+  if (!hasVariants) {
+    if (data.product_price < 0.01) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'MRP must be greater than 0', path: ['product_price'] });
+    }
+    if (data.stock < 0) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Stock cannot be negative', path: ['stock'] });
+    }
+    if (data.min_order_qty < 1) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Minimum 1 required', path: ['min_order_qty'] });
+    }
+    if (data.max_order_qty < 1) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Minimum 1 required', path: ['max_order_qty'] });
+    }
+  }
+}).refine((data) => {
+  if (data.variants && data.variants.length > 0) return true;
+  return data.min_order_qty <= data.max_order_qty;
+}, {
   message: 'Max order qty must be >= min order qty',
   path: ['max_order_qty'],
-}).refine((data) => data.stock >= data.min_order_qty, {
+}).refine((data) => {
+  if (data.variants && data.variants.length > 0) return true;
+  return data.stock >= data.min_order_qty;
+}, {
   message: 'Current stock must be at least equal to minimum order quantity',
   path: ['stock'],
-}).refine((data) => data.min_order_qty <= data.stock, {
+}).refine((data) => {
+  if (data.variants && data.variants.length > 0) return true;
+  return data.min_order_qty <= data.stock;
+}, {
   message: 'Minimum order quantity cannot exceed current stock',
   path: ['min_order_qty'],
 }).refine((data) => {
@@ -172,6 +200,7 @@ export const productFormSchema = z.object({
   message: 'Special price is required',
   path: ['discount_form_details', 'specialPrice'],
 }).refine((data) => {
+  if (data.variants && data.variants.length > 0) return true;
   // Enforce ₹20,000 minimum order value rule: MRP * MOQ >= 20,000
   const minRequiredMoq = Math.ceil(20000 / data.product_price);
   return data.min_order_qty >= minRequiredMoq;
@@ -179,6 +208,7 @@ export const productFormSchema = z.object({
   message: `Minimum order quantity must be at least ${Math.ceil(20000 / data.product_price)} to meet the ₹20,000 requirement.`,
   path: ['min_order_qty'],
 })).refine((data) => {
+  if (data.variants && data.variants.length > 0) return true;
   // Enforce ₹20,000 minimum rule for stock too for consistency
   const minRequiredMoq = Math.ceil(20000 / data.product_price);
   return data.stock >= minRequiredMoq;

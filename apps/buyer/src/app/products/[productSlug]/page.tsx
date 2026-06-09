@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Share2, Plus, Star, Truck, ChevronDown, ChevronUp, Bell, RotateCcw, Minus, Search, User, Bookmark, ShoppingCart, Package, Filter, Menu, ArrowUpRight, Loader2 } from 'lucide-react';
 import Image from 'next/image';
@@ -98,6 +98,7 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
 export default function AnimeProductPage({ params }: { params: { productSlug: string } }) {
   const [activeImage, setActiveImage] = useState(0);
   const [pendingCartProducts, setPendingCartProducts] = useState<Set<string>>(new Set());
+  const [selectedVariantName, setSelectedVariantName] = useState<string>('');
 
   // Extract ID from slug
   const productSlugOrId = parseProductIdFromSlug(params.productSlug);
@@ -119,6 +120,16 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
     categoryId: product?.category?.id,
     limit: 6,
   });
+
+  const productOptions = product?.options || [];
+  const productVariants = product?.variants || [];
+
+  // Ensure first variant is selected by default
+  useEffect(() => {
+    if (productVariants.length > 0 && !selectedVariantName) {
+      setSelectedVariantName(productVariants[0].name);
+    }
+  }, [productVariants, selectedVariantName]);
 
   const cartQuantityMap = new Map<string, number>();
   if (cartData?.items) {
@@ -162,6 +173,13 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
   const displayPrice = validListings.length > 0 ? Math.min(...validListings.map((l: any) => l.price)) : product.price;
   const displayMrp = validListings.find((l: any) => l.mrp || l.originalPrice)?.mrp || validListings.find((l: any) => l.mrp || l.originalPrice)?.originalPrice || product.mrp || product.originalPrice;
   const relatedProducts = relatedProductsData?.data || [];
+
+  // Filter listings based on the selected variant
+  const filteredListings = productVariants.length > 0 && selectedVariantName
+    ? listings.filter((l: any) => l.variantName === selectedVariantName || l.name === selectedVariantName || l.name?.includes(selectedVariantName))
+    : listings;
+
+  const currentVariant = productVariants.find((v: any) => v.name === selectedVariantName);
 
   return (
     <main className="min-h-screen bg-white pb-32">
@@ -299,10 +317,32 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
               </div>
             </div>
 
+            {/* Variant Selector */}
+            {productVariants.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-sm font-bold text-gray-700 mb-3">Available Variants</h3>
+                <div className="flex flex-wrap gap-2">
+                  {productVariants.map((variant: any, idx: number) => (
+                    <button
+                      key={idx}
+                      onClick={() => setSelectedVariantName(variant.name)}
+                      className={`px-4 py-2 rounded-lg text-sm font-semibold border-2 transition-all ${
+                        selectedVariantName === variant.name
+                          ? 'border-[#854cbc] bg-[#854cbc]/10 text-[#854cbc]'
+                          : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                      }`}
+                    >
+                      {variant.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Variations List */}
             <div className="relative">
               <div className="space-y-2 pr-4 max-h-[380px] overflow-y-auto purple-scroll">
-                {(listings.length > 0 ? listings : [product]).map((listing: any, idx: number) => {
+                {(filteredListings.length > 0 ? filteredListings : (productVariants.length > 0 ? [{ ...product, price: currentVariant?.price || product.price, isNotAvailable: true, sellerName: 'No Sellers Available' }] : [product])).map((listing: any, idx: number) => {
                   const itemQty = cartQuantityMap.get(product.id) || 0;
                   const showAdd = itemQty === 0;
                   const price = listing.price || product.price;
@@ -334,7 +374,9 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                       </div>
                       {/* Right Action */}
                       <div className="flex items-center justify-end w-[80px] sm:w-[90px] shrink-0">
-                        {showAdd ? (
+                        {listing.isNotAvailable ? (
+                          <span className="text-[11px] font-bold text-red-500 bg-red-50 px-2.5 py-1 rounded shadow-sm border border-red-100">N/A</span>
+                        ) : showAdd ? (
                           <button onClick={() => addToCart.mutate({ 
                             productId: product.id, 
                             quantity: 1,

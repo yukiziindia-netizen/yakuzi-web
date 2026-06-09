@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { ImageUploader } from "./ImageUploader";
 import { DiscountSelector } from "./DiscountSelector";
 import { CategorySelector } from "./CategorySelector";
+import { VariantBuilder, VariantOption, VariantCombination } from "../ui/variant-builder";
 import type { DiscountFormDetails, Suggestion } from "@yukizi/utils";
 import {
   productFormSchema,
@@ -19,6 +20,7 @@ import {
   VALID_GST_PERCENTAGES,
 } from "@yukizi/utils";
 import { useCreateSellerProduct, useUpdateSellerProduct, useSuggestionSearch } from "@/hooks/useSeller";
+import { getSellerProductById } from "@/api/seller.api";
 
 type FormValues = ProductFormValues;
 
@@ -43,7 +45,6 @@ export function ProductForm({ defaultValues, productId }: { defaultValues?: Part
       product_name: "",
       product_price: 0,
       company_name: "",
-      chemical_combination: "",
       categories: [],
       sub_categories: [],
       stock: 0,
@@ -57,6 +58,9 @@ export function ProductForm({ defaultValues, productId }: { defaultValues?: Part
     },
   });
 
+  const [options, setOptions] = useState<VariantOption[]>([]);
+  const [variants, setVariants] = useState<VariantCombination[]>([]);
+  const [mediaItems, setMediaItems] = useState<any[]>([]);
 
   const watchMrp = watch("product_price");
   const watchGst = watch("gst_percent");
@@ -132,13 +136,10 @@ export function ProductForm({ defaultValues, productId }: { defaultValues?: Part
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isDirty]);
 
-  const handleSuggestionSelect = useCallback((suggestion: Suggestion) => {
+  const handleSuggestionSelect = useCallback(async (suggestion: Suggestion) => {
     setSelectedMasterId(suggestion.id);
     setValue("product_name", suggestion.productName, { shouldDirty: true });
     setValue("company_name", suggestion.companyName, { shouldDirty: true });
-    if (suggestion.chemicalCombination) {
-      setValue("chemical_combination", suggestion.chemicalCombination, { shouldDirty: true });
-    }
     if (suggestion.gstPercent !== undefined) {
       setValue("gst_percent", suggestion.gstPercent, { shouldDirty: true });
     }
@@ -156,6 +157,85 @@ export function ProductForm({ defaultValues, productId }: { defaultValues?: Part
     }
     if (suggestion.images && Array.isArray(suggestion.images)) {
       setValue("image_list", suggestion.images.map((img: any) => typeof img === 'string' ? img : img.url), { shouldDirty: true });
+    }
+
+    try {
+      // Fetch the full product to ensure we get all variants and options
+      const fullProduct = await getSellerProductById(suggestion.id);
+      
+      const optionsToUse = fullProduct?.options || suggestion.options;
+      const variantsToUse = fullProduct?.variants || suggestion.variants;
+
+      let finalOptions: any[] = [];
+      let finalVariants: any[] = [];
+
+      if (optionsToUse && Array.isArray(optionsToUse)) {
+        finalOptions = optionsToUse
+          .filter((o: any) => o && typeof o === 'object' && !Array.isArray(o) && o.name)
+          .map((o: any) => ({
+            id: Math.random().toString(36).substr(2, 9),
+            name: o.name,
+            values: o.values || []
+          }));
+      }
+
+      if (variantsToUse && Array.isArray(variantsToUse)) {
+        finalVariants = variantsToUse.map((v: any) => ({
+          id: Math.random().toString(36).substr(2, 9),
+          name: v.name,
+          price: v.price?.toString() || "0",
+          available: v.available?.toString() || "0",
+          image: v.image
+        }));
+      }
+      
+      // If options is empty but we have variants, reconstruct options to prevent VariantBuilder from clearing variants!
+      if (finalOptions.length === 0 && finalVariants.length > 0) {
+        finalOptions = [{
+          id: Math.random().toString(36).substr(2, 9),
+          name: "Variant",
+          values: finalVariants.map(v => v.name).filter(Boolean)
+        }];
+      }
+
+      setOptions(finalOptions);
+      setVariants(finalVariants);
+    } catch (err) {
+      console.error("Failed to fetch full product details for suggestion", err);
+      // Fallback to suggestion options
+      let finalOptionsFallback: any[] = [];
+      let finalVariantsFallback: any[] = [];
+
+      if (suggestion.options && Array.isArray(suggestion.options)) {
+        finalOptionsFallback = suggestion.options
+          .filter((o: any) => o && typeof o === 'object' && !Array.isArray(o) && o.name)
+          .map((o: any) => ({
+            id: Math.random().toString(36).substr(2, 9),
+            name: o.name,
+            values: o.values || []
+          }));
+      }
+
+      if (suggestion.variants && Array.isArray(suggestion.variants)) {
+        finalVariantsFallback = suggestion.variants.map(v => ({
+          id: Math.random().toString(36).substr(2, 9),
+          name: v.name,
+          price: v.price?.toString() || "0",
+          available: v.available?.toString() || "0",
+          image: v.image
+        }));
+      }
+
+      if (finalOptionsFallback.length === 0 && finalVariantsFallback.length > 0) {
+        finalOptionsFallback = [{
+          id: Math.random().toString(36).substr(2, 9),
+          name: "Variant",
+          values: finalVariantsFallback.map(v => v.name).filter(Boolean)
+        }];
+      }
+
+      setOptions(finalOptionsFallback);
+      setVariants(finalVariantsFallback);
     }
     
     setShowSuggestions(false);
@@ -238,7 +318,6 @@ export function ProductForm({ defaultValues, productId }: { defaultValues?: Part
         name: data.product_name,
         mrp: data.product_price,
         manufacturer: data.company_name,
-        chemicalComposition: data.chemical_combination || "N/A",
         categoryId: data.categories[0],
         ...(data.sub_categories?.length && { subCategoryId: data.sub_categories[0] }),
         stock: data.stock,
@@ -251,6 +330,13 @@ export function ProductForm({ defaultValues, productId }: { defaultValues?: Part
         ...(mappedDiscountType && { discountType: mappedDiscountType }),
         ...(Object.keys(discountMeta).length > 0 && { discountMeta }),
         ...(selectedMasterId && { masterProductId: selectedMasterId }),
+        ...(options.length > 0 && { options: options.map(o => ({ name: o.name, values: o.values })) }),
+        ...(variants.length > 0 && { variants: variants.map(v => ({ 
+          name: v.name, 
+          price: Number(v.price), 
+          available: Number(v.available),
+          image: v.image
+        })) }),
       };
 
       if (isEditing) {
@@ -334,9 +420,6 @@ export function ProductForm({ defaultValues, productId }: { defaultValues?: Part
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input label="Product Name *" error={errors.product_name?.message} {...register("product_name")} disabled={!!selectedMasterId} />
             <Input label="Company / Manufacturer *" error={errors.company_name?.message} {...register("company_name")} disabled={!!selectedMasterId} />
-            <div className="md:col-span-2">
-              <Textarea label="Chemical Combination" error={errors.chemical_combination?.message} {...register("chemical_combination")} disabled={!!selectedMasterId} />
-            </div>
           </div>
         </div>
 
@@ -436,8 +519,20 @@ export function ProductForm({ defaultValues, productId }: { defaultValues?: Part
           </div>
         </div>
 
-        {/* Discounts & Pricing Engine */}
+        {/* Variants */}
         <div className="glass-card rounded-2xl p-6 space-y-4 relative z-[42] transition-opacity duration-300">
+          <VariantBuilder 
+            options={options} 
+            onChangeOptions={setOptions} 
+            variants={variants}
+            onChangeVariants={setVariants}
+            productMedia={mediaItems}
+            onAddProductMedia={(items) => setMediaItems(prev => [...prev, ...items])}
+          />
+        </div>
+
+        {/* Discounts & Pricing Engine */}
+        <div className="glass-card rounded-2xl p-6 space-y-4 relative z-[41] transition-opacity duration-300">
           <h2 className="font-semibold text-lg text-foreground border-b border-border/50 pb-2">Discount & Bonuses</h2>
           <Controller
             control={control}

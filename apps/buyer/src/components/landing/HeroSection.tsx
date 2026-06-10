@@ -109,20 +109,20 @@ export default function HeroSection({ title = 'YUKiZi' }: HeroSectionProps) {
             />
 
             <img
-              src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Shingeki_no_Kyojin_logo.svg"
-              alt="Attack on Titan"
-              className="h-8 md:h-12 w-auto object-contain cursor-pointer mix-blend-multiply filter contrast-125"
-            />
-
-            <img
-              src="https://upload.wikimedia.org/wikipedia/commons/2/29/One_Piece_Logo.svg"
-              alt="One Piece"
+              src="/banner2.jpg"
+              alt="Banner 2"
               className="h-8 md:h-12 w-auto object-contain cursor-pointer mix-blend-multiply"
             />
 
             <img
-              src="https://upload.wikimedia.org/wikipedia/commons/0/05/Bleach_logo.svg"
-              alt="Bleach"
+              src="/banner3.jpg"
+              alt="Banner 3"
+              className="h-8 md:h-12 w-auto object-contain cursor-pointer mix-blend-multiply"
+            />
+
+            <img
+              src="/banner4.jpg"
+              alt="Banner 4"
               className="h-8 md:h-12 w-auto object-contain cursor-pointer mix-blend-multiply"
             />
           </div>

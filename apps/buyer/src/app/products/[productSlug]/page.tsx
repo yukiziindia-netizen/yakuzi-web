@@ -131,10 +131,10 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
     }
   }, [productVariants, selectedVariantName]);
 
-  const cartQuantityMap = new Map<string, number>();
+  const cartItemMap = new Map<string, any>();
   if (cartData?.items) {
     cartData.items.forEach((item: any) => {
-      if (item.productId) cartQuantityMap.set(item.productId, item.quantity);
+      if (item.productId) cartItemMap.set(item.productId, item);
     });
   }
 
@@ -340,7 +340,8 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
             <div className="relative">
               <div className="space-y-2 pr-4 max-h-[380px] overflow-y-auto purple-scroll">
                 {(filteredListings.length > 0 ? filteredListings : (productVariants.length > 0 ? [{ ...product, price: currentVariant?.price || product.price, isNotAvailable: true, sellerName: 'No Sellers Available' }] : [product])).map((listing: any, idx: number) => {
-                  const itemQty = cartQuantityMap.get(product.id) || 0;
+                  const cartItem = cartItemMap.get(product.id);
+                  const itemQty = cartItem?.quantity || 0;
                   const showAdd = itemQty === 0;
                   const price = listing.price || product.price;
                   const discountStr = listing.discount ? `${listing.discount}% off` : 'Special';
@@ -396,10 +397,10 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                               className="text-white cursor-pointer hover:opacity-80" 
                               strokeWidth={3} 
                               onClick={() => {
-                                if (itemQty > 1) {
-                                  updateCartItem.mutate({ productId: product.id, quantity: itemQty - 1 });
-                                } else {
-                                  removeCartItem.mutate(product.id);
+                                if (itemQty > 1 && cartItem) {
+                                  updateCartItem.mutate({ itemId: cartItem.id, quantity: itemQty - 1 });
+                                } else if (cartItem) {
+                                  removeCartItem.mutate(cartItem.id);
                                 }
                               }}
                             />
@@ -408,7 +409,11 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                               size={12} 
                               className="text-white cursor-pointer hover:opacity-80" 
                               strokeWidth={3} 
-                              onClick={() => updateCartItem.mutate({ productId: product.id, quantity: itemQty + 1 })}
+                              onClick={() => {
+                                if (cartItem) {
+                                  updateCartItem.mutate({ itemId: cartItem.id, quantity: itemQty + 1 });
+                                }
+                              }}
                             />
                           </div>
                         )}

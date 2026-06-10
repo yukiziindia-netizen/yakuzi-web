@@ -23,9 +23,9 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
   const addToWishlist = useAddToWishlist();
   const { data: wishlistData } = useWishlist();
 
-  const isYukiziChoice = index % 3 === 0;
-  const isBestSeller = index % 3 === 1;
-  const hasAd = isYukiziChoice || isBestSeller;
+  const isYukiziChoice = product.isYukiziChoice === true;
+  const isBestSeller = product.isBestSeller === true;
+  const hasAd = product.isAd === true;
   const hasBottomRow = index % 3 !== 2;
 
   const discountPercent = product.mrp && product.price && product.mrp > product.price

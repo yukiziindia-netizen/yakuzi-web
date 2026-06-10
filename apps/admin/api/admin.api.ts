@@ -343,7 +343,7 @@ export async function deleteAdmin(adminId: string) {
 }
 
 // ─── Suggestions / Catalog ───────────────────────────
-export async function getSuggestions(params: { page?: number; limit?: number; search?: string } = {}) {
+export async function getSuggestions(params: { page?: number; limit?: number; search?: string; badgeType?: string } = {}) {
   const qs = new URLSearchParams();
   Object.entries(params).forEach(([k, v]) => { if (v) qs.set(k, String(v)); });
   const { data } = await apiClient.get<any>(`/admin/suggestions?${qs}`);

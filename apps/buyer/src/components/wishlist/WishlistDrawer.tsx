@@ -118,7 +118,7 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                   const itemImage = (!itemImageRaw || itemImageRaw === '/products/pharma_bottle.png')
                     ? `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent(initials)}`
                     : itemImageRaw;
-                  const isYukiziChoice = item.isYukiziChoice ?? (idx % 3 === 0);
+                  const isYukiziChoice = item.product?.isYukiziChoice === true || item.isYukiziChoice === true;
                   const quantity = item.quantity ?? 1;
 
                   return (

@@ -34,7 +34,10 @@ export default function AddProductPage() {
     chemicalComposition: "",
     categoryId: "",
     subCategoryId: "",
-    status: "active"
+    status: "active",
+    isYukiziChoice: false,
+    isBestSeller: false,
+    isAd: false
   });
 
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
@@ -67,6 +70,9 @@ export default function AddProductPage() {
         categoryId: form.categoryId,
         subCategoryId: form.subCategoryId || undefined,
         isActive: form.status === "active",
+        isYukiziChoice: form.isYukiziChoice,
+        isBestSeller: form.isBestSeller,
+        isAd: form.isAd,
         images: mediaItems.filter(m => !m.isLoading).map(m => m.url),
         options: options.length > 0 ? options.map(o => ({ name: o.name, values: o.values })) : undefined,
         variants: variants.length > 0 ? variants.map(v => ({ 
@@ -222,6 +228,25 @@ export default function AddProductPage() {
               <p className="text-xs text-muted-foreground mt-2">
                 This product will be hidden from all sales channels if set to Draft.
               </p>
+            </motion.div>
+
+            {/* Badges */}
+            <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.03 }} className="glass-card rounded-2xl p-6 border border-border/50 space-y-4">
+              <h3 className="text-base font-semibold text-foreground">Badges</h3>
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={form.isYukiziChoice} onChange={e => setForm(f => ({ ...f, isYukiziChoice: e.target.checked }))} className="h-4 w-4 rounded border-border bg-background text-primary focus:ring-primary" />
+                  <span className="text-sm text-foreground">Yukizi Choice</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={form.isBestSeller} onChange={e => setForm(f => ({ ...f, isBestSeller: e.target.checked }))} className="h-4 w-4 rounded border-border bg-background text-primary focus:ring-primary" />
+                  <span className="text-sm text-foreground">Best Seller</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={form.isAd} onChange={e => setForm(f => ({ ...f, isAd: e.target.checked }))} className="h-4 w-4 rounded border-border bg-background text-primary focus:ring-primary" />
+                  <span className="text-sm text-foreground">Ad</span>
+                </label>
+              </div>
             </motion.div>
 
             {/* Product Organization */}

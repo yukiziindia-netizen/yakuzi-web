@@ -1,59 +1,50 @@
 "use client";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Plus, Trash2, Layout, Star, ArrowUp } from "lucide-react";
+import { Search, Plus, Trash2, Layout, Star } from "lucide-react";
 import { AdminLayout } from "@/components/layout/admin-layout";
-import { Button, Input, Badge, Pagination } from "@/components/ui";
-import { formatCurrency } from "@yukizi/utils";
+import { Button, Input, Badge } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { 
-  useMarketingProducts, 
-  useAddMarketingProduct, 
-  useRemoveMarketingProduct,
-  useAdminProductsFiltered 
+  useSuggestions,
+  useUpdateSuggestion,
 } from "@/hooks/useAdmin";
 
+type BadgeType = "YUKIZI_CHOICE" | "BEST_SELLER" | "AD";
+
 export default function MarketingPage() {
-  const [slot, setSlot] = useState<"HOMEPAGE_CAROUSEL" | "LOGIN_CAROUSEL">("HOMEPAGE_CAROUSEL");
-  const [search, setSearch] = useState("");
+  const [slot, setSlot] = useState<BadgeType>("YUKIZI_CHOICE");
   const [showAddModal, setShowAddModal] = useState(false);
   const [productSearch, setProductSearch] = useState("");
 
-  const { data: marketingProducts, isLoading: loadingMarketing } = useMarketingProducts(slot);
-  const addMarketing = useAddMarketingProduct();
-  const removeMarketing = useRemoveMarketingProduct();
+  const { data: suggestionsData, isLoading: loadingMarketing } = useSuggestions({ badgeType: slot, limit: 100 });
+  const updateSuggestion = useUpdateSuggestion();
   
   // For searching products to add
-  const { data: productsData } = useAdminProductsFiltered({ 
+  const { data: productsData } = useSuggestions({ 
     search: productSearch, 
     limit: 10
   });
 
-  const featuredList = Array.isArray(marketingProducts) ? marketingProducts : (marketingProducts?.data ?? []);
+  const featuredList = suggestionsData?.data ?? [];
   const searchResults = productsData?.data ?? [];
 
-  const handleAddProduct = async (productId: string) => {
+  const handleToggleBadge = async (productId: string, isAdding: boolean) => {
     try {
-      await addMarketing.mutateAsync({ 
-        productId, 
-        slot, 
-        order: (featuredList.length > 0 ? Math.max(...featuredList.map((p: any) => p.order ?? 0)) + 1 : 0)
-      });
-      toast.success("Product added to carousel");
-      setProductSearch("");
-      setShowAddModal(false);
-    } catch {
-      toast.error("Failed to add product");
-    }
-  };
+      const payload: any = {};
+      if (slot === "YUKIZI_CHOICE") payload.isYukiziChoice = isAdding;
+      if (slot === "BEST_SELLER") payload.isBestSeller = isAdding;
+      if (slot === "AD") payload.isAd = isAdding;
 
-  const handleRemove = async (id: string) => {
-    try {
-      await removeMarketing.mutateAsync(id);
-      toast.success("Product removed");
+      await updateSuggestion.mutateAsync({ id: productId, payload });
+      toast.success(isAdding ? "Product added to section" : "Product removed from section");
+      if (isAdding) {
+        setProductSearch("");
+        setShowAddModal(false);
+      }
     } catch {
-      toast.error("Failed to remove");
+      toast.error("Failed to update product");
     }
   };
 
@@ -66,7 +57,7 @@ export default function MarketingPage() {
               <Layout className="h-6 w-6 text-primary" />
               Marketing Management
             </h1>
-            <p className="text-sm text-muted-foreground mt-0.5"> Manage featured products for carousels</p>
+            <p className="text-sm text-muted-foreground mt-0.5">Manage products with special marketing badges</p>
           </div>
           <Button onClick={() => setShowAddModal(true)} leftIcon={<Plus className="h-4 w-4" />}>
             Add Featured Product
@@ -74,7 +65,7 @@ export default function MarketingPage() {
         </div>
 
         <div className="flex gap-1.5 overflow-x-auto no-sb pb-1" role="group">
-          {(["HOMEPAGE_CAROUSEL", "LOGIN_CAROUSEL"] as const).map(f => (
+          {(["YUKIZI_CHOICE", "BEST_SELLER", "AD"] as const).map(f => (
             <button key={f} onClick={() => setSlot(f)}
               className={cn("px-4 py-2 rounded-xl text-sm font-medium border transition-all whitespace-nowrap", 
                 slot === f ? "bg-primary text-white border-primary shadow-lg shadow-primary/20" : "border-border text-muted-foreground hover:bg-accent/60")}>
@@ -89,38 +80,29 @@ export default function MarketingPage() {
               <thead>
                 <tr className="border-b border-border/50 bg-muted/20">
                   <th className="px-5 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Product</th>
-                  <th className="px-5 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Seller</th>
-                  <th className="px-5 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Priority</th>
+                  <th className="px-5 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Manufacturer</th>
                   <th className="px-5 py-3.5 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/30">
                 {loadingMarketing ? (
-                  <tr><td colSpan={4} className="py-12 text-center text-sm text-muted-foreground">Loading...</td></tr>
+                  <tr><td colSpan={3} className="py-12 text-center text-sm text-muted-foreground">Loading...</td></tr>
                 ) : featuredList.length === 0 ? (
-                  <tr><td colSpan={4} className="py-12 text-center text-sm text-muted-foreground">No featured products in this slot</td></tr>
+                  <tr><td colSpan={3} className="py-12 text-center text-sm text-muted-foreground">No featured products in this slot</td></tr>
                 ) : featuredList.map((item: any, i: number) => (
                   <motion.tr key={item.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }} className="hover:bg-accent/30 transition-colors">
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-xl">💊</div>
                         <div>
-                          <p className="text-sm font-semibold text-foreground">{item.product?.name}</p>
-                          <p className="text-xs text-muted-foreground">{item.product?.manufacturer}</p>
+                          <p className="text-sm font-semibold text-foreground">{item.name}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-5 py-4 text-sm text-muted-foreground">
-                      {item.product?.seller?.companyName}
-                    </td>
-                    <td className="px-5 py-4">
-                      <Badge variant="info" className="flex items-center gap-1 w-fit">
-                        <ArrowUp className="h-3 w-3" />
-                        {item.order}
-                      </Badge>
+                      {item.manufacturer ?? "—"}
                     </td>
                     <td className="px-5 py-4 text-right">
-                      <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-600 hover:bg-red-50" onClick={() => handleRemove(item.id)}>
+                      <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-600 hover:bg-red-50" onClick={() => handleToggleBadge(item.id, false)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </td>
@@ -141,7 +123,7 @@ export default function MarketingPage() {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold flex items-center gap-2">
                 <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
-                Add Product to {slot === "HOMEPAGE_CAROUSEL" ? "Homepage" : "Login"}
+                Add Product to {slot.replace("_", " ")}
               </h2>
               <button onClick={() => setShowAddModal(false)} className="text-muted-foreground hover:text-foreground transition-colors text-xl">&times;</button>
             </div>
@@ -149,7 +131,7 @@ export default function MarketingPage() {
             <div className="space-y-4">
               <div className="max-w-md">
                 <Input 
-                  placeholder="Search products by name or manufacturer..." 
+                  placeholder="Search catalog products by name or manufacturer..." 
                   value={productSearch} 
                   onChange={e => setProductSearch(e.target.value)}
                   leftIcon={<Search className="h-4 w-4" />}
@@ -164,43 +146,28 @@ export default function MarketingPage() {
                       <tr className="border-b border-border/50 text-left">
                         <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Product</th>
                         <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Manufacturer</th>
-                        <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Verified</th>
-                        <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Posted</th>
                         <th className="px-4 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border/20">
                       {searchResults.length === 0 ? (
                         <tr>
-                          <td colSpan={5} className="py-12 text-center text-muted-foreground">
+                          <td colSpan={3} className="py-12 text-center text-muted-foreground">
                             {productSearch.length < 2 ? "Type at least 2 characters to search" : "No products found"}
                           </td>
                         </tr>
                       ) : searchResults.map((p: any) => {
-                        const isApproved = (p.approvalStatus ?? "").toUpperCase() === "APPROVED";
-                        const isPosted = !!p.isActive;
                         return (
                           <tr key={p.id} className="hover:bg-accent/30 transition-colors group">
                             <td className="px-4 py-3">
                               <div className="font-medium text-foreground">{p.name}</div>
                             </td>
                             <td className="px-4 py-3 text-muted-foreground">{p.manufacturer ?? "—"}</td>
-                            <td className="px-4 py-3">
-                              <Badge variant={isApproved ? "success" : "warning"} className="text-[10px] h-5">
-                                {isApproved ? "Verified" : "Pending"}
-                              </Badge>
-                            </td>
-                            <td className="px-4 py-3">
-                              <Badge variant={isPosted ? "success" : "error"} className="text-[10px] h-5">
-                                {isPosted ? "Posted" : "Hidden"}
-                              </Badge>
-                            </td>
                             <td className="px-4 py-3 text-right">
                               <Button 
                                 size="xs" 
-                                disabled={!isApproved || !isPosted}
-                                onClick={() => handleAddProduct(p.id)} 
-                                loading={addMarketing.isPending}
+                                onClick={() => handleToggleBadge(p.id, true)} 
+                                loading={updateSuggestion.isPending}
                               >
                                 Add
                               </Button>
@@ -214,7 +181,7 @@ export default function MarketingPage() {
               </div>
 
               <div className="flex justify-between items-center pt-2">
-                <p className="text-xs text-muted-foreground">Only verified and posted products can be featured in carousels.</p>
+                <p className="text-xs text-muted-foreground">Products added here will be shown in the selected section.</p>
                 <Button variant="ghost" onClick={() => setShowAddModal(false)}>Close</Button>
               </div>
             </div>

@@ -39,3 +39,4 @@ export { cn } from './lib/utils';
 
 // Theme
 export { theme, type Theme } from './theme';
+export { ChatbotWidget } from './components/ChatbotWidget';

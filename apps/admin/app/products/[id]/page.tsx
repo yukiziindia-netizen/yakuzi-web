@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -36,6 +36,9 @@ export default function ProductDetailPage() {
       description: product?.description ?? "",
       hsnCode: product?.hsnCode ?? "",
       gstPercent: product?.gstPercent ?? "",
+      isYukiziChoice: product?.isYukiziChoice ?? false,
+      isBestSeller: product?.isBestSeller ?? false,
+      isAd: product?.isAd ?? false,
     });
     setEditing(true);
   };
@@ -199,6 +202,45 @@ export default function ProductDetailPage() {
                 </div>
               </div>
             </motion.div>
+
+            {/* Badges */}
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="glass-card rounded-2xl p-6">
+              <h2 className="font-semibold text-foreground mb-4">Badges</h2>
+              <div className="space-y-3">
+                {editing ? (
+                  <>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={form.isYukiziChoice} onChange={e => setForm(f => ({ ...f, isYukiziChoice: e.target.checked }))} className="h-4 w-4 rounded border-border bg-background text-primary focus:ring-primary" />
+                      <span className="text-sm text-foreground">Yukizi Choice</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={form.isBestSeller} onChange={e => setForm(f => ({ ...f, isBestSeller: e.target.checked }))} className="h-4 w-4 rounded border-border bg-background text-primary focus:ring-primary" />
+                      <span className="text-sm text-foreground">Best Seller</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={form.isAd} onChange={e => setForm(f => ({ ...f, isAd: e.target.checked }))} className="h-4 w-4 rounded border-border bg-background text-primary focus:ring-primary" />
+                      <span className="text-sm text-foreground">Ad</span>
+                    </label>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Yukizi Choice</span>
+                      <Badge variant={product.isYukiziChoice ? "success" : "default"}>{product.isYukiziChoice ? "Yes" : "No"}</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Best Seller</span>
+                      <Badge variant={product.isBestSeller ? "success" : "default"}>{product.isBestSeller ? "Yes" : "No"}</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Ad</span>
+                      <Badge variant={product.isAd ? "success" : "default"}>{product.isAd ? "Yes" : "No"}</Badge>
+                    </div>
+                  </>
+                )}
+              </div>
+            </motion.div>
+
 
             {/* Seller */}
             {product.seller && (

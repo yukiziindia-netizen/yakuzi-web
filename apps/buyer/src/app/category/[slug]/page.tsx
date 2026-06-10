@@ -17,7 +17,7 @@ export default async function CategoryPage({ params }: { params: { slug: string 
     if (category) {
       categoryName = category.name;
       categoryId = category.id;
-      categoryImage = category.image;
+      categoryImage = category.image || undefined;
       if (categoryImage && categoryImage.startsWith('/')) {
         const base = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000").replace(/\/api$/, "");
         categoryImage = `${base}${categoryImage}`;

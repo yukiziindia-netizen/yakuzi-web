@@ -7,6 +7,8 @@ import { Providers } from './providers';
 
 const openSans = Open_Sans({ subsets: ['latin'] });
 
+import { ChatbotWidget } from '@yukizi/ui';
+
 export const metadata: Metadata = {
   title: 'Yukizi',
   description: 'India\'s Only Trusted B2B Pharma Platform for Wholesalers',
@@ -21,7 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div style={{ flex: 1 }}>
               {children}
             </div>
-
+            <ChatbotWidget />
           </div>
         </Providers>
       </body>

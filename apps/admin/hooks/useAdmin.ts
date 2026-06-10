@@ -377,7 +377,7 @@ export function useDeleteAdmin() {
 
 // ─── Suggestions ─────────────────────────────────────
 
-export function useSuggestions(params: { page?: number; limit?: number; search?: string } = {}) {
+export function useSuggestions(params: { page?: number; limit?: number; search?: string; badgeType?: string } = {}) {
   return useQuery({ queryKey: ["admin", "suggestions", params], queryFn: () => getSuggestions(params), staleTime: 60_000, retry: 1 });
 }
 

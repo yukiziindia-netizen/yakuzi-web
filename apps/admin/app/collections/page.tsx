@@ -10,6 +10,7 @@ import {
   useCategories, useCreateCategory, useUpdateCategory, useDeleteCategory,
   useSubCategories, useCreateSubCategory, useUpdateSubCategory, useDeleteSubCategory
 } from "@/hooks/useAdmin";
+import { uploadImage } from "@/api/admin.api";
 
 export default function AdminCollectionsPage() {
   const [view, setView] = useState<"categories" | "subcategories">("categories");
@@ -44,7 +45,11 @@ export default function AdminCollectionsPage() {
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const [addType, setAddType] = useState<"categories" | "subcategories">("categories");
   const [editId, setEditId] = useState("");
-  const [formData, setFormData] = useState({ name: "", categoryId: "" });
+  const [formData, setFormData] = useState({ name: "", categoryId: "", image: "" });
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
 
   const categories = Array.isArray(categoriesData) ? categoriesData : (categoriesData?.categories ?? []);
   const subCategories = Array.isArray(subCatsData) ? subCatsData : (subCatsData?.subCategories ?? []);
@@ -56,7 +61,10 @@ export default function AdminCollectionsPage() {
     setFormData({
       name: "",
       categoryId: categories.length > 0 ? categories[0].id : "",
+      image: "",
     });
+    setFile(null);
+    setPreview(null);
     setAddPickerOpen(false);
     setModalOpen(true);
   };
@@ -70,24 +78,45 @@ export default function AdminCollectionsPage() {
     setFormData({
       name: item.name || "",
       categoryId: item.categoryId || (categories.length > 0 ? categories[0].id : ""),
+      image: item.image || "",
     });
+    setFile(null);
+    setPreview(item.image || null);
     setModalOpen(true);
   };
 
   const closeModal = () => {
     setModalOpen(false);
-    setFormData({ name: "", categoryId: "" });
+    setFormData({ name: "", categoryId: "", image: "" });
+    setFile(null);
+    setPreview(null);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setFile(f);
+    const reader = new FileReader();
+    reader.onloadend = () => setPreview(reader.result as string);
+    reader.readAsDataURL(f);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      let finalImage = formData.image;
+      if (file) {
+        setUploading(true);
+        finalImage = await uploadImage(file);
+        setUploading(false);
+      }
+
       if (addType === "categories") {
         if (modalMode === "create") {
-          await createCat.mutateAsync({ name: formData.name });
+          await createCat.mutateAsync({ name: formData.name, image: finalImage });
           toast.success("Collection created");
         } else {
-          await updateCat.mutateAsync({ id: editId, payload: { name: formData.name } });
+          await updateCat.mutateAsync({ id: editId, payload: { name: formData.name, image: finalImage } });
           toast.success("Collection updated");
         }
       } else {
@@ -102,6 +131,7 @@ export default function AdminCollectionsPage() {
       }
       closeModal();
     } catch (error: any) {
+      setUploading(false);
       toast.error(error?.response?.data?.message || "Operation failed");
     }
   };
@@ -264,9 +294,36 @@ export default function AdminCollectionsPage() {
                     </div>
                   )}
                   <Input label="Name" value={formData.name} onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))} placeholder="e.g. Antibiotics" required autoFocus />
+                  
+                  {addType === "categories" && (
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-1.5">Collection Image</label>
+                      <input ref={fileRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+                      {preview ? (
+                        <div className="relative aspect-[16/9] w-full rounded-xl overflow-hidden group">
+                          <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button type="button" variant="ghost" className="text-white hover:bg-white/20" onClick={() => fileRef.current?.click()}>
+                              Change Image
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <button type="button" onClick={() => fileRef.current?.click()}
+                          className="w-full aspect-[16/9] border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-muted/50 hover:border-primary/50 transition-colors">
+                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                            <Plus className="h-5 w-5" />
+                          </div>
+                          <div className="text-sm font-medium text-foreground">Upload Image</div>
+                          <div className="text-xs text-muted-foreground">Recommend 1200x400px</div>
+                        </button>
+                      )}
+                    </div>
+                  )}
+
                   <div className="pt-4 flex justify-end gap-3">
                     <Button type="button" variant="ghost" onClick={closeModal}>Cancel</Button>
-                    <Button type="submit" loading={createCat.isPending || updateCat.isPending || createSubCat.isPending || updateSubCat.isPending}>
+                    <Button type="submit" loading={createCat.isPending || updateCat.isPending || createSubCat.isPending || updateSubCat.isPending || uploading}>
                       {modalMode === "create" ? "Create" : "Save Changes"}
                     </Button>
                   </div>

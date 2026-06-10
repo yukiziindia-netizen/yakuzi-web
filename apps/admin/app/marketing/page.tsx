@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Search, Plus, Trash2, Layout, Star, ArrowUp } from "lucide-react";
@@ -38,7 +38,7 @@ export default function MarketingPage() {
       await addMarketing.mutateAsync({ 
         productId, 
         slot, 
-        priority: (featuredList.length > 0 ? Math.max(...featuredList.map((p: any) => p.priority ?? 0)) + 1 : 0)
+        order: (featuredList.length > 0 ? Math.max(...featuredList.map((p: any) => p.order ?? 0)) + 1 : 0)
       });
       toast.success("Product added to carousel");
       setProductSearch("");
@@ -116,7 +116,7 @@ export default function MarketingPage() {
                     <td className="px-5 py-4">
                       <Badge variant="info" className="flex items-center gap-1 w-fit">
                         <ArrowUp className="h-3 w-3" />
-                        {item.priority}
+                        {item.order}
                       </Badge>
                     </td>
                     <td className="px-5 py-4 text-right">

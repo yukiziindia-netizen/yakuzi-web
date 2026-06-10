@@ -1,7 +1,15 @@
-﻿'use client';
+'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { getProducts, getProductById, getCategories, getManufacturers, getCities, getDiscountDetails } from '@yukizi/api-client';
+import { getProducts, getProductById, getCategories, getManufacturers, getCities, getDiscountDetails, getBrands } from '@yukizi/api-client';
+
+export function useBrands() {
+  return useQuery({
+    queryKey: ['brands'],
+    queryFn: getBrands,
+    staleTime: 60 * 60 * 1000,
+  });
+}
 
 export function useProducts(params?: {
   page?: number;

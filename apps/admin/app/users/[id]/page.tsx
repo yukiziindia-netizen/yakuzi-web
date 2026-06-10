@@ -18,7 +18,7 @@ const getFullUrl = (url: string) => {
 
 function SecureDocViewer({ url, label, number, expiry }: { url: string; label: string; number?: string; expiry?: string }) {
   const { data: presignedUrl, isLoading } = usePresignedUrl(url);
-  const displayUrl = presignedUrl || getFullUrl(url);
+  const displayUrl = (typeof presignedUrl === 'object' && presignedUrl !== null ? (presignedUrl as any).url : presignedUrl) || getFullUrl(url);
   const isImage = /\.(jpe?g|png|webp)$/i.test(url);
 
   if (isLoading) return <div className="space-y-1"><div className="h-4 w-32 bg-muted/50 animate-pulse rounded" /><div className="h-20 w-32 bg-muted/50 animate-pulse rounded-lg" /></div>;

@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Bell,
@@ -553,11 +553,13 @@ export default function Navbar({
         onClose={() => setIsWishlistOpen(false)}
       />
 
-      <SidebarSheet
-        view={sidebarView}
-        onClose={() => setSidebarView(null)}
-        onViewChange={setSidebarView}
-      />
+      <Suspense fallback={null}>
+        <SidebarSheet
+          view={sidebarView}
+          onClose={() => setSidebarView(null)}
+          onViewChange={setSidebarView}
+        />
+      </Suspense>
 
       <NotificationDrawer
         isOpen={isNotificationsOpen}

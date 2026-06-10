@@ -178,3 +178,9 @@ export {
   type ChatRequest,
   type ChatResponse,
 } from './modules/chatbot.api';
+
+// Brands
+export {
+  getBrands,
+  type Brand,
+} from './modules/brands.api';

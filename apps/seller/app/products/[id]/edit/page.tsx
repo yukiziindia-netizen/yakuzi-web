@@ -40,8 +40,6 @@ export default function EditProductPage() {
                 stock: product.stock || 0,
                 min_order_qty: product.minimumOrderQuantity || 1,
                 max_order_qty: product.maximumOrderQuantity || 100,
-                expire_date: product.expiryDate || "",
-                gst_percent: product.gstPercent || 12,
                 image_list: product.images || [],
                 custom_extra_fields: product.extraFields || [],
                 discount_form_details: product.discountFormDetails || (product.discountType ? {

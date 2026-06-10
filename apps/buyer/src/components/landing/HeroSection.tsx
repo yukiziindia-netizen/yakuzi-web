@@ -2,7 +2,7 @@
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
-import { useCategories } from "@/hooks/useProducts";
+import { useCategories, useBrands } from "@/hooks/useProducts";
 
 interface HeroSectionProps {
   title?: string;
@@ -10,7 +10,20 @@ interface HeroSectionProps {
 
 export default function HeroSection({ title = 'YUKiZi' }: HeroSectionProps) {
   const { data: categoriesData } = useCategories();
+  const { data: brandsData, isLoading: isLoadingBrands } = useBrands();
+  
   const categories = Array.isArray(categoriesData) ? categoriesData : (categoriesData as any)?.data ?? [];
+  const brands = Array.isArray(brandsData) ? brandsData.filter(b => b.isActive !== false) : [];
+
+  // Fallback images if no brands exist in the database yet
+  const fallbackBrands = [
+    { id: '1', name: 'Naruto', imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/c/c9/Naruto_logo.svg' },
+    { id: '2', name: 'Attack on Titan', imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/d/d8/Attack_on_Titan_logo.png' },
+    { id: '3', name: 'One Piece', imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/2/29/One_Piece_Logo.svg' },
+    { id: '4', name: 'Demon Slayer', imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/9/91/Demon_Slayer_Kimetsu_no_Yaiba_logo.svg' },
+  ];
+
+  const displayBrands = brands.length > 0 ? brands : fallbackBrands;
 
   return (
     <div className="w-full bg-white flex flex-col relative z-10">
@@ -101,30 +114,18 @@ export default function HeroSection({ title = 'YUKiZi' }: HeroSectionProps) {
 
           {/* Logos */}
           <div className="flex items-center justify-center gap-6 md:gap-12 flex-wrap">
-
-            <img
-              src="https://upload.wikimedia.org/wikipedia/commons/c/c9/Naruto_logo.svg"
-              alt="Naruto"
-              className="h-8 md:h-12 w-auto object-contain cursor-pointer mix-blend-multiply"
-            />
-
-            <img
-              src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Shingeki_no_Kyojin_logo.svg"
-              alt="Attack on Titan"
-              className="h-8 md:h-12 w-auto object-contain cursor-pointer mix-blend-multiply filter contrast-125"
-            />
-
-            <img
-              src="https://upload.wikimedia.org/wikipedia/commons/2/29/One_Piece_Logo.svg"
-              alt="One Piece"
-              className="h-8 md:h-12 w-auto object-contain cursor-pointer mix-blend-multiply"
-            />
-
-            <img
-              src="https://upload.wikimedia.org/wikipedia/commons/0/05/Bleach_logo.svg"
-              alt="Bleach"
-              className="h-8 md:h-12 w-auto object-contain cursor-pointer mix-blend-multiply"
-            />
+            {isLoadingBrands ? (
+              <span className="text-gray-400 italic text-sm">Loading brands...</span>
+            ) : (
+              displayBrands.map((brand: any) => (
+                <img
+                  key={brand.id}
+                  src={brand.imageUrl}
+                  alt={brand.name}
+                  className="h-8 md:h-12 w-auto object-contain cursor-pointer mix-blend-multiply transition-transform hover:scale-110"
+                />
+              ))
+            )}
           </div>
 
           {/* Right Arrow */}

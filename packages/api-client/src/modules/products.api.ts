@@ -82,6 +82,7 @@ export const CategorySchema = z.object({
   name: z.string(),
   label: z.string().optional(),
   slug: z.string().optional(),
+  image: z.string().optional().nullable(),
   description: z.string().optional(),
   productCount: z.number().optional(),
   subCategories: z.array(SubCategorySchema).optional(),

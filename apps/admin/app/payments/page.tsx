@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -12,7 +12,7 @@ import { usePayments, useConfirmPayment, useRejectPayment, usePresignedUrl } fro
 
 function SecureLink({ url, className, children, title }: { url: string; className?: string; children: React.ReactNode; title?: string }) {
   const { data: presignedUrl } = usePresignedUrl(url);
-  const displayUrl = presignedUrl || (url.startsWith("http") ? url : "");
+  const displayUrl = (typeof presignedUrl === 'object' && presignedUrl !== null ? (presignedUrl as any).url : presignedUrl) || (url.startsWith("http") ? url : "");
   if (!displayUrl) return null;
   return (
     <a href={displayUrl} target="_blank" rel="noopener noreferrer" title={title} className={className}>

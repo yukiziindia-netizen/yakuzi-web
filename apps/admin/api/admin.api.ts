@@ -179,12 +179,12 @@ export async function getCategories() {
   return data.data;
 }
 
-export async function createCategory(payload: { name: string }) {
+export async function createCategory(payload: { name: string; image?: string }) {
   const { data } = await apiClient.post<{ data: any }>("/admin/categories", payload);
   return data.data;
 }
 
-export async function updateCategory(id: string, payload: { name?: string }) {
+export async function updateCategory(id: string, payload: { name?: string; image?: string }) {
   const { data } = await apiClient.patch<{ data: any }>(`/admin/categories/${id}`, payload);
   return data.data;
 }
@@ -488,12 +488,12 @@ export async function getTopSellers(params: { limit?: number } = {}) {
 }
 // ─── Marketing ─────────────────────────────────────────
 export async function getMarketingProducts(slot?: string) {
-  const qs = slot ? `?slot=${slot}` : "";
-  const { data } = await apiClient.get<{ data: any }>(`/admin/marketing${qs}`);
+  const url = slot ? `/admin/marketing?slot=${slot}` : "/admin/marketing";
+  const { data } = await apiClient.get<{ data: any }>(url);
   return data.data;
 }
 
-export async function addMarketingProduct(payload: { productId: string; slot: string; priority?: number }) {
+export async function addMarketingProduct(payload: { productId: string; slot: string; order?: number }) {
   const { data } = await apiClient.post<{ data: any }>("/admin/marketing", payload);
   return data.data;
 }
@@ -503,11 +503,41 @@ export async function removeMarketingProduct(id: string) {
   return data.data;
 }
 
+// ─── Brands ──────────────────────────────────────────
+export async function getAdminBrands() {
+  const { data } = await apiClient.get<{ data: any }>("/admin/brands");
+  return data.data;
+}
+
+export async function createBrand(payload: { name: string; imageUrl: string; order?: number }) {
+  const { data } = await apiClient.post<{ data: any }>("/admin/brands", payload);
+  return data.data;
+}
+
+export async function updateBrand(id: string, payload: { name?: string; imageUrl?: string; isActive?: boolean; order?: number }) {
+  const { data } = await apiClient.patch<{ data: any }>(`/admin/brands/${id}`, payload);
+  return data.data;
+}
+
+export async function deleteBrand(id: string) {
+  const { data } = await apiClient.delete<{ data: any }>(`/admin/brands/${id}`);
+  return data.data;
+}
+
 // ─── Storage ──────────────────────────────────────────
 export async function getPresignedUrl(key: string) {
   const { data } = await apiClient.post<{ data: { url: string } }>("/storage/view", { key });
+  return data.data;
+}
+
+export async function uploadImage(file: File) {
+  const formData = new FormData();
+  formData.append("file", file);
+  // Reusing blog-image endpoint for generic admin image uploads to get a direct URL
+  const { data } = await apiClient.post<{ data: { url: string } }>("/storage/blog-image", formData);
   return data.data.url;
 }
+
 export async function uploadSettlementProof(file: File) {
   const formData = new FormData();
   formData.append("file", file);

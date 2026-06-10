@@ -9,6 +9,7 @@ export default async function CategoryPage({ params }: { params: { slug: string 
   
   let categoryName = slug;
   let categoryId = slug;
+  let categoryImage: string | undefined = undefined;
   
   try {
     const categories = await getCategories();
@@ -16,6 +17,11 @@ export default async function CategoryPage({ params }: { params: { slug: string 
     if (category) {
       categoryName = category.name;
       categoryId = category.id;
+      categoryImage = category.image;
+      if (categoryImage && categoryImage.startsWith('/')) {
+        const base = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000").replace(/\/api$/, "");
+        categoryImage = `${base}${categoryImage}`;
+      }
     }
   } catch (error) {
     console.error("Failed to fetch categories on server", error);
@@ -38,7 +44,7 @@ export default async function CategoryPage({ params }: { params: { slug: string 
       <div className="w-full max-w-[1600px] mx-auto bg-white overflow-hidden flex flex-col relative min-h-screen">
         <section className="flex-1 flex flex-col w-full">
           <div className="w-full flex-shrink-0 flex flex-col">
-            <CategoryBanner title={categoryName} />
+            <CategoryBanner title={categoryName} imageUrl={categoryImage} />
           </div>
           <div className="flex-1 min-h-[300px] overflow-hidden bg-transparent mt-4 sm:mt-6">
             <ProductCarousel categoryId={categoryId} initialProducts={initialProducts} />

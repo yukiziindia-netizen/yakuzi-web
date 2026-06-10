@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { LayoutDashboard, Users, Package, ClipboardList, BarChart3, Settings, LogOut, Shield, ChevronLeft, FolderTree, CreditCard, Banknote, Ticket, Bell, UserCog, FileSpreadsheet, Image, Gift, Layout, MessageSquare, PackagePlus, Bot, Layers } from "lucide-react";
+import { LayoutDashboard, Users, Package, ClipboardList, BarChart3, Settings, LogOut, Shield, ChevronLeft, FolderTree, CreditCard, Banknote, Ticket, Bell, UserCog, FileSpreadsheet, Image, Gift, Layout, MessageSquare, PackagePlus, Bot, Layers, Tag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAdminAuth } from "@/store";
 import { useState } from "react";
@@ -13,6 +13,7 @@ const NAV = [
   { icon: Users, label: "Users", href: "/users" },
   { icon: Package, label: "Products", href: "/products" },
   { icon: FileSpreadsheet, label: "Suggestions", href: "/suggestions" },
+  { icon: Tag, label: "Brands", href: "/brands" },
   { icon: Layers, label: "Collections", href: "/collections" },
   { icon: PackagePlus, label: "Product Requests", href: "/product-requests" },
   { icon: ClipboardList, label: "Orders", href: "/orders" },

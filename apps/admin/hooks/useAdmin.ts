@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { sendOtp, verifyOtp, getCurrentUser } from "@/api/auth.api";
 import {
@@ -14,6 +14,7 @@ import {
   getAdmins, createAdmin, updateAdmin, deleteAdmin,
   getSuggestions, createSuggestion, updateSuggestion, deleteSuggestion, importSuggestionsCsv,
   getBanners, createBanner, updateBanner, deleteBanner,
+  getAdminBrands, createBrand, updateBrand, deleteBrand,
   getReferralCodes, createReferralCode, deleteReferralCode,
   broadcastNotification, getNotificationHistory, getMyBroadcastHistory, sendUserNotification,
   getPlatformSettings, updatePlatformSettings,
@@ -423,6 +424,28 @@ export function useUpdateBanner() {
 export function useDeleteBanner() {
   const qc = useQueryClient();
   return useMutation({ mutationFn: deleteBanner, onSuccess: () => void qc.invalidateQueries({ queryKey: ["admin", "banners"] }) });
+}
+
+// ─── Brands ──────────────────────────────────────────
+
+export function useAdminBrands() { return useQuery({ queryKey: ["admin", "brands"], queryFn: getAdminBrands, staleTime: 60_000, retry: 1 }); }
+
+export function useCreateBrand() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: createBrand, onSuccess: () => void qc.invalidateQueries({ queryKey: ["admin", "brands"] }) });
+}
+
+export function useUpdateBrand() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: any }) => updateBrand(id, payload),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ["admin", "brands"] }),
+  });
+}
+
+export function useDeleteBrand() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: deleteBrand, onSuccess: () => void qc.invalidateQueries({ queryKey: ["admin", "brands"] }) });
 }
 
 // ─── Referral Codes ──────────────────────────────────

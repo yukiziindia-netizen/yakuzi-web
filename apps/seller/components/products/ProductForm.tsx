@@ -62,7 +62,7 @@ export function ProductForm({ defaultValues, productId }: { defaultValues?: Part
   const [mediaItems, setMediaItems] = useState<any[]>([]);
 
   const watchMrp = watch("product_price");
-  const watchGst = watch("gst_percent");
+  const watchGst = 0;
   const watchMinMoq = watch("min_order_qty");
   const watchStock = watch("stock");
   const watchMaxMoq = watch("max_order_qty");
@@ -147,9 +147,6 @@ export function ProductForm({ defaultValues, productId }: { defaultValues?: Part
     setSelectedMasterId(suggestion.id);
     setValue("product_name", suggestion.productName, { shouldDirty: true });
     setValue("company_name", suggestion.companyName, { shouldDirty: true });
-    if (suggestion.gstPercent !== undefined) {
-      setValue("gst_percent", suggestion.gstPercent, { shouldDirty: true });
-    }
     if (suggestion.mrp !== undefined) {
       setValue("product_price", suggestion.mrp, { shouldDirty: true });
     }
@@ -256,7 +253,7 @@ export function ProductForm({ defaultValues, productId }: { defaultValues?: Part
       // Compute pricing via centralized engine
       let computedPricing: Record<string, any> = {};
       try {
-        const p = calculatePricing(data.product_price, data.gst_percent, {
+        const p = calculatePricing(data.product_price, 0, {
           type: data.discount_form_details.type,
           discountPercent: data.discount_form_details.discountPercent,
           buy: data.discount_form_details.buy,

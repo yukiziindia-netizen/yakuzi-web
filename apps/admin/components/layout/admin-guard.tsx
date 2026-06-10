@@ -23,6 +23,7 @@ const ROUTE_PERMISSIONS: Record<string, string> = {
   "/analytics": "p",
   "/settings": "r",
   "/admins": "x",
+  "/brands": "3",
 };
 
 function hasPermission(permissions: string | undefined, route: string, role?: string, department?: string): boolean {

@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Share2, Loader2, Bookmark, Truck, CheckCircle, Plus, Star, Bell, Package } from 'lucide-react';
 import Image from 'next/image';
+import { DeliveryTruckBadge } from '@/components/shared/DeliveryTruckBadge';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -189,9 +190,9 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
 
                              {/* Delivery */}
                              <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-50 border border-emerald-100">
-                                <Truck className="w-3.5 h-3.5 text-emerald-600" />
-                                <span className="text-emerald-700 font-black text-[11px] uppercase tracking-wide">{listing.deliveryText || '3 days'}</span>
-                             </div>
+                                <span className="text-[#888888] text-[9px]">Delivery by </span>
+                                <DeliveryTruckBadge text={listing.deliveryText || '3 days'} className="w-[45px] text-emerald-700" />
+                              </div>
 
                              {/* Actions */}
                              <div className="flex items-center gap-2">

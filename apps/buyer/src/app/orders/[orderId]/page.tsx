@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { motion } from 'framer-motion';
 import { Package, Truck, ChevronLeft, Calendar, FileText, Loader2, AlertCircle, XCircle, CheckCircle2, CreditCard } from 'lucide-react';
@@ -7,7 +7,7 @@ import Footer from '@/components/landing/Footer';
 import Timeline from '@/components/shared/Timeline';
 import { useToast } from '@/components/shared/Toast';
 import Link from 'next/link';
-import { useOrderById, useCancelOrder } from '@/hooks/useOrders';
+import { useOrderById, useCancelOrder, useOrderTracking } from '@/hooks/useOrders';
 import { useClearCart } from '@/hooks/useCart';
 import AuthGuard from '@/components/shared/AuthGuard';
 import { generateProductSlug } from '@yukizi/utils';
@@ -98,6 +98,7 @@ function getStatusBadge(status: string | undefined) {
 
 export default function OrderIdPage({ params }: { params: { orderId: string } }) {
   const { data: order, isLoading, isError } = useOrderById(params.orderId);
+  const { data: tracking } = useOrderTracking(params.orderId);
   const cancelMutation = useCancelOrder();
   const { toast } = useToast();
 
@@ -131,7 +132,20 @@ export default function OrderIdPage({ params }: { params: { orderId: string } })
 
   const status = order.orderStatus || order.status;
   const badge = getStatusBadge(status);
-  const steps = buildTimelineSteps(status, order);
+  
+  let steps = buildTimelineSteps(status, order);
+  
+  // Overlay Shiprocket live tracking
+  if (tracking?.activities?.length) {
+    // Override the timeline completely with Shiprocket data
+    steps = tracking.activities.map((act: any, idx: number) => ({
+      label: act.activity || act.status || 'Activity',
+      description: `${act.location || ''} ${act.date ? new Date(act.date).toLocaleString('en-IN') : ''}`.trim(),
+      isCompleted: true,
+      isActive: idx === 0, // Most recent activity is active
+    }));
+  }
+
   const orderItems = order.items ?? [];
   const totalAmount = order.totalAmount ?? order.total ?? order.amount ?? 0;
   const orderDate = order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' }) : '';

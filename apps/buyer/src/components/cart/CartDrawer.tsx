@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trash2, Loader2, Star, ArrowUpRight, Bookmark, ShoppingBag } from 'lucide-react';
+import { DeliveryTruckBadge } from '@/components/shared/DeliveryTruckBadge';
 import WishlistIcon from '@/components/shared/WishlistIcon';
 import { useCart, useUpdateCartItem, useRemoveCartItem, useSyncCart, useClearCart } from '@/hooks/useCart';
 import { usePlatformConfig } from '@/hooks/usePlatformConfig';
@@ -227,7 +228,7 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                             <Star className="w-3 h-3 fill-[#6342B4] text-[#6342B4]" />
                             <span className="text-[10px] font-bold text-gray-700">{item.rating || 4.5}</span>
                           </div>
-                          <span className="text-[7px] text-gray-400 font-bold bg-gray-100 px-1 rounded mt-0.5">2 days</span>
+                          <DeliveryTruckBadge text="2 days" className="w-[45px] mt-0.5 text-[#9a9a9a]" />
                         </div>
 
                         {/* Top Right Actions */}

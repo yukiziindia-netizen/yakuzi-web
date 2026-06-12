@@ -144,7 +144,16 @@ export async function confirmMilestonePayment(milestoneId: string, paymentDetail
   return data;
 }
 
-export async function getOrderInvoice(orderId: string): Promise<{ url: string }> {
+export const getOrderInvoice = async (orderId: string): Promise<{ url: string }> => {
   const { data } = await api.get(`/orders/${orderId}/invoice`);
-  return data;
-}
+  return data.data;
+};
+
+// ──────────────────────────────────────────────
+// TRACKING
+// ──────────────────────────────────────────────
+
+export const getOrderTracking = async (orderId: string): Promise<any> => {
+  const { data } = await api.get(`/orders/${orderId}/tracking`);
+  return data.data;
+};

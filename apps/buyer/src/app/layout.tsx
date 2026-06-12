@@ -4,10 +4,7 @@ import { Open_Sans } from 'next/font/google';
 import '../styles/globals.css';
 import { Providers } from './providers';
 
-
 const openSans = Open_Sans({ subsets: ['latin'] });
-
-import { ChatbotWidget } from '@yukizi/ui';
 
 export const metadata: Metadata = {
   title: 'Yukizi',
@@ -23,7 +20,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div style={{ flex: 1 }}>
               {children}
             </div>
-            <ChatbotWidget />
           </div>
         </Providers>
       </body>

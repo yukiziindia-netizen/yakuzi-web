@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Loader2, Share2, Plus, ArrowUpRight, Star, Truck, Bookmark } from 'lucide-react';
+import { Loader2, Share2, Plus, ArrowUpRight, Star, Bookmark } from 'lucide-react';
 import Link from 'next/link';
+import { DeliveryTruckBadge } from '@/components/shared/DeliveryTruckBadge';
 import { useToast } from '@/components/shared/Toast';
 import { getProducts } from '@yukizi/api-client';
 import { generateProductSlug } from '@yukizi/utils';
@@ -139,10 +140,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
               <div className="text-[10px] font-bold text-gray-600">
                 {discountPercent > 0 ? `${discountPercent}% off` : ''}
               </div>
-              <div className="flex items-center gap-1 bg-[#f5f5f5] rounded px-1.5 py-0.5 border border-gray-100">
-                <Truck size={10} strokeWidth={2.5} className="text-gray-500" />
-                <span className="text-[9px] font-bold text-gray-600">{product.deliveryText || (index % 3 === 1 ? 'Tomorrow' : '3 days')}</span>
-              </div>
+              <DeliveryTruckBadge text={product.deliveryText || (index % 3 === 1 ? 'Tomorrow' : '3 days')} className="w-[50px] text-[#9a9a9a]" />
             </div>
           ) : (
             <div className="h-[22px] w-full" /> /* Placeholder to keep alignment if needed, or omit entirely based on screenshot */

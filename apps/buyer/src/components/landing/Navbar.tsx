@@ -7,31 +7,38 @@ import Image from "next/image";
 import { useState, useRef, useEffect, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Bell,
-  User,
-  ShoppingBag,
-  ShoppingCart,
-  LogOut,
-  ClipboardList,
-  HelpCircle,
-  ArrowRight,
-  Bookmark,
   Menu,
-  X,
-  LifeBuoy,
-  Filter,
-  ChevronDown,
   Search,
+  ShoppingCart,
+  Heart,
+  User,
+  X,
+  MapPin,
+  ChevronRight,
+  LogOut,
   Package,
-  ChevronUp,
+  Settings,
+  Bell,
+  MessageSquare,
   Share2,
   Clock,
   RotateCw,
   Plus,
   AudioLines,
   Send,
-  LayoutGrid,
-
+  MessageSquarePlus,
+  Trash2,
+  ChevronLeft,
+  Filter,
+  ShoppingBag,
+  ClipboardList,
+  HelpCircle,
+  ArrowRight,
+  Bookmark,
+  LifeBuoy,
+  ChevronDown,
+  ChevronUp,
+  LayoutGrid
 } from "lucide-react";
 
 
@@ -39,6 +46,7 @@ import {
 import CategoryMegaMenu from "@/components/landing/CategoryMegaMenu";
 import CartDrawer from "@/components/cart/CartDrawer";
 import WishlistDrawer from "@/components/wishlist/WishlistDrawer";
+import { OrderDrawer } from "@/components/orders/OrderDrawer";
 import NotificationDrawer from "@/components/notifications/NotificationDrawer";
 import SearchBar from "@/components/shared/SearchBar";
 import { SidebarSheet, type SidebarView } from "@/components/landing/SidebarSheet";
@@ -77,6 +85,7 @@ export default function Navbar({
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isWishlistOpen, setIsWishlistOpen] =
     useState(false);
+  const [isOrderDrawerOpen, setIsOrderDrawerOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] =
     useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] =
@@ -88,12 +97,17 @@ export default function Navbar({
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isSearchChatOpen, setIsSearchChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatSessions, setChatSessions] = useState<{id: string, date: number, messages: ChatMessage[]}[]>([]);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [chatInput, setChatInput] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [searchInput, setSearchInput] = useState("");
+  const [isRecording, setIsRecording] = useState(false);
+  const [attachments, setAttachments] = useState<{ name: string; data: string; type: string }[]>([]);
   const router = useRouter();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: categoriesData } = useCategories();
   const categories = Array.isArray(categoriesData) ? categoriesData : (categoriesData as any)?.data ?? [];
@@ -121,28 +135,168 @@ export default function Navbar({
     };
     document.addEventListener("mousedown", handleClickOutside);
 
+    // Load chat sessions on mount
+    const savedSessions = localStorage.getItem('yukizi_chat_sessions');
+    if (savedSessions) {
+      try { setChatSessions(JSON.parse(savedSessions)); } catch(e) {}
+    }
+    const savedCurrent = localStorage.getItem('yukizi_current_chat');
+    if (savedCurrent) {
+      try { setChatMessages(JSON.parse(savedCurrent)); } catch(e) {}
+    }
+
     return () => {
       if (scrollContainer) scrollContainer.removeEventListener('wheel', handleWheel);
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
-  const handleChatSubmit = async () => {
-    if (!chatInput.trim() || isChatLoading) return;
+  useEffect(() => {
+    if (isMounted) {
+      localStorage.setItem('yukizi_chat_sessions', JSON.stringify(chatSessions));
+    }
+  }, [chatSessions, isMounted]);
 
-    const userMessage: ChatMessage = { role: 'user', content: chatInput.trim() };
+  useEffect(() => {
+    if (isMounted) {
+      localStorage.setItem('yukizi_current_chat', JSON.stringify(chatMessages));
+    }
+  }, [chatMessages, isMounted]);
+
+  const performChatRequest = async (userMsgText: string, currentHistory: ChatMessage[], currentAttachments: typeof attachments) => {
+    const userMessage: ChatMessage = { role: 'user', content: userMsgText, attachments: currentAttachments };
     setChatMessages((prev) => [...prev, userMessage]);
     setChatInput('');
+    setAttachments([]);
     setIsChatLoading(true);
 
     try {
-      const response = await sendChatMessage(userMessage.content, chatMessages);
+      const response = await sendChatMessage(userMessage.content, currentHistory, userMessage.attachments);
       setChatMessages((prev) => [...prev, { role: 'assistant', content: response }]);
     } catch (error) {
       console.error('Chat error:', error);
       setChatMessages((prev) => [...prev, { role: 'assistant', content: 'Sorry, I encountered an error processing your request.' }]);
     } finally {
       setIsChatLoading(false);
+    }
+  };
+
+  const handleChatSubmit = async () => {
+    if ((!chatInput.trim() && attachments.length === 0) || isChatLoading) return;
+    await performChatRequest(chatInput.trim(), chatMessages, attachments);
+  };
+
+  // 1. Share Chat Logic
+  const handleShare = async () => {
+    if (chatMessages.length === 0) return alert("Nothing to share yet! Send a message first.");
+    const transcript = chatMessages.map(m => `${m.role === 'user' ? 'You' : 'Yukizi AI'}: ${m.content}`).join('\n\n');
+    if (navigator.share) {
+      try { await navigator.share({ title: 'Yukizi Chat Transcript', text: transcript }); } catch (err) { console.error("Share failed", err); }
+    } else {
+      navigator.clipboard.writeText(transcript);
+      alert('Transcript copied to clipboard!');
+    }
+  };
+
+  // 2. Chat History Logic
+  const handleHistory = () => {
+    setIsHistoryModalOpen(true);
+  };
+
+  const handleNewChat = () => {
+    if (chatMessages.length > 0) {
+      setChatSessions(prev => [
+        { id: Math.random().toString(36).substring(7), date: Date.now(), messages: chatMessages },
+        ...prev
+      ]);
+      setChatMessages([]);
+      setChatInput("");
+      setAttachments([]);
+    }
+  };
+
+  const loadSession = (session: {id: string, messages: ChatMessage[]}) => {
+    if (chatMessages.length > 0) {
+      setChatSessions(prev => [
+        { id: Math.random().toString(36).substring(7), date: Date.now(), messages: chatMessages },
+        ...prev.filter(s => s.id !== session.id)
+      ]);
+    } else {
+      setChatSessions(prev => prev.filter(s => s.id !== session.id));
+    }
+    setChatMessages(session.messages);
+    setIsHistoryModalOpen(false);
+  };
+
+  const deleteSession = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    setChatSessions(prev => prev.filter(s => s.id !== id));
+  };
+
+  // 3. Regenerate Logic
+  const handleRegenerate = async () => {
+    if (chatMessages.length < 2 || isChatLoading) {
+       if (chatMessages.length < 2) alert("Need at least one exchange to regenerate.");
+       return;
+    }
+    let lastUserMsgIndex = -1;
+    for (let i = chatMessages.length - 1; i >= 0; i--) {
+      if (chatMessages[i].role === 'user') {
+        lastUserMsgIndex = i;
+        break;
+      }
+    }
+    if (lastUserMsgIndex === -1) {
+       alert("No previous user message found to regenerate.");
+       return;
+    }
+    const lastUserMsg = chatMessages[lastUserMsgIndex];
+    const historyToKeep = chatMessages.slice(0, lastUserMsgIndex);
+    
+    setChatMessages(historyToKeep);
+    await performChatRequest(lastUserMsg.content || "", historyToKeep, lastUserMsg.attachments || []);
+  };
+
+  // 4. File Attachment Logic
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+           setAttachments(prev => [...prev, { name: file.name, data: event.target!.result as string, type: file.type }]);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  // 5. Voice Input Logic
+  const handleVoiceInput = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Your browser doesn't support voice input. (Try Chrome)");
+      return;
+    }
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      
+      recognition.onstart = () => setIsRecording(true);
+      recognition.onend = () => setIsRecording(false);
+      recognition.onerror = (event: any) => {
+         alert(`Voice input error: ${event.error}`);
+         setIsRecording(false);
+      };
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setChatInput((prev) => prev + (prev ? " " : "") + transcript);
+      };
+      recognition.start();
+    } catch (e) {
+      alert("Failed to start microphone. Please check permissions.");
     }
   };
 
@@ -157,6 +311,7 @@ export default function Navbar({
     isMobileMenuOpen ||
     isCartOpen ||
     isWishlistOpen ||
+    isOrderDrawerOpen ||
     isNotificationsOpen ||
     sidebarView !== null;
 
@@ -349,7 +504,7 @@ export default function Navbar({
               )}
             </button>
 
-            <button className="hover:text-purple-300 transition-colors">
+            <button onClick={() => setIsOrderDrawerOpen(true)} className="hover:text-purple-300 transition-colors">
               <Package className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2]" />
             </button>
 
@@ -397,7 +552,30 @@ export default function Navbar({
                   </div>
 
                   {/* Chat Box Header / Input Area */}
-                  <div className={`${chatMessages.length > 0 ? 'h-16 shrink-0' : 'flex-1'} transition-all duration-300 pb-4`}>
+                  <div className={`${chatMessages.length > 0 ? 'h-16 shrink-0' : 'flex-1'} transition-all duration-300 pb-4 flex flex-col`}>
+                    {/* Attachments Preview */}
+                    {attachments.length > 0 && (
+                      <div className="flex items-center gap-2 mb-2 overflow-x-auto">
+                        {attachments.map((att, i) => (
+                          <div key={i} className="relative w-12 h-12 rounded bg-white/10 flex-shrink-0 flex items-center justify-center border border-white/20">
+                            {att.type.startsWith('image/') ? (
+                              <img src={att.data} alt="preview" className="w-full h-full object-cover rounded" />
+                            ) : (
+                              <span className="text-[10px] text-white font-bold uppercase truncate px-1">
+                                {att.name.split('.').pop()}
+                              </span>
+                            )}
+                            <button 
+                              type="button" 
+                              onClick={() => setAttachments(prev => prev.filter((_, idx) => idx !== i))} 
+                              className="absolute -top-1.5 -right-1.5 bg-red-500 hover:bg-red-600 text-white rounded-full p-0.5 shadow-md transition-colors"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                     <textarea
                       value={chatInput}
                       onChange={(e) => setChatInput(e.target.value)}
@@ -407,9 +585,9 @@ export default function Navbar({
                           handleChatSubmit();
                         }
                       }}
-                      placeholder="Start typing ..."
-                      className="w-full h-full bg-transparent text-white text-base sm:text-xl md:text-2xl placeholder-white/70 outline-none resize-none font-medium"
-                      disabled={isChatLoading}
+                      placeholder={isRecording ? "Listening..." : "Start typing ..."}
+                      className="w-full flex-1 bg-transparent text-white text-base sm:text-xl md:text-2xl placeholder-white/70 outline-none resize-none font-medium"
+                      disabled={isChatLoading || isRecording}
                     />
                   </div>
 
@@ -417,29 +595,32 @@ export default function Navbar({
                   <div className="flex items-center justify-between pb-[70px] md:pb-[80px] px-2 md:px-4">
                     {/* Left Icons */}
                     <div className="flex items-center gap-5 sm:gap-7 text-white ml-2 md:ml-4">
-                      <button className="hover:text-white/80 transition-colors">
-                        <Share2 className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2]" />
+                      <button onClick={handleNewChat} className="hover:text-white/80 transition-colors" title="New Chat">
+                        <MessageSquarePlus className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2]" />
                       </button>
-                      <button className="hover:text-white/80 transition-colors">
+                      <button onClick={handleHistory} className="hover:text-white/80 transition-colors" title="Chat History">
                         <Clock className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2]" />
+                      </button>
+                      <button onClick={handleShare} className="hover:text-white/80 transition-colors" title="Share Chat">
+                        <Share2 className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2]" />
                       </button>
                     </div>
 
                     {/* Right Icons */}
                     <div className="flex items-center gap-5 sm:gap-7 text-white mr-2 md:mr-4">
-                      <button className="hover:text-white/80 transition-colors">
+                      <button onClick={handleRegenerate} disabled={isChatLoading || chatMessages.length < 2} className="hover:text-white/80 transition-colors disabled:opacity-50">
                         <RotateCw className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.5]" />
                       </button>
-                      <button className="hover:text-white/80 transition-colors">
+                      <button onClick={() => fileInputRef.current?.click()} className="hover:text-white/80 transition-colors">
                         <Plus className="w-6 h-6 sm:w-7 sm:h-7 stroke-[3]" />
                       </button>
-                      <button className="hover:text-white/80 transition-colors">
+                      <button onClick={handleVoiceInput} className={`transition-colors ${isRecording ? 'text-red-400 animate-pulse' : 'hover:text-white/80'}`}>
                         <AudioLines className="w-6 h-6 sm:w-8 sm:h-8 stroke-[2]" />
                       </button>
                       <button
                         onClick={handleChatSubmit}
-                        disabled={isChatLoading}
-                        className={`w-12 h-10 sm:w-16 sm:h-12 bg-white rounded-xl flex items-center justify-center transition-colors shadow-lg ml-2 ${isChatLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'}`}
+                        disabled={(!chatInput.trim() && attachments.length === 0) || isChatLoading}
+                        className={`w-12 h-10 sm:w-16 sm:h-12 bg-white rounded-xl flex items-center justify-center transition-colors shadow-lg ml-2 ${isChatLoading || (!chatInput.trim() && attachments.length === 0) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'}`}
                       >
                         {isChatLoading ? (
                           <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-[#562996] border-t-transparent rounded-full animate-spin" />
@@ -449,7 +630,75 @@ export default function Navbar({
                       </button>
                     </div>
                   </div>
+                  
+                  {/* Hidden File Input */}
+                  <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    className="hidden" 
+                    accept="image/*,application/pdf" 
+                    multiple={false} 
+                    onChange={handleFileChange} 
+                  />
                 </div>
+                
+                {/* Chat History Modal */}
+                <AnimatePresence>
+                  {isHistoryModalOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      className="absolute inset-0 z-50 bg-[#401b73] rounded-[2rem] md:rounded-[2.5rem] flex flex-col overflow-hidden"
+                    >
+                      <div className="p-6 sm:p-8 md:p-10 flex flex-col h-full">
+                        <div className="flex items-center justify-between mb-8">
+                          <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                            <Clock className="w-6 h-6" /> Chat History
+                          </h2>
+                          <button 
+                            onClick={() => setIsHistoryModalOpen(false)}
+                            className="bg-white/10 hover:bg-white/20 p-2 rounded-full text-white transition-colors"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                        
+                        <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
+                          {chatSessions.length === 0 ? (
+                            <div className="text-white/50 text-center py-10">
+                              No previous chat sessions found.
+                            </div>
+                          ) : (
+                            chatSessions.map(session => (
+                              <div 
+                                key={session.id}
+                                onClick={() => loadSession(session)}
+                                className="group bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl p-4 cursor-pointer transition-all flex items-center justify-between"
+                              >
+                                <div className="flex-1 min-w-0 pr-4">
+                                  <div className="text-white/60 text-xs mb-1 font-medium">
+                                    {new Date(session.date).toLocaleString()}
+                                  </div>
+                                  <div className="text-white text-sm truncate font-medium">
+                                    {session.messages.find(m => m.role === 'user')?.content || "Empty conversation"}
+                                  </div>
+                                </div>
+                                <button 
+                                  onClick={(e) => deleteSession(e, session.id)}
+                                  className="opacity-0 group-hover:opacity-100 p-2 text-white/40 hover:text-red-400 hover:bg-red-400/10 rounded-full transition-all"
+                                  title="Delete Session"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             )}
           </AnimatePresence>
@@ -609,6 +858,11 @@ export default function Navbar({
         onClose={() =>
           setIsNotificationsOpen(false)
         }
+      />
+
+      <OrderDrawer
+        isOpen={isOrderDrawerOpen}
+        onClose={() => setIsOrderDrawerOpen(false)}
       />
 
       {/* GLOBAL MEGA MENU - Outside scroll context to prevent clipping */}

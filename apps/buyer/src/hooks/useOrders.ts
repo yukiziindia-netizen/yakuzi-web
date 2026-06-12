@@ -1,7 +1,7 @@
-﻿'use client';
+'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getOrders, getOrderById, createOrder, cancelOrder, getOrderMilestones, confirmMilestonePayment, getOrderInvoice, type CreateOrderInput } from '@yukizi/api-client';
+import { getOrders, getOrderById, createOrder, cancelOrder, getOrderMilestones, confirmMilestonePayment, getOrderInvoice, getOrderTracking, type CreateOrderInput } from '@yukizi/api-client';
 
 export function useOrders(params?: { page?: number; limit?: number; status?: string }) {
   return useQuery({
@@ -66,5 +66,14 @@ export function useOrderInvoice(orderId: string) {
     queryKey: ['order-invoice', orderId],
     queryFn: () => getOrderInvoice(orderId),
     enabled: !!orderId,
+  });
+}
+
+export function useOrderTracking(orderId: string) {
+  return useQuery({
+    queryKey: ['order-tracking', orderId],
+    queryFn: () => getOrderTracking(orderId),
+    enabled: !!orderId,
+    refetchInterval: 30000,
   });
 }

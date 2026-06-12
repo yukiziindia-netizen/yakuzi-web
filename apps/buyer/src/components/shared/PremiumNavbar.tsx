@@ -1,12 +1,13 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Menu, ChevronDown } from 'lucide-react';
+import { X, Menu, ChevronDown, Package } from 'lucide-react';
 import PremiumBrandsMegaMenu from '@/components/shared/PremiumBrandsMegaMenu';
 import PremiumCategoriesMegaMenu from '@/components/shared/PremiumCategoriesMegaMenu';
 import CartDrawer from '@/components/cart/CartDrawer';
+import { OrderDrawer } from '@/components/orders/OrderDrawer';
 import { useScrollLock } from '@/hooks/useScrollLock';
 import { useCart } from '@/hooks/useCart';
 
@@ -22,6 +23,7 @@ export default function PremiumNavbar({ onLoginClick }: PremiumNavbarProps) {
   const [isCategoriesMenuOpen, setIsCategoriesMenuOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isOrderDrawerOpen, setIsOrderDrawerOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -58,7 +60,7 @@ export default function PremiumNavbar({ onLoginClick }: PremiumNavbarProps) {
   }, []);
 
   // Lock body scroll when any relevant menu is open
-  const isAnyOpen = isMobileMenuOpen || isCartOpen;
+  const isAnyOpen = isMobileMenuOpen || isCartOpen || isOrderDrawerOpen;
   useScrollLock(isAnyOpen);
 
   // Close mobile menu on resize to desktop
@@ -135,8 +137,11 @@ export default function PremiumNavbar({ onLoginClick }: PremiumNavbarProps) {
 
           {/* Right Icons */}
           <div className="flex items-center gap-3 sm:gap-6">
-            <button className="text-black hover:text-gray-600 transition-colors">
-              <svg width="20" height="20" className="sm:w-[22px] sm:h-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" /></svg>
+            <button 
+              onClick={() => setIsOrderDrawerOpen(true)}
+              className="text-black hover:text-gray-600 transition-colors"
+            >
+              <Package className="w-5 h-5 sm:w-[22px] sm:h-[22px]" strokeWidth={1.5} />
             </button>
 
             <button
@@ -333,6 +338,7 @@ export default function PremiumNavbar({ onLoginClick }: PremiumNavbarProps) {
       />
 
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+      <OrderDrawer isOpen={isOrderDrawerOpen} onClose={() => setIsOrderDrawerOpen(false)} />
     </>
   );
 }

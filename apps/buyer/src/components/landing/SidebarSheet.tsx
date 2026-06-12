@@ -1,6 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from 'next/link';
+import Image from 'next/image';
+import { DeliveryTruckBadge } from '../shared/DeliveryTruckBadge';
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   X, Trash2, ShoppingCart, Star, 
@@ -215,14 +218,8 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                     <Star className="w-3 h-3 fill-[#854cbc] text-[#854cbc]" />
                     <span className="text-[11px] font-bold text-gray-700">{rating}</span>
                   </div>
-                  <div className="flex items-center gap-0.5 bg-gray-100 rounded px-1">
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-gray-600">
-                       <path d="M5 18H3c-.6 0-1-.4-1-1V7c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v11"/>
-                       <path d="M14 9h4l4 4v5c0 .6-.4 1-1 1h-2"/>
-                       <circle cx="7" cy="18" r="2"/>
-                       <circle cx="17" cy="18" r="2"/>
-                    </svg>
-                    <span className="text-[8px] font-bold text-gray-600">3 days</span>
+                  <div className="flex items-center mt-1">
+                    <DeliveryTruckBadge text="3 days" className="w-[45px] text-[#9a9a9a]" />
                   </div>
                 </div>
               </div>

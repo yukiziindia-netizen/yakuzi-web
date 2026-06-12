@@ -1,8 +1,8 @@
-﻿"use client";
+"use client";
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft, Package, Truck, CheckCircle, XCircle, Clock, CreditCard, FileText, User, MapPin, Phone, Building2, Mail, ExternalLink } from "lucide-react";
+import { ArrowLeft, Package, Truck, CheckCircle, XCircle, Clock, CreditCard, FileText, User, MapPin, Phone, Building2, Mail, ExternalLink, Navigation } from "lucide-react";
 
 
 import { AdminLayout } from "@/components/layout/admin-layout";
@@ -374,6 +374,31 @@ export default function OrderDetailPage() {
                 </div>
               </div>
             </motion.div>
+
+            {/* Tracking Info */}
+            {order.shiprocketOrderId && (
+              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }} className="glass-card rounded-2xl p-6">
+                <h2 className="font-semibold text-foreground mb-4">Shiprocket Tracking</h2>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Order ID</span>
+                    <span className="text-sm font-semibold text-foreground">{order.shiprocketOrderId}</span>
+                  </div>
+                  {order.awbCode && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">AWB</span>
+                      <span className="text-sm font-semibold text-primary">{order.awbCode}</span>
+                    </div>
+                  )}
+                  {order.courierName && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Courier</span>
+                      <span className="text-sm font-semibold text-foreground">{order.courierName}</span>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
 
             {/* Seller Info */}
             {order.seller && (

@@ -61,6 +61,7 @@ export {
   getOrderMilestones,
   confirmMilestonePayment,
   getOrderInvoice,
+  getOrderTracking,
   type Order,
   type OrderItem,
   type OrderListResponse,

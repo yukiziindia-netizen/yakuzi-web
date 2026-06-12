@@ -228,7 +228,7 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                             <Star className="w-3 h-3 fill-[#6342B4] text-[#6342B4]" />
                             <span className="text-[10px] font-bold text-gray-700">{item.rating || 4.5}</span>
                           </div>
-                          <DeliveryTruckBadge text="2 days" className="w-[45px] mt-0.5 text-[#9a9a9a]" />
+                          <DeliveryTruckBadge text="2 days" className="w-[75px] mt-0.5 text-[#9a9a9a]" />
                         </div>
 
                         {/* Top Right Actions */}

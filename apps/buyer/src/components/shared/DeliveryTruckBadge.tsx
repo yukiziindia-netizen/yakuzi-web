@@ -5,7 +5,7 @@ interface DeliveryTruckBadgeProps {
   className?: string;
 }
 
-export function DeliveryTruckBadge({ text = "3 days", className = "w-[65px] h-auto text-[#9a9a9a]" }: DeliveryTruckBadgeProps) {
+export function DeliveryTruckBadge({ text = "3 days", className = "w-[80px] h-auto text-[#9a9a9a]" }: DeliveryTruckBadgeProps) {
   const maskId = useId();
 
   return (

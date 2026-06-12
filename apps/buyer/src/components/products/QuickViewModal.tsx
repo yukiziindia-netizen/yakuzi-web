@@ -191,7 +191,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                              {/* Delivery */}
                              <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-50 border border-emerald-100">
                                 <span className="text-[#888888] text-[9px]">Delivery by </span>
-                                <DeliveryTruckBadge text={listing.deliveryText || '3 days'} className="w-[45px] text-emerald-700" />
+                                <DeliveryTruckBadge text={listing.deliveryText || '3 days'} className="w-[75px] text-emerald-700" />
                               </div>
 
                              {/* Actions */}

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { ReactQueryProvider } from '@/lib/react-query-provider';
 import { AuthProvider } from '@yukizi/api-client';

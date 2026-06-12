@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useAuth } from '@yukizi/api-client';
 import { useRouter, usePathname } from 'next/navigation';
@@ -41,7 +41,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     }
   }, [isLoading, isAuthenticated, user, router, pathname]);
 
-  // Status Polling — poll every 10s while buyer is pending so approval reflects automatically
+  // Status Polling � poll every 10s while buyer is pending so approval reflects automatically
   useEffect(() => {
     if (!isAuthenticated || !user) return;
 

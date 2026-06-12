@@ -140,7 +140,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
               <div className="text-[10px] font-bold text-gray-600">
                 {discountPercent > 0 ? `${discountPercent}% off` : ''}
               </div>
-              <DeliveryTruckBadge text={product.deliveryText || (index % 3 === 1 ? 'Tomorrow' : '3 days')} className="w-[50px] text-[#9a9a9a]" />
+              <DeliveryTruckBadge text={product.deliveryText || (index % 3 === 1 ? 'Tomorrow' : '3 days')} className="w-[65px] text-[#9a9a9a]" />
             </div>
           ) : (
             <div className="h-[22px] w-full" /> /* Placeholder to keep alignment if needed, or omit entirely based on screenshot */

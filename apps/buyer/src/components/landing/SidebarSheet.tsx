@@ -219,7 +219,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                     <span className="text-[11px] font-bold text-gray-700">{rating}</span>
                   </div>
                   <div className="flex items-center mt-1">
-                    <DeliveryTruckBadge text="3 days" className="w-[45px] text-[#9a9a9a]" />
+                    <DeliveryTruckBadge text="3 days" className="w-[75px] text-[#9a9a9a]" />
                   </div>
                 </div>
               </div>

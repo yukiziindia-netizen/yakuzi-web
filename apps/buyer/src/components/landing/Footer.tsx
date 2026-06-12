@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import Image from 'next/image';
@@ -28,7 +28,7 @@ export default function Footer() {
                 {link.label}
               </Link>
               {index < footerLinks.length - 1 && (
-                <span className="text-gray-300 ml-2 md:ml-3 select-none text-xl leading-none">•</span>
+                <span className="text-gray-300 ml-2 md:ml-3 select-none text-xl leading-none">�</span>
               )}
             </div>
           ))}

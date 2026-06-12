@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { X, Bell, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';

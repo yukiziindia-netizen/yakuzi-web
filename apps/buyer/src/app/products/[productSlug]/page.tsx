@@ -23,6 +23,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import Image from 'next/image';
+import { DeliveryTruckBadge } from '@/components/shared/DeliveryTruckBadge';
 import Link from 'next/link';
 import { useProductById, useProducts } from '@/hooks/useProducts';
 import { useAddToCart, useCart, useUpdateCartItem, useRemoveCartItem } from '@/hooks/useCart';
@@ -417,12 +418,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                     : 'Special'}
               </span>
               <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1.5 rounded-md bg-[#9ca3af] px-2 py-0.5 text-white">
-                  <Truck size={14} strokeWidth={2.5} className="text-white" />
-                  <span className="pt-[1px] text-[12px] font-bold italic tracking-wide">
-                    3 days
-                  </span>
-                </div>
+                <DeliveryTruckBadge text="3 days" className="w-[75px] text-[#9a9a9a]" />
                 <div className="flex items-center gap-2 text-[#854cbc]">
                   <Star size={20} fill="currentColor" />
                   <span className="text-xl font-medium leading-none text-gray-800">4.5</span>
@@ -502,12 +498,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                       </div>
                       {/* Center-right Delivery */}
                       <div className="flex w-16 shrink-0 items-center sm:w-20">
-                        <div className="relative flex items-center gap-1 rounded bg-[#d1d1d1] px-2 py-0.5">
-                          <span className="text-[9px] font-bold italic tracking-wide text-gray-600">
-                            3 days
-                          </span>
-                          <Truck size={12} className="text-gray-500" strokeWidth={3} />
-                        </div>
+                        <DeliveryTruckBadge text="3 days" className="w-[65px] text-[#9a9a9a]" />
                       </div>
                       {/* Right Action */}
                       <div className="flex w-[80px] shrink-0 items-center justify-end sm:w-[90px]">

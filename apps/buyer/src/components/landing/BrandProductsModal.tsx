@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { getProducts, type Product } from '@yukizi/api-client';
@@ -52,7 +52,7 @@ export default function BrandProductsModal({
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
           >
-            ×
+            �
           </button>
         </div>
 
@@ -85,11 +85,11 @@ export default function BrandProductsModal({
                   </h3>
                   <div className="space-y-1">
                     <p className="text-sm font-bold text-gray-900">
-                      ₹{Math.round(product.price ?? product.mrp ?? 0)}
+                      ?{Math.round(product.price ?? product.mrp ?? 0)}
                     </p>
                     {product.mrp && (
                       <p className="text-xs text-gray-500 line-through">
-                        ₹{Math.round(product.mrp)}
+                        ?{Math.round(product.mrp)}
                       </p>
                     )}
                   </div>

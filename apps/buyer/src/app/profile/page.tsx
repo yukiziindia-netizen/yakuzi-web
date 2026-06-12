@@ -1,4 +1,4 @@
-ï»¿'use client';
+'use client';
 
 import { motion } from 'framer-motion';
 import { User, ShieldCheck, MapPin, CreditCard, AlertCircle, CheckCircle2 } from 'lucide-react';
@@ -97,7 +97,7 @@ export default function ProfilePage() {
                     )}
                   </div>
                   <p className="text-gray-500 font-medium tracking-tight">
-                    {profile.email ?? ''} {profile.email && profile.phone ? 'â€¢' : ''} {profile.phone}
+                    {profile.email ?? ''} {profile.email && profile.phone ? '•' : ''} {profile.phone}
                   </p>
                 </div>
               </div>
@@ -119,19 +119,19 @@ export default function ProfilePage() {
                 <div className="space-y-6">
                   <div>
                     <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Legal Name</label>
-                    <p className="text-lg font-bold text-gray-800">{profile.legalName || 'â€”'}</p>
+                    <p className="text-lg font-bold text-gray-800">{profile.legalName || '—'}</p>
                   </div>
                   <div>
                     <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest block mb-1">GST Number</label>
-                    <p className="text-lg font-bold text-gray-800">{profile.gstNumber || 'â€”'}</p>
+                    <p className="text-lg font-bold text-gray-800">{profile.gstNumber || '—'}</p>
                   </div>
                   <div>
                     <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest block mb-1">PAN Number</label>
-                    <p className="text-lg font-bold text-gray-800">{profile.panNumber || 'â€”'}</p>
+                    <p className="text-lg font-bold text-gray-800">{profile.panNumber || '—'}</p>
                   </div>
                   <div>
                     <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Drug License</label>
-                    <p className="text-lg font-bold text-gray-800">{profile.drugLicenseNumber || 'â€”'}</p>
+                    <p className="text-lg font-bold text-gray-800">{profile.drugLicenseNumber || '—'}</p>
                   </div>
                 </div>
               </motion.div>

@@ -137,7 +137,7 @@ export function OrderedProductsDrawer({ isOpen, onClose }: OrderedProductsDrawer
                         </div>
                         <div className="flex items-center gap-1 mt-1">
                            <span className="text-[9px] font-bold text-gray-600 underline whitespace-nowrap">Order details</span>
-                           <DeliveryTruckBadge text="3 days" className="w-[50px] text-[#9a9a9a]" />
+                           <DeliveryTruckBadge text="3 days" className="w-[65px] text-[#9a9a9a]" />
                         </div>
                       </div>
                     </div>

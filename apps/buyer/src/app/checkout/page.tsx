@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -340,7 +340,7 @@ export default function CheckoutPage() {
                   {paymentMethod === 'BANK_TRANSFER' && <CheckCircle2 className="w-6 h-6 text-lime-500" />}
                 </button>
 
-                {/* Online Payment — disabled until payment gateway integration */}
+                {/* Online Payment � disabled until payment gateway integration */}
                 <button
                   disabled
                   className="flex items-center justify-between p-6 rounded-3xl border-2 text-left transition-all bg-gray-50/50 border-gray-100 opacity-50 cursor-not-allowed"
@@ -351,7 +351,7 @@ export default function CheckoutPage() {
                     </div>
                     <div>
                       <p className="font-bold leading-tight text-gray-400">Online Payment</p>
-                      <p className="text-xs font-medium text-gray-400 mt-0.5">Coming Soon — Credit/Debit Card, UPI, Net Banking</p>
+                      <p className="text-xs font-medium text-gray-400 mt-0.5">Coming Soon � Credit/Debit Card, UPI, Net Banking</p>
                     </div>
                   </div>
                 </button>
@@ -385,7 +385,7 @@ export default function CheckoutPage() {
                       </div>
                       <div className="flex-1">
                         <p className="font-bold text-gray-900 leading-tight line-clamp-1">{name}</p>
-                        <p className="text-sm font-medium text-gray-400 mt-1">Qty: {item.quantity} • ₹{item.price}</p>
+                        <p className="text-sm font-medium text-gray-400 mt-1">Qty: {item.quantity} � ?{item.price}</p>
                       </div>
                     </div>
                   );
@@ -395,22 +395,22 @@ export default function CheckoutPage() {
               <div className="space-y-4 border-t border-gray-100 pt-8 mb-8">
                 <div className="flex justify-between text-gray-600 font-medium">
                   <span>Subtotal</span>
-                  <span>₹{subtotal.toLocaleString()}</span>
+                  <span>?{subtotal.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-gray-600 font-medium">
                   <div className="flex items-center gap-2">
                     <span>Shipping</span>
                     <Truck className="w-4 h-4 text-gray-400" />
                   </div>
-                  <span>{shipping === 0 ? 'FREE' : `₹${shipping}`}</span>
+                  <span>{shipping === 0 ? 'FREE' : `?${shipping}`}</span>
                 </div>
                 <div className="flex justify-between text-gray-600 font-medium">
                   <span>GST ({platformConfig?.gst_rate ?? 12}%)</span>
-                  <span>₹{gst.toLocaleString()}</span>
+                  <span>?{gst.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-xl sm:text-2xl md:text-[28px] font-black text-gray-900 pt-4 border-t border-gray-100">
                   <span>Total</span>
-                  <span>₹{total.toLocaleString()}</span>
+                  <span>?{total.toLocaleString()}</span>
                 </div>
               </div>
 

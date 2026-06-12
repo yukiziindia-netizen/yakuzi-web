@@ -88,8 +88,8 @@ export default function Navbar({
   const [isOrderDrawerOpen, setIsOrderDrawerOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] =
     useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] =
-    useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [sidebarView, setSidebarView] = useState<SidebarView>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
@@ -817,18 +817,70 @@ export default function Navbar({
             </div>
 
             {/* Links List */}
-            <div className="flex-1 overflow-y-auto space-y-6 scrollbar-hide mt-16 sm:mt-24 pb-24">
-              {categories.map((category: Category) => (
-                <Link
-                  key={category.id}
-                  href={`/category/${category.slug || category.id}`}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex justify-between items-center text-gray-700 hover:text-black transition-colors group"
-                >
-                  <span className="text-[15px] font-medium tracking-wide">{category.name}</span>
-                  <ChevronUp className="w-6 h-6 text-gray-400 group-hover:text-gray-600 transition-colors" strokeWidth={2.5} />
-                </Link>
-              ))}
+            <div className="flex-1 overflow-y-auto mt-16 sm:mt-24 pb-24 pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#854cbc] [&::-webkit-scrollbar-thumb]:rounded-full">
+              {categories.map((category: Category) => {
+                const hasSub = (category as any).subCategories && (category as any).subCategories.length > 0;
+                const isExpanded = expandedCategory === category.id;
+
+                return (
+                  <div key={category.id} className="flex flex-col border-b border-gray-50 last:border-0">
+                    <div className="flex justify-between items-center py-4 group">
+                      <Link
+                        href={`/category/${category.slug || category.id}`}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="flex-1 text-[16px] font-medium tracking-wide text-gray-700 hover:text-black transition-colors"
+                      >
+                        {category.name}
+                      </Link>
+                      {hasSub ? (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setExpandedCategory(isExpanded ? null : category.id);
+                          }}
+                          className="p-1 -mr-1 text-gray-400 group-hover:text-gray-600 transition-colors"
+                        >
+                          <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} strokeWidth={2.5} />
+                        </button>
+                      ) : (
+                        <Link
+                          href={`/category/${category.slug || category.id}`}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="p-1 -mr-1"
+                        >
+                          <ChevronUp className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-colors rotate-90" strokeWidth={2.5} />
+                        </Link>
+                      )}
+                    </div>
+
+                    <AnimatePresence>
+                      {isExpanded && hasSub && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="flex flex-col space-y-4 pl-6 pb-4 pt-1">
+                            {(category as any).subCategories.map((sub: any) => (
+                              <Link
+                                key={sub.id}
+                                href={`/category/${category.slug || category.id}?sub=${sub.slug || sub.id}`}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="text-[15px] text-gray-600 hover:text-black transition-colors block"
+                              >
+                                {sub.name}
+                              </Link>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })}
             </div>
           </motion.div>
         )}

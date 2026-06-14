@@ -8,15 +8,17 @@ import {
   useEffect,
   type ReactNode,
 } from 'react';
-import { sendOtp, verifyOtp, logout as apiLogout, getProfile, type User } from '../modules/auth.api';
+import { sendOtp, verifyOtp, registerBuyer, loginWithPassword as apiLoginWithPassword, logout as apiLogout, getProfile, type User, type RegisterBuyerRequest } from '../modules/auth.api';
 import { getAccessToken, setAccessToken, setBaseURL } from '../api';
 
 interface AuthContextValue {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  sendOtp: (phone: string) => Promise<void>;
+  sendOtp: (contact: string) => Promise<void>;
   verifyOtp: (phone: string, otp: string) => Promise<void>;
+  registerBuyer: (params: RegisterBuyerRequest) => Promise<void>;
+  loginWithPassword: (params: { contact: string; password: string }) => Promise<void>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -87,12 +89,22 @@ export function AuthProvider({ children, baseURL }: { children: ReactNode; baseU
     initAuth();
   }, []);
 
-  const handleSendOtp = useCallback(async (phone: string) => {
-    await sendOtp(phone);
+  const handleSendOtp = useCallback(async (contact: string) => {
+    await sendOtp(contact);
   }, []);
 
   const handleVerifyOtp = useCallback(async (phone: string, otp: string) => {
     const response = await verifyOtp(phone, otp);
+    setUser(response.user);
+  }, []);
+
+  const handleRegisterBuyer = useCallback(async (params: RegisterBuyerRequest) => {
+    const response = await registerBuyer(params);
+    setUser(response.user);
+  }, []);
+
+  const handleLoginWithPassword = useCallback(async (params: { contact: string; password: string }) => {
+    const response = await apiLoginWithPassword(params);
     setUser(response.user);
   }, []);
 
@@ -124,6 +136,8 @@ export function AuthProvider({ children, baseURL }: { children: ReactNode; baseU
         isLoading,
         sendOtp: handleSendOtp,
         verifyOtp: handleVerifyOtp,
+        registerBuyer: handleRegisterBuyer,
+        loginWithPassword: handleLoginWithPassword,
         logout: handleLogout,
         refresh: handleRefresh,
       }}

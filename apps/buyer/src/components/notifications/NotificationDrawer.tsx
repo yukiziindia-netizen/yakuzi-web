@@ -71,7 +71,7 @@ export default function NotificationDrawer({ isOpen, onClose }: { isOpen: boolea
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[65]"
           />
 
           {/* Drawer Panel */}
@@ -81,7 +81,7 @@ export default function NotificationDrawer({ isOpen, onClose }: { isOpen: boolea
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed top-0 right-0 h-full w-[85%] max-w-[360px] bg-white shadow-2xl z-50 flex flex-col overflow-hidden"
+            className="fixed top-0 right-0 h-full w-[85%] max-w-[400px] bg-white shadow-2xl z-[70] flex flex-col overflow-hidden rounded-l-3xl"
           >
             {/* Custom Scrollbar Styles */}
             <style jsx global>{`

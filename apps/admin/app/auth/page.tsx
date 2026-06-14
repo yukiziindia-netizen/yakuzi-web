@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -32,7 +32,7 @@ export default function AdminAuthPage() {
     setPhone(cleaned); // Clean state for consistency
 
     try {
-      await sendOtpMutation.mutateAsync({ phone: cleaned });
+      await sendOtpMutation.mutateAsync({ contact: cleaned });
       setStep("otp");
       toast.success("OTP sent successfully");
     } catch (err: any) {

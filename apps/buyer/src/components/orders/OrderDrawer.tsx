@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Share2, Plus, ArrowUpRight, ChevronRight, Filter } from 'lucide-react';
+import { Share2, Plus, ArrowUpRight, ChevronRight, Filter, X } from 'lucide-react';
 import Image from 'next/image';
 import { OrderFilterDrawer } from './OrderFilterDrawer';
 import { OrderedProductsDrawer } from './OrderedProductsDrawer';
@@ -18,15 +18,19 @@ export function OrderDrawer({ isOpen, onClose }: OrderDrawerProps) {
       {/* Backdrop overlay */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40 transition-opacity" 
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[65] transition-opacity" 
           onClick={onClose}
         />
       )}
 
       {/* Drawer */}
       <div 
-        className={`fixed inset-y-0 right-0 w-[400px] max-w-full bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'} overflow-y-auto rounded-l-3xl`}
+        className={`fixed inset-y-0 right-0 w-[85%] max-w-[400px] bg-white shadow-2xl z-[70] transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'} overflow-y-auto rounded-l-3xl`}
       >
+        {/* Hidden Close Button */}
+        <button onClick={onClose} className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-900 bg-white/80 rounded-full z-[80] transition-colors">
+          <X className="w-5 h-5" />
+        </button>
         {/* Header */}
         <div className="px-6 py-6 border-b border-gray-100 relative">
           <div className="flex flex-wrap items-center gap-2 mb-2">

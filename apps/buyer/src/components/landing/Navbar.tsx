@@ -331,67 +331,70 @@ export default function Navbar({
       <nav className="fixed bottom-4 sm:bottom-6 md:bottom-4 left-0 right-0 z-[60] flex justify-center items-end sm:items-center pointer-events-none px-2 sm:px-6 w-full">
         <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-6 md:gap-2 pointer-events-auto flex-nowrap justify-center w-full max-w-[1200px] px-1 sm:px-4 relative">
           {/* Left Segment: Logo, Profile, Notifications, Search */}
-          <div className="flex items-center bg-[#562996] rounded-xl sm:rounded-xl md:rounded-xl px-2 xs:px-3 sm:px-4 md:px-6 py-1.5 sm:py-3 md:py-3.5 shadow-md sm:shadow-2xl flex-1 max-w-[480px] justify-between overflow-hidden min-w-0">
+          <div className="flex items-center bg-white sm:bg-[#562996] rounded-[24px] sm:rounded-xl md:rounded-xl px-1.5 xs:px-2.5 sm:px-4 md:px-6 py-1.5 sm:py-3 md:py-3.5 shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl flex-1 max-w-[480px] justify-between overflow-hidden min-w-0 border border-gray-100 sm:border-0">
             {/* DESKTOP VIEW (sm and up) */}
             <div className="hidden sm:flex items-center w-full justify-between">
-              <div className="flex items-center h-full">
-                <Link href="/" className="font-black text-xl md:text-2xl tracking-tighter uppercase shrink-0 text-white" style={{ fontFamily: 'Impact, Arial Black, sans-serif' }}>
-                  YUKIZI
-                </Link>
+                <div className="flex items-center h-full">
+                  <Link href="/" className="shrink-0 flex items-center">
+                    <img src="/yukizi-logo-new.png" alt="YUKiZi" className="h-[28px] md:h-[32px] object-contain" />
+                  </Link>
 
-                <div className="flex items-center gap-4 ml-6 md:ml-8 lg:ml-10">
-                  {isAuthenticated ? (
-                    <div className="relative" ref={profileDropdownRef}>
-                      <button onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)} className="text-white hover:text-purple-300 transition-colors flex items-center">
-                        <User className="w-5 h-5 md:w-6 md:h-6 stroke-[2]" />
+                  <div className="flex items-center gap-1 md:gap-2 ml-2 md:ml-3 lg:ml-4">
+                    {!isAuthenticated ? (
+                      <button 
+                        onClick={onLoginClick || (() => window.dispatchEvent(new CustomEvent('open-login')))} 
+                        className="text-white font-bold text-[14px] md:text-[15px] bg-white/20 hover:bg-white/30 px-3 md:px-4 py-1.5 md:py-2 rounded-lg transition-colors border border-white/20"
+                      >
+                        Start
                       </button>
-                      <AnimatePresence>
-                        {isProfileDropdownOpen && (
-                          <motion.div
-                            initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                            className="absolute left-0 bottom-full mb-3 w-40 sm:w-48 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-[60]"
-                          >
-                            <Link href="/profile" onClick={() => setIsProfileDropdownOpen(false)} className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-sky-600 transition-colors">
-                              <User className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                              My Profile
-                            </Link>
-                            <Link href="/orders" onClick={() => setIsProfileDropdownOpen(false)} className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-sky-600 transition-colors">
-                              <ClipboardList className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                              My Orders
-                            </Link>
-                            <div className="h-px bg-gray-50 my-1 mx-2" />
-                            <button onClick={() => { handleLogout(); setIsProfileDropdownOpen(false); }} className="w-full flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors text-left">
-                              <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                              Logout
-                            </button>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  ) : (
-                    <button onClick={onLoginClick} className="text-white hover:text-purple-300 transition-colors flex items-center">
-                      <User className="w-5 h-5 md:w-6 md:h-6 stroke-[2]" />
-                    </button>
-                  )}
+                    ) : (
+                      <>
+                        <div className="relative" ref={profileDropdownRef}>
+                          <button onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)} className="text-white hover:text-purple-300 transition-colors flex items-center">
+                            <User className="w-5 h-5 md:w-6 md:h-6 stroke-[2]" />
+                          </button>
+                          <AnimatePresence>
+                            {isProfileDropdownOpen && (
+                              <motion.div
+                                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                                className="absolute left-0 bottom-full mb-3 w-40 sm:w-48 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-[60]"
+                              >
+                                <Link href="/profile" onClick={() => setIsProfileDropdownOpen(false)} className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-sky-600 transition-colors">
+                                  <User className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                  My Profile
+                                </Link>
+                                <Link href="/orders" onClick={() => setIsProfileDropdownOpen(false)} className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-sky-600 transition-colors">
+                                  <ClipboardList className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                  My Orders
+                                </Link>
+                                <div className="h-px bg-gray-50 my-1 mx-2" />
+                                <button onClick={() => { handleLogout(); setIsProfileDropdownOpen(false); }} className="w-full flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors text-left">
+                                  <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                  Logout
+                                </button>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
 
-                  {/* Vertical Divider between User and Bell */}
-                  <div className="h-5 w-[1px] bg-white/20 mx-1" />
+                        {/* Vertical Divider between User and Bell */}
+                        <div className="h-5 w-[1px] bg-white/20 mx-1" />
 
-                  <button onClick={() => setIsNotificationsOpen(true)} className="relative text-white hover:text-purple-300 transition-colors flex items-center">
-
-                    <Bell className="w-5 h-5 md:w-6 md:h-6 stroke-[2]" />
-                    {unreadNotificationCount > 0 && (
-                      <span className="absolute -top-1 -right-1 w-3.5 h-3.5 md:w-4 md:h-4 bg-[#f7941d] text-white text-[9px] md:text-[10px] font-bold rounded-full flex items-center justify-center border border-[#562996]">
-                        {unreadNotificationCount}
-                      </span>
+                        <button onClick={() => setIsNotificationsOpen(true)} className="relative text-white hover:text-purple-300 transition-colors flex items-center">
+                          <Bell className="w-5 h-5 md:w-6 md:h-6 stroke-[2]" />
+                          {unreadNotificationCount > 0 && (
+                            <span className="absolute -top-1 -right-1 w-3.5 h-3.5 md:w-4 md:h-4 bg-[#f7941d] text-white text-[9px] md:text-[10px] font-bold rounded-full flex items-center justify-center border border-[#562996]">
+                              {unreadNotificationCount}
+                            </span>
+                          )}
+                        </button>
+                      </>
                     )}
-                  </button>
+                  </div>
                 </div>
-              </div>
-
-              <div className="relative flex items-center justify-end w-[160px] md:w-[200px] lg:w-[220px]">
+              <div className="relative flex items-center justify-end ml-3 sm:ml-4 w-[110px] sm:w-[130px] md:w-[170px] lg:w-[200px]">
                 <input
                   type="text"
                   placeholder="Search"
@@ -400,72 +403,44 @@ export default function Navbar({
                     setIsSearchChatOpen(!isSearchChatOpen);
                     setIsChatOpen(false);
                   }}
-                  className="w-full h-8 md:h-[34px] bg-white rounded-md text-gray-800 text-[13px] md:text-[14px] pl-3 md:pl-4 pr-10 focus:outline-none cursor-pointer placeholder-gray-400 shadow-sm font-medium"
+                  className="w-full h-8 md:h-[34px] bg-white rounded-md text-gray-800 text-[13px] md:text-[14px] pl-3 md:pl-4 pr-8 md:pr-10 focus:outline-none cursor-pointer placeholder-gray-400 shadow-sm font-medium"
                 />
                 <Search className="w-4 h-4 text-gray-400 absolute right-3 md:right-4 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2]" />
               </div>
             </div>
 
             {/* MOBILE VIEW (below sm) */}
-            <div className="flex sm:hidden items-center w-full justify-between gap-1">
-              {!isAuthenticated ? (
-                // BEFORE LOGIN (Image 3 layout)
-                <button onClick={onLoginClick} className="flex items-center gap-1.5 bg-[#562996] text-white rounded-full px-3 py-1.5 shrink-0 hover:bg-[#482080] transition-colors">
-                  <span className="font-black text-sm xs:text-base tracking-tighter uppercase" style={{ fontFamily: 'Impact, Arial Black, sans-serif' }}>YUKIZI</span>
-                  <span className="text-[10px] xs:text-xs font-semibold whitespace-nowrap">Start Now</span>
-                </button>
-              ) : (
-                // AFTER LOGIN (Image 2 layout)
-                <div className="flex items-center gap-1 xs:gap-1.5">
-                  <Link href="/" className="font-black text-sm xs:text-base tracking-tighter uppercase shrink-0 text-white" style={{ fontFamily: 'Impact, Arial Black, sans-serif' }}>
-                    YUKIZI
-                  </Link>
+            <div className="flex sm:hidden items-center w-full justify-between gap-1 xs:gap-1.5 px-0.5">
+              <Link href="/" className="shrink-0 flex items-center">
+                <Image src="/logo-gradient.png" alt="YUKiZi" width={70} height={20} className="w-[60px] xs:w-[70px] object-contain" />
+              </Link>
 
-                  {/* Profile/User Icon on mobile */}
-                  <div className="relative shrink-0" ref={profileDropdownRef}>
-                    <button onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)} className="text-white hover:text-purple-300 transition-colors flex items-center p-1">
-                      <User className="w-4 h-4 xs:w-5 xs:h-5 stroke-[2]" />
-                    </button>
-                    <AnimatePresence>
-                      {isProfileDropdownOpen && (
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                          className="absolute bottom-full left-0 mb-2 w-32 bg-white rounded-lg shadow-lg border border-gray-100 overflow-hidden py-1 z-[70]"
-                        >
-                          <button onClick={() => { handleLogout(); setIsProfileDropdownOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors text-left">
-                            <LogOut className="w-3.5 h-3.5" />
-                            Logout
-                          </button>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-
-                  <div className="h-4 w-[1px] bg-white/20 mx-0.5" />
-
-                  <button onClick={() => setIsNotificationsOpen(true)} className="relative p-1 text-white hover:text-purple-400 transition-colors shrink-0">
-                    <Bell className="w-4 h-4 xs:w-5 xs:h-5 stroke-[2]" />
-                    {unreadNotificationCount > 0 && (
-                      <span className="absolute top-0 right-0 w-2 h-2 bg-[#f7941d] rounded-full border border-white" />
-                    )}
+              <div className="flex items-center gap-1 xs:gap-2">
+                {!isAuthenticated ? (
+                  <button 
+                    onClick={onLoginClick || (() => window.dispatchEvent(new CustomEvent('open-login')))} 
+                    className="text-[#562996] font-bold text-[13px] xs:text-[14px] bg-purple-100 hover:bg-purple-200 px-3 py-1.5 rounded-[10px] transition-colors"
+                  >
+                    Start
                   </button>
-                </div>
-              )}
+                ) : (
+                  <>
+                    <button onClick={() => setIsNotificationsOpen(true)} className="relative p-0.5 text-[#7131b5] hover:text-[#562996] transition-colors shrink-0 mx-1">
+                      <Bell className="w-[18px] h-[18px] xs:w-[22px] xs:h-[22px] stroke-[2.5]" />
+                      <span className="absolute -top-0.5 -right-0.5 w-2 h-2 xs:w-2.5 xs:h-2.5 bg-[#eb4335] rounded-full shadow-sm" />
+                    </button>
+                  </>
+                )}
 
-              <div className="relative shrink-0 flex items-center w-[110px] xs:w-[130px]"
-                onClick={() => {
-                  setIsSearchChatOpen(!isSearchChatOpen);
-                  setIsChatOpen(false);
-                }}>
-                <input
-                  type="text"
-                  placeholder="Search"
-                  readOnly
-                  className="w-full h-[30px] bg-white border border-gray-200 rounded-full text-[#333] text-[12px] pl-3 pr-8 focus:outline-none cursor-pointer placeholder-[#a0a0a0] shadow-sm font-medium"
-                />
-                <Search className="w-[14px] h-[14px] text-[#a0a0a0] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none stroke-2" />
+                <button
+                  onClick={() => {
+                    setIsSearchChatOpen(!isSearchChatOpen);
+                    setIsChatOpen(false);
+                  }}
+                  className="relative p-0.5 text-[#7131b5] hover:text-[#562996] transition-colors shrink-0 mx-1"
+                >
+                  <Search className="w-[18px] h-[18px] xs:w-[22px] xs:h-[22px] stroke-[2.5]" />
+                </button>
               </div>
             </div>
           </div>
@@ -476,50 +451,51 @@ export default function Navbar({
               setIsChatOpen(!isChatOpen);
               setIsSearchChatOpen(false);
             }}
-            className="relative -mt-6 sm:-mt-8 md:-mt-10 z-20 w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-[#ffb040] rounded-xl sm:rounded-2xl md:rounded-[1.5rem] flex items-center justify-center shadow-[0_0_15px_rgba(255,176,64,0.4)] sm:shadow-[0_0_20px_rgba(255,176,64,0.5)] hover:-translate-y-1 sm:hover:-translate-y-2 transition-transform cursor-pointer shrink-0 mx-0.5 xs:mx-1 sm:mx-2 md:mx-4"
+            className="relative -mt-4 sm:-mt-8 md:-mt-10 z-20 w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gradient-to-b from-[#ffb040] to-[#ff8c00] rounded-[18px] sm:rounded-2xl md:rounded-[1.5rem] flex items-center justify-center shadow-[0_4px_15px_rgba(255,176,64,0.4)] sm:shadow-[0_0_20px_rgba(255,176,64,0.5)] hover:-translate-y-1 sm:hover:-translate-y-2 transition-transform cursor-pointer shrink-0 mx-1 xs:mx-2 sm:mx-2 md:mx-4 border-[2px] border-[#fff5eb]"
           >
-            <Image src="/yukizi.jpg" alt="Mascot" width={96} height={96} className="w-full h-full object-cover rounded-xl sm:rounded-2xl md:rounded-[1.5rem]" />
+            <Image src="/yukizi.jpg" alt="Mascot" width={96} height={96} className="w-full h-full object-cover rounded-[16px] sm:rounded-2xl md:rounded-[1.5rem]" />
           </div>
 
 
 
           {/* Right Segment: Cart, Wishlist, Filter, Menu */}
-          <div className="flex items-center justify-between bg-[#562996] rounded-xl sm:rounded-xl md:rounded-xl px-4 xs:px-6 sm:px-8 md:px-12 lg:px-16 py-2 sm:py-3 md:py-3.5 shadow-md sm:shadow-2xl text-white shrink-0 flex-1 max-w-[480px] z-10 overflow-hidden min-w-0">
+          <div className="flex items-center justify-between bg-white sm:bg-[#562996] rounded-[24px] sm:rounded-xl md:rounded-xl px-2.5 xs:px-4 sm:px-8 md:px-12 lg:px-16 py-1.5 sm:py-3 md:py-3.5 shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl text-[#7131b5] sm:text-white shrink-0 flex-1 max-w-[480px] z-10 overflow-hidden min-w-0 border border-gray-100 sm:border-0">
 
             <button onClick={() => setIsWishlistOpen(true)} className="relative hover:text-purple-300 transition-colors">
-              <WishlistIcon useImage isFilled={wishlistCount > 0} className="w-8 h-8 sm:w-8 sm:h-8 text-white" />
+              <Bookmark className="w-[18px] h-[18px] xs:w-[22px] xs:h-[22px] sm:hidden stroke-[2.5] rotate-90" />
+              <WishlistIcon useImage isFilled={wishlistCount > 0} className="w-8 h-8 sm:w-8 sm:h-8 text-white hidden sm:block" />
               {wishlistCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 sm:w-4 sm:h-4 bg-[#f7941d] text-white text-[9px] sm:text-[10px] font-bold rounded-full flex items-center justify-center border border-white sm:border-[#562996]">
+                <span className="absolute -top-1 -right-1 w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 bg-[#f7941d] text-white text-[8px] xs:text-[9px] sm:text-[10px] font-bold rounded-full flex items-center justify-center border border-white sm:border-[#562996]">
                   {wishlistCount}
                 </span>
               )}
             </button>
 
             <button onClick={() => setIsCartOpen(true)} className="relative hover:text-purple-300 transition-colors">
-              <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2]" />
+              <ShoppingCart className="w-[18px] h-[18px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2.5]" />
               {cartData?.items && cartData.items.length > 0 && (
-                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 sm:w-4 sm:h-4 bg-[#f7941d] text-white text-[9px] sm:text-[10px] font-bold rounded-full flex items-center justify-center border border-white sm:border-[#562996]">
+                <span className="absolute -top-1 -right-1 w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 bg-[#f7941d] text-white text-[8px] xs:text-[9px] sm:text-[10px] font-bold rounded-full flex items-center justify-center border border-white sm:border-[#562996]">
                   {cartData.items.length}
                 </span>
               )}
             </button>
 
-            <button onClick={() => setIsOrderDrawerOpen(true)} className="hover:text-purple-300 transition-colors">
-              <Package className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2]" />
+            <button onClick={() => setIsOrderDrawerOpen(true)} className="relative hover:text-purple-300 transition-colors">
+              <Package className="w-[18px] h-[18px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2.5]" />
             </button>
 
             <button onClick={() => {
               setSidebarView("filters");
               onFilterClick?.();
             }} className="hover:text-purple-300 transition-colors">
-              <Filter className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2]" />
+              <Filter className="w-[18px] h-[18px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2.5]" />
             </button>
 
             <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="hover:text-purple-300 transition-colors">
               {isMobileMenuOpen ? (
-                <X className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2]" />
+                <X className="w-[18px] h-[18px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2.5]" />
               ) : (
-                <Menu className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2]" />
+                <Menu className="w-[18px] h-[18px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2.5]" />
               )}
             </button>
           </div>
@@ -769,6 +745,7 @@ export default function Navbar({
       </nav>
 
 
+
       {/* Menu Drawer (Now active on Mobile and Desktop) */}
       <AnimatePresence>
         {isMobileMenuOpen && (
@@ -777,7 +754,7 @@ export default function Navbar({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[65]"
             onClick={() => setIsMobileMenuOpen(false)}
           />
         )}
@@ -788,8 +765,12 @@ export default function Navbar({
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed top-0 right-0 bottom-0 w-[85%] max-w-[400px] bg-white z-50 shadow-2xl rounded-l-3xl flex flex-col p-6 sm:p-8"
+            className="fixed top-0 right-0 bottom-0 w-[85%] max-w-[400px] bg-white z-[70] shadow-2xl rounded-l-3xl flex flex-col p-6 sm:p-8"
           >
+            {/* Hidden Close Button */}
+            <button onClick={() => setIsMobileMenuOpen(false)} className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-900 bg-white/80 rounded-full z-[80] transition-colors">
+              <X className="w-5 h-5" />
+            </button>
             {/* Header */}
             <div className="flex justify-between items-center mb-10 pt-4">
               <h2 className="text-[22px] font-bold text-[#333]">Menu</h2>
@@ -881,6 +862,17 @@ export default function Navbar({
                   </div>
                 );
               })}
+            </div>
+
+            {/* Bottom Drawer Icons */}
+            <div className="mt-auto pt-2 pb-24 flex sm:hidden justify-end pr-2">
+              <Image 
+                src="/drawer-icons.png" 
+                alt="Drawer Icons" 
+                width={80} 
+                height={35} 
+                className="w-[80px] object-contain mix-blend-multiply opacity-90" 
+              />
             </div>
           </motion.div>
         )}

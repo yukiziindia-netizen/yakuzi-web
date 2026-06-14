@@ -5,16 +5,21 @@ export { api, setAccessToken, getAccessToken, onApiEvent, setBaseURL } from './a
 export {
   sendOtp,
   verifyOtp,
+  registerBuyer,
   loginWithPassword,
   loginWithSimplePassword,
   refreshToken,
   logout,
   getProfile,
+  resetPassword,
   type User,
   type SendOtpRequest,
   type SendOtpResponse,
   type VerifyOtpRequest,
   type VerifyOtpResponse,
+  type RegisterBuyerRequest,
+  type ResetPasswordRequest,
+  type ResetPasswordResponse,
 } from './modules/auth.api';
 
 // Auth Context

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -35,7 +35,7 @@ export default function SellerAuthPage() {
     console.log(`[OTP CHECK] Attempting to send OTP to backend for phone: ${cleaned}`);
 
     try {
-      const response = await sendOtpMutation.mutateAsync({ phone: cleaned });
+      const response = await sendOtpMutation.mutateAsync({ contact: cleaned });
       
       // [OTP CHECK] Log the response from the backend
       console.log(`[OTP CHECK] Backend response received:`, response);

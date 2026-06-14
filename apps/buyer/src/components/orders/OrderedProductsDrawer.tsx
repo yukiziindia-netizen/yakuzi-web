@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Share2, Plus, ArrowUpRight, ChevronRight, ChevronLeft, Trash2, Star, RefreshCw, Bookmark, Check, Truck, MapPin, Package, Bike } from 'lucide-react';
+import { Share2, Plus, ArrowUpRight, ChevronRight, ChevronLeft, Trash2, Star, RefreshCw, Bookmark, Check, Truck, MapPin, Package, Bike, X } from 'lucide-react';
 import { DeliveryTruckBadge } from '../shared/DeliveryTruckBadge';
 import Image from 'next/image';
 
@@ -17,12 +17,16 @@ export function OrderedProductsDrawer({ isOpen, onClose }: OrderedProductsDrawer
     <>
       {/* Backdrop overlay */}
       <div 
-        className="fixed inset-0 bg-black/20 z-[60] transition-opacity rounded-l-3xl" 
+        className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[65] transition-opacity rounded-l-3xl" 
         onClick={onClose}
       />
 
       {/* Drawer */}
-      <div className="fixed right-0 inset-y-0 w-[400px] max-w-full bg-white rounded-l-3xl shadow-2xl z-[70] flex flex-col overflow-hidden animate-slide-in-right">
+      <div className={`fixed inset-y-0 right-0 w-[85%] max-w-[400px] bg-white shadow-2xl z-[70] transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'} overflow-y-auto rounded-l-3xl`}>
+        {/* Hidden Close Button */}
+        <button onClick={onClose} className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-900 bg-white/80 rounded-full z-[80] transition-colors">
+          <X className="w-5 h-5" />
+        </button>
         
         {/* Header */}
         <div className="pr-6 pl-12 py-6 border-b border-gray-100 relative shrink-0">

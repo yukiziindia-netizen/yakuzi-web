@@ -52,10 +52,10 @@ export type Cart = z.infer<typeof CartSchema>;
 // This normalizes backend cart data into our frontend Cart type.
 
 function mapBackendCartItem(raw: any): CartItem {
-  const product = raw.product || {};
+  const product = raw.sellerOffer || raw.product || {};
   return {
     id: raw.id,
-    productId: raw.productId || product.id,
+    productId: raw.sellerOfferId || raw.productId || product.id,
     productName: product.name,
     name: product.name,
     price: raw.unitPrice ?? product.price ?? product.mrp ?? 0,
@@ -110,9 +110,9 @@ export async function getCart(): Promise<Cart> {
   }
 }
 
-export async function addToCart(productId: string, quantity: number = 1): Promise<Cart> {
+export async function addToCart(sellerOfferId: string, quantity: number = 1): Promise<Cart> {
   try {
-    const response = await api.post('/cart/add', { productId, quantity });
+    const response = await api.post('/cart/add', { sellerOfferId, quantity });
     // On success, backend may return the new cart or just the item — refetch to be sure
     return mapBackendCart(response.data);
   } catch (err: any) {

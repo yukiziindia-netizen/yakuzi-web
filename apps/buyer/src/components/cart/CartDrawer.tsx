@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Trash2, Loader2, Star, ArrowUpRight, Bookmark, ShoppingBag } from 'lucide-react';
+import { X, Trash2, Loader2, Star, ArrowUpRight, Bookmark, ShoppingBag, ShoppingCart } from 'lucide-react';
 import { DeliveryTruckBadge } from '@/components/shared/DeliveryTruckBadge';
 import WishlistIcon from '@/components/shared/WishlistIcon';
 import { useCart, useUpdateCartItem, useRemoveCartItem, useSyncCart, useClearCart } from '@/hooks/useCart';
@@ -85,7 +85,7 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[65]"
           />
 
           {/* Drawer Panel */}
@@ -95,7 +95,7 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed top-0 right-0 h-full w-[85%] max-w-[360px] bg-white shadow-2xl z-50 flex flex-col overflow-hidden"
+            className="fixed top-0 right-0 h-full w-[85%] max-w-[400px] bg-white shadow-2xl z-[70] flex flex-col overflow-hidden rounded-l-3xl"
           >
             {/* Custom Scrollbar Styles */}
             <style jsx global>{`
@@ -277,18 +277,35 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
             </div>
 
             {/* Footer */}
-            <div className="px-6 pb-24 pt-4">
-              <div className="flex items-center justify-between mb-4 border-t border-gray-100 pt-4">
-                <span className="text-[13px] font-bold text-gray-400 uppercase tracking-widest">Subtotal</span>
-                <span className="text-xl font-black text-gray-900">₹{Math.round(cart?.total ?? 0).toLocaleString('en-IN')}</span>
+            <div className="px-5 pb-6 pt-3 border-t border-gray-100">
+              {/* Subtotal row */}
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[13px] font-semibold text-gray-400 uppercase tracking-widest">Subtotal</span>
+                <span className="text-[20px] font-black text-gray-900">₹{Math.round(cart?.total ?? 0).toLocaleString('en-IN')}</span>
               </div>
+              {items.length > 0 && (
+                <p className="text-[11px] text-gray-400 mb-4">
+                  {items.length} item{items.length > 1 ? 's' : ''} · Shipping calculated at checkout
+                </p>
+              )}
+
+              {/* Primary: Go to Checkout */}
               <button
-                onClick={handleCheckout}
-                disabled={syncCart.isPending || createOrder.isPending || items.length === 0}
-                className="w-full bg-[#854cbc] hover:bg-[#733ea3] text-white rounded-xl py-3.5 text-[15px] font-bold shadow-md transition-all flex justify-center items-center disabled:opacity-50"
+                onClick={() => {
+                  if (!isAuthenticated) {
+                    window.dispatchEvent(new CustomEvent('open-login'));
+                    return;
+                  }
+                  onClose();
+                  router.push('/checkout');
+                }}
+                disabled={items.length === 0}
+                className="w-full bg-[#854cbc] hover:bg-[#6f3ea5] active:scale-[0.98] text-white rounded-xl py-3.5 text-[15px] font-bold shadow-lg transition-all flex justify-center items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed mb-2"
               >
-                {(syncCart.isPending || createOrder.isPending) ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Order Now'}
+                <ShoppingCart className="w-4 h-4" />
+                Order Now
               </button>
+
             </div>
           </motion.div>
         </>

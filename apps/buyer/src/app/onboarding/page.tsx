@@ -286,7 +286,7 @@ export default function OnboardingPage() {
     { num: 2, label: 'Review & Submit', icon: Shield },
   ];
 
-  // Check if buyer is already approved — redirect to products
+  // Check if buyer is already approved â€” redirect to products
   const bp = user?.buyerProfile as any;
   const isApproved = user?.status === 'APPROVED' || user?.verificationStatus === 'VERIFIED' || bp?.verificationStatus === 'VERIFIED';
   
@@ -332,7 +332,7 @@ export default function OnboardingPage() {
                 Your business profile has been submitted and is currently being reviewed by our team. You will receive a notification once your account is verified.
               </p>
               <p className="text-sm text-gray-400 mb-8">
-                Verification typically takes 24–48 hours.
+                Verification typically takes 24â€“48 hours.
               </p>
               <Link href="/" className="inline-flex items-center justify-center w-full h-14 bg-gray-900 text-white rounded-xl font-bold transition-all hover:bg-gray-800">
                 Continue Browsing
@@ -670,9 +670,9 @@ export default function OnboardingPage() {
                         { label: 'GST Number', value: form.gstNumber, verified: gstVerified },
                         { label: 'PAN Number', value: form.panNumber, verified: panVerified },
                         { label: 'Drug License 1', value: form.drugLicenseNumber },
-                        { label: 'Expiry 1', value: form.drugLicenseExpiry ? new Date(form.drugLicenseExpiry).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }) : '—' },
+                        { label: 'Expiry 1', value: form.drugLicenseExpiry ? new Date(form.drugLicenseExpiry).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }) : 'â€”' },
                         { label: 'Drug License 2', value: form.drugLicenseNumber2 },
-                        { label: 'Expiry 2', value: form.drugLicenseExpiry2 ? new Date(form.drugLicenseExpiry2).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }) : '—' },
+                        { label: 'Expiry 2', value: form.drugLicenseExpiry2 ? new Date(form.drugLicenseExpiry2).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }) : 'â€”' },
                         { label: 'City', value: form.city },
                         { label: 'State', value: form.state },
                         { label: 'Pincode', value: form.pincode },
@@ -680,7 +680,7 @@ export default function OnboardingPage() {
                         <div key={item.label} className="bg-gray-50 rounded-xl p-3">
                           <p className="text-xs text-gray-500 mb-0.5">{item.label}</p>
                           <p className="text-sm font-medium text-gray-900 flex items-center gap-1">
-                            {item.value || '—'}
+                            {item.value || 'â€”'}
                             {item.verified && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />}
                           </p>
                         </div>
@@ -688,7 +688,7 @@ export default function OnboardingPage() {
                     </div>
                     <div className="bg-gray-50 rounded-xl p-3">
                       <p className="text-xs text-gray-500 mb-0.5">Address</p>
-                      <p className="text-sm font-medium text-gray-900">{form.address || '—'}</p>
+                      <p className="text-sm font-medium text-gray-900">{form.address || 'â€”'}</p>
                     </div>
                     {uploadedFileName && (
                       <div className="bg-gray-50 rounded-xl p-3">

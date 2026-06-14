@@ -52,7 +52,7 @@ export default function BrandProductsModal({
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
           >
-            ×
+            Ã—
           </button>
         </div>
 

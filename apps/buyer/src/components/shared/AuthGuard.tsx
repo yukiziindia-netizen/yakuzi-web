@@ -41,7 +41,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     }
   }, [isLoading, isAuthenticated, user, router, pathname]);
 
-  // Status Polling — poll every 10s while buyer is pending so approval reflects automatically
+  // Status Polling â€” poll every 10s while buyer is pending so approval reflects automatically
   useEffect(() => {
     if (!isAuthenticated || !user) return;
 

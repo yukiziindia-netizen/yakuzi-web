@@ -14,7 +14,7 @@ FROM node:22-alpine AS builder
 ARG APP_NAME
 WORKDIR /repo
 RUN apk add --no-cache libc6-compat
-RUN corepack enable && corepack prepare pnpm@10.32.1 --activate
+RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
 
 COPY . .
 

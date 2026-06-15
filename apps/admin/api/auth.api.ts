@@ -1,7 +1,7 @@
 import { apiClient } from "@/lib/apiClient";
 import type { User } from "@yukizi/utils";
 
-export interface SendOtpPayload { contact: string; }
+export interface SendOtpPayload { phone: string; }
 export interface VerifyOtpPayload { phone: string; otp: string; role?: string; }
 export interface AuthResponse { data: { accessToken: string; refreshToken?: string; user: User; isNewUser?: boolean }; message?: string; }
 

@@ -32,7 +32,7 @@ export default function AdminAuthPage() {
     setPhone(cleaned); // Clean state for consistency
 
     try {
-      await sendOtpMutation.mutateAsync({ contact: cleaned });
+      await sendOtpMutation.mutateAsync({ phone: cleaned });
       setStep("otp");
       toast.success("OTP sent successfully");
     } catch (err: any) {

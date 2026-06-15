@@ -1,0 +1,81 @@
+name: Production Web Deployment
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ap-south-1
+  ECR_REGISTRY: 370586503907.dkr.ecr.ap-south-1.amazonaws.com
+  ECR_BASE: yukizi-production
+  S3_BUCKET: yukizi-production-static-assets-370586503907
+  K8S_NAMESPACE: yukizi
+
+jobs:
+  deploy-web:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app:
+          - name: buyer
+            port: 3001
+            deployment: web-buyer
+          - name: admin
+            port: 3002
+            deployment: web-admin
+          - name: seller
+            port: 3003
+            deployment: web-seller
+          - name: blog
+            port: 3004
+            deployment: web-blog
+      fail-fast: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Configure Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Build, tag, and push Web App
+        env:
+          TAG: v${{ github.run_number }}-${{ github.sha }}
+        run: |
+          docker build --build-arg APP_NAME=${{ matrix.app.name }} --build-arg APP_PORT=${{ matrix.app.port }} -t $ECR_REGISTRY/$ECR_BASE/web-${{ matrix.app.name }}:$TAG .
+          docker push $ECR_REGISTRY/$ECR_BASE/web-${{ matrix.app.name }}:$TAG
+
+      - name: Sync Static CSS to S3 CDN
+        env:
+          TAG: v${{ github.run_number }}-${{ github.sha }}
+        run: |
+          mkdir -p temp_static
+          CID=$(docker create $ECR_REGISTRY/$ECR_BASE/web-${{ matrix.app.name }}:$TAG)
+          docker cp $CID:/app/.next/static/. temp_static/
+          docker rm $CID
+          aws s3 sync temp_static s3://${{ env.S3_BUCKET }}/_next/static/ --region ${{ env.AWS_REGION }} --cache-control "public,max-age=31536000,immutable"
+
+      - name: Update Kubernetes Deployment
+        env:
+          TAG: v${{ github.run_number }}-${{ github.sha }}
+        run: |
+          kubectl set image deployment/${{ matrix.app.deployment }} "*=$ECR_REGISTRY/$ECR_BASE/web-${{ matrix.app.name }}:$TAG" -n ${{ env.K8S_NAMESPACE }}
+          kubectl rollout status deployment/${{ matrix.app.deployment }} -n ${{ env.K8S_NAMESPACE }}

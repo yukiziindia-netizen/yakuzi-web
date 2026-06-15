@@ -18,9 +18,6 @@ RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
 
 COPY . .
 
-ARG NEXT_PUBLIC_API_BASE_URL
-ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
-
 RUN pnpm install --frozen-lockfile --shamefully-hoist
 
 # Build target app + its workspace deps
@@ -44,6 +41,7 @@ RUN apk add --no-cache libc6-compat \
 
 ENV NODE_ENV=production
 ENV PORT=${APP_PORT}
+ENV NEXT_PUBLIC_API_URL=https://api.dev.yukizi.com/api
 
 COPY --from=builder --chown=nextjs:nextjs /out ./
 

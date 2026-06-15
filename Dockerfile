@@ -18,6 +18,9 @@ RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
 
 COPY . .
 
+ARG NEXT_PUBLIC_API_BASE_URL
+ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
+
 RUN pnpm install --frozen-lockfile --shamefully-hoist
 
 # Build target app + its workspace deps

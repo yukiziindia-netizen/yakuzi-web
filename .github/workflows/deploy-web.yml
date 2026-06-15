@@ -60,7 +60,7 @@ jobs:
         env:
           TAG: v${{ github.run_number }}-${{ github.sha }}
         run: |
-          docker build --build-arg APP_NAME=${{ matrix.app.name }} --build-arg APP_PORT=${{ matrix.app.port }} -t $ECR_REGISTRY/$ECR_BASE/web-${{ matrix.app.name }}:$TAG .
+          docker build --build-arg APP_NAME=${{ matrix.app.name }} --build-arg APP_PORT=${{ matrix.app.port }} --build-arg NEXT_PUBLIC_API_BASE_URL=https://api.dev.yukizi.com/api -t $ECR_REGISTRY/$ECR_BASE/web-${{ matrix.app.name }}:$TAG .
           docker push $ECR_REGISTRY/$ECR_BASE/web-${{ matrix.app.name }}:$TAG
 
       - name: Sync Static CSS to S3 CDN

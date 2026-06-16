@@ -20,6 +20,9 @@ COPY . .
 
 RUN pnpm install --frozen-lockfile --shamefully-hoist
 
+ENV NEXT_PUBLIC_API_URL=https://api.dev.yukizi.com/api
+ENV NEXT_PUBLIC_API_BASE_URL=https://api.dev.yukizi.com/api
+
 # Build target app + its workspace deps
 RUN pnpm --filter "${APP_NAME}..." build
 
@@ -42,6 +45,7 @@ RUN apk add --no-cache libc6-compat \
 ENV NODE_ENV=production
 ENV PORT=${APP_PORT}
 ENV NEXT_PUBLIC_API_URL=https://api.dev.yukizi.com/api
+ENV NEXT_PUBLIC_API_BASE_URL=https://api.dev.yukizi.com/api
 
 COPY --from=builder --chown=nextjs:nextjs /out ./
 

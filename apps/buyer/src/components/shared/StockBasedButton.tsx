@@ -11,6 +11,7 @@ interface StockBasedButtonProps {
   isLoading?: boolean;
   disabled?: boolean;
   moq?: number;
+  isWaitlisted?: boolean;
 }
 
 export function StockBasedButton({
@@ -20,6 +21,7 @@ export function StockBasedButton({
   isLoading = false,
   disabled = false,
   moq = 1,
+  isWaitlisted = false,
 }: StockBasedButtonProps) {
   // Determine stock status
   let status: StockStatus;
@@ -64,20 +66,20 @@ export function StockBasedButton({
     <div className="flex flex-col items-end gap-1">
       <button
         type="button"
-        disabled={disabled || isLoading || status === 'out-of-stock'}
+        disabled={disabled || isLoading}
         onClick={handleClick}
         className={`
-          p-1 transition-all duration-150 active:scale-90
-          ${iconColorMap[status]}
+          p-1 transition-all duration-150 active:scale-90 rounded-full
+          ${status === 'out-of-stock' ? (isWaitlisted ? 'text-red-500 bg-red-50' : 'text-gray-400 hover:text-red-500 hover:bg-red-50') : iconColorMap[status]}
           ${disabled || isLoading ? 'opacity-50 cursor-not-allowed' : ''}
         `}
-        title={status === 'out-of-stock' ? 'Notify when back in stock' : 'Add to bag'}
+        title={status === 'out-of-stock' ? (isWaitlisted ? 'Remove from waitlist' : 'Notify me when available') : 'Add to bag'}
       >
         {isLoading ? (
           <Loader2 className="w-6 h-6 animate-spin" />
         )
           : status === 'out-of-stock' ? (
-            <Dot size={32} className="w-6 h-6 text-white" strokeWidth={2.5} />
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill={isWaitlisted ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
           )
             :
             (

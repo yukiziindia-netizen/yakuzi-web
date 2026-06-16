@@ -24,6 +24,8 @@ interface ProductCardProps {
   onBookmark?: (bookmarked: boolean) => void;
   isLoadingCart?: boolean;
   productId?: string;
+  isWaitlisted?: boolean;
+  onToggleWaitlist?: (productId: string) => void;
 }
 
 export default function ProductCard({ 
@@ -41,7 +43,9 @@ export default function ProductCard({
   isBookmarked = false,
   onBookmark,
   isLoadingCart = false,
-  productId
+  productId,
+  isWaitlisted = false,
+  onToggleWaitlist
 }: ProductCardProps) {
   const isOutOfStock = stock <= 0;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -99,11 +103,25 @@ export default function ProductCard({
                <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
              </button>
           </div>
+        ) : isOutOfStock ? (
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              if (productId && onToggleWaitlist) {
+                onToggleWaitlist(productId);
+              }
+            }} 
+            className={`transition-colors p-1 rounded-full ${isWaitlisted ? 'text-red-500 bg-red-50' : 'text-gray-400 hover:text-red-500 hover:bg-red-50'}`}
+            title={isWaitlisted ? "Remove from waitlist" : "Notify me when available"}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill={isWaitlisted ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 sm:w-6 sm:h-6"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+          </button>
         ) : (
           <button 
             onClick={handlePlusClick} 
             className="text-secondary hover:text-secondary/80 transition-colors p-1"
-            disabled={isLoadingCart || isOutOfStock}
+            disabled={isLoadingCart}
           >
             {isLoadingCart ? <Loader2 className="w-5 h-5 animate-spin" strokeWidth={1.5} /> : <Plus className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={1.5} />}
           </button>

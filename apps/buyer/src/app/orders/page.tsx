@@ -10,30 +10,43 @@ import { SkeletonList } from '@/components/shared/LoaderSkeleton';
 import Link from 'next/link';
 import { useOrders } from '@/hooks/useOrders';
 import AuthGuard from '@/components/shared/AuthGuard';
+import { useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
+import { OrderDrawer } from '@/components/orders/OrderDrawer';
 
 const STATUS_FILTERS = ['ALL', 'PLACED', 'ACCEPTED', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
 
 export default function OrdersPage() {
+  const searchParams = useSearchParams();
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [page, setPage] = useState(1);
+  const [drawerOrderId, setDrawerOrderId] = useState<string | null>(null);
 
-  const { data, isLoading, isError } = useOrders({
+  useEffect(() => {
+    const drawerParam = searchParams.get('drawer');
+    if (drawerParam) {
+      setDrawerOrderId(drawerParam);
+      // Optional: remove it from URL without reloading if needed, but keeping it is fine
+    }
+  }, [searchParams]);
+
+  const { data: ordersData, isLoading, isError } = useOrders({
     page,
     limit: 10,
     status: statusFilter === 'ALL' ? undefined : statusFilter,
   });
 
-  const ordersData = (Array.isArray(data) ? data : data?.data) ?? [];
+  const ordersRaw = Array.isArray(ordersData) ? ordersData : (ordersData?.data || ordersData?.data?.orders || []);
   const orders = statusFilter === 'ALL' 
-    ? ordersData 
-    : ordersData.filter((o: any) => {
+    ? ordersRaw 
+    : ordersRaw.filter((o: any) => {
         const os = (o.status || o.orderStatus || 'PLACED').toUpperCase();
         // Handle aliases: PENDING is basically PLACED for the user
         if (statusFilter === 'PLACED') return os === 'PLACED' || os === 'PENDING';
         return os === statusFilter.toUpperCase();
       });
     
-  const total = (data as any)?.total ?? (Array.isArray(data) ? ordersData.length : 0);
+  const total = (ordersData as any)?.total ?? (Array.isArray(ordersData) ? ordersRaw.length : 0);
 
   return (
     <AuthGuard>
@@ -107,7 +120,7 @@ export default function OrdersPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.05 }}
                   >
-                    <Link href={`/orders/${order.id}`}>
+                    <div onClick={() => setDrawerOrderId(order.id)} className="cursor-pointer">
                       <OrderCard
                         orderId={orderNumber}
                         date={orderDate}
@@ -115,7 +128,7 @@ export default function OrdersPage() {
                         total={`₹${totalAmount.toLocaleString('en-IN')}`}
                         itemCount={itemCount}
                       />
-                    </Link>
+                    </div>
                   </motion.div>
                 );
               })
@@ -146,6 +159,7 @@ export default function OrdersPage() {
           )}
         </motion.div>
       </div>
+      <OrderDrawer isOpen={!!drawerOrderId} onClose={() => setDrawerOrderId(null)} orderId={drawerOrderId} />
 </main>
     </AuthGuard>
   );

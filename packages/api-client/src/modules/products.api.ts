@@ -252,3 +252,18 @@ export async function getFeaturedProducts(slot: 'HOMEPAGE_CAROUSEL' | 'LOGIN_CAR
     return [];
   }
 }
+
+export async function getMyWaitlist() {
+  const { data } = await api.get('/products/waitlist/me');
+  return data?.data ?? [];
+}
+
+export async function addToWaitlist(productId: string) {
+  const { data } = await api.post(`/products/${productId}/notify-me`);
+  return data;
+}
+
+export async function removeFromWaitlist(productId: string) {
+  const { data } = await api.delete(`/products/${productId}/notify-me`);
+  return data;
+}

@@ -25,7 +25,7 @@ import {
 import Image from 'next/image';
 import { DeliveryTruckBadge } from '@/components/shared/DeliveryTruckBadge';
 import Link from 'next/link';
-import { useProductById, useProducts } from '@/hooks/useProducts';
+import { useProductById, useProducts, useWaitlist, useAddToWaitlist, useRemoveFromWaitlist } from '@/hooks/useProducts';
 import { useAddToCart, useCart, useUpdateCartItem, useRemoveCartItem } from '@/hooks/useCart';
 import { useToast } from '@/components/shared/Toast';
 import { useWishlist, useAddToWishlist, useRemoveFromWishlist } from '@/hooks/useWishlist';
@@ -178,11 +178,16 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
   const removeCartItem = useRemoveCartItem();
   const { toast } = useToast();
 
+  const { data: waitlistData } = useWaitlist();
+  const addToWaitlist = useAddToWaitlist();
+  const removeFromWaitlist = useRemoveFromWaitlist();
+
   const { data: wishlistData } = useWishlist();
   const addToWishlist = useAddToWishlist();
   const removeFromWishlist = useRemoveFromWishlist();
 
   const product = (productData as any)?.data || productData;
+  const catalogProductId = product?.catalogProductId || product?.id;
 
   const { data: relatedProductsData } = useProducts({
     categoryId: product?.category?.id,
@@ -210,6 +215,13 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
   if (wishlistData?.items) {
     wishlistData.items.forEach((item: any) => {
       if (item.productId) wishlistSet.add(item.productId);
+    });
+  }
+
+  const waitlistSet = new Set<string>();
+  if (waitlistData) {
+    waitlistData.forEach((w: any) => {
+      waitlistSet.add(w.catalogProductId);
     });
   }
 
@@ -503,9 +515,29 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                       {/* Right Action */}
                       <div className="flex w-[80px] shrink-0 items-center justify-end sm:w-[90px]">
                         {listing.isNotAvailable ? (
-                          <span className="rounded border border-red-100 bg-red-50 px-2.5 py-1 text-[11px] font-bold text-red-500 shadow-sm">
-                            N/A
-                          </span>
+                          <button
+                            onClick={() => {
+                              if (waitlistSet.has(catalogProductId)) {
+                                removeFromWaitlist.mutate(catalogProductId, {
+                                  onSuccess: () => toast('Removed from waitlist', 'success'),
+                                  onError: (err: any) => toast(err?.message || 'Failed to remove', 'error'),
+                                });
+                              } else {
+                                addToWaitlist.mutate(catalogProductId, {
+                                  onSuccess: () => toast('Added to waitlist!', 'success'),
+                                  onError: (err: any) => toast(err?.message || 'Failed to add', 'error'),
+                                });
+                              }
+                            }}
+                            className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${
+                              waitlistSet.has(catalogProductId)
+                                ? 'bg-red-100 text-red-500'
+                                : 'bg-red-50 text-red-500 hover:bg-red-100'
+                            }`}
+                            title={waitlistSet.has(catalogProductId) ? "Remove from waitlist" : "Notify me when available"}
+                          >
+                            <Bell size={16} strokeWidth={2.5} fill={waitlistSet.has(catalogProductId) ? "currentColor" : "none"} />
+                          </button>
                         ) : showAdd ? (
                           <button
                             onClick={() =>

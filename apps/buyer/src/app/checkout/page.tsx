@@ -102,7 +102,15 @@ export default function CheckoutPage() {
     }
 
     setSyncError(null);
-    const orderAddress = { ...address, name: combinedName };
+    // Only send fields the backend DTO accepts — strip firstName, lastName, email
+    const orderAddress = {
+      name: combinedName,
+      phone: address.phone.replace(/\D/g, '').slice(-10), // strip non-digits, keep last 10
+      address: address.address,
+      city: address.city,
+      state: address.state,
+      pincode: String(address.pincode).replace(/\D/g, '').slice(0, 6), // digits only, max 6
+    };
 
     syncCart.mutate(undefined, {
       onSuccess: () => {
@@ -114,14 +122,14 @@ export default function CheckoutPage() {
               {
                 onSuccess: () => {
                   clearCart.mutate(undefined, {
-                    onSuccess: () => { window.location.href = `/orders/${orderId}?success=true`; },
-                    onError: () => { window.location.href = `/orders/${orderId}?success=true`; }
+                    onSuccess: () => { window.location.href = `/orders?drawer=${orderId}&success=true`; },
+                    onError: () => { window.location.href = `/orders?drawer=${orderId}&success=true`; }
                   });
                 },
                 onError: () => {
                   clearCart.mutate(undefined, {
-                    onSuccess: () => { window.location.href = `/orders/${orderId}`; },
-                    onError: () => { window.location.href = `/orders/${orderId}`; }
+                    onSuccess: () => { window.location.href = `/orders?drawer=${orderId}`; },
+                    onError: () => { window.location.href = `/orders?drawer=${orderId}`; }
                   });
                 },
               }

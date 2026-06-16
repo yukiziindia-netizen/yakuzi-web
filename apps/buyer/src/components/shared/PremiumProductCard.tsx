@@ -29,6 +29,8 @@ interface PremiumProductCardProps {
   onCartChange?: (quantity: number | null, productId?: string) => void;
   onQuickView?: () => void;
   onClick?: () => void;
+  isWaitlisted?: boolean;
+  onToggleWaitlist?: (productId: string) => void;
 }
 
 export default function PremiumProductCard({
@@ -50,7 +52,9 @@ export default function PremiumProductCard({
   onBookmark,
   onCartChange,
   onQuickView,
-  onClick
+  onClick,
+  isWaitlisted = false,
+  onToggleWaitlist
 }: PremiumProductCardProps) {
   const [count, setCount] = useState<number>(cartQuantity ?? 0);
   const [bookmarked, setBookmarked] = useState(isBookmarked);
@@ -287,9 +291,13 @@ export default function PremiumProductCard({
             onAddToCart={handleAddToCart}
             onNotifyStockAlert={() => {
               actionClicked.current = true;
+              if (productId && onToggleWaitlist) {
+                onToggleWaitlist(productId);
+              }
             }}
             disabled={isLoadingCart}
             isLoading={isLoadingCart}
+            isWaitlisted={isWaitlisted}
           />
         )}
       </div>

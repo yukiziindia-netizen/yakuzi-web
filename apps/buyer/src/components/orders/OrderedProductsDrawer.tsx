@@ -40,7 +40,7 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
 
   const { data: orderData, isLoading } = useOrderById(orderId || '');
-  const order = orderData?.data || orderData;
+  const order = (orderData as any)?.data || orderData;
   const items = order?.items || order?.orderItems || [];
   
   const { data: trackingResp } = useOrderTracking(orderId || '');

@@ -29,12 +29,12 @@ export function OrderDrawer({ isOpen, onClose, orderId }: OrderDrawerProps) {
   }, [orderId]);
 
   const { data: allOrdersData } = useOrders({ page: 1, limit: 10 });
-  const allOrders = Array.isArray(allOrdersData) ? allOrdersData : (allOrdersData?.data || allOrdersData?.data?.orders || []);
+  const allOrders = Array.isArray(allOrdersData) ? allOrdersData : ((allOrdersData as any)?.data || (allOrdersData as any)?.data?.orders || []);
 
   const effectiveOrderId = selectedOrderId || orderId || (allOrders.length > 0 ? allOrders[0].id : '');
 
   const { data: orderData } = useOrderById(effectiveOrderId || '');
-  const order = orderData?.data || orderData;
+  const order = (orderData as any)?.data || orderData;
   const items = order?.items || order?.orderItems || [];
   console.log("OrderDrawer DEBUG:", { orderId, effectiveOrderId, orderData, itemsLength: items?.length });
 

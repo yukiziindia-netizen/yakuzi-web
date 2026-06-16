@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { Package, AlertCircle, Filter, ShoppingBag } from 'lucide-react';
 import EmptyState from '@/components/shared/EmptyState';
@@ -16,7 +16,7 @@ import { OrderDrawer } from '@/components/orders/OrderDrawer';
 
 const STATUS_FILTERS = ['ALL', 'PLACED', 'ACCEPTED', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
 
-export default function OrdersPage() {
+function OrdersPageContent() {
   const searchParams = useSearchParams();
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [page, setPage] = useState(1);
@@ -36,7 +36,7 @@ export default function OrdersPage() {
     status: statusFilter === 'ALL' ? undefined : statusFilter,
   });
 
-  const ordersRaw = Array.isArray(ordersData) ? ordersData : (ordersData?.data || ordersData?.data?.orders || []);
+  const ordersRaw = Array.isArray(ordersData) ? ordersData : ((ordersData as any)?.data || (ordersData as any)?.data?.orders || []);
   const orders = statusFilter === 'ALL' 
     ? ordersRaw 
     : ordersRaw.filter((o: any) => {
@@ -136,7 +136,7 @@ export default function OrdersPage() {
           </div>
 
           {/* Pagination */}
-          {total > (data?.limit || 10) && (
+          {total > ((ordersData as any)?.limit || 10) && (
             <div className="flex items-center justify-center gap-4 pt-4">
               <motion.button
                 whileTap={{ scale: 0.95 }}
@@ -162,5 +162,13 @@ export default function OrdersPage() {
       <OrderDrawer isOpen={!!drawerOrderId} onClose={() => setDrawerOrderId(null)} orderId={drawerOrderId} />
 </main>
     </AuthGuard>
+  );
+}
+
+export default function OrdersPage() {
+  return (
+    <Suspense fallback={<div className="flex h-screen items-center justify-center"><p>Loading orders...</p></div>}>
+      <OrdersPageContent />
+    </Suspense>
   );
 }

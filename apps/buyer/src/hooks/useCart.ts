@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getCart, addToCart, updateCartItem, removeCartItem, clearCart, useAuth } from '@yukizi/api-client';
@@ -101,9 +101,10 @@ export function useSyncCart() {
         if (!item.productId) continue;
 
         try {
+          const targetId = (item as any).listingId || item.productId;
           // Check if this product is already in the backend cart
           const existingBackendItem = backendItems.find(
-            (bi: any) => bi.productId === item.productId || bi.product?.id === item.productId
+            (bi: any) => bi.productId === targetId || bi.product?.id === targetId || bi.sellerOffer?.id === targetId
           );
 
           if (existingBackendItem) {
@@ -112,7 +113,7 @@ export function useSyncCart() {
             await updateCartItem(existingBackendItem.id, item.quantity);
           } else {
             // If it doesn't exist, add it (POST)
-            await addToCart(item.productId, item.quantity);
+            await addToCart(targetId, item.quantity);
           }
         } catch (e: any) {
           const msg = e?.response?.data?.message || e.message;

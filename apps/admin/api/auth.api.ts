@@ -1,4 +1,4 @@
-﻿import { apiClient } from "@/lib/apiClient";
+import { apiClient } from "@/lib/apiClient";
 import type { User } from "@yukizi/utils";
 
 export interface SendOtpPayload { phone: string; }

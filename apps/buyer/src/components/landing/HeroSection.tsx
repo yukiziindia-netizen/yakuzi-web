@@ -89,7 +89,7 @@ export default function HeroSection({ title = 'YUKiZi' }: HeroSectionProps) {
         </div>
 
         {/* Right Side: Text & Tags */}
-        <div className="relative z-10 flex w-full flex-col items-center justify-center border-t border-gray-100 bg-white px-4 py-6 md:w-[40%] md:border-t-0">
+        <div className="hidden md:flex relative z-10 w-full flex-col items-center justify-center border-t border-gray-100 bg-white px-4 py-6 md:w-[40%] md:border-t-0">
           {/* Text-based Logo Replica */}
           <h1
             className="xs:text-6xl mb-4 bg-gradient-to-b from-[#a955e8] to-[#6a2ba8] bg-clip-text text-center text-5xl font-black leading-none tracking-tighter text-transparent drop-shadow-sm md:text-[6rem]"

@@ -51,15 +51,18 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
         className={`block bg-white rounded-xl border ${isYukiziChoice ? 'border-[#e2cbf5] shadow-[0_2px_15px_rgba(133,76,188,0.12)]' : 'border-gray-200'} p-3 pb-3 flex flex-col hover:shadow-lg transition-all duration-300 w-full h-full relative overflow-hidden`}
       >
 
-        {/* Top Icons */}
         <div className="flex justify-between items-start mb-1">
           <button className="text-gray-400 hover:text-gray-600 transition-colors z-10" onClick={(e) => e.preventDefault()}>
             <Share2 size={16} strokeWidth={2} />
           </button>
-          <button className="text-orange-400 hover:text-orange-500 transition-colors z-10 disabled:opacity-50" disabled={addToCart.isPending} onClick={async (e) => {
+          <button className="text-orange-400 hover:text-orange-500 transition-colors z-10 disabled:opacity-50" disabled={addToCart.isPending || !product.hasSellers} onClick={async (e) => {
             e.preventDefault();
+            if (!product.bestListingId) {
+              toast('Product currently unavailable', 'error');
+              return;
+            }
             await addToCart.mutateAsync({
-              productId: product.id || 'prod-' + index,
+              productId: product.bestListingId,
               name: productName,
               price: product.price || product.mrp || 0,
               image: imageUrl,

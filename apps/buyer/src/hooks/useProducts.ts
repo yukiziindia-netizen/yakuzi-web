@@ -1,7 +1,7 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
-import { getProducts, getProductById, getCategories, getManufacturers, getCities, getDiscountDetails, getBrands } from '@yukizi/api-client';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getProducts, getProductById, getCategories, getManufacturers, getCities, getDiscountDetails, getBrands, getMyWaitlist, addToWaitlist, removeFromWaitlist } from '@yukizi/api-client';
 
 export function useBrands() {
   return useQuery({
@@ -71,5 +71,32 @@ export function useDiscountDetails(productId: string) {
     queryKey: ['discount', productId],
     queryFn: () => getDiscountDetails(productId),
     enabled: !!productId,
+  });
+}
+
+export function useWaitlist() {
+  return useQuery({
+    queryKey: ['waitlist'],
+    queryFn: getMyWaitlist,
+  });
+}
+
+export function useAddToWaitlist() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (productId: string) => addToWaitlist(productId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['waitlist'] });
+    },
+  });
+}
+
+export function useRemoveFromWaitlist() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (productId: string) => removeFromWaitlist(productId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['waitlist'] });
+    },
   });
 }

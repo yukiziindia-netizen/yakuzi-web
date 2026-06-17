@@ -436,7 +436,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[65]"
           />
           
           <motion.div
@@ -445,8 +445,12 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed top-0 right-0 bottom-0 w-[85%] max-w-[400px] bg-white z-50 shadow-2xl rounded-l-3xl flex flex-col overflow-hidden"
+            className="fixed top-0 right-0 bottom-0 w-[85%] max-w-[400px] bg-white z-[70] shadow-2xl rounded-l-3xl flex flex-col overflow-hidden"
           >
+            {/* Hidden Close Button */}
+            <button onClick={onClose} className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-900 bg-white/80 rounded-full z-[80] transition-colors">
+              <X className="w-5 h-5" />
+            </button>
             {view === "filters" ? renderFiltersView() : renderShoppingView()}
           </motion.div>
         </>

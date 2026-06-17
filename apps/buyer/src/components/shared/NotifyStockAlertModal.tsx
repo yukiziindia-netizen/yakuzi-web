@@ -6,6 +6,8 @@ import { useState } from 'react';
 import { useAuth } from '@yukizi/api-client';
 import { useToast } from './Toast';
 
+import { useAddToWaitlist } from '@/hooks/useProducts';
+
 interface NotifyStockAlertModalProps {
   isOpen: boolean;
   productName: string;
@@ -23,8 +25,9 @@ export function NotifyStockAlertModal({
 }: NotifyStockAlertModalProps) {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [email, setEmail] = useState(user?.email || '');
+  const addToWaitlist = useAddToWaitlist();
+  const isSubmitting = addToWaitlist.isPending;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,27 +42,8 @@ export function NotifyStockAlertModal({
       return;
     }
 
-    setIsSubmitting(true);
-
     try {
-      // Call API to register stock alert
-      // POST /notifications/stock-alert
-      const response = await fetch(`http://0.0.0.0:3000/api/notifications/stock-alert`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('pb_access_token') : ''}`,
-        },
-        body: JSON.stringify({
-          productId,
-          email,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to register stock alert');
-      }
-
+      await addToWaitlist.mutateAsync(productId);
       toast(`We'll notify you when "${productName}" is back in stock!`, 'success');
       setEmail('');
       onSuccess?.();
@@ -67,8 +51,6 @@ export function NotifyStockAlertModal({
     } catch (err: any) {
       console.error('[Stock Alert] Error:', err);
       toast(err?.message || 'Failed to set up stock alert. Please try again.', 'error');
-    } finally {
-      setIsSubmitting(false);
     }
   };
 

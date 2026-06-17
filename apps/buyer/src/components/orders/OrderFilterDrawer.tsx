@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { RotateCcw, CreditCard, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react';
+import { RotateCcw, CreditCard, ShoppingCart, ChevronLeft, ChevronRight, X } from 'lucide-react';
 
 interface OrderFilterDrawerProps {
   isOpen: boolean;
@@ -20,12 +20,16 @@ export function OrderFilterDrawer({ isOpen, onClose, onApplyFilters }: OrderFilt
     <>
       {/* Backdrop for filter drawer (darkens the Order Drawer) */}
       <div 
-        className="fixed inset-0 bg-black/20 z-[60] transition-opacity rounded-l-3xl" 
+        className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[65] transition-opacity rounded-l-3xl" 
         onClick={onClose}
       />
 
       {/* Filter Drawer Panel */}
-      <div className="fixed right-0 inset-y-0 w-[320px] bg-white rounded-l-3xl shadow-2xl z-[70] flex flex-col overflow-hidden animate-slide-in-right">
+      <div className="fixed top-0 right-0 bottom-0 w-[85%] max-w-[400px] bg-white rounded-l-3xl shadow-2xl z-[70] flex flex-col overflow-hidden animate-slide-in-right">
+        {/* Hidden Close Button */}
+        <button onClick={onClose} className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-900 bg-white/80 rounded-full z-[80] transition-colors">
+          <X className="w-5 h-5" />
+        </button>
         
         {/* Header */}
         <div className="flex justify-between items-center px-6 py-5 border-b border-gray-100 shrink-0">

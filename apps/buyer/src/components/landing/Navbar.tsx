@@ -97,7 +97,7 @@ export default function Navbar({
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isSearchChatOpen, setIsSearchChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const [chatSessions, setChatSessions] = useState<{id: string, date: number, messages: ChatMessage[]}[]>([]);
+  const [chatSessions, setChatSessions] = useState<{ id: string, date: number, messages: ChatMessage[] }[]>([]);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [chatInput, setChatInput] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
@@ -138,11 +138,11 @@ export default function Navbar({
     // Load chat sessions on mount
     const savedSessions = localStorage.getItem('yukizi_chat_sessions');
     if (savedSessions) {
-      try { setChatSessions(JSON.parse(savedSessions)); } catch(e) {}
+      try { setChatSessions(JSON.parse(savedSessions)); } catch (e) { }
     }
     const savedCurrent = localStorage.getItem('yukizi_current_chat');
     if (savedCurrent) {
-      try { setChatMessages(JSON.parse(savedCurrent)); } catch(e) {}
+      try { setChatMessages(JSON.parse(savedCurrent)); } catch (e) { }
     }
 
     return () => {
@@ -215,7 +215,7 @@ export default function Navbar({
     }
   };
 
-  const loadSession = (session: {id: string, messages: ChatMessage[]}) => {
+  const loadSession = (session: { id: string, messages: ChatMessage[] }) => {
     if (chatMessages.length > 0) {
       setChatSessions(prev => [
         { id: Math.random().toString(36).substring(7), date: Date.now(), messages: chatMessages },
@@ -236,8 +236,8 @@ export default function Navbar({
   // 3. Regenerate Logic
   const handleRegenerate = async () => {
     if (chatMessages.length < 2 || isChatLoading) {
-       if (chatMessages.length < 2) alert("Need at least one exchange to regenerate.");
-       return;
+      if (chatMessages.length < 2) alert("Need at least one exchange to regenerate.");
+      return;
     }
     let lastUserMsgIndex = -1;
     for (let i = chatMessages.length - 1; i >= 0; i--) {
@@ -247,12 +247,12 @@ export default function Navbar({
       }
     }
     if (lastUserMsgIndex === -1) {
-       alert("No previous user message found to regenerate.");
-       return;
+      alert("No previous user message found to regenerate.");
+      return;
     }
     const lastUserMsg = chatMessages[lastUserMsgIndex];
     const historyToKeep = chatMessages.slice(0, lastUserMsgIndex);
-    
+
     setChatMessages(historyToKeep);
     await performChatRequest(lastUserMsg.content || "", historyToKeep, lastUserMsg.attachments || []);
   };
@@ -264,7 +264,7 @@ export default function Navbar({
       const reader = new FileReader();
       reader.onload = (event) => {
         if (event.target?.result) {
-           setAttachments(prev => [...prev, { name: file.name, data: event.target!.result as string, type: file.type }]);
+          setAttachments(prev => [...prev, { name: file.name, data: event.target!.result as string, type: file.type }]);
         }
       };
       reader.readAsDataURL(file);
@@ -283,12 +283,12 @@ export default function Navbar({
       const recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = false;
-      
+
       recognition.onstart = () => setIsRecording(true);
       recognition.onend = () => setIsRecording(false);
       recognition.onerror = (event: any) => {
-         alert(`Voice input error: ${event.error}`);
-         setIsRecording(false);
+        alert(`Voice input error: ${event.error}`);
+        setIsRecording(false);
       };
       recognition.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
@@ -331,7 +331,7 @@ export default function Navbar({
       <nav className="fixed bottom-4 sm:bottom-6 md:bottom-4 left-0 right-0 z-[60] flex justify-center items-end sm:items-center pointer-events-none px-2 sm:px-6 w-full">
         <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-6 md:gap-2 pointer-events-auto flex-nowrap justify-center w-full max-w-[1200px] px-1 sm:px-4 relative">
           {/* Left Segment: Logo, Profile, Notifications, Search */}
-          <div className="flex items-center bg-[#562996] rounded-xl sm:rounded-xl md:rounded-xl px-2 xs:px-3 sm:px-4 md:px-6 py-1.5 sm:py-3 md:py-3.5 shadow-md sm:shadow-2xl flex-1 max-w-[480px] justify-between overflow-hidden min-w-0">
+          <div className={`flex items-center ${!isAuthenticated ? 'bg-white sm:bg-[#562996] p-1 sm:px-4 sm:py-3 rounded-[2rem]' : 'bg-[#562996] px-2 xs:px-3 sm:px-4 py-1.5 sm:py-3 rounded-xl'} sm:rounded-xl md:rounded-xl md:px-6 md:py-3.5 shadow-md sm:shadow-2xl flex-1 max-w-[480px] justify-between overflow-hidden min-w-0`}>
             {/* DESKTOP VIEW (sm and up) */}
             <div className="hidden sm:flex items-center w-full justify-between">
               <div className="flex items-center h-full">
@@ -407,12 +407,13 @@ export default function Navbar({
             </div>
 
             {/* MOBILE VIEW (below sm) */}
-            <div className="flex sm:hidden items-center w-full justify-between gap-1">
+            <div className={`flex sm:hidden items-center w-full justify-between ${!isAuthenticated ? 'gap-1.5' : 'gap-1'}`}>
               {!isAuthenticated ? (
                 // BEFORE LOGIN (Image 3 layout)
-                <button onClick={onLoginClick} className="flex items-center gap-1.5 bg-[#562996] text-white rounded-full px-3 py-1.5 shrink-0 hover:bg-[#482080] transition-colors">
-                  <span className="font-black text-sm xs:text-base tracking-tighter uppercase" style={{ fontFamily: 'Impact, Arial Black, sans-serif' }}>YUKIZI</span>
-                  <span className="text-[10px] xs:text-xs font-semibold whitespace-nowrap">Start Now</span>
+                <button onClick={onLoginClick} className="flex items-center gap-1.5 bg-gradient-to-r from-[#a14eee] to-[#7721ce] text-white rounded-full px-3 py-1.5 flex-1 shadow-sm transition-colors justify-center">
+                  <span className="font-black text-sm xs:text-base tracking-tighter uppercase mt-0.5" style={{ fontFamily: 'Impact, Arial Black, sans-serif' }}>YUKIZI</span>
+                  <div className="h-3.5 w-[1px] bg-white/30 mx-0.5" />
+                  <span className="text-[11px] xs:text-[12px] font-medium whitespace-nowrap">Start Now</span>
                 </button>
               ) : (
                 // AFTER LOGIN (Image 2 layout)
@@ -454,18 +455,27 @@ export default function Navbar({
                 </div>
               )}
 
-              <div className="relative shrink-0 flex items-center w-[110px] xs:w-[130px]"
+              <div className={`relative shrink-0 flex items-center ${!isAuthenticated ? 'w-[85px] xs:w-[100px]' : 'w-[110px] xs:w-[130px]'}`}
                 onClick={() => {
                   setIsSearchChatOpen(!isSearchChatOpen);
                   setIsChatOpen(false);
                 }}>
-                <input
-                  type="text"
-                  placeholder="Search"
-                  readOnly
-                  className="w-full h-[30px] bg-white border border-gray-200 rounded-full text-[#333] text-[12px] pl-3 pr-8 focus:outline-none cursor-pointer placeholder-[#a0a0a0] shadow-sm font-medium"
-                />
-                <Search className="w-[14px] h-[14px] text-[#a0a0a0] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none stroke-2" />
+                {!isAuthenticated ? (
+                  <div className="w-full h-8 bg-white border border-gray-200 rounded-full flex items-center justify-between px-2.5 cursor-pointer shadow-sm hover:bg-gray-50 transition-colors">
+                    <span className="text-[#a14eee] text-[11px] xs:text-[12px] font-medium">Search</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-black"><path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"></path></svg>
+                  </div>
+                ) : (
+                  <>
+                    <input
+                      type="text"
+                      placeholder="Search"
+                      readOnly
+                      className="w-full h-[30px] bg-white border border-gray-200 rounded-full text-[#333] text-[12px] pl-3 pr-8 focus:outline-none cursor-pointer placeholder-[#a0a0a0] shadow-sm font-medium"
+                    />
+                    <Search className="w-[14px] h-[14px] text-[#a0a0a0] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none stroke-2" />
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -565,9 +575,9 @@ export default function Navbar({
                                 {att.name.split('.').pop()}
                               </span>
                             )}
-                            <button 
-                              type="button" 
-                              onClick={() => setAttachments(prev => prev.filter((_, idx) => idx !== i))} 
+                            <button
+                              type="button"
+                              onClick={() => setAttachments(prev => prev.filter((_, idx) => idx !== i))}
                               className="absolute -top-1.5 -right-1.5 bg-red-500 hover:bg-red-600 text-white rounded-full p-0.5 shadow-md transition-colors"
                             >
                               <X className="w-3 h-3" />
@@ -630,18 +640,18 @@ export default function Navbar({
                       </button>
                     </div>
                   </div>
-                  
+
                   {/* Hidden File Input */}
-                  <input 
-                    type="file" 
-                    ref={fileInputRef} 
-                    className="hidden" 
-                    accept="image/*,application/pdf" 
-                    multiple={false} 
-                    onChange={handleFileChange} 
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    accept="image/*,application/pdf"
+                    multiple={false}
+                    onChange={handleFileChange}
                   />
                 </div>
-                
+
                 {/* Chat History Modal */}
                 <AnimatePresence>
                   {isHistoryModalOpen && (
@@ -656,14 +666,14 @@ export default function Navbar({
                           <h2 className="text-2xl font-bold text-white flex items-center gap-3">
                             <Clock className="w-6 h-6" /> Chat History
                           </h2>
-                          <button 
+                          <button
                             onClick={() => setIsHistoryModalOpen(false)}
                             className="bg-white/10 hover:bg-white/20 p-2 rounded-full text-white transition-colors"
                           >
                             <X className="w-5 h-5" />
                           </button>
                         </div>
-                        
+
                         <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
                           {chatSessions.length === 0 ? (
                             <div className="text-white/50 text-center py-10">
@@ -671,7 +681,7 @@ export default function Navbar({
                             </div>
                           ) : (
                             chatSessions.map(session => (
-                              <div 
+                              <div
                                 key={session.id}
                                 onClick={() => loadSession(session)}
                                 className="group bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl p-4 cursor-pointer transition-all flex items-center justify-between"
@@ -684,7 +694,7 @@ export default function Navbar({
                                     {session.messages.find(m => m.role === 'user')?.content || "Empty conversation"}
                                   </div>
                                 </div>
-                                <button 
+                                <button
                                   onClick={(e) => deleteSession(e, session.id)}
                                   className="opacity-0 group-hover:opacity-100 p-2 text-white/40 hover:text-red-400 hover:bg-red-400/10 rounded-full transition-all"
                                   title="Delete Session"

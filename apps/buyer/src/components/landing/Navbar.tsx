@@ -462,8 +462,10 @@ export default function Navbar({
           <div className="flex items-center justify-between bg-white sm:bg-[#562996] rounded-[24px] sm:rounded-xl md:rounded-xl px-2.5 xs:px-4 sm:px-8 md:px-12 lg:px-16 py-1.5 sm:py-3 md:py-3.5 shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl text-[#7131b5] sm:text-white shrink-0 flex-1 max-w-[480px] z-10 overflow-hidden min-w-0 border border-gray-100 sm:border-0">
 
             <button onClick={() => setIsWishlistOpen(true)} className="relative hover:text-purple-300 transition-colors">
-              <Bookmark className="w-[18px] h-[18px] xs:w-[22px] xs:h-[22px] sm:hidden stroke-[2.5] rotate-90" />
-              <WishlistIcon useImage isFilled={wishlistCount > 0} className="w-8 h-8 sm:w-8 sm:h-8 text-white hidden sm:block" />
+              <Bookmark 
+                className="w-[18px] h-[18px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2.5] rotate-90" 
+                fill={wishlistCount > 0 ? "currentColor" : "none"} 
+              />
               {wishlistCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 bg-[#f7941d] text-white text-[8px] xs:text-[9px] sm:text-[10px] font-bold rounded-full flex items-center justify-center border border-white sm:border-[#562996]">
                   {wishlistCount}
@@ -511,21 +513,17 @@ export default function Navbar({
               >
                 <div className="w-full h-full bg-gradient-to-br from-[#9b49e6] to-[#7f26d9] rounded-[2rem] md:rounded-[2.5rem] shadow-[0_0_60px_rgba(155,73,230,0.5)] p-6 sm:p-8 md:p-10 flex flex-col">
                   {/* Chat Messages Area */}
-                  <div className="flex-1 overflow-y-auto mb-4 flex flex-col gap-4 scrollbar-hide">
-                    {chatMessages.length === 0 ? (
-                      <div className="flex-1 flex flex-col justify-end">
-                        {/* Placeholder space when empty */}
-                      </div>
-                    ) : (
-                      chatMessages.map((msg, idx) => (
+                  {chatMessages.length > 0 && (
+                    <div className="flex-1 overflow-y-auto mb-4 flex flex-col gap-4 scrollbar-hide">
+                      {chatMessages.map((msg, idx) => (
                         <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                           <div className={`max-w-[80%] rounded-2xl px-4 py-2 ${msg.role === 'user' ? 'bg-white text-[#7f26d9]' : 'bg-[#562996] text-white border border-white/20'}`}>
                             {msg.content}
                           </div>
                         </div>
-                      ))
-                    )}
-                  </div>
+                      ))}
+                    </div>
+                  )}
 
                   {/* Chat Box Header / Input Area */}
                   <div className={`${chatMessages.length > 0 ? 'h-16 shrink-0' : 'flex-1'} transition-all duration-300 pb-4 flex flex-col`}>

@@ -331,7 +331,7 @@ export default function Navbar({
       <nav className="fixed bottom-4 sm:bottom-6 md:bottom-4 left-0 right-0 z-[60] flex justify-center items-end sm:items-center pointer-events-none px-2 sm:px-6 w-full">
         <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-6 md:gap-2 pointer-events-auto flex-nowrap justify-center w-full max-w-[1200px] px-1 sm:px-4 relative">
           {/* Left Segment: Logo, Profile, Notifications, Search */}
-          <div className="flex items-center bg-white sm:bg-[#562996] rounded-[24px] sm:rounded-xl md:rounded-xl px-1.5 xs:px-2.5 sm:px-4 md:px-6 h-[48px] sm:h-[60px] md:h-[64px] shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl flex-1 max-w-[480px] justify-between overflow-hidden min-w-0 border border-gray-100 sm:border-0">
+          <div className="flex items-center bg-white sm:bg-[#562996] rounded-[24px] sm:rounded-xl md:rounded-xl pl-[2px] pr-1 xs:pl-1 xs:pr-1.5 sm:px-4 md:px-6 h-[48px] sm:h-[60px] md:h-[64px] shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl flex-[1.3] sm:flex-1 max-w-[480px] justify-between overflow-hidden min-w-0 border border-gray-100 sm:border-0">
             {/* DESKTOP VIEW (sm and up) */}
             <div className="hidden sm:flex items-center w-full justify-between">
                 <div className="flex items-center h-full">
@@ -410,38 +410,60 @@ export default function Navbar({
             </div>
 
             {/* MOBILE VIEW (below sm) */}
-            <div className="flex sm:hidden items-center w-full justify-between gap-1 xs:gap-1.5 px-0.5">
-              <Link href="/" className="shrink-0 flex items-center">
-                <Image src="/logo-gradient.png" alt="YUKiZi" width={70} height={20} className="w-[60px] xs:w-[70px] object-contain" />
-              </Link>
-
-              <div className="flex items-center gap-1 xs:gap-2">
-                {!isAuthenticated ? (
+            <div className="flex sm:hidden items-center w-full justify-between h-full px-1">
+              {!isAuthenticated ? (
+                // BEFORE LOGIN
+                <div className="flex items-center justify-between w-full h-full py-[6px] gap-0.5">
                   <button 
                     onClick={onLoginClick || (() => window.dispatchEvent(new CustomEvent('open-login')))} 
-                    className="text-[#562996] font-bold text-[13px] xs:text-[14px] bg-purple-100 hover:bg-purple-200 px-3 py-1.5 rounded-[10px] transition-colors"
+                    className="h-[36px] flex items-center justify-center bg-gradient-to-b from-[#a155e8] via-[#7b41b0] to-[#512384] px-2 xs:px-2.5 rounded-[12px] text-[#e0e0e0] shrink-0 shadow-sm border border-[#a155e8]/20"
                   >
-                    Start
+                    <Image src="/YukiziLogo.png" alt="YUKiZi" width={70} height={24} className="w-[36px] xs:w-[44px] object-contain [filter:brightness(0)_invert(0.88)_drop-shadow(0.25px_0_0_#e0e0e0)_drop-shadow(-0.25px_0_0_#e0e0e0)_drop-shadow(0_0.25px_0_#e0e0e0)]" />
+                    <div className="w-[1px] h-3.5 bg-[#e0e0e0]/30 mx-1 xs:mx-1.5" />
+                    <span className="text-[10px] xs:text-[11px] font-normal whitespace-nowrap">Start Now</span>
                   </button>
-                ) : (
-                  <>
-                    <button onClick={() => setIsNotificationsOpen(true)} className="relative p-0.5 text-[#7131b5] hover:text-[#562996] transition-colors shrink-0 mx-1">
-                      <Bell className="w-[18px] h-[18px] xs:w-[22px] xs:h-[22px] stroke-[2.5]" />
-                      <span className="absolute -top-0.5 -right-0.5 w-2 h-2 xs:w-2.5 xs:h-2.5 bg-[#eb4335] rounded-full shadow-sm" />
-                    </button>
-                  </>
-                )}
 
-                <button
-                  onClick={() => {
-                    setIsSearchChatOpen(!isSearchChatOpen);
-                    setIsChatOpen(false);
-                  }}
-                  className="relative p-0.5 text-[#7131b5] hover:text-[#562996] transition-colors shrink-0 mx-1"
-                >
-                  <Search className="w-[18px] h-[18px] xs:w-[22px] xs:h-[22px] stroke-[2.5]" />
-                </button>
-              </div>
+                  <div className="relative h-[34px] flex items-center flex-1 max-w-[110px] xs:max-w-[130px]">
+                    <button
+                      onClick={() => {
+                        setIsSearchChatOpen(!isSearchChatOpen);
+                        setIsChatOpen(false);
+                      }}
+                      className="w-full h-full bg-white border border-gray-200 rounded-[8px] text-left pl-2.5 pr-7 text-[10px] xs:text-[11px] text-gray-400 font-medium shadow-[inset_0_1.5px_3px_rgba(0,0,0,0.06)] cursor-pointer"
+                    >
+                      Search
+                    </button>
+                    <Search className="w-3.5 h-3.5 text-gray-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2.5]" />
+                  </div>
+                </div>
+              ) : (
+                // AFTER LOGIN
+                <div className="flex items-center justify-between w-full h-full py-[6px] gap-2">
+                  <Link href="/" className="shrink-0 flex items-center pl-1">
+                    <Image src="/YukiziLogo.png" alt="YUKiZi" width={70} height={24} className="w-[55px] xs:w-[65px] object-contain" />
+                  </Link>
+
+                  <div className="flex items-center gap-1.5 xs:gap-2 h-full flex-1 justify-end">
+                    <button onClick={() => setIsNotificationsOpen(true)} className="relative p-1 text-[#562996] transition-colors shrink-0">
+                      <Bell className="w-[18px] h-[18px] xs:w-[20px] xs:h-[20px] stroke-[2]" />
+                      <span className="absolute top-0 right-0 w-1.5 h-1.5 xs:w-2 xs:h-2 bg-[#eb4335] rounded-full shadow-sm" />
+                    </button>
+
+                    <div className="relative h-[34px] flex items-center w-[75px] xs:w-[95px]">
+                      <button
+                        onClick={() => {
+                          setIsSearchChatOpen(!isSearchChatOpen);
+                          setIsChatOpen(false);
+                        }}
+                        className="w-full h-full bg-white border border-gray-200 rounded-[8px] text-left pl-2.5 pr-7 text-[10px] xs:text-[11px] text-gray-400 font-medium shadow-[inset_0_1.5px_3px_rgba(0,0,0,0.06)] cursor-pointer"
+                      >
+                        Search
+                      </button>
+                      <Search className="w-3.5 h-3.5 text-gray-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2.5]" />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -459,11 +481,11 @@ export default function Navbar({
 
 
           {/* Right Segment: Cart, Wishlist, Filter, Menu */}
-          <div className="flex items-center justify-between bg-[#562996] rounded-[24px] sm:rounded-xl md:rounded-xl px-2.5 xs:px-4 sm:px-8 md:px-12 lg:px-16 h-[48px] sm:h-[60px] md:h-[64px] shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl text-white shrink-0 flex-1 max-w-[480px] z-10 overflow-hidden min-w-0 border border-[#562996] sm:border-0">
+          <div className="flex items-center justify-between bg-white sm:bg-[#562996] rounded-[24px] sm:rounded-xl md:rounded-xl px-2.5 xs:px-4 sm:px-8 md:px-12 lg:px-16 h-[48px] sm:h-[60px] md:h-[64px] shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl text-[#562996] sm:text-white sm:shrink-0 flex-[1] sm:flex-1 max-w-[480px] z-10 overflow-hidden min-w-0 border border-gray-100 sm:border-0">
 
-            <button onClick={() => setIsWishlistOpen(true)} className="relative hover:text-purple-300 transition-colors">
+            <button onClick={() => setIsWishlistOpen(true)} className="relative sm:hover:text-purple-300 transition-colors">
               <Bookmark 
-                className="w-[18px] h-[18px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2.5] rotate-90" 
+                className="w-[20px] h-[20px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2] rotate-90" 
                 fill={wishlistCount > 0 ? "currentColor" : "none"} 
               />
               {wishlistCount > 0 && (
@@ -473,8 +495,8 @@ export default function Navbar({
               )}
             </button>
 
-            <button onClick={() => setIsCartOpen(true)} className="relative hover:text-purple-300 transition-colors">
-              <ShoppingCart className="w-[18px] h-[18px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2.5]" />
+            <button onClick={() => setIsCartOpen(true)} className="relative sm:hover:text-purple-300 transition-colors">
+              <ShoppingCart className="w-[20px] h-[20px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2]" />
               {cartData?.items && cartData.items.length > 0 && (
                 <span className="absolute -top-1 -right-1 w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 bg-[#f7941d] text-white text-[8px] xs:text-[9px] sm:text-[10px] font-bold rounded-full flex items-center justify-center border border-white sm:border-[#562996]">
                   {cartData.items.length}
@@ -482,22 +504,22 @@ export default function Navbar({
               )}
             </button>
 
-            <button onClick={() => setIsOrderDrawerOpen(true)} className="relative hover:text-purple-300 transition-colors">
+            <button onClick={() => setIsOrderDrawerOpen(true)} className="hidden sm:block relative hover:text-purple-300 transition-colors">
               <Package className="w-[18px] h-[18px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2.5]" />
             </button>
 
             <button onClick={() => {
               setSidebarView("filters");
               onFilterClick?.();
-            }} className="hover:text-purple-300 transition-colors">
-              <Filter className="w-[18px] h-[18px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2.5]" />
+            }} className="sm:hover:text-purple-300 transition-colors">
+              <Filter className="w-[20px] h-[20px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2]" />
             </button>
 
-            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="hover:text-purple-300 transition-colors">
+            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="sm:hover:text-purple-300 transition-colors">
               {isMobileMenuOpen ? (
-                <X className="w-[18px] h-[18px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2.5]" />
+                <X className="w-[20px] h-[20px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2]" />
               ) : (
-                <Menu className="w-[18px] h-[18px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2.5]" />
+                <Menu className="w-[20px] h-[20px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2]" />
               )}
             </button>
           </div>

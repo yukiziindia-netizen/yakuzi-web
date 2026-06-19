@@ -6,6 +6,9 @@ import Link from 'next/link';
 import { getProducts } from '@yukizi/api-client';
 import { generateProductSlug } from '@yukizi/utils';
 import QuickReviewModal from './QuickReviewModal';
+import { useAddToCart } from '@/hooks/useCart';
+import { useAddToWishlist, useWishlist, useRemoveFromWishlist } from '@/hooks/useWishlist';
+import { useToast } from '@/components/shared/Toast';
 
 interface ProductCarouselProps {
   reverse?: boolean;
@@ -15,6 +18,16 @@ interface ProductCarouselProps {
 }
 
 function GridProductCard({ product, index, onOpenReview }: { product: any; index: number; onOpenReview: (p: any) => void }) {
+  const { mutate: addToCart } = useAddToCart();
+  const { mutate: addToWishlist } = useAddToWishlist();
+  const { mutate: removeFromWishlist } = useRemoveFromWishlist();
+  const { data: wishlistData } = useWishlist();
+  const { toast } = useToast();
+  
+  const currentProductId = product?.id || `mock-prod-${index}`;
+  const isSaved = wishlistData?.items?.some(
+    (item: any) => item.productId === currentProductId || item.product?.id === currentProductId || item.id === currentProductId
+  );
 
   // Use data from backend or fallback to screenshot mock data for visual parity
   const mockTag = index % 3 === 0 ? 'YUKIZI_CHOICE' : index % 3 === 1 ? 'BEST_SELLER' : null;
@@ -69,17 +82,40 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
           <button className="text-gray-400 hover:text-gray-600 transition-colors z-10 p-0.5" onClick={(e) => e.preventDefault()}>
              <Share2 size={16} strokeWidth={2} className="opacity-80" />
           </button>
-          <button className="text-[#f97316] hover:text-orange-600 transition-colors z-10 p-0.5" onClick={(e) => e.preventDefault()}>
+          <button 
+            className="text-[#f97316] hover:text-orange-600 transition-colors z-10 p-0.5" 
+            onClick={(e) => { 
+              e.preventDefault(); 
+              addToCart(
+                { productId: currentProductId, quantity: 1, price, originalPrice, ...product },
+                { onSuccess: () => toast('Added to cart', 'success') }
+              );
+            }}
+          >
              <Plus size={20} strokeWidth={2.5} />
           </button>
         </div>
 
         {/* Right Edge Ribbon (Wishlist/Save) */}
-        <div className="absolute top-[45%] -right-[1px] z-20">
+        <button 
+          className="absolute top-[45%] -right-[1px] z-20 cursor-pointer"
+          onClick={(e) => { 
+            e.preventDefault(); 
+            if (isSaved) {
+              removeFromWishlist(currentProductId, {
+                onSuccess: () => toast('Removed from wishlist', 'info')
+              });
+            } else {
+              addToWishlist(product, {
+                onSuccess: () => toast('Added to wishlist', 'success')
+              });
+            }
+          }}
+        >
           <Bookmark 
-            className={`w-[28px] h-[40px] stroke-[1] rotate-90 ${ribbonColor === 'purple' ? 'fill-[#854cbc] text-[#854cbc]' : 'fill-[#FAF6EB] text-[#e8dfd5]'}`}
+            className={`w-[28px] h-[40px] stroke-[1] rotate-90 transition-colors ${isSaved ? 'fill-[#854cbc] text-[#854cbc]' : 'fill-[#FAF6EB] text-[#e8dfd5] hover:brightness-95'}`}
           />
-        </div>
+        </button>
 
         {/* Image Container */}
         <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`} className="w-full h-[140px] sm:h-[150px] flex items-center justify-center mb-3 mt-1 relative group-hover:scale-105 transition-transform duration-500 block z-10">

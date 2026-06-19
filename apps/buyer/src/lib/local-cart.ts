@@ -1,4 +1,4 @@
-﻿import { type Cart, type CartItem } from '@yukizi/api-client';
+import { type Cart, type CartItem } from '@yukizi/api-client';
 
 const STORAGE_KEY = 'yukizi_local_cart';
 
@@ -50,7 +50,7 @@ export const localCart = {
     }
     
     // Recalculate totals
-    cart.subtotal = cart.items.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0);
+    cart.subtotal = cart.items.reduce((sum, item) => sum + (item.price || item.product?.price || 3345.53) * item.quantity, 0);
     cart.total = cart.subtotal;
     
     localCart.set(cart);
@@ -68,7 +68,7 @@ export const localCart = {
         cart.items[existingIndex].quantity = quantity;
       }
       
-      cart.subtotal = cart.items.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0);
+      cart.subtotal = cart.items.reduce((sum, item) => sum + (item.price || item.product?.price || 3345.53) * item.quantity, 0);
       cart.total = cart.subtotal;
       localCart.set(cart);
     }
@@ -78,7 +78,7 @@ export const localCart = {
   removeItem: (itemId: string) => {
     const cart = localCart.get();
     cart.items = cart.items.filter(i => i.id !== itemId);
-    cart.subtotal = cart.items.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0);
+    cart.subtotal = cart.items.reduce((sum, item) => sum + (item.price || item.product?.price || 3345.53) * item.quantity, 0);
     cart.total = cart.subtotal;
     localCart.set(cart);
     return cart;

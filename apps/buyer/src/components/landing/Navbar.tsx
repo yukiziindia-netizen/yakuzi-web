@@ -414,14 +414,15 @@ export default function Navbar({
               {!isAuthenticated ? (
                 // BEFORE LOGIN
                 <div className="flex items-center justify-between w-full h-full py-[6px] gap-0.5">
-                  <button 
-                    onClick={onLoginClick || (() => window.dispatchEvent(new CustomEvent('open-login')))} 
-                    className="h-[36px] flex items-center justify-center bg-gradient-to-b from-[#a155e8] via-[#7b41b0] to-[#512384] px-2 xs:px-2.5 rounded-[12px] text-[#e0e0e0] shrink-0 shadow-sm border border-[#a155e8]/20"
-                  >
-                    <Image src="/YukiziLogo.png" alt="YUKiZi" width={70} height={24} className="w-[36px] xs:w-[44px] object-contain [filter:brightness(0)_invert(0.88)_drop-shadow(0.25px_0_0_#e0e0e0)_drop-shadow(-0.25px_0_0_#e0e0e0)_drop-shadow(0_0.25px_0_#e0e0e0)]" />
+                  <div className="h-[36px] flex items-center justify-center bg-gradient-to-b from-[#a155e8] via-[#7b41b0] to-[#512384] px-2 xs:px-2.5 rounded-[12px] text-[#e0e0e0] shrink-0 shadow-sm border border-[#a155e8]/20">
+                    <Link href="/" className="h-full flex items-center">
+                      <Image src="/YukiziLogo.png" alt="YUKiZi" width={70} height={24} className="w-[36px] xs:w-[44px] object-contain [filter:brightness(0)_invert(0.88)_drop-shadow(0.25px_0_0_#e0e0e0)_drop-shadow(-0.25px_0_0_#e0e0e0)_drop-shadow(0_0.25px_0_#e0e0e0)] cursor-pointer" />
+                    </Link>
                     <div className="w-[1px] h-3.5 bg-[#e0e0e0]/30 mx-1 xs:mx-1.5" />
-                    <span className="text-[10px] xs:text-[11px] font-normal whitespace-nowrap">Start Now</span>
-                  </button>
+                    <Link href="/login" className="h-full flex items-center cursor-pointer">
+                      <span className="text-[10px] xs:text-[11px] font-normal whitespace-nowrap">Start Now</span>
+                    </Link>
+                  </div>
 
                   <div className="relative h-[34px] flex items-center flex-1 max-w-[110px] xs:max-w-[130px]">
                     <button

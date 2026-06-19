@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Loader2, Share2, Plus, ArrowUpRight, Star, Truck } from 'lucide-react';
+import { Loader2, Share2, Plus, ArrowUpRight, Star, Truck, Bookmark } from 'lucide-react';
 import Link from 'next/link';
 import { getProducts } from '@yukizi/api-client';
 import { generateProductSlug } from '@yukizi/utils';
@@ -15,12 +15,34 @@ interface ProductCarouselProps {
 }
 
 function GridProductCard({ product, index, onOpenReview }: { product: any; index: number; onOpenReview: (p: any) => void }) {
-  const isYukiziChoice = index % 3 === 0;
-  const isBestSeller = index % 3 === 1;
-  const hasAd = isYukiziChoice || isBestSeller;
-  const hasBottomRow = index % 3 !== 2;
+
+  // Use data from backend or fallback to screenshot mock data for visual parity
+  const mockTag = index % 3 === 0 ? 'YUKIZI_CHOICE' : index % 3 === 1 ? 'BEST_SELLER' : null;
+  const tag = product?.tag !== undefined ? product.tag : mockTag;
   
-  const productName = product.name || "Product Name";
+  const isYukiziChoice = tag === 'YUKIZI_CHOICE';
+  const isBestSeller = tag === 'BEST_SELLER';
+  
+  const mockIsAd = index % 3 === 0 || index % 3 === 1;
+  const isAd = product?.isAd !== undefined ? product.isAd : mockIsAd;
+  
+  const price = product?.price || 3345.53;
+  const mockOriginalPrice = index % 3 !== 2 ? 3800.25 : null;
+  const originalPrice = product?.originalPrice !== undefined ? product.originalPrice : mockOriginalPrice;
+  
+  const rating = product?.rating || 4.5;
+  
+  const mockDiscountText = index % 3 !== 2 ? '25% off' : null;
+  const discountText = product?.discountText !== undefined ? product.discountText : mockDiscountText;
+  
+  const mockDeliveryText = index % 3 === 0 ? '3 days' : index % 3 === 1 ? 'Tomorrow' : null;
+  const deliveryText = product?.deliveryText !== undefined ? product.deliveryText : mockDeliveryText;
+
+  const mockRibbonColor = index % 3 === 1 ? 'purple' : 'beige';
+  const ribbonColor = product?.ribbonColor || mockRibbonColor;
+
+  const productName = product?.name || (index % 3 === 0 ? "Spider Man Fri..." : index % 3 === 1 ? "Madara Uchiha..." : "Resident Evil Le...");
+  
   const getInitials = (name: string) => {
     if (!name) return 'PR';
     const words = name.trim().split(/\s+/);
@@ -29,91 +51,100 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
   };
   const fallbackImage = `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent(getInitials(productName))}`;
   
-  const imageUrl = product.images?.[0]?.url || product.images?.[0] || product.image || fallbackImage;
+  const imageUrl = product?.images?.[0]?.url || product?.images?.[0] || product?.image || fallbackImage;
 
   return (
-    <div className="relative mt-3 group">
+    <div className="relative mt-3 group flex flex-col h-full">
+      {/* Container with relative positioning for absolute badges */}
       <div 
-        className={`block bg-white rounded-xl border ${isYukiziChoice ? 'border-[#e2cbf5] shadow-[0_2px_15px_rgba(133,76,188,0.12)]' : 'border-gray-200'} p-3 pb-3 flex flex-col hover:shadow-lg transition-all duration-300 w-full h-full relative overflow-hidden`}
+        className={`block bg-white rounded-xl border ${
+          isYukiziChoice 
+            ? 'border-[#cdaef1] shadow-[0_0_15px_rgba(133,76,188,0.2)]' 
+            : 'border-gray-200 shadow-sm'
+        } p-2.5 pb-3 flex flex-col hover:shadow-lg transition-all duration-300 w-full h-full relative overflow-hidden`}
       >
         
         {/* Top Icons */}
-        <div className="flex justify-between items-start mb-1">
-          <button className="text-gray-400 hover:text-gray-600 transition-colors z-10" onClick={(e) => e.preventDefault()}>
-             <Share2 size={16} strokeWidth={2} />
+        <div className="flex justify-between items-start">
+          <button className="text-gray-400 hover:text-gray-600 transition-colors z-10 p-0.5" onClick={(e) => e.preventDefault()}>
+             <Share2 size={16} strokeWidth={2} className="opacity-80" />
           </button>
-          <button className="text-orange-400 hover:text-orange-500 transition-colors z-10" onClick={(e) => e.preventDefault()}>
+          <button className="text-[#f97316] hover:text-orange-600 transition-colors z-10 p-0.5" onClick={(e) => e.preventDefault()}>
              <Plus size={20} strokeWidth={2.5} />
           </button>
         </div>
 
-        {/* Right Edge Ribbon */}
-        <div 
-          className={`absolute top-[45%] right-0 w-3 h-5 ${isBestSeller ? 'bg-[#854cbc]' : 'bg-[#f4efe9]'} z-10`} 
-          style={{ clipPath: 'polygon(100% 0, 100% 100%, 0 100%, 25% 50%, 0 0)' }} 
-        />
+        {/* Right Edge Ribbon (Wishlist/Save) */}
+        <div className="absolute top-[45%] -right-[1px] z-20">
+          <Bookmark 
+            className={`w-[28px] h-[40px] stroke-[1] rotate-90 ${ribbonColor === 'purple' ? 'fill-[#854cbc] text-[#854cbc]' : 'fill-[#FAF6EB] text-[#e8dfd5]'}`}
+          />
+        </div>
 
         {/* Image Container */}
-        <Link href={`/products/${generateProductSlug(productName, product.id || 'prod-' + index)}`} className="w-full h-[120px] sm:h-[140px] flex items-center justify-center mb-4 mt-1 relative group-hover:scale-105 transition-transform duration-500 block z-10">
-           <img src={imageUrl} alt={productName} className="max-h-full max-w-full object-contain mix-blend-multiply" />
+        <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`} className="w-full h-[140px] sm:h-[150px] flex items-center justify-center mb-3 mt-1 relative group-hover:scale-105 transition-transform duration-500 block z-10">
+           <img src={imageUrl} alt={productName} className="max-h-full max-w-full object-contain mix-blend-multiply drop-shadow-sm" />
         </Link>
 
         {/* Details Section */}
-        <div className="mt-auto flex flex-col gap-1.5">
+        <div className="mt-auto flex flex-col gap-1 px-0.5">
            {/* Title Line */}
-           <div className="flex justify-between items-center gap-1">
-              <h3 className="text-[13px] font-medium text-gray-800 truncate flex-1">
+           <div className="flex justify-between items-center gap-1.5 mb-1">
+              <h3 className="text-[14px] font-medium text-gray-700 truncate flex-1">
                  {productName}
               </h3>
               <button 
                  onClick={(e) => { e.preventDefault(); onOpenReview(product); }}
-                 className="bg-gray-400 hover:bg-gray-500 transition-colors rounded-full p-[3px] flex-shrink-0 z-10 relative"
+                 className="bg-gray-400 hover:bg-gray-500 transition-colors rounded-full p-[3px] flex-shrink-0 z-10"
               >
                  <ArrowUpRight size={12} className="text-white" strokeWidth={3} />
               </button>
            </div>
            
            {/* Price and Rating */}
-           <div className="flex justify-between items-center">
+           <div className="flex justify-between items-center mb-1.5">
               <div className="flex items-baseline gap-1.5">
-                 <span className="text-[14px] font-semibold text-gray-800 tracking-tight">₹3345.53</span>
-                 <span className="text-[10px] text-gray-400 line-through">₹3800.25</span>
+                 <span className="text-[15px] font-semibold text-gray-700 tracking-tight">₹{price}</span>
+                 {originalPrice && (
+                    <span className="text-[10px] text-gray-400 line-through">₹{originalPrice}</span>
+                 )}
               </div>
               <div className="flex items-center gap-0.5">
-                 <Star size={12} className="fill-[#854cbc] text-[#854cbc]" />
-                 <span className="text-[12px] font-medium text-gray-700">4.5</span>
+                 <Star size={13} className="fill-[#854cbc] text-[#854cbc]" />
+                 <span className="text-[13px] font-medium text-gray-600">{rating}</span>
               </div>
            </div>
 
            {/* Bottom Badges */}
-           {hasBottomRow ? (
-             <div className="flex justify-between items-center mt-1">
-                <div className="text-[10px] font-bold text-gray-600">
-                   25% off
-                </div>
-                <div className="flex items-center gap-1 bg-[#f5f5f5] rounded px-1.5 py-0.5 border border-gray-100">
+           <div className="flex justify-between items-center h-[20px] mt-0.5">
+              {discountText ? (
+                <span className="text-[10px] font-bold text-gray-700">
+                   {discountText}
+                </span>
+              ) : <span />}
+              
+              {deliveryText && (
+                <div className="flex items-center gap-1 bg-[#f0f0f0] rounded px-1.5 py-[3px]">
                    <Truck size={10} strokeWidth={2.5} className="text-gray-500" />
-                   <span className="text-[9px] font-bold text-gray-600">{index % 3 === 1 ? 'Tomorrow' : '3 days'}</span>
+                   <span className="text-[9px] font-bold text-gray-600 leading-none">{deliveryText}</span>
                 </div>
-             </div>
-           ) : (
-             <div className="h-[22px] w-full" /> /* Placeholder to keep alignment if needed, or omit entirely based on screenshot */
-           )}
+              )}
+           </div>
         </div>
       </div>
 
-      {/* Overlapping Badges */}
+      {/* Overlapping Badges - Rendered outside the border but positioned over it */}
       {isYukiziChoice && (
-        <div className="absolute -top-2 left-3 px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#854cbc] text-white z-20 pointer-events-none shadow-sm">
+        <div className="absolute -top-2 left-3 px-2.5 py-[2px] rounded-full text-[9px] tracking-wide font-bold bg-[#854cbc] text-white z-20 pointer-events-none border-[1.5px] border-white">
           Yukizi Choice
         </div>
       )}
       {isBestSeller && (
-        <div className="absolute -top-2 left-3 px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#333333] text-white z-20 pointer-events-none shadow-sm">
+        <div className="absolute -top-2 left-3 px-2.5 py-[2px] rounded-full text-[9px] tracking-wide font-bold bg-[#4a4a4a] text-white z-20 pointer-events-none border-[1.5px] border-white">
           Best Seller
         </div>
       )}
-      {hasAd && (
+      {isAd && (
         <div className="absolute -top-2 right-4 px-1 text-[9px] font-medium text-gray-400 bg-white z-20 pointer-events-none">
           Ad
         </div>
@@ -152,7 +183,7 @@ export default function ProductCarousel({ slot = 'HOMEPAGE_CAROUSEL', categoryId
   if (loading) return <div className="h-40 flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-[#854cbc]" /></div>;
   
   const displayProducts = [...products];
-  const slicedProducts = displayProducts;
+  const slicedProducts = displayProducts.length > 0 ? displayProducts : Array(6).fill({});
 
   return (
     <div className="w-full max-w-[1600px] mx-auto px-2 sm:px-4 lg:px-6 mb-8 sm:mb-12 pt-4">
@@ -165,7 +196,7 @@ export default function ProductCarousel({ slot = 'HOMEPAGE_CAROUSEL', categoryId
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-3 lg:gap-4">
         {slicedProducts.map((product, index) => (
           <GridProductCard 
-            key={`${product.id || 'prod'}-${index}`} 
+            key={`${product?.id || 'prod'}-${index}`} 
             product={product} 
             index={index} 
             onOpenReview={setReviewProduct}
@@ -183,4 +214,5 @@ export default function ProductCarousel({ slot = 'HOMEPAGE_CAROUSEL', categoryId
     </div>
   );
 }
+
 

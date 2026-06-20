@@ -1,12 +1,14 @@
-﻿'use client';
+'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getNotifications, markAsRead, markAllAsRead, deleteNotification } from '@yukizi/api-client';
+import { getNotifications, markAsRead, markAllAsRead, deleteNotification, useAuth } from '@yukizi/api-client';
 
 export function useNotifications(params?: { page?: number; limit?: number }) {
+  const { isAuthenticated } = useAuth();
   return useQuery({
     queryKey: ['notifications', params],
     queryFn: () => getNotifications(params),
+    enabled: isAuthenticated,
   });
 }
 

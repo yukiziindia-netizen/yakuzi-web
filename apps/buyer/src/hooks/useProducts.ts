@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getProducts, getProductById, getCategories, getManufacturers, getCities, getDiscountDetails, getBrands, getMyWaitlist, addToWaitlist, removeFromWaitlist } from '@yukizi/api-client';
+import { getProducts, getProductById, getCategories, getManufacturers, getCities, getDiscountDetails, getBrands, getMyWaitlist, addToWaitlist, removeFromWaitlist, useAuth } from '@yukizi/api-client';
 
 export function useBrands() {
   return useQuery({
@@ -75,9 +75,11 @@ export function useDiscountDetails(productId: string) {
 }
 
 export function useWaitlist() {
+  const { isAuthenticated } = useAuth();
   return useQuery({
     queryKey: ['waitlist'],
     queryFn: getMyWaitlist,
+    enabled: isAuthenticated,
   });
 }
 

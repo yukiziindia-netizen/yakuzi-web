@@ -22,7 +22,7 @@ const ROUTE_PERMISSIONS: Record<string, string> = {
   "/custom-orders": "n",
   "/analytics": "p",
   "/settings": "r",
-  "/admins": "x",
+  "/admins": "t",
   "/brands": "3",
 };
 

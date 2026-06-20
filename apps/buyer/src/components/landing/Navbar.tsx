@@ -97,7 +97,7 @@ export default function Navbar({
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isSearchChatOpen, setIsSearchChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const [chatSessions, setChatSessions] = useState<{id: string, date: number, messages: ChatMessage[]}[]>([]);
+  const [chatSessions, setChatSessions] = useState<{ id: string, date: number, messages: ChatMessage[] }[]>([]);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [chatInput, setChatInput] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
@@ -138,11 +138,11 @@ export default function Navbar({
     // Load chat sessions on mount
     const savedSessions = localStorage.getItem('yukizi_chat_sessions');
     if (savedSessions) {
-      try { setChatSessions(JSON.parse(savedSessions)); } catch(e) {}
+      try { setChatSessions(JSON.parse(savedSessions)); } catch (e) { }
     }
     const savedCurrent = localStorage.getItem('yukizi_current_chat');
     if (savedCurrent) {
-      try { setChatMessages(JSON.parse(savedCurrent)); } catch(e) {}
+      try { setChatMessages(JSON.parse(savedCurrent)); } catch (e) { }
     }
 
     return () => {
@@ -215,7 +215,7 @@ export default function Navbar({
     }
   };
 
-  const loadSession = (session: {id: string, messages: ChatMessage[]}) => {
+  const loadSession = (session: { id: string, messages: ChatMessage[] }) => {
     if (chatMessages.length > 0) {
       setChatSessions(prev => [
         { id: Math.random().toString(36).substring(7), date: Date.now(), messages: chatMessages },
@@ -236,8 +236,8 @@ export default function Navbar({
   // 3. Regenerate Logic
   const handleRegenerate = async () => {
     if (chatMessages.length < 2 || isChatLoading) {
-       if (chatMessages.length < 2) alert("Need at least one exchange to regenerate.");
-       return;
+      if (chatMessages.length < 2) alert("Need at least one exchange to regenerate.");
+      return;
     }
     let lastUserMsgIndex = -1;
     for (let i = chatMessages.length - 1; i >= 0; i--) {
@@ -247,12 +247,12 @@ export default function Navbar({
       }
     }
     if (lastUserMsgIndex === -1) {
-       alert("No previous user message found to regenerate.");
-       return;
+      alert("No previous user message found to regenerate.");
+      return;
     }
     const lastUserMsg = chatMessages[lastUserMsgIndex];
     const historyToKeep = chatMessages.slice(0, lastUserMsgIndex);
-    
+
     setChatMessages(historyToKeep);
     await performChatRequest(lastUserMsg.content || "", historyToKeep, lastUserMsg.attachments || []);
   };
@@ -264,7 +264,7 @@ export default function Navbar({
       const reader = new FileReader();
       reader.onload = (event) => {
         if (event.target?.result) {
-           setAttachments(prev => [...prev, { name: file.name, data: event.target!.result as string, type: file.type }]);
+          setAttachments(prev => [...prev, { name: file.name, data: event.target!.result as string, type: file.type }]);
         }
       };
       reader.readAsDataURL(file);
@@ -283,12 +283,12 @@ export default function Navbar({
       const recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = false;
-      
+
       recognition.onstart = () => setIsRecording(true);
       recognition.onend = () => setIsRecording(false);
       recognition.onerror = (event: any) => {
-         alert(`Voice input error: ${event.error}`);
-         setIsRecording(false);
+        alert(`Voice input error: ${event.error}`);
+        setIsRecording(false);
       };
       recognition.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
@@ -331,7 +331,7 @@ export default function Navbar({
       <nav className="fixed bottom-4 sm:bottom-6 md:bottom-4 left-0 right-0 z-[60] flex justify-center items-end sm:items-center pointer-events-none px-2 sm:px-6 w-full">
         <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-6 md:gap-2 pointer-events-auto flex-nowrap justify-center w-full max-w-[1200px] px-1 sm:px-4 relative">
           {/* Left Segment: Logo, Profile, Notifications, Search */}
-          <div className="flex items-center bg-white sm:bg-[#562996] rounded-[24px] sm:rounded-xl md:rounded-xl px-1.5 xs:px-2.5 sm:px-4 md:px-6 py-1.5 sm:py-3 md:py-3.5 shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl flex-1 max-w-[480px] justify-between overflow-hidden min-w-0 border border-gray-100 sm:border-0">
+          <div className="flex items-center bg-white sm:bg-[#562996] rounded-[24px] sm:rounded-xl md:rounded-xl pl-[2px] pr-1 xs:pl-1 xs:pr-1.5 sm:px-4 md:px-6 h-[48px] sm:h-[60px] md:h-[64px] shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl flex-[1.3] sm:flex-1 max-w-[480px] justify-between overflow-hidden min-w-0 border border-gray-100 sm:border-0">
             {/* DESKTOP VIEW (sm and up) */}
             <div className="hidden sm:flex items-center w-full justify-between">
                 <div className="flex items-center h-full">
@@ -410,38 +410,61 @@ export default function Navbar({
             </div>
 
             {/* MOBILE VIEW (below sm) */}
-            <div className="flex sm:hidden items-center w-full justify-between gap-1 xs:gap-1.5 px-0.5">
-              <Link href="/" className="shrink-0 flex items-center">
-                <Image src="/logo-gradient.png" alt="YUKiZi" width={70} height={20} className="w-[60px] xs:w-[70px] object-contain" />
-              </Link>
+            <div className="flex sm:hidden items-center w-full justify-between h-full px-1">
+              {!isAuthenticated ? (
+                // BEFORE LOGIN
+                <div className="flex items-center justify-between w-full h-full py-[6px] gap-0.5">
+                  <div className="h-[36px] flex items-center justify-center bg-gradient-to-b from-[#a155e8] via-[#7b41b0] to-[#512384] px-2 xs:px-2.5 rounded-[12px] text-[#e0e0e0] shrink-0 shadow-sm border border-[#a155e8]/20">
+                    <Link href="/" className="h-full flex items-center">
+                      <Image src="/YukiziLogo.png" alt="YUKiZi" width={70} height={24} className="w-[36px] xs:w-[44px] object-contain [filter:brightness(0)_invert(0.88)_drop-shadow(0.25px_0_0_#e0e0e0)_drop-shadow(-0.25px_0_0_#e0e0e0)_drop-shadow(0_0.25px_0_#e0e0e0)] cursor-pointer" />
+                    </Link>
+                    <div className="w-[1px] h-3.5 bg-[#e0e0e0]/30 mx-1 xs:mx-1.5" />
+                    <Link href="/login" className="h-full flex items-center cursor-pointer">
+                      <span className="text-[10px] xs:text-[11px] font-normal whitespace-nowrap">Start Now</span>
+                    </Link>
+                  </div>
 
-              <div className="flex items-center gap-1 xs:gap-2">
-                {!isAuthenticated ? (
-                  <button 
-                    onClick={onLoginClick || (() => window.dispatchEvent(new CustomEvent('open-login')))} 
-                    className="text-[#562996] font-bold text-[13px] xs:text-[14px] bg-purple-100 hover:bg-purple-200 px-3 py-1.5 rounded-[10px] transition-colors"
-                  >
-                    Start
-                  </button>
-                ) : (
-                  <>
-                    <button onClick={() => setIsNotificationsOpen(true)} className="relative p-0.5 text-[#7131b5] hover:text-[#562996] transition-colors shrink-0 mx-1">
-                      <Bell className="w-[18px] h-[18px] xs:w-[22px] xs:h-[22px] stroke-[2.5]" />
-                      <span className="absolute -top-0.5 -right-0.5 w-2 h-2 xs:w-2.5 xs:h-2.5 bg-[#eb4335] rounded-full shadow-sm" />
+                  <div className="relative h-[34px] flex items-center flex-1 max-w-[110px] xs:max-w-[130px]">
+                    <button
+                      onClick={() => {
+                        setIsSearchChatOpen(!isSearchChatOpen);
+                        setIsChatOpen(false);
+                      }}
+                      className="w-full h-full bg-white border border-gray-200 rounded-[8px] text-left pl-2.5 pr-7 text-[10px] xs:text-[11px] text-gray-400 font-medium shadow-[inset_0_1.5px_3px_rgba(0,0,0,0.06)] cursor-pointer"
+                    >
+                      Search
                     </button>
-                  </>
-                )}
+                    <Search className="w-3.5 h-3.5 text-gray-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2.5]" />
+                  </div>
+                </div>
+              ) : (
+                // AFTER LOGIN
+                <div className="flex items-center justify-between w-full h-full py-[6px] gap-2">
+                  <Link href="/" className="shrink-0 flex items-center pl-1">
+                    <Image src="/YukiziLogo.png" alt="YUKiZi" width={70} height={24} className="w-[55px] xs:w-[65px] object-contain" />
+                  </Link>
 
-                <button
-                  onClick={() => {
-                    setIsSearchChatOpen(!isSearchChatOpen);
-                    setIsChatOpen(false);
-                  }}
-                  className="relative p-0.5 text-[#7131b5] hover:text-[#562996] transition-colors shrink-0 mx-1"
-                >
-                  <Search className="w-[18px] h-[18px] xs:w-[22px] xs:h-[22px] stroke-[2.5]" />
-                </button>
-              </div>
+                  <div className="flex items-center gap-1.5 xs:gap-2 h-full flex-1 justify-end">
+                    <button onClick={() => setIsNotificationsOpen(true)} className="relative p-1 text-[#562996] transition-colors shrink-0">
+                      <Bell className="w-[18px] h-[18px] xs:w-[20px] xs:h-[20px] stroke-[2]" />
+                      <span className="absolute top-0 right-0 w-1.5 h-1.5 xs:w-2 xs:h-2 bg-[#eb4335] rounded-full shadow-sm" />
+                    </button>
+
+                    <div className="relative h-[34px] flex items-center w-[75px] xs:w-[95px]">
+                      <button
+                        onClick={() => {
+                          setIsSearchChatOpen(!isSearchChatOpen);
+                          setIsChatOpen(false);
+                        }}
+                        className="w-full h-full bg-white border border-gray-200 rounded-[8px] text-left pl-2.5 pr-7 text-[10px] xs:text-[11px] text-gray-400 font-medium shadow-[inset_0_1.5px_3px_rgba(0,0,0,0.06)] cursor-pointer"
+                      >
+                        Search
+                      </button>
+                      <Search className="w-3.5 h-3.5 text-gray-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2.5]" />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -459,11 +482,13 @@ export default function Navbar({
 
 
           {/* Right Segment: Cart, Wishlist, Filter, Menu */}
-          <div className="flex items-center justify-between bg-white sm:bg-[#562996] rounded-[24px] sm:rounded-xl md:rounded-xl px-2.5 xs:px-4 sm:px-8 md:px-12 lg:px-16 py-1.5 sm:py-3 md:py-3.5 shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl text-[#7131b5] sm:text-white shrink-0 flex-1 max-w-[480px] z-10 overflow-hidden min-w-0 border border-gray-100 sm:border-0">
+          <div className="flex items-center justify-between bg-white sm:bg-[#562996] rounded-[24px] sm:rounded-xl md:rounded-xl px-2.5 xs:px-4 sm:px-8 md:px-12 lg:px-16 h-[48px] sm:h-[60px] md:h-[64px] shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl text-[#562996] sm:text-white sm:shrink-0 flex-[1] sm:flex-1 max-w-[480px] z-10 overflow-hidden min-w-0 border border-gray-100 sm:border-0">
 
-            <button onClick={() => setIsWishlistOpen(true)} className="relative hover:text-purple-300 transition-colors">
-              <Bookmark className="w-[18px] h-[18px] xs:w-[22px] xs:h-[22px] sm:hidden stroke-[2.5] rotate-90" />
-              <WishlistIcon useImage isFilled={wishlistCount > 0} className="w-8 h-8 sm:w-8 sm:h-8 text-white hidden sm:block" />
+            <button onClick={() => setIsWishlistOpen(true)} className="relative sm:hover:text-purple-300 transition-colors">
+              <Bookmark 
+                className="w-[20px] h-[20px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2] rotate-90" 
+                fill={wishlistCount > 0 ? "currentColor" : "none"} 
+              />
               {wishlistCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 bg-[#f7941d] text-white text-[8px] xs:text-[9px] sm:text-[10px] font-bold rounded-full flex items-center justify-center border border-white sm:border-[#562996]">
                   {wishlistCount}
@@ -471,8 +496,8 @@ export default function Navbar({
               )}
             </button>
 
-            <button onClick={() => setIsCartOpen(true)} className="relative hover:text-purple-300 transition-colors">
-              <ShoppingCart className="w-[18px] h-[18px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2.5]" />
+            <button onClick={() => setIsCartOpen(true)} className="relative sm:hover:text-purple-300 transition-colors">
+              <ShoppingCart className="w-[20px] h-[20px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2]" />
               {cartData?.items && cartData.items.length > 0 && (
                 <span className="absolute -top-1 -right-1 w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 bg-[#f7941d] text-white text-[8px] xs:text-[9px] sm:text-[10px] font-bold rounded-full flex items-center justify-center border border-white sm:border-[#562996]">
                   {cartData.items.length}
@@ -480,22 +505,22 @@ export default function Navbar({
               )}
             </button>
 
-            <button onClick={() => setIsOrderDrawerOpen(true)} className="relative hover:text-purple-300 transition-colors">
+            <button onClick={() => setIsOrderDrawerOpen(true)} className="hidden sm:block relative hover:text-purple-300 transition-colors">
               <Package className="w-[18px] h-[18px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2.5]" />
             </button>
 
             <button onClick={() => {
               setSidebarView("filters");
               onFilterClick?.();
-            }} className="hover:text-purple-300 transition-colors">
-              <Filter className="w-[18px] h-[18px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2.5]" />
+            }} className="sm:hover:text-purple-300 transition-colors">
+              <Filter className="w-[20px] h-[20px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2]" />
             </button>
 
-            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="hover:text-purple-300 transition-colors">
+            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="sm:hover:text-purple-300 transition-colors">
               {isMobileMenuOpen ? (
-                <X className="w-[18px] h-[18px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2.5]" />
+                <X className="w-[20px] h-[20px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2]" />
               ) : (
-                <Menu className="w-[18px] h-[18px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2.5]" />
+                <Menu className="w-[20px] h-[20px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2]" />
               )}
             </button>
           </div>
@@ -511,21 +536,17 @@ export default function Navbar({
               >
                 <div className="w-full h-full bg-gradient-to-br from-[#9b49e6] to-[#7f26d9] rounded-[2rem] md:rounded-[2.5rem] shadow-[0_0_60px_rgba(155,73,230,0.5)] p-6 sm:p-8 md:p-10 flex flex-col">
                   {/* Chat Messages Area */}
-                  <div className="flex-1 overflow-y-auto mb-4 flex flex-col gap-4 scrollbar-hide">
-                    {chatMessages.length === 0 ? (
-                      <div className="flex-1 flex flex-col justify-end">
-                        {/* Placeholder space when empty */}
-                      </div>
-                    ) : (
-                      chatMessages.map((msg, idx) => (
+                  {chatMessages.length > 0 && (
+                    <div className="flex-1 overflow-y-auto mb-4 flex flex-col gap-4 scrollbar-hide">
+                      {chatMessages.map((msg, idx) => (
                         <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                           <div className={`max-w-[80%] rounded-2xl px-4 py-2 ${msg.role === 'user' ? 'bg-white text-[#7f26d9]' : 'bg-[#562996] text-white border border-white/20'}`}>
                             {msg.content}
                           </div>
                         </div>
-                      ))
-                    )}
-                  </div>
+                      ))}
+                    </div>
+                  )}
 
                   {/* Chat Box Header / Input Area */}
                   <div className={`${chatMessages.length > 0 ? 'h-16 shrink-0' : 'flex-1'} transition-all duration-300 pb-4 flex flex-col`}>
@@ -541,9 +562,9 @@ export default function Navbar({
                                 {att.name.split('.').pop()}
                               </span>
                             )}
-                            <button 
-                              type="button" 
-                              onClick={() => setAttachments(prev => prev.filter((_, idx) => idx !== i))} 
+                            <button
+                              type="button"
+                              onClick={() => setAttachments(prev => prev.filter((_, idx) => idx !== i))}
                               className="absolute -top-1.5 -right-1.5 bg-red-500 hover:bg-red-600 text-white rounded-full p-0.5 shadow-md transition-colors"
                             >
                               <X className="w-3 h-3" />
@@ -606,18 +627,18 @@ export default function Navbar({
                       </button>
                     </div>
                   </div>
-                  
+
                   {/* Hidden File Input */}
-                  <input 
-                    type="file" 
-                    ref={fileInputRef} 
-                    className="hidden" 
-                    accept="image/*,application/pdf" 
-                    multiple={false} 
-                    onChange={handleFileChange} 
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    accept="image/*,application/pdf"
+                    multiple={false}
+                    onChange={handleFileChange}
                   />
                 </div>
-                
+
                 {/* Chat History Modal */}
                 <AnimatePresence>
                   {isHistoryModalOpen && (
@@ -632,14 +653,14 @@ export default function Navbar({
                           <h2 className="text-2xl font-bold text-white flex items-center gap-3">
                             <Clock className="w-6 h-6" /> Chat History
                           </h2>
-                          <button 
+                          <button
                             onClick={() => setIsHistoryModalOpen(false)}
                             className="bg-white/10 hover:bg-white/20 p-2 rounded-full text-white transition-colors"
                           >
                             <X className="w-5 h-5" />
                           </button>
                         </div>
-                        
+
                         <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
                           {chatSessions.length === 0 ? (
                             <div className="text-white/50 text-center py-10">
@@ -647,7 +668,7 @@ export default function Navbar({
                             </div>
                           ) : (
                             chatSessions.map(session => (
-                              <div 
+                              <div
                                 key={session.id}
                                 onClick={() => loadSession(session)}
                                 className="group bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl p-4 cursor-pointer transition-all flex items-center justify-between"
@@ -660,7 +681,7 @@ export default function Navbar({
                                     {session.messages.find(m => m.role === 'user')?.content || "Empty conversation"}
                                   </div>
                                 </div>
-                                <button 
+                                <button
                                   onClick={(e) => deleteSession(e, session.id)}
                                   className="opacity-0 group-hover:opacity-100 p-2 text-white/40 hover:text-red-400 hover:bg-red-400/10 rounded-full transition-all"
                                   title="Delete Session"

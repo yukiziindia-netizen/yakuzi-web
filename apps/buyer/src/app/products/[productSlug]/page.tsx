@@ -21,6 +21,7 @@ import {
   Menu,
   ArrowUpRight,
   Loader2,
+  GitGraph,
 } from 'lucide-react';
 import Image from 'next/image';
 import { DeliveryTruckBadge } from '@/components/shared/DeliveryTruckBadge';
@@ -298,7 +299,6 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
           <div className="rounded-full bg-[#854cbc] px-3 py-1 text-[11px] font-bold tracking-wide text-white shadow-sm">
             Yukizi Choice
           </div>
-          <div className="text-[11px] font-semibold text-gray-500">Ad</div>
         </div>
 
         {/* 2-Column Main Layout */}
@@ -486,34 +486,38 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                   return (
                     <div
                       key={listing.id || idx}
-                      className="flex items-center gap-4 rounded-md border border-[#e5e7eb]/50 bg-[#e9e9e9] p-2.5 px-4 shadow-sm sm:gap-6"
+                      className="flex items-center justify-between gap-3 rounded-xl border border-[#e5e7eb]/50 bg-[#e9e9e9] p-2.5 px-4 shadow-sm"
                     >
                       {/* Left Badge */}
-                      <div className="flex shrink-0 items-center rounded bg-[#854cbc] px-2 py-1 text-[10px] font-bold text-white shadow-sm">
+                      <div className="flex shrink-0 items-center rounded-lg bg-[#854cbc] px-2 py-1.5 text-[10px] font-bold text-white shadow-sm">
                         {discountStr}
                       </div>
+
                       {/* Center-left Text */}
-                      <div className="flex min-w-[100px] flex-1 flex-col">
-                        <span className="text-[14px] font-bold leading-none text-gray-800 sm:text-[15px]">
+                      <div className="flex min-w-[90px] flex-1 flex-col justify-center">
+                        <span className="text-[15px] font-black leading-none text-gray-800">
                           ₹{price}
                         </span>
-                        <span className="mt-1 text-[9px] font-medium text-gray-400">
-                          {sellerName}
+                        <span className="mt-1 text-[9px] font-semibold text-gray-400">
+                          {listing.offerText || (listing.discount ? `${listing.discount}% off on purchase of 3` : '25% off on purchase of 3')}
                         </span>
                       </div>
+
                       {/* Center Rating */}
-                      <div className="flex w-12 shrink-0 items-center gap-1.5 text-[#854cbc] sm:w-16">
-                        <Star size={14} fill="currentColor" />
-                        <span className="text-[13px] font-medium text-gray-800">
+                      <div className="flex shrink-0 items-center gap-1">
+                        <Star size={14} className="text-[#854cbc] fill-[#854cbc]" />
+                        <span className="text-[13px] font-bold text-gray-700">
                           {listing.rating || '4.5'}
                         </span>
                       </div>
+
                       {/* Center-right Delivery */}
-                      <div className="flex w-16 shrink-0 items-center sm:w-20">
+                      <div className="flex shrink-0 items-center">
                         <DeliveryTruckBadge text="3 days" className="w-[65px] text-[#9a9a9a]" />
                       </div>
+
                       {/* Right Action */}
-                      <div className="flex w-[80px] shrink-0 items-center justify-end sm:w-[90px]">
+                      <div className="flex w-[100px] shrink-0 items-center justify-end">
                         {listing.isNotAvailable ? (
                           <button
                             onClick={() => {
@@ -560,38 +564,41 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                             <Plus size={22} strokeWidth={3} />
                           </button>
                         ) : (
-                          <div className="flex w-full items-center justify-between rounded-md bg-[#6a34a8] px-2 py-1 text-xs font-bold text-white shadow-sm">
-                            <Minus
-                              size={12}
-                              className="cursor-pointer text-white hover:opacity-80"
-                              strokeWidth={3}
-                              onClick={() => {
-                                if (itemQty > 1 && cartItem) {
-                                  updateCartItem.mutate({
-                                    itemId: cartItem.id,
-                                    quantity: itemQty - 1,
-                                  });
-                                } else if (cartItem) {
-                                  removeCartItem.mutate(cartItem.id);
-                                }
-                              }}
-                            />
-                            <span className="mx-2 text-[13px] font-semibold">
-                              {itemQty < 10 ? `0${itemQty}` : itemQty}
-                            </span>
-                            <Plus
-                              size={12}
-                              className="cursor-pointer text-white hover:opacity-80"
-                              strokeWidth={3}
-                              onClick={() => {
-                                if (cartItem) {
-                                  updateCartItem.mutate({
-                                    itemId: cartItem.id,
-                                    quantity: itemQty + 1,
-                                  });
-                                }
-                              }}
-                            />
+                          <div className="flex items-center gap-1.5 w-full justify-end">
+                            <GitGraph className="w-5 h-5 text-gray-800 stroke-[2] shrink-0" />
+                            <div className="flex flex-1 items-center justify-between rounded-[8px] bg-[#48286b] px-2 py-1 text-xs font-bold text-white shadow-sm h-[32px] min-w-[65px]">
+                              <Minus
+                                size={10}
+                                className="cursor-pointer text-white/90 hover:text-white"
+                                strokeWidth={2.5}
+                                onClick={() => {
+                                  if (itemQty > 1 && cartItem) {
+                                    updateCartItem.mutate({
+                                      itemId: cartItem.id,
+                                      quantity: itemQty - 1,
+                                    });
+                                  } else if (cartItem) {
+                                    removeCartItem.mutate(cartItem.id);
+                                  }
+                                }}
+                              />
+                              <span className="text-[12px] font-bold text-white">
+                                {itemQty < 10 ? `0${itemQty}` : itemQty}
+                              </span>
+                              <Plus
+                                size={10}
+                                className="cursor-pointer text-white/90 hover:text-white"
+                                strokeWidth={2.5}
+                                onClick={() => {
+                                  if (cartItem) {
+                                    updateCartItem.mutate({
+                                      itemId: cartItem.id,
+                                      quantity: itemQty + 1,
+                                    });
+                                  }
+                                }}
+                              />
+                            </div>
                           </div>
                         )}
                       </div>

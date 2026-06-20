@@ -90,13 +90,15 @@ export default function HeroSection({ title = 'YUKiZi' }: HeroSectionProps) {
 
         {/* Right Side: Text & Tags */}
         <div className="hidden md:flex relative z-10 w-full flex-col items-center justify-center border-t border-gray-100 bg-white px-4 py-6 md:w-[40%] md:border-t-0">
-          {/* Text-based Logo Replica */}
-          <h1
-            className="xs:text-6xl mb-4 bg-gradient-to-b from-[#a955e8] to-[#6a2ba8] bg-clip-text text-center text-5xl font-black leading-none tracking-tighter text-transparent drop-shadow-sm md:text-[6rem]"
-            style={{ fontFamily: '"Faster", Impact, sans-serif', letterSpacing: '-0.05em' }}
-          >
-            {title}
-          </h1>
+          {/* Image-based Logo */}
+          <Image
+            src="/YukiziLogo.png"
+            alt={title || 'YUKiZi Logo'}
+            width={400}
+            height={120}
+            className="mb-4 h-14 w-auto object-contain drop-shadow-sm md:h-[6rem]"
+            priority
+          />
 
           <div className="mb-4 flex max-w-[380px] flex-wrap justify-center gap-x-3 gap-y-2 text-center text-[13.5px] font-medium text-gray-500">
             {categories.map((category: any, index: number) => {

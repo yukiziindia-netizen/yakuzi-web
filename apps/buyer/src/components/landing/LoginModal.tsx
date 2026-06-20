@@ -246,9 +246,9 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
       <div className="z-10 w-full max-w-sm flex flex-col items-center">
         
         {/* Logo */}
-        <div className="mb-6 md:mb-8 flex justify-center w-full max-w-[240px] md:max-w-[280px]">
+        <div className="mb-6 md:mb-8 flex justify-center w-full max-w-[180px] xs:max-w-[220px] sm:max-w-[240px] md:max-w-[280px] transition-all duration-300">
           <img 
-            src="/login-logo.png" 
+            src="/YukiziLogo.png" 
             alt="YUKiZi" 
             className="w-full h-auto object-contain drop-shadow-sm" 
           />

@@ -14,7 +14,7 @@ export const BuyerProfileSchema = z.object({
   panNumber: z.string().optional(),
   drugLicenseNumber: z.string().optional(),
   drugLicenseUrl: z.string().optional(),
-  address: z.string().optional(),
+  address: z.any().optional(),
   city: z.string().optional(),
   state: z.string().optional(),
   pincode: z.string().optional(),
@@ -25,6 +25,13 @@ export const BuyerProfileSchema = z.object({
   creditTier: z.string().optional(),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
+  user: z.object({
+    id: z.string(),
+    phone: z.string().nullable().optional(),
+    email: z.string().nullable().optional(),
+    username: z.string().nullable().optional(),
+    status: z.string().optional(),
+  }).optional(),
 });
 
 export const CreateBuyerProfileSchema = z.object({
@@ -63,7 +70,11 @@ export const CreateBuyerProfileSchema = z.object({
   gstPanResponse: z.record(z.any()).optional(),
 });
 
-export const UpdateBuyerProfileSchema = CreateBuyerProfileSchema.partial();
+export const UpdateBuyerProfileSchema = CreateBuyerProfileSchema.partial().extend({
+  username: z.string().optional(),
+  email: z.string().optional(),
+  phone: z.string().optional(),
+});
 
 // ─── Types ──────────────────────────────────────────
 

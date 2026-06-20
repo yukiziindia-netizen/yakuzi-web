@@ -44,6 +44,7 @@ import {
 
 
 import CategoryMegaMenu from "@/components/landing/CategoryMegaMenu";
+import EditProfileDrawer from "@/components/profile/EditProfileDrawer";
 import CartDrawer from "@/components/cart/CartDrawer";
 import WishlistDrawer from "@/components/wishlist/WishlistDrawer";
 import { OrderDrawer } from "@/components/orders/OrderDrawer";
@@ -89,6 +90,7 @@ export default function Navbar({
   const [isNotificationsOpen, setIsNotificationsOpen] =
     useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [sidebarView, setSidebarView] = useState<SidebarView>(null);
   const [isMounted, setIsMounted] = useState(false);
@@ -313,6 +315,7 @@ export default function Navbar({
     isWishlistOpen ||
     isOrderDrawerOpen ||
     isNotificationsOpen ||
+    isProfileOpen ||
     sidebarView !== null;
 
   useScrollLock(isAnyDrawerOpen);
@@ -328,7 +331,7 @@ export default function Navbar({
   return (
     <>
       {/* Navbar Fixed at Bottom */}
-      <nav className="fixed bottom-4 sm:bottom-6 md:bottom-4 left-0 right-0 z-[60] flex justify-center items-end sm:items-center pointer-events-none px-2 sm:px-6 w-full">
+      <nav className="fixed bottom-4 sm:bottom-6 md:bottom-4 left-0 right-0 z-[90] flex justify-center items-end sm:items-center pointer-events-none px-2 sm:px-6 w-full">
         <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-6 md:gap-2 pointer-events-auto flex-nowrap justify-center w-full max-w-[1200px] px-1 sm:px-4 relative">
           {/* Left Segment: Logo, Profile, Notifications, Search */}
           <div className="flex items-center bg-white sm:bg-[#562996] rounded-[24px] sm:rounded-xl md:rounded-xl pl-[2px] pr-1 xs:pl-1 xs:pr-1.5 sm:px-4 md:px-6 h-[48px] sm:h-[60px] md:h-[64px] shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl flex-[1.3] sm:flex-1 max-w-[480px] justify-between overflow-hidden min-w-0 border border-gray-100 sm:border-0">
@@ -349,41 +352,23 @@ export default function Navbar({
                       </button>
                     ) : (
                       <>
-                        <div className="relative" ref={profileDropdownRef}>
-                          <button onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)} className="text-white hover:text-purple-300 transition-colors flex items-center">
-                            <User className="w-5 h-5 md:w-6 md:h-6 stroke-[2]" />
-                          </button>
-                          <AnimatePresence>
-                            {isProfileDropdownOpen && (
-                              <motion.div
-                                initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                                className="absolute left-0 bottom-full mb-3 w-40 sm:w-48 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-[60]"
-                              >
-                                <Link href="/profile" onClick={() => setIsProfileDropdownOpen(false)} className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-sky-600 transition-colors">
-                                  <User className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                  My Profile
-                                </Link>
-                                <Link href="/orders" onClick={() => setIsProfileDropdownOpen(false)} className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-sky-600 transition-colors">
-                                  <ClipboardList className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                  My Orders
-                                </Link>
-                                <div className="h-px bg-gray-50 my-1 mx-2" />
-                                <button onClick={() => { handleLogout(); setIsProfileDropdownOpen(false); }} className="w-full flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors text-left">
-                                  <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                  Logout
-                                </button>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
-
+                        <button onClick={() => setIsProfileOpen(true)} className="text-white hover:text-purple-300 transition-all duration-200 hover:scale-110 flex items-center">
+                          <User className="w-5 h-5 md:w-6 md:h-6 stroke-[2]" fill={isProfileOpen ? "currentColor" : "none"} />
+                        </button>
                         {/* Vertical Divider between User and Bell */}
                         <div className="h-5 w-[1px] bg-white/20 mx-1" />
 
-                        <button onClick={() => setIsNotificationsOpen(true)} className="relative text-white hover:text-purple-300 transition-colors flex items-center">
-                          <Bell className="w-5 h-5 md:w-6 md:h-6 stroke-[2]" />
+                        <button 
+                          onClick={() => setIsNotificationsOpen(true)} 
+                          className={`relative transition-all duration-200 flex items-center ${
+                            isNotificationsOpen
+                              ? "text-white scale-110 opacity-100"
+                              : isAnyDrawerOpen
+                              ? "text-white/40 opacity-50"
+                              : "text-white hover:text-purple-300"
+                          }`}
+                        >
+                          <Bell className="w-5 h-5 md:w-6 md:h-6 stroke-[2]" fill={isNotificationsOpen ? "currentColor" : "none"} />
                           {unreadNotificationCount > 0 && (
                             <span className="absolute -top-1 -right-1 w-3.5 h-3.5 md:w-4 md:h-4 bg-[#f7941d] text-white text-[9px] md:text-[10px] font-bold rounded-full flex items-center justify-center border border-[#562996]">
                               {unreadNotificationCount}
@@ -445,8 +430,30 @@ export default function Navbar({
                   </Link>
 
                   <div className="flex items-center gap-1.5 xs:gap-2 h-full flex-1 justify-end">
-                    <button onClick={() => setIsNotificationsOpen(true)} className="relative p-1 text-[#562996] transition-colors shrink-0">
-                      <Bell className="w-[18px] h-[18px] xs:w-[20px] xs:h-[20px] stroke-[2]" />
+                    <button 
+                      onClick={() => setIsProfileOpen(true)} 
+                      className={`relative p-1 transition-all duration-200 shrink-0 ${
+                        isProfileOpen
+                          ? "text-[#562996] scale-110 opacity-100"
+                          : isAnyDrawerOpen
+                          ? "text-[#562996]/40 opacity-50"
+                          : "text-[#562996]"
+                      }`}
+                    >
+                      <User className="w-[18px] h-[18px] xs:w-[20px] xs:h-[20px] stroke-[2]" fill={isProfileOpen ? "currentColor" : "none"} />
+                    </button>
+
+                    <button 
+                      onClick={() => setIsNotificationsOpen(true)} 
+                      className={`relative p-1 transition-all duration-200 shrink-0 ${
+                        isNotificationsOpen
+                          ? "text-[#562996] scale-110 opacity-100"
+                          : isAnyDrawerOpen
+                          ? "text-[#562996]/40 opacity-50"
+                          : "text-[#562996]"
+                      }`}
+                    >
+                      <Bell className="w-[18px] h-[18px] xs:w-[20px] xs:h-[20px] stroke-[2]" fill={isNotificationsOpen ? "currentColor" : "none"} />
                       <span className="absolute top-0 right-0 w-1.5 h-1.5 xs:w-2 xs:h-2 bg-[#eb4335] rounded-full shadow-sm" />
                     </button>
 
@@ -484,10 +491,19 @@ export default function Navbar({
           {/* Right Segment: Cart, Wishlist, Filter, Menu */}
           <div className="flex items-center justify-between bg-white sm:bg-[#562996] rounded-[24px] sm:rounded-xl md:rounded-xl px-2.5 xs:px-4 sm:px-8 md:px-12 lg:px-16 h-[48px] sm:h-[60px] md:h-[64px] shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl text-[#562996] sm:text-white sm:shrink-0 flex-[1] sm:flex-1 max-w-[480px] z-10 overflow-hidden min-w-0 border border-gray-100 sm:border-0">
 
-            <button onClick={() => setIsWishlistOpen(true)} className="relative sm:hover:text-purple-300 transition-colors">
+            <button 
+              onClick={() => setIsWishlistOpen(true)} 
+              className={`relative transition-all duration-200 hover:scale-110 ${
+                isWishlistOpen
+                  ? "text-[#562996] sm:text-white scale-110 opacity-100"
+                  : isAnyDrawerOpen
+                  ? "text-[#562996]/40 sm:text-white/40 opacity-50"
+                  : "text-[#562996] sm:text-white sm:hover:text-purple-300"
+              }`}
+            >
               <Bookmark 
                 className="w-[20px] h-[20px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2] rotate-90" 
-                fill={wishlistCount > 0 ? "currentColor" : "none"} 
+                fill={isWishlistOpen || wishlistCount > 0 ? "currentColor" : "none"} 
               />
               {wishlistCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 bg-[#f7941d] text-white text-[8px] xs:text-[9px] sm:text-[10px] font-bold rounded-full flex items-center justify-center border border-white sm:border-[#562996]">
@@ -496,8 +512,20 @@ export default function Navbar({
               )}
             </button>
 
-            <button onClick={() => setIsCartOpen(true)} className="relative sm:hover:text-purple-300 transition-colors">
-              <ShoppingCart className="w-[20px] h-[20px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2]" />
+            <button 
+              onClick={() => setIsCartOpen(true)} 
+              className={`relative transition-all duration-200 hover:scale-110 ${
+                isCartOpen
+                  ? "text-[#562996] sm:text-white scale-110 opacity-100"
+                  : isAnyDrawerOpen
+                  ? "text-[#562996]/40 sm:text-white/40 opacity-50"
+                  : "text-[#562996] sm:text-white sm:hover:text-purple-300"
+              }`}
+            >
+              <ShoppingCart 
+                className="w-[20px] h-[20px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2]" 
+                fill={isCartOpen ? "currentColor" : "none"}
+              />
               {cartData?.items && cartData.items.length > 0 && (
                 <span className="absolute -top-1 -right-1 w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 bg-[#f7941d] text-white text-[8px] xs:text-[9px] sm:text-[10px] font-bold rounded-full flex items-center justify-center border border-white sm:border-[#562996]">
                   {cartData.items.length}
@@ -505,18 +533,51 @@ export default function Navbar({
               )}
             </button>
 
-            <button onClick={() => setIsOrderDrawerOpen(true)} className="hidden sm:block relative hover:text-purple-300 transition-colors">
-              <Package className="w-[18px] h-[18px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2.5]" />
+            <button 
+              onClick={() => setIsOrderDrawerOpen(true)} 
+              className={`hidden sm:block relative transition-all duration-200 hover:scale-110 ${
+                isOrderDrawerOpen
+                  ? "text-[#562996] sm:text-white scale-110 opacity-100"
+                  : isAnyDrawerOpen
+                  ? "text-[#562996]/40 sm:text-white/40 opacity-50"
+                  : "text-[#562996] sm:text-white sm:hover:text-purple-300"
+              }`}
+            >
+              <Package 
+                className="w-[18px] h-[18px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2.5]" 
+                fill={isOrderDrawerOpen ? "currentColor" : "none"}
+              />
             </button>
 
-            <button onClick={() => {
-              setSidebarView("filters");
-              onFilterClick?.();
-            }} className="sm:hover:text-purple-300 transition-colors">
-              <Filter className="w-[20px] h-[20px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2]" />
+            <button 
+              onClick={() => {
+                setSidebarView("filters");
+                onFilterClick?.();
+              }} 
+              className={`transition-all duration-200 hover:scale-110 ${
+                sidebarView === "filters"
+                  ? "text-[#562996] sm:text-white scale-110 opacity-100"
+                  : isAnyDrawerOpen
+                  ? "text-[#562996]/40 sm:text-white/40 opacity-50"
+                  : "text-[#562996] sm:text-white sm:hover:text-purple-300"
+              }`}
+            >
+              <Filter 
+                className="w-[20px] h-[20px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2]" 
+                fill={sidebarView === "filters" ? "currentColor" : "none"}
+              />
             </button>
 
-            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="sm:hover:text-purple-300 transition-colors">
+            <button 
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+              className={`transition-all duration-200 hover:scale-110 ${
+                isMobileMenuOpen
+                  ? "text-[#562996] sm:text-white scale-110 opacity-100"
+                  : isAnyDrawerOpen
+                  ? "text-[#562996]/40 sm:text-white/40 opacity-50"
+                  : "text-[#562996] sm:text-white sm:hover:text-purple-300"
+              }`}
+            >
               {isMobileMenuOpen ? (
                 <X className="w-[20px] h-[20px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2]" />
               ) : (
@@ -813,7 +874,7 @@ export default function Navbar({
                   }}
                   className="text-gray-500 text-sm hover:text-gray-800 transition-colors"
                 >
-                  Sign out
+                  Sign in
                 </button>
               )}
             </div>
@@ -886,20 +947,38 @@ export default function Navbar({
             </div>
 
             {/* Bottom Drawer Icons */}
-            <div className="mt-auto pt-2 pb-24 flex sm:hidden justify-end pr-2">
-              <Image 
-                src="/drawer-icons.png" 
-                alt="Drawer Icons" 
-                width={80} 
-                height={35} 
-                className="w-[80px] object-contain mix-blend-multiply opacity-90" 
-              />
-            </div>
+            {isAuthenticated && (
+              <div className="mt-auto pt-2 pb-24 flex sm:hidden justify-end pr-2 gap-4">
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    setIsOrderDrawerOpen(true);
+                  }}
+                  className="w-10 h-10 rounded-full bg-[#f3ebfa] flex items-center justify-center text-[#8e44ad] hover:bg-[#ebdcf7] transition-all duration-200 shadow-sm border border-purple-100"
+                >
+                  <Package className="w-5 h-5 stroke-[2]" />
+                </button>
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    setIsProfileOpen(true);
+                  }}
+                  className="w-10 h-10 rounded-full bg-[#f3ebfa] flex items-center justify-center text-[#8e44ad] hover:bg-[#ebdcf7] transition-all duration-200 shadow-sm border border-purple-100"
+                >
+                  <User className="w-5 h-5 stroke-[2]" />
+                </button>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* Drawers */}
+      <EditProfileDrawer
+        isOpen={isProfileOpen}
+        onClose={() => setIsProfileOpen(false)}
+      />
+
       <CartDrawer
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}

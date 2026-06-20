@@ -75,9 +75,13 @@ export default function LoginPage() {
       <div className="z-10 w-full max-w-sm flex flex-col items-center mt-[-10vh]">
         
         {/* Logo */}
-        <h1 className="text-[60px] font-black tracking-tighter text-[#8e44ad] mb-20 uppercase" style={{ fontFamily: 'Impact, Arial Black, sans-serif' }}>
-          YUKiZi
-        </h1>
+        <div className="mb-10 w-full flex justify-center px-4 max-w-[200px] xs:max-w-[240px] sm:max-w-[280px] md:max-w-[320px] transition-all duration-300">
+          <img 
+            src="/YukiziLogo.png" 
+            alt="YUKiZi" 
+            className="w-full h-auto object-contain drop-shadow-md" 
+          />
+        </div>
 
         {/* Form */}
         {!isOtpMode ? (

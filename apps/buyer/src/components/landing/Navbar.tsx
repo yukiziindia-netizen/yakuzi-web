@@ -44,6 +44,7 @@ import {
 
 
 import CategoryMegaMenu from "@/components/landing/CategoryMegaMenu";
+import EditProfileDrawer from "@/components/profile/EditProfileDrawer";
 import CartDrawer from "@/components/cart/CartDrawer";
 import WishlistDrawer from "@/components/wishlist/WishlistDrawer";
 import { OrderDrawer } from "@/components/orders/OrderDrawer";
@@ -89,6 +90,7 @@ export default function Navbar({
   const [isNotificationsOpen, setIsNotificationsOpen] =
     useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [sidebarView, setSidebarView] = useState<SidebarView>(null);
   const [isMounted, setIsMounted] = useState(false);
@@ -313,6 +315,7 @@ export default function Navbar({
     isWishlistOpen ||
     isOrderDrawerOpen ||
     isNotificationsOpen ||
+    isProfileOpen ||
     sidebarView !== null;
 
   useScrollLock(isAnyDrawerOpen);
@@ -349,36 +352,9 @@ export default function Navbar({
                       </button>
                     ) : (
                       <>
-                        <div className="relative" ref={profileDropdownRef}>
-                          <button onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)} className="text-white hover:text-purple-300 transition-colors flex items-center">
-                            <User className="w-5 h-5 md:w-6 md:h-6 stroke-[2]" />
-                          </button>
-                          <AnimatePresence>
-                            {isProfileDropdownOpen && (
-                              <motion.div
-                                initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                                className="absolute left-0 bottom-full mb-3 w-40 sm:w-48 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-[60]"
-                              >
-                                <Link href="/profile" onClick={() => setIsProfileDropdownOpen(false)} className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-sky-600 transition-colors">
-                                  <User className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                  My Profile
-                                </Link>
-                                <Link href="/orders" onClick={() => setIsProfileDropdownOpen(false)} className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-sky-600 transition-colors">
-                                  <ClipboardList className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                  My Orders
-                                </Link>
-                                <div className="h-px bg-gray-50 my-1 mx-2" />
-                                <button onClick={() => { handleLogout(); setIsProfileDropdownOpen(false); }} className="w-full flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors text-left">
-                                  <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                  Logout
-                                </button>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
-
+                        <button onClick={() => setIsProfileOpen(true)} className="text-white hover:text-purple-300 transition-all duration-200 hover:scale-110 flex items-center">
+                          <User className="w-5 h-5 md:w-6 md:h-6 stroke-[2]" fill={isProfileOpen ? "currentColor" : "none"} />
+                        </button>
                         {/* Vertical Divider between User and Bell */}
                         <div className="h-5 w-[1px] bg-white/20 mx-1" />
 
@@ -454,6 +430,19 @@ export default function Navbar({
                   </Link>
 
                   <div className="flex items-center gap-1.5 xs:gap-2 h-full flex-1 justify-end">
+                    <button 
+                      onClick={() => setIsProfileOpen(true)} 
+                      className={`relative p-1 transition-all duration-200 shrink-0 ${
+                        isProfileOpen
+                          ? "text-[#562996] scale-110 opacity-100"
+                          : isAnyDrawerOpen
+                          ? "text-[#562996]/40 opacity-50"
+                          : "text-[#562996]"
+                      }`}
+                    >
+                      <User className="w-[18px] h-[18px] xs:w-[20px] xs:h-[20px] stroke-[2]" fill={isProfileOpen ? "currentColor" : "none"} />
+                    </button>
+
                     <button 
                       onClick={() => setIsNotificationsOpen(true)} 
                       className={`relative p-1 transition-all duration-200 shrink-0 ${
@@ -885,7 +874,7 @@ export default function Navbar({
                   }}
                   className="text-gray-500 text-sm hover:text-gray-800 transition-colors"
                 >
-                  Sign out
+                  Sign in
                 </button>
               )}
             </div>
@@ -958,20 +947,38 @@ export default function Navbar({
             </div>
 
             {/* Bottom Drawer Icons */}
-            <div className="mt-auto pt-2 pb-24 flex sm:hidden justify-end pr-2">
-              <Image 
-                src="/drawer-icons.png" 
-                alt="Drawer Icons" 
-                width={80} 
-                height={35} 
-                className="w-[80px] object-contain mix-blend-multiply opacity-90" 
-              />
-            </div>
+            {isAuthenticated && (
+              <div className="mt-auto pt-2 pb-24 flex sm:hidden justify-end pr-2 gap-4">
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    setIsOrderDrawerOpen(true);
+                  }}
+                  className="w-10 h-10 rounded-full bg-[#f3ebfa] flex items-center justify-center text-[#8e44ad] hover:bg-[#ebdcf7] transition-all duration-200 shadow-sm border border-purple-100"
+                >
+                  <Package className="w-5 h-5 stroke-[2]" />
+                </button>
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    setIsProfileOpen(true);
+                  }}
+                  className="w-10 h-10 rounded-full bg-[#f3ebfa] flex items-center justify-center text-[#8e44ad] hover:bg-[#ebdcf7] transition-all duration-200 shadow-sm border border-purple-100"
+                >
+                  <User className="w-5 h-5 stroke-[2]" />
+                </button>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* Drawers */}
+      <EditProfileDrawer
+        isOpen={isProfileOpen}
+        onClose={() => setIsProfileOpen(false)}
+      />
+
       <CartDrawer
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}

@@ -7,7 +7,7 @@ import { formatCurrency } from "@yukizi/utils";
 import { cn } from "@/lib/utils";
 import { useSellerProducts, useDeleteSellerProduct } from "@/hooks/useSeller";
 import Link from "next/link";
-import { FileText } from "lucide-react";
+
 
 const EMOJI: Record<string,string> = {"eye-drops":"👁️",capsules:"🔴",tablets:"💊",syrups:"🧪",vitamins:"🌟",default:"💊"};
 const PAGE_SIZE = 20;
@@ -44,9 +44,6 @@ export default function ProductsPage() {
           <div className="flex items-center justify-between">
             <div><h1 className="font-semibold text-2xl text-foreground">Products</h1><p className="text-sm text-muted-foreground mt-0.5">Manage your product listings</p></div>
             <div className="flex items-center gap-3">
-              <Link href="/products/requests">
-                <Button variant="secondary" leftIcon={<FileText className="h-4 w-4"/>}>Request Product</Button>
-              </Link>
               <Link href="/products/new">
                 <Button leftIcon={<Plus className="h-4 w-4"/>}>Add Product</Button>
               </Link>

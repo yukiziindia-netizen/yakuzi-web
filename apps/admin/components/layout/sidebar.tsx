@@ -15,7 +15,6 @@ const NAV = [
   { icon: FileSpreadsheet, label: "Suggestions", href: "/suggestions" },
   { icon: Tag, label: "Brands", href: "/brands" },
   { icon: Layers, label: "Collections", href: "/collections" },
-  { icon: PackagePlus, label: "Product Requests", href: "/product-requests" },
   { icon: ClipboardList, label: "Orders", href: "/orders" },
   { icon: Layout, label: "Marketing", href: "/marketing" },
   { icon: Banknote, label: "Settlements", href: "/settlements" },

@@ -1,4 +1,4 @@
-﻿import { type Wishlist, type WishlistItem } from '@yukizi/api-client';
+import { type Wishlist, type WishlistItem } from '@yukizi/api-client';
 
 const STORAGE_KEY = 'yukizi_local_wishlist';
 
@@ -26,14 +26,15 @@ export const localWishlist = {
 
   addItem: (productData: any) => {
     const list = localWishlist.get();
-    const existingIndex = list.items.findIndex((item: any) => item.productId === productData.id);
+    const prodId = productData.id || productData.productId;
+    const existingIndex = list.items.findIndex((item: any) => item.productId === prodId);
     
     if (existingIndex > -1) {
       return list; // already exists
     } else {
       list.items.push({
         id: `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        productId: productData.id,
+        productId: prodId,
         product: productData,
         createdAt: new Date().toISOString()
       });
@@ -46,7 +47,7 @@ export const localWishlist = {
 
   removeItem: (productId: string) => {
     const list = localWishlist.get();
-    list.items = list.items.filter((i: any) => i.productId !== productId);
+    list.items = list.items.filter((i: any) => i.productId !== productId && i.id !== productId);
     list.total = list.items.length;
     localWishlist.set(list);
     return list;

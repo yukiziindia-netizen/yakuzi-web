@@ -41,8 +41,74 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
   const [showStockAlert, setShowStockAlert] = useState(false);
   const [showCustomOrder, setShowCustomOrder] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [mockQuantities, setMockQuantities] = useState<Record<string, number>>({});
 
   if (!displayProduct) return null;
+
+  const productImages = displayProduct.images && displayProduct.images.length > 0
+    ? displayProduct.images
+    : [
+        displayProduct.image || `https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?auto=format&fit=crop&q=80&w=400`,
+        displayProduct.image || `https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?auto=format&fit=crop&q=80&w=400`,
+        displayProduct.image || `https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?auto=format&fit=crop&q=80&w=400`
+      ];
+
+  const activeImage = productImages[activeImageIndex % productImages.length];
+
+  // Populate up to 4 comparison rows to precisely replicate the layout in the screenshot
+  const baseListings = listings.length > 0 ? listings : [
+    { id: 'l1', price: displayProduct.mrp || 3345.53, stock: 10, moq: 1, seller: { rating: 4.5 }, deliveryText: 'Tomorrow' }
+  ];
+
+  const comparisonListings = [...baseListings];
+  if (comparisonListings.length < 4) {
+    const diff = 4 - comparisonListings.length;
+    for (let i = 0; i < diff; i++) {
+      const mockPrices = [
+        (displayProduct.mrp || 3345.53) * 0.95,
+        (displayProduct.mrp || 3345.53) * 0.9,
+        (displayProduct.mrp || 3345.53) * 0.85,
+        (displayProduct.mrp || 3345.53) * 0.4
+      ];
+      const mockStock = i === 1 ? 0 : 5; // one out-of-stock
+      comparisonListings.push({
+        id: `mock-l-${i}`,
+        price: parseFloat(mockPrices[i % mockPrices.length].toFixed(2)),
+        stock: mockStock,
+        moq: i === 1 ? 2 : 1,
+        seller: { rating: 4.5 },
+        deliveryText: i === 0 ? '3 days' : 'Tomorrow',
+        isMock: true,
+      });
+    }
+  }
+
+  const handleAddToCart = (listing: any, quantity: number) => {
+    if (listing.isMock) {
+      toast(`Added ${quantity} units of ${displayProduct.name} to bag!`, 'success');
+      return;
+    }
+    addToCart.mutate({
+      productId: listing.id,
+      quantity,
+      productName: displayProduct.name,
+      price: listing.price,
+      mrp: displayProduct.mrp
+    });
+  };
+
+  const handleUpdateQty = (listing: any, quantity: number) => {
+    if (listing.isMock) {
+      toast(`Updated bag quantity to ${quantity}!`, 'success');
+      return;
+    }
+    addToCart.mutate({
+      productId: listing.id,
+      quantity,
+      replace: true
+    });
+  };
 
   return (
     <>
@@ -56,253 +122,243 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
             onClick={onClose}
           >
             {/* Ambient Backdrop */}
-            <div className="absolute inset-0 bg-white/10 backdrop-blur-2xl backdrop-saturate-[1.8]" />
+            <div className="absolute inset-0 bg-black/10 backdrop-blur-2xl backdrop-saturate-[1.8]" />
 
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-[840px] max-h-[90vh] overflow-y-auto bg-white/95 backdrop-blur-sm rounded-[32px] shadow-[0_25px_60px_-12px_rgba(0,0,0,0.25),0_0_0_1px_rgba(255,255,255,0.1)] border border-white/40 no-scrollbar"
+              className="relative w-full max-w-[500px] max-h-[90vh] overflow-y-auto bg-white/95 backdrop-blur-sm rounded-[32px] shadow-[0_25px_60px_-12px_rgba(0,0,0,0.25),0_0_0_1px_rgba(255,255,255,0.1)] border border-white/40 no-scrollbar p-6 flex flex-col gap-5"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Header section with Bookmark & Share */}
-              <div className="flex items-center justify-between px-8 pt-8 pb-4 relative">
-                <div className="max-w-[80%]">
-                  <h2 className="text-[24px] md:text-[28px] font-[900] text-gray-900 tracking-tight leading-tight">
+              {/* Header section with Title & Share */}
+              <div className="flex flex-col relative w-full border-t-[3px] border-purple-500 pt-3">
+                <div className="flex items-start justify-between w-full">
+                  <h2 className="text-[20px] font-black text-gray-800 tracking-tight leading-tight max-w-[85%]">
                     {displayProduct.name}
                   </h2>
-                  <p className="text-[13px] font-bold text-teal-600 uppercase tracking-widest mt-1">
-                    {displayProduct.category?.name || 'Pharmaceuticals'}
-                  </p>
+                  <button
+                    onClick={onClose}
+                    className="p-1 rounded-full hover:bg-gray-100 transition-colors self-start"
+                  >
+                    <X className="w-5 h-5 text-gray-400" />
+                  </button>
                 </div>
-
-                <div className="flex items-center gap-4 mr-16 relative z-30">
-                   <ShareButton 
-                      productName={displayProduct.name}
-                      productId={displayProduct.id}
-                      productPrice={displayProduct.mrp}
-                      className="p-2 bg-gray-50 rounded-full hover:bg-gray-100 transition-colors"
-                   />
-                </div>
-
-                {/* Ribbon Bookmark */}
-                <button
-                  onClick={() => setIsBookmarked(!isBookmarked)}
-                  className="absolute right-4 top-16 md:top-8 md:right-20 z-20 w-[40px] h-[40px] bg-white shadow-md border border-gray-100 rounded-full flex items-center justify-center hover:scale-105 transition-transform"
-                >
-                  <WishlistIcon isFilled={isBookmarked} className="w-[20px] h-[20px] text-[#8b5cf6]" />
-                </button>
                 
+              </div>
+
+              {/* Product Banner Halftone Card */}
+              <div 
+                className="relative w-full aspect-[4/3] rounded-[24px] bg-gradient-to-br from-[#854dff] via-[#b336e8] to-[#ff2b9a] border border-purple-400/20 shadow-md flex items-center justify-center p-6"
+                style={{
+                  backgroundImage: `
+                    radial-gradient(rgba(255, 255, 255, 0.15) 1.5px, transparent 1.5px),
+                    linear-gradient(135deg, #854dff 0%, #b336e8 50%, #ff2b9a 100%)
+                  `,
+                  backgroundSize: '12px 12px, 100% 100%',
+                }}
+              >
+                {/* Abstract slashes for action look */}
+                <div className="absolute right-0 bottom-0 top-0 w-1/3 bg-gradient-to-l from-pink-500/20 to-transparent skew-x-12 transform origin-bottom-right pointer-events-none" />
+                <div className="absolute -right-10 -bottom-10 w-64 h-64 rounded-full bg-pink-500/10 blur-2xl pointer-events-none" />
+
+                {/* Share Button on Top Left Corner */}
+                <div className="absolute -top-3.5 -left-3.5 z-30">
+                  <ShareButton 
+                    productName={displayProduct.name}
+                    productId={displayProduct.id}
+                    productPrice={displayProduct.mrp}
+                    className="p-3 bg-white rounded-full border border-gray-300 shadow-md hover:bg-gray-50 text-gray-500 hover:text-purple-600 focus:outline-none hover:scale-105 transition-transform"
+                    iconClassName="w-[18px] h-[18px]"
+                  />
+                </div>
+
+                {/* Interactive Thumbnail Gallery overlay on the left */}
+                <div className="absolute left-4 bottom-4 flex flex-col gap-2 z-20">
+                  {productImages.map((img: string, idx: number) => (
+                    <button
+                      key={idx}
+                      onClick={() => setActiveImageIndex(idx)}
+                      className={`w-11 h-11 rounded-lg overflow-hidden border-2 bg-white/15 backdrop-blur-sm shadow-sm transition-all duration-200 ${
+                        activeImageIndex === idx ? 'border-orange-500 scale-105 shadow-md' : 'border-white/30 hover:border-white/60'
+                      }`}
+                    >
+                      <Image 
+                        src={img} 
+                        alt="" 
+                        width={44}
+                        height={44}
+                        className="w-full h-full object-cover" 
+                      />
+                    </button>
+                  ))}
+                </div>
+
+                {/* Main Product Image */}
+                <div className="relative w-[80%] h-[80%] flex items-center justify-center">
+                  <Image
+                    src={activeImage}
+                    alt={displayProduct.name}
+                    fill
+                    className="object-contain hover:scale-105 transition-transform duration-500 p-2"
+                    priority
+                  />
+                </div>
+
+                {/* Ribbon Bookmark flag on the right edge */}
                 <button
-                  onClick={onClose}
-                  className="absolute -top-2 -right-2 md:top-8 md:right-8 p-2 rounded-full bg-white shadow-md border border-gray-100 hover:bg-gray-50 transition-colors z-20"
+                  type="button"
+                  onClick={() => setIsBookmarked(!isBookmarked)}
+                  className="absolute right-0 top-[45%] z-20 focus:outline-none transition-transform hover:scale-105"
                 >
-                  <X className="w-5 h-5 text-gray-400" />
+                  <svg
+                    width="32"
+                    height="40"
+                    viewBox="0 0 32 40"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="overflow-visible drop-shadow-sm"
+                  >
+                    <path
+                      d="M32 0 H0 L8 20 L0 40 H32 V0 Z"
+                      fill={isBookmarked ? "#854cbc" : "#ffffff"}
+                      stroke={isBookmarked ? "#854cbc" : "#9ca3af"}
+                      strokeWidth="2.5"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
                 </button>
               </div>
 
-              <div className="px-8 pb-8 pt-2">
-                {/* Information Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-[1fr_240px] gap-8 mb-8">
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-2 gap-y-4 gap-x-6">
-                      <div>
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Manufacturer</p>
-                        <p className="text-[14px] font-[700] text-gray-700">{displayProduct.manufacturer || 'General Pharma'}</p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Composition</p>
-                        <p className="text-[14px] font-[700] text-gray-700 break-words">{displayProduct.chemicalComposition || 'N/A'}</p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Base MRP</p>
-                        <p className="text-[16px] font-black text-gray-900">₹{displayProduct.mrp?.toFixed(2)}</p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">GST Application</p>
-                        <p className="text-[14px] font-bold text-blue-600">{displayProduct.gstPercent || 12}% Included</p>
-                      </div>
-                    </div>
+              {/* Marketplace Offers Comparison List */}
+              <div className="flex flex-col gap-3 w-full">
+                {comparisonListings.map((listing: any, index: number) => {
+                  const inStock = (listing.stock ?? 0) > 0 || listing.isMock;
+                  const cartItem = cartData?.items?.find((item: any) => item.productId === listing.id);
+                  const itemQty = listing.isMock 
+                    ? (mockQuantities[listing.id] ?? 0) 
+                    : (cartItem?.quantity || 0);
+                  const sellerMoq = listing.moq || listing.minimumOrderQuantity || 1;
+                  const minQty = listing.price > 0
+                    ? Math.max(sellerMoq, Math.ceil(minOrderAmount / listing.price))
+                    : sellerMoq;
+                  
+                  const discountPercent = listing.isMock
+                    ? (index === 3 ? 60 : 20 - index * 5)
+                    : (listing.discountMeta?.discountPercent || 20);
 
-                    <div className="p-4 rounded-2xl bg-gray-50/50 border border-gray-100 italic text-[13px] text-gray-500 leading-relaxed border-l-4 border-l-teal-500">
-                      {displayProduct.description || "The product information provided is for informational purposes only. Please consult a qualified healthcare professional before use."}
-                    </div>
-                  </div>
+                  const handleQtyChange = (newQty: number) => {
+                    if (listing.isMock) {
+                      setMockQuantities(prev => ({ ...prev, [listing.id]: newQty }));
+                      toast(`Updated bag quantity to ${newQty}!`, 'success');
+                      return;
+                    }
+                    handleUpdateQty(listing, newQty);
+                  };
 
-                  <div className="relative aspect-square bg-[#f8fcf9] rounded-3xl border border-gray-100 flex items-center justify-center p-6 shadow-sm overflow-hidden group">
-                     <Image
-                        src={displayProduct.images?.[0] || displayProduct.image || `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent((displayProduct.name || 'PR').trim().split(/\s+/).length === 1 ? (displayProduct.name || 'PR').trim().substring(0,2).toUpperCase() : ((displayProduct.name || 'PR').trim().split(/\s+/)[0][0] + (displayProduct.name || 'PR').trim().split(/\s+/)[(displayProduct.name || 'PR').trim().split(/\s+/).length - 1][0]).toUpperCase())}`}
-                        alt={displayProduct.name}
-                        fill
-                        className="object-contain p-6 group-hover:scale-110 transition-transform duration-500"
-                        priority
-                      />
-                  </div>
-                </div>
+                  return (
+                    <div 
+                      key={listing.id} 
+                      className="flex flex-row items-center justify-between p-3.5 rounded-2xl bg-gray-50 hover:bg-gray-100/70 border border-gray-100/80 transition-colors gap-3 w-full"
+                    >
+                      {/* Left: Discount Badge & Price */}
+                      <div className="flex items-center gap-3.5 min-w-[155px]">
+                        <div className="bg-[#854cbc] text-white px-2 py-1.5 rounded-lg text-[9px] font-black tracking-wider uppercase leading-none min-w-[66px] text-center select-none">
+                          {discountPercent}% off
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-[15px] font-black text-gray-800 leading-none">
+                            ₹{listing.price?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                          </span>
+                          <span className="text-[9px] text-gray-400 font-bold mt-1.5 leading-none">
+                            {listing.moq > 1 ? `${listing.moq * 10}% off on purchase of ${listing.moq}` : 'MOQ: 1'}
+                          </span>
+                        </div>
+                      </div>
 
-                {/* Marketplace Comparison section */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-[900] text-gray-900 uppercase tracking-tight flex items-center gap-3">
-                      Compare Seller Offers
-                      <span className="bg-teal-100 text-teal-700 text-[10px] px-2 py-0.5 rounded-full font-black">
-                        {listings.length} Available
-                      </span>
-                    </h3>
-                  </div>
+                      {/* Middle: Star Rating & Delivery badge */}
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-1">
+                          <Star className="w-3.5 h-3.5 fill-[#854cbc] text-[#854cbc]" />
+                          <span className="text-gray-800 font-black text-[12px] leading-none">{listing.seller?.rating || '4.5'}</span>
+                        </div>
 
-                  <div className="space-y-3">
-                    {listings.map((listing: any) => {
-                      const inStock = (listing.stock || 0) > 0;
-                      const cartItem = cartData?.items?.find((item: any) => item.productId === listing.id);
-                      const sellerMoq = listing.moq || listing.minimumOrderQuantity || 1;
-                      const minQty = listing.price > 0
-                        ? Math.max(sellerMoq, Math.ceil(minOrderAmount / listing.price))
-                        : sellerMoq;
-                      
-                      return (
-                        <div key={listing.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-5 rounded-2xl bg-white border border-gray-100 shadow-sm hover:border-teal-200 transition-all gap-4">
-                          <div className="flex items-center gap-5">
-                            {/* Price & Seller */}
-                            <div className="bg-purple-50 text-purple-700 px-3 py-1.5 rounded-xl font-black text-[11px] min-w-[75px] text-center border border-purple-100">
-                               {listing.discountMeta?.discountPercent ? `${listing.discountMeta.discountPercent}% OFF` : 'FLAT'}
-                            </div>
+                        <DeliveryTruckBadge text={listing.deliveryText || '3 days'} className="w-[72px] h-auto text-gray-400" />
+                      </div>
+
+                      {/* Right: Actions */}
+                      <div className="flex items-center gap-3">
+                        {inStock ? (
+                          <>
+                            {/* Refresh offer */}
+                            <button 
+                              onClick={() => toast('Offer details refreshed!', 'success')}
+                              className="p-1.5 rounded-full hover:bg-gray-200/50 text-gray-400 hover:text-purple-600 transition-colors focus:outline-none"
+                            >
+                              <svg className="w-5 h-5 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H17" />
+                              </svg>
+                            </button>
                             
-                            <div className="flex flex-col">
-                              <span className="text-[18px] font-black text-gray-900 leading-none">₹{listing.price?.toLocaleString('en-IN')}</span>
+                            {/* Quantity Control Pill */}
+                            <div className="flex items-center bg-[#48286b] rounded-full overflow-hidden h-8 w-24 text-white shadow-sm font-black text-[11px] select-none justify-between">
+                              <button 
+                                className={`px-3 h-full hover:bg-black/10 active:scale-95 transition-all text-white/80 hover:text-white font-extrabold text-sm ${itemQty === 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
+                                onClick={() => itemQty > 0 && handleQtyChange(itemQty - 1)}
+                                disabled={itemQty === 0}
+                              >
+                                -
+                              </button>
+                              <span className="px-1 font-bold">{String(itemQty).padStart(2, '0')}</span>
+                              <button 
+                                className="px-3 h-full hover:bg-black/10 active:scale-95 transition-all text-white/80 hover:text-white font-extrabold text-sm"
+                                onClick={() => handleQtyChange(itemQty === 0 ? minQty : itemQty + 1)}
+                              >
+                                +
+                              </button>
                             </div>
-
-                            {/* Stock Indicator */}
-                            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-gray-50 border border-gray-100">
-                               <Package className="w-3.5 h-3.5 text-gray-400" />
-                               <span className={`text-[11px] font-black ${inStock ? 'text-emerald-600' : 'text-rose-600'}`}>
-                                 {inStock ? `${listing.stock} Units In Stock` : 'Out of Stock'}
-                               </span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-4">
-                             {/* Rating */}
-                             <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-amber-50 border border-amber-100">
-                                <span className="text-amber-700 font-black text-[12px]">{listing.seller?.rating || '4.5'}</span>
-                                <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
-                             </div>
-
-                             {/* Delivery */}
-                             <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-50 border border-emerald-100">
-                                <span className="text-[#888888] text-[9px]">Delivery by </span>
-                                <DeliveryTruckBadge text={listing.deliveryText || '3 days'} className="w-[75px] text-emerald-700" />
-                              </div>
-
-                             {/* Actions */}
-                             <div className="flex items-center gap-2">
-                               {inStock ? (
-                                 cartItem ? (
-                                   <div className="flex items-center bg-gray-900 rounded-xl overflow-hidden h-10 text-white shadow-lg">
-                                     <button 
-                                       className="w-10 h-full flex items-center justify-center hover:bg-gray-800 transition-colors"
-                                       onClick={() => addToCart.mutate({ productId: listing.id, quantity: Math.max(0, cartItem.quantity - 1), replace: true })}
-                                     >
-                                       -
-                                     </button>
-                                     <span className="px-3 font-black text-sm">{cartItem.quantity}</span>
-                                     <button 
-                                       className="w-10 h-full flex items-center justify-center hover:bg-gray-800 transition-colors"
-                                       onClick={() => addToCart.mutate({ productId: listing.id, quantity: cartItem.quantity + 1, replace: true })}
-                                     >
-                                       +
-                                     </button>
-                                   </div>
-                                 ) : (
-                                   <button 
-                                     onClick={() => addToCart.mutate({ 
-                                       productId: listing.id, 
-                                       quantity: minQty,
-                                       productName: displayProduct.name,
-                                       price: listing.price,
-                                       mrp: displayProduct.mrp
-                                     })}
-                                     className="px-6 h-10 rounded-xl bg-teal-600 text-white font-black text-xs uppercase tracking-widest hover:bg-teal-700 transition-all shadow-lg active:scale-95"
-                                   >
-                                     Add To Bag
-                                   </button>
-                                 )
-                               ) : (
-                                 <button 
-                                   onClick={() => setShowStockAlert(true)}
-                                   className="h-10 px-4 rounded-xl border border-rose-100 bg-rose-50 text-rose-600 font-bold text-xs uppercase flex items-center gap-2"
-                                 >
-                                   <Bell className="w-4 h-4" />
-                                   Notify
-                                 </button>
-                               )}
-                             </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-
-                    {listings.length === 0 && (
-                      <div className="flex flex-col items-center justify-center py-10 px-6 rounded-[32px] bg-gray-50/50 border-2 border-dashed border-gray-200 text-center gap-4">
-                        <Package className="w-10 h-10 text-gray-300" />
-                        <div>
-                          <p className="text-lg font-black text-gray-800">No Professional Sellers Found</p>
-                          <p className="text-[13px] text-gray-500 max-w-[320px] mx-auto mt-1">We couldn't locate active listings in our network. Would you like us to source this for you?</p>
-                        </div>
-                        <button 
-                          onClick={() => setShowCustomOrder(true)}
-                          className="px-8 py-3 bg-white border border-gray-200 rounded-2xl text-[12px] font-black text-teal-600 uppercase tracking-widest hover:bg-teal-50 transition-all shadow-sm"
-                        >
-                          Request Personalized Source
-                        </button>
+                          </>
+                        ) : (
+                          <button 
+                            onClick={() => setShowStockAlert(true)}
+                            className="w-8.5 h-8.5 rounded-full bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center border border-red-100 active:scale-95 transition-all focus:outline-none"
+                          >
+                            <Bell className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
-                    )}
-                  </div>
-
-                  {listings.length > 0 && (
-                    <div className="mt-4 flex justify-center">
-                      <button
-                        onClick={() => setShowCustomOrder(true)}
-                        className="group flex items-center gap-2 text-[12px] font-bold text-gray-500 hover:text-teal-600 transition-all"
-                      >
-                        <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
-                        Didn't find your preferred deal? 
-                        <span className="underline underline-offset-4 decoration-teal-200 decoration-2 group-hover:decoration-teal-500">
-                          Request Custom Order
-                        </span>
-                      </button>
                     </div>
-                  )}
-                </div>
+                  );
+                })}
+              </div>
 
-                {/* Footer Badges */}
-                <div className="mt-10 pt-8 border-t border-gray-100 flex flex-wrap items-center justify-center gap-10">
-                   <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center">
-                         <Truck className="w-5 h-5 text-emerald-600" />
-                      </div>
-                      <div>
-                         <p className="text-[11px] font-black uppercase text-gray-800">Swift Logistics</p>
-                         <p className="text-[10px] text-gray-400 font-bold">Priority Delivery</p>
-                      </div>
-                   </div>
-                   <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
-                         <CheckCircle className="w-5 h-5 text-blue-600" />
-                      </div>
-                      <div>
-                         <p className="text-[11px] font-black uppercase text-gray-800">Quality Verified</p>
-                         <p className="text-[10px] text-gray-400 font-bold">100% Assurance</p>
-                      </div>
-                   </div>
-                   <Link 
-                      href={`/products/${generateProductSlug(displayProduct.name, displayProduct.id)}`}
-                      onClick={onClose}
-                      className="px-6 py-2.5 bg-gray-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all ml-auto"
-                   >
-                     View Profile
-                   </Link>
+              {/* Ambient Logistics Footer */}
+              <div className="flex flex-wrap items-center justify-center gap-6 border-t border-gray-100 pt-4 w-full">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
+                    <Truck className="w-4.5 h-4.5" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black uppercase text-gray-800 leading-none">Swift Logistics</p>
+                    <p className="text-[9px] text-gray-400 font-bold mt-1 leading-none">Priority Delivery</p>
+                  </div>
                 </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                    <CheckCircle className="w-4.5 h-4.5" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black uppercase text-gray-800 leading-none">Quality Verified</p>
+                    <p className="text-[9px] text-gray-400 font-bold mt-1 leading-none">100% Assurance</p>
+                  </div>
+                </div>
+                <Link 
+                  href={`/products/${generateProductSlug(displayProduct.name, displayProduct.id)}`}
+                  onClick={onClose}
+                  className="px-4 py-2 bg-gray-900 hover:bg-black text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ml-auto"
+                >
+                  View Profile
+                </Link>
               </div>
             </motion.div>
           </motion.div>

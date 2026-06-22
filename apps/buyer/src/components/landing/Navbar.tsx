@@ -1007,6 +1007,7 @@ export default function Navbar({
       <OrderDrawer
         isOpen={isOrderDrawerOpen}
         onClose={() => setIsOrderDrawerOpen(false)}
+        onLoginClick={onLoginClick}
       />
 
       {/* GLOBAL MEGA MENU - Outside scroll context to prevent clipping */}

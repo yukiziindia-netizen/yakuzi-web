@@ -950,7 +950,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                 
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-lg border border-gray-200/50">
-                    <Truck className="w-4.5 h-4.5 text-gray-400" />
+                    <img src="/icons/truck.png" alt="Delivery" className="w-[24px] h-[20px] object-contain" />
                     <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">3 days</span>
                   </div>
                   <div className="flex items-center gap-1">

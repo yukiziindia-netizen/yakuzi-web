@@ -17,6 +17,7 @@ import { useProductById } from '@/hooks/useProducts';
 import { calculatePricing, getSellingPrice, getEffectiveDiscountPercent, generateProductSlug } from '@yukizi/utils';
 import type { Product } from '@yukizi/utils';
 import { usePlatformConfig } from '@/hooks/usePlatformConfig';
+import { useWishlist, useAddToWishlist, useRemoveFromWishlist } from '@/hooks/useWishlist';
 
 interface QuickViewModalProps {
   product: Product | null;
@@ -38,57 +39,55 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
   const { data: cartData } = useCart();
   const { data: config } = usePlatformConfig();
   const minOrderAmount = config?.min_order_amount ?? 20000;
+
+  const { data: wishlistData } = useWishlist();
+  const addToWishlist = useAddToWishlist();
+  const removeFromWishlist = useRemoveFromWishlist();
+
   const [showStockAlert, setShowStockAlert] = useState(false);
   const [showCustomOrder, setShowCustomOrder] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [mockQuantities, setMockQuantities] = useState<Record<string, number>>({});
 
   if (!displayProduct) return null;
 
   const productImages = displayProduct.images && displayProduct.images.length > 0
-    ? displayProduct.images
+    ? displayProduct.images.map((img: any) => img.url || img)
     : [
-        displayProduct.image || `https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?auto=format&fit=crop&q=80&w=400`,
-        displayProduct.image || `https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?auto=format&fit=crop&q=80&w=400`,
-        displayProduct.image || `https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?auto=format&fit=crop&q=80&w=400`
+        displayProduct.image ||
+          `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent((displayProduct.name || 'PR').trim().split(/\s+/).length === 1 ? (displayProduct.name || 'PR').trim().substring(0, 2).toUpperCase() : ((displayProduct.name || 'PR').trim().split(/\s+/)[0][0] + (displayProduct.name || 'PR').trim().split(/\s+/)[(displayProduct.name || 'PR').trim().split(/\s+/).length - 1][0]).toUpperCase())}`,
       ];
 
   const activeImage = productImages[activeImageIndex % productImages.length];
 
-  // Populate up to 4 comparison rows to precisely replicate the layout in the screenshot
-  const baseListings = listings.length > 0 ? listings : [
-    { id: 'l1', price: displayProduct.mrp || 3345.53, stock: 10, moq: 1, seller: { rating: 4.5 }, deliveryText: 'Tomorrow' }
-  ];
+  const comparisonListings = listings.filter((l: any) => l.price != null);
+  const displayPrice = comparisonListings.length > 0 ? Math.min(...comparisonListings.map((l: any) => l.price)) : displayProduct.price;
 
-  const comparisonListings = [...baseListings];
-  if (comparisonListings.length < 4) {
-    const diff = 4 - comparisonListings.length;
-    for (let i = 0; i < diff; i++) {
-      const mockPrices = [
-        (displayProduct.mrp || 3345.53) * 0.95,
-        (displayProduct.mrp || 3345.53) * 0.9,
-        (displayProduct.mrp || 3345.53) * 0.85,
-        (displayProduct.mrp || 3345.53) * 0.4
-      ];
-      const mockStock = i === 1 ? 0 : 5; // one out-of-stock
-      comparisonListings.push({
-        id: `mock-l-${i}`,
-        price: parseFloat(mockPrices[i % mockPrices.length].toFixed(2)),
-        stock: mockStock,
-        moq: i === 1 ? 2 : 1,
-        seller: { rating: 4.5 },
-        deliveryText: i === 0 ? '3 days' : 'Tomorrow',
-        isMock: true,
+  const wishlistSet = new Set<string>();
+  if (wishlistData?.items) {
+    wishlistData.items.forEach((item: any) => {
+      if (item.productId) wishlistSet.add(item.productId);
+    });
+  }
+  const isBookmarked = wishlistSet.has(displayProduct.id);
+
+  const handleBookmarkToggle = () => {
+    if (isBookmarked) {
+      removeFromWishlist.mutate(displayProduct.id, {
+        onSuccess: () => toast('Removed from wishlist', 'success'),
+      });
+    } else {
+      addToWishlist.mutate({
+        productId: displayProduct.id,
+        productName: displayProduct.name,
+        price: displayPrice || 0,
+        image: displayProduct.image || productImages[0],
+      }, {
+        onSuccess: () => toast('Added to wishlist!', 'success'),
       });
     }
-  }
+  };
 
   const handleAddToCart = (listing: any, quantity: number) => {
-    if (listing.isMock) {
-      toast(`Added ${quantity} units of ${displayProduct.name} to bag!`, 'success');
-      return;
-    }
     addToCart.mutate({
       productId: listing.id,
       quantity,
@@ -99,10 +98,6 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
   };
 
   const handleUpdateQty = (listing: any, quantity: number) => {
-    if (listing.isMock) {
-      toast(`Updated bag quantity to ${quantity}!`, 'success');
-      return;
-    }
     addToCart.mutate({
       productId: listing.id,
       quantity,
@@ -208,7 +203,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                 {/* Ribbon Bookmark flag on the right edge */}
                 <button
                   type="button"
-                  onClick={() => setIsBookmarked(!isBookmarked)}
+                  onClick={handleBookmarkToggle}
                   className="absolute right-0 top-[45%] z-20 focus:outline-none transition-transform hover:scale-105"
                 >
                   <svg
@@ -232,104 +227,105 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
 
               {/* Marketplace Offers Comparison List */}
               <div className="flex flex-col gap-3 w-full">
-                {comparisonListings.map((listing: any, index: number) => {
-                  const inStock = (listing.stock ?? 0) > 0 || listing.isMock;
-                  const cartItem = cartData?.items?.find((item: any) => item.productId === listing.id);
-                  const itemQty = listing.isMock 
-                    ? (mockQuantities[listing.id] ?? 0) 
-                    : (cartItem?.quantity || 0);
-                  const sellerMoq = listing.moq || listing.minimumOrderQuantity || 1;
-                  const minQty = listing.price > 0
-                    ? Math.max(sellerMoq, Math.ceil(minOrderAmount / listing.price))
-                    : sellerMoq;
-                  
-                  const discountPercent = listing.isMock
-                    ? (index === 3 ? 60 : 20 - index * 5)
-                    : (listing.discountMeta?.discountPercent || 20);
+                {comparisonListings.length > 0 ? (
+                  comparisonListings.map((listing: any) => {
+                    const inStock = (listing.stock ?? 0) > 0;
+                    const cartItem = cartData?.items?.find((item: any) => item.productId === listing.id);
+                    const itemQty = cartItem?.quantity || 0;
+                    const sellerMoq = listing.moq || listing.minimumOrderQuantity || 1;
+                    const minQty = listing.price > 0
+                      ? Math.max(sellerMoq, Math.ceil(minOrderAmount / listing.price))
+                      : sellerMoq;
+                    
+                    const itemMrp = listing.mrp || listing.originalPrice || displayProduct.mrp || displayProduct.originalPrice;
+                    const discountPercent = itemMrp && listing.price && itemMrp > listing.price
+                      ? Math.round(((itemMrp - listing.price) / itemMrp) * 100)
+                      : (listing.discountMeta?.discountPercent || 20);
 
-                  const handleQtyChange = (newQty: number) => {
-                    if (listing.isMock) {
-                      setMockQuantities(prev => ({ ...prev, [listing.id]: newQty }));
-                      toast(`Updated bag quantity to ${newQty}!`, 'success');
-                      return;
-                    }
-                    handleUpdateQty(listing, newQty);
-                  };
+                    const handleQtyChange = (newQty: number) => {
+                      if (itemQty === 0) {
+                        if (newQty > 0) {
+                          handleAddToCart(listing, newQty);
+                        }
+                      } else {
+                        handleUpdateQty(listing, newQty);
+                      }
+                    };
 
-                  return (
-                    <div 
-                      key={listing.id} 
-                      className="flex flex-row items-center justify-between p-3.5 rounded-2xl bg-gray-50 hover:bg-gray-100/70 border border-gray-100/80 transition-colors gap-3 w-full"
-                    >
-                      {/* Left: Discount Badge & Price */}
-                      <div className="flex items-center gap-3.5 min-w-[155px]">
-                        <div className="bg-[#854cbc] text-white px-2 py-1.5 rounded-lg text-[9px] font-black tracking-wider uppercase leading-none min-w-[66px] text-center select-none">
-                          {discountPercent}% off
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-[15px] font-black text-gray-800 leading-none">
-                            ₹{listing.price?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                          </span>
-                          <span className="text-[9px] text-gray-400 font-bold mt-1.5 leading-none">
-                            {listing.moq > 1 ? `${listing.moq * 10}% off on purchase of ${listing.moq}` : 'MOQ: 1'}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Middle: Star Rating & Delivery badge */}
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-1">
-                          <Star className="w-3.5 h-3.5 fill-[#854cbc] text-[#854cbc]" />
-                          <span className="text-gray-800 font-black text-[12px] leading-none">{listing.seller?.rating || '4.5'}</span>
+                    return (
+                      <div 
+                        key={listing.id} 
+                        className="flex flex-row items-center justify-between p-3.5 rounded-2xl bg-gray-50 hover:bg-gray-100/70 border border-gray-100/80 transition-colors gap-3 w-full"
+                      >
+                        {/* Left: Discount Badge & Price */}
+                        <div className="flex items-center gap-3.5 min-w-[155px]">
+                          <div className="bg-[#854cbc] text-white px-2 py-1.5 rounded-lg text-[9px] font-black tracking-wider uppercase leading-none min-w-[66px] text-center select-none">
+                            {discountPercent}% off
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-[15px] font-black text-gray-800 leading-none">
+                              ₹{listing.price?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                            </span>
+                            <span className="text-[9px] text-gray-400 font-bold mt-1.5 leading-none">
+                              {listing.moq > 1 ? `${listing.moq * 10}% off on purchase of ${listing.moq}` : 'MOQ: 1'}
+                            </span>
+                          </div>
                         </div>
 
-                        <DeliveryTruckBadge text={listing.deliveryText || '3 days'} className="w-[72px] h-auto text-gray-400" />
-                      </div>
+                        {/* Middle: Star Rating & Delivery badge */}
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-1">
+                            <Star className="w-3.5 h-3.5 fill-[#854cbc] text-[#854cbc]" />
+                            <span className="text-gray-800 font-black text-[12px] leading-none">{listing.seller?.rating || '4.5'}</span>
+                          </div>
 
-                      {/* Right: Actions */}
-                      <div className="flex items-center gap-3">
-                        {inStock ? (
-                          <>
-                            {/* Refresh offer */}
+                          <DeliveryTruckBadge text={listing.deliveryText || listing.deliveryTime || '3 days'} className="w-[72px] h-auto text-gray-400" />
+                        </div>
+
+                        {/* Right: Actions */}
+                        <div className="flex items-center gap-3">
+                          {inStock ? (
+                            itemQty > 0 ? (
+                              <div className="flex items-center bg-[#48286b] rounded-full overflow-hidden h-8 w-24 text-white shadow-sm font-black text-[11px] select-none justify-between">
+                                <button 
+                                  className="px-3 h-full hover:bg-black/10 active:scale-95 transition-all text-white/80 hover:text-white font-extrabold text-sm"
+                                  onClick={() => handleQtyChange(itemQty - 1)}
+                                >
+                                  -
+                                </button>
+                                <span className="px-1 font-bold">{String(itemQty).padStart(2, '0')}</span>
+                                <button 
+                                  className="px-3 h-full hover:bg-black/10 active:scale-95 transition-all text-white/80 hover:text-white font-extrabold text-sm"
+                                  onClick={() => handleQtyChange(itemQty + 1)}
+                                >
+                                  +
+                                </button>
+                              </div>
+                            ) : (
+                              <button 
+                                onClick={() => handleQtyChange(minQty)}
+                                className="w-8 h-8 rounded-lg bg-orange-500 hover:bg-orange-600 text-white flex items-center justify-center shadow-md active:scale-95 transition-all focus:outline-none"
+                              >
+                                <Plus className="w-4.5 h-4.5 stroke-[3]" />
+                              </button>
+                            )
+                          ) : (
                             <button 
-                              onClick={() => toast('Offer details refreshed!', 'success')}
-                              className="p-1.5 rounded-full hover:bg-gray-200/50 text-gray-400 hover:text-purple-600 transition-colors focus:outline-none"
+                              onClick={() => setShowStockAlert(true)}
+                              className="w-8.5 h-8.5 rounded-full bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center border border-red-100 active:scale-95 transition-all focus:outline-none"
                             >
-                              <svg className="w-5 h-5 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H17" />
-                              </svg>
+                              <Bell className="w-4 h-4" />
                             </button>
-                            
-                            {/* Quantity Control Pill */}
-                            <div className="flex items-center bg-[#48286b] rounded-full overflow-hidden h-8 w-24 text-white shadow-sm font-black text-[11px] select-none justify-between">
-                              <button 
-                                className={`px-3 h-full hover:bg-black/10 active:scale-95 transition-all text-white/80 hover:text-white font-extrabold text-sm ${itemQty === 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
-                                onClick={() => itemQty > 0 && handleQtyChange(itemQty - 1)}
-                                disabled={itemQty === 0}
-                              >
-                                -
-                              </button>
-                              <span className="px-1 font-bold">{String(itemQty).padStart(2, '0')}</span>
-                              <button 
-                                className="px-3 h-full hover:bg-black/10 active:scale-95 transition-all text-white/80 hover:text-white font-extrabold text-sm"
-                                onClick={() => handleQtyChange(itemQty === 0 ? minQty : itemQty + 1)}
-                              >
-                                +
-                              </button>
-                            </div>
-                          </>
-                        ) : (
-                          <button 
-                            onClick={() => setShowStockAlert(true)}
-                            className="w-8.5 h-8.5 rounded-full bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center border border-red-100 active:scale-95 transition-all focus:outline-none"
-                          >
-                            <Bell className="w-4 h-4" />
-                          </button>
-                        )}
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                ) : (
+                  <div className="text-center py-6 text-xs text-gray-400 font-medium border border-dashed border-gray-200 rounded-2xl bg-gray-50/50">
+                    No active offers available for this product.
+                  </div>
+                )}
               </div>
 
               {/* Ambient Logistics Footer */}

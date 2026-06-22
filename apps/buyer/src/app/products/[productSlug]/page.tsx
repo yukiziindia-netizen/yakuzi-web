@@ -30,6 +30,7 @@ import { useProductById, useProducts, useWaitlist, useAddToWaitlist, useRemoveFr
 import { useAddToCart, useCart, useUpdateCartItem, useRemoveCartItem } from '@/hooks/useCart';
 import { useToast } from '@/components/shared/Toast';
 import { useWishlist, useAddToWishlist, useRemoveFromWishlist } from '@/hooks/useWishlist';
+import { useProductReviews, useCreateReview } from '@/hooks/useReviews';
 import Navbar from '@/components/landing/Navbar';
 import { generateProductSlug, parseProductIdFromSlug } from '@yukizi/utils';
 import { ShareButton } from '@/components/shared/ShareButton';
@@ -77,8 +78,13 @@ function Accordion({
 }
 
 function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
-  const isYukiziChoice = index === 0;
-  const hasTimer = index === 1;
+  const isYukiziChoice = !!prod.isNew;
+  
+  const price = prod.price;
+  const mrp = prod.mrp || prod.originalPrice;
+  const discountText = mrp != null && price != null && mrp > price
+    ? `${Math.round(((mrp - price) / mrp) * 100)}% off`
+    : null;
 
   return (
     <div
@@ -88,50 +94,23 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
       <div className="relative z-10 mb-1 flex items-start justify-between">
         {isYukiziChoice && (
           <div className="pointer-events-none rounded-full bg-[#854cbc] px-2 py-0.5 text-[8px] font-bold text-white">
-            Yukizi Choice
-          </div>
-        )}
-        {hasTimer && (
-          <div className="pointer-events-none ml-auto rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[8px] font-bold text-gray-500">
-            1:52:10
+            New Arrival
           </div>
         )}
       </div>
-
-      {isYukiziChoice && (
-        <div className="pointer-events-none absolute -top-2 right-2 text-[9px] font-medium text-gray-400">
-          Ad
-        </div>
-      )}
 
       <div className="absolute left-2 top-7 z-10 cursor-pointer text-gray-300 hover:text-gray-500">
         <Share2 size={12} strokeWidth={2.5} />
       </div>
-      {index === 0 && (
-        <div className="absolute right-2 top-7 z-10 cursor-pointer text-orange-400 hover:text-orange-500">
-          <Plus size={14} strokeWidth={3} />
-        </div>
-      )}
-      {index === 2 && (
-        <div className="absolute right-2 top-7 z-10 cursor-pointer text-red-500 hover:text-red-600">
-          <Bell size={12} strokeWidth={3} />
-        </div>
-      )}
-
-      {/* Right Edge Ribbon */}
-      <div
-        className={`absolute right-0 top-[45%] h-4 w-2 ${index === 1 ? 'bg-[#854cbc]' : 'bg-[#e5e7eb]'} z-10`}
-        style={{ clipPath: 'polygon(100% 0, 100% 100%, 0 100%, 25% 50%, 0 0)' }}
-      />
 
       <Link
         href={`/products/${generateProductSlug(prod.name || 'Product', prod.id || 'prod-' + index)}`}
-        className="relative z-0 mb-3 mt-4 flex h-28 w-full items-center justify-center transition-transform group-hover:scale-105"
+        className="relative z-0 mb-3 mt-4 flex h-28 w-full items-center justify-center transition-transform group-hover:scale-105 block"
       >
         <img
           src={
             prod.image ||
-            (prod.images && prod.images[0]) ||
+            (prod.images && (typeof prod.images[0] === 'string' ? prod.images[0] : prod.images[0]?.url)) ||
             `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent((prod.name || 'PR').trim().split(/\s+/).length === 1 ? (prod.name || 'PR').trim().substring(0, 2).toUpperCase() : ((prod.name || 'PR').trim().split(/\s+/)[0][0] + (prod.name || 'PR').trim().split(/\s+/)[(prod.name || 'PR').trim().split(/\s+/).length - 1][0]).toUpperCase())}`
           }
           alt={prod.name}
@@ -149,18 +128,22 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
 
         <div className="mt-1 flex items-center justify-between">
           <div className="flex items-baseline gap-1">
-            <span className="text-[12px] font-bold text-gray-400">₹{prod.price}</span>
-            <span className="text-[9px] text-gray-300 line-through">
-              ₹{prod.mrp || prod.originalPrice || prod.price}
-            </span>
+            <span className="text-[12px] font-bold text-gray-700">₹{prod.price}</span>
+            {mrp && mrp > (price || 0) && (
+              <span className="text-[9px] text-gray-300 line-through">
+                ₹{mrp}
+              </span>
+            )}
           </div>
-          <div className="flex items-center gap-0.5">
-            <Star size={10} className="fill-[#854cbc] text-[#854cbc]" />
-            <span className="text-[10px] font-bold text-gray-600">{prod.rating || '4.5'}</span>
-          </div>
+          {prod.rating && (
+            <div className="flex items-center gap-0.5">
+              <Star size={10} className="fill-[#854cbc] text-[#854cbc]" />
+              <span className="text-[10px] font-bold text-gray-600">{prod.rating}</span>
+            </div>
+          )}
         </div>
 
-        {index !== 2 && <div className="mt-0.5 text-[8px] font-bold text-gray-300">25% off</div>}
+        {discountText && <div className="mt-0.5 text-[8px] font-bold text-gray-400">{discountText}</div>}
       </div>
     </div>
   );
@@ -300,7 +283,6 @@ function ComparisonOffersList({
   toast: any;
   setShowStockAlert: (val: boolean) => void;
 }) {
-  const [mockQuantities, setMockQuantities] = useState<Record<string, number>>({});
   const cartItemMap = new Map<string, any>();
   if (cartData?.items) {
     cartData.items.forEach((item: any) => {
@@ -308,29 +290,28 @@ function ComparisonOffersList({
     });
   }
 
+  if (!comparisonListings || comparisonListings.length === 0) {
+    return (
+      <div className="p-6 rounded-2xl bg-gray-50 border border-dashed border-gray-200 text-center text-xs font-semibold text-gray-400">
+        No active offers available for this product.
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-3 w-full">
       {comparisonListings.map((listing: any, index: number) => {
-        const inStock = (listing.stock ?? 0) > 0 || listing.isMock;
+        const inStock = (listing.stock ?? 0) > 0;
         const cartItem = cartItemMap.get(listing.id);
-        const itemQty = listing.isMock 
-          ? (mockQuantities[listing.id] ?? 0) 
-          : (cartItem?.quantity || 0);
+        const itemQty = cartItem?.quantity || 0;
         const sellerMoq = listing.moq || listing.minimumOrderQuantity || 1;
         const minQty = listing.price > 0
           ? Math.max(sellerMoq, Math.ceil(minOrderAmount / listing.price))
           : sellerMoq;
 
-        const discountPercent = listing.isMock
-          ? (index === 3 ? 60 : index === 7 ? 60 : 25 - (index % 4) * 5)
-          : (listing.discount || 25);
+        const discountPercent = listing.discount || 25;
 
         const handleQtyChange = (newQty: number) => {
-          if (listing.isMock) {
-            setMockQuantities(prev => ({ ...prev, [listing.id]: newQty }));
-            toast(`Updated bag quantity to ${newQty}!`, 'success');
-            return;
-          }
           if (cartItem) {
             if (newQty > 0) {
               updateCartItem.mutate({
@@ -517,6 +498,28 @@ function ReviewSubmissionForm({
   );
 }
 
+const getMockReviewsForProduct = (productName: string, categoryName?: string) => {
+  const cleanName = productName || 'product';
+  const cleanCategory = categoryName || 'items';
+  
+  return [
+    {
+      id: 'mock-rev-1',
+      userName: 'Amit Sharma',
+      rating: 5,
+      comment: `Extremely satisfied with the ${cleanName}! The quality is superb and it matches the description perfectly. Highly recommended if you are looking for reliable ${cleanCategory}.`,
+      createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: 'mock-rev-2',
+      userName: 'Priya Patel',
+      rating: 4,
+      comment: `Good purchase. The ${cleanName} works exactly as expected. Quick delivery and secure packaging. Will definitely buy more from this category.`,
+      createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+    }
+  ];
+};
+
 export default function AnimeProductPage({ params }: { params: { productSlug: string } }) {
   const [activeImage, setActiveImage] = useState(0);
   const [selectedVariantName, setSelectedVariantName] = useState<string>('');
@@ -535,13 +538,26 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
   const addToWishlist = useAddToWishlist();
   const removeFromWishlist = useRemoveFromWishlist();
 
+  const product = (productData as any)?.data || productData;
+
+  const { data: reviewsData } = useProductReviews(product?.id || '');
+  const { mutate: submitReview } = useCreateReview();
+
+  const reviewsList = reviewsData?.data && reviewsData.data.length > 0
+    ? reviewsData.data
+    : getMockReviewsForProduct(product?.name || 'Product', product?.category?.name || 'Item');
+
+  const averageRating = reviewsData?.averageRating || (reviewsData?.data && reviewsData.data.length > 0
+    ? (reviewsData.data.reduce((acc: number, curr: any) => acc + curr.rating, 0) / reviewsData.data.length)
+    : 4.5);
+
+  const totalReviews = reviewsData?.total || (reviewsData?.data && reviewsData.data.length > 0 ? reviewsData.data.length : reviewsList.length);
+
   // Review state
   const [rating, setRating] = useState(0);
   const [reviewTitle, setReviewTitle] = useState('');
   const [reviewComment, setReviewComment] = useState('');
   const [showStockAlert, setShowStockAlert] = useState(false);
-
-  const product = (productData as any)?.data || productData;
 
   const { data: relatedProductsData } = useProducts({
     categoryId: product?.category?.id,
@@ -614,39 +630,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
         )
       : listings;
 
-  // Populate comparison offers (up to 8 rows for comparison replicate)
-  const baseListings = filteredListings.length > 0 ? filteredListings : [
-    { id: 'l1', price: displayPrice || 3345.53, stock: 10, moq: 1, seller: { rating: 4.5 }, deliveryText: 'Tomorrow' }
-  ];
-
-  const comparisonListings = [...baseListings];
-  if (comparisonListings.length < 8) {
-    const diff = 8 - comparisonListings.length;
-    for (let i = 0; i < diff; i++) {
-      const mockPrices = [
-        (displayPrice || 3345.53) * 0.95,
-        (displayPrice || 3345.53) * 0.9,
-        (displayPrice || 3345.53) * 0.85,
-        (displayPrice || 3345.53) * 0.4,
-        (displayPrice || 3345.53) * 0.98,
-        (displayPrice || 3345.53) * 0.92,
-        (displayPrice || 3345.53) * 0.88,
-        (displayPrice || 3345.53) * 0.5
-      ];
-      let mockStock = 5;
-      if (i === 2) mockStock = 0; // out of stock
-      const mockMoq = i === 1 || i === 5 ? 2 : 1;
-      comparisonListings.push({
-        id: `mock-l-${i}`,
-        price: parseFloat(mockPrices[i % mockPrices.length].toFixed(2)),
-        stock: mockStock,
-        moq: mockMoq,
-        seller: { rating: 4.5 },
-        deliveryText: i % 2 === 0 ? '3 days' : 'Tomorrow',
-        isMock: true,
-      });
-    }
-  }
+  const comparisonListings = filteredListings || [];
 
   // Wishlist / Bookmark logic
   const isBookmarked = wishlistSet.has(product.id);
@@ -673,10 +657,24 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
       toast('Please select a rating star', 'error');
       return;
     }
-    toast('Review submitted successfully!', 'success');
-    setRating(0);
-    setReviewTitle('');
-    setReviewComment('');
+    
+    const comment = reviewTitle ? `${reviewTitle}: ${reviewComment}` : reviewComment;
+    
+    submitReview({
+      productId: product.id,
+      rating,
+      comment,
+    }, {
+      onSuccess: () => {
+        toast('Review submitted successfully!', 'success');
+        setRating(0);
+        setReviewTitle('');
+        setReviewComment('');
+      },
+      onError: () => {
+        toast('Failed to submit review', 'error');
+      }
+    });
   };
 
   return (
@@ -760,80 +758,54 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
               <div>
                 <div className="mb-1 flex items-center gap-3">
                   <div className="flex gap-1 text-[#854cbc]">
-                    {[1, 2, 3, 4, 5].map((_, i) => (
-                      <div key={i} className="relative h-6 w-6">
-                        {i < 4 ? (
-                          <Star size={24} fill="currentColor" />
-                        ) : (
-                          <>
-                            <Star
-                              size={24}
-                              fill="none"
-                              stroke="currentColor"
-                              className="absolute text-[#854cbc]"
-                            />
-                            <div className="absolute inset-0 w-[80%] overflow-hidden">
+                    {[1, 2, 3, 4, 5].map((starVal) => {
+                      const fillPercent = Math.max(0, Math.min(100, (averageRating - (starVal - 1)) * 100));
+                      return (
+                        <div key={starVal} className="relative h-6 w-6">
+                          <Star
+                            size={24}
+                            fill="none"
+                            stroke="currentColor"
+                            className="absolute text-[#854cbc]"
+                          />
+                          {fillPercent > 0 && (
+                            <div className="absolute inset-0 overflow-hidden" style={{ width: `${fillPercent}%` }}>
                               <Star size={24} fill="currentColor" className="text-[#854cbc]" />
                             </div>
-                          </>
-                        )}
-                      </div>
-                    ))}
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
-                  <span className="text-[28px] font-black leading-none text-gray-800">4.5</span>
+                  <span className="text-[28px] font-black leading-none text-gray-800">
+                    {averageRating.toFixed(1)}
+                  </span>
                 </div>
                 <p className="text-[13px] font-medium text-gray-400">
-                  4.8 out of 5 stars (based on 6 reviews)
+                  {averageRating.toFixed(1)} out of 5 stars (based on {totalReviews} review{totalReviews !== 1 ? 's' : ''})
                 </p>
               </div>
-              <button 
-                type="button"
-                className="rounded-lg bg-[#854cbc] px-6 py-2 text-xs font-bold uppercase tracking-wider text-white shadow-sm transition-colors hover:bg-purple-800"
-              >
-                See all reviews
-              </button>
             </div>
 
             {/* Review Cards Carousel */}
             <div className="hide-scrollbar flex flex-col gap-4 overflow-x-auto pb-2 sm:flex-row">
-              <div className="flex min-w-[200px] flex-1 flex-col justify-between rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                <p className="mb-4 text-[11px] font-medium leading-relaxed text-gray-500">
-                  I gifted this shirt to my friend and he love it so much ! Thank you CS 💖?
-                </p>
-                <div>
-                  <div className="mb-1.5 flex gap-0.5 text-[#b165f1]">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <Star key={i} size={14} fill="currentColor" />
-                    ))}
-                  </div>
-                  <p className="text-[10px] font-semibold text-gray-400">
-                    - Kshitij, January 24, 2024
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex min-w-[280px] flex-[1.5] gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                <div className="flex flex-1 flex-col justify-between">
-                  <p className="mb-4 pr-2 text-[11px] font-medium leading-relaxed text-gray-500">
-                    nice printing excellent product, but fade as get washed ...{' '}
+              {reviewsList.map((rev: any) => (
+                <div key={rev.id} className="flex min-w-[240px] flex-1 flex-col justify-between rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                  <p className="mb-4 text-[11px] font-medium leading-relaxed text-gray-500">
+                    {rev.comment}
                   </p>
                   <div>
                     <div className="mb-1.5 flex gap-0.5 text-[#b165f1]">
                       {[1, 2, 3, 4, 5].map((i) => (
-                        <Star key={i} size={14} fill="currentColor" />
+                        <Star key={i} size={14} fill={i <= rev.rating ? "currentColor" : "none"} className={i <= rev.rating ? "text-[#b165f1]" : "text-gray-200"} />
                       ))}
                     </div>
-                    <p className="text-[10px] font-semibold text-gray-400">- DJD, April 29, 2023</p>
+                    <p className="text-[10px] font-semibold text-gray-400">
+                      - {rev.userName || 'Anonymous'}, {new Date(rev.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                    </p>
                   </div>
                 </div>
-                <div className="h-20 w-16 shrink-0 overflow-hidden rounded-lg border border-gray-100">
-                  <img
-                    src={images[2] || images[0]}
-                    alt="review"
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-              </div>
+              ))}
             </div>
 
             {/* Review Submission Form */}
@@ -955,7 +927,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                   </div>
                   <div className="flex items-center gap-1">
                     <Star className="w-4.5 h-4.5 fill-[#854cbc] text-[#854cbc]" />
-                    <span className="text-[13px] font-black text-gray-800">4.5</span>
+                    <span className="text-[13px] font-black text-gray-800">{averageRating.toFixed(1)}</span>
                   </div>
                 </div>
               </div>
@@ -996,80 +968,54 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                 <div>
                   <div className="mb-1 flex items-center gap-3">
                     <div className="flex gap-1 text-[#854cbc]">
-                      {[1, 2, 3, 4, 5].map((_, i) => (
-                        <div key={i} className="relative h-6 w-6">
-                          {i < 4 ? (
-                            <Star size={24} fill="currentColor" />
-                          ) : (
-                            <>
-                              <Star
-                                size={24}
-                                fill="none"
-                                stroke="currentColor"
-                                className="absolute text-[#854cbc]"
-                              />
-                              <div className="absolute inset-0 w-[80%] overflow-hidden">
+                      {[1, 2, 3, 4, 5].map((starVal) => {
+                        const fillPercent = Math.max(0, Math.min(100, (averageRating - (starVal - 1)) * 100));
+                        return (
+                          <div key={starVal} className="relative h-6 w-6">
+                            <Star
+                              size={24}
+                              fill="none"
+                              stroke="currentColor"
+                              className="absolute text-[#854cbc]"
+                            />
+                            {fillPercent > 0 && (
+                              <div className="absolute inset-0 overflow-hidden" style={{ width: `${fillPercent}%` }}>
                                 <Star size={24} fill="currentColor" className="text-[#854cbc]" />
                               </div>
-                            </>
-                          )}
-                        </div>
-                      ))}
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
-                    <span className="text-[28px] font-black leading-none text-gray-800">4.5</span>
+                    <span className="text-[28px] font-black leading-none text-gray-800">
+                      {averageRating.toFixed(1)}
+                    </span>
                   </div>
                   <p className="text-[13px] font-medium text-gray-400">
-                    4.8 out of 5 stars (based on 6 reviews)
+                    {averageRating.toFixed(1)} out of 5 stars (based on {totalReviews} review{totalReviews !== 1 ? 's' : ''})
                   </p>
                 </div>
-                <button 
-                  type="button"
-                  className="rounded-lg bg-[#854cbc] px-6 py-2 text-xs font-bold uppercase tracking-wider text-white shadow-sm transition-colors hover:bg-purple-800 focus:outline-none"
-                >
-                  See all reviews
-                </button>
               </div>
 
               {/* Review Cards Carousel */}
               <div className="hide-scrollbar flex flex-col gap-4 overflow-x-auto pb-2 sm:flex-row">
-                <div className="flex min-w-[200px] flex-1 flex-col justify-between rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                  <p className="mb-4 text-[11px] font-medium leading-relaxed text-gray-500">
-                    I gifted this shirt to my friend and he love it so much ! Thank you CS 💖?
-                  </p>
-                  <div>
-                    <div className="mb-1.5 flex gap-0.5 text-[#b165f1]">
-                      {[1, 2, 3, 4, 5].map((i) => (
-                        <Star key={i} size={14} fill="currentColor" />
-                      ))}
-                    </div>
-                    <p className="text-[10px] font-semibold text-gray-400">
-                      - Kshitij, January 24, 2024
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex min-w-[280px] flex-[1.5] gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                  <div className="flex flex-1 flex-col justify-between">
-                    <p className="mb-4 pr-2 text-[11px] font-medium leading-relaxed text-gray-500">
-                      nice printing excellent product, but fade as get washed ...{' '}
+                {reviewsList.map((rev: any) => (
+                  <div key={rev.id} className="flex min-w-[240px] flex-1 flex-col justify-between rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                    <p className="mb-4 text-[11px] font-medium leading-relaxed text-gray-500">
+                      {rev.comment}
                     </p>
                     <div>
                       <div className="mb-1.5 flex gap-0.5 text-[#b165f1]">
                         {[1, 2, 3, 4, 5].map((i) => (
-                          <Star key={i} size={14} fill="currentColor" />
+                          <Star key={i} size={14} fill={i <= rev.rating ? "currentColor" : "none"} className={i <= rev.rating ? "text-[#b165f1]" : "text-gray-200"} />
                         ))}
                       </div>
-                      <p className="text-[10px] font-semibold text-gray-400">- DJD, April 29, 2023</p>
+                      <p className="text-[10px] font-semibold text-gray-400">
+                        - {rev.userName || 'Anonymous'}, {new Date(rev.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                      </p>
                     </div>
                   </div>
-                  <div className="h-20 w-16 shrink-0 overflow-hidden rounded-lg border border-gray-100">
-                    <img
-                      src={images[2] || images[0]}
-                      alt="review"
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                </div>
+                ))}
               </div>
 
               {/* Review Submission Form */}

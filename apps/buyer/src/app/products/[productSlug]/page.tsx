@@ -188,7 +188,7 @@ function ProductBannerCard({
       <div className="absolute -right-10 -bottom-10 w-64 h-64 rounded-full bg-pink-500/10 blur-2xl pointer-events-none" />
 
       {/* Share Button on Top Left Corner */}
-      <div className="absolute -top-3.5 -left-3.5 z-30">
+      <div className={`absolute ${isDesktop ? 'top-4 left-4' : '-top-3.5 -left-3.5'} z-30`}>
         <ShareButton 
           productName={productName}
           productId={productId}
@@ -199,7 +199,7 @@ function ProductBannerCard({
       </div>
 
       {/* Vertical Thumbnails */}
-      <div className="absolute left-4 bottom-4 flex flex-col gap-2 z-20">
+      <div className={`absolute left-4 ${isDesktop ? 'top-1/2 -translate-y-1/2' : 'bottom-4'} flex flex-col gap-2 z-20`}>
         {images.slice(0, 3).map((img: string, idx: number) => (
           <button
             key={idx}
@@ -823,18 +823,51 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
 
         {/* DESKTOP VIEW LAYOUT */}
         <div className="hidden lg:flex flex-col gap-6 w-full">
+          {/* Header Row */}
+          <div className="grid grid-cols-[1.15fr_1fr] gap-10 items-center">
+            {/* Left Header */}
+            <div className="flex items-center justify-between w-full">
+              <div className="rounded-full bg-[#854cbc] px-4 py-1.5 text-[11px] font-bold tracking-wide text-white shadow-sm">
+                Yukizi Choice
+              </div>
+              <span className="text-[10px] text-gray-400 font-bold uppercase select-none">Ad</span>
+            </div>
+
+            {/* Right Header */}
+            <div className="hide-scrollbar flex items-center gap-1.5 text-[11px] font-semibold tracking-wide text-gray-400">
+              <Link href="/" className="transition-colors hover:text-[#854cbc]">
+                Home
+              </Link>
+              <span>&gt;</span>
+              {product.category && (
+                <>
+                  <Link
+                    href={`/category/${product.category.slug || product.category.id}`}
+                    className="transition-colors hover:text-[#854cbc]"
+                  >
+                    {product.category.name || 'Category'}
+                  </Link>
+                  <span>&gt;</span>
+                </>
+              )}
+              {product.subCategory && (
+                <>
+                  <span className="cursor-pointer transition-colors hover:text-[#854cbc]">
+                    {product.subCategory.name}
+                  </span>
+                  <span>&gt;</span>
+                </>
+              )}
+              <span className="max-w-[200px] truncate text-gray-700">
+                {product.name}
+              </span>
+            </div>
+          </div>
+
           {/* 2-Column Grid */}
           <div className="grid grid-cols-[1.15fr_1fr] gap-10 items-start">
             {/* Left Column */}
             <div className="flex flex-col gap-6">
-              {/* Top Choice Ribbon header directly above Left Column */}
-              <div className="flex items-center justify-between w-full">
-                <div className="rounded-full bg-[#854cbc] px-4 py-1.5 text-[11px] font-bold tracking-wide text-white shadow-sm">
-                  Yukizi Choice
-                </div>
-                <span className="text-[10px] text-gray-400 font-bold uppercase select-none">Ad</span>
-              </div>
-
               {/* Product Image Banner */}
               <ProductBannerCard 
                 images={images}
@@ -863,46 +896,16 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
 
             {/* Right Column */}
             <div className="flex flex-col">
-              {/* Breadcrumbs */}
-              <div className="hide-scrollbar flex items-center gap-1.5 text-[11px] font-semibold tracking-wide text-gray-400 mb-3">
-                <Link href="/" className="transition-colors hover:text-[#854cbc]">
-                  Home
-                </Link>
-                <span>&gt;</span>
-                {product.category && (
-                  <>
-                    <Link
-                      href={`/category/${product.category.slug || product.category.id}`}
-                      className="transition-colors hover:text-[#854cbc]"
-                    >
-                      {product.category.name || 'Category'}
-                    </Link>
-                    <span>&gt;</span>
-                  </>
-                )}
-                {product.subCategory && (
-                  <>
-                    <span className="cursor-pointer transition-colors hover:text-[#854cbc]">
-                      {product.subCategory.name}
-                    </span>
-                    <span>&gt;</span>
-                  </>
-                )}
-                <span className="max-w-[200px] truncate text-gray-700">
-                  {product.name}
-                </span>
-              </div>
               {/* Title Block */}
               <div className="flex items-start justify-between w-full mb-3">
-                <h1 className="text-2xl font-[900] text-gray-800 tracking-tight leading-tight max-w-[85%]">
+                <h1 className="text-2xl font-semibold text-gray-500 tracking-tight leading-tight max-w-[85%]">
                   {product.name}
                 </h1>
-
               </div>
 
               {/* Price details */}
               <div className="flex items-baseline gap-3 mb-2">
-                <span className="text-[26px] font-[1000] text-gray-800 leading-none">
+                <span className="text-[26px] font-semibold text-gray-700 leading-none">
                   ₹{displayPrice?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                 </span>
                 {displayMrp && displayMrp > displayPrice && (
@@ -914,20 +917,17 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
 
               {/* Discount / rating line */}
               <div className="flex items-center justify-between w-full border-b border-gray-100 pb-5 mb-5">
-                <span className="text-[14px] font-black text-[#854cbc] uppercase select-none">
+                <span className="text-[14px] font-semibold text-gray-700 select-none">
                   {displayMrp && displayPrice && displayMrp > displayPrice
                     ? `${Math.round(((displayMrp - displayPrice) / displayMrp) * 100)}% off`
-                    : '25% OFF'}
+                    : '25% off'}
                 </span>
                 
                 <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-lg border border-gray-200/50">
-                    <img src="/icons/truck.png" alt="Delivery" className="w-[24px] h-[20px] object-contain" />
-                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">3 days</span>
-                  </div>
+                  <DeliveryTruckBadge text="3 days" className="w-[72px] h-auto text-gray-400" />
                   <div className="flex items-center gap-1">
                     <Star className="w-4.5 h-4.5 fill-[#854cbc] text-[#854cbc]" />
-                    <span className="text-[13px] font-black text-gray-800">{averageRating.toFixed(1)}</span>
+                    <span className="text-[13px] font-semibold text-gray-800">{averageRating.toFixed(1)}</span>
                   </div>
                 </div>
               </div>

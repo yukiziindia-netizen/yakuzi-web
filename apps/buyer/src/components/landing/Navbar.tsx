@@ -481,7 +481,7 @@ export default function Navbar({
               setIsChatOpen(!isChatOpen);
               setIsSearchChatOpen(false);
             }}
-            className="relative -mt-4 sm:-mt-8 md:-mt-10 z-20 w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gradient-to-b from-[#ffb040] to-[#ff8c00] rounded-[18px] sm:rounded-2xl md:rounded-[1.5rem] flex items-center justify-center shadow-[0_4px_15px_rgba(255,176,64,0.4)] sm:shadow-[0_0_20px_rgba(255,176,64,0.5)] hover:-translate-y-1 sm:hover:-translate-y-2 transition-transform cursor-pointer shrink-0 mx-1 xs:mx-2 sm:mx-2 md:mx-4 border-[2px] border-[#fff5eb]"
+            className="relative -mt-0.5 sm:-mt-1.5 md:-mt-2 z-20 w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gradient-to-b from-[#ffb040] to-[#ff8c00] rounded-[18px] sm:rounded-2xl md:rounded-[1.5rem] flex items-center justify-center shadow-[0_4px_15px_rgba(255,176,64,0.4)] sm:shadow-[0_0_20px_rgba(255,176,64,0.5)] hover:-translate-y-1 sm:hover:-translate-y-2 transition-transform cursor-pointer shrink-0 mx-1 xs:mx-1.5 sm:mx-2 md:mx-2 border-[2px] border-[#fff5eb]"
           >
             <Image src="/yukizi.jpg" alt="Mascot" width={96} height={96} className="w-full h-full object-cover rounded-[16px] sm:rounded-2xl md:rounded-[1.5rem]" />
           </div>

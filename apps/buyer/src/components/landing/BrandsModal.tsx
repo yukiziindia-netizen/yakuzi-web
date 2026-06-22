@@ -61,8 +61,8 @@ export default function BrandsModal({
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/50" onClick={onClose}></div>
-      <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+      <div className="fixed inset-0 z-[100] bg-black/50" onClick={onClose}></div>
+      <div className="fixed inset-0 z-[110] flex items-center justify-center pointer-events-none">
         <div className="bg-white rounded-lg shadow-2xl w-11/12 max-w-5xl max-h-[85vh] overflow-auto pointer-events-auto">
           {/* Header */}
           <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-5 flex items-center justify-between">

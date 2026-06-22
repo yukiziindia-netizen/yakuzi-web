@@ -86,7 +86,7 @@ export default function QuickReviewModal({ isOpen, onClose, product }: QuickRevi
   const activeImage = productImages[activeImageIndex % productImages.length];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/50">
       <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden relative shadow-2xl flex flex-col max-h-[95vh]">
         
         {/* Header */}

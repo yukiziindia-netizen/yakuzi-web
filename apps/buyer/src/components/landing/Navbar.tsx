@@ -502,7 +502,7 @@ export default function Navbar({
               }`}
             >
               <Bookmark 
-                className="w-[20px] h-[20px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2] rotate-90" 
+                className="w-[24px] h-[24px] xs:w-[26px] xs:h-[26px] sm:w-7 sm:h-7 stroke-[2] rotate-90" 
                 fill={isWishlistOpen || wishlistCount > 0 ? "currentColor" : "none"} 
               />
               {wishlistCount > 0 && (
@@ -523,7 +523,7 @@ export default function Navbar({
               }`}
             >
               <ShoppingCart 
-                className="w-[20px] h-[20px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2]" 
+                className="w-[24px] h-[24px] xs:w-[26px] xs:h-[26px] sm:w-7 sm:h-7 stroke-[2]" 
                 fill={isCartOpen ? "currentColor" : "none"}
               />
               {cartData?.items && cartData.items.length > 0 && (
@@ -544,7 +544,7 @@ export default function Navbar({
               }`}
             >
               <Package 
-                className="w-[18px] h-[18px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2.5]" 
+                className="w-[24px] h-[24px] xs:w-[26px] xs:h-[26px] sm:w-7 sm:h-7 stroke-[2.5]" 
                 fill={isOrderDrawerOpen ? "currentColor" : "none"}
               />
             </button>
@@ -563,7 +563,7 @@ export default function Navbar({
               }`}
             >
               <Filter 
-                className="w-[20px] h-[20px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2]" 
+                className="w-[24px] h-[24px] xs:w-[26px] xs:h-[26px] sm:w-7 sm:h-7 stroke-[2]" 
                 fill={sidebarView === "filters" ? "currentColor" : "none"}
               />
             </button>
@@ -579,9 +579,9 @@ export default function Navbar({
               }`}
             >
               {isMobileMenuOpen ? (
-                <X className="w-[20px] h-[20px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2]" />
+                <X className="w-[24px] h-[24px] xs:w-[26px] xs:h-[26px] sm:w-7 sm:h-7 stroke-[2]" />
               ) : (
-                <Menu className="w-[20px] h-[20px] xs:w-[22px] xs:h-[22px] sm:w-6 sm:h-6 stroke-[2]" />
+                <Menu className="w-[24px] h-[24px] xs:w-[26px] xs:h-[26px] sm:w-7 sm:h-7 stroke-[2]" />
               )}
             </button>
           </div>

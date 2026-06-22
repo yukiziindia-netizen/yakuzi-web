@@ -29,9 +29,9 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
     (item: any) => item.productId === currentProductId || item.product?.id === currentProductId || item.id === currentProductId
   );
 
-  const isYukiziChoice = !!product?.isNew;
-  const isBestSeller = !!product?.isBestSelling;
-  const isAd = false;
+  const isYukiziChoice = !!product?.isYukiziChoice;
+  const isBestSeller = !!product?.isBestSeller;
+  const isAd = !!product?.isAd;
   
   const price = product?.price;
   const mrp = product?.mrp || product?.originalPrice;
@@ -167,7 +167,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
       {/* Overlapping Badges - Rendered outside the border but positioned over it */}
       {isYukiziChoice && (
         <div className="absolute -top-2 left-3 px-2.5 py-[2px] rounded-full text-[9px] tracking-wide font-bold bg-[#854cbc] text-white z-20 pointer-events-none border-[1.5px] border-white">
-          New Arrival
+          Yukizi Choice
         </div>
       )}
       {isBestSeller && (

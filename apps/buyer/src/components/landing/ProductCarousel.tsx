@@ -24,37 +24,26 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
   const { data: wishlistData } = useWishlist();
   const { toast } = useToast();
   
-  const currentProductId = product?.id || `mock-prod-${index}`;
+  const currentProductId = product?.id || `prod-${index}`;
   const isSaved = wishlistData?.items?.some(
     (item: any) => item.productId === currentProductId || item.product?.id === currentProductId || item.id === currentProductId
   );
 
-  // Use data from backend or fallback to screenshot mock data for visual parity
-  const mockTag = index % 3 === 0 ? 'YUKIZI_CHOICE' : index % 3 === 1 ? 'BEST_SELLER' : null;
-  const tag = product?.tag !== undefined ? product.tag : mockTag;
+  const isYukiziChoice = !!product?.isNew;
+  const isBestSeller = !!product?.isBestSelling;
+  const isAd = false;
   
-  const isYukiziChoice = tag === 'YUKIZI_CHOICE';
-  const isBestSeller = tag === 'BEST_SELLER';
+  const price = product?.price;
+  const mrp = product?.mrp || product?.originalPrice;
   
-  const mockIsAd = index % 3 === 0 || index % 3 === 1;
-  const isAd = product?.isAd !== undefined ? product.isAd : mockIsAd;
+  const rating = product?.rating || null;
   
-  const price = product?.price || 3345.53;
-  const mockOriginalPrice = index % 3 !== 2 ? 3800.25 : null;
-  const originalPrice = product?.originalPrice !== undefined ? product.originalPrice : mockOriginalPrice;
+  const discountText = mrp != null && price != null && mrp > price
+    ? `${Math.round(((mrp - price) / mrp) * 100)}% off`
+    : null;
   
-  const rating = product?.rating || 4.5;
-  
-  const mockDiscountText = index % 3 !== 2 ? '25% off' : null;
-  const discountText = product?.discountText !== undefined ? product.discountText : mockDiscountText;
-  
-  const mockDeliveryText = index % 3 === 0 ? '3 days' : index % 3 === 1 ? 'Tomorrow' : null;
-  const deliveryText = product?.deliveryText !== undefined ? product.deliveryText : mockDeliveryText;
-
-  const mockRibbonColor = index % 3 === 1 ? 'purple' : 'beige';
-  const ribbonColor = product?.ribbonColor || mockRibbonColor;
-
-  const productName = product?.name || (index % 3 === 0 ? "Spider Man Fri..." : index % 3 === 1 ? "Madara Uchiha..." : "Resident Evil Le...");
+  const deliveryText = product?.deliveryTime || null;
+  const productName = product?.name || 'Product';
   
   const getInitials = (name: string) => {
     if (!name) return 'PR';
@@ -82,18 +71,20 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
           <button className="text-gray-400 hover:text-gray-600 transition-colors z-10 p-0.5" onClick={(e) => e.preventDefault()}>
              <Share2 size={16} strokeWidth={2} className="opacity-80" />
           </button>
-          <button 
-            className="text-[#f97316] hover:text-orange-600 transition-colors z-10 p-0.5" 
-            onClick={(e) => { 
-              e.preventDefault(); 
-              addToCart(
-                { productId: currentProductId, quantity: 1, price, originalPrice, ...product },
-                { onSuccess: () => toast('Added to cart', 'success') }
-              );
-            }}
-          >
-             <Plus size={20} strokeWidth={2.5} />
-          </button>
+          {price != null && (
+            <button 
+              className="text-[#f97316] hover:text-orange-600 transition-colors z-10 p-0.5" 
+              onClick={(e) => { 
+                e.preventDefault(); 
+                addToCart(
+                  { productId: currentProductId, quantity: 1, price, originalPrice: mrp, ...product },
+                  { onSuccess: () => toast('Added to cart', 'success') }
+                );
+              }}
+            >
+               <Plus size={20} strokeWidth={2.5} />
+            </button>
+          )}
         </div>
 
         {/* Right Edge Ribbon (Wishlist/Save) */}
@@ -140,15 +131,19 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
            {/* Price and Rating */}
            <div className="flex justify-between items-center mb-1.5">
               <div className="flex items-baseline gap-1.5">
-                 <span className="text-[15px] font-semibold text-gray-700 tracking-tight">₹{price}</span>
-                 {originalPrice && (
-                    <span className="text-[10px] text-gray-400 line-through">₹{originalPrice}</span>
+                 <span className="text-[15px] font-semibold text-gray-700 tracking-tight">
+                    {price != null ? `₹${Number(price).toLocaleString('en-IN')}` : 'N/A'}
+                 </span>
+                 {mrp != null && mrp > (price || 0) && (
+                    <span className="text-[10px] text-gray-400 line-through">₹{Number(mrp).toLocaleString('en-IN')}</span>
                  )}
               </div>
-              <div className="flex items-center gap-0.5">
-                 <Star size={13} className="fill-[#854cbc] text-[#854cbc]" />
-                 <span className="text-[13px] font-medium text-gray-600">{rating}</span>
-              </div>
+              {rating !== null && (
+                <div className="flex items-center gap-0.5">
+                   <Star size={13} className="fill-[#854cbc] text-[#854cbc]" />
+                   <span className="text-[13px] font-medium text-gray-600">{rating}</span>
+                </div>
+              )}
            </div>
 
            {/* Bottom Badges */}
@@ -172,7 +167,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
       {/* Overlapping Badges - Rendered outside the border but positioned over it */}
       {isYukiziChoice && (
         <div className="absolute -top-2 left-3 px-2.5 py-[2px] rounded-full text-[9px] tracking-wide font-bold bg-[#854cbc] text-white z-20 pointer-events-none border-[1.5px] border-white">
-          Yukizi Choice
+          New Arrival
         </div>
       )}
       {isBestSeller && (
@@ -218,8 +213,15 @@ export default function ProductCarousel({ slot = 'HOMEPAGE_CAROUSEL', categoryId
 
   if (loading) return <div className="h-40 flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-[#854cbc]" /></div>;
   
-  const displayProducts = [...products];
-  const slicedProducts = displayProducts.length > 0 ? displayProducts : Array(6).fill({});
+  if (!products || products.length === 0) {
+    return (
+      <div className="w-full max-w-[1600px] mx-auto px-4 py-16 text-center text-gray-400 font-medium border border-dashed border-gray-200 rounded-2xl bg-gray-50/50">
+        No products available.
+      </div>
+    );
+  }
+
+  const slicedProducts = [...products];
 
   return (
     <div className="w-full max-w-[1600px] mx-auto px-2 sm:px-4 lg:px-6 mb-8 sm:mb-12 pt-4">

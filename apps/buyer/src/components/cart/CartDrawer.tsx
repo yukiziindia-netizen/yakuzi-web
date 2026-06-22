@@ -85,7 +85,7 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[65]"
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[100]"
           />
 
           {/* Drawer Panel */}
@@ -95,7 +95,7 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed top-0 right-0 h-full w-[85%] max-w-[400px] bg-white shadow-2xl z-[70] flex flex-col overflow-hidden rounded-l-3xl"
+            className="fixed top-0 right-0 h-full w-[85%] max-w-[400px] bg-white shadow-2xl z-[110] flex flex-col overflow-hidden rounded-l-3xl"
           >
             {/* Custom Scrollbar Styles */}
             <style jsx global>{`

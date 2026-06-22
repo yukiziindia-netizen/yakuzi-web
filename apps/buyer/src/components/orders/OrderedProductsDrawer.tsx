@@ -76,12 +76,12 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
     <>
       {/* Backdrop overlay */}
       <div 
-        className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[65] transition-opacity rounded-l-3xl" 
+        className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[100] transition-opacity rounded-l-3xl" 
         onClick={onClose}
       />
 
       {/* Drawer */}
-      <div className={`fixed inset-y-0 right-0 w-[85%] max-w-[400px] bg-white shadow-2xl z-[70] transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'} overflow-y-auto rounded-l-3xl`}>
+      <div className={`fixed inset-y-0 right-0 w-[85%] max-w-[400px] bg-white shadow-2xl z-[110] transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'} overflow-y-auto rounded-l-3xl`}>
         {/* Hidden Close Button */}
         <button onClick={onClose} className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-900 bg-white/80 rounded-full z-[80] transition-colors">
           <X className="w-5 h-5" />

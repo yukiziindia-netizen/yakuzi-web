@@ -897,14 +897,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                 <h1 className="text-2xl font-[900] text-gray-800 tracking-tight leading-tight max-w-[85%]">
                   {product.name}
                 </h1>
-                {/* Large orange plus button on top right */}
-                <button
-                  type="button"
-                  onClick={() => toast('Quick add item triggered!', 'info')}
-                  className="w-10 h-10 rounded-full bg-orange-100 hover:bg-orange-200 text-orange-500 flex items-center justify-center font-bold focus:outline-none transition-colors"
-                >
-                  <Plus className="w-6 h-6 stroke-[3]" />
-                </button>
+
               </div>
 
               {/* Price details */}

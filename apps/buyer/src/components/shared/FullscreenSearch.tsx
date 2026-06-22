@@ -71,7 +71,7 @@ export default function FullscreenSearch({ isOpen, onClose }: { isOpen: boolean;
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 bg-white/95 backdrop-blur-sm flex flex-col"
+          className="fixed inset-0 z-[110] bg-white/95 backdrop-blur-sm flex flex-col"
         >
           {/* Main Search Area - Large centered */}
           <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-8 pt-16 sm:pt-24">

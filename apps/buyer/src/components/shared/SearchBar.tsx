@@ -77,7 +77,7 @@ export default function SearchBar({ isOpen = false, onClose }: SearchBarProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] bg-black/10 backdrop-blur-[1px]"
+            className="fixed inset-0 z-[100] bg-black/10 backdrop-blur-[1px]"
             onClick={onClose}
           />
           
@@ -87,7 +87,7 @@ export default function SearchBar({ isOpen = false, onClose }: SearchBarProps) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed bottom-[85px] sm:bottom-[100px] md:bottom-[110px] left-1/2 -translate-x-1/2 w-[90%] max-w-[600px] z-[70] bg-white rounded-3xl shadow-2xl p-4 sm:p-6 flex flex-col shadow-purple-900/10"
+            className="fixed bottom-[85px] sm:bottom-[100px] md:bottom-[110px] left-1/2 -translate-x-1/2 w-[90%] max-w-[600px] z-[110] bg-white rounded-3xl shadow-2xl p-4 sm:p-6 flex flex-col shadow-purple-900/10"
           >
             {/* Input Area */}
             <div className="relative mb-2 sm:mb-4">

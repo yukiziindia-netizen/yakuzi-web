@@ -175,7 +175,7 @@ function ProductBannerCard({
 
   return (
     <div 
-      className="relative w-full aspect-[4/3] rounded-[24px] bg-gradient-to-br from-[#854dff] via-[#b336e8] to-[#ff2b9a] border border-purple-400/20 shadow-md flex items-center justify-center p-6 mt-4"
+      className="relative w-full aspect-[4/3] rounded-[24px] bg-gradient-to-br from-[#854dff] via-[#b336e8] to-[#ff2b9a] border border-purple-400/20 shadow-md flex items-center justify-center p-6 mt-4 lg:mt-0"
       style={{
         backgroundImage: `
           radial-gradient(rgba(255, 255, 255, 0.15) 1.5px, transparent 1.5px),
@@ -193,7 +193,11 @@ function ProductBannerCard({
           productName={productName}
           productId={productId}
           productPrice={productPrice}
-          className="p-3 bg-white rounded-full border border-gray-300 shadow-md hover:bg-gray-50 text-gray-500 hover:text-purple-600 focus:outline-none hover:scale-105 transition-transform"
+          className={`p-3 bg-white rounded-full text-gray-500 focus:outline-none hover:scale-105 transition-transform ${
+            isDesktop 
+              ? "border border-gray-300 shadow-md hover:bg-gray-50 hover:text-purple-600" 
+              : "border-0 shadow-none"
+          }`}
           iconClassName="w-[18px] h-[18px]"
         />
       </div>
@@ -237,18 +241,18 @@ function ProductBannerCard({
       <button
         type="button"
         onClick={onBookmarkToggle}
-        className="absolute right-0 top-[45%] z-20 focus:outline-none transition-transform hover:scale-105"
+        className="absolute -right-[10px] top-[45%] z-20 focus:outline-none transition-transform hover:scale-105"
       >
         <svg
-          width="32"
+          width="44"
           height="40"
-          viewBox="0 0 32 40"
+          viewBox="0 0 44 40"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
           className="overflow-visible drop-shadow-sm"
         >
           <path
-            d="M32 0 H0 L8 20 L0 40 H32 V0 Z"
+            d="M44 0 H0 L11 20 L0 40 H44 V0 Z"
             fill={isBookmarked ? "#854cbc" : "#ffffff"}
             stroke={isBookmarked ? "#854cbc" : "#9ca3af"}
             strokeWidth="2.5"
@@ -824,7 +828,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
         {/* DESKTOP VIEW LAYOUT */}
         <div className="hidden lg:flex flex-col gap-6 w-full">
           {/* Header Row */}
-          <div className="grid grid-cols-[1.15fr_1fr] gap-10 items-center">
+          <div className="grid grid-cols-[1.15fr_1fr] gap-10 items-center mt-6">
             {/* Left Header */}
             <div className="flex items-center justify-between w-full">
               <div className="rounded-full bg-[#854cbc] px-4 py-1.5 text-[11px] font-bold tracking-wide text-white shadow-sm">

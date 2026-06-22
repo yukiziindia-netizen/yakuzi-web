@@ -132,7 +132,7 @@ export default function HeroSection({ title = 'YUKiZi' }: HeroSectionProps) {
           </button>
 
           {/* Logos */}
-          <div className="flex flex-wrap items-center justify-center gap-6 md:gap-12">
+          <div className="flex flex-nowrap items-center justify-center gap-2.5 xs:gap-3.5 md:gap-12">
             {isLoadingBrands ? (
               <span className="text-sm italic text-gray-400">Loading brands...</span>
             ) : (
@@ -141,7 +141,7 @@ export default function HeroSection({ title = 'YUKiZi' }: HeroSectionProps) {
                   key={brand.id}
                   src={brand.imageUrl}
                   alt={brand.name}
-                  className="h-8 w-auto cursor-pointer object-contain mix-blend-multiply transition-transform hover:scale-110 md:h-12"
+                  className="h-[22px] xs:h-7 cursor-pointer object-contain mix-blend-multiply transition-transform hover:scale-110 md:h-12"
                 />
               ))
             )}

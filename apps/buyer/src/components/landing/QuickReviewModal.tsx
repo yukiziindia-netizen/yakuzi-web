@@ -140,7 +140,7 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
             onClick={onClose}
           >
             {/* Ambient Backdrop */}
-            <div className="absolute inset-0 bg-black/10 backdrop-blur-2xl backdrop-saturate-[1.8]" />
+            <div className="absolute inset-0 bg-black/10 backdrop-blur-sm backdrop-saturate-[1.8]" />
 
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -150,7 +150,7 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header section with Title & Share */}
-              <div className="relative flex w-full flex-col border-t-[3px] border-purple-500 pt-3">
+              <div className="relative flex w-full flex-col pt-3">
                 <div className="flex w-full items-start justify-between">
                   <h2 className="max-w-[85%] text-[20px] font-black leading-tight tracking-tight text-gray-800">
                     {displayProduct.name}
@@ -185,13 +185,13 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                     productName={displayProduct.name}
                     productId={displayProduct.id}
                     productPrice={displayProduct.mrp}
-                    className="rounded-full border border-gray-300 bg-white p-3 text-gray-500 shadow-md transition-transform hover:scale-105 hover:bg-gray-50 hover:text-purple-600 focus:outline-none"
+                    className="rounded-full border-0 bg-white p-3 text-gray-500 shadow-none transition-transform hover:scale-105 focus:outline-none"
                     iconClassName="w-[18px] h-[18px]"
                   />
                 </div>
 
                 {/* Interactive Thumbnail Gallery overlay on the left */}
-                <div className="absolute bottom-4 left-4 z-20 flex flex-col gap-2">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-2">
                   {productImages.map((img: string, idx: number) => (
                     <button
                       key={idx}
@@ -220,18 +220,18 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                 <button
                   type="button"
                   onClick={handleBookmarkToggle}
-                  className="absolute right-0 top-[45%] z-20 transition-transform hover:scale-105 focus:outline-none"
+                  className="absolute -right-[10px] top-[45%] z-20 transition-transform hover:scale-105 focus:outline-none"
                 >
                   <svg
-                    width="32"
+                    width="44"
                     height="40"
-                    viewBox="0 0 32 40"
+                    viewBox="0 0 44 40"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
                     className="overflow-visible drop-shadow-sm"
                   >
                     <path
-                      d="M32 0 H0 L8 20 L0 40 H32 V0 Z"
+                      d="M44 0 H0 L11 20 L0 40 H44 V0 Z"
                       fill={isBookmarked ? '#854cbc' : '#ffffff'}
                       stroke={isBookmarked ? '#854cbc' : '#9ca3af'}
                       strokeWidth="2.5"
@@ -362,42 +362,7 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                 )}
               </div>
 
-              {/* Ambient Logistics Footer */}
-              <div className="flex w-full flex-wrap items-center justify-center gap-6 border-t border-gray-100 pt-4">
-                <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
-                    <Truck className="w-4.5 h-4.5" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-black uppercase leading-none text-gray-800">
-                      Swift Logistics
-                    </p>
-                    <p className="mt-1 text-[9px] font-bold leading-none text-gray-400">
-                      Priority Delivery
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-blue-600">
-                    <CheckCircle className="w-4.5 h-4.5" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-black uppercase leading-none text-gray-800">
-                      Quality Verified
-                    </p>
-                    <p className="mt-1 text-[9px] font-bold leading-none text-gray-400">
-                      100% Assurance
-                    </p>
-                  </div>
-                </div>
-                <Link
-                  href={`/products/${generateProductSlug(displayProduct.name, displayProduct.id)}`}
-                  onClick={onClose}
-                  className="ml-auto rounded-xl bg-gray-900 px-4 py-2 text-[9px] font-black uppercase tracking-widest text-white transition-all hover:bg-black"
-                >
-                  View Profile
-                </Link>
-              </div>
+
             </motion.div>
           </motion.div>
         )}

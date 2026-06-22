@@ -117,7 +117,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
             onClick={onClose}
           >
             {/* Ambient Backdrop */}
-            <div className="absolute inset-0 bg-black/10 backdrop-blur-2xl backdrop-saturate-[1.8]" />
+            <div className="absolute inset-0 bg-black/10 backdrop-blur-sm backdrop-saturate-[1.8]" />
 
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -127,7 +127,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header section with Title & Share */}
-              <div className="flex flex-col relative w-full border-t-[3px] border-purple-500 pt-3">
+              <div className="flex flex-col relative w-full pt-3">
                 <div className="flex items-start justify-between w-full">
                   <h2 className="text-[20px] font-black text-gray-800 tracking-tight leading-tight max-w-[85%]">
                     {displayProduct.name}
@@ -163,13 +163,13 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                     productName={displayProduct.name}
                     productId={displayProduct.id}
                     productPrice={displayProduct.mrp}
-                    className="p-3 bg-white rounded-full border border-gray-300 shadow-md hover:bg-gray-50 text-gray-500 hover:text-purple-600 focus:outline-none hover:scale-105 transition-transform"
+                    className="p-3 bg-white rounded-full border-0 shadow-none text-gray-500 focus:outline-none hover:scale-105 transition-transform"
                     iconClassName="w-[18px] h-[18px]"
                   />
                 </div>
 
                 {/* Interactive Thumbnail Gallery overlay on the left */}
-                <div className="absolute left-4 bottom-4 flex flex-col gap-2 z-20">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 flex flex-col gap-2 z-20">
                   {productImages.map((img: string, idx: number) => (
                     <button
                       key={idx}
@@ -204,18 +204,18 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                 <button
                   type="button"
                   onClick={handleBookmarkToggle}
-                  className="absolute right-0 top-[45%] z-20 focus:outline-none transition-transform hover:scale-105"
+                  className="absolute -right-[10px] top-[45%] z-20 focus:outline-none transition-transform hover:scale-105"
                 >
                   <svg
-                    width="32"
+                    width="44"
                     height="40"
-                    viewBox="0 0 32 40"
+                    viewBox="0 0 44 40"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
                     className="overflow-visible drop-shadow-sm"
                   >
                     <path
-                      d="M32 0 H0 L8 20 L0 40 H32 V0 Z"
+                      d="M44 0 H0 L11 20 L0 40 H44 V0 Z"
                       fill={isBookmarked ? "#854cbc" : "#ffffff"}
                       stroke={isBookmarked ? "#854cbc" : "#9ca3af"}
                       strokeWidth="2.5"
@@ -328,34 +328,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                 )}
               </div>
 
-              {/* Ambient Logistics Footer */}
-              <div className="flex flex-wrap items-center justify-center gap-6 border-t border-gray-100 pt-4 w-full">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
-                    <Truck className="w-4.5 h-4.5" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-black uppercase text-gray-800 leading-none">Swift Logistics</p>
-                    <p className="text-[9px] text-gray-400 font-bold mt-1 leading-none">Priority Delivery</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
-                    <CheckCircle className="w-4.5 h-4.5" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-black uppercase text-gray-800 leading-none">Quality Verified</p>
-                    <p className="text-[9px] text-gray-400 font-bold mt-1 leading-none">100% Assurance</p>
-                  </div>
-                </div>
-                <Link 
-                  href={`/products/${generateProductSlug(displayProduct.name, displayProduct.id)}`}
-                  onClick={onClose}
-                  className="px-4 py-2 bg-gray-900 hover:bg-black text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ml-auto"
-                >
-                  View Profile
-                </Link>
-              </div>
+
             </motion.div>
           </motion.div>
         )}

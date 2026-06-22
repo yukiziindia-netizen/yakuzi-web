@@ -409,18 +409,19 @@ export default function Navbar({
                     </Link>
                   </div>
 
-                  <div className="relative h-[34px] flex items-center flex-1 max-w-[110px] xs:max-w-[130px]">
-                    <button
-                      onClick={() => {
-                        setIsSearchChatOpen(!isSearchChatOpen);
-                        setIsChatOpen(false);
-                      }}
-                      className="w-full h-full bg-white border border-gray-200 rounded-[8px] text-left pl-2.5 pr-7 text-[10px] xs:text-[11px] text-gray-400 font-medium shadow-[inset_0_1.5px_3px_rgba(0,0,0,0.06)] cursor-pointer"
-                    >
-                      Search
-                    </button>
-                    <Search className="w-3.5 h-3.5 text-gray-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2.5]" />
-                  </div>
+                  <button
+                    onClick={() => {
+                      setIsSearchChatOpen(!isSearchChatOpen);
+                      setIsChatOpen(false);
+                    }}
+                    className={`relative p-1 mr-2.5 transition-all duration-200 shrink-0 ${
+                      isSearchChatOpen
+                        ? "text-[#562996] scale-110 opacity-100"
+                        : "text-gray-400 hover:text-gray-600"
+                    }`}
+                  >
+                    <Search className="w-[18px] h-[18px] xs:w-[20px] xs:h-[20px] stroke-[2.5]" />
+                  </button>
                 </div>
               ) : (
                 // AFTER LOGIN
@@ -457,18 +458,21 @@ export default function Navbar({
                       <span className="absolute top-0 right-0 w-1.5 h-1.5 xs:w-2 xs:h-2 bg-[#eb4335] rounded-full shadow-sm" />
                     </button>
 
-                    <div className="relative h-[34px] flex items-center w-[75px] xs:w-[95px]">
-                      <button
-                        onClick={() => {
-                          setIsSearchChatOpen(!isSearchChatOpen);
-                          setIsChatOpen(false);
-                        }}
-                        className="w-full h-full bg-white border border-gray-200 rounded-[8px] text-left pl-2.5 pr-7 text-[10px] xs:text-[11px] text-gray-400 font-medium shadow-[inset_0_1.5px_3px_rgba(0,0,0,0.06)] cursor-pointer"
-                      >
-                        Search
-                      </button>
-                      <Search className="w-3.5 h-3.5 text-gray-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2.5]" />
-                    </div>
+                    <button
+                      onClick={() => {
+                        setIsSearchChatOpen(!isSearchChatOpen);
+                        setIsChatOpen(false);
+                      }}
+                      className={`relative p-1 mr-2.5 transition-all duration-200 shrink-0 ${
+                        isSearchChatOpen
+                          ? "text-[#562996] scale-110 opacity-100"
+                          : isAnyDrawerOpen
+                          ? "text-[#562996]/40 opacity-50"
+                          : "text-[#562996]"
+                      }`}
+                    >
+                      <Search className="w-[18px] h-[18px] xs:w-[20px] xs:h-[20px] stroke-[2.5]" />
+                    </button>
                   </div>
                 </div>
               )}

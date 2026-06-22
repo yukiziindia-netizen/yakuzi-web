@@ -16,6 +16,7 @@ const PERMISSION_LABELS: Record<string, string> = {
   h: "View Marketing", i: "Manage Marketing", j: "View Notifications", k: "Manage Notifications",
   l: "View Referrals", m: "Manage Referrals", n: "View Custom Orders", o: "Manage Custom Orders",
   p: "View Analytics", q: "Manage Analytics", r: "View Settings", s: "Manage Settings",
+  t: "View Admins", u: "Manage Admins",
   v: "View Banners", w: "Manage Banners",
   x: "Super Admin",
 };

@@ -1,20 +1,23 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getOrders, getOrderById, createOrder, cancelOrder, getOrderMilestones, confirmMilestonePayment, getOrderInvoice, getOrderTracking, type CreateOrderInput } from '@yukizi/api-client';
+import { getOrders, getOrderById, createOrder, cancelOrder, getOrderMilestones, confirmMilestonePayment, getOrderInvoice, getOrderTracking, type CreateOrderInput, useAuth } from '@yukizi/api-client';
 
 export function useOrders(params?: { page?: number; limit?: number; status?: string }) {
+  const { isAuthenticated } = useAuth();
   return useQuery({
     queryKey: ['orders', params],
     queryFn: () => getOrders(params),
+    enabled: isAuthenticated,
   });
 }
 
 export function useOrderById(id: string) {
+  const { isAuthenticated } = useAuth();
   return useQuery({
     queryKey: ['order', id],
     queryFn: () => getOrderById(id),
-    enabled: !!id,
+    enabled: isAuthenticated && !!id,
     refetchInterval: 10000,
   });
 }
@@ -42,10 +45,11 @@ export function useCancelOrder() {
 }
 
 export function useOrderMilestones(orderId: string) {
+  const { isAuthenticated } = useAuth();
   return useQuery({
     queryKey: ['order-milestones', orderId],
     queryFn: () => getOrderMilestones(orderId),
-    enabled: !!orderId,
+    enabled: isAuthenticated && !!orderId,
   });
 }
 
@@ -62,18 +66,20 @@ export function useConfirmMilestonePayment() {
 }
 
 export function useOrderInvoice(orderId: string) {
+  const { isAuthenticated } = useAuth();
   return useQuery({
     queryKey: ['order-invoice', orderId],
     queryFn: () => getOrderInvoice(orderId),
-    enabled: !!orderId,
+    enabled: isAuthenticated && !!orderId,
   });
 }
 
 export function useOrderTracking(orderId: string) {
+  const { isAuthenticated } = useAuth();
   return useQuery({
     queryKey: ['order-tracking', orderId],
     queryFn: () => getOrderTracking(orderId),
-    enabled: !!orderId,
+    enabled: isAuthenticated && !!orderId,
     refetchInterval: 30000,
   });
 }

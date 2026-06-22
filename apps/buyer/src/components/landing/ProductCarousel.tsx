@@ -89,7 +89,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
 
         {/* Right Edge Ribbon (Wishlist/Save) */}
         <button 
-          className="absolute top-[45%] -right-[1px] z-20 cursor-pointer"
+          className="absolute top-[30%] -right-[1px] z-20 cursor-pointer"
           onClick={(e) => { 
             e.preventDefault(); 
             if (isSaved) {

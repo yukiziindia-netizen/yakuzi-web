@@ -4,6 +4,9 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronRight, ChevronLeft, Plus, Send } from 'lucide-react';
 import { useScrollLock } from '@/hooks/useScrollLock';
+import { Outfit } from 'next/font/google';
+
+const outfit = Outfit({ subsets: ['latin'] });
 
 interface SupportDrawerProps {
   isOpen: boolean;
@@ -147,7 +150,7 @@ export default function SupportDrawer({ isOpen, onClose }: SupportDrawerProps) {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed top-0 right-0 h-full w-[85%] max-w-[400px] bg-white shadow-2xl z-[110] flex flex-col overflow-hidden rounded-l-3xl"
+            className={`fixed top-0 right-0 h-full w-[85%] max-w-[400px] bg-white shadow-2xl z-[110] flex flex-col overflow-hidden rounded-l-3xl ${outfit.className}`}
           >
             {/* SCREEN 1: TICKETS LIST */}
             {activeScreen === 'list' && (
@@ -193,16 +196,16 @@ export default function SupportDrawer({ isOpen, onClose }: SupportDrawerProps) {
                       </div>
                     </div>
                   ))}
+                </div>
 
-                  {/* Create New Chat Button */}
-                  <div className="pt-10 flex justify-center">
-                    <button
-                      onClick={startNewChat}
-                      className="px-6 py-3 bg-[#7B2FBE] hover:bg-[#6c28a8] text-white text-[14px] font-bold rounded-xl shadow-md transition-all active:scale-[0.98]"
-                    >
-                      New Customer Support Chat
-                    </button>
-                  </div>
+                {/* Create New Chat Button - Pinned to bottom */}
+                <div className="pb-16 pt-4 flex justify-center bg-white shrink-0">
+                  <button
+                    onClick={startNewChat}
+                    className="px-6 py-3 bg-[#8C52FF] hover:bg-[#7b46e0] text-white text-[14px] font-bold rounded-xl shadow-md transition-all active:scale-[0.98] w-[80%] max-w-[280px]"
+                  >
+                    New Customer Support Chat
+                  </button>
                 </div>
               </div>
             )}

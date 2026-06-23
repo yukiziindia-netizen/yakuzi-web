@@ -47,6 +47,7 @@ import CategoryMegaMenu from "@/components/landing/CategoryMegaMenu";
 import EditProfileDrawer from "@/components/profile/EditProfileDrawer";
 import CartDrawer from "@/components/cart/CartDrawer";
 import WishlistDrawer from "@/components/wishlist/WishlistDrawer";
+import SupportDrawer from "@/components/shared/SupportDrawer";
 import { OrderDrawer } from "@/components/orders/OrderDrawer";
 import NotificationDrawer from "@/components/notifications/NotificationDrawer";
 import SearchBar from "@/components/shared/SearchBar";
@@ -91,6 +92,7 @@ export default function Navbar({
     useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isSupportDrawerOpen, setIsSupportDrawerOpen] = useState(false);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [sidebarView, setSidebarView] = useState<SidebarView>(null);
   const [isMounted, setIsMounted] = useState(false);
@@ -860,27 +862,54 @@ export default function Navbar({
             {/* Header */}
             <div className="flex justify-between items-center mb-10 pt-4">
               <h2 className="text-[22px] font-bold text-[#333]">Menu</h2>
-              {isAuthenticated ? (
-                <button
-                  onClick={() => {
-                    handleLogout();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="text-gray-500 text-sm hover:text-gray-800 transition-colors"
-                >
-                  Sign out
-                </button>
-              ) : (
+              <div className="flex items-center gap-3">
                 <button
                   onClick={() => {
                     setIsMobileMenuOpen(false);
-                    onLoginClick?.();
+                    setIsSupportDrawerOpen(true);
                   }}
-                  className="text-gray-500 text-sm hover:text-gray-800 transition-colors"
+                  className="text-gray-600 hover:text-gray-800 transition-colors p-1"
+                  title="Customer Support"
                 >
-                  Sign in
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M3 14c0-4.97 4.03-9 9-9s9 4.03 9 9" />
+                    <rect x="2" y="13" width="3" height="5" rx="1.5" />
+                    <rect x="19" y="13" width="3" height="5" rx="1.5" />
+                    <path d="M5 17c2 3 12 3 14 0" />
+                  </svg>
                 </button>
-              )}
+                <div className="w-[1px] h-4 bg-gray-300" />
+                {isAuthenticated ? (
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="text-gray-500 text-sm hover:text-gray-800 transition-colors"
+                  >
+                    Sign out
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      onLoginClick?.();
+                    }}
+                    className="text-gray-500 text-sm hover:text-gray-800 transition-colors"
+                  >
+                    Sign in
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Links List */}
@@ -1012,6 +1041,11 @@ export default function Navbar({
         isOpen={isOrderDrawerOpen}
         onClose={() => setIsOrderDrawerOpen(false)}
         onLoginClick={onLoginClick}
+      />
+
+      <SupportDrawer
+        isOpen={isSupportDrawerOpen}
+        onClose={() => setIsSupportDrawerOpen(false)}
       />
 
       {/* GLOBAL MEGA MENU - Outside scroll context to prevent clipping */}

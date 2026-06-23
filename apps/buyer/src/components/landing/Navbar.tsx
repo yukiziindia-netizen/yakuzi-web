@@ -861,23 +861,23 @@ export default function Navbar({
             </button>
             {/* Header */}
             <div className="flex justify-between items-center mb-10 pt-4">
-              <h2 className="text-[22px] font-bold text-[#333]">Menu</h2>
-              <div className="flex items-center gap-3">
+              <h2 className="text-[22px] font-bold text-[#2d2d2d] tracking-tight">Menu</h2>
+              <div className="flex items-center gap-2.5">
                 <button
                   onClick={() => {
                     setIsMobileMenuOpen(false);
                     setIsSupportDrawerOpen(true);
                   }}
-                  className="text-gray-600 hover:text-gray-800 transition-colors p-1"
+                  className="text-[#484848] hover:text-black transition-colors"
                   title="Customer Support"
                 >
                   <svg
-                    width="20"
-                    height="20"
+                    width="23"
+                    height="23"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth="1.8"
+                    strokeWidth="1.6"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   >
@@ -887,14 +887,14 @@ export default function Navbar({
                     <path d="M5 17c2 3 12 3 14 0" />
                   </svg>
                 </button>
-                <div className="w-[1px] h-4 bg-gray-300" />
+                <div style={{ width: '1px', height: '18px', backgroundColor: '#cccccc' }} className="mx-1" />
                 {isAuthenticated ? (
                   <button
                     onClick={() => {
                       handleLogout();
                       setIsMobileMenuOpen(false);
                     }}
-                    className="text-gray-500 text-sm hover:text-gray-800 transition-colors"
+                    className="text-[#484848] text-[15px] font-medium hover:text-black transition-colors"
                   >
                     Sign out
                   </button>
@@ -904,7 +904,7 @@ export default function Navbar({
                       setIsMobileMenuOpen(false);
                       onLoginClick?.();
                     }}
-                    className="text-gray-500 text-sm hover:text-gray-800 transition-colors"
+                    className="text-[#484848] text-[15px] font-medium hover:text-black transition-colors"
                   >
                     Sign in
                   </button>

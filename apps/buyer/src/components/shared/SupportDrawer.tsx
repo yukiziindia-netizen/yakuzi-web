@@ -140,7 +140,7 @@ export default function SupportDrawer({ isOpen, onClose }: SupportDrawerProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={handleClose}
-            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[100]"
+            className="fixed inset-0 bg-[#6342B4]/35 z-[100] backdrop-blur-none"
           />
 
           {/* Drawer Panel */}
@@ -150,7 +150,7 @@ export default function SupportDrawer({ isOpen, onClose }: SupportDrawerProps) {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className={`fixed top-0 right-0 h-full w-[85%] max-w-[400px] bg-white shadow-2xl z-[110] flex flex-col overflow-hidden rounded-l-3xl ${outfit.className}`}
+            className={`fixed top-0 right-0 h-full w-[92%] sm:w-[500px] md:w-[520px] max-w-full bg-white shadow-2xl z-[110] flex flex-col overflow-hidden rounded-l-3xl ${outfit.className}`}
           >
             {/* SCREEN 1: TICKETS LIST */}
             {activeScreen === 'list' && (

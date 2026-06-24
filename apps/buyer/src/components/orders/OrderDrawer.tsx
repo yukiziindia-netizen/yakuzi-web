@@ -56,14 +56,14 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
       {/* Backdrop overlay */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[100] transition-opacity" 
+          className="fixed inset-0 bg-[#6342B4]/35 z-[100] transition-opacity" 
           onClick={onClose}
         />
       )}
 
       {/* Drawer */}
       <div 
-        className={`fixed inset-y-0 right-0 w-[85%] max-w-[400px] bg-white shadow-2xl z-[110] transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'} overflow-y-auto rounded-l-3xl`}
+        className={`fixed inset-y-0 right-0 w-[92%] sm:w-[500px] md:w-[520px] max-w-full bg-white shadow-2xl z-[110] transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'} overflow-y-auto rounded-l-3xl`}
       >
         {/* Hidden Close Button */}
         <button onClick={onClose} className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-900 bg-white/80 rounded-full z-[80] transition-colors">

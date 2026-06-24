@@ -842,7 +842,7 @@ export default function Navbar({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[100]"
+            className="fixed inset-0 bg-[#6342B4]/35 z-[100] backdrop-blur-none"
             onClick={() => setIsMobileMenuOpen(false)}
           />
         )}
@@ -853,7 +853,7 @@ export default function Navbar({
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed top-0 right-0 bottom-0 w-[85%] max-w-[400px] bg-white z-[110] shadow-2xl rounded-l-3xl flex flex-col p-6 sm:p-8"
+            className="fixed top-0 right-0 bottom-0 w-[92%] sm:w-[500px] md:w-[520px] max-w-full bg-white z-[110] shadow-2xl rounded-l-3xl flex flex-col p-6 sm:p-8"
           >
             {/* Hidden Close Button */}
             <button onClick={() => setIsMobileMenuOpen(false)} className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-900 bg-white/80 rounded-full z-[80] transition-colors">

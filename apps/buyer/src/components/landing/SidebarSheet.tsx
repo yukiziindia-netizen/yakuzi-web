@@ -235,7 +235,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
     return (
       <div className="flex flex-col h-full bg-white text-[#333] p-6 pr-8">
         <div className="mb-6 pt-2">
-          <h2 className="text-lg font-bold">Filters</h2>
+          <h2 className="text-2xl font-bold text-gray-800">Filters</h2>
         </div>
 
         <div className="flex-1 overflow-y-auto scrollbar-hide pb-24 pr-4">
@@ -243,7 +243,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
           <div className="space-y-4 mb-6">
             <button 
               onClick={() => toggleSection("price")}
-              className="flex items-center justify-between w-full font-bold text-gray-800 text-[13px]"
+              className="flex items-center justify-between w-full font-bold text-gray-800 text-[16px]"
             >
               Price
               {openSections.price ? <ChevronUp className="w-4 h-4 text-gray-500" strokeWidth={3} /> : <ChevronDown className="w-4 h-4 text-gray-500" strokeWidth={3} />}
@@ -282,7 +282,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                           className="absolute w-full appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-[#854cbc] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:pointer-events-auto z-10"
                         />
                       </div>
-                      <div className="flex justify-between mt-2 text-[12px] text-gray-500">
+                      <div className="flex justify-between mt-2 text-[14px] text-gray-500 font-medium">
                         <span>₹{filters.minPrice}</span>
                         <span>₹{filters.maxPrice}</span>
                       </div>
@@ -295,18 +295,18 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
           <div className="border-t border-gray-200 mb-4" />
 
           {/* Checkboxes */}
-          <div className="space-y-3 mb-6">
+          <div className="space-y-3.5 mb-6">
             <label className="flex items-center gap-3 cursor-pointer group" onClick={() => handleFilterChange('newItems', !filters.newItems)}>
-              <div className={`w-3.5 h-3.5 rounded-[3px] border flex items-center justify-center transition-colors ${filters.newItems ? "bg-[#854cbc] border-[#854cbc] text-white" : "border-gray-300 bg-white"}`}>
-                {filters.newItems && <Check className="w-2.5 h-2.5" strokeWidth={3} />}
+              <div className={`w-[18px] h-[18px] rounded-[4px] border flex items-center justify-center transition-colors ${filters.newItems ? "bg-[#854cbc] border-[#854cbc] text-white" : "border-gray-300 bg-white"}`}>
+                {filters.newItems && <Check className="w-3 h-3" strokeWidth={3} />}
               </div>
-              <span className="text-gray-700 text-[13px]">New Items</span>
+              <span className="text-gray-700 text-[15px] font-medium">New Items</span>
             </label>
             <label className="flex items-center gap-3 cursor-pointer group" onClick={() => handleFilterChange('bestSelling', !filters.bestSelling)}>
-              <div className={`w-3.5 h-3.5 rounded-[3px] border flex items-center justify-center transition-colors ${filters.bestSelling ? "bg-[#854cbc] border-[#854cbc] text-white" : "border-gray-300 bg-white"}`}>
-                {filters.bestSelling && <Check className="w-2.5 h-2.5" strokeWidth={3} />}
+              <div className={`w-[18px] h-[18px] rounded-[4px] border flex items-center justify-center transition-colors ${filters.bestSelling ? "bg-[#854cbc] border-[#854cbc] text-white" : "border-gray-300 bg-white"}`}>
+                {filters.bestSelling && <Check className="w-3 h-3" strokeWidth={3} />}
               </div>
-              <span className="text-gray-700 text-[13px]">Best Selling</span>
+              <span className="text-gray-700 text-[15px] font-medium">Best Selling</span>
             </label>
           </div>
 
@@ -316,7 +316,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
           <div className="space-y-4 mb-6">
             <button 
               onClick={() => toggleSection("discount")}
-              className="flex items-center justify-between w-full font-bold text-gray-800 text-[13px]"
+              className="flex items-center justify-between w-full font-bold text-gray-800 text-[16px]"
             >
               Discount
               {openSections.discount ? <ChevronUp className="w-4 h-4 text-gray-500" strokeWidth={3} /> : <ChevronDown className="w-4 h-4 text-gray-500" strokeWidth={3} />}
@@ -329,16 +329,16 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                   exit={{ height: 0, opacity: 0 }}
                   className="overflow-hidden"
                 >
-                  <div className="space-y-2.5 pt-1">
+                  <div className="space-y-3 pt-1">
                     {["<50+", "30-35", "50-90", ">50++"].map(opt => (
                       <label key={opt} className="flex items-center gap-3 cursor-pointer group" onClick={(e) => {
                         e.preventDefault();
                         handleFilterChange('discount', filters.discount === opt ? "All" : opt);
                       }}>
-                        <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-colors ${filters.discount === opt ? "border-[#854cbc]" : "border-gray-200 group-hover:border-[#854cbc]/50"}`}>
-                           {filters.discount === opt && <div className="w-1.5 h-1.5 rounded-full bg-[#854cbc]" />}
+                        <div className={`w-[18px] h-[18px] rounded-full border-2 flex items-center justify-center transition-colors ${filters.discount === opt ? "border-[#854cbc]" : "border-gray-200 group-hover:border-[#854cbc]/50"}`}>
+                           {filters.discount === opt && <div className="w-2 h-2 rounded-full bg-[#854cbc]" />}
                         </div>
-                        <span className="text-[13px] text-gray-700">{opt}</span>
+                        <span className="text-[15px] text-gray-700 font-medium">{opt}</span>
                       </label>
                     ))}
                   </div>
@@ -353,7 +353,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
           <div className="space-y-4 mb-6">
             <button 
               onClick={() => toggleSection("location")}
-              className="flex items-center justify-between w-full font-bold text-gray-800 text-[13px]"
+              className="flex items-center justify-between w-full font-bold text-gray-800 text-[16px]"
             >
               Location
               {openSections.location ? <ChevronUp className="w-4 h-4 text-gray-500" strokeWidth={3} /> : <ChevronDown className="w-4 h-4 text-gray-500" strokeWidth={3} />}
@@ -366,16 +366,16 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                   exit={{ height: 0, opacity: 0 }}
                   className="overflow-hidden"
                 >
-                  <div className="space-y-2.5 pt-1">
+                  <div className="space-y-3 pt-1">
                     {["All", "Monteria", "Marana", "Pownhon"].map(opt => (
                       <label key={opt} className="flex items-center gap-3 cursor-pointer group" onClick={(e) => {
                         e.preventDefault();
                         handleFilterChange('location', filters.location === opt && opt !== "All" ? "All" : opt);
                       }}>
-                        <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-colors ${filters.location === opt ? "border-[#854cbc]" : "border-gray-200 group-hover:border-[#854cbc]/50"}`}>
-                           {filters.location === opt && <div className="w-1.5 h-1.5 rounded-full bg-[#854cbc]" />}
+                        <div className={`w-[18px] h-[18px] rounded-full border-2 flex items-center justify-center transition-colors ${filters.location === opt ? "border-[#854cbc]" : "border-gray-200 group-hover:border-[#854cbc]/50"}`}>
+                           {filters.location === opt && <div className="w-2 h-2 rounded-full bg-[#854cbc]" />}
                         </div>
-                        <span className="text-[13px] text-gray-700">{opt}</span>
+                        <span className="text-[15px] text-gray-700 font-medium">{opt}</span>
                       </label>
                     ))}
                   </div>
@@ -390,7 +390,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
           <div className="space-y-4">
             <button 
               onClick={() => toggleSection("discountType")}
-              className="flex items-center justify-between w-full font-bold text-gray-800 text-[13px]"
+              className="flex items-center justify-between w-full font-bold text-gray-800 text-[16px]"
             >
               Discount Type
               {openSections.discountType ? <ChevronUp className="w-4 h-4 text-gray-500" strokeWidth={3} /> : <ChevronDown className="w-4 h-4 text-gray-500" strokeWidth={3} />}
@@ -403,16 +403,16 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                   exit={{ height: 0, opacity: 0 }}
                   className="overflow-hidden"
                 >
-                  <div className="space-y-2.5 pt-1">
+                  <div className="space-y-3 pt-1">
                     {["All", "Upclom", "Fuill"].map(opt => (
                       <label key={opt} className="flex items-center gap-3 cursor-pointer group" onClick={(e) => {
                         e.preventDefault();
                         handleFilterChange('discountType', filters.discountType === opt && opt !== "All" ? "All" : opt);
                       }}>
-                        <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-colors ${filters.discountType === opt ? "border-[#854cbc]" : "border-gray-200 group-hover:border-[#854cbc]/50"}`}>
-                           {filters.discountType === opt && <div className="w-1.5 h-1.5 rounded-full bg-[#854cbc]" />}
+                        <div className={`w-[18px] h-[18px] rounded-full border-2 flex items-center justify-center transition-colors ${filters.discountType === opt ? "border-[#854cbc]" : "border-gray-200 group-hover:border-[#854cbc]/50"}`}>
+                           {filters.discountType === opt && <div className="w-2 h-2 rounded-full bg-[#854cbc]" />}
                         </div>
-                        <span className="text-[13px] text-gray-700">{opt}</span>
+                        <span className="text-[15px] text-gray-700 font-medium">{opt}</span>
                       </label>
                     ))}
                   </div>
@@ -436,7 +436,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[100]"
+            className="fixed inset-0 bg-[#6342B4]/35 z-[100] backdrop-blur-none"
           />
           
           <motion.div
@@ -445,7 +445,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed top-0 right-0 bottom-0 w-[85%] max-w-[400px] bg-white z-[110] shadow-2xl rounded-l-3xl flex flex-col overflow-hidden"
+            className="fixed top-0 right-0 bottom-0 w-[92%] sm:w-[500px] md:w-[520px] max-w-full bg-white z-[110] shadow-2xl rounded-l-3xl flex flex-col overflow-hidden"
           >
             {/* Hidden Close Button */}
             <button onClick={onClose} className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-900 bg-white/80 rounded-full z-[80] transition-colors">

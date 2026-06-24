@@ -2,24 +2,28 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trash2, Loader2, Star, ArrowUpRight, Plus, RefreshCw } from 'lucide-react';
-import EmptyState from '@/components/shared/EmptyState';
 import WishlistIcon from '@/components/shared/WishlistIcon';
 import { useWishlist, useRemoveFromWishlist } from '@/hooks/useWishlist';
 import { useToast } from '@/components/shared/Toast';
-import { useAddToCart } from '@/hooks/useCart';
+import { useAddToCart, useCart, useUpdateCartItem, useRemoveCartItem } from '@/hooks/useCart';
 import { useAuth } from '@yukizi/api-client';
 import { useRouter } from 'next/navigation';
 import { useScrollLock } from '@/hooks/useScrollLock';
-
-
+import Link from 'next/link';
+import { generateProductSlug } from '@yukizi/utils';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const { data: wishlist, isLoading, isError } = useWishlist();
   const removeFromWishlist = useRemoveFromWishlist();
   const addToCart = useAddToCart();
+  const { data: cartData } = useCart();
+  const updateCartItem = useUpdateCartItem();
+  const removeCartItem = useRemoveCartItem();
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   useScrollLock(isOpen);
 
@@ -32,7 +36,7 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
     }
     const cartItem = {
       productId: item.productId || item.product?.id || item.id,
-      quantity: 1, // Or whatever quantity is selected
+      quantity: 1,
     };
     addToCart.mutate(cartItem, {
       onSuccess: () => {
@@ -52,7 +56,7 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[100]"
+            className="fixed inset-0 bg-[#6342B4]/35 z-[100] backdrop-blur-none"
           />
 
           {/* Drawer Panel */}
@@ -62,7 +66,7 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed top-0 right-0 h-full w-[85%] max-w-[400px] bg-white shadow-2xl z-[110] flex flex-col overflow-hidden rounded-l-3xl"
+            className="fixed top-0 right-0 h-full w-[92%] sm:w-[500px] md:w-[520px] max-w-full bg-white shadow-2xl z-[110] flex flex-col overflow-hidden rounded-l-3xl"
           >
             {/* Custom Scrollbar Styles */}
             <style jsx global>{`
@@ -85,7 +89,7 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
 
             {/* Header */}
             <div className="pt-8 px-6 pb-2">
-              <h2 className="text-[22px] font-bold text-gray-800">Saved</h2>
+              <h2 className="text-[22px] font-bold text-gray-800">Wishlist</h2>
             </div>
 
             {/* Items */}
@@ -108,97 +112,165 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                 <AnimatePresence initial={false}>
                   {items.map((item: any, idx: number) => {
                     const itemName = item.product?.name ?? item.productName ?? item.name ?? 'Product';
-                  const itemPrice = item.product?.price ?? item.price ?? 3345.53;
-                  const itemOriginalPrice = item.product?.originalPrice ?? item.originalPrice ?? 5000.00;
-                  const itemImageRaw = item.product?.images?.[0] || item.imageUrl || item.image;
-                  const titleWords = itemName.trim().split(' ').filter(Boolean);
-                  const initials = titleWords.length === 1 
-                    ? itemName.trim().substring(0,2).toUpperCase() 
-                    : (titleWords[0][0] + titleWords[titleWords.length - 1][0]).toUpperCase();
-                  const itemImage = (!itemImageRaw || itemImageRaw === '/products/pharma_bottle.png')
-                    ? `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent(initials)}`
-                    : itemImageRaw;
-                  const isYukiziChoice = item.product?.isYukiziChoice === true || item.isYukiziChoice === true;
-                  const quantity = item.quantity ?? 1;
+                    const itemPrice = item.product?.price ?? item.price ?? 3345.53;
+                    const itemOriginalPrice = item.product?.originalPrice ?? item.originalPrice ?? 5000.00;
+                    
+                    const titleWords = itemName.trim().split(' ').filter(Boolean);
+                    const initials = titleWords.length === 1 
+                      ? itemName.trim().substring(0,2).toUpperCase() 
+                      : (titleWords[0][0] + titleWords[titleWords.length - 1][0]).toUpperCase();
+                    
+                    const rawImage = item.product?.images?.[0]?.url || item.product?.images?.[0] || item.product?.image || item.imageUrl || item.image;
+                    const resolvedImage = typeof rawImage === 'object' && rawImage?.url ? rawImage.url : rawImage;
+                    const itemImage = (typeof resolvedImage === 'string' && resolvedImage && resolvedImage.trim() !== '')
+                      ? resolvedImage
+                      : `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent(initials)}`;
+                    
+                    const isYukiziChoice = item.product?.isYukiziChoice === true || item.isYukiziChoice === true;
+                    
+                    const inCartItem = cartData?.items?.find(
+                      (ci: any) => ci.productId === (item.productId || item.product?.id || item.id)
+                    );
+                    const cartQty = inCartItem?.quantity || 0;
 
-                  return (
-                    <motion.div
-                      key={item.id || idx}
-                      layout
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, x: -50 }}
-                      className="bg-white rounded-[14px] shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border border-gray-100 p-3 flex gap-3 relative overflow-hidden group"
-                    >
-                      {isYukiziChoice && (
-                        <span className="absolute top-0 left-0 text-[7px] font-bold text-white bg-[#6342B4] px-1.5 py-0.5 rounded-br-lg z-10 uppercase tracking-wider">
-                          YUKIZI CHOICE
-                        </span>
-                      )}
+                    const handleIncrement = (e: React.MouseEvent) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      if (inCartItem) {
+                        updateCartItem.mutate({
+                          itemId: inCartItem.id,
+                          quantity: cartQty + 1,
+                        });
+                      } else {
+                        handleAddToCart(item);
+                      }
+                    };
 
-                      {/* Left Image */}
-                      <div className="w-[72px] h-[72px] bg-[#f8f5fd] rounded-xl flex items-center justify-center relative flex-shrink-0 mt-3 overflow-hidden">
-                        <img src={itemImage} alt={itemName} className="w-12 h-12 object-contain mix-blend-multiply" />
-                        <button 
-                          onClick={() => removeFromWishlist.mutate(item.productId || item.product?.id || item.id, {
-                            onSuccess: () => toast('Removed from saved items', 'info'),
-                          })}
-                          disabled={removeFromWishlist.isPending}
-                          className="absolute bottom-0 left-0 bg-[#f7941d] text-white p-1 rounded-tr-lg hover:bg-orange-500 transition-colors z-10 disabled:opacity-50"
-                        >
-                          <Trash2 className="w-[14px] h-[14px]" />
-                        </button>
-                      </div>
+                    const handleDecrement = (e: React.MouseEvent) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      if (inCartItem) {
+                        if (cartQty > 1) {
+                          updateCartItem.mutate({
+                            itemId: inCartItem.id,
+                            quantity: cartQty - 1,
+                          });
+                        } else {
+                          removeCartItem.mutate(inCartItem.id);
+                        }
+                      }
+                    };
 
-                      {/* Right Content */}
-                      <div className="flex-1 min-w-0 pr-8 mt-1">
-                        <h3 className="text-[11px] font-bold text-gray-800 leading-snug truncate mb-1.5">{itemName}</h3>
-                        <div className="flex items-center gap-1.5 mb-1.5">
-                          <span className="text-[13px] font-black text-gray-900">₹{itemPrice.toLocaleString('en-IN')}</span>
-                          <span className="text-[9px] font-bold text-gray-400 line-through">₹{itemOriginalPrice.toLocaleString('en-IN')}</span>
-                        </div>
-                        <span className="text-[9px] font-bold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
-                          {item.discount || '25% off'}
-                        </span>
-                        
-                        {/* Rating */}
-                        <div className="absolute right-3 bottom-3 flex flex-col items-center">
-                          <div className="flex items-center gap-[2px]">
-                            <Star className="w-3 h-3 fill-[#6342B4] text-[#6342B4]" />
-                            <span className="text-[10px] font-bold text-gray-700">{item.rating || 4.6}</span>
-                          </div>
-                          <span className="text-[7px] text-gray-400 font-bold bg-gray-100 px-1 rounded mt-0.5">2 days</span>
-                        </div>
+                    return (
+                      <motion.div
+                        key={item.id || idx}
+                        layout
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, x: -50 }}
+                        className={`bg-white rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border p-3 flex gap-3.5 relative overflow-hidden group transition-all ${
+                          isYukiziChoice ? 'border-[#6342B4] border-[1.5px]' : 'border-gray-100'
+                        }`}
+                      >
+                        {isYukiziChoice && (
+                          <span className="absolute top-0 left-0 text-[7px] font-bold text-white bg-[#6342B4] px-1.5 py-0.5 rounded-br-lg z-10 uppercase tracking-wider">
+                            YUKIZI CHOICE
+                          </span>
+                        )}
 
-                        {/* Top Right Actions */}
-                        <div className="absolute top-2 right-2 flex flex-col items-end gap-1.5">
-                          {quantity > 0 ? (
-                            <div className="flex items-center gap-1.5">
-                              <button className="text-gray-400 hover:text-gray-600 transition-colors">
-                                 <RefreshCw className="w-3.5 h-3.5" />
-                              </button>
-                              <div className="flex items-center bg-[#562996] rounded-full text-white shadow-sm h-[22px] px-1">
-                                 <button className="px-1.5 h-full hover:bg-black/20 flex items-center justify-center font-bold text-[11px] transition-colors">-</button>
-                                 <span className="text-[10px] font-black px-0.5 tracking-tighter">{quantity.toString().padStart(2, '0')}</span>
-                                 <button className="px-1.5 h-full hover:bg-black/20 flex items-center justify-center font-bold text-[11px] transition-colors">+</button>
-                              </div>
-                            </div>
-                          ) : (
-                            <button 
-                              onClick={() => handleAddToCart(item)}
-                              className="text-[#f7941d]/50 hover:text-[#f7941d] mt-1 mr-1 transition-colors"
-                            >
-                              <Plus className="w-4 h-4" />
-                            </button>
-                          )}
-                          <button className="text-gray-400 hover:text-gray-600 mr-1 mt-0.5">
-                            <ArrowUpRight className="w-4 h-4 bg-gray-100 rounded-full p-0.5" />
+                        {/* Left Image */}
+                        <div className="w-[72px] h-[72px] bg-[#f8f5fd] rounded-xl flex items-center justify-center relative flex-shrink-0 mt-3 overflow-hidden">
+                          <img src={itemImage} alt={itemName} className="w-12 h-12 object-contain mix-blend-multiply" />
+                          <button 
+                            onClick={() => removeFromWishlist.mutate(item.productId || item.product?.id || item.id, {
+                              onSuccess: () => toast('Removed from saved items', 'info'),
+                            })}
+                            disabled={removeFromWishlist.isPending}
+                            className="absolute bottom-0 left-0 bg-[#f7941d] text-white p-1 rounded-tr-lg hover:bg-orange-500 transition-colors z-10 disabled:opacity-50"
+                          >
+                            <Trash2 className="w-[14px] h-[14px]" />
                           </button>
                         </div>
-                      </div>
-                    </motion.div>
-                  );
-                })}
+
+                        {/* Middle Content */}
+                        <div className="flex-1 min-w-0 mt-1 flex flex-col gap-1.5">
+                          {/* Row 1: Move to Cart (left) & Refresh + Quantity Selector (right) */}
+                          <div className="flex items-center justify-between w-full pr-3">
+                            <button
+                              onClick={() => handleAddToCart(item)}
+                              className="flex items-center gap-1 bg-[#f7941d] hover:bg-orange-600 text-white px-2.5 py-1 rounded-[6px] text-[10px] font-bold transition-all whitespace-nowrap shadow-sm"
+                            >
+                              <span>Move to Cart</span>
+                              <Plus className="w-3 h-3 text-white" strokeWidth={3} />
+                            </button>
+
+                            {/* Right actions: Refresh + Quantity Selector */}
+                            <div className="flex items-center gap-1.5">
+                              {/* Refresh button */}
+                              <button 
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  queryClient.invalidateQueries({ queryKey: ['wishlist'] });
+                                  toast('Wishlist refreshed', 'success');
+                                }}
+                                className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+                                title="Refresh saved items"
+                              >
+                                <RefreshCw className="w-3.5 h-3.5 text-gray-600" />
+                              </button>
+
+                              {/* Purple Quantity Selector Pill */}
+                              <div className="flex items-center bg-[#48286b] rounded-lg text-white shadow-sm h-6 px-1.5 gap-1.5 select-none">
+                                <button 
+                                  onClick={handleDecrement}
+                                  className="px-1 text-white hover:bg-white/10 rounded font-bold text-xs"
+                                  disabled={cartQty === 0}
+                                >
+                                  -
+                                </button>
+                                <span className="text-[10px] font-black px-0.5 tracking-tighter min-w-[12px] text-center">
+                                  {cartQty.toString().padStart(2, '0')}
+                                </span>
+                                <button 
+                                  onClick={handleIncrement}
+                                  className="px-1 text-white hover:bg-white/10 rounded font-bold text-xs"
+                                >
+                                  +
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Row 2: Product Name */}
+                          <h3 className="text-[11px] font-bold text-gray-500 leading-snug truncate text-left w-full pr-8">{itemName}</h3>
+
+                          {/* Row 3: Price */}
+                          <div className="flex items-baseline gap-1.5 text-left w-full pr-8">
+                            <span className="text-[13px] font-black text-gray-900">₹{itemPrice.toLocaleString('en-IN')}</span>
+                            <span className="text-[9px] font-bold text-gray-400 line-through">₹{itemOriginalPrice.toLocaleString('en-IN')}</span>
+                          </div>
+
+                          {/* Row 4: Discount & Delivery */}
+                          <div className="flex items-center justify-between w-full pr-8">
+                            <span className="text-[9px] font-bold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
+                              {item.discount || '25% off'}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Bottom-Right: Rating & Delivery & Logo */}
+                        <div className="absolute right-3 bottom-3 flex flex-col items-end gap-1">
+                          <div className="flex items-center gap-[2px]">
+                            <Star className="w-2.5 h-2.5 fill-[#6342B4] text-[#6342B4]" />
+                            <span className="text-[10px] font-bold text-gray-700">{item.rating || 4.5}</span>
+                          </div>
+                          <span className="text-[7px] text-gray-400 font-bold bg-gray-100 px-1 rounded">3 days</span>
+                          <img src="/yukizi-logo-new.png" className="w-5 h-auto object-contain opacity-70" alt="logo" />
+                        </div>
+                      </motion.div>
+                    );
+                  })}
                 </AnimatePresence>
               )}
             </div>

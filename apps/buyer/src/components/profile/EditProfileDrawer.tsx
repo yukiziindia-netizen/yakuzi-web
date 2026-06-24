@@ -124,7 +124,7 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[100]"
+        className="fixed inset-0 bg-[#6342B4]/35 z-[100] backdrop-blur-none"
         onClick={onClose}
       />
 
@@ -134,7 +134,7 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
         animate={{ x: 0 }}
         exit={{ x: '100%' }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="fixed top-0 right-0 bottom-0 w-full sm:w-[420px] bg-white z-[110] shadow-2xl flex flex-col overflow-hidden sm:rounded-l-3xl p-6 md:p-8 font-sans"
+        className="fixed top-0 right-0 bottom-0 w-[92%] sm:w-[500px] md:w-[520px] max-w-full bg-white z-[110] shadow-2xl flex flex-col overflow-hidden rounded-l-3xl p-6 md:p-8 font-sans"
       >
         {/* Header */}
         <div className="flex items-center justify-between mt-2 mb-8 relative">

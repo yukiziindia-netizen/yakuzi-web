@@ -20,12 +20,12 @@ export function OrderFilterDrawer({ isOpen, onClose, onApplyFilters }: OrderFilt
     <>
       {/* Backdrop for filter drawer (darkens the Order Drawer) */}
       <div 
-        className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[100] transition-opacity rounded-l-3xl" 
+        className="fixed inset-0 bg-[#6342B4]/35 z-[100] transition-opacity" 
         onClick={onClose}
       />
 
       {/* Filter Drawer Panel */}
-      <div className="fixed top-0 right-0 bottom-0 w-[85%] max-w-[400px] bg-white rounded-l-3xl shadow-2xl z-[110] flex flex-col overflow-hidden animate-slide-in-right">
+      <div className="fixed top-0 right-0 bottom-0 w-[92%] sm:w-[500px] md:w-[520px] max-w-full bg-white rounded-l-3xl shadow-2xl z-[110] flex flex-col overflow-hidden animate-slide-in-right">
         {/* Hidden Close Button */}
         <button onClick={onClose} className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-900 bg-white/80 rounded-full z-[80] transition-colors">
           <X className="w-5 h-5" />
@@ -33,7 +33,7 @@ export function OrderFilterDrawer({ isOpen, onClose, onApplyFilters }: OrderFilt
         
         {/* Header */}
         <div className="flex justify-between items-center px-6 py-5 border-b border-gray-100 shrink-0">
-          <h2 className="text-xl font-bold text-gray-700">Filters</h2>
+          <h2 className="text-2xl font-bold text-gray-800">Filters</h2>
           <button 
             className="text-purple-600 hover:text-purple-700 transition-colors"
             onClick={() => {
@@ -53,15 +53,15 @@ export function OrderFilterDrawer({ isOpen, onClose, onApplyFilters }: OrderFilt
           {/* Payment Status */}
           <div className="mb-6">
             <div className="flex justify-between items-center mb-3">
-              <h3 className="text-[15px] font-bold text-gray-700">Payment Status</h3>
-              <CreditCard className="w-4 h-4 text-gray-400" />
+              <h3 className="text-[17px] font-bold text-gray-800">Payment Status</h3>
+              <CreditCard className="w-5 h-5 text-gray-400" />
             </div>
             <div className="flex gap-2">
               {['All', 'COD', 'PREPAID'].map((status) => (
                 <button
                   key={status}
                   onClick={() => setPaymentStatus(status)}
-                  className={`flex-1 py-1.5 text-xs font-bold rounded ${
+                  className={`flex-1 py-2 text-sm font-bold rounded ${
                     paymentStatus === status 
                       ? 'bg-purple-600 text-white' 
                       : 'bg-[#d1d1d1] text-white hover:bg-gray-400'
@@ -76,15 +76,15 @@ export function OrderFilterDrawer({ isOpen, onClose, onApplyFilters }: OrderFilt
           {/* Order Status */}
           <div className="mb-6">
             <div className="flex justify-between items-center mb-3">
-              <h3 className="text-[15px] font-bold text-gray-700">Order Status</h3>
-              <ShoppingCart className="w-4 h-4 text-gray-400" />
+              <h3 className="text-[17px] font-bold text-gray-800">Order Status</h3>
+              <ShoppingCart className="w-5 h-5 text-gray-400" />
             </div>
             <div className="flex flex-col gap-2">
               {['Canceled', 'Replacement', 'Returned', 'Delivered', 'Out for delivery', 'In transit / Placed', 'All orders'].map((status) => (
                 <button
                   key={status}
                   onClick={() => setOrderStatus(status)}
-                  className={`w-full py-2 text-xs font-bold rounded ${
+                  className={`w-full py-2.5 text-sm font-bold rounded ${
                     orderStatus === status 
                       ? 'bg-purple-600 text-white' 
                       : 'bg-[#d1d1d1] text-white hover:bg-gray-400'
@@ -100,15 +100,15 @@ export function OrderFilterDrawer({ isOpen, onClose, onApplyFilters }: OrderFilt
 
           {/* Year */}
           <div className="mb-6">
-            <h3 className="text-[15px] font-bold text-gray-700 mb-3">Year</h3>
+            <h3 className="text-[17px] font-bold text-gray-800 mb-3">Year</h3>
             <div className="flex items-center gap-1">
-              <button className="p-1 text-gray-400 hover:text-gray-600"><ChevronLeft className="w-4 h-4" /></button>
+              <button className="p-1 text-gray-400 hover:text-gray-600"><ChevronLeft className="w-5 h-5" /></button>
               <div className="flex flex-1 gap-2">
                 {['2024', '2025', '2026'].map((y) => (
                   <button
                     key={y}
                     onClick={() => setYear(y)}
-                    className={`flex-1 py-1.5 text-xs font-bold rounded ${
+                    className={`flex-1 py-2 text-sm font-bold rounded ${
                       year === y 
                         ? 'bg-purple-600 text-white' 
                         : 'bg-[#d1d1d1] text-white hover:bg-gray-400'
@@ -118,19 +118,19 @@ export function OrderFilterDrawer({ isOpen, onClose, onApplyFilters }: OrderFilt
                   </button>
                 ))}
               </div>
-              <button className="p-1 text-gray-400 hover:text-gray-600"><ChevronRight className="w-4 h-4" /></button>
+              <button className="p-1 text-gray-400 hover:text-gray-600"><ChevronRight className="w-5 h-5" /></button>
             </div>
           </div>
 
           {/* Month */}
           <div className="mb-6">
-            <h3 className="text-[15px] font-bold text-gray-700 mb-3">Month</h3>
+            <h3 className="text-[17px] font-bold text-gray-800 mb-3">Month</h3>
             <div className="grid grid-cols-3 gap-2">
               {['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'].map((m) => (
                 <button
                   key={m}
                   onClick={() => setMonth(m)}
-                  className={`py-1.5 text-xs font-bold rounded ${
+                  className={`py-2 text-sm font-bold rounded ${
                     month === m 
                       ? 'bg-purple-600 text-white' 
                       : 'bg-[#d1d1d1] text-white hover:bg-gray-400'

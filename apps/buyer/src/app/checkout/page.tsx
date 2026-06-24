@@ -229,7 +229,7 @@ export default function CheckoutPage() {
         .co-section { margin-bottom: 28px; }
         .co-section-title { font-size: 20px; font-weight: 700; color: #1a1a1a; }
         .co-hr { border: none; border-top: 1px solid #e8e8e8; margin: 20px 0; }
-        @media (max-width: 768px) {
+        @media (max-width: 1023px) {
           .co-layout { flex-direction: column-reverse !important; }
           .co-right-panel { width: 100% !important; position: static !important; top: auto !important; }
           .co-name-grid { grid-template-columns: 1fr !important; }

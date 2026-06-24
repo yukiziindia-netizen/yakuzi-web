@@ -429,7 +429,7 @@ export default function Navbar({
                 // AFTER LOGIN
                 <div className="flex items-center justify-between w-full h-full py-[6px] gap-2">
                   <Link href="/" className="shrink-0 flex items-center pl-1">
-                    <Image src="/YukiziLogo.png" alt="YUKiZi" width={70} height={24} className="w-[55px] xs:w-[65px] object-contain" />
+                    <Image src="/YukiziLogo.png" alt="YUKiZi" width={70} height={24} className="w-[45px] xs:w-[55px] md:w-[65px] object-contain" />
                   </Link>
 
                   <div className="flex items-center gap-1.5 xs:gap-2 h-full flex-1 justify-end">
@@ -487,15 +487,15 @@ export default function Navbar({
               setIsChatOpen(!isChatOpen);
               setIsSearchChatOpen(false);
             }}
-            className="relative -mt-0.5 sm:-mt-1.5 md:-mt-2 z-20 w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gradient-to-b from-[#ffb040] to-[#ff8c00] rounded-[18px] sm:rounded-2xl md:rounded-[1.5rem] flex items-center justify-center shadow-[0_4px_15px_rgba(255,176,64,0.4)] sm:shadow-[0_0_20px_rgba(255,176,64,0.5)] hover:-translate-y-1 sm:hover:-translate-y-2 transition-transform cursor-pointer shrink-0 mx-1 xs:mx-1.5 sm:mx-2 md:mx-2 border-[2px] border-[#fff5eb]"
+            className="relative -mt-0.5 sm:-mt-1.5 md:-mt-2 z-20 w-12 h-12 xs:w-14 xs:h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gradient-to-b from-[#ffb040] to-[#ff8c00] rounded-xl xs:rounded-[18px] sm:rounded-2xl md:rounded-[1.5rem] flex items-center justify-center shadow-[0_4px_15px_rgba(255,176,64,0.4)] sm:shadow-[0_0_20px_rgba(255,176,64,0.5)] hover:-translate-y-1 sm:hover:-translate-y-2 transition-transform cursor-pointer shrink-0 mx-1 xs:mx-1.5 sm:mx-2 md:mx-2 border-[2px] border-[#fff5eb]"
           >
-            <Image src="/yukizi.jpg" alt="Mascot" width={96} height={96} className="w-full h-full object-cover rounded-[16px] sm:rounded-2xl md:rounded-[1.5rem]" />
+            <Image src="/yukizi.jpg" alt="Mascot" width={96} height={96} className="w-full h-full object-cover rounded-[10px] xs:rounded-[16px] sm:rounded-2xl md:rounded-[1.5rem]" />
           </div>
 
 
 
           {/* Right Segment: Cart, Wishlist, Filter, Menu */}
-          <div className="flex items-center justify-between bg-white sm:bg-[#562996] rounded-[24px] sm:rounded-xl md:rounded-xl px-2.5 xs:px-4 sm:px-8 md:px-12 lg:px-16 h-[48px] sm:h-[60px] md:h-[64px] shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl text-[#562996] sm:text-white sm:shrink-0 flex-[1] sm:flex-1 max-w-[480px] z-10 overflow-hidden min-w-0 border border-gray-100 sm:border-0">
+          <div className="flex items-center justify-between bg-white sm:bg-[#562996] rounded-[24px] sm:rounded-xl md:rounded-xl px-2 xs:px-3 sm:px-8 md:px-12 lg:px-16 h-[48px] sm:h-[60px] md:h-[64px] shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl text-[#562996] sm:text-white sm:shrink-0 flex-[1] sm:flex-1 max-w-[480px] z-10 overflow-hidden min-w-0 border border-gray-100 sm:border-0">
 
             <button 
               onClick={() => setIsWishlistOpen(true)} 
@@ -508,7 +508,7 @@ export default function Navbar({
               }`}
             >
               <Bookmark 
-                className="w-[24px] h-[24px] xs:w-[26px] xs:h-[26px] sm:w-7 sm:h-7 stroke-[2] rotate-90" 
+                className="w-[18px] h-[18px] xs:w-[24px] xs:h-[24px] sm:w-7 sm:h-7 stroke-[2] rotate-90" 
                 fill={isWishlistOpen || wishlistCount > 0 ? "currentColor" : "none"} 
               />
               {wishlistCount > 0 && (
@@ -529,7 +529,7 @@ export default function Navbar({
               }`}
             >
               <ShoppingCart 
-                className="w-[24px] h-[24px] xs:w-[26px] xs:h-[26px] sm:w-7 sm:h-7 stroke-[2]" 
+                className="w-[18px] h-[18px] xs:w-[24px] xs:h-[24px] sm:w-7 sm:h-7 stroke-[2]" 
                 fill={isCartOpen ? "currentColor" : "none"}
               />
               {cartData?.items && cartData.items.length > 0 && (
@@ -569,7 +569,7 @@ export default function Navbar({
               }`}
             >
               <Filter 
-                className="w-[24px] h-[24px] xs:w-[26px] xs:h-[26px] sm:w-7 sm:h-7 stroke-[2]" 
+                className="w-[18px] h-[18px] xs:w-[24px] xs:h-[24px] sm:w-7 sm:h-7 stroke-[2]" 
                 fill={sidebarView === "filters" ? "currentColor" : "none"}
               />
             </button>
@@ -585,9 +585,9 @@ export default function Navbar({
               }`}
             >
               {isMobileMenuOpen ? (
-                <X className="w-[24px] h-[24px] xs:w-[26px] xs:h-[26px] sm:w-7 sm:h-7 stroke-[2]" />
+                <X className="w-[18px] h-[18px] xs:w-[24px] xs:h-[24px] sm:w-7 sm:h-7 stroke-[2]" />
               ) : (
-                <Menu className="w-[24px] h-[24px] xs:w-[26px] xs:h-[26px] sm:w-7 sm:h-7 stroke-[2]" />
+                <Menu className="w-[18px] h-[18px] xs:w-[24px] xs:h-[24px] sm:w-7 sm:h-7 stroke-[2]" />
               )}
             </button>
           </div>

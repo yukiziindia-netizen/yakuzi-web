@@ -341,14 +341,14 @@ function ComparisonOffersList({
         return (
           <div 
             key={listing.id} 
-            className="flex flex-row items-center justify-between p-3.5 rounded-2xl bg-gray-50 border border-gray-100/80 hover:border-purple-200 transition-colors gap-3 w-full"
+            className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-2xl bg-gray-50 border border-gray-100/80 hover:border-purple-200 transition-colors gap-3 w-full"
           >
             {/* Left: Discount Badge & Price */}
-            <div className="flex items-center gap-3.5 min-w-[155px]">
+            <div className="flex items-center gap-3.5 min-w-0 sm:min-w-[155px] w-full sm:w-auto justify-between sm:justify-start">
               <div className="bg-[#854cbc] text-white px-2 py-1.5 rounded-lg text-[9px] font-black tracking-wider uppercase leading-none min-w-[66px] text-center select-none">
                 {discountPercent}% off
               </div>
-              <div className="flex flex-col">
+              <div className="flex flex-col text-right sm:text-left">
                 <span className="text-[15px] font-black text-gray-800 leading-none">
                   ₹{listing.price?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                 </span>
@@ -359,7 +359,7 @@ function ComparisonOffersList({
             </div>
 
             {/* Middle: Star Rating & Delivery badge */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-start border-t border-b border-gray-100/50 py-2 sm:border-0 sm:py-0">
               <div className="flex items-center gap-1">
                 <Star className="w-3.5 h-3.5 fill-[#854cbc] text-[#854cbc]" />
                 <span className="text-gray-800 font-black text-[12px] leading-none">{listing.seller?.rating || '4.5'}</span>
@@ -369,7 +369,7 @@ function ComparisonOffersList({
             </div>
 
             {/* Right: Actions */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
               {inStock ? (
                 <>
                   {/* Refresh offer */}
@@ -401,12 +401,15 @@ function ComparisonOffersList({
                   </div>
                 </>
               ) : (
-                <button 
-                  onClick={() => setShowStockAlert(true)}
-                  className="w-8.5 h-8.5 rounded-full bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center border border-red-100 active:scale-95 transition-all focus:outline-none"
-                >
-                  <Bell className="w-4 h-4" />
-                </button>
+                <>
+                  <span className="text-[11px] font-bold text-red-500">Out of Stock</span>
+                  <button 
+                    onClick={() => setShowStockAlert(true)}
+                    className="w-8.5 h-8.5 rounded-full bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center border border-red-100 active:scale-95 transition-all focus:outline-none"
+                  >
+                    <Bell className="w-4 h-4" />
+                  </button>
+                </>
               )}
             </div>
           </div>

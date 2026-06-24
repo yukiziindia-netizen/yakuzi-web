@@ -51,7 +51,7 @@ export default function CartPage() {
 
         <Navbar showUserActions onLoginClick={() => setIsLoginOpen(true)} />
 
-        <div className="pt-20 sm:pt-24 md:pt-28 pb-12 sm:pb-20 px-[4vw] w-full mx-auto relative z-10">
+        <div className="pt-20 sm:pt-24 md:pt-28 pb-12 sm:pb-20 px-[4vw] w-full max-w-7xl mx-auto relative z-10">
           {/* Header */}
           <div className="flex items-center justify-between mb-6 sm:mb-8">
             <div>

@@ -35,13 +35,6 @@ export default function CategoryBanner({ title, imageUrl }: CategoryBannerProps)
           <div className="w-2.5 h-2.5 rounded-full bg-white/40 cursor-pointer hover:bg-white/80 transition-colors shadow-sm"></div>
           <div className="w-2.5 h-2.5 rounded-full bg-white/40 cursor-pointer hover:bg-white/80 transition-colors shadow-sm"></div>
         </div>
-
-        {/* Try Plaiss Engine Badge */}
-        <div className="absolute bottom-4 md:bottom-8 right-4 md:right-8">
-          <button className="bg-white text-gray-800 px-4 py-1.5 md:px-5 md:py-2 rounded-full text-xs md:text-sm font-medium shadow-lg hover:bg-gray-50 transition-colors">
-            Try <span className="font-bold">Plaiss</span> Engine
-          </button>
-        </div>
       </div>
     </div>
   );

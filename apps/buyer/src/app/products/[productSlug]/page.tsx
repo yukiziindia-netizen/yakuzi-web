@@ -50,13 +50,13 @@ function Accordion({
     <div className="border-b border-gray-100 py-3">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between text-left text-[11px] font-bold uppercase tracking-wide text-gray-500 focus:outline-none"
+        className="flex w-full items-center justify-between text-left text-xs sm:text-[13px] font-extrabold uppercase tracking-wider text-gray-700 focus:outline-none"
       >
         {title}
         {isOpen ? (
-          <Minus size={14} className="text-gray-400" />
+          <Minus size={14} className="text-gray-500" strokeWidth={3} />
         ) : (
-          <Plus size={14} className="text-gray-400" />
+          <Plus size={14} className="text-gray-500" strokeWidth={3} />
         )}
       </button>
       <AnimatePresence>
@@ -67,7 +67,7 @@ function Accordion({
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden"
           >
-            <div className="purple-scroll relative max-h-[70px] overflow-y-auto pr-4 pt-2 text-[10px] font-medium leading-relaxed text-gray-400 sm:text-[11px]">
+            <div className="purple-scroll relative max-h-[70px] overflow-y-auto pr-4 pt-2 text-xs sm:text-[13px] font-semibold leading-relaxed text-gray-600">
               {content}
             </div>
           </motion.div>
@@ -78,73 +78,174 @@ function Accordion({
 }
 
 function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
-  const isYukiziChoice = !!prod.isNew;
-  
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { mutate: addToCart } = useAddToCart();
+  const { mutate: addToWishlist } = useAddToWishlist();
+  const { mutate: removeFromWishlist } = useRemoveFromWishlist();
+  const { data: wishlistData } = useWishlist();
+  const { toast } = useToast();
+
+  const currentProductId = prod?.id || `prod-${index}`;
+  const isSaved = wishlistData?.items?.some(
+    (item: any) => item.productId === currentProductId || item.product?.id === currentProductId || item.id === currentProductId
+  );
+
+  const isYukiziChoice = !!prod.isYukiziChoice || !!prod.isNew;
+  const isBestSeller = !!prod.isBestSeller;
+  const isAd = !!prod.isAd;
+
   const price = prod.price;
   const mrp = prod.mrp || prod.originalPrice;
+  const rating = prod.rating || null;
+
   const discountText = mrp != null && price != null && mrp > price
-    ? `${Math.round(((mrp - price) / mrp) * 100)}% off`
+    ? `${Math.round(((mrp - price) / mrp) * 105)}% off`
     : null;
 
+  const deliveryText = prod.deliveryTime || '3 days';
+  const productName = prod.name || 'Product';
+
+  const getInitials = (name: string) => {
+    if (!name) return 'PR';
+    const words = name.trim().split(/\s+/);
+    if (words.length === 1) return words[0].substring(0, 2).toUpperCase();
+    return (words[0][0] + words[words.length - 1][0]).toUpperCase();
+  };
+  const fallbackImage = `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent(getInitials(productName))}`;
+  const imageUrl = prod.images?.[0]?.url || prod.images?.[0] || prod.image || fallbackImage;
+
   return (
-    <div
-      className={`relative rounded-xl border bg-white ${isYukiziChoice ? 'border-[#e2cbf5] shadow-[0_2px_15px_rgba(133,76,188,0.12)]' : 'border-gray-200'} flex w-[180px] min-w-[160px] flex-col p-3 transition-all hover:shadow-lg`}
-    >
-      {/* Top Badges */}
-      <div className="relative z-10 mb-1 flex items-start justify-between">
-        {isYukiziChoice && (
-          <div className="pointer-events-none rounded-full bg-[#854cbc] px-2 py-0.5 text-[8px] font-bold text-white">
-            New Arrival
-          </div>
-        )}
-      </div>
-
-      <div className="absolute left-2 top-7 z-10 cursor-pointer text-gray-300 hover:text-gray-500">
-        <Share2 size={12} strokeWidth={2.5} />
-      </div>
-
-      <Link
-        href={`/products/${generateProductSlug(prod.name || 'Product', prod.id || 'prod-' + index)}`}
-        className="relative z-0 mb-3 mt-4 flex h-28 w-full items-center justify-center transition-transform group-hover:scale-105 block"
+    <div className={`relative mt-3 group flex flex-col h-full ${isMenuOpen ? 'z-50' : 'z-auto'}`}>
+      <div 
+        className={`block bg-white rounded-xl border ${
+          isYukiziChoice 
+            ? 'border-[#cdaef1] shadow-[0_0_15px_rgba(133,76,188,0.2)]' 
+            : 'border-gray-200 shadow-sm'
+        } p-2.5 pb-3 flex flex-col hover:shadow-lg transition-all duration-300 w-full h-full relative overflow-hidden`}
       >
-        <img
-          src={
-            prod.image ||
-            (prod.images && (typeof prod.images[0] === 'string' ? prod.images[0] : prod.images[0]?.url)) ||
-            `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent((prod.name || 'PR').trim().split(/\s+/).length === 1 ? (prod.name || 'PR').trim().substring(0, 2).toUpperCase() : ((prod.name || 'PR').trim().split(/\s+/)[0][0] + (prod.name || 'PR').trim().split(/\s+/)[(prod.name || 'PR').trim().split(/\s+/).length - 1][0]).toUpperCase())}`
-          }
-          alt={prod.name}
-          className="max-h-full max-w-full object-contain mix-blend-multiply"
-        />
-      </Link>
-
-      <div className="mt-auto flex flex-col gap-1.5">
-        <div className="flex items-center justify-between gap-1">
-          <h3 className="flex-1 truncate text-[11px] font-medium text-gray-500">{prod.name}</h3>
-          <div className="flex-shrink-0 cursor-pointer rounded-full bg-gray-400 p-[2px] transition-colors hover:bg-gray-500">
-            <ArrowUpRight size={10} className="text-white" strokeWidth={3} />
+        {/* Top Icons */}
+        <div className="flex justify-between items-start">
+          <div className="z-30 w-7 h-7 flex items-center justify-center">
+            <ShareButton 
+              productName={productName}
+              productPrice={Number(price)}
+              productImage={imageUrl}
+              productId={currentProductId}
+              className="p-1 opacity-70 hover:opacity-100 border-0 shadow-none bg-transparent"
+              onOpenChange={setIsMenuOpen}
+            />
           </div>
-        </div>
-
-        <div className="mt-1 flex items-center justify-between">
-          <div className="flex items-baseline gap-1">
-            <span className="text-[12px] font-bold text-gray-700">₹{prod.price}</span>
-            {mrp && mrp > (price || 0) && (
-              <span className="text-[9px] text-gray-300 line-through">
-                ₹{mrp}
-              </span>
-            )}
-          </div>
-          {prod.rating && (
-            <div className="flex items-center gap-0.5">
-              <Star size={10} className="fill-[#854cbc] text-[#854cbc]" />
-              <span className="text-[10px] font-bold text-gray-600">{prod.rating}</span>
-            </div>
+          {price != null && (
+            <button 
+              className="text-[#f97316] hover:text-orange-600 transition-colors z-10 p-0.5" 
+              onClick={(e) => { 
+                e.preventDefault(); 
+                e.stopPropagation();
+                addToCart(
+                  { productId: currentProductId, quantity: 1, price, originalPrice: mrp, ...prod },
+                  { onSuccess: () => toast('Added to cart', 'success') }
+                );
+              }}
+            >
+               <Plus size={20} strokeWidth={2.5} />
+            </button>
           )}
         </div>
 
-        {discountText && <div className="mt-0.5 text-[8px] font-bold text-gray-400">{discountText}</div>}
+        {/* Right Edge Ribbon (Wishlist/Save) */}
+        <button 
+          className="absolute top-[30%] -right-[1px] z-20 cursor-pointer"
+          onClick={(e) => { 
+            e.preventDefault(); 
+            e.stopPropagation();
+            if (isSaved) {
+              removeFromWishlist(currentProductId, {
+                onSuccess: () => toast('Removed from wishlist', 'info')
+              });
+            } else {
+              addToWishlist(prod, {
+                onSuccess: () => toast('Added to wishlist', 'success')
+              });
+            }
+          }}
+        >
+          <Bookmark 
+            className={`w-[28px] h-[40px] stroke-[1] rotate-90 transition-colors ${isSaved ? 'fill-[#854cbc] text-[#854cbc]' : 'fill-[#FAF6EB] text-[#e8dfd5] hover:brightness-95'}`}
+          />
+        </button>
+
+        {/* Image Container */}
+        <Link href={`/products/${generateProductSlug(productName, prod.id || 'prod-' + index)}`} className="w-full h-[140px] sm:h-[150px] flex items-center justify-center mb-3 mt-1 relative group-hover:scale-105 transition-transform duration-500 block z-10">
+           <img src={imageUrl} alt={productName} className="max-h-full max-w-full object-contain mix-blend-multiply drop-shadow-sm" />
+        </Link>
+
+        {/* Details Section */}
+        <div className="mt-auto flex flex-col gap-1 px-0.5">
+           {/* Title Line */}
+           <div className="flex justify-between items-center gap-1.5 mb-1">
+              <h3 className="text-[14px] font-medium text-gray-700 truncate flex-1 text-left">
+                 {productName}
+              </h3>
+              <Link 
+                 href={`/products/${generateProductSlug(productName, prod.id || 'prod-' + index)}`}
+                 className="bg-gray-400 hover:bg-gray-500 transition-colors rounded-full p-[3px] flex-shrink-0 z-10"
+              >
+                 <ArrowUpRight size={12} className="text-white" strokeWidth={3} />
+              </Link>
+           </div>
+           
+           {/* Price and Rating */}
+           <div className="flex justify-between items-center mb-1.5">
+              <div className="flex items-baseline gap-1.5">
+                 <span className="text-[15px] font-semibold text-gray-700 tracking-tight">
+                    {price != null ? `₹${Number(price).toLocaleString('en-IN')}` : 'N/A'}
+                  </span>
+                  {mrp != null && mrp > (price || 0) && (
+                     <span className="text-[10px] text-gray-400 line-through">₹{Number(mrp).toLocaleString('en-IN')}</span>
+                  )}
+              </div>
+              {rating !== null && (
+                <div className="flex items-center gap-0.5">
+                   <Star size={13} className="fill-[#854cbc] text-[#854cbc]" />
+                   <span className="text-[13px] font-medium text-gray-600">{rating}</span>
+                </div>
+              )}
+           </div>
+
+           {/* Bottom Badges */}
+           <div className="flex justify-between items-center h-[20px] mt-0.5">
+              {discountText ? (
+                <span className="text-[10px] font-bold text-gray-700">
+                   {discountText}
+                </span>
+              ) : <span />}
+              
+              {deliveryText && (
+                <div className="flex items-center gap-1 bg-[#f0f0f0] rounded px-1.5 py-[3px]">
+                   <Truck size={10} strokeWidth={2.5} className="text-gray-500" />
+                   <span className="text-[9px] font-bold text-gray-600 leading-none">{deliveryText}</span>
+                </div>
+              )}
+           </div>
+        </div>
       </div>
+
+      {/* Overlapping Badges */}
+      {isYukiziChoice && (
+        <div className="absolute -top-2 left-3 px-2.5 py-[2px] rounded-full text-[9px] tracking-wide font-bold bg-[#854cbc] text-white z-20 pointer-events-none border-[1.5px] border-white">
+          Yukizi Choice
+        </div>
+      )}
+      {isBestSeller && (
+        <div className="absolute -top-2 left-3 px-2.5 py-[2px] rounded-full text-[9px] tracking-wide font-bold bg-[#4a4a4a] text-white z-20 pointer-events-none border-[1.5px] border-white">
+          Best Seller
+        </div>
+      )}
+      {isAd && (
+        <div className="absolute -top-2 right-4 px-1 text-[9px] font-medium text-gray-400 bg-white z-20 pointer-events-none">
+          Ad
+        </div>
+      )}
     </div>
   );
 }
@@ -203,7 +304,7 @@ function ProductBannerCard({
       </div>
 
       {/* Vertical Thumbnails */}
-      <div className={`absolute left-4 ${isDesktop ? 'top-1/2 -translate-y-1/2' : 'bottom-4'} flex flex-col gap-2 z-20`}>
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 flex flex-col gap-4 z-20">
         {images.slice(0, 3).map((img: string, idx: number) => (
           <button
             key={idx}
@@ -345,14 +446,14 @@ function ComparisonOffersList({
           >
             {/* Left: Discount Badge & Price */}
             <div className="flex items-center gap-3.5 min-w-0 sm:min-w-[155px] w-full sm:w-auto justify-between sm:justify-start">
-              <div className="bg-[#854cbc] text-white px-2 py-1.5 rounded-lg text-[9px] font-black tracking-wider uppercase leading-none min-w-[66px] text-center select-none">
+              <div className="bg-[#854cbc] text-white px-2 py-1.5 rounded-lg text-[10px] font-black tracking-wider uppercase leading-none min-w-[66px] text-center select-none">
                 {discountPercent}% off
               </div>
               <div className="flex flex-col text-right sm:text-left">
-                <span className="text-[15px] font-black text-gray-800 leading-none">
+                <span className="text-[17px] font-black text-gray-900 leading-none">
                   ₹{listing.price?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                 </span>
-                <span className="text-[9px] text-gray-400 font-bold mt-1.5 leading-none">
+                <span className="text-[11px] text-gray-500 font-extrabold mt-1.5 leading-none">
                   {listing.moq > 1 ? `${listing.moq * 10}% off on purchase of ${listing.moq}` : 'MOQ: 1'}
                 </span>
               </div>
@@ -362,7 +463,7 @@ function ComparisonOffersList({
             <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-start border-t border-b border-gray-100/50 py-2 sm:border-0 sm:py-0">
               <div className="flex items-center gap-1">
                 <Star className="w-3.5 h-3.5 fill-[#854cbc] text-[#854cbc]" />
-                <span className="text-gray-800 font-black text-[12px] leading-none">{listing.seller?.rating || '4.5'}</span>
+                <span className="text-gray-900 font-black text-[13px] leading-none">{listing.seller?.rating || '4.5'}</span>
               </div>
 
               <DeliveryTruckBadge text={listing.deliveryText || '3 days'} className="w-[72px] h-auto text-gray-400" />
@@ -505,7 +606,7 @@ function ReviewSubmissionForm({
   );
 }
 
-const getMockReviewsForProduct = (productName: string, categoryName?: string) => {
+const getMockReviewsForProduct = (productName: string, categoryName?: string, productImage?: string) => {
   const cleanName = productName || 'product';
   const cleanCategory = categoryName || 'items';
   
@@ -523,6 +624,7 @@ const getMockReviewsForProduct = (productName: string, categoryName?: string) =>
       rating: 4,
       comment: `Good purchase. The ${cleanName} works exactly as expected. Quick delivery and secure packaging. Will definitely buy more from this category.`,
       createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+      image: productImage || null,
     }
   ];
 };
@@ -549,16 +651,6 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
 
   const { data: reviewsData } = useProductReviews(product?.id || '');
   const { mutate: submitReview } = useCreateReview();
-
-  const reviewsList = reviewsData?.data && reviewsData.data.length > 0
-    ? reviewsData.data
-    : getMockReviewsForProduct(product?.name || 'Product', product?.category?.name || 'Item');
-
-  const averageRating = reviewsData?.averageRating || (reviewsData?.data && reviewsData.data.length > 0
-    ? (reviewsData.data.reduce((acc: number, curr: any) => acc + curr.rating, 0) / reviewsData.data.length)
-    : 4.5);
-
-  const totalReviews = reviewsData?.total || (reviewsData?.data && reviewsData.data.length > 0 ? reviewsData.data.length : reviewsList.length);
 
   // Review state
   const [rating, setRating] = useState(0);
@@ -609,12 +701,29 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
     );
   }
 
+  // Calculated variables safe to declare now that product is guaranteed to exist:
   const images =
     product.images && product.images.length > 0
       ? product.images.map((img: any) => img.url || img)
       : [
           `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent((product.name || 'PR').trim().split(/\s+/).length === 1 ? (product.name || 'PR').trim().substring(0, 2).toUpperCase() : ((product.name || 'PR').trim().split(/\s+/)[0][0] + (product.name || 'PR').trim().split(/\s+/)[(product.name || 'PR').trim().split(/\s+/).length - 1][0]).toUpperCase())}`,
         ];
+
+  const displayImages = [...images];
+  while (displayImages.length < 3 && displayImages.length > 0) {
+    displayImages.push(images[0]);
+  }
+
+  const reviewsList = reviewsData?.data && reviewsData.data.length > 0
+    ? reviewsData.data
+    : getMockReviewsForProduct(product?.name || 'Product', product?.category?.name || 'Item', images[0]);
+
+  const averageRating = reviewsData?.averageRating || (reviewsData?.data && reviewsData.data.length > 0
+    ? (reviewsData.data.reduce((acc: number, curr: any) => acc + curr.rating, 0) / reviewsData.data.length)
+    : 4.5);
+
+  const totalReviews = reviewsData?.total || (reviewsData?.data && reviewsData.data.length > 0 ? reviewsData.data.length : reviewsList.length);
+
   const listings = product.listings || [];
   const validListings = listings.filter((l: any) => l.price != null);
   const displayPrice =
@@ -705,7 +814,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
         <div className="block lg:hidden flex flex-col gap-5 w-full">
           {/* Banner Card */}
           <ProductBannerCard 
-            images={images}
+            images={displayImages}
             activeImageIndex={activeImage}
             setActiveImageIndex={setActiveImage}
             isBookmarked={isBookmarked}
@@ -751,7 +860,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
           {/* Related Products */}
           <div className="mt-4 border-t border-gray-100 pt-6">
             <h2 className="mb-4 text-base font-bold text-gray-600 uppercase tracking-wider">Related Products</h2>
-            <div className="hide-scrollbar flex gap-4 overflow-x-auto pb-4">
+            <div className="grid grid-cols-3 gap-3.5 pb-4">
               {relatedProducts.map((prod: any, idx: number) => (
                 <RelatedProductCard key={prod.id} prod={prod} index={idx} />
               ))}
@@ -761,7 +870,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
           {/* Reviews Summary Section */}
           <div className="mt-4 border-t border-gray-100 pt-6">
             <h2 className="mb-4 text-base font-bold text-gray-600 uppercase tracking-wider">Reviews</h2>
-            <div className="mb-5 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+            <div className="mb-5 flex items-center justify-between w-full">
               <div>
                 <div className="mb-1 flex items-center gap-3">
                   <div className="flex gap-1 text-[#854cbc]">
@@ -792,27 +901,44 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                   {averageRating.toFixed(1)} out of 5 stars (based on {totalReviews} review{totalReviews !== 1 ? 's' : ''})
                 </p>
               </div>
+
+              <button
+                type="button"
+                className="bg-[#854cbc] hover:bg-purple-800 text-white rounded-xl px-4 py-2 sm:px-5 sm:py-2.5 text-xs font-bold shadow-sm transition-colors whitespace-nowrap"
+              >
+                See all reviews
+              </button>
             </div>
 
             {/* Review Cards Carousel */}
             <div className="hide-scrollbar flex flex-col gap-4 overflow-x-auto pb-2 sm:flex-row">
-              {reviewsList.map((rev: any) => (
-                <div key={rev.id} className="flex min-w-[240px] flex-1 flex-col justify-between rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                  <p className="mb-4 text-[11px] font-medium leading-relaxed text-gray-500">
-                    {rev.comment}
-                  </p>
-                  <div>
-                    <div className="mb-1.5 flex gap-0.5 text-[#b165f1]">
-                      {[1, 2, 3, 4, 5].map((i) => (
-                        <Star key={i} size={14} fill={i <= rev.rating ? "currentColor" : "none"} className={i <= rev.rating ? "text-[#b165f1]" : "text-gray-200"} />
-                      ))}
+              {reviewsList.map((rev: any) => {
+                const reviewImage = rev.image || rev.imageUrl;
+                return (
+                  <div key={rev.id} className="flex min-w-[280px] flex-1 flex-row justify-between gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                    <div className="flex flex-col justify-between flex-1">
+                      <p className="mb-4 text-[11px] font-medium leading-relaxed text-gray-500">
+                        {rev.comment}
+                      </p>
+                      <div>
+                        <div className="mb-1.5 flex gap-0.5 text-[#b165f1]">
+                          {[1, 2, 3, 4, 5].map((i) => (
+                            <Star key={i} size={14} fill={i <= rev.rating ? "currentColor" : "none"} className={i <= rev.rating ? "text-[#b165f1]" : "text-gray-200"} />
+                          ))}
+                        </div>
+                        <p className="text-[10px] font-semibold text-gray-400">
+                          - {rev.userName || 'Anonymous'}, {new Date(rev.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-[10px] font-semibold text-gray-400">
-                      - {rev.userName || 'Anonymous'}, {new Date(rev.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                    </p>
+                    {reviewImage && (
+                      <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden flex-shrink-0 self-center border border-gray-100 bg-white">
+                        <img src={reviewImage} alt="Review attachment" className="w-full h-full object-cover" />
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Review Submission Form */}
@@ -877,7 +1003,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
             <div className="flex flex-col gap-6">
               {/* Product Image Banner */}
               <ProductBannerCard 
-                images={images}
+                images={displayImages}
                 activeImageIndex={activeImage}
                 setActiveImageIndex={setActiveImage}
                 isBookmarked={isBookmarked}
@@ -934,7 +1060,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                   <DeliveryTruckBadge text="3 days" className="w-[72px] h-auto text-gray-400" />
                   <div className="flex items-center gap-1">
                     <Star className="w-4.5 h-4.5 fill-[#854cbc] text-[#854cbc]" />
-                    <span className="text-[13px] font-semibold text-gray-800">{averageRating.toFixed(1)}</span>
+                    <span className="text-[15px] font-bold text-gray-900">{averageRating.toFixed(1)}</span>
                   </div>
                 </div>
               </div>
@@ -960,7 +1086,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
             {/* Left: Related Products */}
             <div className="flex flex-col gap-4">
               <h2 className="text-lg font-bold text-gray-700 uppercase tracking-wider">Related Products</h2>
-              <div className="hide-scrollbar flex gap-4 overflow-x-auto pb-4">
+              <div className="grid grid-cols-3 gap-5 pb-4">
                 {relatedProducts.map((prod: any, idx: number) => (
                   <RelatedProductCard key={prod.id} prod={prod} index={idx} />
                 ))}
@@ -971,7 +1097,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
             <div className="flex flex-col">
               <h2 className="text-lg font-bold text-gray-700 uppercase tracking-wider mb-4">Reviews</h2>
               
-              <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+              <div className="mb-6 flex items-center justify-between w-full">
                 <div>
                   <div className="mb-1 flex items-center gap-3">
                     <div className="flex gap-1 text-[#854cbc]">
@@ -1002,27 +1128,44 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                     {averageRating.toFixed(1)} out of 5 stars (based on {totalReviews} review{totalReviews !== 1 ? 's' : ''})
                   </p>
                 </div>
+
+                <button
+                  type="button"
+                  className="bg-[#854cbc] hover:bg-purple-800 text-white rounded-xl px-5 py-2.5 text-xs font-bold shadow-sm transition-colors whitespace-nowrap"
+                >
+                  See all reviews
+                </button>
               </div>
 
               {/* Review Cards Carousel */}
               <div className="hide-scrollbar flex flex-col gap-4 overflow-x-auto pb-2 sm:flex-row">
-                {reviewsList.map((rev: any) => (
-                  <div key={rev.id} className="flex min-w-[240px] flex-1 flex-col justify-between rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                    <p className="mb-4 text-[11px] font-medium leading-relaxed text-gray-500">
-                      {rev.comment}
-                    </p>
-                    <div>
-                      <div className="mb-1.5 flex gap-0.5 text-[#b165f1]">
-                        {[1, 2, 3, 4, 5].map((i) => (
-                          <Star key={i} size={14} fill={i <= rev.rating ? "currentColor" : "none"} className={i <= rev.rating ? "text-[#b165f1]" : "text-gray-200"} />
-                        ))}
+                {reviewsList.map((rev: any) => {
+                  const reviewImage = rev.image || rev.imageUrl;
+                  return (
+                    <div key={rev.id} className="flex min-w-[280px] flex-1 flex-row justify-between gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                      <div className="flex flex-col justify-between flex-1">
+                        <p className="mb-4 text-[11px] font-medium leading-relaxed text-gray-500">
+                          {rev.comment}
+                        </p>
+                        <div>
+                          <div className="mb-1.5 flex gap-0.5 text-[#b165f1]">
+                            {[1, 2, 3, 4, 5].map((i) => (
+                              <Star key={i} size={14} fill={i <= rev.rating ? "currentColor" : "none"} className={i <= rev.rating ? "text-[#b165f1]" : "text-gray-200"} />
+                            ))}
+                          </div>
+                          <p className="text-[10px] font-semibold text-gray-400">
+                            - {rev.userName || 'Anonymous'}, {new Date(rev.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                          </p>
+                        </div>
                       </div>
-                      <p className="text-[10px] font-semibold text-gray-400">
-                        - {rev.userName || 'Anonymous'}, {new Date(rev.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                      </p>
+                      {reviewImage && (
+                        <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden flex-shrink-0 self-center border border-gray-100 bg-white">
+                          <img src={reviewImage} alt="Review attachment" className="w-full h-full object-cover" />
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Review Submission Form */}

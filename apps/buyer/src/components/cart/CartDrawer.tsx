@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Trash2, Loader2, Star, ArrowUpRight, Bookmark, ShoppingBag, ShoppingCart } from 'lucide-react';
+import { X, Trash2, Loader2, Star, Bookmark, ShoppingBag, ShoppingCart } from 'lucide-react';
 import { DeliveryTruckBadge } from '@/components/shared/DeliveryTruckBadge';
 import WishlistIcon from '@/components/shared/WishlistIcon';
 import { useCart, useUpdateCartItem, useRemoveCartItem, useSyncCart, useClearCart } from '@/hooks/useCart';
@@ -117,12 +117,12 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
             </button>
 
             {/* Header */}
-            <div className="pt-8 px-6 pb-2">
+            <div className="pt-8 px-4 sm:px-6 pb-2">
               <h2 className="text-[34px] font-extrabold text-gray-800">My Cart</h2>
             </div>
 
             {/* Items */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar px-6 pb-4 pt-2 space-y-3">
+            <div className="flex-1 overflow-y-auto custom-scrollbar px-3 sm:px-6 pb-4 pt-2 space-y-3">
               {(isLoading || syncCart.isPending) && items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full gap-4">
                   <Loader2 className="w-10 h-10 text-gray-300 animate-spin" />
@@ -162,7 +162,7 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, x: -50 }}
-                      className="bg-white rounded-[14px] shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border border-gray-100 p-3 flex gap-3 relative overflow-hidden group"
+                      className="bg-white rounded-[14px] shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border border-gray-100 p-2 sm:p-3 flex gap-2 sm:gap-3 relative overflow-hidden group"
                     >
                       {isYukiziChoice && (
                         <span className="absolute top-0 left-0 text-[9px] font-bold text-white bg-[#6342B4] px-2 py-1 rounded-br-lg z-10 uppercase tracking-wider">
@@ -171,8 +171,8 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                       )}
 
                       {/* Left Image */}
-                      <div className="w-[105px] h-[105px] bg-[#f8f5fd] rounded-xl flex items-center justify-center relative flex-shrink-0 mt-1.5 overflow-hidden">
-                        <img src={itemImage} alt={itemName} className="w-20 h-20 object-contain mix-blend-multiply" />
+                      <div className="w-[90px] h-[90px] sm:w-[105px] sm:h-[105px] bg-[#f8f5fd] rounded-xl flex items-center justify-center relative flex-shrink-0 mt-1.5 overflow-hidden">
+                        <img src={itemImage} alt={itemName} className="w-16 h-16 sm:w-20 sm:h-20 object-contain mix-blend-multiply" />
                         <button 
                           onClick={(e) => {
                             e.preventDefault();
@@ -181,34 +181,68 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                             });
                           }}
                           disabled={removeItem.isPending || syncCart.isPending}
-                          className="absolute bottom-0 left-0 bg-[#f7941d] text-white p-2 rounded-tr-2xl hover:bg-orange-500 transition-colors z-10 disabled:opacity-50"
+                          className="absolute bottom-0 left-0 bg-[#f7941d] text-white p-1.5 sm:p-2 rounded-tr-2xl hover:bg-orange-500 transition-colors z-10 disabled:opacity-50"
                         >
-                          <Trash2 className="w-[22px] h-[22px]" />
+                          <Trash2 className="w-4 h-4 sm:w-[22px] sm:h-[22px]" />
                         </button>
                       </div>
 
                       {/* Right Content */}
                       <div className="flex-1 min-w-0 pr-1 mt-1 relative">
-                        {/* Wishlist Button Badge */}
-                        <div className="mb-1.5 inline-block">
-                          <button 
-                            onClick={async (e) => {
-                              e.preventDefault();
-                              await addToWishlist.mutateAsync({
-                                ...item,
-                                id: item.product?.id || item.productId || item.id,
-                                name: itemName,
-                                price: itemPrice,
-                                originalPrice: itemOriginalPrice,
-                                image: itemImage,
-                              });
-                              toast('Added to wishlist', 'success');
-                            }}
-                            className="flex items-center gap-1.5 bg-[#562996] text-white px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-[10px] hover:bg-[#432075] transition-colors shadow-sm"
-                          >
-                            <span className="text-[11px] sm:text-[14px] font-bold tracking-wider">Wishlist</span>
-                            <Bookmark className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
-                          </button>
+                        {/* Top Row: Wishlist Badge & Quantity Pill (on mobile) */}
+                        <div className="flex items-center justify-between w-full mb-1.5 pr-1">
+                          {/* Wishlist Button Badge */}
+                          <div className="inline-block">
+                            <button 
+                              onClick={async (e) => {
+                                e.preventDefault();
+                                await addToWishlist.mutateAsync({
+                                  ...item,
+                                  id: item.product?.id || item.productId || item.id,
+                                  name: itemName,
+                                  price: itemPrice,
+                                  originalPrice: itemOriginalPrice,
+                                  image: itemImage,
+                                });
+                                toast('Added to wishlist', 'success');
+                              }}
+                              className="flex items-center gap-1 sm:gap-1.5 bg-[#562996] text-white px-2 sm:px-4 py-1 sm:py-2 rounded-lg sm:rounded-[10px] hover:bg-[#432075] transition-colors shadow-sm"
+                            >
+                              <span className="text-[10px] sm:text-[14px] font-bold tracking-wider">Wishlist</span>
+                              <Bookmark className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
+                            </button>
+                          </div>
+
+                          {/* Quantity Pill (Mobile only) */}
+                          <div className="flex sm:hidden items-center bg-[#562996] rounded-lg text-white overflow-hidden shadow-sm h-7 px-1.5">
+                            <button 
+                              onClick={() => {
+                                const moq = item.moq || item.product?.moq || item.product?.minimumOrderQuantity || 1;
+                                updateItem.mutate({ itemId: item.id, quantity: Math.max(moq, quantity - 1) });
+                              }}
+                              disabled={updateItem.isPending || syncCart.isPending || quantity <= (item.moq || item.product?.moq || item.product?.minimumOrderQuantity || 1)}
+                              className="px-1.5 h-full hover:bg-black/20 flex items-center justify-center font-bold text-xs transition-colors disabled:opacity-50"
+                            >
+                              -
+                            </button>
+                            <span className="text-[11px] font-black px-1 tracking-tighter">{quantity.toString().padStart(2, '0')}</span>
+                            <button 
+                              onClick={() => {
+                                const stock = item.stock ?? item.product?.stock ?? 9999;
+                                const maxLimit = (item.maximumOrderQuantity || item.product?.maximumOrderQuantity) || stock;
+                                const max = Math.min(stock, maxLimit);
+                                if (quantity < max) {
+                                  updateItem.mutate({ itemId: item.id, quantity: quantity + 1 });
+                                } else {
+                                  toast(`Only ${max} units available`, 'error');
+                                }
+                              }}
+                              disabled={updateItem.isPending || syncCart.isPending}
+                              className="px-1.5 h-full hover:bg-black/20 flex items-center justify-center font-bold text-xs transition-colors disabled:opacity-50"
+                            >
+                              +
+                            </button>
+                          </div>
                         </div>
 
                         <h3 className="text-[16px] font-bold text-gray-800 leading-snug truncate pr-6">{itemName}</h3>
@@ -223,18 +257,18 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                         </span>
                         
                         {/* Rating */}
-                        <div className="absolute right-1 bottom-1 flex flex-col items-end">
-                          <div className="flex items-center gap-[4px]">
-                            <Star className="w-4 h-4 fill-[#6342B4] text-[#6342B4]" />
-                            <span className="text-[14px] font-bold text-gray-700">{item.rating || 4.5}</span>
+                        <div className="absolute right-1 bottom-1 flex flex-col items-end gap-0.5 sm:gap-1">
+                          <div className="flex items-center gap-[3px] sm:gap-[4px]">
+                            <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-[#6342B4] text-[#6342B4]" />
+                            <span className="text-xs sm:text-[14px] font-bold text-gray-700">{item.rating || 4.5}</span>
                           </div>
-                          <DeliveryTruckBadge text="2 days" className="w-[95px] mt-0.5 text-[#9a9a9a]" />
+                          <DeliveryTruckBadge text="2 days" className="w-[80px] sm:w-[95px] mt-0.5 text-[#9a9a9a]" />
                         </div>
 
                         {/* Top Right Actions */}
                         <div className="absolute top-0 right-0 flex flex-col items-end gap-2">
-                          {/* Quantity Pill */}
-                          <div className="flex items-center bg-[#562996] rounded-full text-white overflow-hidden shadow-sm h-8 sm:h-10 px-2 sm:px-3">
+                          {/* Quantity Pill (Desktop/Tablet only) */}
+                          <div className="hidden sm:flex items-center bg-[#562996] rounded-lg sm:rounded-[10px] text-white overflow-hidden shadow-sm h-8 sm:h-10 px-2 sm:px-3">
                             <button 
                               onClick={() => {
                                 const moq = item.moq || item.product?.moq || item.product?.minimumOrderQuantity || 1;
@@ -263,10 +297,6 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                               +
                             </button>
                           </div>
-                          
-                          <button className="text-gray-400 hover:text-gray-600 mt-2 mr-1">
-                            <ArrowUpRight className="w-6 h-6 bg-gray-100 rounded-full p-1" />
-                          </button>
                         </div>
                       </div>
                     </motion.div>

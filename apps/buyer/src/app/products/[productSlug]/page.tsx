@@ -121,7 +121,7 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
           isYukiziChoice 
             ? 'border-[#cdaef1] shadow-[0_0_15px_rgba(133,76,188,0.2)]' 
             : 'border-gray-200 shadow-sm'
-        } p-2.5 pb-3 flex flex-col hover:shadow-lg transition-all duration-300 w-full h-full relative overflow-hidden`}
+        } p-3 pb-4 sm:p-2.5 sm:pb-3 flex flex-col hover:shadow-lg transition-all duration-300 w-full h-full relative overflow-hidden`}
       >
         {/* Top Icons */}
         <div className="flex justify-between items-start">
@@ -175,7 +175,7 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
         </button>
 
         {/* Image Container */}
-        <Link href={`/products/${generateProductSlug(productName, prod.id || 'prod-' + index)}`} className="w-full h-[140px] sm:h-[150px] flex items-center justify-center mb-3 mt-1 relative group-hover:scale-105 transition-transform duration-500 block z-10">
+        <Link href={`/products/${generateProductSlug(productName, prod.id || 'prod-' + index)}`} className="w-full h-[160px] sm:h-[150px] flex items-center justify-center mb-3 mt-1 relative group-hover:scale-105 transition-transform duration-500 block z-10">
            <img src={imageUrl} alt={productName} className="max-h-full max-w-full object-contain mix-blend-multiply drop-shadow-sm" />
         </Link>
 
@@ -860,8 +860,8 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
           {/* Related Products */}
           <div className="mt-4 border-t border-gray-100 pt-6">
             <h2 className="mb-4 text-base font-bold text-gray-600 uppercase tracking-wider">Related Products</h2>
-            <div className="grid grid-cols-3 gap-3.5 pb-4">
-              {relatedProducts.map((prod: any, idx: number) => (
+            <div className="grid grid-cols-2 gap-3.5 pb-4">
+              {relatedProducts.slice(0, 4).map((prod: any, idx: number) => (
                 <RelatedProductCard key={prod.id} prod={prod} index={idx} />
               ))}
             </div>

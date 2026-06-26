@@ -63,7 +63,7 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
 
       {/* Drawer */}
       <div 
-        className={`fixed inset-y-0 right-0 w-[92%] sm:w-[500px] md:w-[520px] max-w-full bg-white shadow-2xl z-[110] transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'} overflow-y-auto rounded-l-3xl`}
+        className={`fixed inset-y-0 right-0 w-[95%] sm:w-[580px] md:w-[620px] max-w-full bg-white shadow-2xl z-[110] transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'} overflow-y-auto rounded-l-3xl`}
       >
         {/* Hidden Close Button */}
         <button onClick={onClose} className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-900 bg-white/80 rounded-full z-[80] transition-colors">
@@ -73,8 +73,8 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
         {!isAuthenticated ? (
           <div className="flex flex-col items-center justify-center h-[80vh] px-6 text-center">
             <User className="w-16 h-16 text-purple-200 mb-4" />
-            <h3 className="text-lg font-bold text-gray-700 mb-2">Login to View Orders</h3>
-            <p className="text-xs text-gray-400 max-w-[240px] mb-6">
+            <h3 className="text-2xl font-bold text-gray-700 mb-2">Login to View Orders</h3>
+            <p className="text-sm text-gray-400 max-w-[280px] mb-6">
               Please sign in to your account to view and track your orders.
             </p>
             <button 
@@ -82,7 +82,7 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
                 onClose();
                 onLoginClick?.();
               }}
-              className="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-xl shadow-sm transition-colors"
+              className="bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm uppercase tracking-wider px-8 py-4 rounded-xl shadow-sm transition-colors"
             >
               Sign In
             </button>
@@ -90,13 +90,13 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
         ) : isLoadingAllOrders ? (
           <div className="flex flex-col items-center justify-center h-[80vh] px-6 text-center">
             <Loader2 className="w-10 h-10 animate-spin text-purple-600 mb-2" />
-            <p className="text-xs text-gray-400 font-medium">Loading orders...</p>
+            <p className="text-sm text-gray-400 font-medium">Loading orders...</p>
           </div>
         ) : allOrders.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-[80vh] px-6 text-center">
             <Package className="w-16 h-16 text-purple-200 mb-4" />
-            <h3 className="text-lg font-bold text-gray-700 mb-2">No Orders Yet</h3>
-            <p className="text-xs text-gray-400 max-w-[240px]">
+            <h3 className="text-2xl font-bold text-gray-700 mb-2">No Orders Yet</h3>
+            <p className="text-sm text-gray-400 max-w-[280px]">
               You haven't placed any orders yet. Once you place an order, it will appear here.
             </p>
           </div>
@@ -104,20 +104,20 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
           <>
             {/* Header */}
             <div className="px-6 py-6 border-b border-gray-100 relative">
-              <div className="flex flex-wrap items-center gap-2 mb-2">
-                <h2 className="text-2xl font-bold text-gray-800 mr-2">Orders</h2>
-                <span className="bg-purple-600 text-white text-[10px] px-2 py-0.5 rounded shadow-sm">{order?.paymentMethod === 'COD' ? 'COD' : 'PREPAID'}</span>
-                <span className="bg-purple-600 text-white text-[10px] px-2 py-0.5 rounded shadow-sm capitalize">Status : {displayStatus.toLowerCase()}</span>
-                <span className="bg-purple-600 text-white text-[10px] px-2 py-0.5 rounded shadow-sm">{orderMonth}</span>
-                <span className="bg-purple-600 text-white text-[10px] px-2 py-0.5 rounded shadow-sm">{orderYear}</span>
+              <div className="flex flex-wrap items-center gap-3 mb-2">
+                <h2 className="text-[34px] font-extrabold text-gray-800 mr-2">Orders</h2>
+                <span className="bg-purple-600 text-white text-[14px] px-4 py-2 rounded shadow-sm font-bold">{order?.paymentMethod === 'COD' ? 'COD' : 'PREPAID'}</span>
+                <span className="bg-purple-600 text-white text-[14px] px-4 py-2 rounded shadow-sm font-bold capitalize">Status : {displayStatus.toLowerCase()}</span>
+                <span className="bg-purple-600 text-white text-[14px] px-4 py-2 rounded shadow-sm font-bold">{orderMonth}</span>
+                <span className="bg-purple-600 text-white text-[14px] px-4 py-2 rounded shadow-sm font-bold">{orderYear}</span>
               </div>
-              <div className="flex items-center gap-3 mt-1 absolute right-6 bottom-4">
-                <span className="bg-purple-600 text-white text-[10px] px-2 py-0.5 rounded shadow-sm">All orders</span>
+              <div className="flex items-center gap-3.5 mt-1 absolute right-6 bottom-4">
+                <span className="bg-purple-600 text-white text-[14px] px-4 py-2 rounded shadow-sm font-bold">All orders</span>
                 <button 
                   onClick={() => setIsFilterOpen(true)}
-                  className="text-gray-400 hover:text-purple-600 transition-colors"
+                  className="text-gray-400 hover:text-purple-600 transition-colors p-2"
                 >
-                  <Filter className="w-4 h-4" />
+                  <Filter className="w-7 h-7" />
                 </button>
               </div>
             </div>
@@ -128,8 +128,8 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
                 className="flex justify-between items-center mb-4 cursor-pointer group"
                 onClick={() => setIsOrderedProductsOpen(true)}
               >
-                <h3 className="text-[17px] font-bold text-gray-700">Ordered Products</h3>
-                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-colors" />
+                <h3 className="text-[24px] font-extrabold text-gray-700">Ordered Products</h3>
+                <ChevronRight className="w-7 h-7 text-gray-400 group-hover:text-gray-600 transition-colors" />
               </div>
               <div className="flex gap-4 overflow-x-auto pb-4 hide-scrollbar -mx-2 px-2 snap-x">
                 {items.map((item: any, index: number) => {
@@ -172,8 +172,8 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
             {/* My Orders Section (Grouped) */}
             <div className="px-6 py-2 pb-8">
               <div className="flex justify-between items-center mb-4 cursor-pointer group">
-                <h3 className="text-[17px] font-bold text-gray-700">My Orders</h3>
-                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-colors" />
+                <h3 className="text-[24px] font-extrabold text-gray-700">My Orders</h3>
+                <ChevronRight className="w-7 h-7 text-gray-400 group-hover:text-gray-600 transition-colors" />
               </div>
               
               <div className="flex gap-4 overflow-x-auto pb-4 hide-scrollbar -mx-2 px-2 snap-x">
@@ -190,8 +190,8 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
                   return (
                     <div key={o.id} onClick={() => setSelectedOrderId(o.id)} className={`min-w-[220px] max-w-[220px] border ${effectiveOrderId === o.id ? 'border-purple-500 ring-1 ring-purple-500' : 'border-gray-100'} rounded-xl p-3 shadow-sm bg-white snap-center cursor-pointer hover:shadow-md transition-shadow`}>
                       <div className="flex justify-between items-center mb-3">
-                         <span className={`text-[11px] font-medium ${effectiveOrderId === o.id ? 'text-purple-600' : 'text-gray-500'}`}>{dateString}</span>
-                         <ChevronRight className="w-3 h-3 text-gray-400" />
+                         <span className={`text-[15px] font-black ${effectiveOrderId === o.id ? 'text-purple-600' : 'text-gray-500'}`}>{dateString}</span>
+                         <ChevronRight className="w-5 h-5 text-gray-400" />
                       </div>
                       <div className="grid grid-cols-2 gap-1.5 h-[160px]">
                          <div className="flex flex-col gap-1.5">

@@ -304,21 +304,21 @@ function ProductBannerCard({
       </div>
 
       {/* Vertical Thumbnails */}
-      <div className="absolute left-4 top-1/2 -translate-y-1/2 flex flex-col gap-4 z-20">
+      <div className="absolute left-4 lg:left-6 bottom-8 lg:bottom-14 flex flex-col gap-3.5 lg:gap-5 z-20">
         {images.slice(0, 3).map((img: string, idx: number) => (
           <button
             key={idx}
             type="button"
             onClick={() => setActiveImageIndex(idx)}
-            className={`w-11 h-11 rounded-lg overflow-hidden border-2 bg-white/15 backdrop-blur-sm shadow-sm transition-all duration-200 focus:outline-none ${
+            className={`w-12 h-12 lg:w-16 lg:h-16 rounded-xl overflow-hidden border-2 bg-white/15 backdrop-blur-sm shadow-sm transition-all duration-200 focus:outline-none ${
               activeImageIndex === idx ? 'border-orange-500 scale-105 shadow-md' : 'border-white/30 hover:border-white/60'
             }`}
           >
             <Image 
               src={img} 
               alt="" 
-              width={44}
-              height={44}
+              width={64}
+              height={64}
               className="w-full h-full object-cover" 
             />
           </button>
@@ -326,13 +326,13 @@ function ProductBannerCard({
       </div>
 
       {/* Main Image */}
-      <div className="relative w-[80%] h-[80%] flex items-center justify-center">
+      <div className="absolute top-3 bottom-3 right-6 lg:right-12 left-20 lg:left-28 rounded-xl overflow-hidden">
         {activeImage && (
           <Image
             src={activeImage}
             alt={productName}
             fill
-            className="object-contain hover:scale-105 transition-transform duration-500 p-2"
+            className="object-cover hover:scale-105 transition-transform duration-500"
             priority
           />
         )}

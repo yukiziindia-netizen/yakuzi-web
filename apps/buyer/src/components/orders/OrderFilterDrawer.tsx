@@ -25,7 +25,7 @@ export function OrderFilterDrawer({ isOpen, onClose, onApplyFilters }: OrderFilt
       />
 
       {/* Filter Drawer Panel */}
-      <div className="fixed top-0 right-0 bottom-0 w-[92%] sm:w-[500px] md:w-[520px] max-w-full bg-white rounded-l-3xl shadow-2xl z-[110] flex flex-col overflow-hidden animate-slide-in-right">
+      <div className="fixed top-0 right-0 bottom-0 w-[95%] sm:w-[580px] md:w-[620px] max-w-full bg-white rounded-l-3xl shadow-2xl z-[110] flex flex-col overflow-hidden animate-slide-in-right">
         {/* Hidden Close Button */}
         <button onClick={onClose} className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-900 bg-white/80 rounded-full z-[80] transition-colors">
           <X className="w-5 h-5" />
@@ -33,9 +33,9 @@ export function OrderFilterDrawer({ isOpen, onClose, onApplyFilters }: OrderFilt
         
         {/* Header */}
         <div className="flex justify-between items-center px-6 py-5 border-b border-gray-100 shrink-0">
-          <h2 className="text-2xl font-bold text-gray-800">Filters</h2>
+          <h2 className="text-[34px] font-extrabold text-gray-800">Filters</h2>
           <button 
-            className="text-purple-600 hover:text-purple-700 transition-colors"
+            className="text-purple-600 hover:text-purple-700 transition-colors p-2"
             onClick={() => {
               setPaymentStatus('All');
               setOrderStatus('All orders');
@@ -43,7 +43,7 @@ export function OrderFilterDrawer({ isOpen, onClose, onApplyFilters }: OrderFilt
               setMonth('JAN');
             }}
           >
-            <RotateCcw className="w-5 h-5" />
+            <RotateCcw className="w-7 h-7" />
           </button>
         </div>
 
@@ -52,16 +52,16 @@ export function OrderFilterDrawer({ isOpen, onClose, onApplyFilters }: OrderFilt
           
           {/* Payment Status */}
           <div className="mb-6">
-            <div className="flex justify-between items-center mb-3">
-              <h3 className="text-[17px] font-bold text-gray-800">Payment Status</h3>
-              <CreditCard className="w-5 h-5 text-gray-400" />
+            <div className="flex justify-between items-center mb-3.5">
+              <h3 className="text-[24px] font-extrabold text-gray-800">Payment Status</h3>
+              <CreditCard className="w-7 h-7 text-gray-400" />
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2.5">
               {['All', 'COD', 'PREPAID'].map((status) => (
                 <button
                   key={status}
                   onClick={() => setPaymentStatus(status)}
-                  className={`flex-1 py-2 text-sm font-bold rounded ${
+                  className={`flex-1 py-3 text-[16px] font-bold rounded-lg ${
                     paymentStatus === status 
                       ? 'bg-purple-600 text-white' 
                       : 'bg-[#d1d1d1] text-white hover:bg-gray-400'
@@ -75,16 +75,16 @@ export function OrderFilterDrawer({ isOpen, onClose, onApplyFilters }: OrderFilt
 
           {/* Order Status */}
           <div className="mb-6">
-            <div className="flex justify-between items-center mb-3">
-              <h3 className="text-[17px] font-bold text-gray-800">Order Status</h3>
-              <ShoppingCart className="w-5 h-5 text-gray-400" />
+            <div className="flex justify-between items-center mb-3.5">
+              <h3 className="text-[24px] font-extrabold text-gray-800">Order Status</h3>
+              <ShoppingCart className="w-7 h-7 text-gray-400" />
             </div>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2.5">
               {['Canceled', 'Replacement', 'Returned', 'Delivered', 'Out for delivery', 'In transit / Placed', 'All orders'].map((status) => (
                 <button
                   key={status}
                   onClick={() => setOrderStatus(status)}
-                  className={`w-full py-2.5 text-sm font-bold rounded ${
+                  className={`w-full py-3.5 text-[16px] font-bold rounded-lg ${
                     orderStatus === status 
                       ? 'bg-purple-600 text-white' 
                       : 'bg-[#d1d1d1] text-white hover:bg-gray-400'
@@ -100,15 +100,15 @@ export function OrderFilterDrawer({ isOpen, onClose, onApplyFilters }: OrderFilt
 
           {/* Year */}
           <div className="mb-6">
-            <h3 className="text-[17px] font-bold text-gray-800 mb-3">Year</h3>
-            <div className="flex items-center gap-1">
-              <button className="p-1 text-gray-400 hover:text-gray-600"><ChevronLeft className="w-5 h-5" /></button>
-              <div className="flex flex-1 gap-2">
+            <h3 className="text-[24px] font-extrabold text-gray-800 mb-3.5">Year</h3>
+            <div className="flex items-center gap-1.5">
+              <button className="p-1.5 text-gray-400 hover:text-gray-600"><ChevronLeft className="w-6 h-6" /></button>
+              <div className="flex flex-1 gap-2.5">
                 {['2024', '2025', '2026'].map((y) => (
                   <button
                     key={y}
                     onClick={() => setYear(y)}
-                    className={`flex-1 py-2 text-sm font-bold rounded ${
+                    className={`flex-1 py-3 text-[16px] font-bold rounded-lg ${
                       year === y 
                         ? 'bg-purple-600 text-white' 
                         : 'bg-[#d1d1d1] text-white hover:bg-gray-400'
@@ -118,19 +118,19 @@ export function OrderFilterDrawer({ isOpen, onClose, onApplyFilters }: OrderFilt
                   </button>
                 ))}
               </div>
-              <button className="p-1 text-gray-400 hover:text-gray-600"><ChevronRight className="w-5 h-5" /></button>
+              <button className="p-1.5 text-gray-400 hover:text-gray-600"><ChevronRight className="w-6 h-6" /></button>
             </div>
           </div>
 
           {/* Month */}
           <div className="mb-6">
-            <h3 className="text-[17px] font-bold text-gray-800 mb-3">Month</h3>
-            <div className="grid grid-cols-3 gap-2">
+            <h3 className="text-[24px] font-extrabold text-gray-800 mb-3.5">Month</h3>
+            <div className="grid grid-cols-3 gap-2.5">
               {['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'].map((m) => (
                 <button
                   key={m}
                   onClick={() => setMonth(m)}
-                  className={`py-2 text-sm font-bold rounded ${
+                  className={`py-3 text-[15px] font-bold rounded-lg ${
                     month === m 
                       ? 'bg-purple-600 text-white' 
                       : 'bg-[#d1d1d1] text-white hover:bg-gray-400'
@@ -151,7 +151,7 @@ export function OrderFilterDrawer({ isOpen, onClose, onApplyFilters }: OrderFilt
               if (onApplyFilters) onApplyFilters();
               onClose();
             }} 
-            className="w-full bg-purple-600 text-white font-bold py-3 rounded-xl hover:bg-purple-700 transition-colors"
+            className="w-full bg-purple-600 text-white font-bold py-5 text-[20px] rounded-2xl hover:bg-purple-700 transition-colors"
           >
             Done
           </button>

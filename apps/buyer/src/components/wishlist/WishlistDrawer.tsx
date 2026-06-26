@@ -66,7 +66,7 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed top-0 right-0 h-full w-[92%] sm:w-[500px] md:w-[520px] max-w-full bg-white shadow-2xl z-[110] flex flex-col overflow-hidden rounded-l-3xl"
+            className="fixed top-0 right-0 h-full w-[95%] sm:w-[580px] md:w-[620px] max-w-full bg-white shadow-2xl z-[110] flex flex-col overflow-hidden rounded-l-3xl"
           >
             {/* Custom Scrollbar Styles */}
             <style jsx global>{`
@@ -89,24 +89,24 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
 
             {/* Header */}
             <div className="pt-8 px-6 pb-2">
-              <h2 className="text-[22px] font-bold text-gray-800">Wishlist</h2>
+              <h2 className="text-[34px] font-extrabold text-gray-800">Wishlist</h2>
             </div>
 
             {/* Items */}
             <div className="flex-1 overflow-y-auto custom-scrollbar px-6 pb-24 pt-2 space-y-3">
               {isLoading && items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full gap-4">
-                  <Loader2 className="w-8 h-8 text-gray-300 animate-spin" />
-                  <p className="text-sm font-medium text-gray-400">Loading wishlist...</p>
+                  <Loader2 className="w-10 h-10 text-gray-300 animate-spin" />
+                  <p className="text-base font-medium text-gray-400">Loading wishlist...</p>
                 </div>
               ) : isError && items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full gap-4">
-                  <p className="text-sm font-medium text-red-400">Failed to load wishlist</p>
+                  <p className="text-base font-medium text-red-400">Failed to load wishlist</p>
                 </div>
               ) : items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full gap-4 opacity-50 mt-10">
-                  <WishlistIcon className="w-16 h-16 text-gray-300" />
-                  <p className="text-sm font-medium text-gray-400">Your saved items list is empty</p>
+                  <WishlistIcon className="w-20 h-20 text-gray-300" />
+                  <p className="text-base font-medium text-gray-400">Your saved items list is empty</p>
                 </div>
               ) : (
                 <AnimatePresence initial={false}>
@@ -173,22 +173,22 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                         }`}
                       >
                         {isYukiziChoice && (
-                          <span className="absolute top-0 left-0 text-[7px] font-bold text-white bg-[#6342B4] px-1.5 py-0.5 rounded-br-lg z-10 uppercase tracking-wider">
+                          <span className="absolute top-0 left-0 text-[9px] font-bold text-white bg-[#6342B4] px-2 py-1 rounded-br-lg z-10 uppercase tracking-wider">
                             YUKIZI CHOICE
                           </span>
                         )}
 
                         {/* Left Image */}
-                        <div className="w-[72px] h-[72px] bg-[#f8f5fd] rounded-xl flex items-center justify-center relative flex-shrink-0 mt-3 overflow-hidden">
-                          <img src={itemImage} alt={itemName} className="w-12 h-12 object-contain mix-blend-multiply" />
+                        <div className="w-[105px] h-[105px] bg-[#f8f5fd] rounded-xl flex items-center justify-center relative flex-shrink-0 mt-1.5 overflow-hidden">
+                          <img src={itemImage} alt={itemName} className="w-20 h-20 object-contain mix-blend-multiply" />
                           <button 
                             onClick={() => removeFromWishlist.mutate(item.productId || item.product?.id || item.id, {
                               onSuccess: () => toast('Removed from saved items', 'info'),
                             })}
                             disabled={removeFromWishlist.isPending}
-                            className="absolute bottom-0 left-0 bg-[#f7941d] text-white p-1 rounded-tr-lg hover:bg-orange-500 transition-colors z-10 disabled:opacity-50"
+                            className="absolute bottom-0 left-0 bg-[#f7941d] text-white p-2 rounded-tr-2xl hover:bg-orange-500 transition-colors z-10 disabled:opacity-50"
                           >
-                            <Trash2 className="w-[14px] h-[14px]" />
+                            <Trash2 className="w-[22px] h-[22px]" />
                           </button>
                         </div>
 
@@ -198,14 +198,14 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                           <div className="flex items-center justify-between w-full pr-3">
                             <button
                               onClick={() => handleAddToCart(item)}
-                              className="flex items-center gap-1 bg-[#f7941d] hover:bg-orange-600 text-white px-2.5 py-1 rounded-[6px] text-[10px] font-bold transition-all whitespace-nowrap shadow-sm"
+                              className="flex items-center gap-2 bg-[#f7941d] hover:bg-orange-600 text-white px-6 py-2.5 rounded-[10px] text-[14px] font-bold transition-all whitespace-nowrap shadow-sm"
                             >
                               <span>Move to Cart</span>
-                              <Plus className="w-3 h-3 text-white" strokeWidth={3} />
+                              <Plus className="w-4 h-4 text-white" strokeWidth={3} />
                             </button>
 
                             {/* Right actions: Refresh + Quantity Selector */}
-                            <div className="flex items-center gap-1.5">
+                            <div className="flex items-center gap-2">
                               {/* Refresh button */}
                               <button 
                                 onClick={(e) => {
@@ -214,27 +214,27 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                                   queryClient.invalidateQueries({ queryKey: ['wishlist'] });
                                   toast('Wishlist refreshed', 'success');
                                 }}
-                                className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+                                className="text-gray-400 hover:text-gray-600 transition-colors p-2"
                                 title="Refresh saved items"
                               >
-                                <RefreshCw className="w-3.5 h-3.5 text-gray-600" />
+                                <RefreshCw className="w-[22px] h-[22px] text-gray-600" />
                               </button>
 
                               {/* Purple Quantity Selector Pill */}
-                              <div className="flex items-center bg-[#48286b] rounded-lg text-white shadow-sm h-6 px-1.5 gap-1.5 select-none">
+                              <div className="flex items-center bg-[#48286b] rounded-lg text-white shadow-sm h-10 px-3.5 gap-3 select-none">
                                 <button 
                                   onClick={handleDecrement}
-                                  className="px-1 text-white hover:bg-white/10 rounded font-bold text-xs"
+                                  className="px-2 py-1 text-white hover:bg-white/10 rounded font-bold text-base"
                                   disabled={cartQty === 0}
                                 >
                                   -
                                 </button>
-                                <span className="text-[10px] font-black px-0.5 tracking-tighter min-w-[12px] text-center">
+                                <span className="text-[14px] font-black px-1 tracking-tighter min-w-[18px] text-center">
                                   {cartQty.toString().padStart(2, '0')}
                                 </span>
                                 <button 
                                   onClick={handleIncrement}
-                                  className="px-1 text-white hover:bg-white/10 rounded font-bold text-xs"
+                                  className="px-2 py-1 text-white hover:bg-white/10 rounded font-bold text-base"
                                 >
                                   +
                                 </button>
@@ -243,30 +243,30 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                           </div>
 
                           {/* Row 2: Product Name */}
-                          <h3 className="text-[11px] font-bold text-gray-500 leading-snug truncate text-left w-full pr-8">{itemName}</h3>
+                          <h3 className="text-[16px] font-bold text-gray-700 leading-snug truncate text-left w-full pr-8">{itemName}</h3>
 
                           {/* Row 3: Price */}
-                          <div className="flex items-baseline gap-1.5 text-left w-full pr-8">
-                            <span className="text-[13px] font-black text-gray-900">₹{itemPrice.toLocaleString('en-IN')}</span>
-                            <span className="text-[9px] font-bold text-gray-400 line-through">₹{itemOriginalPrice.toLocaleString('en-IN')}</span>
+                          <div className="flex items-baseline gap-2 text-left w-full pr-8">
+                            <span className="text-[19px] font-black text-gray-900">₹{itemPrice.toLocaleString('en-IN')}</span>
+                            <span className="text-[14px] font-bold text-gray-400 line-through">₹{itemOriginalPrice.toLocaleString('en-IN')}</span>
                           </div>
 
                           {/* Row 4: Discount & Delivery */}
                           <div className="flex items-center justify-between w-full pr-8">
-                            <span className="text-[9px] font-bold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
+                            <span className="text-[13px] font-bold text-gray-600 bg-gray-100 px-2.5 py-1 rounded">
                               {item.discount || '25% off'}
                             </span>
                           </div>
                         </div>
 
                         {/* Bottom-Right: Rating & Delivery & Logo */}
-                        <div className="absolute right-3 bottom-3 flex flex-col items-end gap-1">
-                          <div className="flex items-center gap-[2px]">
-                            <Star className="w-2.5 h-2.5 fill-[#6342B4] text-[#6342B4]" />
-                            <span className="text-[10px] font-bold text-gray-700">{item.rating || 4.5}</span>
+                        <div className="absolute right-3 bottom-3 flex flex-col items-end gap-2">
+                          <div className="flex items-center gap-[4px]">
+                            <Star className="w-4 h-4 fill-[#6342B4] text-[#6342B4]" />
+                            <span className="text-[14px] font-bold text-gray-700">{item.rating || 4.5}</span>
                           </div>
-                          <span className="text-[7px] text-gray-400 font-bold bg-gray-100 px-1 rounded">3 days</span>
-                          <img src="/yukizi-logo-new.png" className="w-5 h-auto object-contain opacity-70" alt="logo" />
+                          <span className="text-[12px] text-gray-500 font-bold bg-gray-100 px-2 py-0.5 rounded">3 days</span>
+                          <img src="/yukizi-logo-new.png" className="w-7 h-auto object-contain opacity-70" alt="logo" />
                         </div>
                       </motion.div>
                     );

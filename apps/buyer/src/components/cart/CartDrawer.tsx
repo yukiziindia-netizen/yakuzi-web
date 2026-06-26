@@ -95,7 +95,7 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed top-0 right-0 h-full w-[92%] sm:w-[500px] md:w-[520px] max-w-full bg-white shadow-2xl z-[110] flex flex-col overflow-hidden rounded-l-3xl"
+            className="fixed top-0 right-0 h-full w-[95%] sm:w-[580px] md:w-[620px] max-w-full bg-white shadow-2xl z-[110] flex flex-col overflow-hidden rounded-l-3xl"
           >
             {/* Custom Scrollbar Styles */}
             <style jsx global>{`
@@ -118,24 +118,24 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
 
             {/* Header */}
             <div className="pt-8 px-6 pb-2">
-              <h2 className="text-[22px] font-bold text-gray-800">My Cart</h2>
+              <h2 className="text-[34px] font-extrabold text-gray-800">My Cart</h2>
             </div>
 
             {/* Items */}
             <div className="flex-1 overflow-y-auto custom-scrollbar px-6 pb-4 pt-2 space-y-3">
               {(isLoading || syncCart.isPending) && items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full gap-4">
-                  <Loader2 className="w-8 h-8 text-gray-300 animate-spin" />
-                  <p className="text-sm font-medium text-gray-400">Loading bag...</p>
+                  <Loader2 className="w-10 h-10 text-gray-300 animate-spin" />
+                  <p className="text-base font-medium text-gray-400">Loading bag...</p>
                 </div>
               ) : isError && items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full gap-4">
-                  <p className="text-sm font-medium text-red-400">Failed to load bag</p>
+                  <p className="text-base font-medium text-red-400">Failed to load bag</p>
                 </div>
               ) : items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full gap-4 opacity-50 mt-10">
-                  <ShoppingBag className="w-16 h-16 text-gray-300" />
-                  <p className="text-sm font-medium text-gray-400">Your cart is empty</p>
+                  <ShoppingBag className="w-20 h-20 text-gray-300" />
+                  <p className="text-base font-medium text-gray-400">Your cart is empty</p>
                 </div>
               ) : (
                 <AnimatePresence initial={false}>
@@ -165,14 +165,14 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                       className="bg-white rounded-[14px] shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border border-gray-100 p-3 flex gap-3 relative overflow-hidden group"
                     >
                       {isYukiziChoice && (
-                        <span className="absolute top-0 left-0 text-[7px] font-bold text-white bg-[#6342B4] px-1.5 py-0.5 rounded-br-lg z-10 uppercase tracking-wider">
+                        <span className="absolute top-0 left-0 text-[9px] font-bold text-white bg-[#6342B4] px-2 py-1 rounded-br-lg z-10 uppercase tracking-wider">
                           YUKIZI CHOICE
                         </span>
                       )}
 
                       {/* Left Image */}
-                      <div className="w-[72px] h-[72px] bg-[#f8f5fd] rounded-xl flex items-center justify-center relative flex-shrink-0 mt-3 overflow-hidden">
-                        <img src={itemImage} alt={itemName} className="w-12 h-12 object-contain mix-blend-multiply" />
+                      <div className="w-[105px] h-[105px] bg-[#f8f5fd] rounded-xl flex items-center justify-center relative flex-shrink-0 mt-1.5 overflow-hidden">
+                        <img src={itemImage} alt={itemName} className="w-20 h-20 object-contain mix-blend-multiply" />
                         <button 
                           onClick={(e) => {
                             e.preventDefault();
@@ -181,9 +181,9 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                             });
                           }}
                           disabled={removeItem.isPending || syncCart.isPending}
-                          className="absolute bottom-0 left-0 bg-[#f7941d] text-white p-1 rounded-tr-lg hover:bg-orange-500 transition-colors z-10 disabled:opacity-50"
+                          className="absolute bottom-0 left-0 bg-[#f7941d] text-white p-2 rounded-tr-2xl hover:bg-orange-500 transition-colors z-10 disabled:opacity-50"
                         >
-                          <Trash2 className="w-[14px] h-[14px]" />
+                          <Trash2 className="w-[22px] h-[22px]" />
                         </button>
                       </div>
 
@@ -204,48 +204,48 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                               });
                               toast('Added to wishlist', 'success');
                             }}
-                            className="flex items-center gap-1 bg-[#562996] text-white px-2 py-[3px] rounded hover:bg-[#432075] transition-colors shadow-sm"
+                            className="flex items-center gap-2 bg-[#562996] text-white px-4 py-2 rounded-[10px] hover:bg-[#432075] transition-colors shadow-sm"
                           >
-                            <span className="text-[10px] font-bold tracking-wider">Wishlist1</span>
-                            <Bookmark className="w-3 h-3 text-white" />
+                            <span className="text-[14px] font-bold tracking-wider">Wishlist</span>
+                            <Bookmark className="w-4 h-4 text-white" />
                           </button>
                         </div>
 
-                        <h3 className="text-[11px] font-bold text-gray-800 leading-snug truncate pr-6">{itemName}</h3>
+                        <h3 className="text-[16px] font-bold text-gray-800 leading-snug truncate pr-6">{itemName}</h3>
                         
                         <div className="flex items-center gap-1.5 mb-1 mt-0.5">
-                          <span className="text-[13px] font-black text-gray-900">₹{(itemPrice * quantity).toLocaleString('en-IN')}</span>
-                          <span className="text-[9px] font-bold text-gray-400 line-through">₹{(itemOriginalPrice * quantity).toLocaleString('en-IN')}</span>
+                          <span className="text-[19px] font-black text-gray-900">₹{(itemPrice * quantity).toLocaleString('en-IN')}</span>
+                          <span className="text-[14px] font-bold text-gray-400 line-through">₹{(itemOriginalPrice * quantity).toLocaleString('en-IN')}</span>
                         </div>
                         
-                        <span className="text-[9px] font-bold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded inline-block">
+                        <span className="text-[13px] font-bold text-gray-600 bg-gray-100 px-2.5 py-1 rounded inline-block">
                           {item.discount || '25% off'}
                         </span>
                         
                         {/* Rating */}
                         <div className="absolute right-1 bottom-1 flex flex-col items-end">
-                          <div className="flex items-center gap-[2px]">
-                            <Star className="w-3 h-3 fill-[#6342B4] text-[#6342B4]" />
-                            <span className="text-[10px] font-bold text-gray-700">{item.rating || 4.5}</span>
+                          <div className="flex items-center gap-[4px]">
+                            <Star className="w-4 h-4 fill-[#6342B4] text-[#6342B4]" />
+                            <span className="text-[14px] font-bold text-gray-700">{item.rating || 4.5}</span>
                           </div>
-                          <DeliveryTruckBadge text="2 days" className="w-[75px] mt-0.5 text-[#9a9a9a]" />
+                          <DeliveryTruckBadge text="2 days" className="w-[95px] mt-0.5 text-[#9a9a9a]" />
                         </div>
 
                         {/* Top Right Actions */}
-                        <div className="absolute top-0 right-0 flex flex-col items-end gap-1">
+                        <div className="absolute top-0 right-0 flex flex-col items-end gap-2">
                           {/* Quantity Pill */}
-                          <div className="flex items-center bg-[#562996] rounded-full text-white overflow-hidden shadow-sm h-[18px]">
+                          <div className="flex items-center bg-[#562996] rounded-full text-white overflow-hidden shadow-sm h-10 px-3">
                             <button 
                               onClick={() => {
                                 const moq = item.moq || item.product?.moq || item.product?.minimumOrderQuantity || 1;
                                 updateItem.mutate({ itemId: item.id, quantity: Math.max(moq, quantity - 1) });
                               }}
                               disabled={updateItem.isPending || syncCart.isPending || quantity <= (item.moq || item.product?.moq || item.product?.minimumOrderQuantity || 1)}
-                              className="px-1.5 h-full hover:bg-black/20 flex items-center justify-center font-bold text-[10px] transition-colors disabled:opacity-50"
+                              className="px-2.5 h-full hover:bg-black/20 flex items-center justify-center font-bold text-sm transition-colors disabled:opacity-50"
                             >
                               -
                             </button>
-                            <span className="text-[9px] font-black px-0.5 tracking-tighter">{quantity.toString().padStart(2, '0')}</span>
+                            <span className="text-sm font-black px-2 tracking-tighter">{quantity.toString().padStart(2, '0')}</span>
                             <button 
                               onClick={() => {
                                 const stock = item.stock ?? item.product?.stock ?? 9999;
@@ -258,14 +258,14 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                                 }
                               }}
                               disabled={updateItem.isPending || syncCart.isPending}
-                              className="px-1.5 h-full hover:bg-black/20 flex items-center justify-center font-bold text-[10px] transition-colors disabled:opacity-50"
+                              className="px-2.5 h-full hover:bg-black/20 flex items-center justify-center font-bold text-sm transition-colors disabled:opacity-50"
                             >
                               +
                             </button>
                           </div>
                           
                           <button className="text-gray-400 hover:text-gray-600 mt-2 mr-1">
-                            <ArrowUpRight className="w-4 h-4 bg-gray-100 rounded-full p-0.5" />
+                            <ArrowUpRight className="w-6 h-6 bg-gray-100 rounded-full p-1" />
                           </button>
                         </div>
                       </div>
@@ -279,12 +279,12 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
             {/* Footer */}
             <div className="px-5 pb-6 pt-3 border-t border-gray-100">
               {/* Subtotal row */}
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[13px] font-semibold text-gray-400 uppercase tracking-widest">Subtotal</span>
-                <span className="text-[20px] font-black text-gray-900">₹{Math.round(cart?.total ?? 0).toLocaleString('en-IN')}</span>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[17px] font-semibold text-gray-400 uppercase tracking-widest">Subtotal</span>
+                <span className="text-[28px] font-black text-gray-900">₹{Math.round(cart?.total ?? 0).toLocaleString('en-IN')}</span>
               </div>
               {items.length > 0 && (
-                <p className="text-[11px] text-gray-400 mb-4">
+                <p className="text-[15px] text-gray-400 mb-4">
                   {items.length} item{items.length > 1 ? 's' : ''} · Shipping calculated at checkout
                 </p>
               )}
@@ -300,9 +300,9 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                   router.push('/checkout');
                 }}
                 disabled={items.length === 0}
-                className="w-full bg-[#854cbc] hover:bg-[#6f3ea5] active:scale-[0.98] text-white rounded-xl py-3.5 text-[15px] font-bold shadow-lg transition-all flex justify-center items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed mb-2"
+                className="w-full bg-[#854cbc] hover:bg-[#6f3ea5] active:scale-[0.98] text-white rounded-2xl py-5 text-[19px] font-bold shadow-lg transition-all flex justify-center items-center gap-3 disabled:opacity-40 disabled:cursor-not-allowed mb-2"
               >
-                <ShoppingCart className="w-4 h-4" />
+                <ShoppingCart className="w-6 h-6" />
                 Order Now
               </button>
 

@@ -198,9 +198,9 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                           <div className="flex items-center justify-between w-full pr-3">
                             <button
                               onClick={() => handleAddToCart(item)}
-                              className="flex items-center gap-2 bg-[#f7941d] hover:bg-orange-600 text-white px-6 py-2.5 rounded-[10px] text-[14px] font-bold transition-all whitespace-nowrap shadow-sm"
+                              className="flex items-center gap-2 bg-[#f7941d] hover:bg-orange-600 text-white px-3 sm:px-6 py-2.5 rounded-[10px] text-[14px] font-bold transition-all whitespace-nowrap shadow-sm"
                             >
-                              <span>Move to Cart</span>
+                              <span className="hidden sm:inline">Move to Cart</span>
                               <Plus className="w-4 h-4 text-white" strokeWidth={3} />
                             </button>
 

@@ -24,15 +24,19 @@ export function OrderFilterDrawer({ isOpen, onClose, onApplyFilters }: OrderFilt
         onClick={onClose}
       />
 
-      {/* Filter Drawer Panel */}
-      <div className="fixed top-0 right-0 bottom-0 w-[95%] sm:w-[580px] md:w-[620px] max-w-full bg-white rounded-l-3xl shadow-2xl z-[110] flex flex-col overflow-hidden animate-slide-in-right">
-        {/* Hidden Close Button */}
-        <button onClick={onClose} className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-900 bg-white/80 rounded-full z-[80] transition-colors">
-          <X className="w-5 h-5" />
-        </button>
+      {/* Filter Drawer Panel (styled as a full-page overlay) */}
+      <div className="fixed inset-0 w-full h-full bg-white z-[110] flex flex-col overflow-hidden animate-slide-in-right">
+        <div className="max-w-4xl mx-auto w-full min-h-screen bg-white relative flex flex-col overflow-hidden">
+          {/* Close Button */}
+          <button onClick={onClose} className="absolute top-6 right-6 p-2 text-gray-400 hover:text-gray-900 bg-white/80 rounded-full z-[80] transition-colors border border-gray-100 shadow-sm">
+            <X className="w-6 h-6" />
+          </button>
         
         {/* Header */}
-        <div className="flex justify-between items-center px-6 py-5 border-b border-gray-100 shrink-0">
+        <div className="flex justify-between items-center pr-6 pl-14 py-5 border-b border-gray-100 shrink-0 relative">
+          <button onClick={onClose} className="absolute left-4 top-5 text-gray-400 hover:text-gray-800 transition-colors p-1.5 z-[80]">
+             <ChevronLeft className="w-8 h-8" />
+          </button>
           <h2 className="text-[34px] font-extrabold text-gray-800">Filters</h2>
           <button 
             className="text-purple-600 hover:text-purple-700 transition-colors p-2"
@@ -166,6 +170,7 @@ export function OrderFilterDrawer({ isOpen, onClose, onApplyFilters }: OrderFilt
             animation: slide-in-right 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
           }
         `}} />
+        </div>
       </div>
     </>
   );

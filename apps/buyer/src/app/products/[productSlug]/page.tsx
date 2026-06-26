@@ -848,11 +848,14 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
           {/* Accordions */}
           <div className="mt-2">
             <Accordion
-              title="DETAILS"
+              title="OFFERS"
+              content={product.offers || 'No offers available at this moment.'}
+            />
+            <Accordion
+              title="DESCRIPTION"
               content={product.description || 'No description available.'}
               defaultOpen={true}
             />
-            <Accordion title="DESCRIPTION" />
             <Accordion title="SHIPPING & RETURN INFO" />
             <Accordion title="ADDITIONAL INFO" />
           </div>

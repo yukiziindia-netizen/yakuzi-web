@@ -80,12 +80,13 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
         onClick={onClose}
       />
 
-      {/* Drawer */}
-      <div className={`fixed inset-y-0 right-0 w-[95%] sm:w-[580px] md:w-[620px] max-w-full bg-white shadow-2xl z-[110] transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'} overflow-y-auto rounded-l-3xl`}>
-        {/* Hidden Close Button */}
-        <button onClick={onClose} className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-900 bg-white/80 rounded-full z-[80] transition-colors">
-          <X className="w-5 h-5" />
-        </button>
+      {/* Drawer (styled as a full-page overlay) */}
+      <div className={`fixed inset-0 w-full h-full bg-[#fcfcfc] z-[110] transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'} overflow-y-auto`}>
+        <div className="max-w-4xl mx-auto w-full min-h-screen bg-[#fcfcfc] relative flex flex-col">
+          {/* Hidden Close Button */}
+          <button onClick={onClose} className="absolute top-6 right-6 p-2 text-gray-400 hover:text-gray-900 bg-white/80 rounded-full z-[80] transition-colors border border-gray-100 shadow-sm">
+            <X className="w-6 h-6" />
+          </button>
         
         {/* Header */}
         <div className="pr-6 pl-12 py-6 border-b border-gray-100 relative shrink-0">
@@ -283,6 +284,7 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
               );
             })}
           </div>
+        </div>
         </div>
       </div>
     </>

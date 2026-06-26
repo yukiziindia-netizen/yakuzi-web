@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Share2, Plus, ArrowUpRight, ChevronRight, Filter, X, User, Package, Loader2 } from 'lucide-react';
+import { Share2, Plus, ArrowUpRight, ChevronRight, ChevronLeft, Filter, X, User, Package, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { OrderFilterDrawer } from './OrderFilterDrawer';
 import { OrderedProductsDrawer } from './OrderedProductsDrawer';
@@ -61,14 +61,15 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
         />
       )}
 
-      {/* Drawer */}
+      {/* Drawer (styled as a full-page overlay) */}
       <div 
-        className={`fixed inset-y-0 right-0 w-[95%] sm:w-[580px] md:w-[620px] max-w-full bg-white shadow-2xl z-[110] transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'} overflow-y-auto rounded-l-3xl`}
+        className={`fixed inset-0 w-full h-full bg-white z-[110] transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'} overflow-y-auto`}
       >
-        {/* Hidden Close Button */}
-        <button onClick={onClose} className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-900 bg-white/80 rounded-full z-[80] transition-colors">
-          <X className="w-5 h-5" />
-        </button>
+        <div className="max-w-4xl mx-auto w-full min-h-screen bg-white relative flex flex-col">
+          {/* Close Button */}
+          <button onClick={onClose} className="absolute top-6 right-6 p-2 text-gray-400 hover:text-gray-900 bg-white/80 rounded-full z-[80] transition-colors border border-gray-100 shadow-sm">
+            <X className="w-6 h-6" />
+          </button>
 
         {!isAuthenticated ? (
           <div className="flex flex-col items-center justify-center h-[80vh] px-6 text-center">
@@ -103,22 +104,30 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
         ) : (
           <>
             {/* Header */}
-            <div className="px-6 py-6 border-b border-gray-100 relative">
-              <div className="flex flex-wrap items-center gap-3 mb-2">
-                <h2 className="text-[34px] font-extrabold text-gray-800 mr-2">Orders</h2>
-                <span className="bg-purple-600 text-white text-[14px] px-4 py-2 rounded shadow-sm font-bold">{order?.paymentMethod === 'COD' ? 'COD' : 'PREPAID'}</span>
-                <span className="bg-purple-600 text-white text-[14px] px-4 py-2 rounded shadow-sm font-bold capitalize">Status : {displayStatus.toLowerCase()}</span>
-                <span className="bg-purple-600 text-white text-[14px] px-4 py-2 rounded shadow-sm font-bold">{orderMonth}</span>
-                <span className="bg-purple-600 text-white text-[14px] px-4 py-2 rounded shadow-sm font-bold">{orderYear}</span>
-              </div>
-              <div className="flex items-center gap-3.5 mt-1 absolute right-6 bottom-4">
-                <span className="bg-purple-600 text-white text-[14px] px-4 py-2 rounded shadow-sm font-bold">All orders</span>
-                <button 
-                  onClick={() => setIsFilterOpen(true)}
-                  className="text-gray-400 hover:text-purple-600 transition-colors p-2"
-                >
-                  <Filter className="w-7 h-7" />
-                </button>
+            <div className="pr-6 pl-14 py-6 border-b border-gray-100 relative">
+              {/* Back Button on Left */}
+              <button onClick={onClose} className="absolute left-4 top-6 text-gray-400 hover:text-gray-800 transition-colors p-1.5 z-[80]">
+                <ChevronLeft className="w-8 h-8" />
+              </button>
+
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex flex-wrap items-center gap-3">
+                  <h2 className="text-[34px] font-extrabold text-gray-800 mr-2">Orders</h2>
+                  <span className="bg-purple-600 text-white text-[14px] px-4 py-2 rounded shadow-sm font-bold">{order?.paymentMethod === 'COD' ? 'COD' : 'PREPAID'}</span>
+                  <span className="bg-purple-600 text-white text-[14px] px-4 py-2 rounded shadow-sm font-bold capitalize">Status : {displayStatus.toLowerCase()}</span>
+                  <span className="bg-purple-600 text-white text-[14px] px-4 py-2 rounded shadow-sm font-bold">{orderMonth}</span>
+                  <span className="bg-purple-600 text-white text-[14px] px-4 py-2 rounded shadow-sm font-bold">{orderYear}</span>
+                </div>
+                
+                <div className="flex items-center gap-3.5 mr-12">
+                  <span className="bg-purple-600 text-white text-[14px] px-4 py-2 rounded shadow-sm font-bold">All orders</span>
+                  <button 
+                    onClick={() => setIsFilterOpen(true)}
+                    className="text-gray-400 hover:text-purple-600 transition-colors p-2"
+                  >
+                    <Filter className="w-7 h-7" />
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -248,6 +257,7 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
             scrollbar-width: none;
           }
         `}} />
+        </div>
       </div>
 
       {/* Render the inner filter drawer */}

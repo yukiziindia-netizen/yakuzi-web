@@ -383,7 +383,7 @@ export default function Navbar({
                     )}
                   </div>
                 </div>
-              <div className="relative flex items-center justify-end ml-3 sm:ml-4 w-[110px] sm:w-[130px] md:w-[170px] lg:w-[200px]">
+              <div className="relative flex items-center justify-end ml-4 sm:ml-8 md:ml-10 w-[95px] sm:w-[115px] md:w-[135px] lg:w-[155px]">
                 <input
                   type="text"
                   placeholder="Search"
@@ -434,20 +434,7 @@ export default function Navbar({
                     <Image src="/YukiziLogo.png" alt="YUKiZi" width={70} height={24} className="w-[45px] xs:w-[55px] md:w-[65px] object-contain" />
                   </Link>
 
-                  <div className="flex items-center gap-1.5 xs:gap-2 h-full flex-1 justify-end">
-                    <button 
-                      onClick={() => setIsProfileOpen(true)} 
-                      className={`relative p-1 transition-all duration-200 shrink-0 ${
-                        isProfileOpen
-                          ? "text-[#562996] scale-110 opacity-100"
-                          : isAnyDrawerOpen
-                          ? "text-[#562996]/40 opacity-50"
-                          : "text-[#562996]"
-                      }`}
-                    >
-                      <User className="w-[18px] h-[18px] xs:w-[20px] xs:h-[20px] stroke-[2]" fill={isProfileOpen ? "currentColor" : "none"} />
-                    </button>
-
+                  <div className="flex items-center gap-2 xs:gap-3 h-full flex-1 justify-end mr-1.5 xs:mr-2">
                     <button 
                       onClick={() => setIsNotificationsOpen(true)} 
                       className={`relative p-1 transition-all duration-200 shrink-0 ${
@@ -578,7 +565,7 @@ export default function Navbar({
 
             <button 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
-              className={`transition-all duration-200 hover:scale-110 ${
+              className={`mr-2 sm:mr-0 transition-all duration-200 hover:scale-110 ${
                 isMobileMenuOpen
                   ? "text-[#562996] sm:text-white scale-110 opacity-100"
                   : isAnyDrawerOpen

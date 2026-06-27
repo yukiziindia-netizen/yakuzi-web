@@ -333,8 +333,8 @@ function ProductBannerCard({
         >
           <path
             d="M0 0 H44 V40 H0 L12 20 Z"
-            fill={isBookmarked ? "#854cbc" : "#ffffff"}
-            stroke="#854cbc"
+            fill={isBookmarked ? "#889096" : "#ffffff"}
+            stroke="#889096"
             strokeWidth="3.5"
             strokeLinejoin="round"
           />

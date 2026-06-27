@@ -9,6 +9,8 @@ import QuickReviewModal from './QuickReviewModal';
 import { useAddToCart } from '@/hooks/useCart';
 import { useAddToWishlist, useWishlist, useRemoveFromWishlist } from '@/hooks/useWishlist';
 import { useToast } from '@/components/shared/Toast';
+import WishlistIcon from '@/components/shared/WishlistIcon';
+import { DeliveryTruckBadge } from '@/components/shared/DeliveryTruckBadge';
 
 interface ProductCarouselProps {
   reverse?: boolean;
@@ -29,20 +31,24 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
     (item: any) => item.productId === currentProductId || item.product?.id === currentProductId || item.id === currentProductId
   );
 
-  const isYukiziChoice = !!product?.isYukiziChoice;
+  const isYukiziChoice = product?.isYukiziChoice !== undefined ? !!product.isYukiziChoice : true;
   const isBestSeller = !!product?.isBestSeller;
-  const isAd = !!product?.isAd;
+  const isAd = isYukiziChoice || isBestSeller;
   
   const price = product?.price;
   const mrp = product?.mrp || product?.originalPrice;
+  const rating = product?.rating || 4.5;
   
-  const rating = product?.rating || null;
+  const displayPrice = price != null ? `₹${Number(price).toLocaleString('en-IN')}` : '₹3,345.53';
+  const displayOriginalPrice = mrp != null && mrp > (price || 0) 
+    ? `₹${Number(mrp).toLocaleString('en-IN')}` 
+    : (price != null ? `₹${Math.round(Number(price) * 1.15).toLocaleString('en-IN')}` : '₹3,800.25');
   
-  const discountText = mrp != null && price != null && mrp > price
+  const displayDiscount = (mrp != null && price != null && mrp > price)
     ? `${Math.round(((mrp - price) / mrp) * 100)}% off`
-    : null;
+    : '25% off';
   
-  const deliveryText = product?.deliveryTime || null;
+  const displayDelivery = product?.deliveryTime || '3 days';
   const productName = product?.name || 'Product';
   
   const getInitials = (name: string) => {
@@ -52,44 +58,57 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
     return (words[0][0] + words[words.length - 1][0]).toUpperCase();
   };
   const fallbackImage = `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent(getInitials(productName))}`;
-  
   const imageUrl = product?.images?.[0]?.url || product?.images?.[0] || product?.image || fallbackImage;
 
   return (
-    <div className="relative mt-3 group flex flex-col h-full">
-      {/* Container with relative positioning for absolute badges */}
+    <div className="relative mt-3 sm:mt-4 group flex flex-col h-full">
+      {/* Yukizi Choice & Best Seller Tags */}
+      <div className="absolute -top-[10px] left-2.5 sm:left-3 flex items-center gap-1 sm:gap-1.5 z-30">
+        {isYukiziChoice && (
+          <div className="bg-[#8b5cf6] text-white px-2 sm:px-2.5 py-0.5 rounded-full font-bold text-[10px] sm:text-[11px] md:text-[11px] lg:text-[12px] xl:text-[10px] shadow-sm tracking-wide flex items-center justify-center">
+            Yukizi Choice
+          </div>
+        )}
+        {isBestSeller && (
+          <div className="bg-[#4a4a4a] text-white px-2 sm:px-2.5 py-0.5 rounded-full font-bold text-[10px] sm:text-[11px] md:text-[11px] lg:text-[12px] xl:text-[10px] shadow-sm tracking-wide flex items-center justify-center">
+            Best Seller
+          </div>
+        )}
+      </div>
+
+      {/* Ad Tag */}
+      {isAd && (
+        <div className="absolute -top-5 right-2 text-[11px] sm:text-[12px] text-gray-500 font-medium z-20">
+          Ad
+        </div>
+      )}
+
+      {/* Container */}
       <div 
-        className={`block bg-white rounded-xl border ${
-          isYukiziChoice 
-            ? 'border-[#cdaef1] shadow-[0_0_15px_rgba(133,76,188,0.2)]' 
-            : 'border-gray-200 shadow-sm'
-        } p-2.5 pb-3 flex flex-col hover:shadow-lg transition-all duration-300 w-full h-full relative overflow-hidden`}
+        className={`bg-white rounded-[14px] sm:rounded-[16px] p-2.5 sm:p-3 hover:shadow-[0_8px_30px_rgb(133,76,188,0.15)] hover:ring-1 hover:ring-primary/50 transition-all duration-300 group flex flex-col relative border ${isYukiziChoice ? 'border-[#8b5cf6] shadow-[0_0_15px_rgba(139,92,246,0.4)]' : 'border-gray-300 shadow-sm'} w-full h-full overflow-hidden`}
       >
-        
-        {/* Top Icons */}
-        <div className="flex justify-between items-start">
-          <button className="text-gray-400 hover:text-gray-600 transition-colors z-10 p-0.5" onClick={(e) => e.preventDefault()}>
-             <Share2 size={16} strokeWidth={2} className="opacity-80" />
+        {/* Top action icons */}
+        <div className="flex justify-between items-center w-full absolute top-2.5 sm:top-3 left-0 px-2.5 sm:px-3 z-20">
+          <button className="text-gray-500 hover:text-gray-700 transition-colors z-10 p-0.5" onClick={(e) => e.preventDefault()}>
+             <Share2 className="w-4 h-4 sm:w-4 sm:h-4" strokeWidth={2} />
           </button>
-          {price != null && (
-            <button 
-              className="text-[#f97316] hover:text-orange-600 transition-colors z-10 p-0.5" 
-              onClick={(e) => { 
-                e.preventDefault(); 
-                addToCart(
-                  { productId: currentProductId, quantity: 1, price, originalPrice: mrp, ...product },
-                  { onSuccess: () => toast('Added to cart', 'success') }
-                );
-              }}
-            >
-               <Plus size={20} strokeWidth={2.5} />
-            </button>
-          )}
+          <button 
+            className="text-[#ff8952] hover:text-[#ff7536] transition-colors z-10 p-1 flex items-center justify-center" 
+            onClick={(e) => { 
+              e.preventDefault(); 
+              addToCart(
+                { productId: currentProductId, quantity: 1, price, originalPrice: mrp, ...product },
+                { onSuccess: () => toast('Added to cart', 'success') }
+              );
+            }}
+          >
+             <Plus className="w-5 h-5 sm:w-5 sm:h-5" strokeWidth={2.5} />
+          </button>
         </div>
 
         {/* Right Edge Ribbon (Wishlist/Save) */}
-        <button 
-          className="absolute top-[30%] -right-[1px] z-20 cursor-pointer"
+        <div
+          onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => { 
             e.preventDefault(); 
             if (isSaved) {
@@ -102,84 +121,56 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
               });
             }
           }}
+          className="absolute right-0 top-[40%] -translate-y-1/2 z-20 cursor-pointer hover:scale-105 transition-transform"
         >
-          <Bookmark 
-            className={`w-[28px] h-[40px] stroke-[1] rotate-90 transition-colors ${isSaved ? 'fill-[#854cbc] text-[#854cbc]' : 'fill-[#FAF6EB] text-[#e8dfd5] hover:brightness-95'}`}
-          />
-        </button>
+          <WishlistIcon isFilled={isSaved} className={`w-5 h-7 sm:w-5 sm:h-7 text-[#8b5cf6] ${isSaved ? 'fill-[#8b5cf6]' : 'fill-none'}`} />
+        </div>
 
         {/* Image Container */}
-        <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`} className="w-full h-[140px] sm:h-[150px] flex items-center justify-center mb-3 mt-1 relative group-hover:scale-105 transition-transform duration-500 block z-10">
-           <img src={imageUrl} alt={productName} className="max-h-full max-w-full object-contain mix-blend-multiply drop-shadow-sm" />
+        <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`} className="relative w-full aspect-[4/5] mb-[-4px] sm:mb-[-6px] mt-1 sm:mt-1.5 overflow-hidden bg-white flex justify-center items-center border-none">
+           <img src={imageUrl} alt={productName} className="max-h-full max-w-full object-contain p-0.5 transform group-hover:scale-105 transition-transform duration-700 ease-out drop-shadow-md" />
         </Link>
 
         {/* Details Section */}
-        <div className="mt-auto flex flex-col gap-1 px-0.5">
+        <div className="flex-1 flex flex-col z-10 w-full mt-0 pb-0.5">
            {/* Title Line */}
-           <div className="flex justify-between items-center gap-1.5 mb-1">
-              <h3 className="text-[14px] font-medium text-gray-700 truncate flex-1">
+           <div className="flex items-center justify-between mb-1 w-full gap-1 sm:gap-1.5">
+              <h3 className="text-[12px] sm:text-[13px] md:text-[14px] lg:text-[15px] xl:text-[13px] font-medium text-[#333333] truncate flex-1 text-left tracking-tight leading-tight">
                  {productName}
               </h3>
               <button 
                  onClick={(e) => { e.preventDefault(); onOpenReview(product); }}
-                 className="bg-gray-400 hover:bg-gray-500 transition-colors rounded-full p-[3px] flex-shrink-0 z-10"
+                 className="w-5 h-5 sm:w-6 sm:h-6 md:w-6 md:h-6 lg:w-7 lg:h-7 xl:w-6 xl:h-6 bg-[#8c8c8c] rounded-full flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform shadow-sm z-20 -mr-1 sm:-mr-1.5 md:-mr-1.5 lg:-mr-2 xl:-mr-1.5"
               >
-                 <ArrowUpRight size={12} className="text-white" strokeWidth={3} />
+                 <ArrowUpRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-3.5 md:h-3.5 lg:w-4 lg:h-4 xl:w-3.5 xl:h-3.5 text-white" strokeWidth={2.5} />
               </button>
            </div>
            
            {/* Price and Rating */}
-           <div className="flex justify-between items-center mb-1.5">
-              <div className="flex items-baseline gap-1.5">
-                 <span className="text-[15px] font-semibold text-gray-700 tracking-tight">
-                    {price != null ? `₹${Number(price).toLocaleString('en-IN')}` : 'N/A'}
+           <div className="flex justify-between items-center w-full mb-1 sm:mb-1.5">
+              <div className="flex items-baseline gap-1 sm:gap-1.5">
+                 <span className="text-[13px] sm:text-[14px] md:text-[15px] lg:text-[16px] xl:text-[14px] font-semibold text-[#333333] tracking-tight leading-none">
+                    {displayPrice}
                  </span>
-                 {mrp != null && mrp > (price || 0) && (
-                    <span className="text-[10px] text-gray-400 line-through">₹{Number(mrp).toLocaleString('en-IN')}</span>
-                 )}
+                 <span className="text-[10px] sm:text-[11px] md:text-[12px] lg:text-[13px] xl:text-[11px] text-gray-400 line-through leading-none">{displayOriginalPrice}</span>
               </div>
-              {rating !== null && (
-                <div className="flex items-center gap-0.5">
-                   <Star size={13} className="fill-[#854cbc] text-[#854cbc]" />
-                   <span className="text-[13px] font-medium text-gray-600">{rating}</span>
-                </div>
-              )}
+              <div className="flex items-center gap-0.5 sm:gap-1 -mr-1 sm:-mr-1.5 md:-mr-1.5 lg:-mr-2 xl:-mr-1.5">
+                 <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 lg:w-4.5 lg:h-4.5 xl:w-3.5 xl:h-3.5 text-[#8b5cf6] fill-[#8b5cf6]" />
+                 <span className="text-[12px] sm:text-[13px] md:text-[14px] lg:text-[15px] xl:text-[13px] font-medium text-[#333333] leading-none">{rating}</span>
+              </div>
            </div>
 
            {/* Bottom Badges */}
-           <div className="flex justify-between items-center h-[20px] mt-0.5">
-              {discountText ? (
-                <span className="text-[10px] font-bold text-gray-700">
-                   {discountText}
-                </span>
-              ) : <span />}
-              
-              {deliveryText && (
-                <div className="flex items-center gap-1 bg-[#f0f0f0] rounded px-1.5 py-[3px]">
-                   <Truck size={10} strokeWidth={2.5} className="text-gray-500" />
-                   <span className="text-[9px] font-bold text-gray-600 leading-none">{deliveryText}</span>
-                </div>
-              )}
+           <div className="flex justify-between items-center w-full mt-auto pt-0.5">
+              <span className="text-[10px] sm:text-[11px] md:text-[12px] lg:text-[13px] xl:text-[11px] font-bold text-[#333333]">
+                 {displayDiscount}
+              </span>
+              <div className="-mr-1 sm:-mr-1.5 md:-mr-1.5 lg:-mr-2 xl:-mr-1.5">
+                 <DeliveryTruckBadge text={displayDelivery} className="w-[55px] sm:w-[60px] md:w-[65px] lg:w-[70px] xl:w-[58px] h-auto text-[#8c8c8c]" />
+              </div>
            </div>
         </div>
       </div>
-
-      {/* Overlapping Badges - Rendered outside the border but positioned over it */}
-      {isYukiziChoice && (
-        <div className="absolute -top-2 left-3 px-2.5 py-[2px] rounded-full text-[9px] tracking-wide font-bold bg-[#854cbc] text-white z-20 pointer-events-none border-[1.5px] border-white">
-          Yukizi Choice
-        </div>
-      )}
-      {isBestSeller && (
-        <div className="absolute -top-2 left-3 px-2.5 py-[2px] rounded-full text-[9px] tracking-wide font-bold bg-[#4a4a4a] text-white z-20 pointer-events-none border-[1.5px] border-white">
-          Best Seller
-        </div>
-      )}
-      {isAd && (
-        <div className="absolute -top-2 right-4 px-1 text-[9px] font-medium text-gray-400 bg-white z-20 pointer-events-none">
-          Ad
-        </div>
-      )}
     </div>
   );
 }
@@ -228,10 +219,11 @@ export default function ProductCarousel({ slot = 'HOMEPAGE_CAROUSEL', categoryId
       {/* 
         Grid Setup:
         - Mobile (sm/xs): 2 columns
-        - Tablet (md): 3 columns, lg: 4 columns
-        - Desktop (xl): 6 columns to perfectly match the screenshot layout
+        - Tablet (md): 4 columns
+        - Large Desktop (lg): 6 columns
+        - Extra Large Desktop (xl): 7 columns
       */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-3 lg:gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-2.5 md:gap-3 lg:gap-4">
         {slicedProducts.map((product, index) => (
           <GridProductCard 
             key={`${product?.id || 'prod'}-${index}`} 

@@ -360,7 +360,7 @@ export default function Navbar({
                           <User className="w-5 h-5 md:w-6 md:h-6 stroke-[2]" fill={isProfileOpen ? "currentColor" : "none"} />
                         </button>
                         {/* Vertical Divider between User and Bell */}
-                        <div className="h-5 w-[1px] bg-white/20 mx-1" />
+                        <div className="h-5 w-[1px] bg-white/20 ml-1 mr-3" />
 
                         <button 
                           onClick={() => setIsNotificationsOpen(true)} 
@@ -437,7 +437,7 @@ export default function Navbar({
                   <div className="flex items-center gap-2 xs:gap-3 h-full flex-1 justify-end mr-1.5 xs:mr-2">
                     <button 
                       onClick={() => setIsNotificationsOpen(true)} 
-                      className={`relative p-1 transition-all duration-200 shrink-0 ${
+                      className={`relative p-1 mr-2 sm:mr-0 transition-all duration-200 shrink-0 ${
                         isNotificationsOpen
                           ? "text-[#562996] scale-110 opacity-100"
                           : isAnyDrawerOpen

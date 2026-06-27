@@ -437,7 +437,7 @@ export default function Navbar({
                   <div className="flex items-center gap-2 xs:gap-3 h-full flex-1 justify-end mr-1.5 xs:mr-2">
                     <button 
                       onClick={() => setIsNotificationsOpen(true)} 
-                      className={`relative p-1 mr-2 sm:mr-0 transition-all duration-200 shrink-0 ${
+                      className={`relative p-1 min-[390px]:mr-2.5 sm:mr-0 mr-0 transition-all duration-200 shrink-0 ${
                         isNotificationsOpen
                           ? "text-[#562996] scale-110 opacity-100"
                           : isAnyDrawerOpen

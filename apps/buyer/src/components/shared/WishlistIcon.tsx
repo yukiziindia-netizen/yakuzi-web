@@ -39,7 +39,7 @@ export default function WishlistIcon({ isFilled, useImage, className, ...props }
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={`text-[#8b5cf6] ${className || ''}`} // default to the purple stroke if no text color is inherited, it can be overridden
+      className={`text-[#889096] ${className || ''}`} // default to the gray stroke if no text color is inherited, it can be overridden
       {...(props as any)}
     >
       <path d="M4 4h16v16H4l4-8Z" />

@@ -332,11 +332,13 @@ export default function Navbar({
 
   return (
     <>
-      {/* Navbar Fixed at Bottom */}
-      <nav className="fixed bottom-4 sm:bottom-6 md:bottom-4 left-0 right-0 z-[90] flex justify-center items-end sm:items-center pointer-events-none px-2 sm:px-6 w-full">
-        <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-6 md:gap-2 pointer-events-auto flex-nowrap justify-center w-full max-w-[1200px] px-1 sm:px-4 relative">
+      <nav className="fixed bottom-0 left-0 right-0 z-[90] flex justify-center items-end sm:items-center pointer-events-none px-2 pb-4 sm:pb-6 md:pb-4 sm:px-6 w-full">
+        {/* Glassmorphism Background Panel */}
+        <div className="absolute bottom-0 left-0 right-0 h-[84px] sm:h-[108px] md:h-[116px] bg-white/70 backdrop-blur-md border-t border-gray-200/30 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] z-0 pointer-events-auto" />
+
+        <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-6 md:gap-2 pointer-events-auto flex-nowrap justify-center w-full max-w-[1200px] px-1 sm:px-4 relative z-10">
           {/* Left Segment: Logo, Profile, Notifications, Search */}
-          <div className="flex items-center bg-white sm:bg-[#562996] rounded-[24px] sm:rounded-xl md:rounded-xl pl-[2px] pr-1 xs:pl-1 xs:pr-1.5 sm:px-4 md:px-6 h-[48px] sm:h-[60px] md:h-[64px] shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl flex-[1.3] sm:flex-1 max-w-[480px] justify-between overflow-hidden min-w-0 border border-gray-100 sm:border-0">
+          <div className="flex items-center bg-white sm:bg-[#562996] rounded-xl pl-[2px] pr-1 xs:pl-1 xs:pr-1.5 sm:px-4 md:px-6 h-[48px] sm:h-[60px] md:h-[64px] shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl flex-[1.3] sm:flex-1 max-w-[480px] justify-between overflow-hidden min-w-0 border border-gray-100 sm:border-0">
             {/* DESKTOP VIEW (sm and up) */}
             <div className="hidden sm:flex items-center w-full justify-between">
                 <div className="flex items-center h-full">
@@ -495,7 +497,7 @@ export default function Navbar({
 
 
           {/* Right Segment: Cart, Wishlist, Filter, Menu */}
-          <div className="flex items-center justify-between bg-white sm:bg-[#562996] rounded-[24px] sm:rounded-xl md:rounded-xl px-2 xs:px-3 sm:px-8 md:px-12 lg:px-16 h-[48px] sm:h-[60px] md:h-[64px] shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl text-[#562996] sm:text-white sm:shrink-0 flex-[1] sm:flex-1 max-w-[480px] z-10 overflow-hidden min-w-0 border border-gray-100 sm:border-0">
+          <div className="flex items-center justify-between bg-white sm:bg-[#562996] rounded-xl px-2 xs:px-3 sm:px-8 md:px-12 lg:px-16 h-[48px] sm:h-[60px] md:h-[64px] shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl text-[#562996] sm:text-white sm:shrink-0 flex-[1] sm:flex-1 max-w-[480px] z-10 overflow-hidden min-w-0 border border-gray-100 sm:border-0">
 
             <button 
               onClick={() => setIsWishlistOpen(true)} 

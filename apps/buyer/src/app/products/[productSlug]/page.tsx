@@ -193,7 +193,7 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
           }}
           className="absolute right-0 top-[40%] -translate-y-1/2 z-20 cursor-pointer hover:scale-105 transition-transform"
         >
-          <WishlistIcon isFilled={isSaved} className={`w-5 h-7 sm:w-5 sm:h-7 text-[#8b5cf6] ${isSaved ? 'fill-[#8b5cf6]' : 'fill-none'}`} />
+          <WishlistIcon isFilled={isSaved} className={`w-5 h-7 sm:w-5 sm:h-7 text-[#889096] ${isSaved ? 'fill-[#889096]' : 'fill-none'}`} />
         </div>
 
         {/* Image Container */}
@@ -880,7 +880,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
           {/* Related Products */}
           <div className="mt-4 border-t border-gray-100 pt-6">
             <h2 className="mb-4 text-base font-bold text-gray-600 uppercase tracking-wider">Related Products</h2>
-            <div className="grid grid-cols-2 gap-3.5 pb-4">
+            <div className="grid grid-cols-2 gap-x-3.5 gap-y-[28px] pb-4">
               {relatedProducts.slice(0, 4).map((prod: any, idx: number) => (
                 <RelatedProductCard key={prod.id} prod={prod} index={idx} />
               ))}

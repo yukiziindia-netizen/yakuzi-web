@@ -164,7 +164,7 @@ export default function ProductCard({
         onClick={handleBookmarkClick}
         className="absolute right-0 top-[42%] -translate-y-1/2 z-20 cursor-pointer hover:scale-105 transition-transform"
       >
-        <WishlistIcon isFilled={isBookmarked} className={`w-7 h-9 text-[#8b5cf6] ${isBookmarked ? 'fill-[#8b5cf6]' : 'fill-none'}`} />
+        <WishlistIcon isFilled={isBookmarked} className={`w-7 h-9 text-[#889096] ${isBookmarked ? 'fill-[#889096]' : 'fill-none'}`} />
       </div>
 
       {/* Product Image */}

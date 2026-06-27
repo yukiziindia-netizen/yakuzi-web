@@ -123,7 +123,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
           }}
           className="absolute right-0 top-[40%] -translate-y-1/2 z-20 cursor-pointer hover:scale-105 transition-transform"
         >
-          <WishlistIcon isFilled={isSaved} className={`w-5 h-7 sm:w-5 sm:h-7 text-[#8b5cf6] ${isSaved ? 'fill-[#8b5cf6]' : 'fill-none'}`} />
+          <WishlistIcon isFilled={isSaved} className={`w-5 h-7 sm:w-5 sm:h-7 text-[#889096] ${isSaved ? 'fill-[#889096]' : 'fill-none'}`} />
         </div>
 
         {/* Image Container */}
@@ -223,7 +223,7 @@ export default function ProductCarousel({ slot = 'HOMEPAGE_CAROUSEL', categoryId
         - Large Desktop (lg): 6 columns
         - Extra Large Desktop (xl): 7 columns
       */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-2.5 md:gap-3 lg:gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-x-2.5 gap-y-[28px] md:gap-3 lg:gap-4">
         {slicedProducts.map((product, index) => (
           <GridProductCard 
             key={`${product?.id || 'prod'}-${index}`} 

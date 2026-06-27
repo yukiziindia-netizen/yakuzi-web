@@ -330,7 +330,7 @@ export default function PremiumProductCard({
         onClick={toggleBookmark}
         className="absolute right-3 top-4 z-20 outline-none w-[32px] h-[32px] bg-white shadow-sm border border-gray-100 rounded-full flex items-center justify-center hover:scale-105 transition-transform"
       >
-        <WishlistIcon isFilled={bookmarked} className="w-[18px] h-[18px] text-[#8b5cf6]" />
+        <WishlistIcon isFilled={bookmarked} className="w-[18px] h-[18px] text-[#889096]" />
       </button>
 
       {/* Info Section */}

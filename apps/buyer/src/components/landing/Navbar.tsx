@@ -383,7 +383,7 @@ export default function Navbar({
                     )}
                   </div>
                 </div>
-              <div className="relative flex items-center justify-end ml-4 sm:ml-8 md:ml-10 w-[95px] sm:w-[115px] md:w-[135px] lg:w-[155px]">
+              <div className="relative flex items-center justify-end ml-3 sm:ml-4 md:ml-5 flex-1 max-w-[220px] sm:max-w-[260px] md:max-w-[300px]">
                 <input
                   type="text"
                   placeholder="Search"
@@ -585,12 +585,23 @@ export default function Navbar({
           <AnimatePresence>
             {isChatOpen && (
               <motion.div
+                key="chat-backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/50 backdrop-blur-[1px] z-[-2] pointer-events-auto"
+                onClick={() => setIsChatOpen(false)}
+              />
+            )}
+            {isChatOpen && (
+              <motion.div
+                key="chat-popup"
                 initial={{ opacity: 0, y: 50, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 50, scale: 0.95 }}
                 className="absolute bottom-[-16px] md:bottom-[-24px] left-0 right-0 z-[-1] pointer-events-auto h-[75vh] max-h-[850px]"
               >
-                <div className="w-full h-full bg-gradient-to-br from-[#9b49e6] to-[#7f26d9] rounded-[2rem] md:rounded-[2.5rem] shadow-[0_0_60px_rgba(155,73,230,0.5)] p-6 sm:p-8 md:p-10 flex flex-col">
+                <div className="w-full h-full bg-gradient-to-br from-[#9b49e6] to-[#7f26d9] rounded-2xl md:rounded-3xl shadow-[0_0_60px_rgba(155,73,230,0.5)] p-6 sm:p-8 md:p-10 flex flex-col">
                   {/* Chat Messages Area */}
                   {chatMessages.length > 0 && (
                     <div className="flex-1 overflow-y-auto mb-4 flex flex-col gap-4 scrollbar-hide">
@@ -763,9 +774,9 @@ export default function Navbar({
                 initial={{ opacity: 0, y: 50, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 50, scale: 0.95 }}
-                className="absolute bottom-[-16px] md:bottom-[-24px] left-0 right-0 z-[-2] pointer-events-auto h-[60vh] max-h-[600px]"
+                className="absolute bottom-[-16px] md:bottom-[-24px] left-0 right-0 z-[-2] pointer-events-auto h-[50vh] max-h-[600px]"
               >
-                <div className="w-full h-full bg-white rounded-[2rem] md:rounded-[2.5rem] shadow-[0_0_40px_rgba(0,0,0,0.1)] border border-gray-100 p-6 sm:p-8 md:p-10 flex flex-col relative overflow-hidden">
+                <div className="w-full h-full bg-white rounded-2xl md:rounded-3xl shadow-[0_0_40px_rgba(0,0,0,0.1)] border border-gray-100 p-6 sm:p-8 md:p-10 flex flex-col relative overflow-hidden">
 
                   {/* Subtle pink/purple glow behind the mascot area */}
                   <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[300px] h-[150px] bg-pink-500/10 blur-[50px] pointer-events-none rounded-full" />

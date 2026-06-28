@@ -123,7 +123,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
           }}
           className="absolute right-0 top-[40%] -translate-y-1/2 z-20 cursor-pointer hover:scale-105 transition-transform"
         >
-          <WishlistIcon isFilled={isSaved} className={`w-5 h-7 sm:w-5 sm:h-7 text-[#889096] ${isSaved ? 'fill-[#889096]' : 'fill-none'}`} />
+          <WishlistIcon isFilled={isSaved} className={`w-6 h-7 sm:w-7 sm:h-7 text-[#7B2FBE] ${isSaved ? 'fill-[#7B2FBE]' : 'fill-none'}`} />
         </div>
 
         {/* Image Container */}
@@ -147,7 +147,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
            </div>
            
            {/* Price and Rating */}
-           <div className="flex justify-between items-center w-full mb-1 sm:mb-1.5">
+           <div className="flex justify-between items-center w-full mt-auto mb-0.5 sm:mb-1">
               <div className="flex items-baseline gap-1 sm:gap-1.5">
                  <span className="text-[13px] sm:text-[14px] md:text-[15px] lg:text-[16px] xl:text-[14px] font-semibold text-[#333333] tracking-tight leading-none">
                     {displayPrice}
@@ -161,7 +161,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
            </div>
 
            {/* Bottom Badges */}
-           <div className="flex justify-between items-center w-full mt-auto pt-0.5">
+           <div className="flex justify-between items-center w-full pt-0">
               <span className="text-[10px] sm:text-[11px] md:text-[12px] lg:text-[13px] xl:text-[11px] font-bold text-[#333333]">
                  {displayDiscount}
               </span>

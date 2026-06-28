@@ -164,7 +164,7 @@ export default function ProductCard({
         onClick={handleBookmarkClick}
         className="absolute right-0 top-[42%] -translate-y-1/2 z-20 cursor-pointer hover:scale-105 transition-transform"
       >
-        <WishlistIcon isFilled={isBookmarked} className={`w-7 h-9 text-[#889096] ${isBookmarked ? 'fill-[#889096]' : 'fill-none'}`} />
+        <WishlistIcon isFilled={isBookmarked} className={`w-8 sm:w-9 h-9 text-[#7B2FBE] ${isBookmarked ? 'fill-[#7B2FBE]' : 'fill-none'}`} />
       </div>
 
       {/* Product Image */}
@@ -194,7 +194,7 @@ export default function ProductCard({
       </div>
       
       {/* Price Section & Rating */}
-      <div className="flex justify-between items-center w-full mb-2 sm:mb-3">
+      <div className="flex justify-between items-center w-full mt-auto mb-1 sm:mb-2">
         <div className="flex items-baseline gap-2.5">
           <span className="text-[22px] sm:text-[25px] font-normal text-[#333333] tracking-tight leading-none">{displayPrice}</span>
           <span className="text-[15px] sm:text-[16px] text-gray-400 line-through leading-none">{displayOriginalPrice}</span>
@@ -206,7 +206,7 @@ export default function ProductCard({
       </div>
 
       {/* Bottom row: Discount & Delivery Truck */}
-      <div className="flex justify-between items-center w-full mt-auto pt-0.5">
+      <div className="flex justify-between items-center w-full pt-0">
         <span className="text-[15px] sm:text-[16px] font-bold text-[#333333]">{displayDiscount}</span>
         <div className="-mr-2 sm:-mr-2.5">
           <DeliveryTruckBadge text={deliveryTime} className="w-[85px] sm:w-[90px] h-auto text-[#8c8c8c]" />

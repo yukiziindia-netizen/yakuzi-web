@@ -26,6 +26,7 @@ export function ShareButton({
   iconClassName = 'w-[18px] h-[18px]',
   onOpenChange,
 }: ShareButtonProps) {
+  return null;
   const [showMenu, setShowMenu] = useState(false);
   const [copied, setCopied] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);

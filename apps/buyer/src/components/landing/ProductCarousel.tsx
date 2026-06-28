@@ -63,14 +63,14 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
   return (
     <div className="relative mt-3 sm:mt-4 group flex flex-col h-full">
       {/* Yukizi Choice & Best Seller Tags */}
-      <div className="absolute -top-[10px] left-2.5 sm:left-3 flex items-center gap-1 sm:gap-1.5 z-30">
+      <div className="absolute -top-[8px] left-2 sm:left-2 flex items-center gap-1 z-30">
         {isYukiziChoice && (
-          <div className="bg-[#8b5cf6] text-white px-2 sm:px-2.5 py-0.5 rounded-full font-bold text-[10px] sm:text-[11px] md:text-[11px] lg:text-[12px] xl:text-[10px] shadow-sm tracking-wide flex items-center justify-center">
+          <div className="bg-[#8b5cf6] text-white px-1.5 sm:px-2 py-0.5 rounded-full font-semibold text-[9px] sm:text-[10px] shadow-sm tracking-wide flex items-center justify-center">
             Yukizi Choice
           </div>
         )}
         {isBestSeller && (
-          <div className="bg-[#4a4a4a] text-white px-2 sm:px-2.5 py-0.5 rounded-full font-bold text-[10px] sm:text-[11px] md:text-[11px] lg:text-[12px] xl:text-[10px] shadow-sm tracking-wide flex items-center justify-center">
+          <div className="bg-[#4a4a4a] text-white px-1.5 sm:px-2 py-0.5 rounded-full font-semibold text-[9px] sm:text-[10px] shadow-sm tracking-wide flex items-center justify-center">
             Best Seller
           </div>
         )}
@@ -78,20 +78,17 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
 
       {/* Ad Tag */}
       {isAd && (
-        <div className="absolute -top-5 right-2 text-[11px] sm:text-[12px] text-gray-500 font-medium z-20">
+        <div className="absolute -top-4 right-2 text-[10px] sm:text-[11px] text-gray-500 font-medium z-20">
           Ad
         </div>
       )}
 
       {/* Container */}
       <div 
-        className={`bg-white rounded-[14px] sm:rounded-[16px] p-2.5 sm:p-3 hover:shadow-[0_8px_30px_rgb(133,76,188,0.15)] hover:ring-1 hover:ring-primary/50 transition-all duration-300 group flex flex-col relative border ${isYukiziChoice ? 'border-[#8b5cf6] shadow-[0_0_15px_rgba(139,92,246,0.4)]' : 'border-gray-300 shadow-sm'} w-full h-full overflow-hidden`}
+        className={`bg-white rounded-[6px] sm:rounded-[6px] p-2.5 sm:p-3 hover:shadow-[0_8px_30px_rgb(133,76,188,0.15)] hover:ring-1 hover:ring-primary/50 transition-all duration-300 group flex flex-col relative border ${isYukiziChoice ? 'border-[#8b5cf6] shadow-[0_0_15px_rgba(139,92,246,0.4)]' : 'border-gray-300 shadow-sm'} w-full h-full overflow-hidden`}
       >
         {/* Top action icons */}
-        <div className="flex justify-between items-center w-full absolute top-2.5 sm:top-3 left-0 px-2.5 sm:px-3 z-20">
-          <button className="text-gray-500 hover:text-gray-700 transition-colors z-10 p-0.5" onClick={(e) => e.preventDefault()}>
-             <Share2 className="w-4 h-4 sm:w-4 sm:h-4" strokeWidth={2} />
-          </button>
+        <div className="flex justify-end items-center w-full absolute top-1 sm:top-1.5 left-0 pl-2.5 sm:pl-3 pr-0.5 sm:pr-1 z-20">
           <button 
             className="text-[#ff8952] hover:text-[#ff7536] transition-colors z-10 p-1 flex items-center justify-center" 
             onClick={(e) => { 
@@ -123,31 +120,31 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
           }}
           className="absolute right-0 top-[40%] -translate-y-1/2 z-20 cursor-pointer hover:scale-105 transition-transform"
         >
-          <WishlistIcon isFilled={isSaved} className={`w-6 h-7 sm:w-7 sm:h-7 text-[#7B2FBE] ${isSaved ? 'fill-[#7B2FBE]' : 'fill-none'}`} />
+          <WishlistIcon isFilled={isSaved} preserveAspectRatio="none" className={`w-[24px] h-[18px] xs:w-[24px] xs:h-[18px] sm:w-[24px] sm:h-[18px] text-[#7B2FBE] ${isSaved ? 'fill-[#7B2FBE]' : 'fill-none'}`} />
         </div>
 
         {/* Image Container */}
-        <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`} className="relative w-full aspect-[4/5] mb-[-4px] sm:mb-[-6px] mt-1 sm:mt-1.5 overflow-hidden bg-white flex justify-center items-center border-none">
+        <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`} className="relative w-full aspect-[4/5] mb-[-8px] sm:mb-[-10px] mt-[-10px] sm:mt-[-12px] overflow-hidden bg-white flex justify-center items-center border-none">
            <img src={imageUrl} alt={productName} className="max-h-full max-w-full object-contain p-0.5 transform group-hover:scale-105 transition-transform duration-700 ease-out drop-shadow-md" />
         </Link>
 
         {/* Details Section */}
-        <div className="flex-1 flex flex-col z-10 w-full mt-0 pb-0.5">
+        <div className="flex-1 flex flex-col justify-end gap-0.5 sm:gap-0.5 z-10 w-full mt-0 pb-0.5">
            {/* Title Line */}
-           <div className="flex items-center justify-between mb-1 w-full gap-1 sm:gap-1.5">
+           <div className="flex items-center justify-between w-full gap-1 sm:gap-1.5">
               <h3 className="text-[12px] sm:text-[13px] md:text-[14px] lg:text-[15px] xl:text-[13px] font-medium text-[#333333] truncate flex-1 text-left tracking-tight leading-tight">
                  {productName}
               </h3>
               <button 
                  onClick={(e) => { e.preventDefault(); onOpenReview(product); }}
-                 className="w-5 h-5 sm:w-6 sm:h-6 md:w-6 md:h-6 lg:w-7 lg:h-7 xl:w-6 xl:h-6 bg-[#8c8c8c] rounded-full flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform shadow-sm z-20 -mr-1 sm:-mr-1.5 md:-mr-1.5 lg:-mr-2 xl:-mr-1.5"
+                 className="w-4 h-4 sm:w-4 sm:h-4 md:w-4 md:h-4 lg:w-4 lg:h-4 xl:w-4 xl:h-4 bg-[#8c8c8c] rounded-full flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform shadow-sm z-20 -mr-2 sm:-mr-2.5 md:-mr-2.5 lg:-mr-3 xl:-mr-2.5"
               >
-                 <ArrowUpRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-3.5 md:h-3.5 lg:w-4 lg:h-4 xl:w-3.5 xl:h-3.5 text-white" strokeWidth={2.5} />
+                 <ArrowUpRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-3.5 md:h-3.5 lg:w-3.5 lg:h-3.5 xl:w-3.5 xl:h-3.5 text-white" strokeWidth={2.5} />
               </button>
            </div>
            
            {/* Price and Rating */}
-           <div className="flex justify-between items-center w-full mt-auto mb-0.5 sm:mb-1">
+           <div className="flex justify-between items-center w-full">
               <div className="flex items-baseline gap-1 sm:gap-1.5">
                  <span className="text-[13px] sm:text-[14px] md:text-[15px] lg:text-[16px] xl:text-[14px] font-semibold text-[#333333] tracking-tight leading-none">
                     {displayPrice}
@@ -161,7 +158,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
            </div>
 
            {/* Bottom Badges */}
-           <div className="flex justify-between items-center w-full pt-0">
+           <div className="flex justify-between items-center w-full">
               <span className="text-[10px] sm:text-[11px] md:text-[12px] lg:text-[13px] xl:text-[11px] font-bold text-[#333333]">
                  {displayDiscount}
               </span>

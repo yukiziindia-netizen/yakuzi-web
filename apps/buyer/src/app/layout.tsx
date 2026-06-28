@@ -14,7 +14,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={openSans.className}>
+      <head>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" />
+      </head>
+      <body className={`${openSans.className} font-sans`}>
         <Providers>
           <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
             <div style={{ flex: 1 }}>

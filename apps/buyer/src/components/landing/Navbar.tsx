@@ -333,9 +333,6 @@ export default function Navbar({
   return (
     <>
       <nav className="fixed bottom-0 left-0 right-0 z-[90] flex justify-center items-end sm:items-center pointer-events-none px-2 pb-4 sm:pb-6 md:pb-4 sm:px-6 w-full">
-        {/* Glassmorphism Background Panel */}
-        <div className="absolute bottom-0 left-0 right-0 h-[84px] sm:h-[108px] md:h-[116px] bg-white/70 backdrop-blur-md border-t border-gray-200/30 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] z-0 pointer-events-auto" />
-
         <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-6 md:gap-2 pointer-events-auto flex-nowrap justify-center w-full max-w-[1200px] px-1 sm:px-4 relative z-10">
           {/* Left Segment: Logo, Profile, Notifications, Search */}
           <div className="flex items-center bg-white sm:bg-[#562996] rounded-xl pl-[2px] pr-1 xs:pl-1 xs:pr-1.5 sm:px-4 md:px-6 h-[48px] sm:h-[60px] md:h-[64px] shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl flex-[1.3] sm:flex-1 max-w-[480px] justify-between overflow-hidden min-w-0 border border-gray-100 sm:border-0">
@@ -601,7 +598,7 @@ export default function Navbar({
                 exit={{ opacity: 0, y: 50, scale: 0.95 }}
                 className="absolute bottom-[-16px] md:bottom-[-24px] left-0 right-0 z-[-1] pointer-events-auto h-[75vh] max-h-[850px]"
               >
-                <div className="w-full h-full bg-gradient-to-br from-[#9b49e6] to-[#7f26d9] rounded-2xl md:rounded-3xl shadow-[0_0_60px_rgba(155,73,230,0.5)] p-6 sm:p-8 md:p-10 flex flex-col">
+                <div className="w-full h-full bg-gradient-to-r from-[#8527bf] via-[#ae44eb] to-[#8d2bcd] rounded-2xl md:rounded-3xl shadow-[0_0_80px_rgba(174,68,235,0.75)] p-6 sm:p-8 md:p-10 flex flex-col">
                   {/* Chat Messages Area */}
                   {chatMessages.length > 0 && (
                     <div className="flex-1 overflow-y-auto mb-4 flex flex-col gap-4 scrollbar-hide">

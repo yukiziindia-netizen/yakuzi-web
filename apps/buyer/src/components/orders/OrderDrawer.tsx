@@ -8,10 +8,13 @@ import { useAuth } from '@yukizi/api-client';
 
 function formatImageUrl(url: any): string | undefined {
   if (!url) return undefined;
-  const urlStr = typeof url === 'string' ? url : url.url;
-  if (!urlStr || typeof urlStr !== 'string') return undefined;
-  if (urlStr.startsWith('http')) return urlStr;
-  return `http://localhost:3000${urlStr.startsWith('/') ? '' : '/'}${urlStr}`;
+  const path = typeof url === 'string' ? url : (url.url || url.path || (Array.isArray(url) ? url[0] : undefined));
+  if (!path || typeof path !== 'string') return undefined;
+  if (path.startsWith('http') || path.startsWith('data:')) return path;
+  const env = (typeof process !== 'undefined' ? process.env : {}) as any;
+  const baseURL = env.NEXT_PUBLIC_API_BASE_URL || env.NEXT_PUBLIC_API_URL || '';
+  const cleanBase = baseURL.replace(/\/api\/?$/, '');
+  return `${cleanBase}${path.startsWith('/') ? '' : '/'}${path}`;
 }
 
 interface OrderDrawerProps {
@@ -134,7 +137,7 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
               <div className="flex gap-4 overflow-x-auto pb-4 hide-scrollbar -mx-2 px-2 snap-x">
                 {items.map((item: any, index: number) => {
                   const product = item.sellerOffer || {};
-                  const imageUrl = formatImageUrl(product.variant?.catalogProduct?.images?.[0]) || 'https://images.unsplash.com/photo-1534996858220-e80315df5fad?q=80&w=200&auto=format&fit=crop';
+                  const imageUrl = formatImageUrl(product.variant?.catalogProduct?.images?.[0]) || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=200&auto=format&fit=crop';
                   const name = product.name || 'Unknown Product';
                   
                   return (
@@ -183,7 +186,7 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
                   const images = oItems.map((item: any) => formatImageUrl(item.sellerOffer?.variant?.catalogProduct?.images?.[0])).filter(Boolean);
                   
                   if (images.length === 0) {
-                    images.push("https://images.unsplash.com/photo-1534996858220-e80315df5fad?q=80&w=150&auto=format&fit=crop");
+                    images.push("https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=150&auto=format&fit=crop");
                   }
 
                   const date = new Date(o.createdAt);
@@ -198,11 +201,11 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
                       <div className="grid grid-cols-2 gap-1.5 h-[160px]">
                          <div className="flex flex-col gap-1.5">
                             <div className="bg-gray-50 rounded flex-1 flex items-center justify-center overflow-hidden">
-                               <img src={images[0] || "https://images.unsplash.com/photo-1534996858220-e80315df5fad?q=80&w=150&auto=format&fit=crop"} className="w-full h-full object-cover" alt="" />
+                               <img src={images[0] || "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=150&auto=format&fit=crop"} className="w-full h-full object-cover" alt="" />
                             </div>
                             <div className="bg-gray-50 rounded flex-1 flex items-center justify-center overflow-hidden">
                                {images.length > 1 ? (
-                                 <img src={images[1] || "https://images.unsplash.com/photo-1534996858220-e80315df5fad?q=80&w=150&auto=format&fit=crop"} className="w-full h-full object-cover" alt="" />
+                                 <img src={images[1] || "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=150&auto=format&fit=crop"} className="w-full h-full object-cover" alt="" />
                                ) : (
                                  <div className="w-full h-full bg-gray-100/50"></div>
                                )}
@@ -211,14 +214,14 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
                          <div className="flex flex-col gap-1.5">
                              <div className="bg-gray-50 rounded flex-[2] flex items-center justify-center overflow-hidden">
                                {images.length > 2 ? (
-                                 <img src={images[2] || "https://images.unsplash.com/photo-1534996858220-e80315df5fad?q=80&w=150&auto=format&fit=crop"} className="w-full h-full object-cover" alt="" />
+                                 <img src={images[2] || "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=150&auto=format&fit=crop"} className="w-full h-full object-cover" alt="" />
                                ) : (
                                  <div className="w-full h-full bg-gray-100/50"></div>
                                )}
                             </div>
                              <div className="bg-gray-50 rounded flex-1 flex items-center justify-center overflow-hidden">
                                {images.length > 3 ? (
-                                 <img src={images[3] || "https://images.unsplash.com/photo-1534996858220-e80315df5fad?q=80&w=150&auto=format&fit=crop"} className="w-full h-full object-cover" alt="" />
+                                 <img src={images[3] || "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=150&auto=format&fit=crop"} className="w-full h-full object-cover" alt="" />
                                ) : (
                                  <div className="w-full h-full bg-gray-100/50"></div>
                                )}

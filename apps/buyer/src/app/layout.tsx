@@ -8,7 +8,7 @@ const openSans = Open_Sans({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Yukizi',
-  description: 'India\'s Only Trusted B2B Pharma Platform for Wholesalers',
+  description: 'Stay updated with the latest trends and updates from Yukizi',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

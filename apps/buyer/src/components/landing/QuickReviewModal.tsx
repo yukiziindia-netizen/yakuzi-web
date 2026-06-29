@@ -118,6 +118,9 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
       productName: displayProduct.name,
       price: listing.price,
       mrp: displayProduct.mrp,
+      image: productImages[0],
+      imageUrl: productImages[0],
+      images: productImages,
     });
   };
 

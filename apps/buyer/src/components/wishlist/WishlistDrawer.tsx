@@ -35,9 +35,15 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
       window.dispatchEvent(new CustomEvent('open-login'));
       return;
     }
+    const imgUrl = item.image || item.product?.image || (item.product?.images && (typeof item.product.images[0] === 'string' ? item.product.images[0] : item.product.images[0]?.url));
     const cartItem = {
       productId: item.productId || item.product?.id || item.id,
       quantity: 1,
+      productName: item.productName || item.product?.name,
+      price: item.price || item.product?.price,
+      image: imgUrl,
+      imageUrl: imgUrl,
+      images: imgUrl ? [imgUrl] : [],
     };
     addToCart.mutate(cartItem, {
       onSuccess: () => {

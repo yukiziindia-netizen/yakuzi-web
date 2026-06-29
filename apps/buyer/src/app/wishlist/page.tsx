@@ -32,7 +32,19 @@ export default function WishlistPage() {
   };
 
   const handleAddToCart = (productId: string) => {
-    addToCart.mutate({ productId, quantity: 1 }, {
+    const item = items.find((i: any) => i.productId === productId);
+    const product = item?.product;
+    const imgUrl = (typeof product?.images?.[0] === 'string' ? product.images[0] : (product?.images?.[0] as any)?.url);
+    addToCart.mutate({
+      productId,
+      quantity: 1,
+      productName: product?.name || 'Product',
+      price: product?.price,
+      mrp: product?.mrp,
+      image: imgUrl,
+      imageUrl: imgUrl,
+      images: imgUrl ? [imgUrl] : [],
+    }, {
       onSuccess: () => toast('Added to bag', 'success'),
       onError: () => toast('Failed to add to bag', 'error'),
     });

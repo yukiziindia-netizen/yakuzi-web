@@ -343,6 +343,7 @@ function ComparisonOffersList({
   productMrp,
   toast,
   setShowStockAlert,
+  productImage,
 }: {
   comparisonListings: any[];
   cartData: any;
@@ -354,6 +355,7 @@ function ComparisonOffersList({
   productMrp: number;
   toast: any;
   setShowStockAlert: (val: boolean) => void;
+  productImage?: string;
 }) {
   const cartItemMap = new Map<string, any>();
   if (cartData?.items) {
@@ -401,6 +403,9 @@ function ComparisonOffersList({
                 productName: productName,
                 price: listing.price,
                 mrp: productMrp,
+                image: productImage,
+                imageUrl: productImage,
+                images: productImage ? [productImage] : [],
               });
             }
           }
@@ -878,6 +883,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
             productMrp={displayMrp || displayPrice}
             toast={toast}
             setShowStockAlert={setShowStockAlert}
+            productImage={displayImages[0]}
           />
 
           {/* Accordions */}
@@ -1153,6 +1159,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                 productMrp={displayMrp || displayPrice}
                 toast={toast}
                 setShowStockAlert={setShowStockAlert}
+                productImage={displayImages[0]}
               />
             </div>
           </div>

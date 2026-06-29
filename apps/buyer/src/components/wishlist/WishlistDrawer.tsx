@@ -112,8 +112,11 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                 <AnimatePresence initial={false}>
                   {items.map((item: any, idx: number) => {
                     const itemName = item.product?.name ?? item.productName ?? item.name ?? 'Product';
-                    const itemPrice = item.product?.price ?? item.price ?? 3345.53;
-                    const itemOriginalPrice = item.product?.originalPrice ?? item.originalPrice ?? 5000.00;
+                    const rawPrice = item.product?.price ?? item.price;
+                    const rawOriginalPrice = item.product?.originalPrice ?? item.product?.mrp ?? item.originalPrice ?? item.mrp;
+                    const itemPrice = rawPrice != null ? rawPrice : 0;
+                    const itemOriginalPrice = rawOriginalPrice != null ? rawOriginalPrice : 0;
+                    const isNotAvailable = item.product?.sellerCount === 0 || item.product?.sellerOffers?.length === 0 || rawPrice == null;
                     
                     const titleWords = itemName.trim().split(' ').filter(Boolean);
                     const initials = titleWords.length === 1 
@@ -247,8 +250,8 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
 
                           {/* Row 3: Price */}
                           <div className="flex items-baseline gap-2 text-left w-full pr-8">
-                            <span className="text-[19px] font-black text-gray-900">₹{itemPrice.toLocaleString('en-IN')}</span>
-                            <span className="text-[14px] font-bold text-gray-400 line-through">₹{itemOriginalPrice.toLocaleString('en-IN')}</span>
+                            <span className="text-[19px] font-black text-gray-900">{isNotAvailable ? 'N/A' : `₹${itemPrice.toLocaleString('en-IN')}`}</span>
+                            <span className="text-[14px] font-bold text-gray-400 line-through">{!isNotAvailable && itemOriginalPrice > 0 ? `₹${itemOriginalPrice.toLocaleString('en-IN')}` : ''}</span>
                           </div>
 
                           {/* Row 4: Discount & Delivery */}

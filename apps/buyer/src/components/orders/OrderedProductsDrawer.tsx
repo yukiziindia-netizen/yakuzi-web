@@ -74,29 +74,23 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
 
   return (
     <>
-      {/* Backdrop overlay */}
-      <div 
-        className="fixed inset-0 bg-[#6342B4]/35 z-[100] transition-opacity" 
-        onClick={onClose}
-      />
-
-      {/* Drawer (styled as a full-page overlay) */}
+      {/* Full Page View */}
       <div className={`fixed inset-0 w-full h-full bg-[#fcfcfc] z-[110] transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'} overflow-y-auto`}>
-        <div className="max-w-4xl mx-auto w-full min-h-screen bg-[#fcfcfc] relative flex flex-col">
-          {/* Hidden Close Button */}
-          <button onClick={onClose} className="absolute top-6 right-6 p-2 text-gray-400 hover:text-gray-900 bg-white/80 rounded-full z-[80] transition-colors border border-gray-100 shadow-sm">
+        <div className="w-full max-w-7xl mx-auto min-h-screen bg-[#fcfcfc] relative flex flex-col px-4 sm:px-6 md:px-8 py-6">
+          {/* Close Button */}
+          <button onClick={onClose} className="absolute top-6 right-6 p-2 text-gray-400 hover:text-gray-900 bg-white hover:bg-gray-100 rounded-full z-[80] transition-colors border border-gray-200 shadow-sm">
             <X className="w-6 h-6" />
           </button>
         
         {/* Header */}
-        <div className="pr-6 pl-12 py-6 border-b border-gray-100 relative shrink-0">
-          <button onClick={onClose} className="absolute left-4 top-6 text-gray-400 hover:text-gray-800 transition-colors p-1.5">
+        <div className="pr-6 pl-14 py-6 border-b border-gray-100 relative shrink-0">
+          <button onClick={onClose} className="absolute left-4 top-6 text-gray-400 hover:text-gray-800 transition-colors p-1.5 z-[80]">
              <ChevronLeft className="w-8 h-8" />
           </button>
           
-          <div className="flex justify-between items-start">
+          <div className="flex justify-between items-start gap-4">
              <h2 className="text-[34px] font-extrabold text-gray-800 leading-tight">Ordered<br/>Products</h2>
-             <div className="flex flex-col items-end gap-1.5">
+             <div className="flex flex-col items-end gap-1.5 mr-12">
                <div className="flex gap-1.5 flex-wrap justify-end">
                  {paymentMethod && <span className="bg-[#8b3dcc] text-white text-[14px] font-bold px-4 py-2 rounded shadow-sm">{paymentMethod}</span>}
                  <span className="bg-[#8b3dcc] text-white text-[14px] font-bold px-4 py-2 rounded shadow-sm capitalize">Status : {displayStatus.toLowerCase()}</span>
@@ -113,7 +107,7 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
           <div className="flex flex-col gap-3 pb-24">
             
             {items.map((item: any, index: number) => {
-              const isYukiziChoice = false; // Add real logic here if needed
+              const isYukiziChoice = false;
               const hasQuantity = item.quantity > 1;
               const product = item.sellerOffer || {};
               const imageUrl = formatImageUrl(product.variant?.catalogProduct?.images?.[0]) || 'https://images.unsplash.com/photo-1534996858220-e80315df5fad?q=80&w=200&auto=format&fit=crop';

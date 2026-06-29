@@ -44,6 +44,10 @@ export function ProductForm({ defaultValues, productId }: { defaultValues?: Part
     defaultValues: defaultValues || {
       product_name: "",
       product_price: 0,
+      compare_at_price: 0,
+      gst_percent: 12,
+      unit: "1",
+      pack_size: "1",
       company_name: "",
       categories: [],
       sub_categories: [],
@@ -62,30 +66,23 @@ export function ProductForm({ defaultValues, productId }: { defaultValues?: Part
   const [mediaItems, setMediaItems] = useState<any[]>([]);
 
   const watchMrp = watch("product_price");
-  const watchGst = 0;
+  const watchCompareAt = watch("compare_at_price");
+  const watchGst = watch("gst_percent") || 0;
   const watchMinMoq = watch("min_order_qty");
   const watchStock = watch("stock");
   const watchMaxMoq = watch("max_order_qty");
   const lastMrpRef = useRef<number>(0);
 
-  // Real-time synchronization when MRP changes
+  // Real-time discount calculation when compare_at_price is added/updated
   useEffect(() => {
-    if (!watchMrp || watchMrp <= 0) return;
-
-    const minRequiredMoq = Math.ceil(20000 / watchMrp);
-
-    // Only auto-sync values when MRP changes
-    const isPriceChanged = watchMrp !== lastMrpRef.current;
-
-    if (isPriceChanged) {
-      // Sync both to the minimum required for the new price
-      setValue("min_order_qty", minRequiredMoq, { shouldDirty: true, shouldValidate: true });
-      if (watchStock < minRequiredMoq) {
-        setValue("stock", minRequiredMoq, { shouldDirty: true, shouldValidate: true });
-      }
-      lastMrpRef.current = watchMrp;
+    if (watchCompareAt && watchMrp && watchMrp > watchCompareAt) {
+      const discountPercent = parseFloat((((watchMrp - watchCompareAt) / watchMrp) * 100).toFixed(2));
+      setValue("discount_form_details", {
+        type: "ptr_discount",
+        discountPercent: discountPercent,
+      }, { shouldDirty: true, shouldValidate: true });
     }
-  }, [watchMrp, setValue, watchStock]);
+  }, [watchCompareAt, watchMrp, setValue]);
 
   // Reset active index when suggestions change
   useEffect(() => {
@@ -150,6 +147,8 @@ export function ProductForm({ defaultValues, productId }: { defaultValues?: Part
     if (suggestion.mrp !== undefined) {
       setValue("product_price", suggestion.mrp, { shouldDirty: true });
     }
+    const compareAt = (suggestion as any).extraFields?.compare_at_price ? Number((suggestion as any).extraFields.compare_at_price) : 0;
+    setValue("compare_at_price", compareAt, { shouldDirty: true });
     if (suggestion.categoryId) {
       setValue("categories", [suggestion.categoryId], { shouldDirty: true });
     }
@@ -318,6 +317,13 @@ export function ProductForm({ defaultValues, productId }: { defaultValues?: Part
       // Map discount type if present
       const mappedDiscountType = formDiscountType ? discountTypeMap[formDiscountType as keyof typeof discountTypeMap] : undefined;
 
+      const mergedExtraFields = {
+        ...extra_fields,
+        ...(data.compare_at_price && { compare_at_price: String(data.compare_at_price) }),
+        ...(data.unit && { unit: data.unit }),
+        ...(data.pack_size && { pack_size: data.pack_size }),
+      };
+
       const backendPayload: Record<string, any> = {
         name: data.product_name,
         mrp: data.product_price,
@@ -328,10 +334,10 @@ export function ProductForm({ defaultValues, productId }: { defaultValues?: Part
         expiryDate: new Date('2099-12-31').toISOString(),
         minimumOrderQuantity: data.min_order_qty,
         maximumOrderQuantity: data.max_order_qty,
-        gstPercent: 0,
+        gstPercent: data.gst_percent || 0,
         ...(data.delivery_text && { deliveryText: data.delivery_text }),
         ...(realImages.length > 0 && { images: realImages }),
-        ...(Object.keys(extra_fields).length > 0 && { extraFields: extra_fields }),
+        ...(Object.keys(mergedExtraFields).length > 0 && { extraFields: mergedExtraFields }),
         ...(mappedDiscountType && { discountType: mappedDiscountType }),
         ...(Object.keys(discountMeta).length > 0 && { discountMeta }),
         ...(selectedMasterId && { masterProductId: selectedMasterId }),
@@ -456,53 +462,86 @@ export function ProductForm({ defaultValues, productId }: { defaultValues?: Part
           </div>
         </div>
 
-        {/* Pricing & Stock */}
+        {/* Pricing */}
         <div className="glass-card rounded-2xl p-6 space-y-4 relative z-[43] transition-opacity duration-300">
-          <h2 className="font-semibold text-lg text-foreground border-b border-border/50 pb-2">Pricing & Stock</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <h2 className="font-semibold text-lg text-foreground border-b border-border/50 pb-2">Pricing</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input 
-              label="MRP (₹) *" 
+              label="Price (₹)" 
               type="number" 
               step="0.01" 
+              placeholder="0.00"
               error={errors.product_price?.message} 
               {...register("product_price", { valueAsNumber: true })} 
             />
             <Input 
-              label="Current Stock *" 
+              label="Compare at price (MRP) (₹)" 
               type="number" 
-              min={watchMrp > 0 ? Math.ceil(20000 / watchMrp) : 1}
-              error={errors.stock?.message} 
-              disabled={variants && variants.length > 0}
-              {...register("stock", { valueAsNumber: true })} 
+              step="0.01" 
+              placeholder="3345"
+              error={errors.compare_at_price?.message} 
+              {...register("compare_at_price", { valueAsNumber: true })} 
+            />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <Input 
+              label="Charge tax on this product (%)" 
+              type="number" 
+              placeholder="12"
+              error={errors.gst_percent?.message} 
+              {...register("gst_percent", { valueAsNumber: true })} 
+            />
+          </div>
+        </div>
+
+        {/* Inventory */}
+        <div className="glass-card rounded-2xl p-6 space-y-4 relative z-[43] transition-opacity duration-300">
+          <h2 className="font-semibold text-lg text-foreground border-b border-border/50 pb-2">Inventory</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input 
+              label="Unit (e.g., Tablet, Bottle)" 
+              placeholder="1"
+              error={errors.unit?.message} 
+              {...register("unit")} 
             />
             <Input 
-              label="Delivery Time (e.g. 3 days, Tomorrow)" 
-              placeholder="e.g. 3 days, Tomorrow" 
-              error={errors.delivery_text?.message} 
-              {...register("delivery_text")} 
+              label="Pack Size (e.g., 10x10)" 
+              placeholder="1"
+              error={errors.pack_size?.message} 
+              {...register("pack_size")} 
             />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
             <div className="space-y-1">
               <Input 
-                label="Minimum Order Qty *" 
+                label="Minimum Order Quantity" 
                 type="number" 
-                min={watchMrp > 0 ? Math.ceil(20000 / watchMrp) : 1}
+                min={1}
                 error={errors.min_order_qty?.message} 
                 {...register("min_order_qty", { valueAsNumber: true })} 
               />
-              {watchMrp > 0 && (
-                <p className="text-[10px] text-muted-foreground px-1">
-                  Min. {Math.ceil(20000 / watchMrp)} units (₹20k min)
-                </p>
-              )}
             </div>
+            <Input 
+              label="Current Stock *" 
+              type="number" 
+              min={1}
+              error={errors.stock?.message} 
+              {...register("stock", { valueAsNumber: true })} 
+            />
             <Input 
               label="Maximum Order Qty *" 
               type="number" 
               min={watchMinMoq}
               error={errors.max_order_qty?.message} 
               {...register("max_order_qty", { valueAsNumber: true })} 
+            />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+            <Input 
+              label="Delivery Time (e.g. 3 days, Tomorrow)" 
+              placeholder="e.g. 3 days, Tomorrow" 
+              error={errors.delivery_text?.message} 
+              {...register("delivery_text")} 
             />
           </div>
         </div>

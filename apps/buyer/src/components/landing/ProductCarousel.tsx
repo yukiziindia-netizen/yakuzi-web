@@ -19,6 +19,37 @@ interface ProductCarouselProps {
   initialProducts?: any[];
 }
 
+export const renderBuyerOfferBadge = (p: any) => {
+  if (!p?.discountType) {
+    const mrp = p?.mrp || p?.originalPrice;
+    const price = p?.price;
+    const defaultText = (mrp != null && price != null && mrp > price)
+      ? `${Math.round(((mrp - price) / mrp) * 100)}% off`
+      : '25% off';
+    return <span className="bg-[#854cbc] text-white px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold tracking-wide shadow-sm whitespace-nowrap">{defaultText}</span>;
+  }
+  const meta = p.discountMeta || {};
+  if (p.discountType === "PTR_DISCOUNT") {
+    return <span className="bg-purple-600 text-white px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold tracking-wide shadow-sm whitespace-nowrap">{meta.discountPercent || 0}% PTR Discount</span>;
+  }
+  if (p.discountType === "SAME_PRODUCT_BONUS") {
+    return <span className="bg-blue-600 text-white px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold tracking-wide shadow-sm whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} Free</span>;
+  }
+  if (p.discountType === "PTR_PLUS_SAME_PRODUCT_BONUS") {
+    return <div className="flex flex-col gap-0.5"><span className="bg-purple-600 text-white px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold tracking-wide shadow-sm whitespace-nowrap">{meta.discountPercent || 0}% PTR</span><span className="bg-blue-600 text-white px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold tracking-wide shadow-sm whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} Free</span></div>;
+  }
+  if (p.discountType === "DIFFERENT_PRODUCT_BONUS") {
+    return <span className="bg-amber-600 text-white px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold tracking-wide shadow-sm whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} {meta.bonusProductName}</span>;
+  }
+  if (p.discountType === "PTR_PLUS_DIFFERENT_PRODUCT_BONUS") {
+    return <div className="flex flex-col gap-0.5"><span className="bg-purple-600 text-white px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold tracking-wide shadow-sm whitespace-nowrap">{meta.discountPercent || 0}% PTR</span><span className="bg-amber-600 text-white px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold tracking-wide shadow-sm whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} {meta.bonusProductName}</span></div>;
+  }
+  if (p.discountType === "SPECIAL_PRICE") {
+    return <span className="bg-emerald-600 text-white px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold tracking-wide shadow-sm whitespace-nowrap">Special Price: ₹{meta.specialPrice || 0}</span>;
+  }
+  return <span className="bg-purple-600 text-white px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold tracking-wide shadow-sm whitespace-nowrap">{p.discountType.replace(/_/g, ' ')}</span>;
+};
+
 function GridProductCard({ product, index, onOpenReview }: { product: any; index: number; onOpenReview: (p: any) => void }) {
   const { mutate: addToCart } = useAddToCart();
   const { mutate: addToWishlist } = useAddToWishlist();
@@ -39,16 +70,13 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
   const mrp = product?.mrp || product?.originalPrice;
   const rating = product?.rating || 4.5;
   
-  const displayPrice = price != null ? `₹${Number(price).toLocaleString('en-IN')}` : '₹3,345.53';
+  const isNotAvailable = product?.sellerCount === 0 || product?.sellerOffers?.length === 0 || price == null;
+  const displayPrice = isNotAvailable ? 'N/A' : `₹${Number(price).toLocaleString('en-IN')}`;
   const displayOriginalPrice = mrp != null && mrp > (price || 0) 
     ? `₹${Number(mrp).toLocaleString('en-IN')}` 
-    : (price != null ? `₹${Math.round(Number(price) * 1.15).toLocaleString('en-IN')}` : '₹3,800.25');
+    : (!isNotAvailable ? `₹${Math.round(Number(price) * 1.15).toLocaleString('en-IN')}` : '');
   
-  const displayDiscount = (mrp != null && price != null && mrp > price)
-    ? `${Math.round(((mrp - price) / mrp) * 100)}% off`
-    : '25% off';
-  
-  const displayDelivery = product?.deliveryTime || '3 days';
+  const displayDelivery = product?.deliveryText || product?.deliveryTime || '3 days';
   const productName = product?.name || 'Product';
   
   const getInitials = (name: string) => {
@@ -89,6 +117,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
       >
         {/* Top action icons */}
         <div className="flex justify-end items-center w-full absolute top-1 sm:top-1.5 left-0 pl-2.5 sm:pl-3 pr-0.5 sm:pr-1 z-20">
+          {!isNotAvailable && (
           <button 
             className="text-[#ff8952] hover:text-[#ff7536] transition-colors z-10 p-1 flex items-center justify-center" 
             onClick={(e) => { 
@@ -101,6 +130,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
           >
              <Plus className="w-5 h-5 sm:w-5 sm:h-5" strokeWidth={2.5} />
           </button>
+          )}
         </div>
 
         {/* Right Edge Ribbon (Wishlist/Save) */}
@@ -158,10 +188,10 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
            </div>
 
            {/* Bottom Badges */}
-           <div className="flex justify-between items-center w-full">
-              <span className="text-[10px] sm:text-[11px] md:text-[12px] lg:text-[13px] xl:text-[11px] font-bold text-[#333333]">
-                 {displayDiscount}
-              </span>
+           <div className="flex justify-between items-center w-full mt-1">
+              <div className="flex items-center gap-1">
+                 {renderBuyerOfferBadge(product)}
+              </div>
               <div className="-mr-1 sm:-mr-1.5 md:-mr-1.5 lg:-mr-2 xl:-mr-1.5">
                  <DeliveryTruckBadge text={displayDelivery} className="w-[55px] sm:w-[60px] md:w-[65px] lg:w-[70px] xl:w-[58px] h-auto text-[#8c8c8c]" />
               </div>

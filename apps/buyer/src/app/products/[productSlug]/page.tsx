@@ -695,9 +695,10 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
           `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent((product.name || 'PR').trim().split(/\s+/).length === 1 ? (product.name || 'PR').trim().substring(0, 2).toUpperCase() : ((product.name || 'PR').trim().split(/\s+/)[0][0] + (product.name || 'PR').trim().split(/\s+/)[(product.name || 'PR').trim().split(/\s+/).length - 1][0]).toUpperCase())}`,
         ];
 
-  const displayImages = [...images];
+  const selectedVariant = productVariants.find((v: any) => v.name === selectedVariantName);
+  const displayImages = selectedVariant?.image ? [selectedVariant.image, ...images.filter((img: string) => img !== selectedVariant.image)] : [...images];
   while (displayImages.length < 3 && displayImages.length > 0) {
-    displayImages.push(images[0]);
+    displayImages.push(displayImages[0]);
   }
 
   const reviewsList = reviewsData?.data && reviewsData.data.length > 0
@@ -835,6 +836,35 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
           <h1 className="text-xl font-bold text-gray-800 leading-tight">
             {product.name}
           </h1>
+
+          {/* Variant Selector */}
+          {productVariants.length > 0 && (
+            <div className="flex flex-col gap-2 mt-1 mb-2">
+              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Select Variant</span>
+              <div className="flex flex-wrap gap-2">
+                {productVariants.map((v: any) => (
+                  <button
+                    key={v.id || v.name}
+                    type="button"
+                    onClick={() => {
+                      setSelectedVariantName(v.name);
+                      setActiveImage(0);
+                    }}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all ${
+                      selectedVariantName === v.name
+                        ? 'bg-[#854cbc] text-white border-[#854cbc] shadow-md scale-105'
+                        : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
+                    }`}
+                  >
+                    {v.image && (
+                      <img src={v.image} alt={v.name} className="w-5 h-5 rounded-full object-cover" />
+                    )}
+                    <span>{v.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* 8-Row Comparison list */}
           <ComparisonOffersList 
@@ -1081,6 +1111,35 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                   </div>
                 </div>
               </div>
+
+              {/* Variant Selector */}
+              {productVariants.length > 0 && (
+                <div className="flex flex-col gap-2 mb-6">
+                  <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Select Variant</span>
+                  <div className="flex flex-wrap gap-2.5">
+                    {productVariants.map((v: any) => (
+                      <button
+                        key={v.id || v.name}
+                        type="button"
+                        onClick={() => {
+                          setSelectedVariantName(v.name);
+                          setActiveImage(0);
+                        }}
+                        className={`flex items-center gap-2.5 px-4 py-2 rounded-xl border text-sm font-bold transition-all ${
+                          selectedVariantName === v.name
+                            ? 'bg-[#854cbc] text-white border-[#854cbc] shadow-md scale-105'
+                            : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
+                        }`}
+                      >
+                        {v.image && (
+                          <img src={v.image} alt={v.name} className="w-6 h-6 rounded-full object-cover" />
+                        )}
+                        <span>{v.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* 8-row comparison list */}
               <ComparisonOffersList 

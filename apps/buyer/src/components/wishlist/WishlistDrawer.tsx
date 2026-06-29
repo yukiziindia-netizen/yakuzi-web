@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trash2, Loader2, Star, ArrowUpRight, Plus, RefreshCw } from 'lucide-react';
 import WishlistIcon from '@/components/shared/WishlistIcon';
 import { useWishlist, useRemoveFromWishlist } from '@/hooks/useWishlist';
+import { DeliveryTruckBadge } from '@/components/shared/DeliveryTruckBadge';
 import { useToast } from '@/components/shared/Toast';
 import { useAddToCart, useCart, useUpdateCartItem, useRemoveCartItem } from '@/hooks/useCart';
 import { useAuth } from '@yukizi/api-client';
@@ -127,6 +128,7 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                       : `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent(initials)}`;
                     
                     const isYukiziChoice = item.product?.isYukiziChoice === true || item.isYukiziChoice === true;
+                    const deliveryTime = item.product?.deliveryTime || item.product?.deliveryText || item.deliveryTime || item.deliveryText || '3 days';
                     
                     const inCartItem = cartData?.items?.find(
                       (ci: any) => ci.productId === (item.productId || item.product?.id || item.id)
@@ -265,7 +267,7 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                             <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-[#6342B4] text-[#6342B4]" />
                             <span className="text-xs sm:text-[14px] font-bold text-gray-700">{item.rating || 4.5}</span>
                           </div>
-                          <span className="text-[10px] sm:text-[12px] text-gray-500 font-bold bg-gray-100 px-1.5 py-0.5 rounded">3 days</span>
+                          <DeliveryTruckBadge text={deliveryTime} className="w-[80px] sm:w-[95px] mt-0.5 text-[#9a9a9a]" />
                           <img src="/yukizi-logo-new.png" className="w-5 sm:w-7 h-auto object-contain opacity-70" alt="logo" />
                         </div>
                       </motion.div>

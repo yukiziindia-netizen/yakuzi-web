@@ -116,8 +116,11 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
 
           {displayItems.map((item: any, idx: number) => {
             const title = isCart ? (item.product?.name ?? item.productName ?? item.name ?? "Product") : item.title;
-            const price = isCart ? (item.product?.price ?? item.price ?? 3345.53) : item.price;
-            const originalPrice = isCart ? (item.product?.originalPrice ?? item.originalPrice ?? 5000.00) : item.originalPrice;
+            const rawPrice = isCart ? (item.product?.price ?? item.price) : item.price;
+            const rawOriginalPrice = isCart ? (item.product?.originalPrice ?? item.product?.mrp ?? item.originalPrice ?? item.mrp) : (item.originalPrice ?? item.mrp);
+            const price = rawPrice != null ? rawPrice : 0;
+            const originalPrice = rawOriginalPrice != null ? rawOriginalPrice : 0;
+            const isNotAvailable = item.product?.sellerCount === 0 || item.product?.sellerOffers?.length === 0 || rawPrice == null;
             const discount = isCart ? (item.discount || "25% off") : item.discount;
             const rating = isCart ? (item.rating || 4.5) : item.rating;
             const quantity = isCart ? (item.quantity ?? 1) : item.quantity;
@@ -168,8 +171,8 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                   {title}
                 </h3>
                 <div className="flex items-end gap-1.5 leading-none mb-1">
-                  <span className="text-[15px] font-medium text-gray-800">₹{price.toLocaleString('en-IN')}</span>
-                  <span className="text-[9px] text-gray-400 line-through pb-0.5">₹{originalPrice.toLocaleString('en-IN')}</span>
+                  <span className="text-[15px] font-medium text-gray-800">{isNotAvailable ? 'N/A' : `₹${price.toLocaleString('en-IN')}`}</span>
+                  <span className="text-[9px] text-gray-400 line-through pb-0.5">{!isNotAvailable && originalPrice > 0 ? `₹${originalPrice.toLocaleString('en-IN')}` : ''}</span>
                 </div>
                 <span className="text-[9px] font-bold text-gray-800">
                   {discount}

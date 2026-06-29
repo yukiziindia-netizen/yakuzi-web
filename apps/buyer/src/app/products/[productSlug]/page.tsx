@@ -35,6 +35,7 @@ import Navbar from '@/components/landing/Navbar';
 import { generateProductSlug, parseProductIdFromSlug } from '@yukizi/utils';
 import { ShareButton } from '@/components/shared/ShareButton';
 import WishlistIcon from '@/components/shared/WishlistIcon';
+import { renderBuyerOfferBadge } from '@/components/landing/ProductCarousel';
 
 function Accordion({
   title,
@@ -98,16 +99,13 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
   const mrp = prod.mrp || prod.originalPrice;
   const rating = prod.rating || 4.5;
 
-  const displayPrice = price != null ? `₹${Number(price).toLocaleString('en-IN')}` : '₹3,345.53';
+  const isNotAvailable = prod.sellerCount === 0 || prod.sellerOffers?.length === 0 || price == null;
+  const displayPrice = isNotAvailable ? 'N/A' : `₹${Number(price).toLocaleString('en-IN')}`;
   const displayOriginalPrice = mrp != null && mrp > (price || 0) 
     ? `₹${Number(mrp).toLocaleString('en-IN')}` 
-    : (price != null ? `₹${Math.round(Number(price) * 1.15).toLocaleString('en-IN')}` : '₹3,800.25');
+    : (!isNotAvailable ? `₹${Math.round(Number(price) * 1.15).toLocaleString('en-IN')}` : '');
   
-  const displayDiscount = (mrp != null && price != null && mrp > price)
-    ? `${Math.round(((mrp - price) / mrp) * 100)}% off`
-    : '25% off';
-
-  const displayDelivery = prod.deliveryTime || '3 days';
+  const displayDelivery = prod.deliveryText || prod.deliveryTime || '3 days';
   const productName = prod.name || 'Product';
 
   const getInitials = (name: string) => {
@@ -148,7 +146,7 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
       >
         {/* Top action icons */}
         <div className="flex justify-end items-center w-full absolute top-1 sm:top-1.5 left-0 pl-2.5 sm:pl-3 pr-0.5 sm:pr-1 z-20">
-          {price != null && (
+          {!isNotAvailable && (
             <button 
               className="text-[#ff8952] hover:text-[#ff7536] transition-colors z-10 p-1 flex items-center justify-center" 
               onClick={(e) => { 
@@ -221,10 +219,10 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
            </div>
 
            {/* Bottom Badges */}
-           <div className="flex justify-between items-center w-full">
-              <span className="text-[10px] sm:text-[11px] md:text-[12px] lg:text-[13px] xl:text-[11px] font-bold text-[#333333]">
-                 {displayDiscount}
-              </span>
+           <div className="flex justify-between items-center w-full mt-1">
+              <div className="flex items-center gap-1">
+                 {renderBuyerOfferBadge(prod)}
+              </div>
               <div className="-mr-1 sm:-mr-1.5 md:-mr-1.5 lg:-mr-2 xl:-mr-1.5">
                  <DeliveryTruckBadge text={displayDelivery} className="w-[55px] sm:w-[60px] md:w-[65px] lg:w-[70px] xl:w-[58px] h-auto text-[#8c8c8c]" />
               </div>
@@ -415,8 +413,8 @@ function ComparisonOffersList({
           >
             {/* 1. Discount Badge */}
             <div className="flex-1 flex justify-start">
-              <div className="bg-[#854cbc] text-white px-2 py-1 sm:px-3.5 sm:py-1.5 rounded-md sm:rounded-lg text-[10px] sm:text-[13px] font-bold tracking-wide select-none shadow-sm whitespace-nowrap">
-                {discountPercent}% <span className="text-[8px] sm:text-[10px]">off</span>
+              <div className="flex items-center justify-start">
+                {renderBuyerOfferBadge(listing)}
               </div>
             </div>
 
@@ -697,9 +695,10 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
           `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent((product.name || 'PR').trim().split(/\s+/).length === 1 ? (product.name || 'PR').trim().substring(0, 2).toUpperCase() : ((product.name || 'PR').trim().split(/\s+/)[0][0] + (product.name || 'PR').trim().split(/\s+/)[(product.name || 'PR').trim().split(/\s+/).length - 1][0]).toUpperCase())}`,
         ];
 
-  const displayImages = [...images];
+  const selectedVariant = productVariants.find((v: any) => v.name === selectedVariantName);
+  const displayImages = selectedVariant?.image ? [selectedVariant.image, ...images.filter((img: string) => img !== selectedVariant.image)] : [...images];
   while (displayImages.length < 3 && displayImages.length > 0) {
-    displayImages.push(images[0]);
+    displayImages.push(displayImages[0]);
   }
 
   const reviewsList = reviewsData?.data && reviewsData.data.length > 0
@@ -837,6 +836,35 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
           <h1 className="text-xl font-bold text-gray-800 leading-tight">
             {product.name}
           </h1>
+
+          {/* Variant Selector */}
+          {productVariants.length > 0 && (
+            <div className="flex flex-col gap-2 mt-1 mb-2">
+              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Select Variant</span>
+              <div className="flex flex-wrap gap-2">
+                {productVariants.map((v: any) => (
+                  <button
+                    key={v.id || v.name}
+                    type="button"
+                    onClick={() => {
+                      setSelectedVariantName(v.name);
+                      setActiveImage(0);
+                    }}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all ${
+                      selectedVariantName === v.name
+                        ? 'bg-[#854cbc] text-white border-[#854cbc] shadow-md scale-105'
+                        : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
+                    }`}
+                  >
+                    {v.image && (
+                      <img src={v.image} alt={v.name} className="w-5 h-5 rounded-full object-cover" />
+                    )}
+                    <span>{v.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* 8-Row Comparison list */}
           <ComparisonOffersList 
@@ -1071,20 +1099,47 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
 
               {/* Discount / rating line */}
               <div className="flex items-center justify-between w-full border-b border-gray-100 pb-5 mb-5">
-                <span className="text-[14px] font-semibold text-gray-700 select-none">
-                  {displayMrp && displayPrice && displayMrp > displayPrice
-                    ? `${Math.round(((displayMrp - displayPrice) / displayMrp) * 100)}% off`
-                    : '25% off'}
-                </span>
+                <div className="flex items-center gap-2">
+                  {renderBuyerOfferBadge(product)}
+                </div>
                 
                 <div className="flex items-center gap-4">
-                  <DeliveryTruckBadge text="3 days" className="w-[72px] h-auto text-gray-400" />
+                  <DeliveryTruckBadge text={product.deliveryText || "3 days"} className="w-[72px] h-auto text-gray-400" />
                   <div className="flex items-center gap-1">
                     <Star className="w-4.5 h-4.5 fill-[#854cbc] text-[#854cbc]" />
                     <span className="text-[15px] font-bold text-gray-900">{averageRating.toFixed(1)}</span>
                   </div>
                 </div>
               </div>
+
+              {/* Variant Selector */}
+              {productVariants.length > 0 && (
+                <div className="flex flex-col gap-2 mb-6">
+                  <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Select Variant</span>
+                  <div className="flex flex-wrap gap-2.5">
+                    {productVariants.map((v: any) => (
+                      <button
+                        key={v.id || v.name}
+                        type="button"
+                        onClick={() => {
+                          setSelectedVariantName(v.name);
+                          setActiveImage(0);
+                        }}
+                        className={`flex items-center gap-2.5 px-4 py-2 rounded-xl border text-sm font-bold transition-all ${
+                          selectedVariantName === v.name
+                            ? 'bg-[#854cbc] text-white border-[#854cbc] shadow-md scale-105'
+                            : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
+                        }`}
+                      >
+                        {v.image && (
+                          <img src={v.image} alt={v.name} className="w-6 h-6 rounded-full object-cover" />
+                        )}
+                        <span>{v.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* 8-row comparison list */}
               <ComparisonOffersList 

@@ -31,7 +31,7 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
   }, [orderId]);
 
   const { isAuthenticated } = useAuth();
-  const { data: allOrdersData, isLoading: isLoadingAllOrders } = useOrders({ page: 1, limit: 10 });
+  const { data: allOrdersData, isLoading: isLoadingAllOrders } = useOrders({ page: 1, limit: 50 });
   const allOrders = Array.isArray(allOrdersData) ? allOrdersData : ((allOrdersData as any)?.data || (allOrdersData as any)?.data?.orders || []);
 
   const effectiveOrderId = selectedOrderId || orderId || (allOrders.length > 0 ? allOrders[0].id : '');
@@ -39,7 +39,6 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
   const { data: orderData } = useOrderById(effectiveOrderId || '');
   const order = (orderData as any)?.data || orderData;
   const items = order?.items || order?.orderItems || [];
-  // console.log("OrderDrawer DEBUG:", { orderId, effectiveOrderId, orderData, itemsLength: items?.length });
 
   const os = order?.orderStatus || order?.status || 'PLACED';
   const displayStatus = os.replace(/_/g, ' ');
@@ -53,21 +52,13 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
 
   return (
     <>
-      {/* Backdrop overlay */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 bg-[#6342B4]/35 z-[100] transition-opacity" 
-          onClick={onClose}
-        />
-      )}
-
-      {/* Drawer (styled as a full-page overlay) */}
+      {/* Full Page View */}
       <div 
         className={`fixed inset-0 w-full h-full bg-white z-[110] transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'} overflow-y-auto`}
       >
-        <div className="max-w-4xl mx-auto w-full min-h-screen bg-white relative flex flex-col">
+        <div className="w-full max-w-7xl mx-auto min-h-screen bg-white relative flex flex-col px-4 sm:px-6 md:px-8 py-6">
           {/* Close Button */}
-          <button onClick={onClose} className="absolute top-6 right-6 p-2 text-gray-400 hover:text-gray-900 bg-white/80 rounded-full z-[80] transition-colors border border-gray-100 shadow-sm">
+          <button onClick={onClose} className="absolute top-6 right-6 p-2 text-gray-400 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 rounded-full z-[80] transition-colors border border-gray-200 shadow-sm">
             <X className="w-6 h-6" />
           </button>
 
@@ -191,13 +182,15 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
                   const oItems = o.items || o.orderItems || [];
                   const images = oItems.map((item: any) => formatImageUrl(item.sellerOffer?.variant?.catalogProduct?.images?.[0])).filter(Boolean);
                   
-                  if (images.length === 0) return null;
+                  if (images.length === 0) {
+                    images.push("https://images.unsplash.com/photo-1534996858220-e80315df5fad?q=80&w=150&auto=format&fit=crop");
+                  }
 
                   const date = new Date(o.createdAt);
                   const dateString = date.toLocaleDateString('default', { day: 'numeric', month: 'short', year: 'numeric' });
 
                   return (
-                    <div key={o.id} onClick={() => setSelectedOrderId(o.id)} className={`min-w-[220px] max-w-[220px] border ${effectiveOrderId === o.id ? 'border-purple-500 ring-1 ring-purple-500' : 'border-gray-100'} rounded-xl p-3 shadow-sm bg-white snap-center cursor-pointer hover:shadow-md transition-shadow`}>
+                    <div key={o.id} onClick={() => setSelectedOrderId(o.id)} className={`min-w-[220px] max-w-[220px] border ${effectiveOrderId === o.id ? 'border-purple-600 ring-2 ring-purple-600 shadow-md' : 'border-gray-200'} rounded-xl p-3 shadow-sm bg-white snap-center cursor-pointer hover:shadow-md transition-all`}>
                       <div className="flex justify-between items-center mb-3">
                          <span className={`text-[15px] font-black ${effectiveOrderId === o.id ? 'text-purple-600' : 'text-gray-500'}`}>{dateString}</span>
                          <ChevronRight className="w-5 h-5 text-gray-400" />

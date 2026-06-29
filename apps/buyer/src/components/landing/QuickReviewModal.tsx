@@ -34,6 +34,7 @@ import {
 import type { Product } from '@yukizi/utils';
 import { usePlatformConfig } from '@/hooks/usePlatformConfig';
 import { useWishlist, useAddToWishlist, useRemoveFromWishlist } from '@/hooks/useWishlist';
+import { renderBuyerOfferBadge } from '@/components/landing/ProductCarousel';
 
 interface QuickReviewModalProps {
   isOpen: boolean;
@@ -283,8 +284,8 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                       >
                         {/* Left: Discount Badge & Price */}
                         <div className="flex min-w-[155px] items-center gap-3.5">
-                          <div className="min-w-[66px] select-none rounded-lg bg-[#854cbc] px-2 py-1.5 text-center text-[9px] font-black uppercase leading-none tracking-wider text-white">
-                            {discountPercent}% off
+                          <div className="min-w-[66px] flex items-center justify-center">
+                            {renderBuyerOfferBadge(listing)}
                           </div>
                           <div className="flex flex-col">
                             <span className="text-[15px] font-black leading-none text-gray-800">

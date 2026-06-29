@@ -95,6 +95,10 @@ export const discountFormDetailsSchema = z.object({
 export const productFormSchema = z.object({
   product_name: z.string().min(2, 'Product name must be at least 2 characters'),
   product_price: z.preprocess((val) => Number(val) || 0, z.number()),
+  compare_at_price: z.preprocess((val) => Number(val) || 0, z.number()).optional(),
+  gst_percent: z.preprocess((val) => Number(val) || 0, z.number()).optional(),
+  unit: z.string().optional(),
+  pack_size: z.string().optional(),
   company_name: z.string().min(2, 'Company name is required'),
   chemical_combination: z.string().optional(),
   categories: z.array(z.string()).min(1, 'Select at least one category'),
@@ -183,24 +187,6 @@ export const productFormSchema = z.object({
 }, {
   message: 'Special price is required',
   path: ['discount_form_details', 'specialPrice'],
-}).refine((data) => {
-  if (data.variants && data.variants.length > 0) return true;
-  if (data.product_price <= 0) return true;
-  // Enforce ₹20,000 minimum order value rule: MRP * MOQ >= 20,000
-  const minRequiredMoq = Math.ceil(20000 / data.product_price);
-  return data.min_order_qty >= minRequiredMoq;
-}, (data) => ({
-  message: `Minimum order quantity must be at least ${Math.ceil(20000 / (data.product_price || 1))} to meet the ₹20,000 requirement.`,
-  path: ['min_order_qty'],
-})).refine((data) => {
-  if (data.variants && data.variants.length > 0) return true;
-  if (data.product_price <= 0) return true;
-  // Enforce ₹20,000 minimum rule for stock too for consistency
-  const minRequiredMoq = Math.ceil(20000 / data.product_price);
-  return data.stock >= minRequiredMoq;
-}, (data) => ({
-  message: `Current stock must be at least ${Math.ceil(20000 / (data.product_price || 1))} units to meet the ₹20,000 requirement.`,
-  path: ['stock'],
-}));
+});
 
 export type ProductFormValues = z.infer<typeof productFormSchema>;

@@ -141,8 +141,11 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                 <AnimatePresence initial={false}>
                   {items.map((item: any, idx: number) => {
                     const itemName = item.product?.name ?? item.productName ?? item.name ?? 'Product';
-                  const itemPrice = item.product?.price ?? item.price ?? 3345.53;
-                  const itemOriginalPrice = item.product?.originalPrice ?? item.originalPrice ?? 5000.00;
+                  const rawPrice = item.product?.price ?? item.price;
+                  const rawOriginalPrice = item.product?.originalPrice ?? item.product?.mrp ?? item.originalPrice ?? item.mrp;
+                  const itemPrice = rawPrice != null ? rawPrice : 0;
+                  const itemOriginalPrice = rawOriginalPrice != null ? rawOriginalPrice : 0;
+                  const isNotAvailable = item.product?.sellerCount === 0 || item.product?.sellerOffers?.length === 0 || rawPrice == null;
                   const itemImageRaw = item.product?.images?.[0] || item.imageUrl || item.image;
                   const titleWords = itemName.trim().split(' ').filter(Boolean);
                   const initials = titleWords.length === 1 
@@ -248,8 +251,8 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                         <h3 className="text-[16px] font-bold text-gray-800 leading-snug truncate pr-6">{itemName}</h3>
                         
                         <div className="flex items-center gap-1.5 mb-1 mt-0.5">
-                          <span className="text-[19px] font-black text-gray-900">₹{(itemPrice * quantity).toLocaleString('en-IN')}</span>
-                          <span className="text-[14px] font-bold text-gray-400 line-through">₹{(itemOriginalPrice * quantity).toLocaleString('en-IN')}</span>
+                          <span className="text-[19px] font-black text-gray-900">{isNotAvailable ? 'N/A' : `₹${(itemPrice * quantity).toLocaleString('en-IN')}`}</span>
+                          <span className="text-[14px] font-bold text-gray-400 line-through">{!isNotAvailable && itemOriginalPrice > 0 ? `₹${(itemOriginalPrice * quantity).toLocaleString('en-IN')}` : ''}</span>
                         </div>
                         
                         <span className="text-[13px] font-bold text-gray-600 bg-gray-100 px-2.5 py-1 rounded inline-block">

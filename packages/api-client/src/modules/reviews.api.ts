@@ -5,7 +5,7 @@ import { api } from '../api';
 
 export const ReviewSchema = z.object({
   id: z.string(),
-  productId: z.string(),
+  catalogProductId: z.string(),
   userId: z.string(),
   userName: z.string().optional(),
   rating: z.number().min(1).max(5),
@@ -22,7 +22,7 @@ export const ReviewListResponseSchema = z.object({
 });
 
 export const CreateReviewSchema = z.object({
-  productId: z.string(),
+  catalogProductId: z.string(),
   rating: z.number().min(1).max(5),
   comment: z.string().optional(),
 });
@@ -47,6 +47,16 @@ export async function createReview(input: CreateReviewInput): Promise<Review> {
   const body = CreateReviewSchema.parse(input);
   const { data } = await api.post('/reviews', body);
   return ReviewSchema.parse(data);
+}
+
+export async function getAdminReviews(params?: { page?: number; limit?: number }) {
+  const { data } = await api.get('/reviews/admin', { params });
+  return data;
+}
+
+export async function deleteAdminReview(reviewId: string) {
+  const { data } = await api.delete(`/reviews/admin/${reviewId}`);
+  return data;
 }
 
 export async function updateReview(

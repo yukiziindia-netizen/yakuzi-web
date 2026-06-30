@@ -1,18 +1,35 @@
 import React, { useState } from 'react';
 import { RotateCcw, CreditCard, ShoppingCart, ChevronLeft, ChevronRight, X } from 'lucide-react';
 
+export interface OrderFilters {
+  paymentStatus: string;
+  orderStatus: string;
+  year: string;
+  month: string;
+}
+
 interface OrderFilterDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  onApplyFilters?: () => void;
+  filters: OrderFilters;
+  onApplyFilters: (filters: OrderFilters) => void;
 }
 
-export function OrderFilterDrawer({ isOpen, onClose, onApplyFilters }: OrderFilterDrawerProps) {
-  // Mock states for UI interactivity
-  const [paymentStatus, setPaymentStatus] = useState('All');
-  const [orderStatus, setOrderStatus] = useState('All orders');
-  const [year, setYear] = useState('2026');
-  const [month, setMonth] = useState('JAN');
+export function OrderFilterDrawer({ isOpen, onClose, filters, onApplyFilters }: OrderFilterDrawerProps) {
+  // Local state for the drawer before applying
+  const [localFilters, setLocalFilters] = useState<OrderFilters>(filters);
+
+  // Sync when opened
+  React.useEffect(() => {
+    if (isOpen) {
+      setLocalFilters(filters);
+    }
+  }, [isOpen, filters]);
+
+  const setPaymentStatus = (v: string) => setLocalFilters(prev => ({ ...prev, paymentStatus: v }));
+  const setOrderStatus = (v: string) => setLocalFilters(prev => ({ ...prev, orderStatus: v }));
+  const setYear = (v: string) => setLocalFilters(prev => ({ ...prev, year: v }));
+  const setMonth = (v: string) => setLocalFilters(prev => ({ ...prev, month: v }));
 
   if (!isOpen) return null;
 
@@ -41,10 +58,12 @@ export function OrderFilterDrawer({ isOpen, onClose, onApplyFilters }: OrderFilt
           <button 
             className="text-purple-600 hover:text-purple-700 transition-colors p-2"
             onClick={() => {
-              setPaymentStatus('All');
-              setOrderStatus('All orders');
-              setYear('2026');
-              setMonth('JAN');
+              setLocalFilters({
+                paymentStatus: 'All',
+                orderStatus: 'All orders',
+                year: 'All',
+                month: 'All',
+              });
             }}
           >
             <RotateCcw className="w-7 h-7" />
@@ -66,7 +85,7 @@ export function OrderFilterDrawer({ isOpen, onClose, onApplyFilters }: OrderFilt
                   key={status}
                   onClick={() => setPaymentStatus(status)}
                   className={`flex-1 py-3 text-[16px] font-bold rounded-lg ${
-                    paymentStatus === status 
+                    localFilters.paymentStatus === status 
                       ? 'bg-purple-600 text-white' 
                       : 'bg-[#d1d1d1] text-white hover:bg-gray-400'
                   } transition-colors`}
@@ -89,7 +108,7 @@ export function OrderFilterDrawer({ isOpen, onClose, onApplyFilters }: OrderFilt
                   key={status}
                   onClick={() => setOrderStatus(status)}
                   className={`w-full py-3.5 text-[16px] font-bold rounded-lg ${
-                    orderStatus === status 
+                    localFilters.orderStatus === status 
                       ? 'bg-purple-600 text-white' 
                       : 'bg-[#d1d1d1] text-white hover:bg-gray-400'
                   } transition-colors`}
@@ -108,12 +127,12 @@ export function OrderFilterDrawer({ isOpen, onClose, onApplyFilters }: OrderFilt
             <div className="flex items-center gap-1.5">
               <button className="p-1.5 text-gray-400 hover:text-gray-600"><ChevronLeft className="w-6 h-6" /></button>
               <div className="flex flex-1 gap-2.5">
-                {['2024', '2025', '2026'].map((y) => (
+                {['All', '2024', '2025', '2026'].map((y) => (
                   <button
                     key={y}
                     onClick={() => setYear(y)}
                     className={`flex-1 py-3 text-[16px] font-bold rounded-lg ${
-                      year === y 
+                      localFilters.year === y 
                         ? 'bg-purple-600 text-white' 
                         : 'bg-[#d1d1d1] text-white hover:bg-gray-400'
                     } transition-colors`}
@@ -130,12 +149,12 @@ export function OrderFilterDrawer({ isOpen, onClose, onApplyFilters }: OrderFilt
           <div className="mb-6">
             <h3 className="text-[24px] font-extrabold text-gray-800 mb-3.5">Month</h3>
             <div className="grid grid-cols-3 gap-2.5">
-              {['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'].map((m) => (
+              {['All', 'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'].map((m) => (
                 <button
                   key={m}
                   onClick={() => setMonth(m)}
                   className={`py-3 text-[15px] font-bold rounded-lg ${
-                    month === m 
+                    localFilters.month === m 
                       ? 'bg-purple-600 text-white' 
                       : 'bg-[#d1d1d1] text-white hover:bg-gray-400'
                   } transition-colors`}
@@ -152,7 +171,7 @@ export function OrderFilterDrawer({ isOpen, onClose, onApplyFilters }: OrderFilt
         <div className="p-4 border-t border-gray-100 shrink-0">
           <button 
             onClick={() => {
-              if (onApplyFilters) onApplyFilters();
+              onApplyFilters(localFilters);
               onClose();
             }} 
             className="w-full bg-purple-600 text-white font-bold py-5 text-[20px] rounded-2xl hover:bg-purple-700 transition-colors"

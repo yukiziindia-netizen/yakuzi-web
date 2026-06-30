@@ -26,6 +26,8 @@ import {
 import Image from 'next/image';
 import { DeliveryTruckBadge } from '@/components/shared/DeliveryTruckBadge';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@yukizi/api-client';
 import { useProductById, useProducts, useWaitlist, useAddToWaitlist, useRemoveFromWaitlist } from '@/hooks/useProducts';
 import { useAddToCart, useCart, useUpdateCartItem, useRemoveCartItem } from '@/hooks/useCart';
 import { useToast } from '@/components/shared/Toast';
@@ -434,10 +436,21 @@ function ComparisonOffersList({
             </div>
 
             {/* 3. Star Rating */}
-            <div className="flex-1 flex items-center justify-center gap-1 sm:gap-2">
-              <Star className="w-4 h-4 sm:w-5 sm:h-5 lg:w-7 lg:h-7 fill-[#854cbc] text-[#854cbc] flex-shrink-0" />
-              <span className="text-gray-800 font-bold text-[14px] sm:text-[18px] lg:text-[22px] leading-none">{listing.seller?.rating || '4.5'}</span>
-            </div>
+            <button 
+              type="button"
+              onClick={() => {
+                const el = document.getElementById('review-section-desktop') || document.getElementById('review-section-mobile');
+                if (el) {
+                  el.scrollIntoView({ behavior: 'smooth' });
+                  toast('Write a review for this product and seller below.', 'info');
+                }
+              }}
+              className="flex-1 flex items-center justify-center gap-1 sm:gap-2 hover:scale-105 transition-transform cursor-pointer focus:outline-none group"
+              title="Add rating & review"
+            >
+              <Star className="w-4 h-4 sm:w-5 sm:h-5 lg:w-7 lg:h-7 fill-[#854cbc] text-[#854cbc] flex-shrink-0 group-hover:fill-purple-600" />
+              <span className="text-gray-800 font-bold text-[14px] sm:text-[18px] lg:text-[22px] leading-none group-hover:text-purple-700">{listing.seller?.rating || '4.5'}</span>
+            </button>
 
             {/* 4. Delivery badge */}
             <div className="flex-1 flex items-center justify-center">
@@ -638,6 +651,9 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
 
   const { data: reviewsData } = useProductReviews(product?.id || '');
   const { mutate: submitReview } = useCreateReview();
+  
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
 
   // Review state
   const [rating, setRating] = useState(0);
@@ -761,6 +777,13 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
 
   const handleReviewSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!isAuthenticated) {
+      toast('Please log in to submit a review', 'info');
+      router.push('/login');
+      return;
+    }
+
     if (rating === 0) {
       toast('Please select a rating star', 'error');
       return;
@@ -769,7 +792,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
     const comment = reviewTitle ? `${reviewTitle}: ${reviewComment}` : reviewComment;
     
     submitReview({
-      productId: product.id,
+      catalogProductId: product.id,
       rating,
       comment,
     }, {
@@ -912,7 +935,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
           </div>
 
           {/* Reviews Summary Section */}
-          <div className="mt-4 border-t border-gray-100 pt-6">
+          <div id="review-section-mobile" className="mt-4 border-t border-gray-100 pt-6">
             <h2 className="mb-4 text-base font-bold text-gray-600 uppercase tracking-wider">Reviews</h2>
             <div className="mb-5 flex items-center justify-between w-full">
               <div>
@@ -1177,7 +1200,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
             </div>
 
             {/* Right: Reviews */}
-            <div className="flex flex-col">
+            <div id="review-section-desktop" className="flex flex-col">
               <h2 className="text-lg font-bold text-gray-700 uppercase tracking-wider mb-4">Reviews</h2>
               
               <div className="mb-6 flex items-center justify-between w-full">

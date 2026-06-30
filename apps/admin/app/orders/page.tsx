@@ -1,5 +1,5 @@
-﻿"use client";
-import { useState } from "react";
+"use client";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Search, Loader2 } from "lucide-react";
@@ -39,6 +39,10 @@ export default function AdminOrdersPage() {
     to: new Date(),
   });
 
+  useEffect(() => {
+    setPage(1);
+  }, [search, filter, dateRange]);
+
   const { data: ordersData, isLoading } = useAdminOrdersFiltered({
     page,
     limit: PAGE_LIMIT,
@@ -54,19 +58,7 @@ export default function AdminOrdersPage() {
   const totalOrders = ordersData?.total ?? allOrders.length;
   const totalPages = Math.max(1, Math.ceil(totalOrders / PAGE_LIMIT));
 
-  const filtered = allOrders.filter((o: any) => {
-    const s = search.toLowerCase();
-    const sellerId = o.items?.[0]?.product?.seller?.id || o.items?.[0]?.seller?.id || o.sellerId || "";
-    const buyerId = o.buyer?.id || o.buyerId || "";
-    return (filter === "all" || o.orderStatus === filter) &&
-      (!search || 
-        (o.id ?? "").toLowerCase().includes(s) || 
-        (o.orderId ?? "").toLowerCase().includes(s) ||
-        (o.buyer?.phone ?? "").includes(search) ||
-        sellerId.toLowerCase().includes(s) ||
-        buyerId.toLowerCase().includes(s)
-      );
-  });
+  const filtered = allOrders;
 
   const handleOverride = async (e: React.MouseEvent, orderId: string, currentStatus: string, targetStatus?: string) => {
     e.stopPropagation();

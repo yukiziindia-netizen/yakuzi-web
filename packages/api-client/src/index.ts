@@ -101,9 +101,11 @@ export {
 // Reviews
 export {
   getProductReviews,
+  getAdminReviews,
   createReview,
   updateReview,
   deleteReview,
+  deleteAdminReview,
   type Review,
   type ReviewListResponse,
   type CreateReviewInput,

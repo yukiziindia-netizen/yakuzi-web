@@ -5,6 +5,7 @@ import { OrderFilterDrawer } from './OrderFilterDrawer';
 import { OrderedProductsDrawer } from './OrderedProductsDrawer';
 import { useOrderById, useOrders } from '@/hooks/useOrders';
 import { useAuth } from '@yukizi/api-client';
+import type { OrderFilters } from './OrderFilterDrawer';
 
 function formatImageUrl(url: any): string | undefined {
   if (!url) return undefined;
@@ -52,10 +53,51 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
     orderYear = d.getFullYear().toString();
   }
 
+  const [filters, setFilters] = useState<OrderFilters>({
+    paymentStatus: 'All',
+    orderStatus: 'All orders',
+    year: '2026',
+    month: 'All'
+  });
+
+  const filteredOrders = React.useMemo(() => {
+    return allOrders.filter((o: any) => {
+      // Payment Status
+      if (filters.paymentStatus !== 'All') {
+        const pm = (o.paymentMethod || 'COD').toUpperCase();
+        if (pm !== filters.paymentStatus.toUpperCase()) return false;
+      }
+      
+      // Order Status
+      if (filters.orderStatus !== 'All orders') {
+        const os = (o.status || o.orderStatus || 'PLACED').toUpperCase();
+        const target = filters.orderStatus.toUpperCase();
+        if (target === 'IN TRANSIT / PLACED') {
+           if (os !== 'PLACED' && os !== 'PENDING' && os !== 'IN TRANSIT') return false;
+        } else if (os !== target) return false;
+      }
+
+      const d = new Date(o.createdAt || new Date());
+      
+      // Year
+      if (filters.year !== 'All') {
+        if (d.getFullYear().toString() !== filters.year) return false;
+      }
+      
+      // Month
+      if (filters.month !== 'All') {
+        const mNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+        if (mNames[d.getMonth()] !== filters.month) return false;
+      }
+      
+      return true;
+    });
+  }, [allOrders, filters]);
+
   const allOrderedItems = React.useMemo(() => {
-    const all = allOrders.flatMap((o: any) => o.items || o.orderItems || []);
+    const all = filteredOrders.flatMap((o: any) => o.items || o.orderItems || []);
     return all;
-  }, [allOrders]);
+  }, [filteredOrders]);
 
   const items = allOrderedItems;
 
@@ -113,10 +155,10 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex flex-wrap items-center gap-3">
                   <h2 className="text-[34px] font-extrabold text-gray-800 mr-2">Orders</h2>
-                  <span className="bg-purple-600 text-white text-[14px] px-4 py-2 rounded shadow-sm font-bold">{order?.paymentMethod === 'COD' ? 'COD' : 'PREPAID'}</span>
-                  <span className="bg-purple-600 text-white text-[14px] px-4 py-2 rounded shadow-sm font-bold capitalize">Status : {displayStatus.toLowerCase()}</span>
-                  <span className="bg-purple-600 text-white text-[14px] px-4 py-2 rounded shadow-sm font-bold">{orderMonth}</span>
-                  <span className="bg-purple-600 text-white text-[14px] px-4 py-2 rounded shadow-sm font-bold">{orderYear}</span>
+                  {filters.paymentStatus !== 'All' && <span className="bg-purple-600 text-white text-[14px] px-4 py-2 rounded shadow-sm font-bold uppercase">{filters.paymentStatus}</span>}
+                  {filters.orderStatus !== 'All orders' && <span className="bg-purple-600 text-white text-[14px] px-4 py-2 rounded shadow-sm font-bold capitalize">Status : {filters.orderStatus.toLowerCase()}</span>}
+                  {filters.month !== 'All' && <span className="bg-purple-600 text-white text-[14px] px-4 py-2 rounded shadow-sm font-bold uppercase">{filters.month}</span>}
+                  {filters.year !== 'All' && <span className="bg-purple-600 text-white text-[14px] px-4 py-2 rounded shadow-sm font-bold">{filters.year}</span>}
                 </div>
                 
                 <div className="flex items-center gap-3.5 mr-12">
@@ -189,7 +231,7 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
                 
                 {(() => {
                   const groups: Record<string, { dateString: string; orderIds: string[]; images: string[]; dateObj: Date }> = {};
-                  allOrders.forEach((o: any) => {
+                  filteredOrders.forEach((o: any) => {
                     const date = new Date(o.createdAt);
                     const dateString = date.toLocaleDateString('default', { day: 'numeric', month: 'short', year: 'numeric' });
                     
@@ -284,7 +326,8 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
       <OrderFilterDrawer 
         isOpen={isFilterOpen} 
         onClose={() => setIsFilterOpen(false)} 
-        onApplyFilters={() => setIsOrderedProductsOpen(true)}
+        filters={filters}
+        onApplyFilters={(f) => setFilters(f)}
       />
       
       {/* Render the ordered products drawer */}

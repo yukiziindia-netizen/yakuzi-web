@@ -13,8 +13,6 @@ import { useToast } from '@/components/shared/Toast';
 import { useAuth } from '@yukizi/api-client';
 import { useRouter } from 'next/navigation';
 import { useScrollLock } from '@/hooks/useScrollLock';
-import Link from 'next/link';
-import { generateProductSlug } from '@yukizi/utils';
 import { useState } from 'react';
 import { QuickViewModal } from '@/components/products/QuickViewModal';
 

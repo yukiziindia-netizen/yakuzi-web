@@ -10,8 +10,6 @@ import { useAddToCart, useCart, useUpdateCartItem, useRemoveCartItem } from '@/h
 import { useAuth } from '@yukizi/api-client';
 import { useRouter } from 'next/navigation';
 import { useScrollLock } from '@/hooks/useScrollLock';
-import Link from 'next/link';
-import { generateProductSlug } from '@yukizi/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { QuickViewModal } from '@/components/products/QuickViewModal';

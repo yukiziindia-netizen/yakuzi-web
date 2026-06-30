@@ -116,7 +116,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[150] flex items-center justify-center p-4"
+            className="fixed inset-0 z-[150] flex items-center justify-center p-2 sm:p-4"
             onClick={onClose}
           >
             {/* Ambient Backdrop */}
@@ -126,7 +126,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-[500px] max-h-[90vh] overflow-y-auto bg-white/95 backdrop-blur-sm rounded-[32px] shadow-[0_25px_60px_-12px_rgba(0,0,0,0.25),0_0_0_1px_rgba(255,255,255,0.1)] border border-white/40 no-scrollbar p-6 flex flex-col gap-5"
+              className="relative w-full max-w-[500px] max-h-[90vh] overflow-y-auto bg-white/95 backdrop-blur-sm rounded-[32px] shadow-[0_25px_60px_-12px_rgba(0,0,0,0.25),0_0_0_1px_rgba(255,255,255,0.1)] border border-white/40 no-scrollbar p-4 sm:p-6 flex flex-col gap-4 sm:gap-5"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header section with Title & Share */}
@@ -192,7 +192,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                 </div>
 
                 {/* Main Product Image */}
-                <div className="relative w-[80%] h-[80%] flex items-center justify-center">
+                <div className="relative w-[70%] h-[80%] flex items-center justify-center ml-[25%]">
                   <Image
                     src={activeImage}
                     alt={displayProduct.name}
@@ -258,47 +258,47 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                     return (
                       <div 
                         key={listing.id} 
-                        className="flex flex-row items-center justify-between p-3.5 rounded-2xl bg-gray-50 hover:bg-gray-100/70 border border-gray-100/80 transition-colors gap-3 w-full"
+                        className="flex flex-row items-center justify-between p-2.5 sm:p-3.5 rounded-2xl bg-gray-50 hover:bg-gray-100/70 border border-gray-100/80 transition-colors gap-2 sm:gap-3 w-full"
                       >
                         {/* Left: Discount Badge & Price */}
-                        <div className="flex items-center gap-3.5 min-w-[155px]">
-                           <div className="bg-[#864ac5] text-white px-2 py-1.5 rounded-lg text-[9px] font-black tracking-wider uppercase leading-none min-w-[66px] text-center select-none">
+                        <div className="flex items-center gap-2 sm:gap-3.5 min-w-[120px] sm:min-w-[155px]">
+                          <div className="bg-[#864ac5] text-white px-1.5 py-1 sm:px-2 sm:py-1.5 rounded-lg text-[8px] sm:text-[9px] font-black tracking-wider uppercase leading-none min-w-[50px] sm:min-w-[66px] text-center select-none flex-shrink-0">
                             {discountPercent}% off
                           </div>
-                          <div className="flex flex-col">
-                            <span className="text-[15px] font-black text-gray-800 leading-none">
+                          <div className="flex flex-col min-w-0">
+                            <span className="text-xs sm:text-[15px] font-black text-gray-800 leading-none truncate">
                               ₹{listing.price?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                             </span>
-                            <span className="text-[9px] text-gray-400 font-bold mt-1.5 leading-none">
+                            <span className="text-[8px] sm:text-[9px] text-gray-400 font-bold mt-1 sm:mt-1.5 leading-none truncate">
                               {listing.moq > 1 ? `${listing.moq * 10}% off on purchase of ${listing.moq}` : 'MOQ: 1'}
                             </span>
                           </div>
                         </div>
 
                         {/* Middle: Star Rating & Delivery badge */}
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-1">
-                            <Star className="w-3.5 h-3.5 fill-[#864ac5] text-[#864ac5]" />
-                            <span className="text-gray-800 font-black text-[12px] leading-none">{listing.seller?.rating || '4.5'}</span>
+                        <div className="flex items-center gap-1.5 sm:gap-4">
+                          <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
+                            <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-[#864ac5] text-[#864ac5]" />
+                            <span className="text-gray-800 font-black text-[10px] sm:text-[12px] leading-none">{listing.seller?.rating || '4.5'}</span>
                           </div>
 
-                          <DeliveryTruckBadge text={listing.deliveryText || listing.deliveryTime || '3 days'} className="w-[72px] h-auto text-gray-400" />
+                          <DeliveryTruckBadge text={listing.deliveryText || listing.deliveryTime || '3 days'} className="w-[54px] sm:w-[72px] h-auto text-gray-400 flex-shrink-0" />
                         </div>
 
                         {/* Right: Actions */}
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                           {inStock ? (
                             itemQty > 0 ? (
-                              <div className="flex items-center bg-[#48286b] rounded-xl overflow-hidden h-8 w-24 text-white shadow-sm font-black text-[11px] select-none justify-between">
+                              <div className="flex items-center bg-[#48286b] rounded-xl overflow-hidden h-7 w-20 sm:h-8 sm:w-24 text-white shadow-sm font-black text-[10px] sm:text-[11px] select-none justify-between">
                                 <button 
-                                  className="px-3 h-full hover:bg-black/10 active:scale-95 transition-all text-white/80 hover:text-white font-extrabold text-sm"
+                                  className="px-2 sm:px-3 h-full hover:bg-black/10 active:scale-95 transition-all text-white/80 hover:text-white font-extrabold text-xs sm:text-sm"
                                   onClick={() => handleQtyChange(itemQty - 1)}
                                 >
                                   -
                                 </button>
-                                <span className="px-1 font-bold">{String(itemQty).padStart(2, '0')}</span>
+                                <span className="px-0.5 sm:px-1 font-bold">{String(itemQty).padStart(2, '0')}</span>
                                 <button 
-                                  className="px-3 h-full hover:bg-black/10 active:scale-95 transition-all text-white/80 hover:text-white font-extrabold text-sm"
+                                  className="px-2 sm:px-3 h-full hover:bg-black/10 active:scale-95 transition-all text-white/80 hover:text-white font-extrabold text-xs sm:text-sm"
                                   onClick={() => handleQtyChange(itemQty + 1)}
                                 >
                                   +
@@ -307,17 +307,17 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                             ) : (
                               <button 
                                 onClick={() => handleQtyChange(minQty)}
-                                className="w-8 h-8 rounded-lg bg-orange-500 hover:bg-orange-600 text-white flex items-center justify-center shadow-md active:scale-95 transition-all focus:outline-none"
+                                className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-orange-500 hover:bg-orange-600 text-white flex items-center justify-center shadow-md active:scale-95 transition-all focus:outline-none"
                               >
-                                <Plus className="w-4.5 h-4.5 stroke-[3]" />
+                                <Plus className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-[3]" />
                               </button>
                             )
                           ) : (
                             <button 
                               onClick={() => setShowStockAlert(true)}
-                              className="w-8.5 h-8.5 rounded-full bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center border border-red-100 active:scale-95 transition-all focus:outline-none"
+                              className="w-7.5 h-7.5 sm:w-8.5 sm:h-8.5 rounded-full bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center border border-red-100 active:scale-95 transition-all focus:outline-none"
                             >
-                              <Bell className="w-4 h-4" />
+                              <Bell className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                             </button>
                           )}
                         </div>

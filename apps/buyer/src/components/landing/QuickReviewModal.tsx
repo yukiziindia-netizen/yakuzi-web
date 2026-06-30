@@ -322,7 +322,7 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                         <div className="flex items-center gap-3">
                           {inStock ? (
                             itemQty > 0 ? (
-                              <div className="flex h-8 w-24 select-none items-center justify-between overflow-hidden rounded-full bg-[#48286b] text-[11px] font-black text-white shadow-sm">
+                              <div className="flex h-8 w-24 select-none items-center justify-between overflow-hidden rounded-xl bg-[#48286b] text-[11px] font-black text-white shadow-sm">
                                 <button
                                   className="h-full px-3 text-sm font-extrabold text-white/80 transition-all hover:bg-black/10 hover:text-white active:scale-95"
                                   onClick={() => handleQtyChange(itemQty - 1)}

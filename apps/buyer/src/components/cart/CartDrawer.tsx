@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Trash2, Loader2, Star, Bookmark, ShoppingBag, ShoppingCart } from 'lucide-react';
+import { X, Trash2, Loader2, Star, Bookmark, ShoppingBag, ShoppingCart, ArrowUpRight } from 'lucide-react';
 import { DeliveryTruckBadge } from '@/components/shared/DeliveryTruckBadge';
 import WishlistIcon from '@/components/shared/WishlistIcon';
 import { useCart, useUpdateCartItem, useRemoveCartItem, useSyncCart, useClearCart } from '@/hooks/useCart';
@@ -13,11 +13,16 @@ import { useToast } from '@/components/shared/Toast';
 import { useAuth } from '@yukizi/api-client';
 import { useRouter } from 'next/navigation';
 import { useScrollLock } from '@/hooks/useScrollLock';
+import Link from 'next/link';
+import { generateProductSlug } from '@yukizi/utils';
+import { useState } from 'react';
+import { QuickViewModal } from '@/components/products/QuickViewModal';
 
 
 
 export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const { data: cart, isLoading, isError } = useCart();
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const { data: config } = usePlatformConfig();
   const updateItem = useUpdateCartItem();
   const removeItem = useRemoveCartItem();
@@ -248,24 +253,40 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                           </div>
                         </div>
 
-                        <h3 className="text-[16px] font-bold text-gray-800 leading-snug truncate pr-6">{itemName}</h3>
-                        
-                        <div className="flex items-center gap-1.5 mb-1 mt-0.5">
-                          <span className="text-[19px] font-black text-gray-900">{isNotAvailable ? 'N/A' : `₹${(itemPrice * quantity).toLocaleString('en-IN')}`}</span>
-                          <span className="text-[14px] font-bold text-gray-400 line-through">{!isNotAvailable && itemOriginalPrice > 0 ? `₹${(itemOriginalPrice * quantity).toLocaleString('en-IN')}` : ''}</span>
+                        {/* Product Name & Arrow Button */}
+                        <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2">
+                          <h3 className="text-[16px] font-bold text-gray-800 leading-snug truncate flex-1">{itemName}</h3>
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setSelectedProduct(item.product || {
+                                id: item.productId || item.id,
+                                name: itemName,
+                                price: itemPrice,
+                                image: itemImage,
+                              });
+                            }}
+                            className="w-5 h-5 sm:w-6 sm:h-6 bg-[#8c8c8c] rounded-full flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform shadow-sm"
+                          >
+                            <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" strokeWidth={2.5} />
+                          </button>
                         </div>
-                        
-                        <span className="text-[13px] font-bold text-gray-600 bg-gray-100 px-2.5 py-1 rounded inline-block">
-                          {item.discount || '25% off'}
-                        </span>
-                        
-                        {/* Rating */}
-                        <div className="absolute right-1 bottom-1 flex flex-col items-end gap-0.5 sm:gap-1">
+                        {/* Price & Rating */}
+                        <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2">
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <span className="text-[19px] font-black text-gray-900">{isNotAvailable ? 'N/A' : `₹${(itemPrice * quantity).toLocaleString('en-IN')}`}</span>
+                            <span className="text-[14px] font-bold text-gray-400 line-through">{!isNotAvailable && itemOriginalPrice > 0 ? `₹${(itemOriginalPrice * quantity).toLocaleString('en-IN')}` : ''}</span>
+                          </div>
                           <div className="flex items-center gap-[3px] sm:gap-[4px]">
                             <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-[#6342B4] text-[#6342B4]" />
                             <span className="text-xs sm:text-[14px] font-bold text-gray-700">{item.rating || 4.5}</span>
                           </div>
-                          <DeliveryTruckBadge text="2 days" className="w-[80px] sm:w-[95px] mt-0.5 text-[#9a9a9a]" />
+                        </div>
+
+                        {/* Delivery */}
+                        <div className="flex justify-end w-full pr-1.5 sm:pr-3 mt-0.5">
+                          <DeliveryTruckBadge text="2 days" className="w-[80px] sm:w-[95px] text-[#9a9a9a]" />
                         </div>
 
                         {/* Top Right Actions */}
@@ -340,6 +361,12 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
               </button>
 
             </div>
+
+            <QuickViewModal
+              product={selectedProduct}
+              isOpen={!!selectedProduct}
+              onClose={() => setSelectedProduct(null)}
+            />
           </motion.div>
         </>
       )}

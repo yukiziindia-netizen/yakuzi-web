@@ -13,6 +13,8 @@ import { useScrollLock } from '@/hooks/useScrollLock';
 import Link from 'next/link';
 import { generateProductSlug } from '@yukizi/utils';
 import { useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
+import { QuickViewModal } from '@/components/products/QuickViewModal';
 
 export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const { data: wishlist, isLoading, isError } = useWishlist();
@@ -25,6 +27,7 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
   const { isAuthenticated } = useAuth();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
   useScrollLock(isOpen);
 
@@ -253,31 +256,42 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                             </div>
                           </div>
 
-                          {/* Row 2: Product Name */}
-                          <h3 className="text-[16px] font-bold text-gray-700 leading-snug truncate text-left w-full pr-8">{itemName}</h3>
-
-                          {/* Row 3: Price */}
-                          <div className="flex items-baseline gap-2 text-left w-full pr-8">
-                            <span className="text-[19px] font-black text-gray-900">{isNotAvailable ? 'N/A' : `₹${itemPrice.toLocaleString('en-IN')}`}</span>
-                            <span className="text-[14px] font-bold text-gray-400 line-through">{!isNotAvailable && itemOriginalPrice > 0 ? `₹${itemOriginalPrice.toLocaleString('en-IN')}` : ''}</span>
+                          {/* Row 2: Product Name & Arrow Button */}
+                          <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2">
+                            <h3 className="text-[16px] font-bold text-gray-700 leading-snug truncate text-left flex-1">{itemName}</h3>
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setSelectedProduct(item.product || {
+                                  id: item.productId || item.id,
+                                  name: itemName,
+                                  price: itemPrice,
+                                  image: itemImage,
+                                });
+                              }}
+                              className="w-5 h-5 sm:w-6 sm:h-6 bg-[#8c8c8c] rounded-full flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform shadow-sm"
+                            >
+                              <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" strokeWidth={2.5} />
+                            </button>
                           </div>
 
-                          {/* Row 4: Discount & Delivery */}
-                          <div className="flex items-center justify-between w-full pr-8">
-                            <span className="text-[13px] font-bold text-gray-600 bg-gray-100 px-2.5 py-1 rounded">
-                              {item.discount || '25% off'}
-                            </span>
+                          {/* Row 3: Price & Rating */}
+                          <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2">
+                            <div className="flex items-baseline gap-2 text-left">
+                              <span className="text-[19px] font-black text-gray-900">{isNotAvailable ? 'N/A' : `₹${itemPrice.toLocaleString('en-IN')}`}</span>
+                              <span className="text-[14px] font-bold text-gray-400 line-through">{!isNotAvailable && itemOriginalPrice > 0 ? `₹${itemOriginalPrice.toLocaleString('en-IN')}` : ''}</span>
+                            </div>
+                            <div className="flex items-center gap-[3px] sm:gap-[4px]">
+                              <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-[#6342B4] text-[#6342B4]" />
+                              <span className="text-xs sm:text-[14px] font-bold text-gray-700">{item.rating || 4.5}</span>
+                            </div>
                           </div>
-                        </div>
 
-                        {/* Bottom-Right: Rating & Delivery & Logo */}
-                        <div className="absolute right-2 bottom-2 sm:right-3 sm:bottom-3 flex flex-col items-end gap-1 sm:gap-2">
-                          <div className="flex items-center gap-[3px] sm:gap-[4px]">
-                            <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-[#6342B4] text-[#6342B4]" />
-                            <span className="text-xs sm:text-[14px] font-bold text-gray-700">{item.rating || 4.5}</span>
+                          {/* Row 4: Delivery */}
+                          <div className="flex justify-end w-full pr-1.5 sm:pr-3 mt-0.5">
+                            <DeliveryTruckBadge text={deliveryTime} className="w-[80px] sm:w-[95px] text-[#9a9a9a]" />
                           </div>
-                          <DeliveryTruckBadge text={deliveryTime} className="w-[80px] sm:w-[95px] mt-0.5 text-[#9a9a9a]" />
-                          <img src="/yukizi-logo-new.png" className="w-5 sm:w-7 h-auto object-contain opacity-70" alt="logo" />
                         </div>
                       </motion.div>
                     );
@@ -285,6 +299,12 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                 </AnimatePresence>
               )}
             </div>
+
+            <QuickViewModal
+              product={selectedProduct}
+              isOpen={!!selectedProduct}
+              onClose={() => setSelectedProduct(null)}
+            />
           </motion.div>
         </>
       )}

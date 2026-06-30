@@ -14,7 +14,7 @@ import { useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 import { OrderDrawer } from '@/components/orders/OrderDrawer';
 
-const STATUS_FILTERS = ['ALL', 'PLACED', 'ACCEPTED', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
+
 
 function OrdersPageContent() {
   const searchParams = useSearchParams();
@@ -37,6 +37,9 @@ function OrdersPageContent() {
   });
 
   const ordersRaw = Array.isArray(ordersData) ? ordersData : ((ordersData as any)?.data || (ordersData as any)?.data?.orders || []);
+  const uniqueStatuses = Array.from(new Set(ordersRaw.map((o: any) => (o.orderStatus || o.status || 'PLACED').toUpperCase())));
+  const STATUS_FILTERS = ['ALL', ...(uniqueStatuses as string[])];
+
   const orders = statusFilter === 'ALL' 
     ? ordersRaw 
     : ordersRaw.filter((o: any) => {
@@ -110,6 +113,14 @@ function OrdersPageContent() {
                 const orderNumber = order.orderNumber ?? order.id?.slice(0, 8).toUpperCase();
                 const totalAmount = order.totalAmount ?? order.total ?? order.amount ?? 0;
                 const itemCount = order.items?.length ?? order.orderItems?.length ?? 0;
+                
+                let productName, productImage;
+                if (itemCount === 1) {
+                  const item = order.items?.[0] ?? order.orderItems?.[0];
+                  productName = item?.sellerOffer?.name || item?.product?.name;
+                  productImage = item?.sellerOffer?.variant?.catalogProduct?.images?.[0]?.url || item?.product?.images?.[0]?.url || item?.product?.image;
+                }
+
                 const orderDate = order.createdAt
                   ? new Date(order.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })
                   : '';
@@ -127,6 +138,8 @@ function OrdersPageContent() {
                         status={order.orderStatus || order.status || 'PLACED'}
                         total={`₹${totalAmount.toLocaleString('en-IN')}`}
                         itemCount={itemCount}
+                        productName={productName}
+                        productImage={productImage}
                       />
                     </div>
                   </motion.div>

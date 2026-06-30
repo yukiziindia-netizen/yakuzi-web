@@ -24,7 +24,7 @@ export default function CartPage() {
   const { toast } = useToast();
 
   const gstRate = (config?.gst_rate ?? 12) / 100;
-  const minOrderAmount = config?.min_order_amount ?? 20000;
+  const minOrderAmount = config?.min_order_amount ?? 0;
 
   const items = cart?.items ?? [];
   const subtotal = items.reduce((acc, item: any) => {

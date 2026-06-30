@@ -38,7 +38,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
   const addToCart = useAddToCart();
   const { data: cartData } = useCart();
   const { data: config } = usePlatformConfig();
-  const minOrderAmount = config?.min_order_amount ?? 20000;
+  const minOrderAmount = config?.min_order_amount ?? 0;
 
   const { data: wishlistData } = useWishlist();
   const addToWishlist = useAddToWishlist();
@@ -232,13 +232,11 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
               <div className="flex flex-col gap-3 w-full">
                 {comparisonListings.length > 0 ? (
                   comparisonListings.map((listing: any) => {
-                    const inStock = (listing.stock ?? 0) > 0;
+                    const inStock = true; // accept even if stock is 0
                     const cartItem = cartData?.items?.find((item: any) => item.productId === listing.id);
                     const itemQty = cartItem?.quantity || 0;
                     const sellerMoq = listing.moq || listing.minimumOrderQuantity || 1;
-                    const minQty = listing.price > 0
-                      ? Math.max(sellerMoq, Math.ceil(minOrderAmount / listing.price))
-                      : sellerMoq;
+                    const minQty = sellerMoq;
                     
                     const itemMrp = listing.mrp || listing.originalPrice || displayProduct.mrp || displayProduct.originalPrice;
                     const discountPercent = itemMrp && listing.price && itemMrp > listing.price
@@ -299,7 +297,15 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                                 <span className="px-1 font-bold">{String(itemQty).padStart(2, '0')}</span>
                                 <button 
                                   className="px-3 h-full hover:bg-black/10 active:scale-95 transition-all text-white/80 hover:text-white font-extrabold text-sm"
-                                  onClick={() => handleQtyChange(itemQty + 1)}
+                                  onClick={() => {
+                                    const nextQty = itemQty + 1;
+                                    const maxQty = listing.maximumOrderQuantity || listing.maxOrderQty || config?.max_order_qty || 100;
+                                    if (nextQty > maxQty) {
+                                      handleQtyChange(minQty);
+                                    } else {
+                                      handleQtyChange(nextQty);
+                                    }
+                                  }}
                                 >
                                   +
                                 </button>

@@ -1,11 +1,11 @@
-﻿'use client';
+'use client';
 
 import { useQuery } from '@tanstack/react-query';
 import { getPlatformConfig, type PlatformConfig } from '@yukizi/api-client';
 
 const DEFAULTS: PlatformConfig = {
   gst_rate: 12,
-  min_order_amount: 20000,
+  min_order_amount: 0,
   shipping_threshold: 5000,
   shipping_fee: 250,
   default_moq: 1,

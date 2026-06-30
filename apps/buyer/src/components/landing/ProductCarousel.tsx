@@ -122,8 +122,9 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
             className="text-[#ff8952] hover:text-[#ff7536] transition-colors z-10 p-1 flex items-center justify-center" 
             onClick={(e) => { 
               e.preventDefault(); 
+              const targetProductId = product.bestListingId || currentProductId;
               addToCart(
-                { productId: currentProductId, quantity: 1, price, originalPrice: mrp, ...product },
+                { productId: targetProductId, quantity: 1, price, originalPrice: mrp, ...product },
                 { onSuccess: () => toast('Added to cart', 'success') }
               );
             }}

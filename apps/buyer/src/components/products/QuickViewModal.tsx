@@ -130,7 +130,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header section with Title & Share */}
-              <div className="flex flex-col relative w-full pt-3">
+              <div className="flex flex-col relative w-full pt-3 gap-2">
                 <div className="flex items-start justify-between w-full">
                   <h2 className="text-[20px] font-black text-gray-800 tracking-tight leading-tight max-w-[85%]">
                     {displayProduct.name}
@@ -143,6 +143,16 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                   </button>
                 </div>
                 
+                {/* Share Button Row */}
+                <div className="flex justify-start">
+                  <ShareButton 
+                    productName={displayProduct.name}
+                    productId={displayProduct.id}
+                    productPrice={displayProduct.mrp}
+                    className="w-10 h-10 bg-white border border-gray-200 rounded-full text-gray-400 focus:outline-none hover:scale-105 transition-transform flex items-center justify-center shadow-none p-0"
+                    iconClassName="w-[18px] h-[18px]"
+                  />
+                </div>
               </div>
 
               {/* Product Banner Halftone Card */}
@@ -159,17 +169,6 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                 {/* Abstract slashes for action look */}
                 <div className="absolute right-0 bottom-0 top-0 w-1/3 bg-gradient-to-l from-pink-500/20 to-transparent skew-x-12 transform origin-bottom-right pointer-events-none" />
                 <div className="absolute -right-10 -bottom-10 w-64 h-64 rounded-full bg-pink-500/10 blur-2xl pointer-events-none" />
-
-                {/* Share Button on Top Left Corner */}
-                <div className="absolute -top-3.5 -left-3.5 z-30">
-                  <ShareButton 
-                    productName={displayProduct.name}
-                    productId={displayProduct.id}
-                    productPrice={displayProduct.mrp}
-                    className="p-3 bg-white rounded-full border-0 shadow-none text-gray-500 focus:outline-none hover:scale-105 transition-transform"
-                    iconClassName="w-[18px] h-[18px]"
-                  />
-                </div>
 
                 {/* Interactive Thumbnail Gallery overlay on the left */}
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 flex flex-col gap-2 z-20">
@@ -218,11 +217,12 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                     className="overflow-visible drop-shadow-sm"
                   >
                     <path
-                      d="M44 0 H0 L11 20 L0 40 H44 V0 Z"
-                      fill={isBookmarked ? "#854cbc" : "#ffffff"}
-                      stroke={isBookmarked ? "#854cbc" : "#9ca3af"}
+                      d="M0 0 H44 L33 20 L44 40 H0 Z"
+                      fill={isBookmarked ? "#864ac5" : "#ffffff"}
+                      stroke={isBookmarked ? "#864ac5" : "#9ca3af"}
                       strokeWidth="2.5"
                       strokeLinejoin="round"
+                      strokeLinecap="round"
                     />
                   </svg>
                 </button>
@@ -262,7 +262,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                       >
                         {/* Left: Discount Badge & Price */}
                         <div className="flex items-center gap-3.5 min-w-[155px]">
-                          <div className="bg-[#854cbc] text-white px-2 py-1.5 rounded-lg text-[9px] font-black tracking-wider uppercase leading-none min-w-[66px] text-center select-none">
+                           <div className="bg-[#864ac5] text-white px-2 py-1.5 rounded-lg text-[9px] font-black tracking-wider uppercase leading-none min-w-[66px] text-center select-none">
                             {discountPercent}% off
                           </div>
                           <div className="flex flex-col">
@@ -278,7 +278,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                         {/* Middle: Star Rating & Delivery badge */}
                         <div className="flex items-center gap-4">
                           <div className="flex items-center gap-1">
-                            <Star className="w-3.5 h-3.5 fill-[#854cbc] text-[#854cbc]" />
+                            <Star className="w-3.5 h-3.5 fill-[#864ac5] text-[#864ac5]" />
                             <span className="text-gray-800 font-black text-[12px] leading-none">{listing.seller?.rating || '4.5'}</span>
                           </div>
 

@@ -41,7 +41,6 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
 
   const { data: orderData } = useOrderById(effectiveOrderId || '');
   const order = (orderData as any)?.data || orderData;
-  const items = order?.items || order?.orderItems || [];
 
   const os = order?.orderStatus || order?.status || 'PLACED';
   const displayStatus = os.replace(/_/g, ' ');
@@ -53,15 +52,22 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
     orderYear = d.getFullYear().toString();
   }
 
+  const allOrderedItems = React.useMemo(() => {
+    const all = allOrders.flatMap((o: any) => o.items || o.orderItems || []);
+    return all;
+  }, [allOrders]);
+
+  const items = allOrderedItems;
+
   return (
     <>
       {/* Full Page View */}
       <div 
-        className={`fixed inset-0 w-full h-full bg-white z-[110] transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'} overflow-y-auto`}
+        className={`fixed inset-0 w-full h-full bg-[#fcfcfc] z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'} overflow-y-auto`}
       >
-        <div className="w-full max-w-7xl mx-auto min-h-screen bg-white relative flex flex-col px-4 sm:px-6 md:px-8 py-6">
+        <div className="w-full max-w-7xl mx-auto min-h-screen bg-[#fcfcfc] relative flex flex-col px-4 sm:px-6 md:px-8 py-6">
           {/* Close Button */}
-          <button onClick={onClose} className="absolute top-6 right-6 p-2 text-gray-400 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 rounded-full z-[80] transition-colors border border-gray-200 shadow-sm">
+          <button onClick={onClose} className="absolute top-6 right-6 p-2 text-gray-400 hover:text-gray-900 bg-white hover:bg-gray-100 rounded-full z-50 transition-colors border border-gray-200 shadow-sm">
             <X className="w-6 h-6" />
           </button>
 
@@ -181,56 +187,74 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
               
               <div className="flex gap-4 overflow-x-auto pb-4 hide-scrollbar -mx-2 px-2 snap-x">
                 
-                {allOrders.map((o: any) => {
-                  const oItems = o.items || o.orderItems || [];
-                  const images = oItems.map((item: any) => formatImageUrl(item.sellerOffer?.variant?.catalogProduct?.images?.[0])).filter(Boolean);
+                {(() => {
+                  const groups: Record<string, { dateString: string; orderIds: string[]; images: string[]; dateObj: Date }> = {};
+                  allOrders.forEach((o: any) => {
+                    const date = new Date(o.createdAt);
+                    const dateString = date.toLocaleDateString('default', { day: 'numeric', month: 'short', year: 'numeric' });
+                    
+                    if (!groups[dateString]) {
+                      groups[dateString] = { dateString, orderIds: [], images: [], dateObj: date };
+                    }
+                    
+                    groups[dateString].orderIds.push(o.id);
+                    
+                    const oItems = o.items || o.orderItems || [];
+                    const itemImages = oItems.map((item: any) => formatImageUrl(item.sellerOffer?.variant?.catalogProduct?.images?.[0] || item.product?.images?.[0] || item.image)).filter(Boolean);
+                    groups[dateString].images.push(...itemImages);
+                  });
                   
-                  if (images.length === 0) {
-                    images.push("https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=150&auto=format&fit=crop");
-                  }
+                  const groupedOrders = Object.values(groups).sort((a, b) => b.dateObj.getTime() - a.dateObj.getTime());
 
-                  const date = new Date(o.createdAt);
-                  const dateString = date.toLocaleDateString('default', { day: 'numeric', month: 'short', year: 'numeric' });
+                  return groupedOrders.map((group, idx) => {
+                    const images = [...group.images];
+                    
+                    if (images.length === 0) {
+                      images.push("https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=150&auto=format&fit=crop");
+                    }
 
-                  return (
-                    <div key={o.id} onClick={() => setSelectedOrderId(o.id)} className={`min-w-[220px] max-w-[220px] border ${effectiveOrderId === o.id ? 'border-purple-600 ring-2 ring-purple-600 shadow-md' : 'border-gray-200'} rounded-xl p-3 shadow-sm bg-white snap-center cursor-pointer hover:shadow-md transition-all`}>
-                      <div className="flex justify-between items-center mb-3">
-                         <span className={`text-[15px] font-black ${effectiveOrderId === o.id ? 'text-purple-600' : 'text-gray-500'}`}>{dateString}</span>
-                         <ChevronRight className="w-5 h-5 text-gray-400" />
+                    const isSelected = group.orderIds.includes(effectiveOrderId);
+
+                    return (
+                      <div key={group.dateString + idx} onClick={() => setSelectedOrderId(group.orderIds[0])} className={`min-w-[220px] max-w-[220px] border ${isSelected ? 'border-purple-600 ring-2 ring-purple-600 shadow-md' : 'border-gray-200'} rounded-xl p-3 shadow-sm bg-white snap-center cursor-pointer hover:shadow-md transition-all`}>
+                        <div className="flex justify-between items-center mb-3">
+                           <span className={`text-[15px] font-black ${isSelected ? 'text-purple-600' : 'text-gray-500'}`}>{group.dateString}</span>
+                           <ChevronRight className="w-5 h-5 text-gray-400" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-1.5 h-[160px]">
+                           <div className="flex flex-col gap-1.5 h-full min-h-0">
+                              <div className="bg-gray-50 rounded flex-1 relative flex items-center justify-center overflow-hidden">
+                                 <img src={images[0] || "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=150&auto=format&fit=crop"} className="absolute inset-0 w-full h-full object-contain p-1" alt="" />
+                              </div>
+                              <div className="bg-gray-50 rounded flex-1 relative flex items-center justify-center overflow-hidden">
+                                 {images.length > 1 ? (
+                                   <img src={images[1] || "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=150&auto=format&fit=crop"} className="absolute inset-0 w-full h-full object-contain p-1" alt="" />
+                                 ) : (
+                                   <div className="absolute inset-0 bg-gray-100/50"></div>
+                                 )}
+                              </div>
+                           </div>
+                           <div className="flex flex-col gap-1.5 h-full min-h-0">
+                               <div className="bg-gray-50 rounded flex-[2] relative flex items-center justify-center overflow-hidden">
+                                 {images.length > 2 ? (
+                                   <img src={images[2] || "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=150&auto=format&fit=crop"} className="absolute inset-0 w-full h-full object-contain p-1" alt="" />
+                                 ) : (
+                                   <div className="absolute inset-0 bg-gray-100/50"></div>
+                                 )}
+                              </div>
+                               <div className="bg-gray-50 rounded flex-1 relative flex items-center justify-center overflow-hidden">
+                                 {images.length > 3 ? (
+                                   <img src={images[3] || "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=150&auto=format&fit=crop"} className="absolute inset-0 w-full h-full object-contain p-1" alt="" />
+                                 ) : (
+                                   <div className="absolute inset-0 bg-gray-100/50"></div>
+                                 )}
+                              </div>
+                           </div>
+                        </div>
                       </div>
-                      <div className="grid grid-cols-2 gap-1.5 h-[160px]">
-                         <div className="flex flex-col gap-1.5">
-                            <div className="bg-gray-50 rounded flex-1 flex items-center justify-center overflow-hidden">
-                               <img src={images[0] || "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=150&auto=format&fit=crop"} className="w-full h-full object-cover" alt="" />
-                            </div>
-                            <div className="bg-gray-50 rounded flex-1 flex items-center justify-center overflow-hidden">
-                               {images.length > 1 ? (
-                                 <img src={images[1] || "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=150&auto=format&fit=crop"} className="w-full h-full object-cover" alt="" />
-                               ) : (
-                                 <div className="w-full h-full bg-gray-100/50"></div>
-                               )}
-                            </div>
-                         </div>
-                         <div className="flex flex-col gap-1.5">
-                             <div className="bg-gray-50 rounded flex-[2] flex items-center justify-center overflow-hidden">
-                               {images.length > 2 ? (
-                                 <img src={images[2] || "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=150&auto=format&fit=crop"} className="w-full h-full object-cover" alt="" />
-                               ) : (
-                                 <div className="w-full h-full bg-gray-100/50"></div>
-                               )}
-                            </div>
-                             <div className="bg-gray-50 rounded flex-1 flex items-center justify-center overflow-hidden">
-                               {images.length > 3 ? (
-                                 <img src={images[3] || "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=150&auto=format&fit=crop"} className="w-full h-full object-cover" alt="" />
-                               ) : (
-                                 <div className="w-full h-full bg-gray-100/50"></div>
-                               )}
-                            </div>
-                         </div>
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  });
+                })()}
 
                 {allOrders.length === 0 && (
                   <div className="w-full text-center py-6 text-sm text-gray-400">

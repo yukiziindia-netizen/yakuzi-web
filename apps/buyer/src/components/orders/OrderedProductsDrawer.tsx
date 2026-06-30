@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Share2, Plus, ArrowUpRight, ChevronRight, ChevronLeft, Trash2, Star, RefreshCw, Bookmark, Check, Truck, MapPin, Package, Bike, X } from 'lucide-react';
 import { DeliveryTruckBadge } from '../shared/DeliveryTruckBadge';
 import Image from 'next/image';
-import { useOrderById, useOrderTracking } from '@/hooks/useOrders';
+import { useOrders } from '@/hooks/useOrders';
 
 function formatDateShort(dStr: string | null | undefined) {
   if (!dStr) return '';
@@ -39,36 +39,31 @@ interface OrderedProductsDrawerProps {
 export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProductsDrawerProps) {
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
 
-  const { data: orderData, isLoading } = useOrderById(orderId || '');
-  const order = (orderData as any)?.data || orderData;
-  const items = order?.items || order?.orderItems || [];
-  
-  const { data: trackingResp } = useOrderTracking(orderId || '');
-  const tracking = trackingResp?.data;
+  const { data: ordersData } = useOrders({ page: 1, limit: 50 });
+  const allOrders = Array.isArray(ordersData) ? ordersData : ((ordersData as any)?.data || (ordersData as any)?.data?.orders || []);
 
-  // Determine Timeline Progress
-  const os = order?.orderStatus || order?.status || 'PLACED';
-  const isDelivered = os === 'DELIVERED';
-  const isOut = isDelivered || os === 'OUT_FOR_DELIVERY';
-  const isNear = isOut || os === 'SHIPPED';
-  const isShipped = isNear || ['DISPATCHED_FROM_SELLER', 'RECEIVED_AT_WAREHOUSE'].includes(os);
-  const isPlaced = true;
+  const items = React.useMemo(() => {
+    return allOrders.flatMap((o: any) => {
+      const oItems = o.items || o.orderItems || [];
+      return oItems.map((item: any) => ({ ...item, order: o }));
+    });
+  }, [allOrders]);
   
-  const stepCount = isDelivered ? 5 : isOut ? 4 : isNear ? 3 : isShipped ? 2 : 1;
-  const progressPercent = ((stepCount - 1) / 4) * 100;
+  // We use the first order or the specific orderId for the header info
+  const headerOrder = allOrders.find((o: any) => o.id === orderId) || allOrders[0] || {};
   
-  // Format Date
+  // Format Date for Header
   let orderMonth = 'JAN', orderYear = '2026';
-  if (order?.createdAt) {
-    const d = new Date(order.createdAt);
+  if (headerOrder?.createdAt) {
+    const d = new Date(headerOrder.createdAt);
     orderMonth = d.toLocaleString('en-US', { month: 'short' }).toUpperCase();
     orderYear = d.getFullYear().toString();
   }
   
-  // Format Status
-  const statusRaw = order?.orderStatus || order?.status || 'In transit';
+  // Format Status for Header
+  const statusRaw = headerOrder?.orderStatus || headerOrder?.status || 'In transit';
   const displayStatus = normalizeStatus(statusRaw).replace(/_/g, ' ');
-  const paymentMethod = order?.paymentMethod === 'BANK_TRANSFER' ? 'BANK' : order?.paymentMethod || 'COD';
+  const paymentMethod = headerOrder?.paymentMethod === 'BANK_TRANSFER' ? 'BANK' : headerOrder?.paymentMethod || 'COD';
 
   if (!isOpen) return null;
 
@@ -107,6 +102,17 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
           <div className="flex flex-col gap-3 pb-24">
             
             {items.map((item: any, index: number) => {
+              const itemOrder = item.order || {};
+              const os = itemOrder?.orderStatus || itemOrder?.status || 'PLACED';
+              const isDelivered = os === 'DELIVERED';
+              const isOut = isDelivered || os === 'OUT_FOR_DELIVERY';
+              const isNear = isOut || os === 'SHIPPED';
+              const isShipped = isNear || ['DISPATCHED_FROM_SELLER', 'RECEIVED_AT_WAREHOUSE'].includes(os);
+              const isPlaced = true;
+              
+              const stepCount = isDelivered ? 5 : isOut ? 4 : isNear ? 3 : isShipped ? 2 : 1;
+              const progressPercent = ((stepCount - 1) / 4) * 100;
+
               const isYukiziChoice = false;
               const hasQuantity = item.quantity > 1;
               const product = item.sellerOffer || {};
@@ -223,7 +229,7 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
                           </div>
                           <div className="text-center w-[70px]">
                             <p className={`text-[11px] font-bold leading-tight ${isPlaced ? 'text-gray-700' : 'text-gray-500'}`}>Placed</p>
-                            <p className="text-[9px] text-gray-400 font-medium">{formatDateShort(order?.createdAt)}</p>
+                            <p className="text-[9px] text-gray-400 font-medium">{formatDateShort(itemOrder?.createdAt)}</p>
                           </div>
                         </div>
 

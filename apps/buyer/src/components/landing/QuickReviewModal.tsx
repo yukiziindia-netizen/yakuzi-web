@@ -140,7 +140,7 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+            className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4"
             onClick={onClose}
           >
             {/* Ambient Backdrop */}
@@ -150,7 +150,7 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="no-scrollbar relative flex max-h-[90vh] w-full max-w-[500px] flex-col gap-5 overflow-y-auto rounded-[32px] border border-white/40 bg-white/95 p-6 shadow-[0_25px_60px_-12px_rgba(0,0,0,0.25),0_0_0_1px_rgba(255,255,255,0.1)] backdrop-blur-sm"
+              className="no-scrollbar relative flex max-h-[90vh] w-full max-w-[500px] flex-col gap-4 sm:gap-5 overflow-y-auto rounded-[32px] border border-white/40 bg-white/95 p-4 sm:p-6 shadow-[0_25px_60px_-12px_rgba(0,0,0,0.25),0_0_0_1px_rgba(255,255,255,0.1)] backdrop-blur-sm"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header section with Title & Share */}
@@ -212,7 +212,7 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                 </div>
 
                 {/* Main Product Image */}
-                <div className="relative flex h-[80%] w-[80%] items-center justify-center">
+                <div className="relative flex h-[80%] w-[70%] items-center justify-center ml-[25%]">
                   <img
                     src={activeImage}
                     alt={displayProduct.name}
@@ -280,19 +280,18 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                     return (
                       <div
                         key={listing.id}
-                        className="flex w-full flex-row items-center justify-between gap-3 rounded-2xl border border-gray-100/80 bg-gray-50 p-3.5 transition-colors hover:bg-gray-100/70"
+                        className="flex w-full flex-row items-center justify-between gap-2 sm:gap-3 rounded-2xl border border-gray-100/80 bg-gray-50 p-2.5 sm:p-3.5 transition-colors hover:bg-gray-100/70"
                       >
                         {/* Left: Discount Badge & Price */}
-                        <div className="flex min-w-[155px] items-center gap-3.5">
-                          <div className="min-w-[66px] flex items-center justify-center">
+                        <div className="flex min-w-[120px] sm:min-w-[155px] items-center gap-2 sm:gap-3.5">
+                          <div className="min-w-[50px] sm:min-w-[66px] flex items-center justify-center flex-shrink-0">
                             {renderBuyerOfferBadge(listing)}
                           </div>
-                          <div className="flex flex-col">
-                            <span className="text-[15px] font-black leading-none text-gray-800">
-                              ₹
-                              {listing.price?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                          <div className="flex flex-col min-w-0">
+                            <span className="text-xs sm:text-[15px] font-black leading-none text-gray-800 truncate">
+                              ₹{listing.price?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                             </span>
-                            <span className="mt-1.5 text-[9px] font-bold leading-none text-gray-400">
+                            <span className="mt-1 sm:mt-1.5 text-[8px] sm:text-[9px] font-bold leading-none text-gray-400 truncate">
                               {listing.moq > 1
                                 ? `${listing.moq * 10}% off on purchase of ${listing.moq}`
                                 : 'MOQ: 1'}
@@ -301,32 +300,32 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                         </div>
 
                         {/* Middle: Star Rating & Delivery badge */}
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-1">
-                            <Star className="h-3.5 w-3.5 fill-[#854cbc] text-[#854cbc]" />
-                            <span className="text-[12px] font-black leading-none text-gray-800">
+                        <div className="flex items-center gap-1.5 sm:gap-4">
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            <Star className="h-3 w-3 sm:h-3.5 sm:w-3.5 fill-[#854cbc] text-[#854cbc]" />
+                            <span className="text-[10px] sm:text-[12px] font-black leading-none text-gray-800">
                               {listing.seller?.rating || '4.5'}
                             </span>
                           </div>
 
                           <DeliveryTruckBadge
                             text={listing.deliveryText || listing.deliveryTime || '3 days'}
-                            className="h-auto w-[72px] text-gray-400"
+                            className="h-auto w-[54px] sm:w-[72px] text-gray-400 flex-shrink-0"
                           />
                         </div>
 
                         {/* Right: Actions */}
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                           {inStock ? (
                             itemQty > 0 ? (
-                              <div className="flex h-8 w-24 select-none items-center justify-between overflow-hidden rounded-full bg-[#48286b] text-[11px] font-black text-white shadow-sm">
+                              <div className="flex h-7 w-20 sm:h-8 sm:w-24 select-none items-center justify-between overflow-hidden rounded-xl bg-[#48286b] text-[10px] sm:text-[11px] font-black text-white shadow-sm">
                                 <button
-                                  className="h-full px-3 text-sm font-extrabold text-white/80 transition-all hover:bg-black/10 hover:text-white active:scale-95"
+                                  className="h-full px-2 sm:px-3 text-xs sm:text-sm font-extrabold text-white/80 transition-all hover:bg-black/10 hover:text-white active:scale-95"
                                   onClick={() => handleQtyChange(itemQty - 1)}
                                 >
                                   -
                                 </button>
-                                <span className="px-1 font-bold">
+                                <span className="px-0.5 sm:px-1 font-bold">
                                   {String(itemQty).padStart(2, '0')}
                                 </span>
                                 <button
@@ -347,17 +346,17 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                             ) : (
                               <button
                                 onClick={() => handleQtyChange(minQty)}
-                                className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500 text-white shadow-md transition-all hover:bg-orange-600 focus:outline-none active:scale-95"
+                                className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-orange-500 text-white shadow-md transition-all hover:bg-orange-600 focus:outline-none active:scale-95"
                               >
-                                <Plus className="w-4.5 h-4.5 stroke-[3]" />
+                                <Plus className="h-4 w-4 sm:h-4.5 sm:w-4.5 stroke-[3]" />
                               </button>
                             )
                           ) : (
                             <button
                               onClick={() => setShowStockAlert(true)}
-                              className="w-8.5 h-8.5 flex items-center justify-center rounded-full border border-red-100 bg-red-50 text-red-500 transition-all hover:bg-red-100 focus:outline-none active:scale-95"
+                              className="w-7.5 h-7.5 sm:w-8.5 sm:h-8.5 flex items-center justify-center rounded-full border border-red-100 bg-red-50 text-red-500 transition-all hover:bg-red-100 focus:outline-none active:scale-95"
                             >
-                              <Bell className="h-4 w-4" />
+                              <Bell className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                             </button>
                           )}
                         </div>

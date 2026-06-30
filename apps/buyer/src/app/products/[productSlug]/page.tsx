@@ -26,8 +26,6 @@ import {
 import Image from 'next/image';
 import { DeliveryTruckBadge } from '@/components/shared/DeliveryTruckBadge';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@yukizi/api-client';
 import { useProductById, useProducts, useWaitlist, useAddToWaitlist, useRemoveFromWaitlist } from '@/hooks/useProducts';
 import { useAddToCart, useCart, useUpdateCartItem, useRemoveCartItem } from '@/hooks/useCart';
 import { useToast } from '@/components/shared/Toast';
@@ -215,7 +213,7 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
                  <span className="text-[10px] sm:text-[11px] md:text-[12px] lg:text-[13px] xl:text-[11px] text-gray-400 line-through leading-none">{displayOriginalPrice}</span>
               </div>
               <div className="flex items-center gap-0.5 sm:gap-1 -mr-1 sm:-mr-1.5 md:-mr-1.5 lg:-mr-2 xl:-mr-1.5">
-                 <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 lg:w-4.5 lg:h-4.5 xl:w-3.5 xl:h-3.5 text-[#8b5cf6] fill-[#8b5cf6]" />
+                 <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 lg:w-4 lg:h-4 xl:w-3.5 xl:h-3.5 text-[#8b5cf6] fill-[#8b5cf6]" />
                  <span className="text-[12px] sm:text-[13px] md:text-[14px] lg:text-[15px] xl:text-[13px] font-medium text-[#333333] leading-none">{rating}</span>
               </div>
            </div>
@@ -416,17 +414,17 @@ function ComparisonOffersList({
         return (
           <div 
             key={listing.id} 
-            className="flex flex-row items-center justify-between py-2 pl-2 pr-3.5 sm:py-2.5 sm:px-6 rounded-2xl bg-[#eaeaea] border border-gray-200/60 hover:border-purple-200 transition-colors w-full gap-1 sm:gap-4 shadow-sm"
+            className="flex flex-row items-center justify-between py-2 px-2 sm:py-2.5 sm:px-6 rounded-2xl bg-[#eaeaea] border border-gray-200/60 hover:border-purple-200 transition-colors w-full gap-1 sm:gap-4 shadow-sm"
           >
             {/* 1. Discount Badge */}
-            <div className="w-[14%] sm:flex-1 flex justify-start flex-shrink-0 min-w-0">
+            <div className="w-[15%] sm:flex-[1.2] flex justify-start flex-shrink-0 min-w-0">
               <div className="w-full overflow-hidden text-ellipsis whitespace-nowrap">
                 {renderBuyerOfferBadge(listing)}
               </div>
             </div>
 
             {/* 2. Price & Subtext */}
-            <div className="w-[26%] sm:flex-1 flex flex-col items-start text-left flex-shrink-0 min-w-0 pl-1.5 sm:pl-0">
+            <div className="w-[25%] sm:flex-1 flex flex-col items-start text-left flex-shrink-0 min-w-0 pl-2 sm:pl-0">
               <span className="text-[12px] sm:text-[18px] lg:text-[22px] font-bold text-gray-800 leading-none tracking-tight">
                 ₹{listing.price?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
               </span>
@@ -436,29 +434,18 @@ function ComparisonOffersList({
             </div>
 
             {/* 3. Star Rating */}
-            <button 
-              type="button"
-              onClick={() => {
-                const el = document.getElementById('review-section-desktop') || document.getElementById('review-section-mobile');
-                if (el) {
-                  el.scrollIntoView({ behavior: 'smooth' });
-                  toast('Write a review for this product and seller below.', 'info');
-                }
-              }}
-              className="w-[10%] sm:flex-1 flex items-center justify-center gap-0.5 sm:gap-2 hover:scale-105 transition-transform cursor-pointer focus:outline-none group flex-shrink-0"
-              title="Add rating & review"
-            >
-              <Star className="w-3.5 h-3.5 sm:w-5 sm:h-5 lg:w-7 lg:h-7 fill-[#854cbc] text-[#854cbc] flex-shrink-0 group-hover:fill-purple-600" />
-              <span className="text-gray-800 font-bold text-[12px] sm:text-[18px] lg:text-[22px] leading-none group-hover:text-purple-700">{listing.seller?.rating || '4.5'}</span>
-            </button>
+            <div className="w-[12%] sm:flex-[0.8] flex items-center justify-center gap-0.5 sm:gap-2 flex-shrink-0">
+              <Star className="w-3.5 h-3.5 sm:w-5 sm:h-5 lg:w-7 lg:h-7 fill-[#854cbc] text-[#854cbc] flex-shrink-0" />
+              <span className="text-gray-800 font-bold text-[12px] sm:text-[18px] lg:text-[22px] leading-none">{listing.seller?.rating || '4.5'}</span>
+            </div>
 
             {/* 4. Delivery badge */}
-            <div className="w-[17%] sm:flex-1 flex items-center justify-center flex-shrink-0">
+            <div className="w-[18%] sm:flex-1 flex items-center justify-center flex-shrink-0">
               <DeliveryTruckBadge text={listing.deliveryText || '3 days'} className="w-[50px] sm:w-[70px] lg:w-[84px] h-auto text-gray-500 flex-shrink-0" />
             </div>
 
             {/* 5. Actions (Plus / Incremental / Reset) */}
-            <div className="w-[33%] sm:flex-1 flex items-center justify-center sm:justify-end gap-1 sm:gap-3 flex-shrink-0 sm:pr-0">
+            <div className="w-[30%] sm:flex-1 flex items-center justify-end gap-1 sm:gap-3 flex-shrink-0 pr-3 sm:pr-0">
               {inStock ? (
                 itemQty === 0 ? (
                   <button 
@@ -477,7 +464,7 @@ function ComparisonOffersList({
                       title="Reset quantity"
                       className="text-[#48286b] hover:text-purple-900 transition-transform active:scale-90 focus:outline-none p-0.5 sm:p-1"
                     >
-                      <svg className="w-4.5 h-4.5 sm:w-6 sm:h-6 lg:w-7 lg:h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <svg className="w-4 h-4 sm:w-6 sm:h-6 lg:w-7 lg:h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.85 1.05 6.5 2.5L21 8" />
                         <path d="M21 3v5h-5" />
                       </svg>
@@ -651,9 +638,6 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
 
   const { data: reviewsData } = useProductReviews(product?.id || '');
   const { mutate: submitReview } = useCreateReview();
-  
-  const router = useRouter();
-  const { isAuthenticated } = useAuth();
 
   // Review state
   const [rating, setRating] = useState(0);
@@ -777,13 +761,6 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
 
   const handleReviewSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!isAuthenticated) {
-      toast('Please log in to submit a review', 'info');
-      router.push('/login');
-      return;
-    }
-
     if (rating === 0) {
       toast('Please select a rating star', 'error');
       return;
@@ -935,7 +912,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
           </div>
 
           {/* Reviews Summary Section */}
-          <div id="review-section-mobile" className="mt-4 border-t border-gray-100 pt-6">
+          <div className="mt-4 border-t border-gray-100 pt-6">
             <h2 className="mb-4 text-base font-bold text-gray-600 uppercase tracking-wider">Reviews</h2>
             <div className="mb-5 flex items-center justify-between w-full">
               <div>
@@ -1135,7 +1112,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                 <div className="flex items-center gap-4">
                   <DeliveryTruckBadge text={product.deliveryText || "3 days"} className="w-[72px] h-auto text-gray-400" />
                   <div className="flex items-center gap-1">
-                    <Star className="w-4.5 h-4.5 fill-[#854cbc] text-[#854cbc]" />
+                    <Star className="w-5 h-5 fill-[#854cbc] text-[#854cbc]" />
                     <span className="text-[15px] font-bold text-gray-900">{averageRating.toFixed(1)}</span>
                   </div>
                 </div>
@@ -1200,7 +1177,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
             </div>
 
             {/* Right: Reviews */}
-            <div id="review-section-desktop" className="flex flex-col">
+            <div className="flex flex-col">
               <h2 className="text-lg font-bold text-gray-700 uppercase tracking-wider mb-4">Reviews</h2>
               
               <div className="mb-6 flex items-center justify-between w-full">

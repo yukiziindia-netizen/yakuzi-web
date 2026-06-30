@@ -9,9 +9,11 @@ interface OrderCardProps {
   status: string;
   total: string;
   itemCount: number;
+  productName?: string;
+  productImage?: string;
 }
 
-export default function OrderCard({ orderId, date, status, total, itemCount }: OrderCardProps) {
+export default function OrderCard({ orderId, date, status, total, itemCount, productName, productImage }: OrderCardProps) {
   const getStatusConfig = (s: string) => {
     switch (s.toUpperCase()) {
       case 'DELIVERED': 
@@ -46,19 +48,25 @@ export default function OrderCard({ orderId, date, status, total, itemCount }: O
     >
       <div className="flex items-start sm:items-center justify-between gap-3">
         <div className="flex items-start sm:items-center gap-3 sm:gap-4 md:gap-6 flex-1 min-w-0">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 bg-gradient-to-br from-gray-50 to-white border border-gray-100 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500 flex-shrink-0">
-            <Package className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-gray-900 stroke-[1.5px]" />
+          <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 bg-gradient-to-br from-gray-50 to-white border border-gray-100 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500 flex-shrink-0 overflow-hidden">
+            {productImage ? (
+              <img src={productImage} alt={productName || 'Product'} className="w-full h-full object-cover" />
+            ) : (
+              <Package className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-gray-900 stroke-[1.5px]" />
+            )}
           </div>
           <div className="flex flex-col min-w-0">
             <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-1">
-              <h3 className="text-base sm:text-lg md:text-xl font-black text-gray-900 tracking-tight truncate">Order #{orderId}</h3>
+              <h3 className="text-base sm:text-lg md:text-xl font-black text-gray-900 tracking-tight truncate max-w-[200px] sm:max-w-[300px]">
+                {productName ? productName : `Order #${orderId}`}
+              </h3>
               <span className={`text-[9px] font-black uppercase tracking-[0.15em] px-2 sm:px-3 py-0.5 sm:py-1 rounded-full border ${statusConfig.cls} flex items-center gap-1 sm:gap-1.5 flex-shrink-0`}>
                 <StatusIcon className="w-3 h-3" />
                 {status}
               </span>
             </div>
-            <p className="text-xs sm:text-sm text-gray-400 font-bold tracking-tight">
-              {date} • <span className="text-gray-900">{itemCount} items</span>
+            <p className="text-xs sm:text-sm text-gray-400 font-bold tracking-tight truncate">
+              {productName ? `Order #${orderId} • ` : ''}{date} • <span className="text-gray-900">{itemCount} items</span>
             </p>
             {/* Show total on mobile below text */}
             <p className="text-lg font-black text-gray-950 tracking-tighter mt-1 sm:hidden">{total}</p>

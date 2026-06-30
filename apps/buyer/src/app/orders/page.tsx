@@ -14,7 +14,7 @@ import { useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 import { OrderDrawer } from '@/components/orders/OrderDrawer';
 
-const STATUS_FILTERS = ['ALL', 'PLACED', 'ACCEPTED', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
+
 
 function OrdersPageContent() {
   const searchParams = useSearchParams();
@@ -30,13 +30,17 @@ function OrdersPageContent() {
     }
   }, [searchParams]);
 
+  const LIMIT = 10;
   const { data: ordersData, isLoading, isError } = useOrders({
     page,
-    limit: 10,
+    limit: LIMIT,
     status: statusFilter === 'ALL' ? undefined : statusFilter,
   });
 
   const ordersRaw = Array.isArray(ordersData) ? ordersData : ((ordersData as any)?.data || (ordersData as any)?.data?.orders || []);
+  const uniqueStatuses = Array.from(new Set(ordersRaw.map((o: any) => (o.orderStatus || o.status || 'PLACED').toUpperCase())));
+  const STATUS_FILTERS = ['ALL', ...(uniqueStatuses as string[])];
+
   const orders = statusFilter === 'ALL' 
     ? ordersRaw 
     : ordersRaw.filter((o: any) => {
@@ -46,7 +50,8 @@ function OrdersPageContent() {
         return os === statusFilter.toUpperCase();
       });
     
-  const total = (ordersData as any)?.total ?? (Array.isArray(ordersData) ? ordersRaw.length : 0);
+  const total = orders.length;
+  const paginatedOrders = orders.slice((page - 1) * LIMIT, page * LIMIT);
 
   return (
     <AuthGuard>
@@ -97,7 +102,7 @@ function OrdersPageContent() {
                 <AlertCircle className="w-12 h-12 text-red-300" />
                 <p className="text-lg font-bold text-gray-400">Failed to load orders</p>
               </div>
-            ) : orders.length === 0 ? (
+            ) : paginatedOrders.length === 0 ? (
               <EmptyState
                 icon={ShoppingBag}
                 title="No orders found"
@@ -106,10 +111,18 @@ function OrdersPageContent() {
                 actionHref="/"
               />
             ) : (
-              orders.map((order: any, idx: number) => {
+              paginatedOrders.map((order: any, idx: number) => {
                 const orderNumber = order.orderNumber ?? order.id?.slice(0, 8).toUpperCase();
                 const totalAmount = order.totalAmount ?? order.total ?? order.amount ?? 0;
                 const itemCount = order.items?.length ?? order.orderItems?.length ?? 0;
+                
+                let productName, productImage;
+                if (itemCount === 1) {
+                  const item = order.items?.[0] ?? order.orderItems?.[0];
+                  productName = item?.sellerOffer?.name || item?.product?.name;
+                  productImage = item?.sellerOffer?.variant?.catalogProduct?.images?.[0]?.url || item?.product?.images?.[0]?.url || item?.product?.image;
+                }
+
                 const orderDate = order.createdAt
                   ? new Date(order.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })
                   : '';
@@ -127,6 +140,8 @@ function OrdersPageContent() {
                         status={order.orderStatus || order.status || 'PLACED'}
                         total={`₹${totalAmount.toLocaleString('en-IN')}`}
                         itemCount={itemCount}
+                        productName={productName}
+                        productImage={productImage}
                       />
                     </div>
                   </motion.div>
@@ -136,7 +151,7 @@ function OrdersPageContent() {
           </div>
 
           {/* Pagination */}
-          {total > ((ordersData as any)?.limit || 10) && (
+          {total > LIMIT && (
             <div className="flex items-center justify-center gap-4 pt-4">
               <motion.button
                 whileTap={{ scale: 0.95 }}
@@ -150,7 +165,7 @@ function OrdersPageContent() {
               <motion.button
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setPage((p) => p + 1)}
-                disabled={orders.length < 10}
+                disabled={page * LIMIT >= total}
                 className="px-6 py-2 bg-white border border-gray-100 rounded-2xl font-bold text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-30"
               >
                 Next

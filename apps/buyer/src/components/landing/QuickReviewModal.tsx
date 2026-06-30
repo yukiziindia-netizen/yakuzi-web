@@ -55,7 +55,7 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
   const addToCart = useAddToCart();
   const { data: cartData } = useCart();
   const { data: config } = usePlatformConfig();
-  const minOrderAmount = config?.min_order_amount ?? 20000;
+  const minOrderAmount = config?.min_order_amount ?? 0;
 
   const { data: wishlistData } = useWishlist();
   const addToWishlist = useAddToWishlist();
@@ -249,16 +249,13 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
               <div className="flex w-full flex-col gap-3">
                 {comparisonListings.length > 0 ? (
                   comparisonListings.map((listing: any) => {
-                    const inStock = (listing.stock ?? 0) > 0;
+                    const inStock = true;
                     const cartItem = cartData?.items?.find(
                       (item: any) => item.productId === listing.id,
                     );
                     const itemQty = cartItem?.quantity || 0;
                     const sellerMoq = listing.moq || listing.minimumOrderQuantity || 1;
-                    const minQty =
-                      listing.price > 0
-                        ? Math.max(sellerMoq, Math.ceil(minOrderAmount / listing.price))
-                        : sellerMoq;
+                    const minQty = sellerMoq;
 
                     const itemMrp =
                       listing.mrp ||
@@ -332,8 +329,16 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                                   {String(itemQty).padStart(2, '0')}
                                 </span>
                                 <button
-                                  className="h-full px-2 sm:px-3 text-xs sm:text-sm font-extrabold text-white/80 transition-all hover:bg-black/10 hover:text-white active:scale-95"
-                                  onClick={() => handleQtyChange(itemQty + 1)}
+                                  className="h-full px-3 text-sm font-extrabold text-white/80 transition-all hover:bg-black/10 hover:text-white active:scale-95"
+                                  onClick={() => {
+                                    const nextQty = itemQty + 1;
+                                    const maxQty = listing.maximumOrderQuantity || listing.maxOrderQty || config?.max_order_qty || 100;
+                                    if (nextQty > maxQty) {
+                                      handleQtyChange(minQty);
+                                    } else {
+                                      handleQtyChange(nextQty);
+                                    }
+                                  }}
                                 >
                                   +
                                 </button>

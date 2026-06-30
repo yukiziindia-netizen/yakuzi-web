@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -22,7 +22,7 @@ export function useCreateReview() {
   return useMutation({
     mutationFn: (input: CreateReviewInput) => createReview(input),
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['reviews', variables.productId] });
+      queryClient.invalidateQueries({ queryKey: ['reviews', variables.catalogProductId] });
     },
   });
 }

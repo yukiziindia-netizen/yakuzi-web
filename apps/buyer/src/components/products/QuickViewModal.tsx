@@ -1,7 +1,18 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Share2, Loader2, Bookmark, Truck, CheckCircle, Plus, Star, Bell, Package } from 'lucide-react';
+import {
+  X,
+  Share2,
+  Loader2,
+  Bookmark,
+  Truck,
+  CheckCircle,
+  Plus,
+  Star,
+  Bell,
+  Package,
+} from 'lucide-react';
 import Image from 'next/image';
 import { DeliveryTruckBadge } from '@/components/shared/DeliveryTruckBadge';
 import Link from 'next/link';
@@ -14,7 +25,12 @@ import { CustomOrderModal } from '@/components/shared/CustomOrderModal';
 import WishlistIcon from '@/components/shared/WishlistIcon';
 import { useAddToCart, useCart } from '@/hooks/useCart';
 import { useProductById } from '@/hooks/useProducts';
-import { calculatePricing, getSellingPrice, getEffectiveDiscountPercent, generateProductSlug } from '@yukizi/utils';
+import {
+  calculatePricing,
+  getSellingPrice,
+  getEffectiveDiscountPercent,
+  generateProductSlug,
+} from '@yukizi/utils';
 import type { Product } from '@yukizi/utils';
 import { usePlatformConfig } from '@/hooks/usePlatformConfig';
 import { useWishlist, useAddToWishlist, useRemoveFromWishlist } from '@/hooks/useWishlist';
@@ -28,7 +44,7 @@ interface QuickViewModalProps {
 export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps) {
   const router = useRouter();
   const { data: fullProductRaw, isLoading: isLoadingDetails } = useProductById(product?.id || '', {
-    enabled: !!product?.id && isOpen
+    enabled: !!product?.id && isOpen,
   });
 
   const fullProduct = fullProductRaw as any;
@@ -38,7 +54,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
   const addToCart = useAddToCart();
   const { data: cartData } = useCart();
   const { data: config } = usePlatformConfig();
-  const minOrderAmount = config?.min_order_amount ?? 20000;
+  const minOrderAmount = config?.min_order_amount ?? 0;
 
   const { data: wishlistData } = useWishlist();
   const addToWishlist = useAddToWishlist();
@@ -50,17 +66,21 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
 
   if (!displayProduct) return null;
 
-  const productImages = displayProduct.images && displayProduct.images.length > 0
-    ? displayProduct.images.map((img: any) => img.url || img)
-    : [
-        displayProduct.image ||
-          `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent((displayProduct.name || 'PR').trim().split(/\s+/).length === 1 ? (displayProduct.name || 'PR').trim().substring(0, 2).toUpperCase() : ((displayProduct.name || 'PR').trim().split(/\s+/)[0][0] + (displayProduct.name || 'PR').trim().split(/\s+/)[(displayProduct.name || 'PR').trim().split(/\s+/).length - 1][0]).toUpperCase())}`,
-      ];
+  const productImages =
+    displayProduct.images && displayProduct.images.length > 0
+      ? displayProduct.images.map((img: any) => img.url || img)
+      : [
+          displayProduct.image ||
+            `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent((displayProduct.name || 'PR').trim().split(/\s+/).length === 1 ? (displayProduct.name || 'PR').trim().substring(0, 2).toUpperCase() : ((displayProduct.name || 'PR').trim().split(/\s+/)[0][0] + (displayProduct.name || 'PR').trim().split(/\s+/)[(displayProduct.name || 'PR').trim().split(/\s+/).length - 1][0]).toUpperCase())}`,
+        ];
 
   const activeImage = productImages[activeImageIndex % productImages.length];
 
   const comparisonListings = listings.filter((l: any) => l.price != null);
-  const displayPrice = comparisonListings.length > 0 ? Math.min(...comparisonListings.map((l: any) => l.price)) : displayProduct.price;
+  const displayPrice =
+    comparisonListings.length > 0
+      ? Math.min(...comparisonListings.map((l: any) => l.price))
+      : displayProduct.price;
 
   const wishlistSet = new Set<string>();
   if (wishlistData?.items) {
@@ -76,14 +96,17 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
         onSuccess: () => toast('Removed from wishlist', 'success'),
       });
     } else {
-      addToWishlist.mutate({
-        productId: displayProduct.id,
-        productName: displayProduct.name,
-        price: displayPrice || 0,
-        image: displayProduct.image || productImages[0],
-      }, {
-        onSuccess: () => toast('Added to wishlist!', 'success'),
-      });
+      addToWishlist.mutate(
+        {
+          productId: displayProduct.id,
+          productName: displayProduct.name,
+          price: displayPrice || 0,
+          image: displayProduct.image || productImages[0],
+        },
+        {
+          onSuccess: () => toast('Added to wishlist!', 'success'),
+        },
+      );
     }
   };
 
@@ -104,7 +127,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
     addToCart.mutate({
       productId: listing.id,
       quantity,
-      replace: true
+      replace: true,
     });
   };
 
@@ -126,38 +149,38 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-[500px] max-h-[90vh] overflow-y-auto bg-white/95 backdrop-blur-sm rounded-[32px] shadow-[0_25px_60px_-12px_rgba(0,0,0,0.25),0_0_0_1px_rgba(255,255,255,0.1)] border border-white/40 no-scrollbar p-4 sm:p-6 flex flex-col gap-4 sm:gap-5"
+              className="no-scrollbar relative flex max-h-[90vh] w-full max-w-[500px] flex-col gap-4 overflow-y-auto rounded-[32px] border border-white/40 bg-white/95 p-4 shadow-[0_25px_60px_-12px_rgba(0,0,0,0.25),0_0_0_1px_rgba(255,255,255,0.1)] backdrop-blur-sm sm:gap-5 sm:p-6"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header section with Title & Share */}
-              <div className="flex flex-col relative w-full pt-3 gap-2">
-                <div className="flex items-start justify-between w-full">
-                  <h2 className="text-[20px] font-black text-gray-800 tracking-tight leading-tight max-w-[85%]">
+              <div className="relative flex w-full flex-col gap-2 pt-3">
+                <div className="flex w-full items-start justify-between">
+                  <h2 className="max-w-[85%] text-[20px] font-black leading-tight tracking-tight text-gray-800">
                     {displayProduct.name}
                   </h2>
                   <button
                     onClick={onClose}
-                    className="p-1 rounded-full hover:bg-gray-100 transition-colors self-start"
+                    className="self-start rounded-full p-1 transition-colors hover:bg-gray-100"
                   >
-                    <X className="w-5 h-5 text-gray-400" />
+                    <X className="h-5 w-5 text-gray-400" />
                   </button>
                 </div>
-                
+
                 {/* Share Button Row */}
                 <div className="flex justify-start">
-                  <ShareButton 
+                  <ShareButton
                     productName={displayProduct.name}
                     productId={displayProduct.id}
                     productPrice={displayProduct.mrp}
-                    className="w-10 h-10 bg-white border border-gray-200 rounded-full text-gray-400 focus:outline-none hover:scale-105 transition-transform flex items-center justify-center shadow-none p-0"
+                    className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white p-0 text-gray-400 shadow-none transition-transform hover:scale-105 focus:outline-none"
                     iconClassName="w-[18px] h-[18px]"
                   />
                 </div>
               </div>
 
               {/* Product Banner Halftone Card */}
-              <div 
-                className="relative w-full aspect-[4/3] rounded-[24px] bg-gradient-to-br from-[#854dff] via-[#b336e8] to-[#ff2b9a] border border-purple-400/20 shadow-md flex items-center justify-center p-6"
+              <div
+                className="relative flex aspect-[4/3] w-full items-center justify-center rounded-[24px] border border-purple-400/20 bg-gradient-to-br from-[#854dff] via-[#b336e8] to-[#ff2b9a] p-6 shadow-md"
                 style={{
                   backgroundImage: `
                     radial-gradient(rgba(255, 255, 255, 0.15) 1.5px, transparent 1.5px),
@@ -167,37 +190,39 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                 }}
               >
                 {/* Abstract slashes for action look */}
-                <div className="absolute right-0 bottom-0 top-0 w-1/3 bg-gradient-to-l from-pink-500/20 to-transparent skew-x-12 transform origin-bottom-right pointer-events-none" />
-                <div className="absolute -right-10 -bottom-10 w-64 h-64 rounded-full bg-pink-500/10 blur-2xl pointer-events-none" />
+                <div className="pointer-events-none absolute bottom-0 right-0 top-0 w-1/3 origin-bottom-right skew-x-12 transform bg-gradient-to-l from-pink-500/20 to-transparent" />
+                <div className="pointer-events-none absolute -bottom-10 -right-10 h-64 w-64 rounded-full bg-pink-500/10 blur-2xl" />
 
                 {/* Interactive Thumbnail Gallery overlay on the left */}
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 flex flex-col gap-2 z-20">
+                <div className="absolute left-4 top-1/2 z-20 flex -translate-y-1/2 flex-col gap-2">
                   {productImages.map((img: string, idx: number) => (
                     <button
                       key={idx}
                       onClick={() => setActiveImageIndex(idx)}
-                      className={`w-11 h-11 rounded-lg overflow-hidden border-2 bg-white/15 backdrop-blur-sm shadow-sm transition-all duration-200 ${
-                        activeImageIndex === idx ? 'border-orange-500 scale-105 shadow-md' : 'border-white/30 hover:border-white/60'
+                      className={`h-11 w-11 overflow-hidden rounded-lg border-2 bg-white/15 shadow-sm backdrop-blur-sm transition-all duration-200 ${
+                        activeImageIndex === idx
+                          ? 'scale-105 border-orange-500 shadow-md'
+                          : 'border-white/30 hover:border-white/60'
                       }`}
                     >
-                      <Image 
-                        src={img} 
-                        alt="" 
+                      <Image
+                        src={img}
+                        alt=""
                         width={44}
                         height={44}
-                        className="w-full h-full object-cover" 
+                        className="h-full w-full object-cover"
                       />
                     </button>
                   ))}
                 </div>
 
                 {/* Main Product Image */}
-                <div className="relative w-[70%] h-[80%] flex items-center justify-center ml-[25%]">
+                <div className="relative ml-[25%] flex h-[80%] w-[70%] items-center justify-center">
                   <Image
                     src={activeImage}
                     alt={displayProduct.name}
                     fill
-                    className="object-contain hover:scale-105 transition-transform duration-500 p-2"
+                    className="object-contain p-2 transition-transform duration-500 hover:scale-105"
                     priority
                   />
                 </div>
@@ -206,7 +231,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                 <button
                   type="button"
                   onClick={handleBookmarkToggle}
-                  className="absolute -right-[10px] top-[45%] z-20 focus:outline-none transition-transform hover:scale-105"
+                  className="absolute -right-[10px] top-[45%] z-20 transition-transform hover:scale-105 focus:outline-none"
                 >
                   <svg
                     width="44"
@@ -218,8 +243,8 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                   >
                     <path
                       d="M0 0 H44 L33 20 L44 40 H0 Z"
-                      fill={isBookmarked ? "#864ac5" : "#ffffff"}
-                      stroke={isBookmarked ? "#864ac5" : "#9ca3af"}
+                      fill={isBookmarked ? '#864ac5' : '#ffffff'}
+                      stroke={isBookmarked ? '#864ac5' : '#9ca3af'}
                       strokeWidth="2.5"
                       strokeLinejoin="round"
                       strokeLinecap="round"
@@ -229,21 +254,26 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
               </div>
 
               {/* Marketplace Offers Comparison List */}
-              <div className="flex flex-col gap-3 w-full">
+              <div className="flex w-full flex-col gap-3">
                 {comparisonListings.length > 0 ? (
                   comparisonListings.map((listing: any) => {
-                    const inStock = (listing.stock ?? 0) > 0;
-                    const cartItem = cartData?.items?.find((item: any) => item.productId === listing.id);
+                    const inStock = true; // accept even if stock is 0
+                    const cartItem = cartData?.items?.find(
+                      (item: any) => item.productId === listing.id,
+                    );
                     const itemQty = cartItem?.quantity || 0;
                     const sellerMoq = listing.moq || listing.minimumOrderQuantity || 1;
-                    const minQty = listing.price > 0
-                      ? Math.max(sellerMoq, Math.ceil(minOrderAmount / listing.price))
-                      : sellerMoq;
-                    
-                    const itemMrp = listing.mrp || listing.originalPrice || displayProduct.mrp || displayProduct.originalPrice;
-                    const discountPercent = itemMrp && listing.price && itemMrp > listing.price
-                      ? Math.round(((itemMrp - listing.price) / itemMrp) * 100)
-                      : (listing.discountMeta?.discountPercent || 20);
+                    const minQty = sellerMoq;
+
+                    const itemMrp =
+                      listing.mrp ||
+                      listing.originalPrice ||
+                      displayProduct.mrp ||
+                      displayProduct.originalPrice;
+                    const discountPercent =
+                      itemMrp && listing.price && itemMrp > listing.price
+                        ? Math.round(((itemMrp - listing.price) / itemMrp) * 100)
+                        : listing.discountMeta?.discountPercent || 20;
 
                     const handleQtyChange = (newQty: number) => {
                       if (itemQty === 0) {
@@ -256,68 +286,90 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                     };
 
                     return (
-                      <div 
-                        key={listing.id} 
-                        className="flex flex-row items-center justify-between p-2.5 sm:p-3.5 rounded-2xl bg-gray-50 hover:bg-gray-100/70 border border-gray-100/80 transition-colors gap-2 sm:gap-3 w-full"
+                      <div
+                        key={listing.id}
+                        className="flex w-full flex-row items-center justify-between gap-2 rounded-2xl border border-gray-100/80 bg-gray-50 p-2.5 transition-colors hover:bg-gray-100/70 sm:gap-3 sm:p-3.5"
                       >
                         {/* Left: Discount Badge & Price */}
-                        <div className="flex items-center gap-2 sm:gap-3.5 min-w-[120px] sm:min-w-[155px]">
-                          <div className="bg-[#864ac5] text-white px-1.5 py-1 sm:px-2 sm:py-1.5 rounded-lg text-[8px] sm:text-[9px] font-black tracking-wider uppercase leading-none min-w-[50px] sm:min-w-[66px] text-center select-none flex-shrink-0">
+                        <div className="flex min-w-[120px] items-center gap-2 sm:min-w-[155px] sm:gap-3.5">
+                          <div className="min-w-[50px] flex-shrink-0 select-none rounded-lg bg-[#864ac5] px-1.5 py-1 text-center text-[8px] font-black uppercase leading-none tracking-wider text-white sm:min-w-[66px] sm:px-2 sm:py-1.5 sm:text-[9px]">
                             {discountPercent}% off
                           </div>
-                          <div className="flex flex-col min-w-0">
-                            <span className="text-xs sm:text-[15px] font-black text-gray-800 leading-none truncate">
-                              ₹{listing.price?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                          <div className="flex min-w-0 flex-col">
+                            <span className="truncate text-xs font-black leading-none text-gray-800 sm:text-[15px]">
+                              ₹
+                              {listing.price?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                             </span>
-                            <span className="text-[8px] sm:text-[9px] text-gray-400 font-bold mt-1 sm:mt-1.5 leading-none truncate">
-                              {listing.moq > 1 ? `${listing.moq * 10}% off on purchase of ${listing.moq}` : 'MOQ: 1'}
+                            <span className="mt-1 truncate text-[8px] font-bold leading-none text-gray-400 sm:mt-1.5 sm:text-[9px]">
+                              {listing.moq > 1
+                                ? `${listing.moq * 10}% off on purchase of ${listing.moq}`
+                                : 'MOQ: 1'}
                             </span>
                           </div>
                         </div>
 
                         {/* Middle: Star Rating & Delivery badge */}
                         <div className="flex items-center gap-1.5 sm:gap-4">
-                          <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
-                            <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-[#864ac5] text-[#864ac5]" />
-                            <span className="text-gray-800 font-black text-[10px] sm:text-[12px] leading-none">{listing.seller?.rating || '4.5'}</span>
+                          <div className="flex flex-shrink-0 items-center gap-0.5 sm:gap-1">
+                            <Star className="h-3 w-3 fill-[#864ac5] text-[#864ac5] sm:h-3.5 sm:w-3.5" />
+                            <span className="text-[10px] font-black leading-none text-gray-800 sm:text-[12px]">
+                              {listing.seller?.rating || '4.5'}
+                            </span>
                           </div>
 
-                          <DeliveryTruckBadge text={listing.deliveryText || listing.deliveryTime || '3 days'} className="w-[54px] sm:w-[72px] h-auto text-gray-400 flex-shrink-0" />
+                          <DeliveryTruckBadge
+                            text={listing.deliveryText || listing.deliveryTime || '3 days'}
+                            className="h-auto w-[54px] flex-shrink-0 text-gray-400 sm:w-[72px]"
+                          />
                         </div>
 
                         {/* Right: Actions */}
-                        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                        <div className="flex flex-shrink-0 items-center gap-2 sm:gap-3">
                           {inStock ? (
                             itemQty > 0 ? (
-                              <div className="flex items-center bg-[#48286b] rounded-xl overflow-hidden h-7 w-20 sm:h-8 sm:w-24 text-white shadow-sm font-black text-[10px] sm:text-[11px] select-none justify-between">
-                                <button 
-                                  className="px-2 sm:px-3 h-full hover:bg-black/10 active:scale-95 transition-all text-white/80 hover:text-white font-extrabold text-xs sm:text-sm"
+                              <div className="flex h-7 w-20 select-none items-center justify-between overflow-hidden rounded-xl bg-[#48286b] text-[10px] font-black text-white shadow-sm sm:h-8 sm:w-24 sm:text-[11px]">
+                                <button
+                                  className="h-full px-2 text-xs font-extrabold text-white/80 transition-all hover:bg-black/10 hover:text-white active:scale-95 sm:px-3 sm:text-sm"
                                   onClick={() => handleQtyChange(itemQty - 1)}
                                 >
                                   -
                                 </button>
-                                <span className="px-0.5 sm:px-1 font-bold">{String(itemQty).padStart(2, '0')}</span>
-                                <button 
-                                  className="px-2 sm:px-3 h-full hover:bg-black/10 active:scale-95 transition-all text-white/80 hover:text-white font-extrabold text-xs sm:text-sm"
-                                  onClick={() => handleQtyChange(itemQty + 1)}
+                                <span className="px-0.5 font-bold sm:px-1">
+                                  {String(itemQty).padStart(2, '0')}
+                                </span>
+                                <button
+                                  className="h-full px-3 text-sm font-extrabold text-white/80 transition-all hover:bg-black/10 hover:text-white active:scale-95"
+                                  onClick={() => {
+                                    const nextQty = itemQty + 1;
+                                    const maxQty =
+                                      listing.maximumOrderQuantity ||
+                                      listing.maxOrderQty ||
+                                      config?.max_order_qty ||
+                                      100;
+                                    if (nextQty > maxQty) {
+                                      handleQtyChange(minQty);
+                                    } else {
+                                      handleQtyChange(nextQty);
+                                    }
+                                  }}
                                 >
                                   +
                                 </button>
                               </div>
                             ) : (
-                              <button 
+                              <button
                                 onClick={() => handleQtyChange(minQty)}
-                                className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-orange-500 hover:bg-orange-600 text-white flex items-center justify-center shadow-md active:scale-95 transition-all focus:outline-none"
+                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-500 text-white shadow-md transition-all hover:bg-orange-600 focus:outline-none active:scale-95 sm:h-8 sm:w-8"
                               >
-                                <Plus className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-[3]" />
+                                <Plus className="sm:w-4.5 sm:h-4.5 h-4 w-4 stroke-[3]" />
                               </button>
                             )
                           ) : (
-                            <button 
+                            <button
                               onClick={() => setShowStockAlert(true)}
-                              className="w-7.5 h-7.5 sm:w-8.5 sm:h-8.5 rounded-full bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center border border-red-100 active:scale-95 transition-all focus:outline-none"
+                              className="w-7.5 h-7.5 sm:w-8.5 sm:h-8.5 flex items-center justify-center rounded-full border border-red-100 bg-red-50 text-red-500 transition-all hover:bg-red-100 focus:outline-none active:scale-95"
                             >
-                              <Bell className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                              <Bell className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                             </button>
                           )}
                         </div>
@@ -325,13 +377,11 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                     );
                   })
                 ) : (
-                  <div className="text-center py-6 text-xs text-gray-400 font-medium border border-dashed border-gray-200 rounded-2xl bg-gray-50/50">
+                  <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 py-6 text-center text-xs font-medium text-gray-400">
                     No active offers available for this product.
                   </div>
                 )}
               </div>
-
-
             </motion.div>
           </motion.div>
         )}

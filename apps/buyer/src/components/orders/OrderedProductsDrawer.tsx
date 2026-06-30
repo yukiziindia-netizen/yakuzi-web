@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Share2, Plus, ArrowUpRight, ChevronRight, ChevronLeft, Trash2, Star, RefreshCw, Bookmark, Check, Truck, MapPin, Package, Bike, X } from 'lucide-react';
 import { DeliveryTruckBadge } from '../shared/DeliveryTruckBadge';
 import Image from 'next/image';
-import { useOrders } from '@/hooks/useOrders';
+import { useOrders, useOrderTracking } from '@/hooks/useOrders';
 
 function formatDateShort(dStr: string | null | undefined) {
   if (!dStr) return '';
@@ -38,6 +38,9 @@ interface OrderedProductsDrawerProps {
 
 export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProductsDrawerProps) {
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
+
+  const { data: trackingResp } = useOrderTracking(orderId || '');
+  const tracking = trackingResp?.data;
 
   const { data: ordersData } = useOrders({ page: 1, limit: 50 });
   const allOrders = Array.isArray(ordersData) ? ordersData : ((ordersData as any)?.data || (ordersData as any)?.data?.orders || []);
@@ -262,7 +265,7 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
                           </div>
                           <div className="text-center w-[75px]">
                             <p className={`text-[11px] font-bold leading-tight ${isOut ? 'text-gray-700' : 'text-gray-500'}`}>Out for delivery</p>
-                            <p className="text-[9px] text-gray-400 font-medium">{isOut ? formatDateShort(tracking?.estimated_delivery || order?.updatedAt) : ''}</p>
+                            <p className="text-[9px] text-gray-400 font-medium">{isOut ? formatDateShort(tracking?.estimated_delivery || itemOrder?.updatedAt) : ''}</p>
                           </div>
                         </div>
 

@@ -34,7 +34,7 @@ export default function WishlistPage() {
   const handleAddToCart = (productId: string) => {
     const item = items.find((i: any) => i.productId === productId);
     const product = item?.product;
-    const targetProductId = product?.bestListingId || productId;
+    const targetProductId = (product as any)?.bestListingId || productId;
     const imgUrl = (typeof product?.images?.[0] === 'string' ? product.images[0] : (product?.images?.[0] as any)?.url);
     addToCart.mutate({
       productId: targetProductId,

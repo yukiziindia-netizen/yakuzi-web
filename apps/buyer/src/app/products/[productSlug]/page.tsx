@@ -380,9 +380,7 @@ function ComparisonOffersList({
         const cartItem = cartItemMap.get(listing.id);
         const itemQty = cartItem?.quantity || 0;
         const sellerMoq = listing.moq || listing.minimumOrderQuantity || 1;
-        const minQty = listing.price > 0
-          ? Math.max(sellerMoq, Math.ceil(minOrderAmount / listing.price))
-          : sellerMoq;
+        const minQty = sellerMoq;
 
         const discountPercent = listing.discount || 1.99;
 

@@ -23,7 +23,29 @@
     --border: 224 14% 16%; --input: 224 14% 16%; --ring: 239 84% 67%;
   }
   * { @apply border-border; box-sizing: border-box; }
-  html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    font-size: calc(16px * (100vw / 393));
+  }
+
+  @media (min-width: 640px) {
+    html {
+      font-size: calc(16px * (100vw / 768));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    html {
+      font-size: calc(16px * (100vw / 1440));
+    }
+  }
+
+  @media (min-width: 1920px) {
+    html {
+      font-size: 21.33px;
+    }
+  }
   body { @apply bg-background text-foreground; font-family: var(--font-inter, system-ui, sans-serif); }
   ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-thumb { @apply bg-border rounded-full; }
 }

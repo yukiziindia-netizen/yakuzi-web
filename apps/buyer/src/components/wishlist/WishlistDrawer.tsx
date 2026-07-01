@@ -218,18 +218,24 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
 
                             {/* Right actions: Refresh + Quantity Selector */}
                             <div className="flex items-center gap-1 sm:gap-2">
-                              {/* Refresh button */}
+                              {/* Reset count button */}
                               <button 
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
-                                  queryClient.invalidateQueries({ queryKey: ['wishlist'] });
-                                  toast('Wishlist refreshed', 'success');
+                                  if (inCartItem) {
+                                    removeCartItem.mutate(inCartItem.id, {
+                                      onSuccess: () => {
+                                        toast('Quantity reset', 'success');
+                                      }
+                                    });
+                                  }
                                 }}
-                                className="text-gray-400 hover:text-gray-600 transition-colors p-1 sm:p-2"
-                                title="Refresh saved items"
+                                className="text-[#48286b] hover:text-[#361e51] transition-colors p-1 sm:p-2"
+                                title="Reset quantity"
+                                disabled={removeCartItem.isPending}
                               >
-                                <RefreshCw className="w-4 h-4 sm:w-[22px] sm:h-[22px] text-gray-600" />
+                                <RefreshCw className={`w-4 h-4 sm:w-[22px] sm:h-[22px] ${removeCartItem.isPending ? 'animate-spin' : ''}`} />
                               </button>
 
                               {/* Purple Quantity Selector Pill */}

@@ -165,20 +165,22 @@ export default function OrderDetailPage() {
               {items.length === 0 ? (
                 <div className="py-12 text-center text-sm text-muted-foreground">No items</div>
               ) : items.map((item: any, i: number) => {
-                const itemImage = item.product?.images?.[0] || item.image;
+                const itemImage = item.sellerOffer?.variant?.catalogProduct?.images?.[0]?.url || item.product?.images?.[0] || item.image;
+                const itemName = item.sellerOffer?.name ?? item.product?.name ?? item.productName ?? "Product";
+                const itemManufacturer = item.sellerOffer?.manufacturer ?? item.product?.manufacturer ?? item.manufacturer ?? "—";
                 return (
                 <div key={item.id || i} className="px-6 py-4 flex items-center gap-4">
                   {itemImage ? (
                     <div className="h-12 w-12 rounded-xl overflow-hidden border border-border flex-shrink-0">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={itemImage} alt={item.product?.name ?? item.productName ?? "Product"} className="w-full h-full object-cover" />
+                      <img src={itemImage} alt={itemName} className="w-full h-full object-cover" />
                     </div>
                   ) : (
                     <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-lg flex-shrink-0">💊</div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate">{item.product?.name ?? item.productName ?? "Product"}</p>
-                    <p className="text-xs text-muted-foreground">{item.product?.manufacturer ?? item.manufacturer ?? "—"} · Qty: {item.quantity ?? 1}</p>
+                    <p className="text-sm font-semibold text-foreground truncate">{itemName}</p>
+                    <p className="text-xs text-muted-foreground">{itemManufacturer} · Qty: {item.quantity ?? 1}</p>
                     {item.discountType && <p className="text-xs text-primary mt-0.5">Discount: {item.discountType} {item.discountValue ? `(${item.discountValue})` : ""}</p>}
                   </div>
                   <div className="text-right flex-shrink-0">

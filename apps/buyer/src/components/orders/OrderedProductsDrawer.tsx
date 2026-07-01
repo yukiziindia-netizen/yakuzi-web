@@ -87,26 +87,26 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
           </button>
           
           <div className="flex justify-between items-start gap-4">
-             <h2 className="text-[34px] font-extrabold text-gray-800 leading-tight">Ordered<br/>Products</h2>
-             <div className="flex flex-col items-end gap-1 mr-12 mt-1 shrink-0">
-               <div className="flex gap-1 justify-end flex-nowrap">
+             <h2 className="text-[20px] xs:text-[24px] sm:text-[28px] md:text-[34px] font-extrabold text-gray-800 leading-tight">Ordered<br/>Products</h2>
+             <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1 sm:gap-1.5 mr-12 mt-1 shrink-0">
+               <div className="flex gap-1 sm:gap-1.5 justify-end flex-nowrap">
                  {paymentMethod && (
-                   <span className="bg-[#8b3dcc] text-white text-[10px] sm:text-[11px] font-bold px-2 py-1 rounded shadow-sm whitespace-nowrap">
+                   <span className="bg-[#8b3dcc] text-white text-[10px] sm:text-[13px] font-bold px-2 py-1 sm:px-3.5 sm:py-1.5 rounded shadow-sm whitespace-nowrap">
                      {paymentMethod}
                    </span>
                  )}
-                 <span className="bg-[#8b3dcc] text-white text-[10px] sm:text-[11px] font-bold px-2 py-1 rounded shadow-sm capitalize whitespace-nowrap">
+                 <span className="bg-[#8b3dcc] text-white text-[10px] sm:text-[13px] font-bold px-2 py-1 sm:px-3.5 sm:py-1.5 rounded shadow-sm capitalize whitespace-nowrap">
                    Status : {displayStatus.toLowerCase()}
                  </span>
                </div>
-               <div className="flex gap-1 justify-end flex-nowrap">
-                 <span className="bg-[#8b3dcc] text-white text-[10px] sm:text-[11px] font-bold px-2 py-1 rounded shadow-sm whitespace-nowrap">
+               <div className="flex gap-1 sm:gap-1.5 justify-end flex-nowrap">
+                 <span className="bg-[#8b3dcc] text-white text-[10px] sm:text-[13px] font-bold px-2 py-1 sm:px-3.5 sm:py-1.5 rounded shadow-sm whitespace-nowrap">
                    {orderMonth}
                  </span>
-                 <span className="bg-[#8b3dcc] text-white text-[10px] sm:text-[11px] font-bold px-2 py-1 rounded shadow-sm whitespace-nowrap">
+                 <span className="bg-[#8b3dcc] text-white text-[10px] sm:text-[13px] font-bold px-2 py-1 sm:px-3.5 sm:py-1.5 rounded shadow-sm whitespace-nowrap">
                    {orderYear}
                  </span>
-                 <span className="bg-[#8b3dcc] text-white text-[10px] sm:text-[11px] font-bold px-2 py-1 rounded shadow-sm whitespace-nowrap">
+                 <span className="bg-[#8b3dcc] text-white text-[10px] sm:text-[13px] font-bold px-2 py-1 sm:px-3.5 sm:py-1.5 rounded shadow-sm whitespace-nowrap">
                    All orders
                  </span>
                </div>

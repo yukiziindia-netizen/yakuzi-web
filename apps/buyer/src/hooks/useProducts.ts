@@ -1,12 +1,20 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getProducts, getProductById, getCategories, getManufacturers, getCities, getDiscountDetails, getBrands, getMyWaitlist, addToWaitlist, removeFromWaitlist, useAuth } from '@yukizi/api-client';
+import { getProducts, getProductById, getCategories, getManufacturers, getCities, getDiscountDetails, getBrands, getBanners, getMyWaitlist, addToWaitlist, removeFromWaitlist, useAuth } from '@yukizi/api-client';
 
 export function useBrands() {
   return useQuery({
     queryKey: ['brands'],
     queryFn: getBrands,
+    staleTime: 60 * 60 * 1000,
+  });
+}
+
+export function useBanners() {
+  return useQuery({
+    queryKey: ['banners'],
+    queryFn: getBanners,
     staleTime: 60 * 60 * 1000,
   });
 }

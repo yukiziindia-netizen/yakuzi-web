@@ -195,3 +195,9 @@ export {
   getBrands,
   type Brand,
 } from './modules/brands.api';
+
+// Banners
+export {
+  getBanners,
+  type Banner,
+} from './modules/banners.api';

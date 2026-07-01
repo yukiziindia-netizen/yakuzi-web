@@ -14,6 +14,7 @@ const NAV = [
   { icon: Package, label: "Products", href: "/products" },
   { icon: FileSpreadsheet, label: "Suggestions", href: "/suggestions" },
   { icon: Tag, label: "Brands", href: "/brands" },
+  { icon: Image, label: "HeroSection Image", href: "/banners" },
   { icon: Layers, label: "Collections", href: "/collections" },
   { icon: ClipboardList, label: "Orders", href: "/orders" },
   { icon: Layout, label: "Marketing", href: "/marketing" },

@@ -2,7 +2,7 @@
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
-import { useCategories, useBrands } from '@/hooks/useProducts';
+import { useCategories, useBrands, useBanners } from '@/hooks/useProducts';
 
 interface HeroSectionProps {
   title?: string;
@@ -11,6 +11,14 @@ interface HeroSectionProps {
 export default function HeroSection({ title = 'YUKiZi' }: HeroSectionProps) {
   const { data: categoriesData } = useCategories();
   const { data: brandsData, isLoading: isLoadingBrands } = useBrands();
+  const { data: bannersData } = useBanners();
+
+  const banners = Array.isArray(bannersData) ? bannersData.filter((b) => b.isActive !== false) : [];
+  const displayHeroBanners = [
+    banners[0]?.imageUrl || '/hero1.jpg',
+    banners[1]?.imageUrl || '/hero2.jpg',
+    banners[2]?.imageUrl || '/hero3.jpg',
+  ];
 
   const categories = Array.isArray(categoriesData)
     ? categoriesData
@@ -54,36 +62,77 @@ export default function HeroSection({ title = 'YUKiZi' }: HeroSectionProps) {
             {/* Left Image */}
             <div className="relative flex-1 -skew-x-[15deg] overflow-hidden">
               <div className="absolute inset-0 z-10 bg-red-600/10 mix-blend-color"></div>
-              <img
-                src="/hero1.jpg"
-                alt="Anime character"
-                className="-ml-[25%] h-full w-[150%] origin-center skew-x-[15deg] object-cover"
-              />
+              {banners[0]?.link ? (
+                <a href={banners[0].link} target="_blank" rel="noopener noreferrer">
+                  <img
+                    src={displayHeroBanners[0]}
+                    alt={banners[0]?.title || "Anime character"}
+                    className="-ml-[25%] h-full w-[150%] origin-center skew-x-[15deg] object-cover"
+                  />
+                </a>
+              ) : (
+                <img
+                  src={displayHeroBanners[0]}
+                  alt="Anime character"
+                  className="-ml-[25%] h-full w-[150%] origin-center skew-x-[15deg] object-cover"
+                />
+              )}
             </div>
 
             {/* Middle Image */}
             <div className="relative z-20 mx-1 flex-[1.3] -skew-x-[15deg] overflow-hidden border-4 border-[#854cbc] bg-white shadow-xl">
               <div className="absolute inset-0 z-10 bg-yellow-400/10 mix-blend-color"></div>
-              <img
-                src="/hero2.jpg"
-                alt="Group of characters"
-                className="-ml-[25%] h-full w-[150%] origin-center skew-x-[15deg] object-cover"
-              />
+              {banners[1]?.link ? (
+                <a href={banners[1].link} target="_blank" rel="noopener noreferrer">
+                  <img
+                    src={displayHeroBanners[1]}
+                    alt={banners[1]?.title || "Group of characters"}
+                    className="-ml-[25%] h-full w-[150%] origin-center skew-x-[15deg] object-cover"
+                  />
+                </a>
+              ) : (
+                <img
+                  src={displayHeroBanners[1]}
+                  alt="Group of characters"
+                  className="-ml-[25%] h-full w-[150%] origin-center skew-x-[15deg] object-cover"
+                />
+              )}
               <div className="absolute bottom-4 left-1/2 z-20 -translate-x-1/2 skew-x-[15deg]">
-                <button className="whitespace-nowrap rounded-full bg-[#854cbc] px-8 py-2 text-sm font-medium text-white shadow-md transition-colors hover:bg-[#723b9e]">
-                  Learn more
-                </button>
+                {banners[1]?.link ? (
+                  <a
+                    href={banners[1].link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="whitespace-nowrap rounded-full bg-[#854cbc] px-8 py-2 text-sm font-medium text-white shadow-md transition-colors hover:bg-[#723b9e] inline-block"
+                  >
+                    {banners[1]?.title || 'Learn more'}
+                  </a>
+                ) : (
+                  <button className="whitespace-nowrap rounded-full bg-[#854cbc] px-8 py-2 text-sm font-medium text-white shadow-md transition-colors hover:bg-[#723b9e]">
+                    {banners[1]?.title || 'Learn more'}
+                  </button>
+                )}
               </div>
             </div>
 
             {/* Right Image */}
             <div className="relative z-10 flex-1 -skew-x-[15deg] overflow-hidden">
               <div className="absolute inset-0 z-10 bg-red-600/10 mix-blend-color"></div>
-              <img
-                src="/hero3.jpg"
-                alt="Character"
-                className="-ml-[25%] h-full w-[150%] origin-center skew-x-[15deg] object-cover"
-              />
+              {banners[2]?.link ? (
+                <a href={banners[2].link} target="_blank" rel="noopener noreferrer">
+                  <img
+                    src={displayHeroBanners[2]}
+                    alt={banners[2]?.title || "Character"}
+                    className="-ml-[25%] h-full w-[150%] origin-center skew-x-[15deg] object-cover"
+                  />
+                </a>
+              ) : (
+                <img
+                  src={displayHeroBanners[2]}
+                  alt="Character"
+                  className="-ml-[25%] h-full w-[150%] origin-center skew-x-[15deg] object-cover"
+                />
+              )}
             </div>
           </div>
         </div>

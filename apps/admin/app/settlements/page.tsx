@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useState, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
@@ -193,7 +193,7 @@ export default function AdminSettlementsPage() {
     );
   }
 
-  const pendingAmount = settlements.filter((s: any) => s.payoutStatus === "PENDING").reduce((sum: number, s: any) => sum + (s.amount ?? 0), 0);
+  const pendingAmount = displayItems.filter((s: any) => s.payoutStatus !== "PAID").reduce((sum: number, s: any) => sum + (s.amount ?? 0), 0);
 
   return (
     <AdminLayout>
@@ -215,9 +215,9 @@ export default function AdminSettlementsPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard title="Total Transactions" value={String(totalSettlements)} icon={CreditCard} iconClass="bg-blue-50 text-blue-600 dark:bg-blue-900/20" delay={0} />
-          <StatCard title="Gross Settlement Volume" value={formatCurrency(settlements.reduce((sum: number, s: any) => sum + (s.amount ?? 0), 0))} icon={TrendingUp} iconClass="bg-purple-50 text-purple-600 dark:bg-purple-900/20" delay={0.05} />
+          <StatCard title="Gross Settlement Volume" value={formatCurrency(displayItems.reduce((sum: number, s: any) => sum + (s.amount ?? 0), 0))} icon={TrendingUp} iconClass="bg-purple-50 text-purple-600 dark:bg-purple-900/20" delay={0.05} />
           <StatCard title="Pending Payouts" value={formatCurrency(pendingAmount)} icon={Clock} iconClass="bg-yellow-50 text-yellow-600 dark:bg-yellow-900/20" delay={0.1} />
-          <StatCard title="Total Settled" value={formatCurrency(settlements.filter((s: any) => s.payoutStatus === "PAID").reduce((sum: number, s: any) => sum + (s.amount ?? 0), 0))} icon={CheckCircle2} iconClass="bg-green-50 text-green-600 dark:bg-green-900/20" delay={0.15} />
+          <StatCard title="Total Settled" value={formatCurrency(displayItems.filter((s: any) => s.payoutStatus === "PAID").reduce((sum: number, s: any) => sum + (s.amount ?? 0), 0))} icon={CheckCircle2} iconClass="bg-green-50 text-green-600 dark:bg-green-900/20" delay={0.15} />
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-border/40">

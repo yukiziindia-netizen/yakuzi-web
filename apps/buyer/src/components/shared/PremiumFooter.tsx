@@ -37,7 +37,7 @@ export default function PremiumFooter() {
               </div>
               <div>
                 <h3 className="text-4xl font-black text-gray-950 tracking-tighter mb-1 uppercase">
-                  Pharma Bag
+                  Yukizi
                 </h3>
                 <div className="flex items-center gap-3">
                    <div className="w-2 h-2 rounded-full bg-lime-500 animate-pulse" />

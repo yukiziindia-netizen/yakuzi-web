@@ -19,6 +19,18 @@ function InfoRow({ label, value, mono }: { label: string; value?: string | null;
   );
 }
 
+function DocRow({ label, url }: { label: string; url?: string | null }) {
+  if (!url) return null;
+  return (
+    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 py-3 border-b border-border/30 last:border-0">
+      <span className="text-sm text-muted-foreground sm:w-40 flex-shrink-0">{label}</span>
+      <a href={url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline flex items-center gap-1 font-medium">
+        <FileText className="h-4 w-4" /> View Document
+      </a>
+    </div>
+  );
+}
+
 function VerificationBadge({ status }: { status?: string }) {
   const map: Record<string, { label: string; variant: "success" | "warning" | "error"; icon: React.ElementType }> = {
     APPROVED: { label: "Verified", variant: "success", icon: CheckCircle2 },
@@ -87,9 +99,10 @@ export default function ProfilePage() {
           <div>
             <InfoRow label="GST Number" value={sellerProfile.gstNumber || sellerProfile.gst} mono />
             <InfoRow label="PAN Number" value={sellerProfile.panNumber || sellerProfile.pan} mono />
-            <InfoRow label="Drug License 1" value={sellerProfile.drugLicenseNumber || sellerProfile.drugLicense} mono />
-            <InfoRow label="Drug License 2" value={sellerProfile.drugLicenseNumber2} mono />
-            <InfoRow label="FSSAI Number" value={sellerProfile.fssaiNumber} mono />
+            <DocRow label="Cancelled Cheque" url={sellerProfile.cancelCheck} />
+            {sellerProfile.additionalDocuments?.map((doc: string, idx: number) => (
+              <DocRow key={`doc-${idx}`} label={`Further Document ${idx + 1}`} url={doc} />
+            ))}
             <InfoRow label="Verification" value={undefined} />
             <div className="pl-0 sm:pl-44 -mt-3 pb-2">
               <VerificationBadge status={p.status} />

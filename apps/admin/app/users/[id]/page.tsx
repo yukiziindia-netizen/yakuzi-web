@@ -175,12 +175,12 @@ export default function UserDetailPage() {
                 <InfoRow icon={FileText} label="PAN Number" value={sp.panNumber ?? "—"} mono />
                 {sp.email && <InfoRow icon={Mail} label="Business Email" value={sp.email} />}
                 
-                {sp.drugLicenseUrl && (
-                  <SecureDocViewer url={sp.drugLicenseUrl} label="License 1 (20B)" number={sp.drugLicenseNumber} expiry={sp.drugLicenseExpiry} />
+                {sp.cancelCheck && (
+                  <SecureDocViewer url={sp.cancelCheck} label="Cancelled Cheque" />
                 )}
-                {sp.drugLicenseUrl2 && (
-                  <SecureDocViewer url={sp.drugLicenseUrl2} label="License 2 (21B)" number={sp.drugLicenseNumber2} expiry={sp.drugLicenseExpiry2} />
-                )}
+                {sp.additionalDocuments && sp.additionalDocuments.length > 0 && sp.additionalDocuments.map((docUrl: string, idx: number) => (
+                  <SecureDocViewer key={`doc-${idx}`} url={docUrl} label={`Further Document ${idx + 1}`} />
+                ))}
                 <InfoRow icon={MapPin} label="Address" value={[sp.address, sp.city, sp.state, sp.pincode].filter(Boolean).join(", ") || "—"} className="sm:col-span-2" />
                 {sp.bankAccount && (
                   <>
@@ -189,8 +189,6 @@ export default function UserDetailPage() {
                     <InfoRow icon={FileText} label="IFSC Code" value={sp.bankAccount.ifsc ?? "—"} mono />
                   </>
                 )}
-                {sp.cancelCheck && (
-                  <SecureDocViewer url={sp.cancelCheck} label="Cancelled Cheque" />
                 )}
               </div>
             ) : (
@@ -233,10 +231,9 @@ export default function UserDetailPage() {
         {isSeller && sp && (
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass-card rounded-2xl p-6">
             <h2 className="font-semibold text-foreground mb-4">KYC Verification</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <KycCard label="PAN Verification" status={sp.panVerified ? "verified" : "pending"} value={sp.panNumber} />
               <KycCard label="GST Verification" status={sp.gstVerified ? "verified" : "pending"} value={sp.gstNumber} />
-              <KycCard label="Drug License" status={sp.drugLicenseVerified ? "verified" : "pending"} value={sp.drugLicenseNumber} />
             </div>
             {canApprove && (
               <div className="mt-6 pt-6 border-t border-border flex gap-3">

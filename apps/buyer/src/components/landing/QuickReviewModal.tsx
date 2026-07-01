@@ -102,6 +102,7 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
           productId: displayProduct.id,
           productName: displayProduct.name,
           price: displayPrice || 0,
+          originalPrice: displayProduct.mrp || displayProduct.originalPrice || displayPrice,
           image: displayProduct.image || productImages[0],
         },
         {
@@ -112,12 +113,18 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
   };
 
   const handleAddToCart = (listing: any, quantity: number) => {
+    const itemMrp =
+      listing.mrp ||
+      listing.originalPrice ||
+      displayProduct.mrp ||
+      displayProduct.originalPrice ||
+      listing.price;
     addToCart.mutate({
       productId: listing.id,
       quantity,
       productName: displayProduct.name,
       price: listing.price,
-      mrp: displayProduct.mrp,
+      mrp: itemMrp,
       image: productImages[0],
       imageUrl: productImages[0],
       images: productImages,

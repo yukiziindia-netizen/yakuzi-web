@@ -29,6 +29,7 @@ import Link from 'next/link';
 import { useProductById, useProducts, useWaitlist, useAddToWaitlist, useRemoveFromWaitlist } from '@/hooks/useProducts';
 import { useAddToCart, useCart, useUpdateCartItem, useRemoveCartItem } from '@/hooks/useCart';
 import { useToast } from '@/components/shared/Toast';
+import { usePlatformConfig } from '@/hooks/usePlatformConfig';
 import { useWishlist, useAddToWishlist, useRemoveFromWishlist } from '@/hooks/useWishlist';
 import { useProductReviews, useCreateReview } from '@/hooks/useReviews';
 import Navbar from '@/components/landing/Navbar';
@@ -101,9 +102,9 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
 
   const isNotAvailable = prod.sellerCount === 0 || prod.sellerOffers?.length === 0 || price == null;
   const displayPrice = isNotAvailable ? 'N/A' : `₹${Number(price).toLocaleString('en-IN')}`;
-  const displayOriginalPrice = mrp != null && mrp > (price || 0) 
+  const displayOriginalPrice = mrp != null && Number(mrp) > Number(price || 0) 
     ? `₹${Number(mrp).toLocaleString('en-IN')}` 
-    : (!isNotAvailable ? `₹${Math.round(Number(price) * 1.15).toLocaleString('en-IN')}` : '');
+    : '';
   
   const displayDelivery = prod.deliveryText || prod.deliveryTime || '3 days';
   const productName = prod.name || 'Product';
@@ -402,7 +403,7 @@ function ComparisonOffersList({
                 quantity: newQty,
                 productName: productName,
                 price: listing.price,
-                mrp: productMrp,
+                mrp: listing.mrp || listing.originalPrice || productMrp,
                 image: productImage,
                 imageUrl: productImage,
                 images: productImage ? [productImage] : [],
@@ -629,6 +630,8 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
   const updateCartItem = useUpdateCartItem();
   const removeCartItem = useRemoveCartItem();
   const { toast } = useToast();
+  const { data: config } = usePlatformConfig();
+  const minOrderAmount = config?.min_order_amount ?? 0;
 
   const { data: wishlistData } = useWishlist();
   const addToWishlist = useAddToWishlist();
@@ -752,6 +755,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
         productId: product.id,
         productName: product.name,
         price: displayPrice || 0,
+        originalPrice: product.mrp || product.originalPrice || displayPrice,
         image: product.image || images[0],
       }, {
         onSuccess: () => toast('Added to wishlist!', 'success'),
@@ -875,7 +879,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
           <ComparisonOffersList 
             comparisonListings={comparisonListings}
             cartData={cartData}
-            minOrderAmount={20000}
+            minOrderAmount={minOrderAmount}
             addToCart={addToCart}
             updateCartItem={updateCartItem}
             removeCartItem={removeCartItem}
@@ -1151,7 +1155,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
               <ComparisonOffersList 
                 comparisonListings={comparisonListings}
                 cartData={cartData}
-                minOrderAmount={20000}
+                minOrderAmount={minOrderAmount}
                 addToCart={addToCart}
                 updateCartItem={updateCartItem}
                 removeCartItem={removeCartItem}

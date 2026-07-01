@@ -72,9 +72,9 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
   
   const isNotAvailable = product?.sellerCount === 0 || product?.sellerOffers?.length === 0 || price == null;
   const displayPrice = isNotAvailable ? 'N/A' : `₹${Number(price).toLocaleString('en-IN')}`;
-  const displayOriginalPrice = mrp != null && mrp > (price || 0) 
+  const displayOriginalPrice = mrp != null && Number(mrp) > Number(price || 0) 
     ? `₹${Number(mrp).toLocaleString('en-IN')}` 
-    : (!isNotAvailable ? `₹${Math.round(Number(price) * 1.15).toLocaleString('en-IN')}` : '');
+    : '';
   
   const displayDelivery = product?.deliveryText || product?.deliveryTime || '3 days';
   const productName = product?.name || 'Product';

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { sendOtp, verifyOtp, getCurrentUser } from "@/api/auth.api";
 import {
@@ -6,7 +6,7 @@ import {
   getSellerSettlementSummary, requestSellerPayout, createSellerProduct, updateSellerProduct, deleteSellerProduct,
   updateSellerOrderStatus, getSellerProfile, updateSellerProfile, getSellerProductById,
   getCategories, toggleVacationMode, getSellerTickets, getSellerTicketById, createSellerTicket, addTicketMessage,
-  getSellerOrderById, acceptSellerOrder, rejectSellerOrder, uploadOrderInvoice,
+  getSellerOrderById, acceptSellerOrder, rejectSellerOrder, uploadOrderDocument, updateShippingDetails,
   getSellerCustomOrders, getSellerCancelledOrders,
   getSellerNotifications, markNotificationRead, markAllNotificationsRead,
   getSellerFullProfile, getProductRequests, createProductRequest, getSellerAnalytics,
@@ -205,11 +205,20 @@ export function useRejectSellerOrder() {
   });
 }
 
-export function useUploadOrderInvoice() {
+export function useUploadOrderDocument() {
+  return useMutation({
+    mutationFn: (formData: FormData) => uploadOrderDocument(formData),
+  });
+}
+
+export function useUpdateShippingDetails() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ orderId, formData }: { orderId: string; formData: FormData }) => uploadOrderInvoice(orderId, formData),
-    onSuccess: () => { void qc.invalidateQueries({ queryKey: ["seller", "orders"] }); void qc.invalidateQueries({ queryKey: ["seller", "order"] }); },
+    mutationFn: ({ orderId, payload }: { orderId: string; payload: any }) => updateShippingDetails(orderId, payload),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["seller", "orders"] });
+      void qc.invalidateQueries({ queryKey: ["seller", "order"] });
+    },
   });
 }
 

@@ -16,19 +16,19 @@ const renderOffer = (p: any) => {
   if (!p.discountType) return <span className="text-xs text-muted-foreground">No offer</span>;
   const meta = p.discountMeta || {};
   if (p.discountType === "PTR_DISCOUNT") {
-    return <Badge className="bg-purple-600 hover:bg-purple-700 text-white font-bold">{meta.discountPercent || 0}% PTR Discount</Badge>;
+    return <Badge className="bg-purple-600 hover:bg-purple-700 text-white font-bold">{meta.discountPercent || 0}% Discount</Badge>;
   }
   if (p.discountType === "SAME_PRODUCT_BONUS") {
     return <Badge className="bg-blue-600 hover:bg-blue-700 text-white font-bold">Buy {meta.buy || 0} Get {meta.get || 0} Free</Badge>;
   }
   if (p.discountType === "PTR_PLUS_SAME_PRODUCT_BONUS") {
-    return <div className="flex flex-col gap-1"><Badge className="bg-purple-600 hover:bg-purple-700 text-white font-bold">{meta.discountPercent || 0}% PTR</Badge><Badge className="bg-blue-600 hover:bg-blue-700 text-white font-bold">Buy {meta.buy || 0} Get {meta.get || 0} Free</Badge></div>;
+    return <div className="flex flex-col gap-1"><Badge className="bg-purple-600 hover:bg-purple-700 text-white font-bold">{meta.discountPercent || 0}% Discount</Badge><Badge className="bg-blue-600 hover:bg-blue-700 text-white font-bold">Buy {meta.buy || 0} Get {meta.get || 0} Free</Badge></div>;
   }
   if (p.discountType === "DIFFERENT_PRODUCT_BONUS") {
     return <Badge className="bg-amber-600 hover:bg-amber-700 text-white font-bold">Buy {meta.buy || 0} Get {meta.get || 0} {meta.bonusProductName}</Badge>;
   }
   if (p.discountType === "PTR_PLUS_DIFFERENT_PRODUCT_BONUS") {
-    return <div className="flex flex-col gap-1"><Badge className="bg-purple-600 hover:bg-purple-700 text-white font-bold">{meta.discountPercent || 0}% PTR</Badge><Badge className="bg-amber-600 hover:bg-amber-700 text-white font-bold">Buy {meta.buy || 0} Get {meta.get || 0} {meta.bonusProductName}</Badge></div>;
+    return <div className="flex flex-col gap-1"><Badge className="bg-purple-600 hover:bg-purple-700 text-white font-bold">{meta.discountPercent || 0}% Discount</Badge><Badge className="bg-amber-600 hover:bg-amber-700 text-white font-bold">Buy {meta.buy || 0} Get {meta.get || 0} {meta.bonusProductName}</Badge></div>;
   }
   if (p.discountType === "SPECIAL_PRICE") {
     return <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold">Special Price: {formatCurrency(meta.specialPrice || 0)}</Badge>;
@@ -99,14 +99,14 @@ export default function ProductsPage() {
                 <table className="w-full" aria-label="Products">
                   <thead>
                     <tr className="border-b border-border/50 bg-muted/20">
-                      {["Product","Category","Price","Stock","GST","Offer","Status","Actions"].map(h=>(
+                      {["Product","Category","Price","Stock","GST","Offer","Actions"].map(h=>(
                         <th key={h} scope="col" className="px-5 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/30">
                     {products.length===0 ? (
-                      <tr><td colSpan={8} className="py-12 text-center text-sm text-muted-foreground">No products found</td></tr>
+                      <tr><td colSpan={7} className="py-12 text-center text-sm text-muted-foreground">No products found</td></tr>
                     ) : products.map((p: any, i: number)=>(
                       <motion.tr key={p.id} initial={{opacity:0,y:6}} animate={{opacity:1,y:0}} transition={{delay:i*0.05}} className="hover:bg-accent/30 transition-colors">
                         <td className="px-5 py-4">
@@ -127,7 +127,6 @@ export default function ProductsPage() {
                         </td>
                         <td className="px-5 py-4 text-sm font-medium text-muted-foreground">{p.gstPercent ?? p.gst ?? 0}%</td>
                         <td className="px-5 py-4">{renderOffer(p)}</td>
-                        <td className="px-5 py-4"><ApprovalBadge status={p.approvalStatus ?? "PENDING"}/></td>
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-1">
                             <Link href={`/products/${p.id}`} aria-label={`View ${p.name}`} className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent/60 transition-colors"><Eye className="h-3.5 w-3.5"/></Link>

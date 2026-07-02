@@ -78,6 +78,7 @@ const validGstValues = VALID_GST_PERCENTAGES as readonly number[];
 
 export const discountFormDetailsSchema = z.object({
   type: z.enum([
+    'none',
     'ptr_discount',
     'same_product_bonus',
     'ptr_discount_and_same_product_bonus',
@@ -97,6 +98,7 @@ export const productFormSchema = z.object({
   product_price: z.preprocess((val) => Number(val) || 0, z.number()),
   compare_at_price: z.preprocess((val) => Number(val) || 0, z.number()).optional(),
   gst_percent: z.preprocess((val) => Number(val) || 0, z.number()).optional(),
+  is_tax_included: z.boolean().default(false).optional(),
   unit: z.string().optional(),
   pack_size: z.string().optional(),
   company_name: z.string().min(2, 'Company name is required'),

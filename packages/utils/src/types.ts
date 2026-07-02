@@ -215,6 +215,7 @@ export interface Payout {
 }
 
 export type DiscountType =
+  | "none"
   | "ptr_discount"
   | "same_product_bonus"
   | "ptr_discount_and_same_product_bonus"

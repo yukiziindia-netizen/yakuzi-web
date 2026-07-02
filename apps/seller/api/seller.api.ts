@@ -1,4 +1,4 @@
-﻿import { apiClient } from "@/lib/apiClient";
+import { apiClient } from "@/lib/apiClient";
 import type { Product, Order, Payout, Suggestion, CategoryItem } from "@yukizi/utils";
 import type { ProductPayload } from "@yukizi/utils";
 
@@ -60,9 +60,14 @@ export async function updateSellerProduct(productId: string, input: Partial<Prod
 export async function getSellerProductById(productId: string) {
   const { data } = await apiClient.get<{ data: Product }>(`/products/${productId}`);
   const product = data.data;
+  const categoryObj = typeof product?.category === 'object' && product?.category ? product.category as any : null;
+  const subCategoryObj = typeof (product as any)?.subCategory === 'object' && (product as any)?.subCategory ? (product as any).subCategory as any : null;
+  
   return {
     ...product,
-    category: typeof product?.category === 'object' && product?.category ? (product.category as any).name || (product.category as any).id : product?.category,
+    category: categoryObj ? categoryObj.name || categoryObj.id : product?.category,
+    categoryId: product.categoryId || categoryObj?.id || categoryObj?._id,
+    subCategoryId: product.subCategoryId || subCategoryObj?.id || subCategoryObj?._id,
   };
 }
 
@@ -146,9 +151,15 @@ export async function rejectSellerOrder(orderId: string, reason: string) {
   return data.data ?? data.order ?? data;
 }
 
-export async function uploadOrderInvoice(orderId: string, formData: FormData) {
-  const { data } = await apiClient.post<any>(`/orders/${orderId}/invoice`, formData);
+export async function uploadOrderDocument(formData: FormData) {
+  const { data } = await apiClient.post<any>(`/storage/order-document`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return data.data?.url ?? data.url ?? data;
+}
 
+export async function updateShippingDetails(orderId: string, payload: any) {
+  const { data } = await apiClient.patch<any>(`/orders/${orderId}/shipping-details`, payload);
   return data.data ?? data;
 }
 

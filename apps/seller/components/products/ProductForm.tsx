@@ -19,12 +19,26 @@ import {
   calculatePricing,
   VALID_GST_PERCENTAGES,
 } from "@yukizi/utils";
-import { useCreateSellerProduct, useUpdateSellerProduct, useSuggestionSearch } from "@/hooks/useSeller";
+import { useCreateSellerProduct, useUpdateSellerProduct, useSuggestionSearch, useCategories } from "@/hooks/useSeller";
 import { getSellerProductById } from "@/api/seller.api";
 
 type FormValues = ProductFormValues;
 
-export function ProductForm({ defaultValues, productId }: { defaultValues?: Partial<FormValues>; productId?: string }) {
+export function ProductForm({ 
+  defaultValues, 
+  productId,
+  initialOptions = [],
+  initialVariants = [],
+  initialCategoryName,
+  initialSubcategoryName,
+}: { 
+  defaultValues?: Partial<FormValues>; 
+  productId?: string;
+  initialOptions?: any[];
+  initialVariants?: any[];
+  initialCategoryName?: string;
+  initialSubcategoryName?: string;
+}) {
   const router = useRouter();
   const createProduct = useCreateSellerProduct();
   const updateProduct = useUpdateSellerProduct();
@@ -46,6 +60,7 @@ export function ProductForm({ defaultValues, productId }: { defaultValues?: Part
       product_price: 0,
       compare_at_price: 0,
       gst_percent: 12,
+      is_tax_included: false,
       unit: "1",
       pack_size: "1",
       company_name: "",
@@ -57,13 +72,37 @@ export function ProductForm({ defaultValues, productId }: { defaultValues?: Part
       delivery_text: "",
       image_list: [],
       custom_extra_fields: [],
-      discount_form_details: { type: "ptr_discount" } as DiscountFormDetails,
+      discount_form_details: { type: "none" } as DiscountFormDetails,
     },
   });
 
-  const [options, setOptions] = useState<VariantOption[]>([]);
-  const [variants, setVariants] = useState<VariantCombination[]>([]);
+  const [options, setOptions] = useState<VariantOption[]>(() => {
+    if (initialOptions.length === 0 && initialVariants.length > 0) {
+      return [{
+        id: Math.random().toString(36).substr(2, 9),
+        name: "Variant",
+        values: initialVariants.map(v => v.name).filter(Boolean)
+      }];
+    }
+    return initialOptions;
+  });
+  const [variants, setVariants] = useState<VariantCombination[]>(initialVariants);
   const [mediaItems, setMediaItems] = useState<any[]>([]);
+
+  const { data: allCategories } = useCategories();
+
+  useEffect(() => {
+    if (allCategories && initialCategoryName && getValues("categories").length === 0) {
+      const cat = allCategories.find((c: any) => c.name === initialCategoryName || c.id === initialCategoryName);
+      if (cat) {
+        setValue("categories", [cat.id]);
+        if (initialSubcategoryName && cat.subcategories) {
+          const sub = cat.subcategories.find((s: any) => s.name === initialSubcategoryName || s.id === initialSubcategoryName);
+          if (sub) setValue("sub_categories", [sub.id]);
+        }
+      }
+    }
+  }, [allCategories, initialCategoryName, initialSubcategoryName, setValue, getValues]);
 
   const watchMrp = watch("product_price");
   const watchCompareAt = watch("compare_at_price");
@@ -335,11 +374,12 @@ export function ProductForm({ defaultValues, productId }: { defaultValues?: Part
         minimumOrderQuantity: data.min_order_qty,
         maximumOrderQuantity: data.max_order_qty,
         gstPercent: data.gst_percent || 0,
-        ...(data.delivery_text && { deliveryText: data.delivery_text }),
+        isTaxIncluded: data.is_tax_included || false,
+        ...(data.delivery_text && { deliveryText: `${data.delivery_text} ${Number(data.delivery_text) === 1 ? 'day' : 'days'}` }),
         ...(realImages.length > 0 && { images: realImages }),
         ...(Object.keys(mergedExtraFields).length > 0 && { extraFields: mergedExtraFields }),
-        ...(mappedDiscountType && { discountType: mappedDiscountType }),
-        ...(Object.keys(discountMeta).length > 0 && { discountMeta }),
+        discountType: mappedDiscountType || null,
+        discountMeta: Object.keys(discountMeta).length > 0 ? discountMeta : null,
         ...(selectedMasterId && { masterProductId: selectedMasterId }),
         ...(options.length > 0 && { options: options.map(o => ({ name: o.name, values: o.values })) }),
         ...((variants.filter(v => Number(v.price) > 0)).length > 0 && { 
@@ -454,6 +494,7 @@ export function ProductForm({ defaultValues, productId }: { defaultValues?: Part
                       selectedSubcategoryIds={subcats || []}
                       onChangeSubcategories={setSubcats}
                       error={errors.categories?.message}
+                      disabled={isEditing}
                     />
                   )}
                 />
@@ -491,6 +532,19 @@ export function ProductForm({ defaultValues, productId }: { defaultValues?: Part
               error={errors.gst_percent?.message} 
               {...register("gst_percent", { valueAsNumber: true })} 
             />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <div className="flex items-center gap-2 mt-8">
+              <input
+                type="checkbox"
+                id="is_tax_included"
+                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                {...register("is_tax_included")}
+              />
+              <label htmlFor="is_tax_included" className="text-sm font-medium text-foreground cursor-pointer">
+                Price includes tax
+              </label>
+            </div>
           </div>
         </div>
 
@@ -538,8 +592,10 @@ export function ProductForm({ defaultValues, productId }: { defaultValues?: Part
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
             <Input 
-              label="Delivery Time (e.g. 3 days, Tomorrow)" 
-              placeholder="e.g. 3 days, Tomorrow" 
+              label="Delivery Time (in days)" 
+              type="number"
+              min={1}
+              placeholder="e.g. 3" 
               error={errors.delivery_text?.message} 
               {...register("delivery_text")} 
             />

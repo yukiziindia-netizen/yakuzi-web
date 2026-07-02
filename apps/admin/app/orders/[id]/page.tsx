@@ -402,6 +402,63 @@ export default function OrderDetailPage() {
               </motion.div>
             )}
 
+            {/* Shipping & Fulfillment Details */}
+            {(order.packageLength || order.invoiceUrl) && (
+              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.23 }} className="glass-card rounded-2xl p-6">
+                <h2 className="font-semibold text-foreground mb-4 flex items-center gap-2"><Package className="h-4 w-4 text-primary" /> Shipping Details</h2>
+                <div className="space-y-4">
+                  {order.packageLength && (
+                    <div className="grid grid-cols-2 gap-3 pb-3 border-b border-border/30">
+                      <div>
+                        <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-1">Dimensions (L×B×H)</p>
+                        <p className="text-sm font-semibold text-foreground">{order.packageLength} × {order.packageBreadth} × {order.packageHeight} cm</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-1">Weight</p>
+                        <p className="text-sm font-semibold text-foreground">{order.packageWeight} kg</p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Documents</p>
+                    <div className="flex flex-wrap gap-2">
+                      {order.invoiceUrl && (
+                        <a href={order.invoiceUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg text-[10px] font-bold text-primary transition-colors">
+                          <FileText className="h-3 w-3" /> Invoice
+                        </a>
+                      )}
+                      {order.manifestUrl && (
+                        <a href={order.manifestUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg text-[10px] font-bold text-primary transition-colors">
+                          <FileText className="h-3 w-3" /> Manifest
+                        </a>
+                      )}
+                      {order.lengthImage && (
+                        <a href={order.lengthImage} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg text-[10px] font-bold text-primary transition-colors">
+                          Length Proof <ExternalLink className="h-3 w-3" />
+                        </a>
+                      )}
+                      {order.breadthImage && (
+                        <a href={order.breadthImage} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg text-[10px] font-bold text-primary transition-colors">
+                          Breadth Proof <ExternalLink className="h-3 w-3" />
+                        </a>
+                      )}
+                      {order.heightImage && (
+                        <a href={order.heightImage} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg text-[10px] font-bold text-primary transition-colors">
+                          Height Proof <ExternalLink className="h-3 w-3" />
+                        </a>
+                      )}
+                      {order.weightImage && (
+                        <a href={order.weightImage} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg text-[10px] font-bold text-primary transition-colors">
+                          Weight Proof <ExternalLink className="h-3 w-3" />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
             {/* Seller Info */}
             {order.seller && (
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="glass-card rounded-2xl p-6">

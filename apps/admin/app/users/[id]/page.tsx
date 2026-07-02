@@ -173,7 +173,7 @@ export default function UserDetailPage() {
                 <InfoRow icon={Building2} label="Company" value={sp.companyName ?? sp.businessName ?? "—"} />
                 <InfoRow icon={FileText} label="GST Number" value={sp.gstNumber ?? "—"} mono />
                 <InfoRow icon={FileText} label="PAN Number" value={sp.panNumber ?? "—"} mono />
-                {sp.email && <InfoRow icon={Mail} label="Business Email" value={sp.email} />}
+                <InfoRow icon={Mail} label="Business Email" value={sp.email || user.email || "—"} />
                 
                 <InfoRow icon={MapPin} label="Address" value={[sp.address, sp.city, sp.state, sp.pincode].filter(Boolean).join(", ") || "—"} className="sm:col-span-2" />
                 {sp.bankAccount && (
@@ -182,6 +182,9 @@ export default function UserDetailPage() {
                     <InfoRow icon={UserCheck} label="Account Holder" value={sp.bankAccount.accountHolder ?? "—"} />
                     <InfoRow icon={FileText} label="IFSC Code" value={sp.bankAccount.ifsc ?? "—"} mono />
                   </>
+                )}
+                {sp.cancelCheck && (
+                  <SecureDocViewer url={typeof sp.cancelCheck === 'object' ? sp.cancelCheck.url : sp.cancelCheck} label="Cancelled Cheque" />
                 )}
                 {(sp?.drugLicenseUrl ?? user.drugLicenseUrl) && (
                   <SecureDocViewer 
@@ -199,16 +202,13 @@ export default function UserDetailPage() {
                     expiry={sp?.drugLicenseExpiry2 ?? user.drugLicenseExpiry2}
                   />
                 )}
-                {sp.cancelCheck && (
-                  <SecureDocViewer url={sp.cancelCheck} label="Cancelled Cheque" />
-                )}
                 {(() => {
                   let docs: any = sp.additionalDocuments;
                   if (typeof docs === 'string') {
                     try { docs = JSON.parse(docs); } catch (e) { docs = [docs]; }
                   }
-                  return Array.isArray(docs) && docs.length > 0 ? docs.map((docUrl: string, idx: number) => (
-                    <SecureDocViewer key={`doc-${idx}`} url={docUrl} label={`Further Document ${idx + 1}`} />
+                  return Array.isArray(docs) && docs.length > 0 ? docs.map((docUrl: string | any, idx: number) => (
+                    <SecureDocViewer key={`doc-${idx}`} url={typeof docUrl === 'object' ? docUrl.url : docUrl} label={`Further Document ${idx + 1}`} />
                   )) : null;
                 })()}
               </div>

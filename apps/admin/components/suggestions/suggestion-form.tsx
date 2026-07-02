@@ -33,6 +33,8 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
     packSize: "1",
     minimumOrderQuantity: "1",
     manufacturer: "",
+    sku: "",
+    specifications: "",
     categoryId: "",
     subCategoryId: "",
     status: "active"
@@ -57,6 +59,8 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
         packSize: initialData.packSize || "1",
         minimumOrderQuantity: initialData.minimumOrderQuantity ? String(initialData.minimumOrderQuantity) : "1",
         manufacturer: initialData.manufacturer || "",
+        sku: initialData.sku || "",
+        specifications: initialData.specifications || "",
         categoryId: initialData.categoryId || "",
         subCategoryId: initialData.subCategoryId || "",
         status: initialData.isActive === false ? "draft" : "active"
@@ -166,6 +170,8 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
         packSize: form.packSize,
         minimumOrderQuantity: form.minimumOrderQuantity !== "" ? Number(form.minimumOrderQuantity) : null,
         manufacturer: form.manufacturer,
+        sku: form.sku,
+        specifications: form.specifications,
         categoryId: form.categoryId,
         subCategoryId: form.subCategoryId || undefined,
         isActive: form.status === "active",
@@ -313,12 +319,24 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
               </select>
             </div>
 
-            <div className="pt-2">
+            <div className="pt-2 space-y-4">
               <Input
                 label="Manufacturer / Vendor"
                 placeholder="e.g. Cipla"
                 value={form.manufacturer}
                 onChange={e => setForm(f => ({ ...f, manufacturer: e.target.value }))}
+              />
+              <Input
+                label="Product SKU"
+                placeholder="e.g. SKU-12345"
+                value={form.sku}
+                onChange={e => setForm(f => ({ ...f, sku: e.target.value }))}
+              />
+              <Input
+                label="Product Specification"
+                placeholder="e.g. 500mg, Cotton, etc."
+                value={form.specifications}
+                onChange={e => setForm(f => ({ ...f, specifications: e.target.value }))}
               />
             </div>
 

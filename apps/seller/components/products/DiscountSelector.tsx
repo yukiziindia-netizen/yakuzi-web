@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React, { useMemo } from "react";
 import { Select, Input, Badge } from "@/components/ui";
 import type { DiscountFormDetails, DiscountType } from "@yukizi/utils";
@@ -20,12 +20,8 @@ interface Props {
 }
 
 const DISCOUNT_OPTIONS: { label: string; value: string }[] = [
-  { label: "PTR Discount Only", value: "ptr_discount" },
-  { label: "PTR Discount + Same Product Bonus", value: "ptr_discount_and_same_product_bonus" },
-  { label: "PTR Discount + Different Product Bonus", value: "ptr_discount_and_different_product_bonus" },
-  { label: "Same Product Bonus (Buy X Get Y)", value: "same_product_bonus" },
-  { label: "Different Product Bonus", value: "different_product_bonus" },
-  { label: "Special / Fixed Price", value: "special_price" },
+  { label: "None", value: "none" },
+  { label: "Discount", value: "ptr_discount" },
 ];
 
 export function DiscountSelector({ value, onChange, mrp, gstPercent, error }: Props) {
@@ -75,7 +71,7 @@ export function DiscountSelector({ value, onChange, mrp, gstPercent, error }: Pr
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {showPercent && (
           <Input
-            label="PTR Discount %"
+            label="Discount %"
             type="number"
             min={0}
             max={100}

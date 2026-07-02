@@ -27,10 +27,13 @@ export default function AddProductPage() {
     mrp: "",
     price: "",
     gstPercent: "",
+    isTaxIncluded: false,
     unit: "1",
     packSize: "1",
     minimumOrderQuantity: "1",
     manufacturer: "",
+    sku: "",
+    specifications: "",
     chemicalComposition: "",
     categoryId: "",
     subCategoryId: "",
@@ -62,10 +65,13 @@ export default function AddProductPage() {
         mrp: form.mrp ? Number(form.mrp) : undefined,
         price: form.price ? Number(form.price) : undefined,
         gstPercent: form.gstPercent ? Number(form.gstPercent) : undefined,
+        isTaxIncluded: form.isTaxIncluded,
         unit: form.unit,
         packSize: form.packSize,
         minimumOrderQuantity: form.minimumOrderQuantity ? Number(form.minimumOrderQuantity) : undefined,
         manufacturer: form.manufacturer,
+        sku: form.sku,
+        specifications: form.specifications,
         chemicalComposition: form.chemicalComposition,
         categoryId: form.categoryId,
         subCategoryId: form.subCategoryId || undefined,
@@ -168,6 +174,18 @@ export default function AddProductPage() {
                   value={form.gstPercent}
                   onChange={e => setForm(f => ({ ...f, gstPercent: e.target.value }))}
                 />
+                <div className="flex items-center gap-2 mt-8">
+                  <input
+                    type="checkbox"
+                    id="isTaxIncluded"
+                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                    checked={form.isTaxIncluded}
+                    onChange={e => setForm(f => ({ ...f, isTaxIncluded: e.target.checked }))}
+                  />
+                  <label htmlFor="isTaxIncluded" className="text-sm font-medium text-foreground cursor-pointer">
+                    Price includes tax
+                  </label>
+                </div>
               </div>
             </motion.div>
 
@@ -282,12 +300,24 @@ export default function AddProductPage() {
                 </select>
               </div>
 
-              <div className="pt-2">
+              <div className="pt-2 space-y-4">
                 <Input
                   label="Manufacturer / Vendor"
                   placeholder="e.g. Cipla"
                   value={form.manufacturer}
                   onChange={e => setForm(f => ({ ...f, manufacturer: e.target.value }))}
+                />
+                <Input
+                  label="Product SKU"
+                  placeholder="e.g. SKU-12345"
+                  value={form.sku}
+                  onChange={e => setForm(f => ({ ...f, sku: e.target.value }))}
+                />
+                <Input
+                  label="Product Specification"
+                  placeholder="e.g. 500mg, Cotton, etc."
+                  value={form.specifications}
+                  onChange={e => setForm(f => ({ ...f, specifications: e.target.value }))}
                 />
               </div>
 

@@ -1,4 +1,4 @@
-﻿// ─── Yukizi Centralized Pricing Engine ──────────────
+// ─── Yukizi Centralized Pricing Engine ──────────────
 // All pricing calculations are done here. NO pricing logic in frontend components.
 // Matches legacy PHP/Node system with bug fixes noted inline.
 
@@ -42,6 +42,7 @@ function round2(n: number): number {
 // 6 types matching legacy system exactly
 
 export type PricingDiscountType =
+  | 'none'                                             // Type 0: No discount
   | 'ptr_discount'                                     // Type 1: PTR discount only
   | 'same_product_bonus'                               // Type 2: Same product bonus (buy X get Y same)
   | 'ptr_discount_and_same_product_bonus'              // Type 3: PTR discount + same product bonus
@@ -121,6 +122,13 @@ export function calculatePricing(
   let bonusProductName = discountInput.bonusProductName ?? '';
 
   switch (type) {
+    case 'none': {
+      discountPercent = 0;
+      finalPtr = ptr;
+      get = 0;
+      break;
+    }
+
     case 'ptr_discount': {
       // Type 1: PTR discount only — no bonus
       discountPercent = discountInput.discountPercent ?? 0;

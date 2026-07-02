@@ -121,7 +121,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
             const price = rawPrice != null ? rawPrice : 0;
             const originalPrice = rawOriginalPrice != null ? rawOriginalPrice : 0;
             const isNotAvailable = item.product?.sellerCount === 0 || item.product?.sellerOffers?.length === 0 || rawPrice == null;
-            const discount = isCart ? (item.discount || "25% off") : item.discount;
+            const discount = item.discount;
             const rating = isCart ? (item.rating || 4.5) : item.rating;
             const quantity = isCart ? (item.quantity ?? 1) : item.quantity;
             const isYukiziChoice = isCart ? (item.isYukiziChoice ?? (idx % 3 === 0)) : item.isYukiziChoice;

@@ -428,7 +428,7 @@ function ComparisonOffersList({
                 ₹{listing.price?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
               </span>
               <span className="text-[8px] sm:text-[11px] text-gray-500 font-medium mt-1 leading-none whitespace-nowrap overflow-hidden text-ellipsis max-w-full">
-                {listing.moq > 1 ? `${listing.moq * 10}% off on purchase of ${listing.moq}` : '25%off on purchase of 3'}
+                  {listing.moq > 1 ? `Min. purchase of ${listing.moq}` : ''}
               </span>
             </div>
 

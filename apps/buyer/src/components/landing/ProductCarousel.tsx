@@ -23,26 +23,27 @@ export const renderBuyerOfferBadge = (p: any) => {
   if (!p?.discountType) {
     const mrp = p?.mrp || p?.originalPrice;
     const price = p?.price;
-    const defaultText = (mrp != null && price != null && mrp > price)
-      ? `${Math.round(((mrp - price) / mrp) * 100)}% off`
-      : '25% off';
-    return <span className="bg-[#864ac5] text-white px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold tracking-wide shadow-sm whitespace-nowrap">{defaultText}</span>;
+    if (mrp != null && price != null && mrp > price) {
+      const percent = Math.round(((mrp - price) / mrp) * 100);
+      return <span className="bg-[#864ac5] text-white px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold tracking-wide shadow-sm whitespace-nowrap">{percent}% off</span>;
+    }
+    return null;
   }
   const meta = p.discountMeta || {};
   if (p.discountType === "PTR_DISCOUNT") {
-    return <span className="bg-[#864ac5] text-white px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold tracking-wide shadow-sm whitespace-nowrap">{meta.discountPercent || 0}% PTR Discount</span>;
+    return <span className="bg-[#864ac5] text-white px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold tracking-wide shadow-sm whitespace-nowrap">{meta.discountPercent || 0}% off</span>;
   }
   if (p.discountType === "SAME_PRODUCT_BONUS") {
     return <span className="bg-[#864ac5] text-white px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold tracking-wide shadow-sm whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} Free</span>;
   }
   if (p.discountType === "PTR_PLUS_SAME_PRODUCT_BONUS") {
-    return <div className="flex flex-col gap-0.5"><span className="bg-[#864ac5] text-white px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold tracking-wide shadow-sm whitespace-nowrap">{meta.discountPercent || 0}% PTR</span><span className="bg-[#864ac5] text-white px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold tracking-wide shadow-sm whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} Free</span></div>;
+    return <div className="flex flex-col gap-0.5"><span className="bg-[#864ac5] text-white px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold tracking-wide shadow-sm whitespace-nowrap">{meta.discountPercent || 0}% off</span><span className="bg-[#864ac5] text-white px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold tracking-wide shadow-sm whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} Free</span></div>;
   }
   if (p.discountType === "DIFFERENT_PRODUCT_BONUS") {
     return <span className="bg-[#864ac5] text-white px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold tracking-wide shadow-sm whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} {meta.bonusProductName}</span>;
   }
   if (p.discountType === "PTR_PLUS_DIFFERENT_PRODUCT_BONUS") {
-    return <div className="flex flex-col gap-0.5"><span className="bg-[#864ac5] text-white px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold tracking-wide shadow-sm whitespace-nowrap">{meta.discountPercent || 0}% PTR</span><span className="bg-[#864ac5] text-white px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold tracking-wide shadow-sm whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} {meta.bonusProductName}</span></div>;
+    return <div className="flex flex-col gap-0.5"><span className="bg-[#864ac5] text-white px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold tracking-wide shadow-sm whitespace-nowrap">{meta.discountPercent || 0}% off</span><span className="bg-[#864ac5] text-white px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold tracking-wide shadow-sm whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} {meta.bonusProductName}</span></div>;
   }
   if (p.discountType === "SPECIAL_PRICE") {
     return <span className="bg-emerald-600 text-white px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold tracking-wide shadow-sm whitespace-nowrap">Special Price: ₹{meta.specialPrice || 0}</span>;

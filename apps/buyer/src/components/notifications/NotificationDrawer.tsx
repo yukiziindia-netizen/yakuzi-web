@@ -16,7 +16,7 @@ const MOCK_NOTIFICATIONS = [
     title: 'Dragon Ball / Goku action figurine - original edition...',
     price: 3345.53,
     originalPrice: 5000.00,
-    discount: '25% off',
+    
     rating: 4.5,
   },
   { id: 5, type: 'promo', text: '20% off on Dragon Ball Z products.\nUse promo code 6256' },
@@ -29,7 +29,7 @@ const MOCK_NOTIFY_ME = [
     title: 'Dragon Ball / Goku action figurine - original edition...',
     price: 3345.53,
     originalPrice: 5000.00,
-    discount: '25% off',
+    
     rating: 4.5,
     timer: '1:20:35',
     isYukiziChoice: true,
@@ -40,7 +40,7 @@ const MOCK_NOTIFY_ME = [
     title: 'Dragon Ball / Goku action figurine - original edition...',
     price: 3345.53,
     originalPrice: 5000.00,
-    discount: '25% off',
+    
     rating: 4.5,
     timer: '7:25:52',
     isYukiziChoice: false,
@@ -51,7 +51,7 @@ const MOCK_NOTIFY_ME = [
     title: 'Dragon Ball / Goku action figurine - original edition...',
     price: 3345.53,
     originalPrice: 5000.00,
-    discount: '25% off',
+    
     rating: 4.5,
     timer: '7 Days',
     isYukiziChoice: false,

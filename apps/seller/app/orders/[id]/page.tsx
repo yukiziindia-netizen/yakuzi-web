@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -10,7 +10,8 @@ import {
 import { Button, Badge, OrderStatusBadge } from "@/components/ui";
 import { formatCurrency, formatDate } from "@yukizi/utils";
 import {
-  useSellerOrder, useAcceptSellerOrder, useRejectSellerOrder, useUploadOrderInvoice, useUpdateSellerOrderStatus,
+  useSellerOrder, useAcceptSellerOrder, useRejectSellerOrder, useUpdateSellerOrderStatus,
+  useUploadOrderDocument, useUpdateShippingDetails
 } from "@/hooks/useSeller";
 import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
@@ -23,10 +24,18 @@ export default function OrderDetailPage() {
   const { data: order, isLoading } = useSellerOrder(id);
   const acceptOrder = useAcceptSellerOrder();
   const rejectOrder = useRejectSellerOrder();
-  const uploadInvoice = useUploadOrderInvoice();
+  const uploadDoc = useUploadOrderDocument();
+  const updateShipping = useUpdateShippingDetails();
   const updateStatus = useUpdateSellerOrderStatus();
   const [rejectReason, setRejectReason] = useState("");
   const [showRejectModal, setShowRejectModal] = useState(false);
+
+  const [shippingData, setShippingData] = useState({
+    length: "", breadth: "", height: "", weight: "",
+  });
+  const [shippingFiles, setShippingFiles] = useState<Record<string, File | null>>({
+    lengthImg: null, breadthImg: null, heightImg: null, weightImg: null, invoice: null, manifest: null
+  });
 
   if (isLoading) {
     return <div className="min-h-[60vh] flex items-center justify-center text-muted-foreground">Loading order details...</div>;
@@ -60,15 +69,46 @@ export default function OrderDetailPage() {
     });
   };
 
-  const handleInvoiceUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const formData = new FormData();
-    formData.append("invoice", file);
-    uploadInvoice.mutate({ orderId: id, formData }, {
-      onSuccess: () => toast.success("Invoice uploaded — stock will be deducted"),
-      onError: () => toast.error("Failed to upload invoice"),
-    });
+  const handleShippingSubmit = async () => {
+    if (!shippingData.length || !shippingData.breadth || !shippingData.height || !shippingData.weight) {
+      toast.error("Please enter all dimensions"); return;
+    }
+    if (!shippingFiles.lengthImg || !shippingFiles.breadthImg || !shippingFiles.heightImg || !shippingFiles.weightImg) {
+      toast.error("All 4 dimension images are mandatory"); return;
+    }
+
+    const toastId = toast.loading("Uploading documents...");
+    try {
+      const urls: Record<string, string> = {};
+      for (const [key, file] of Object.entries(shippingFiles)) {
+        if (file) {
+          const fd = new FormData();
+          fd.append("file", file);
+          const url = await uploadDoc.mutateAsync(fd);
+          urls[key] = url;
+        }
+      }
+
+      toast.loading("Saving shipping details...", { id: toastId });
+      await updateShipping.mutateAsync({
+        orderId: id,
+        payload: {
+          packageLength: parseFloat(shippingData.length),
+          packageBreadth: parseFloat(shippingData.breadth),
+          packageHeight: parseFloat(shippingData.height),
+          packageWeight: parseFloat(shippingData.weight),
+          lengthImage: urls.lengthImg,
+          breadthImage: urls.breadthImg,
+          heightImage: urls.heightImg,
+          weightImage: urls.weightImg,
+          invoiceUrl: urls.invoice,
+          manifestUrl: urls.manifest,
+        }
+      });
+      toast.success("Shipping details saved successfully", { id: toastId });
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to save shipping details", { id: toastId });
+    }
   };
 
   const handleMarkAsShipped = () => {
@@ -92,15 +132,7 @@ export default function OrderDetailPage() {
           <p className="text-sm text-muted-foreground mt-0.5">Placed {formatDate(mainOrder.createdAt)}</p>
         </div>
         <div className="flex gap-2">
-          {/* Order Action Buttons hidden as requested */}
-          {(mainOrder.orderStatus === "ACCEPTED" || mainOrder.status === "ACCEPTED" || mainOrder.status === "confirmed" || mainOrder.status === "AWAITING_INVOICE") && (
-            <label>
-              <Button size="sm" variant="outline" leftIcon={<Upload className="h-3.5 w-3.5" />} loading={uploadInvoice.isPending} onClick={() => document.getElementById("invoice-upload")?.click()}>
-                Upload Invoice
-              </Button>
-              <input id="invoice-upload" type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" onChange={handleInvoiceUpload} />
-            </label>
-          )}
+          {/* Action buttons removed/moved */}
         </div>
       </motion.div>
 
@@ -124,7 +156,11 @@ export default function OrderDetailPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">{item.product?.name || item.name || item.productName}</p>
-                  <p className="text-xs text-muted-foreground">Qty: {item.quantity} × {formatCurrency(item.unitPrice || item.price || 0)}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {item.sellerOffer?.variant?.name && <span>Variant: {item.sellerOffer.variant.name} </span>}
+                    {item.sellerOffer?.variant?.sku && <span>(SKU: {item.sellerOffer.variant.sku})</span>}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Qty: {item.quantity} × {formatCurrency(item.unitPrice || item.price || 0)}</p>
                   {item.discount && <p className="text-xs text-green-600">Discount: {item.discount}</p>}
                 </div>
                 <p className="text-sm font-semibold text-foreground">{formatCurrency((item.quantity || 1) * (item.unitPrice || item.price || 0))}</p>
@@ -141,6 +177,84 @@ export default function OrderDetailPage() {
             {mainOrder.shippingAmount != null && <div className="flex justify-between text-sm"><span className="text-muted-foreground">Shipping</span><span className="text-foreground">{formatCurrency(mainOrder.shippingAmount)}</span></div>}
             <div className="flex justify-between text-base font-semibold pt-2 border-t border-border/30"><span>Total</span><span>{formatCurrency(mainOrder.totalAmount || mainOrder.finalAmount ?? mainOrder.total ?? 0)}</span></div>
           </div>
+        </motion.div>
+
+        {/* Shipping & Fulfillment */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="lg:col-span-2 glass-card rounded-2xl overflow-hidden p-5 space-y-4">
+          <div className="border-b border-border/50 pb-4">
+            <h2 className="font-semibold text-foreground flex items-center gap-2"><Package className="h-4 w-4 text-primary" />Shipping & Fulfillment</h2>
+            <p className="text-sm text-muted-foreground mt-1">Enter dimensions and upload mandatory images before marking the order as shipped.</p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Length (cm)</label>
+              <input type="number" step="0.01" className="w-full bg-background border border-input rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none" value={shippingData.length} onChange={(e) => setShippingData({...shippingData, length: e.target.value})} disabled={!!mainOrder.packageLength} placeholder={mainOrder.packageLength?.toString() || "0"} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Breadth (cm)</label>
+              <input type="number" step="0.01" className="w-full bg-background border border-input rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none" value={shippingData.breadth} onChange={(e) => setShippingData({...shippingData, breadth: e.target.value})} disabled={!!mainOrder.packageBreadth} placeholder={mainOrder.packageBreadth?.toString() || "0"} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Height (cm)</label>
+              <input type="number" step="0.01" className="w-full bg-background border border-input rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none" value={shippingData.height} onChange={(e) => setShippingData({...shippingData, height: e.target.value})} disabled={!!mainOrder.packageHeight} placeholder={mainOrder.packageHeight?.toString() || "0"} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Weight (kg)</label>
+              <input type="number" step="0.01" className="w-full bg-background border border-input rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none" value={shippingData.weight} onChange={(e) => setShippingData({...shippingData, weight: e.target.value})} disabled={!!mainOrder.packageWeight} placeholder={mainOrder.packageWeight?.toString() || "0"} />
+            </div>
+          </div>
+
+          <div className="space-y-3 pt-2">
+            <h3 className="text-sm font-medium text-foreground">Dimension Proofs (Mandatory)</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { key: 'lengthImg', label: 'Length Proof' },
+                { key: 'breadthImg', label: 'Breadth Proof' },
+                { key: 'heightImg', label: 'Height Proof' },
+                { key: 'weightImg', label: 'Weight Proof' }
+              ].map(f => (
+                <div key={f.key} className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground block">{f.label}</label>
+                  {(mainOrder as any)[f.key.replace('Img', 'Image')] ? (
+                     <a href={(mainOrder as any)[f.key.replace('Img', 'Image')]} target="_blank" className="text-xs text-primary underline">View Uploaded</a>
+                  ) : (
+                    <input type="file" accept="image/*" onChange={(e) => setShippingFiles(p => ({...p, [f.key]: e.target.files?.[0] || null}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-3 pt-2">
+            <h3 className="text-sm font-medium text-foreground">Shipping Documents</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground block">Invoice</label>
+                {mainOrder.invoiceUrl ? (
+                   <a href={mainOrder.invoiceUrl} target="_blank" className="text-xs text-primary underline">View Invoice</a>
+                ) : (
+                  <input type="file" accept=".pdf,image/*" onChange={(e) => setShippingFiles(p => ({...p, invoice: e.target.files?.[0] || null}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground block">Manifest</label>
+                {mainOrder.manifestUrl ? (
+                   <a href={mainOrder.manifestUrl} target="_blank" className="text-xs text-primary underline">View Manifest</a>
+                ) : (
+                  <input type="file" accept=".pdf,image/*" onChange={(e) => setShippingFiles(p => ({...p, manifest: e.target.files?.[0] || null}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
+                )}
+              </div>
+            </div>
+          </div>
+
+          {(!mainOrder.packageLength || !mainOrder.lengthImage || !mainOrder.invoiceUrl) && (
+            <div className="pt-4 flex justify-end">
+              <Button size="sm" onClick={handleShippingSubmit} loading={updateShipping.isPending}>
+                Save Shipping Details
+              </Button>
+            </div>
+          )}
         </motion.div>
 
         {/* Sidebar Info */}

@@ -29,7 +29,7 @@ export default function EditProductPage() {
             </div>
           ) : (
             <ProductForm 
-              productId={product.id} 
+              productId={productId} 
               defaultValues={{
                 product_name: product.name,
                 product_price: product.mrp ?? product.price,
@@ -40,9 +40,10 @@ export default function EditProductPage() {
                 stock: product.stock || 0,
                 min_order_qty: product.minimumOrderQuantity || 1,
                 max_order_qty: product.maximumOrderQuantity || 100,
-                image_list: product.images || [],
+                delivery_text: (product as any).deliveryText ? String(parseInt(String((product as any).deliveryText).match(/\d+/)?.[0] || "0") || "") : "",
+                image_list: Array.isArray(product.images) ? product.images.map((img: any) => typeof img === 'string' ? img : img.url).filter(Boolean) : [],
                 custom_extra_fields: product.extraFields || [],
-                discount_form_details: product.discountFormDetails || (product.discountType ? {
+                discount_form_details: product.discountFormDetails || (product.discountType && (product.discount || product.discountMeta?.discountPercent || product.discountMeta?.specialPrice) ? {
                   type: {
                     "PTR_DISCOUNT": "ptr_discount",
                     "SAME_PRODUCT_BONUS": "same_product_bonus",
@@ -50,10 +51,15 @@ export default function EditProductPage() {
                     "DIFFERENT_PRODUCT_BONUS": "different_product_bonus",
                     "PTR_PLUS_DIFFERENT_PRODUCT_BONUS": "ptr_discount_and_different_product_bonus",
                     "SPECIAL_PRICE": "special_price",
-                  }[product.discountType] || "ptr_discount",
-                  ...product.discountMeta
-                } : { type: "ptr_discount", discountPercent: product.discount }) as any,
+                  }[product.discountType] || "none",
+                  ...product.discountMeta,
+                  discountPercent: product.discount || product.discountMeta?.discountPercent
+                } : { type: "none" }) as any,
               }} 
+              initialOptions={product.options || []}
+              initialVariants={product.variants || []}
+              initialCategoryName={typeof (product as any).category === 'object' ? (product as any).category?.name || (product as any).category?.id : (product as any).category}
+              initialSubcategoryName={typeof (product as any).subCategory === 'object' ? (product as any).subCategory?.name || (product as any).subCategory?.id : (product as any).subCategory}
             />
           )}
         </div>

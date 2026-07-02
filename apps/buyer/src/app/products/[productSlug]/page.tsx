@@ -802,7 +802,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
         }}
       />
 
-      <div className="mx-auto max-w-[1400px] px-4 pt-4 sm:px-6 sm:pt-6 lg:px-8 xl:px-12 2xl:max-w-[1600px]">
+      <div className="mx-auto w-full max-w-[1400px] lg:max-w-[1600px] xl:max-w-[1800px] 2xl:max-w-[2000px] px-4 pt-4 sm:px-6 sm:pt-6 lg:px-6 xl:px-8">
         
         {/* MOBILE VIEW LAYOUT */}
         <div className="block lg:hidden flex flex-col gap-5 w-full">

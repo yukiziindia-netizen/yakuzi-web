@@ -210,14 +210,14 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                           <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3">
                             <button
                               onClick={() => handleAddToCart(item)}
-                              className="flex items-center gap-1 bg-[#f7941d] hover:bg-orange-600 text-white p-2 sm:px-6 sm:py-2.5 rounded-[10px] text-[13px] sm:text-[14px] font-bold transition-all whitespace-nowrap shadow-sm"
+                              className="flex items-center gap-1 bg-[#f7941d] hover:bg-orange-600 text-white p-1.5 px-3 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-xs font-bold transition-all whitespace-nowrap shadow-sm"
                             >
                               <span className="hidden sm:inline">Move to Cart</span>
-                              <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" strokeWidth={3} />
+                              <Plus className="w-3.5 h-3.5 sm:w-3.5 sm:h-3.5 text-white" strokeWidth={3} />
                             </button>
 
                             {/* Right actions: Refresh + Quantity Selector */}
-                            <div className="flex items-center gap-1 sm:gap-2">
+                            <div className="flex items-center gap-1 sm:gap-1.5">
                               {/* Reset count button */}
                               <button 
                                 onClick={(e) => {
@@ -231,28 +231,28 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                                     });
                                   }
                                 }}
-                                className="text-[#48286b] hover:text-[#361e51] transition-colors p-1 sm:p-2"
+                                className="text-[#48286b] hover:text-[#361e51] transition-colors p-1"
                                 title="Reset quantity"
                                 disabled={removeCartItem.isPending}
                               >
-                                <RefreshCw className={`w-4 h-4 sm:w-[22px] sm:h-[22px] ${removeCartItem.isPending ? 'animate-spin' : ''}`} />
+                                <RefreshCw className={`w-4 h-4 sm:w-4.5 sm:h-4.5 ${removeCartItem.isPending ? 'animate-spin' : ''}`} />
                               </button>
 
                               {/* Purple Quantity Selector Pill */}
-                              <div className="flex items-center bg-[#48286b] rounded-lg text-white shadow-sm h-8 sm:h-10 px-2 sm:px-3.5 gap-1.5 sm:gap-3 select-none">
+                              <div className="flex items-center bg-[#48286b] rounded-lg text-white shadow-sm h-7 sm:h-8 px-2 sm:px-2.5 gap-1.5 sm:gap-2 select-none">
                                 <button 
                                   onClick={handleDecrement}
-                                  className="px-1.5 py-0.5 sm:px-2 sm:py-1 text-white hover:bg-white/10 rounded font-bold text-xs sm:text-base"
+                                  className="px-1.5 py-0.5 sm:px-2 sm:py-0.5 text-white hover:bg-white/10 rounded font-bold text-xs sm:text-sm"
                                   disabled={cartQty === 0}
                                 >
                                   -
                                 </button>
-                                <span className="text-xs sm:text-[14px] font-black px-0.5 sm:px-1 tracking-tighter min-w-[14px] sm:min-w-[18px] text-center">
+                                <span className="text-xs sm:text-xs font-black px-0.5 sm:px-1 tracking-tighter min-w-[14px] sm:min-w-[16px] text-center">
                                   {cartQty.toString().padStart(2, '0')}
                                 </span>
                                 <button 
                                   onClick={handleIncrement}
-                                  className="px-1.5 py-0.5 sm:px-2 sm:py-1 text-white hover:bg-white/10 rounded font-bold text-xs sm:text-base"
+                                  className="px-1.5 py-0.5 sm:px-2 sm:py-0.5 text-white hover:bg-white/10 rounded font-bold text-xs sm:text-sm"
                                 >
                                   +
                                 </button>

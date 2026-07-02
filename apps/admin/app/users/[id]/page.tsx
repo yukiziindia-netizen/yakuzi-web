@@ -159,7 +159,7 @@ export default function UserDetailPage() {
             <h2 className="font-semibold text-foreground mb-4">Contact Information</h2>
             <div className="space-y-4">
               <InfoRow icon={Phone} label="Phone" value={user.phone ?? "—"} />
-              <InfoRow icon={Mail} label="Email" value={user.email ?? "—"} />
+              <InfoRow icon={Mail} label="Email" value={user.email || sp?.email || bp?.email || "—"} />
               <InfoRow icon={Calendar} label="Joined" value={user.createdAt ? new Date(user.createdAt).toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" }) : "—"} />
               {user.lastLoginAt && <InfoRow icon={Calendar} label="Last Login" value={new Date(user.lastLoginAt).toLocaleDateString("en-IN")} />}
             </div>
@@ -175,12 +175,6 @@ export default function UserDetailPage() {
                 <InfoRow icon={FileText} label="PAN Number" value={sp.panNumber ?? "—"} mono />
                 {sp.email && <InfoRow icon={Mail} label="Business Email" value={sp.email} />}
                 
-                {sp.drugLicenseUrl && (
-                  <SecureDocViewer url={sp.drugLicenseUrl} label="License 1 (20B)" number={sp.drugLicenseNumber} expiry={sp.drugLicenseExpiry} />
-                )}
-                {sp.drugLicenseUrl2 && (
-                  <SecureDocViewer url={sp.drugLicenseUrl2} label="License 2 (21B)" number={sp.drugLicenseNumber2} expiry={sp.drugLicenseExpiry2} />
-                )}
                 <InfoRow icon={MapPin} label="Address" value={[sp.address, sp.city, sp.state, sp.pincode].filter(Boolean).join(", ") || "—"} className="sm:col-span-2" />
                 {sp.bankAccount && (
                   <>
@@ -189,9 +183,34 @@ export default function UserDetailPage() {
                     <InfoRow icon={FileText} label="IFSC Code" value={sp.bankAccount.ifsc ?? "—"} mono />
                   </>
                 )}
+                {(sp?.drugLicenseUrl ?? user.drugLicenseUrl) && (
+                  <SecureDocViewer 
+                    url={sp?.drugLicenseUrl ?? user.drugLicenseUrl ?? ''} 
+                    label="License 1 (20B)" 
+                    number={sp?.drugLicenseNumber ?? user.drugLicenseNumber} 
+                    expiry={sp?.drugLicenseExpiry ?? user.drugLicenseExpiry}
+                  />
+                )}
+                {(sp?.drugLicenseUrl2 ?? user.drugLicenseUrl2) && (
+                  <SecureDocViewer 
+                    url={sp?.drugLicenseUrl2 ?? user.drugLicenseUrl2 ?? ''} 
+                    label="License 2 (21B)" 
+                    number={sp?.drugLicenseNumber2 ?? user.drugLicenseNumber2} 
+                    expiry={sp?.drugLicenseExpiry2 ?? user.drugLicenseExpiry2}
+                  />
+                )}
                 {sp.cancelCheck && (
                   <SecureDocViewer url={sp.cancelCheck} label="Cancelled Cheque" />
                 )}
+                {(() => {
+                  let docs: any = sp.additionalDocuments;
+                  if (typeof docs === 'string') {
+                    try { docs = JSON.parse(docs); } catch (e) { docs = [docs]; }
+                  }
+                  return Array.isArray(docs) && docs.length > 0 ? docs.map((docUrl: string, idx: number) => (
+                    <SecureDocViewer key={`doc-${idx}`} url={docUrl} label={`Further Document ${idx + 1}`} />
+                  )) : null;
+                })()}
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -229,23 +248,6 @@ export default function UserDetailPage() {
           </motion.div>
         </div>
 
-        {/* KYC Documents - Seller */}
-        {isSeller && sp && (
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass-card rounded-2xl p-6">
-            <h2 className="font-semibold text-foreground mb-4">KYC Verification</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <KycCard label="PAN Verification" status={sp.panVerified ? "verified" : "pending"} value={sp.panNumber} />
-              <KycCard label="GST Verification" status={sp.gstVerified ? "verified" : "pending"} value={sp.gstNumber} />
-              <KycCard label="Drug License" status={sp.drugLicenseVerified ? "verified" : "pending"} value={sp.drugLicenseNumber} />
-            </div>
-            {canApprove && (
-              <div className="mt-6 pt-6 border-t border-border flex gap-3">
-                <Button variant="primary" onClick={() => handleAction("approve")} leftIcon={<UserCheck className="h-4 w-4" />}>Approve Seller</Button>
-                <Button variant="danger" onClick={() => handleAction("reject")} leftIcon={<UserX className="h-4 w-4" />}>Reject Seller</Button>
-              </div>
-            )}
-          </motion.div>
-        )}
       </div>
 
       {/* Delete Confirmation Modal */}
@@ -271,14 +273,3 @@ function InfoRow({ icon: Icon, label, value, mono, className }: { icon: React.El
   );
 }
 
-function KycCard({ label, status, value }: { label: string; status: "verified" | "pending"; value?: string }) {
-  return (
-    <div className={cn("p-4 rounded-xl border", status === "verified" ? "border-green-200 bg-green-50/50 dark:bg-green-900/10 dark:border-green-800" : "border-yellow-200 bg-yellow-50/50 dark:bg-yellow-900/10 dark:border-yellow-800")}>
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-medium text-foreground">{label}</span>
-        <Badge variant={status === "verified" ? "success" : "warning"}>{status === "verified" ? "Verified" : "Pending"}</Badge>
-      </div>
-      {value && <p className="text-xs font-mono text-muted-foreground">{value}</p>}
-    </div>
-  );
-}

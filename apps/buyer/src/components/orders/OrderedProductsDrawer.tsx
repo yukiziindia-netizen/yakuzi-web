@@ -132,9 +132,10 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
 
               const isYukiziChoice = false;
               const hasQuantity = item.quantity > 1;
-              const product = item.sellerOffer || {};
-              const imageUrl = formatImageUrl(product.variant?.catalogProduct?.images?.[0]) || 'https://images.unsplash.com/photo-1534996858220-e80315df5fad?q=80&w=200&auto=format&fit=crop';
-              const name = product.name || 'Unknown Product';
+              const product = item.sellerOffer || item.product || {};
+              const name = product.name || product.variant?.catalogProduct?.name || 'Unknown Product';
+              const fallbackImage = `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent((name || 'PR').trim().split(/\\s+/).length === 1 ? (name || 'PR').trim().substring(0,2).toUpperCase() : ((name || 'PR').trim().split(/\\s+/)[0][0] + (name || 'PR').trim().split(/\\s+/)[(name || 'PR').trim().split(/\\s+/).length - 1][0]).toUpperCase())}`;
+              const imageUrl = formatImageUrl(product.variant?.catalogProduct?.images?.[0]) || product?.images?.[0]?.url || product?.images?.[0] || product?.image || fallbackImage;
               const price = item.unitPrice || 0;
               const mrp = product.mrp || price;
               const discount = mrp > price ? Math.round(((mrp - price) / mrp) * 100) : 0;

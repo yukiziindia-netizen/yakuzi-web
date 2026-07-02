@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { 
   Store, Building2, FileText, CheckCircle2, AlertCircle, MapPin, 
-  ArrowRight, ArrowLeft, Loader2, Upload, Shield, Phone, Mail, CreditCard 
+  ArrowRight, ArrowLeft, Loader2, Upload, Shield, Phone, Mail, CreditCard, X
 } from "lucide-react";
 import { Button, Input } from "@/components/ui";
 import { 
@@ -55,6 +55,7 @@ export default function SellerOnboardingPage() {
     bankIfsc: "",
     bankAccountHolder: "",
     cancelCheck: "",
+    additionalDocuments: [] as string[],
     email: "",
   });
 
@@ -62,6 +63,8 @@ export default function SellerOnboardingPage() {
 
   const [uploadingCheck, setUploadingCheck] = useState(false);
   const [uploadedCheckName, setUploadedCheckName] = useState("");
+  const [uploadingAdditional, setUploadingAdditional] = useState(false);
+  const additionalDocRef = useRef<HTMLInputElement>(null);
   const [isFetchingPincode, setIsFetchingPincode] = useState(false);
 
   // Auto-fill City/State from Pincode
@@ -118,6 +121,7 @@ export default function SellerOnboardingPage() {
         bankIfsc: existingProfile.bankAccount?.ifsc || prev.bankIfsc,
         bankAccountHolder: existingProfile.bankAccount?.accountHolder || prev.bankAccountHolder,
         cancelCheck: existingProfile.cancelCheck || prev.cancelCheck,
+        additionalDocuments: existingProfile.additionalDocuments || prev.additionalDocuments,
         email: existingProfile.email || prev.email,
       }));
       // GST and PAN verification removed
@@ -160,11 +164,42 @@ export default function SellerOnboardingPage() {
     });
   };
 
+  const handleAdditionalDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File size must be less than 5MB");
+      return;
+    }
+    
+    const kycFormData = new FormData();
+    kycFormData.append("file", file);
+    
+    setUploadingAdditional(true);
+    uploadKyc.mutate(kycFormData, {
+      onSuccess: (res: any) => {
+        const urlOrKey = res.url || res.key || (typeof res === 'string' ? res : '');
+        setFormData(prev => ({ ...prev, additionalDocuments: [...prev.additionalDocuments, urlOrKey] }));
+        toast.success("Document uploaded");
+        if (additionalDocRef.current) additionalDocRef.current.value = '';
+      },
+      onError: () => toast.error("Upload failed"),
+      onSettled: () => setUploadingAdditional(false),
+    });
+  };
+
+  const removeAdditionalDoc = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      additionalDocuments: prev.additionalDocuments.filter((_, i) => i !== index)
+    }));
+  };
+
   const validate = () => {
     const e: Record<string, string> = {};
     if (!formData.companyName.trim()) e.companyName = "Business name is required";
     
-    if (!formData.gstNumber.trim()) e.gstNumber = "GST number is required";
+    if (!formData.panNumber.trim()) e.panNumber = "PAN number is required";
     
     if (!formData.address.trim()) e.address = "Address is required";
     if (!formData.city.trim()) e.city = "City is required";
@@ -176,7 +211,6 @@ export default function SellerOnboardingPage() {
     if (!formData.bankName.trim()) e.bankName = "Bank name is required";
     if (!formData.bankIfsc.trim()) e.bankIfsc = "IFSC code is required";
     if (!formData.bankAccountHolder.trim()) e.bankAccountHolder = "Account holder name is required";
-    if (!formData.cancelCheck) e.cancelCheck = "Please upload cancelled cheque";
     if (!formData.email.trim()) e.email = "Email is required";
     else if (!/^\S+@\S+\.\S+$/.test(formData.email)) e.email = "Invalid email format";
 
@@ -205,6 +239,7 @@ export default function SellerOnboardingPage() {
         accountHolder: formData.bankAccountHolder.trim(),
       },
       cancelCheck: formData.cancelCheck,
+      additionalDocuments: formData.additionalDocuments,
       email: formData.email.trim().toLowerCase(),
     };
 
@@ -308,8 +343,8 @@ export default function SellerOnboardingPage() {
 
               {/* GST and PAN Numbers */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Input label="GST Number" value={formData.gstNumber} onChange={(e) => updateField("gstNumber", e.target.value.toUpperCase())} placeholder="e.g. 27AABCU9603R1ZM" maxLength={15} required className="uppercase h-14 rounded-2xl" error={errors.gstNumber} />
-                <Input label="PAN Number" value={formData.panNumber} onChange={(e) => updateField("panNumber", e.target.value.toUpperCase())} placeholder="e.g. ABCDE1234F" maxLength={10} className="uppercase h-14 rounded-2xl" error={errors.panNumber} />
+                <Input label="GST Number (Optional)" value={formData.gstNumber} onChange={(e) => updateField("gstNumber", e.target.value.toUpperCase())} placeholder="e.g. 27AABCU9603R1ZM" maxLength={15} className="uppercase h-14 rounded-2xl" error={errors.gstNumber} />
+                <Input label="PAN Number" value={formData.panNumber} onChange={(e) => updateField("panNumber", e.target.value.toUpperCase())} placeholder="e.g. ABCDE1234F" maxLength={10} required className="uppercase h-14 rounded-2xl" error={errors.panNumber} />
               </div>
 
               <Input label="Business Legal Name" value={formData.companyName} onChange={(e) => updateField("companyName", e.target.value)} placeholder="Full registered company name" required className="h-14 rounded-2xl" error={errors.companyName} />
@@ -363,6 +398,37 @@ export default function SellerOnboardingPage() {
                     )}
                   </button>
                   {errors.cancelCheck && <p className="text-[10px] text-red-500 mt-1 font-bold">{errors.cancelCheck}</p>}
+                </div>
+              </div>
+
+              <div className="space-y-4 pt-4 border-t border-slate-50">
+                <div className="flex items-center gap-3 mb-2">
+                   <div className="p-2 bg-indigo-50 rounded-lg"><FileText className="w-5 h-5 text-indigo-600" /></div>
+                   <h2 className="text-xl font-bold text-slate-900">Further Documents</h2>
+                </div>
+                <p className="text-sm text-slate-500 mb-4">Upload any other relevant business documents (optional).</p>
+                
+                <div className="space-y-3">
+                  {formData.additionalDocuments.map((doc, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-3 border border-slate-200 rounded-xl bg-slate-50">
+                      <div className="flex items-center gap-2 overflow-hidden">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
+                        <span className="text-sm font-medium text-slate-700 truncate">Document {idx + 1}</span>
+                      </div>
+                      <button type="button" onClick={() => removeAdditionalDoc(idx)} className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-500 hover:text-red-500 transition-colors">
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                  
+                  <input ref={additionalDocRef} type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={handleAdditionalDocUpload} className="hidden" />
+                  <button type="button" onClick={() => additionalDocRef.current?.click()} disabled={uploadingAdditional} className={`w-full flex items-center justify-center gap-2 p-4 border-2 border-dashed border-slate-200 rounded-xl hover:border-primary/50 hover:bg-slate-50 transition-all text-slate-500 group`}>
+                    {uploadingAdditional ? (
+                      <><Loader2 className="w-5 h-5 animate-spin text-primary" /> <span className="font-bold text-sm">Uploading...</span></>
+                    ) : (
+                      <><Upload className="w-5 h-5 group-hover:text-primary transition-colors" /> <span className="font-bold text-sm group-hover:text-slate-900">Upload Document</span></>
+                    )}
+                  </button>
                 </div>
               </div>
             </div>

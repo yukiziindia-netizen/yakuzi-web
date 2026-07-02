@@ -152,22 +152,19 @@ function SellerDetails({ userId }: { userId: string }) {
           <p className="text-sm font-mono text-foreground">{sp.panNumber || "—"}</p>
         </div>
 
-        {sp.drugLicenseUrl && (
+        {sp.cancelCheck && (
           <SecureDocViewer 
-            url={typeof sp.drugLicenseUrl === 'object' ? sp.drugLicenseUrl.url : sp.drugLicenseUrl} 
-            label="License 1 (20B)" 
-            number={sp.drugLicenseNumber} 
-            expiry={sp.drugLicenseExpiry}
+            url={typeof sp.cancelCheck === 'object' ? sp.cancelCheck.url : sp.cancelCheck} 
+            label="Cancelled Cheque" 
           />
         )}
-        {sp.drugLicenseUrl2 && (
+        {sp.additionalDocuments && sp.additionalDocuments.length > 0 && sp.additionalDocuments.map((docUrl: string | any, idx: number) => (
           <SecureDocViewer 
-            url={typeof sp.drugLicenseUrl2 === 'object' ? sp.drugLicenseUrl2.url : sp.drugLicenseUrl2} 
-            label="License 2 (21B)" 
-            number={sp.drugLicenseNumber2} 
-            expiry={sp.drugLicenseExpiry2}
+            key={`doc-${idx}`} 
+            url={typeof docUrl === 'object' ? docUrl.url : docUrl} 
+            label={`Further Document ${idx + 1}`} 
           />
-        )}
+        ))}
 
         <div className="space-y-1 sm:col-span-2">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground uppercase">
@@ -363,7 +360,7 @@ export default function UsersPage() {
                         <td className="px-5 py-4">
                           <Badge variant={u.role === "BUYER" ? "success" : u.role === "SELLER" ? "info" : "orange"}>{u.role}</Badge>
                         </td>
-                        <td className="px-5 py-4 text-sm text-muted-foreground">{u.email ?? "—"}</td>
+                        <td className="px-5 py-4 text-sm text-muted-foreground">{u.email || u.sellerProfile?.email || u.buyerProfile?.email || "—"}</td>
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-1.5">
                             <Badge variant={u.status === "APPROVED" ? "success" : u.status === "PENDING" ? "warning" : "error"}>{u.status}</Badge>

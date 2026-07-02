@@ -184,9 +184,10 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
               </div>
               <div className="flex gap-4 overflow-x-auto pb-4 hide-scrollbar -mx-2 px-2 snap-x">
                 {items.map((item: any, index: number) => {
-                  const product = item.sellerOffer || {};
-                  const imageUrl = formatImageUrl(product.variant?.catalogProduct?.images?.[0]) || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=200&auto=format&fit=crop';
-                  const name = product.name || 'Unknown Product';
+                  const product = item.sellerOffer || item.product || {};
+                  const name = product.name || product.variant?.catalogProduct?.name || 'Unknown Product';
+                  const fallbackImage = `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent((name || 'PR').trim().split(/\\s+/).length === 1 ? (name || 'PR').trim().substring(0,2).toUpperCase() : ((name || 'PR').trim().split(/\\s+/)[0][0] + (name || 'PR').trim().split(/\\s+/)[(name || 'PR').trim().split(/\\s+/).length - 1][0]).toUpperCase())}`;
+                  const imageUrl = formatImageUrl(product.variant?.catalogProduct?.images?.[0]) || product?.images?.[0]?.url || product?.images?.[0] || product?.image || fallbackImage;
                   
                   return (
                     <div key={item.id || index} onClick={() => setIsOrderedProductsOpen(true)} className="min-w-[150px] border border-gray-100 rounded-xl p-3 relative shadow-sm hover:shadow-md transition-shadow bg-white snap-center cursor-pointer">
@@ -242,7 +243,12 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
                     groups[dateString].orderIds.push(o.id);
                     
                     const oItems = o.items || o.orderItems || [];
-                    const itemImages = oItems.map((item: any) => formatImageUrl(item.sellerOffer?.variant?.catalogProduct?.images?.[0] || item.product?.images?.[0] || item.image)).filter(Boolean);
+                    const itemImages = oItems.map((item: any) => {
+                      const product = item.sellerOffer || item.product || {};
+                      const name = product.name || product.variant?.catalogProduct?.name || 'Unknown Product';
+                      const fallbackImage = `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent((name || 'PR').trim().split(/\\s+/).length === 1 ? (name || 'PR').trim().substring(0,2).toUpperCase() : ((name || 'PR').trim().split(/\\s+/)[0][0] + (name || 'PR').trim().split(/\\s+/)[(name || 'PR').trim().split(/\\s+/).length - 1][0]).toUpperCase())}`;
+                      return formatImageUrl(product.variant?.catalogProduct?.images?.[0]) || product?.images?.[0]?.url || product?.images?.[0] || product?.image || fallbackImage;
+                    }).filter(Boolean);
                     groups[dateString].images.push(...itemImages);
                   });
                   

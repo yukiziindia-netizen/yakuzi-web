@@ -245,59 +245,7 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
             <MediaUploader items={mediaItems} onChange={setMediaItems} />
           </motion.div>
 
-          {/* Pricing */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-card rounded-2xl p-6 border border-border/50 space-y-4">
-            <h3 className="text-base font-semibold text-foreground">Pricing</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="Price (₹)"
-                type="number"
-                placeholder="0.00"
-                value={form.price}
-                onChange={e => setForm(f => ({ ...f, price: e.target.value }))}
-              />
-              <Input
-                label="Compare at price (MRP) (₹)"
-                type="number"
-                placeholder="0.00"
-                value={form.mrp}
-                onChange={e => setForm(f => ({ ...f, mrp: e.target.value }))}
-              />
-              <Input
-                label="Charge tax on this product (%)"
-                type="number"
-                placeholder="e.g. 12"
-                value={form.gstPercent}
-                onChange={e => setForm(f => ({ ...f, gstPercent: e.target.value }))}
-              />
-            </div>
-          </motion.div>
-
-          {/* Inventory / Shipping */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="glass-card rounded-2xl p-6 border border-border/50 space-y-4">
-            <h3 className="text-base font-semibold text-foreground">Inventory</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="Unit (e.g., Tablet, Bottle)"
-                placeholder="Tablet"
-                value={form.unit}
-                onChange={e => setForm(f => ({ ...f, unit: e.target.value }))}
-              />
-              <Input
-                label="Pack Size (e.g., 10x10)"
-                placeholder="10x10"
-                value={form.packSize}
-                onChange={e => setForm(f => ({ ...f, packSize: e.target.value }))}
-              />
-              <Input
-                label="Minimum Order Quantity"
-                type="number"
-                placeholder="1"
-                value={form.minimumOrderQuantity}
-                onChange={e => setForm(f => ({ ...f, minimumOrderQuantity: e.target.value }))}
-              />
-            </div>
-          </motion.div>
+          {/* Pricing and Inventory sections removed from master catalog */}
 
           {/* Variants */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>

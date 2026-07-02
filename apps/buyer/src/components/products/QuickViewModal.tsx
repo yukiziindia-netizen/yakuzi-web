@@ -295,15 +295,15 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                     return (
                       <div
                         key={listing.id}
-                        className="flex w-full flex-row items-center justify-between gap-2 rounded-2xl border border-gray-100/80 bg-gray-50 p-2.5 transition-colors hover:bg-gray-100/70 sm:gap-3 sm:p-3.5"
+                        className="flex w-full flex-row items-center justify-between gap-1.5 sm:gap-2 rounded-2xl border border-gray-100/80 bg-gray-50 p-2.5 transition-colors hover:bg-gray-100/70 sm:p-3.5"
                       >
                         {/* Left: Discount Badge & Price */}
-                        <div className="flex min-w-[120px] items-center gap-2 sm:min-w-[155px] sm:gap-3.5">
-                          <div className="min-w-[50px] flex-shrink-0 select-none rounded-lg bg-[#864ac5] px-1.5 py-1 text-center text-[8px] font-black uppercase leading-none tracking-wider text-white sm:min-w-[66px] sm:px-2 sm:py-1.5 sm:text-[9px]">
+                        <div className="flex min-w-[105px] items-center gap-1.5 sm:min-w-[130px] sm:gap-2">
+                          <div className="min-w-[50px] flex-shrink-0 select-none rounded-lg bg-[#864ac5] px-1.5 py-1 text-center text-[8px] font-black uppercase leading-none tracking-wider text-white sm:min-w-[55px] sm:px-2 sm:py-1.5 sm:text-[9px]">
                             {discountPercent}% off
                           </div>
                           <div className="flex min-w-0 flex-col">
-                            <span className="truncate text-xs font-black leading-none text-gray-800 sm:text-[15px]">
+                            <span className="truncate text-xs font-black leading-none text-gray-800 sm:text-[14px]">
                               ₹
                               {listing.price?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                             </span>
@@ -316,8 +316,8 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                         </div>
 
                         {/* Middle: Star Rating & Delivery badge */}
-                        <div className="flex items-center gap-1.5 sm:gap-4">
-                          <div className="flex flex-shrink-0 items-center gap-0.5 sm:gap-1">
+                        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                          <div className="flex flex-shrink-0 items-center gap-0.5">
                             <Star className="h-3 w-3 fill-[#864ac5] text-[#864ac5] sm:h-3.5 sm:w-3.5" />
                             <span className="text-[10px] font-black leading-none text-gray-800 sm:text-[12px]">
                               {listing.seller?.rating || '4.5'}
@@ -326,7 +326,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
 
                           <DeliveryTruckBadge
                             text={listing.deliveryText || listing.deliveryTime || '3 days'}
-                            className="h-auto w-[54px] flex-shrink-0 text-gray-400 sm:w-[72px]"
+                            className="h-auto w-[50px] flex-shrink-0 text-gray-400 sm:w-[60px]"
                           />
                         </div>
 
@@ -334,18 +334,18 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                         <div className="flex flex-shrink-0 items-center gap-2 sm:gap-3">
                           {inStock ? (
                             itemQty > 0 ? (
-                              <div className="flex h-7 w-20 select-none items-center justify-between overflow-hidden rounded-xl bg-[#48286b] text-[10px] font-black text-white shadow-sm sm:h-8 sm:w-24 sm:text-[11px]">
+                              <div className="flex h-7 w-20 select-none items-center justify-between overflow-hidden rounded-xl bg-[#48286b] text-[10px] font-black text-white shadow-sm sm:h-8">
                                 <button
-                                  className="h-full px-2 text-xs font-extrabold text-white/80 transition-all hover:bg-black/10 hover:text-white active:scale-95 sm:px-3 sm:text-sm"
+                                  className="h-full px-2 sm:px-2.5 text-xs font-extrabold text-white/80 transition-all hover:bg-black/10 hover:text-white active:scale-95"
                                   onClick={() => handleQtyChange(itemQty - 1)}
                                 >
                                   -
                                 </button>
-                                <span className="px-0.5 font-bold sm:px-1">
+                                <span className="px-0.5 font-bold">
                                   {String(itemQty).padStart(2, '0')}
                                 </span>
                                 <button
-                                  className="h-full px-3 text-sm font-extrabold text-white/80 transition-all hover:bg-black/10 hover:text-white active:scale-95"
+                                  className="h-full px-2 sm:px-2.5 text-xs font-extrabold text-white/80 transition-all hover:bg-black/10 hover:text-white active:scale-95"
                                   onClick={() => {
                                     const nextQty = itemQty + 1;
                                     const maxQty =
@@ -368,7 +368,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                                 onClick={() => handleQtyChange(minQty)}
                                 className="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-500 text-white shadow-md transition-all hover:bg-orange-600 focus:outline-none active:scale-95 sm:h-8 sm:w-8"
                               >
-                                <Plus className="sm:w-4.5 sm:h-4.5 h-4 w-4 stroke-[3]" />
+                                <Plus className="h-4 w-4 sm:h-4.5 sm:w-4.5 stroke-[3]" />
                               </button>
                             )
                           ) : (

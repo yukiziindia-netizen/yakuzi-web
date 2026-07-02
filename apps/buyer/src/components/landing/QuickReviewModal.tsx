@@ -287,15 +287,15 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                     return (
                       <div
                         key={listing.id}
-                        className="flex w-full flex-row items-center justify-between gap-2 sm:gap-3 rounded-2xl border border-gray-100/80 bg-gray-50 p-2.5 sm:p-3.5 transition-colors hover:bg-gray-100/70"
+                        className="flex w-full flex-row items-center justify-between gap-1.5 sm:gap-2 rounded-2xl border border-gray-100/80 bg-gray-50 p-2.5 sm:p-3.5 transition-colors hover:bg-gray-100/70"
                       >
                         {/* Left: Discount Badge & Price */}
-                        <div className="flex min-w-[120px] sm:min-w-[155px] items-center gap-2 sm:gap-3.5">
-                          <div className="min-w-[50px] sm:min-w-[66px] flex items-center justify-center flex-shrink-0">
+                        <div className="flex min-w-[105px] sm:min-w-[130px] items-center gap-1.5 sm:gap-2">
+                          <div className="min-w-[50px] sm:min-w-[55px] flex items-center justify-center flex-shrink-0">
                             {renderBuyerOfferBadge(listing)}
                           </div>
                           <div className="flex flex-col min-w-0">
-                            <span className="text-xs sm:text-[15px] font-black leading-none text-gray-800 truncate">
+                            <span className="text-xs sm:text-[14px] font-black leading-none text-gray-800 truncate">
                               ₹{listing.price?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                             </span>
                             <span className="mt-1 sm:mt-1.5 text-[8px] sm:text-[9px] font-bold leading-none text-gray-400 truncate">
@@ -307,8 +307,8 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                         </div>
 
                         {/* Middle: Star Rating & Delivery badge */}
-                        <div className="flex items-center gap-1.5 sm:gap-4">
-                          <div className="flex items-center gap-1 flex-shrink-0">
+                        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                          <div className="flex items-center gap-0.5 flex-shrink-0">
                             <Star className="h-3 w-3 sm:h-3.5 sm:w-3.5 fill-[#854cbc] text-[#854cbc]" />
                             <span className="text-[10px] sm:text-[12px] font-black leading-none text-gray-800">
                               {listing.seller?.rating || '4.5'}
@@ -317,7 +317,7 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
 
                           <DeliveryTruckBadge
                             text={listing.deliveryText || listing.deliveryTime || '3 days'}
-                            className="h-auto w-[54px] sm:w-[72px] text-gray-400 flex-shrink-0"
+                            className="h-auto w-[50px] sm:w-[60px] text-gray-400 flex-shrink-0"
                           />
                         </div>
 
@@ -325,18 +325,18 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                           {inStock ? (
                             itemQty > 0 ? (
-                              <div className="flex h-7 w-20 sm:h-8 sm:w-24 select-none items-center justify-between overflow-hidden rounded-xl bg-[#48286b] text-[10px] sm:text-[11px] font-black text-white shadow-sm">
+                              <div className="flex h-7 w-20 sm:h-8 select-none items-center justify-between overflow-hidden rounded-xl bg-[#48286b] text-[10px] sm:text-[11px] font-black text-white shadow-sm">
                                 <button
-                                  className="h-full px-2 sm:px-3 text-xs sm:text-sm font-extrabold text-white/80 transition-all hover:bg-black/10 hover:text-white active:scale-95"
+                                  className="h-full px-2 sm:px-2.5 text-xs font-extrabold text-white/80 transition-all hover:bg-black/10 hover:text-white active:scale-95"
                                   onClick={() => handleQtyChange(itemQty - 1)}
                                 >
                                   -
                                 </button>
-                                <span className="px-0.5 sm:px-1 font-bold">
+                                <span className="px-0.5 font-bold">
                                   {String(itemQty).padStart(2, '0')}
                                 </span>
                                 <button
-                                  className="h-full px-3 text-sm font-extrabold text-white/80 transition-all hover:bg-black/10 hover:text-white active:scale-95"
+                                  className="h-full px-2 sm:px-2.5 text-xs font-extrabold text-white/80 transition-all hover:bg-black/10 hover:text-white active:scale-95"
                                   onClick={() => {
                                     const nextQty = itemQty + 1;
                                     const maxQty = listing.maximumOrderQuantity || listing.maxOrderQty || config?.max_order_qty || 100;

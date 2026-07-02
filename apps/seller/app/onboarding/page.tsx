@@ -199,7 +199,6 @@ export default function SellerOnboardingPage() {
     const e: Record<string, string> = {};
     if (!formData.companyName.trim()) e.companyName = "Business name is required";
     
-    if (!formData.gstNumber.trim()) e.gstNumber = "GST number is required";
     if (!formData.panNumber.trim()) e.panNumber = "PAN number is required";
     
     if (!formData.address.trim()) e.address = "Address is required";
@@ -344,7 +343,7 @@ export default function SellerOnboardingPage() {
 
               {/* GST and PAN Numbers */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Input label="GST Number" value={formData.gstNumber} onChange={(e) => updateField("gstNumber", e.target.value.toUpperCase())} placeholder="e.g. 27AABCU9603R1ZM" maxLength={15} required className="uppercase h-14 rounded-2xl" error={errors.gstNumber} />
+                <Input label="GST Number (Optional)" value={formData.gstNumber} onChange={(e) => updateField("gstNumber", e.target.value.toUpperCase())} placeholder="e.g. 27AABCU9603R1ZM" maxLength={15} className="uppercase h-14 rounded-2xl" error={errors.gstNumber} />
                 <Input label="PAN Number" value={formData.panNumber} onChange={(e) => updateField("panNumber", e.target.value.toUpperCase())} placeholder="e.g. ABCDE1234F" maxLength={10} required className="uppercase h-14 rounded-2xl" error={errors.panNumber} />
               </div>
 

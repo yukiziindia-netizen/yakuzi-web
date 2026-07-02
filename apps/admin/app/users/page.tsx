@@ -360,7 +360,7 @@ export default function UsersPage() {
                         <td className="px-5 py-4">
                           <Badge variant={u.role === "BUYER" ? "success" : u.role === "SELLER" ? "info" : "orange"}>{u.role}</Badge>
                         </td>
-                        <td className="px-5 py-4 text-sm text-muted-foreground">{u.email ?? "—"}</td>
+                        <td className="px-5 py-4 text-sm text-muted-foreground">{u.email || u.sellerProfile?.email || u.buyerProfile?.email || "—"}</td>
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-1.5">
                             <Badge variant={u.status === "APPROVED" ? "success" : u.status === "PENDING" ? "warning" : "error"}>{u.status}</Badge>

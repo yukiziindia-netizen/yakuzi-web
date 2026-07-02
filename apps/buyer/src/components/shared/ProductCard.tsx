@@ -58,7 +58,7 @@ export default function ProductCard({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const displayPrice = typeof price === 'number' ? `₹${price.toFixed(2)}` : price;
   const displayOriginalPrice = typeof originalPrice === 'number' ? `₹${originalPrice.toFixed(2)}` : (originalPrice || `₹${(Number(price) * 1.2).toFixed(2)}`);
-  const displayDiscount = discount || '15% off';
+  const displayDiscount = discount;
   const showAd = isYukiziChoice || isBestSeller;
 
   const handlePlusClick = (e: React.MouseEvent) => {
@@ -196,8 +196,12 @@ export default function ProductCard({
         </div>
 
         {/* Bottom row: Discount & Delivery Truck */}
-        <div className="flex justify-between items-center w-full">
-          <span className="text-[15px] sm:text-[16px] font-bold text-[#333333]">{displayDiscount}</span>
+        <div className={`flex items-center w-full ${displayDiscount ? 'justify-between' : 'justify-end'}`}>
+          {displayDiscount && (
+            <span className="text-[15px] sm:text-[16px] font-bold text-[#333333]">
+              {displayDiscount.toString().replace(/ptr discount/i, 'off')}
+            </span>
+          )}
           <div className="-mr-2 sm:-mr-2.5">
             <DeliveryTruckBadge text={deliveryTime} className="w-[85px] sm:w-[90px] h-auto text-[#8c8c8c]" />
           </div>

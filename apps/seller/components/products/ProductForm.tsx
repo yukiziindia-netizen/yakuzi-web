@@ -70,6 +70,7 @@ export function ProductForm({
       min_order_qty: 1,
       max_order_qty: 100,
       delivery_text: "",
+      shipping_charges: 0,
       image_list: [],
       custom_extra_fields: [],
       discount_form_details: { type: "none" } as DiscountFormDetails,
@@ -110,6 +111,8 @@ export function ProductForm({
   const watchMinMoq = watch("min_order_qty");
   const watchStock = watch("stock");
   const watchMaxMoq = watch("max_order_qty");
+  const watchDiscount = watch("discount_form_details");
+  const watchShippingCharges = watch("shipping_charges") || 0;
   const lastMrpRef = useRef<number>(0);
 
   // Real-time discount calculation when compare_at_price is added/updated
@@ -179,10 +182,18 @@ export function ProductForm({
     }
   }, [variants, setValue]);
 
-  const handleSuggestionSelect = useCallback(async (suggestion: Suggestion) => {
+    const handleSuggestionSelect = useCallback(async (suggestion: Suggestion) => {
     setSelectedMasterId(suggestion.id);
     setValue("product_name", suggestion.productName, { shouldDirty: true });
     setValue("company_name", suggestion.companyName, { shouldDirty: true });
+    
+    if (suggestion.sku) {
+      setValue("sku", suggestion.sku, { shouldDirty: true });
+    }
+    if (suggestion.specifications) {
+      setValue("specifications", suggestion.specifications, { shouldDirty: true });
+    }
+    
     if (suggestion.mrp !== undefined) {
       setValue("product_price", suggestion.mrp, { shouldDirty: true });
     }
@@ -367,6 +378,8 @@ export function ProductForm({
         name: data.product_name,
         mrp: data.product_price,
         manufacturer: data.company_name,
+        ...(data.sku && { sku: data.sku }),
+        ...(data.specifications && { specifications: data.specifications }),
         categoryId: data.categories[0],
         ...(data.sub_categories?.length && { subCategoryId: data.sub_categories[0] }),
         stock: data.stock,
@@ -375,6 +388,7 @@ export function ProductForm({
         maximumOrderQuantity: data.max_order_qty,
         gstPercent: data.gst_percent || 0,
         isTaxIncluded: data.is_tax_included || false,
+        shippingCharges: data.shipping_charges || 0,
         ...(data.delivery_text && { deliveryText: `${data.delivery_text} ${Number(data.delivery_text) === 1 ? 'day' : 'days'}` }),
         ...(realImages.length > 0 && { images: realImages }),
         ...(Object.keys(mergedExtraFields).length > 0 && { extraFields: mergedExtraFields }),
@@ -467,14 +481,16 @@ export function ProductForm({
           </div>
         )}
 
-        {/* Basic Info */}
-        <div className="glass-card rounded-2xl p-6 space-y-4 relative z-[45] transition-opacity duration-300">
-          <h2 className="font-semibold text-lg text-foreground border-b border-border/50 pb-2">Basic Information</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input label="Product Name *" error={errors.product_name?.message} {...register("product_name")} disabled={!!selectedMasterId} />
-            <Input label="Company / Manufacturer *" error={errors.company_name?.message} {...register("company_name")} disabled={!!selectedMasterId} />
+          {/* Basic Info */}
+          <div className="glass-card rounded-2xl p-6 space-y-4 relative z-[45] transition-opacity duration-300">
+            <h2 className="font-semibold text-lg text-foreground border-b border-border/50 pb-2">Basic Information</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input label="Product Name *" error={errors.product_name?.message} {...register("product_name")} disabled={!!selectedMasterId} />
+              <Input label="Company / Manufacturer *" error={errors.company_name?.message} {...register("company_name")} disabled={!!selectedMasterId} />
+              <Input label="Product SKU" placeholder="e.g. SKU-12345" error={errors.sku?.message} {...register("sku")} disabled={!!selectedMasterId} />
+              <Input label="Product Specification" placeholder="e.g. 500mg, Cotton, etc." error={errors.specifications?.message} {...register("specifications")} disabled={!!selectedMasterId} />
+            </div>
           </div>
-        </div>
 
         {/* Categories */}
         <div className="glass-card rounded-2xl p-6 space-y-4 relative z-[44] transition-opacity duration-300">
@@ -502,6 +518,29 @@ export function ProductForm({
             />
           </div>
         </div>
+
+          {/* Shipping & Delivery */}
+          <div className="glass-card rounded-2xl p-6 space-y-4 relative z-[43] transition-opacity duration-300">
+            <h2 className="font-semibold text-lg text-foreground border-b border-border/50 pb-2">Shipping & Delivery</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+              <Input 
+                label="Delivery Time (in days)" 
+                type="number"
+                min={1}
+                placeholder="e.g. 3" 
+                error={errors.delivery_text?.message} 
+                {...register("delivery_text")} 
+              />
+              <Input 
+                label="Shipping Charges (₹)" 
+                type="number"
+                min={0}
+                placeholder="0" 
+                error={errors.shipping_charges?.message} 
+                {...register("shipping_charges", { valueAsNumber: true })} 
+              />
+            </div>
+          </div>
 
         {/* Pricing */}
         <div className="glass-card rounded-2xl p-6 space-y-4 relative z-[43] transition-opacity duration-300">
@@ -533,19 +572,25 @@ export function ProductForm({
               {...register("gst_percent", { valueAsNumber: true })} 
             />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-            <div className="flex items-center gap-2 mt-8">
-              <input
-                type="checkbox"
-                id="is_tax_included"
-                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                {...register("is_tax_included")}
-              />
-              <label htmlFor="is_tax_included" className="text-sm font-medium text-foreground cursor-pointer">
-                Price includes tax
-              </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+              <div className="space-y-1">
+                <label className="block text-[13px] font-semibold text-foreground/80 mb-1">Tax Status</label>
+                <Controller
+                  name="is_tax_included"
+                  control={control}
+                  render={({ field }) => (
+                    <select
+                      className="w-full bg-background border border-input rounded-xl px-4 py-2.5 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200"
+                      value={field.value ? "include" : "exclude"}
+                      onChange={(e) => field.onChange(e.target.value === "include")}
+                    >
+                      <option value="include">Include (Price includes tax)</option>
+                      <option value="exclude">Exclude (Price excludes tax)</option>
+                    </select>
+                  )}
+                />
+              </div>
             </div>
-          </div>
         </div>
 
         {/* Inventory */}
@@ -565,22 +610,15 @@ export function ProductForm({
               {...register("pack_size")} 
             />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-            <div className="space-y-1">
-              <Input 
-                label="Minimum Order Quantity" 
-                type="number" 
-                min={1}
-                error={errors.min_order_qty?.message} 
-                {...register("min_order_qty", { valueAsNumber: true })} 
-              />
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+            <Input label="Minimum Order Qty *" type="number" min={1} error={errors.min_order_qty?.message} {...register("min_order_qty", { valueAsNumber: true })} />
             <Input 
               label="Current Stock *" 
               type="number" 
               min={1}
               error={errors.stock?.message} 
               {...register("stock", { valueAsNumber: true })} 
+              disabled={variants.length > 0}
             />
             <Input 
               label="Maximum Order Qty *" 
@@ -588,16 +626,6 @@ export function ProductForm({
               min={watchMinMoq}
               error={errors.max_order_qty?.message} 
               {...register("max_order_qty", { valueAsNumber: true })} 
-            />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-            <Input 
-              label="Delivery Time (in days)" 
-              type="number"
-              min={1}
-              placeholder="e.g. 3" 
-              error={errors.delivery_text?.message} 
-              {...register("delivery_text")} 
             />
           </div>
         </div>
@@ -611,6 +639,9 @@ export function ProductForm({
             onChangeVariants={setVariants}
             productMedia={mediaItems}
             onAddProductMedia={(items) => setMediaItems(prev => [...prev, ...items])}
+            gstPercent={watchGst}
+            discountDetails={watchDiscount}
+            shippingCharges={watchShippingCharges}
           />
         </div>
 

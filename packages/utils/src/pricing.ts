@@ -62,6 +62,8 @@ export interface DiscountFormInput {
   bonusProductName?: string;
   /** Special/fixed price (for type 6) */
   specialPrice?: number;
+  /** Shipping charges (per unit) */
+  shippingCharges?: number;
 }
 
 export interface PricingOutput {
@@ -81,7 +83,9 @@ export interface PricingOutput {
   discountValue: number;
   /** GST value = finalPtr × gstPercent / 100 */
   gstValue: number;
-  /** Per unit PTR including GST = finalPtr + gstValue */
+  /** Shipping charge per unit */
+  shippingCharges: number;
+  /** Per unit PTR including GST and shipping = finalPtr + gstValue + shippingCharges */
   perPtrWithGst: number;
   /** Items to pay for (buy quantity — NOT buy+get) */
   itemsToPayFor: number;
@@ -183,7 +187,8 @@ export function calculatePricing(
 
   const discountValue = round2(ptr * discountPercent / 100);
   const gstValue = round2(finalPtr * gstPercent / 100);
-  const perPtrWithGst = round2(finalPtr + gstValue);
+  const shippingCharges = discountInput.shippingCharges ?? 0;
+  const perPtrWithGst = round2(finalPtr + gstValue + shippingCharges);
 
   // itemsToPayFor = buy (NEVER buy + get — legacy bug fixed)
   const itemsToPayFor = buy;
@@ -204,6 +209,7 @@ export function calculatePricing(
     discountPercent,
     discountValue,
     gstValue,
+    shippingCharges,
     perPtrWithGst,
     itemsToPayFor,
     totalUnits,
@@ -233,7 +239,10 @@ export function formatPricingSummary(p: PricingOutput): string {
 
   lines.push(`Final PTR: ₹${p.finalPtr}`);
   lines.push(`GST Value: ₹${p.gstValue}`);
-  lines.push(`Price per unit (incl. GST): ₹${p.perPtrWithGst}`);
+  if (p.shippingCharges > 0) {
+    lines.push(`Shipping Charges: ₹${p.shippingCharges}`);
+  }
+  lines.push(`Price per unit (incl. GST & shipping): ₹${p.perPtrWithGst}`);
 
   if (p.get > 0) {
     lines.push(`Buy ${p.buy} Get ${p.get} (${p.bonusProductName || 'same product'})`);

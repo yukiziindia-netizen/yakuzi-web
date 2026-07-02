@@ -58,7 +58,7 @@ function SortableMediaItem({ item, onRemove }: { item: MediaItem; onRemove: (id:
       {...listeners}
       className={cn(
         "relative rounded-xl overflow-hidden border border-border bg-muted/30 group cursor-grab active:cursor-grabbing",
-        "aspect-square flex items-center justify-center",
+        "w-full h-full flex items-center justify-center",
         isDragging && "opacity-50 shadow-xl ring-2 ring-primary"
       )}
     >
@@ -75,7 +75,7 @@ function SortableMediaItem({ item, onRemove }: { item: MediaItem; onRemove: (id:
         </div>
       ) : (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={item.url} alt="Media" className="w-full h-full object-cover" draggable={false} />
+        <img src={item.url} alt="Media" className="w-full h-full object-contain" draggable={false} />
       )}
       
       {!item.isLoading && (
@@ -231,10 +231,8 @@ export function MediaUploader({ items, onChange }: MediaUploaderProps) {
             <div className="grid grid-cols-3 md:grid-cols-4 gap-4 auto-rows-[120px] md:auto-rows-[160px]">
               
               {items.map((item, index) => {
-                // Make the first item take up 2x2 grid space if we have more items or just make it big
-                const isFirst = index === 0;
                 return (
-                  <div key={item.id} className={cn(isFirst ? "col-span-2 row-span-2" : "col-span-1 row-span-1")}>
+                  <div key={item.id} className="col-span-1 row-span-1 h-full">
                     <SortableMediaItem item={item} onRemove={handleRemove} />
                   </div>
                 );
@@ -244,7 +242,7 @@ export function MediaUploader({ items, onChange }: MediaUploaderProps) {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="col-span-1 row-span-1 border-2 border-dashed border-border rounded-xl flex items-center justify-center text-muted-foreground hover:bg-accent/5 transition-colors aspect-square"
+                className="col-span-1 row-span-1 border-2 border-dashed border-border rounded-xl flex items-center justify-center text-muted-foreground hover:bg-accent/5 transition-colors h-full w-full"
               >
                 <Plus className="h-6 w-6" />
               </button>

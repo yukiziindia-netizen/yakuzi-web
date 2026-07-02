@@ -21,12 +21,6 @@ interface ProductCarouselProps {
 
 export const renderBuyerOfferBadge = (p: any) => {
   if (!p?.discountType) {
-    const mrp = p?.mrp || p?.originalPrice;
-    const price = p?.price;
-    if (mrp != null && price != null && mrp > price) {
-      const percent = Math.round(((mrp - price) / mrp) * 100);
-      return <span className="bg-[#864ac5] text-white px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold tracking-wide shadow-sm whitespace-nowrap">{percent}% off</span>;
-    }
     return null;
   }
   const meta = p.discountMeta || {};

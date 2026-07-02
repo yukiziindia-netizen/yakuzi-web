@@ -1,4 +1,4 @@
-﻿// ─── Orders Page ─────────────────────────────────────────────────────────────
+// ─── Orders Page ─────────────────────────────────────────────────────────────
 "use client";
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
@@ -116,23 +116,50 @@ export function OrdersContent() {
   const recordedSettlements: any[] = Array.isArray(settlementsList) ? settlementsList : (settlementsList as any)?.data ?? (settlementsList as any)?.settlements ?? [];
 
   const dynamicStats = useMemo(() => {
-    let totalPending = 0;
+    // Start from settled ledger amounts
     let totalPaid = 0;
+    let settledPending = 0;
     recordedSettlements.forEach(s => {
       if ((s.payoutStatus || s.status) === "PAID") totalPaid += (s.amount || 0);
-      else totalPending += (s.amount || 0);
+      else settledPending += (s.amount || 0);
     });
+
+    // Collect all order item IDs that are already in the settlement ledger
+    const settledItemIds = new Set(recordedSettlements.map(s => s.orderItemId).filter(Boolean));
+
+    // Sum up amounts for all orders that are still "in-progress" (not cancelled)
+    // and for DELIVERED orders whose items haven't been settled yet
+    let activePending = 0;
+    const ACTIVE_STATUSES = new Set(["PLACED", "PENDING", "ACCEPTED", "CONFIRMED", "PROCESSING", "DISPATCHED_FROM_SELLER", "RECEIVED_AT_WAREHOUSE", "WAREHOUSE", "SHIPPED", "TRANSIT"]);
+
     allOrders.forEach(order => {
-      if ((order.orderStatus || order.status || "").toUpperCase() === "DELIVERED") {
+      const status = (order.orderStatus || order.status || "").toUpperCase();
+      if (status === "CANCELLED") return; // skip cancelled orders entirely
+
+      if (ACTIVE_STATUSES.has(status)) {
+        // Order is still active — the full sellerTotal is pending
+        const orderTotal = order.sellerTotal ?? order.totalAmount ?? order.total ?? 0;
+        if (orderTotal > 0) {
+          activePending += orderTotal;
+        } else {
+          // Fallback: sum items manually if sellerTotal isn't available
+          const items = order.items || order.orderItems || [];
+          items.forEach((item: any) => {
+            activePending += (item.totalPrice || (item.price * (item.quantity || 1)));
+          });
+        }
+      } else if (status === "DELIVERED") {
+        // Order delivered — only add items not yet in the settlement ledger
         const items = order.items || order.orderItems || [];
         items.forEach((item: any) => {
-          const inLedger = recordedSettlements.some(rs => rs.orderItemId === item.id);
-          if (!inLedger) {
-            totalPending += (item.totalPrice || (item.price * (item.quantity || 1)));
+          if (!settledItemIds.has(item.id)) {
+            activePending += (item.totalPrice || (item.price * (item.quantity || 1)));
           }
         });
       }
     });
+
+    const totalPending = settledPending + activePending;
     return { totalPending, totalPaid };
   }, [allOrders, recordedSettlements]);
 

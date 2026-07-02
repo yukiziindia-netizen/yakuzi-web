@@ -258,6 +258,8 @@ export interface Suggestion {
   id: string;
   productName: string;
   companyName: string;
+  sku?: string;
+  specifications?: string;
   chemicalCombination?: string;
   category?: string;
   subCategory?: string;

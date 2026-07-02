@@ -29,6 +29,7 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
     mrp: "",
     price: "",
     gstPercent: "",
+    shippingCharges: "0",
     unit: "1",
     packSize: "1",
     minimumOrderQuantity: "1",
@@ -55,6 +56,7 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
         mrp: initialData.mrp ? String(initialData.mrp) : "",
         price: initialData.price ? String(initialData.price) : "",
         gstPercent: initialData.gstPercent ? String(initialData.gstPercent) : "",
+        shippingCharges: initialData.shippingCharges ? String(initialData.shippingCharges) : "0",
         unit: initialData.unit || "1",
         packSize: initialData.packSize || "1",
         minimumOrderQuantity: initialData.minimumOrderQuantity ? String(initialData.minimumOrderQuantity) : "1",
@@ -166,6 +168,7 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
         mrp: form.mrp !== "" ? Number(form.mrp) : null,
         price: form.price !== "" ? Number(form.price) : null,
         gstPercent: form.gstPercent !== "" ? Number(form.gstPercent) : null,
+        shippingCharges: form.shippingCharges !== "" ? Number(form.shippingCharges) : 0,
         unit: form.unit,
         packSize: form.packSize,
         minimumOrderQuantity: form.minimumOrderQuantity !== "" ? Number(form.minimumOrderQuantity) : null,
@@ -291,7 +294,7 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
             <h3 className="text-base font-semibold text-foreground">Product organization</h3>
             
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium text-foreground">Category (Collection)</label>
+              <label className="block text-sm font-medium text-foreground">Category</label>
               <select
                 value={form.categoryId}
                 onChange={e => setForm(f => ({ ...f, categoryId: e.target.value, subCategoryId: "" }))}
@@ -337,6 +340,13 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
                 placeholder="e.g. 500mg, Cotton, etc."
                 value={form.specifications}
                 onChange={e => setForm(f => ({ ...f, specifications: e.target.value }))}
+              />
+              <Input
+                label="Shipping Charges (₹)"
+                type="number"
+                placeholder="0"
+                value={form.shippingCharges}
+                onChange={e => setForm(f => ({ ...f, shippingCharges: e.target.value }))}
               />
             </div>
 

@@ -28,6 +28,7 @@ export default function AddProductPage() {
     price: "",
     gstPercent: "",
     isTaxIncluded: false,
+    shippingCharges: "0",
     unit: "1",
     packSize: "1",
     minimumOrderQuantity: "1",
@@ -66,6 +67,7 @@ export default function AddProductPage() {
         price: form.price ? Number(form.price) : undefined,
         gstPercent: form.gstPercent ? Number(form.gstPercent) : undefined,
         isTaxIncluded: form.isTaxIncluded,
+        shippingCharges: form.shippingCharges ? Number(form.shippingCharges) : 0,
         unit: form.unit,
         packSize: form.packSize,
         minimumOrderQuantity: form.minimumOrderQuantity ? Number(form.minimumOrderQuantity) : undefined,
@@ -318,6 +320,13 @@ export default function AddProductPage() {
                   placeholder="e.g. 500mg, Cotton, etc."
                   value={form.specifications}
                   onChange={e => setForm(f => ({ ...f, specifications: e.target.value }))}
+                />
+                <Input
+                  label="Shipping Charges (₹)"
+                  type="number"
+                  placeholder="0"
+                  value={form.shippingCharges}
+                  onChange={e => setForm(f => ({ ...f, shippingCharges: e.target.value }))}
                 />
               </div>
 

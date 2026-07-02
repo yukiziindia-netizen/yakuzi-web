@@ -23,16 +23,14 @@ export default function CartPage() {
   const clearCart = useClearCart();
   const { toast } = useToast();
 
-  const gstRate = (config?.gst_rate ?? 12) / 100;
   const minOrderAmount = config?.min_order_amount ?? 0;
 
   const items = cart?.items ?? [];
-  const subtotal = items.reduce((acc, item: any) => {
+  const subtotal = items.reduce((acc: number, item: any) => {
     const price = item.product?.price ?? item.price;
     return acc + (price || 0) * item.quantity;
   }, 0);
-  const gst = Math.round(subtotal * gstRate);
-  const total = subtotal + gst;
+  const total = subtotal;
   const isAboveMinimum = subtotal >= minOrderAmount;
   const remaining = minOrderAmount - subtotal;
 
@@ -214,14 +212,6 @@ export default function CartPage() {
                     <div className="flex justify-between text-sm text-gray-500">
                       <span>Subtotal ({items.length} items)</span>
                       <span className="font-medium">{formatCurrency(subtotal)}</span>
-                    </div>
-                    <div className="flex justify-between text-sm text-gray-500">
-                      <span>GST ({config?.gst_rate ?? 12}%)</span>
-                      <span className="font-medium">{formatCurrency(gst)}</span>
-                    </div>
-                    <div className="flex justify-between text-sm text-gray-500">
-                      <span>Delivery</span>
-                      <span className="font-medium text-emerald-600">Free</span>
                     </div>
                     <div className="border-t border-gray-100 pt-3 flex justify-between">
                       <span className="font-bold text-gray-900">Total</span>

@@ -84,12 +84,7 @@ export default function CheckoutPage() {
   const cart = (cartData as any)?.data || cartData || { items: [], total: 0 };
   const items = cart.items ?? [];
   const subtotal = Math.round(cart.total ?? 0);
-  const shippingThreshold = platformConfig?.shipping_threshold ?? 5000;
-  const shippingFee = platformConfig?.shipping_fee ?? 250;
-  const gstRate = (platformConfig?.gst_rate ?? 12) / 100;
-  const shipping = subtotal > shippingThreshold ? 0 : shippingFee;
-  const gst = Math.round(subtotal * gstRate);
-  const total = Math.round(subtotal + shipping + gst);
+  const total = subtotal;
 
   const handlePlaceOrder = () => {
     const combinedName = address.firstName && address.lastName
@@ -357,7 +352,7 @@ export default function CheckoutPage() {
                   <span style={{ fontSize: 14, color: '#444' }}>Delivered in 4 - 11 Business Days!</span>
                 </div>
                 <span style={{ fontSize: 14, fontWeight: 600, color: '#1a1a1a' }}>
-                  {shipping === 0 ? 'FREE' : `₹${shipping}`}
+                  { 'FREE (Included in price)' }
                 </span>
               </div>
             </div>
@@ -512,12 +507,8 @@ export default function CheckoutPage() {
                   <HelpCircle size={14} color="#aaa" />
                 </div>
                 <span style={{ fontSize: 14, color: address.address ? '#1a1a1a' : '#888' }}>
-                  {address.address ? (shipping === 0 ? 'Free' : `₹${shipping}`) : 'Enter shipping address'}
+                  {address.address ? 'Free (Included in price)' : 'Enter shipping address'}
                 </span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: 14, color: '#555' }}>GST ({platformConfig?.gst_rate ?? 12}%)</span>
-                <span style={{ fontSize: 14, color: '#1a1a1a', fontWeight: 500 }}>₹{gst.toLocaleString('en-IN')}</span>
               </div>
             </div>
 
@@ -532,7 +523,7 @@ export default function CheckoutPage() {
               </div>
             </div>
             <p style={{ fontSize: 12, color: '#888', marginTop: 4 }}>
-              Including ₹{gst.toLocaleString('en-IN')} in taxes
+              Includes applicable taxes and shipping
             </p>
           </div>
         </div>

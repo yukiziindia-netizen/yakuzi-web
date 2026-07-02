@@ -5,6 +5,8 @@ import { Plus, GripVertical, Image as ImageIcon, Search, ArrowDownUp, Grid2X2, X
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
+import { calculatePricing, formatCurrency } from "@yukizi/utils";
+import type { DiscountFormDetails } from "@yukizi/utils";
 
 export type MediaItem = {
   id: string;
@@ -34,6 +36,9 @@ interface VariantBuilderProps {
   onChangeVariants?: (variants: VariantCombination[]) => void;
   productMedia?: MediaItem[];
   onAddProductMedia?: (items: MediaItem[]) => void;
+  gstPercent?: number;
+  discountDetails?: DiscountFormDetails;
+  shippingCharges?: number;
 }
 
 // Helper to generate cartesian product
@@ -68,7 +73,10 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
   variants = [],
   onChangeVariants,
   productMedia,
-  onAddProductMedia
+  onAddProductMedia,
+  gstPercent,
+  discountDetails,
+  shippingCharges
 }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -161,92 +169,70 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                     <motion.div 
                       key={option.id}
                       layout
-                      initial={{ opacity: 0, y: -10 }}
+                      initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="bg-white border border-gray-200 rounded-lg p-5"
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      className="bg-gray-50 p-4 rounded-lg border border-gray-200"
                     >
                       <div className="space-y-4">
-                        {/* Option Name Input */}
-                        <div className="flex items-center gap-3">
-                          <GripVertical className="w-4 h-4 text-gray-400 cursor-grab" />
-                          <div className="flex-1">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Option name
-                            </label>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Option name</label>
+                          <input
+                            type="text"
+                            value={option.name}
+                            onChange={(e) => updateOption(option.id, { name: e.target.value })}
+                            className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm py-2 px-3 border"
+                            placeholder="e.g. Size, Color, Material"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Option values</label>
+                          <div className="flex gap-2">
                             <input
                               type="text"
-                              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-colors"
-                              placeholder="Size, Color, Material"
-                              value={option.name}
-                              onChange={(e) => updateOption(option.id, { name: e.target.value })}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  const val = e.currentTarget.value.trim();
+                                  if (val && !option.values.includes(val)) {
+                                    updateOption(option.id, { values: [...option.values, val] });
+                                    e.currentTarget.value = "";
+                                  }
+                                }
+                              }}
+                              className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm py-2 px-3 border"
+                              placeholder="Type a value and press Enter"
                             />
                           </div>
+                          {option.values.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mt-3">
+                              {option.values.map((val, idx) => (
+                                <span key={idx} className="inline-flex items-center px-2.5 py-1 rounded-md text-sm font-medium bg-white border border-gray-200 text-gray-700 shadow-sm">
+                                  {val}
+                                  <button
+                                    type="button"
+                                    onClick={() => updateOption(option.id, { values: option.values.filter(v => v !== val) })}
+                                    className="ml-1.5 inline-flex items-center justify-center text-gray-400 hover:text-gray-500"
+                                  >
+                                    <X className="w-3.5 h-3.5" />
+                                  </button>
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </div>
-
-                        {/* Option Values Inputs */}
-                        <div>
-                          <div className="flex items-center gap-3 mb-1">
-                            <div className="w-4 h-4" /> {/* Spacer for grip */}
-                            <label className="block text-sm font-medium text-gray-700">
-                              Option values
-                            </label>
-                          </div>
-                          
-                          <div className="space-y-2">
-                            {[...(Array.isArray(option.values) ? option.values : []), ""].map((val, idx) => {
-                              const isLast = idx === (Array.isArray(option.values) ? option.values : []).length;
-                              return (
-                                <div key={idx} className="flex items-center gap-3">
-                                  <div className="w-4 h-4 flex items-center justify-center">
-                                    {!isLast && <GripVertical className="w-4 h-4 text-gray-400 cursor-grab" />}
-                                  </div>
-                                  <input
-                                    type="text"
-                                    className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-colors"
-                                    placeholder={isLast ? "Add another value" : ""}
-                                    value={val}
-                                    onChange={(e) => {
-                                      const newValues = [...(Array.isArray(option.values) ? option.values : [])];
-                                      if (idx < (Array.isArray(option.values) ? option.values : []).length) {
-                                        newValues[idx] = e.target.value;
-                                      } else {
-                                        if (e.target.value) newValues.push(e.target.value);
-                                      }
-                                      updateOption(option.id, { values: newValues });
-                                    }}
-                                    onBlur={() => {
-                                      // Remove empty values on blur
-                                      const arrValues = Array.isArray(option.values) ? option.values : [];
-                                      if (idx < arrValues.length && arrValues[idx].trim() === "") {
-                                        const newValues = [...arrValues];
-                                        newValues.splice(idx, 1);
-                                        updateOption(option.id, { values: newValues });
-                                      }
-                                    }}
-                                  />
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-
-                        {/* Actions */}
-                        <div className="flex items-center justify-between pt-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-4 h-4" />
-                            <button
-                              type="button"
-                              onClick={() => deleteOption(option.id)}
-                              className="text-sm font-medium text-red-600 bg-white border border-gray-200 hover:bg-red-50 px-4 py-1.5 rounded-md transition-colors"
-                            >
-                              Delete
-                            </button>
-                          </div>
+                        <div className="flex items-center gap-2 pt-2 border-t border-gray-200">
+                          <button
+                            type="button"
+                            onClick={() => deleteOption(option.id)}
+                            className="text-sm font-medium text-red-600 hover:text-red-700"
+                          >
+                            Delete
+                          </button>
                           <button
                             type="button"
                             onClick={() => setEditingId(null)}
-                            className="text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 px-5 py-1.5 rounded-md transition-colors"
+                            className="ml-auto px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 shadow-sm"
                           >
                             Done
                           </button>
@@ -256,7 +242,6 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                   );
                 }
 
-                // Read-only chip view
                 return (
                   <motion.div 
                     key={option.id}
@@ -264,54 +249,41 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="flex items-start bg-white border border-gray-200 rounded-lg p-4"
+                    className="flex items-center gap-3 group"
                   >
-                    <div className="pt-1 pr-3 text-gray-400 cursor-grab">
-                      <GripVertical className="w-4 h-4" />
+                    <div className="p-2 text-gray-400 cursor-grab hover:text-gray-600">
+                      <GripVertical className="w-5 h-5" />
                     </div>
-                    
-                    <div className="flex-1">
-                      <div className="text-sm font-medium text-gray-900 mb-2">
-                        {option.name || "Option"}
+                    <div className="flex-1 bg-white border border-gray-200 rounded-lg p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm hover:border-gray-300 transition-colors">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{option.name}</p>
+                        <p className="text-sm text-gray-500 mt-0.5">{option.values.join(", ")}</p>
                       </div>
-                      <div className="flex flex-wrap gap-2">
-                        {(Array.isArray(option.values) ? option.values : []).filter(v => v && typeof v === 'string' && v.trim() !== "").map((val, idx) => (
-                          <span 
-                            key={idx} 
-                            className="bg-gray-100 text-gray-800 text-sm px-3 py-1 rounded-md"
-                          >
-                            {val}
-                          </span>
-                        ))}
-                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setEditingId(option.id)}
+                        className="text-sm font-medium text-blue-600 hover:text-blue-700 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+                      >
+                        Edit
+                      </button>
                     </div>
-                    
-                    <button
-                      type="button"
-                      onClick={() => setEditingId(option.id)}
-                      className="text-sm font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 px-4 py-1.5 rounded-md transition-colors ml-4"
-                    >
-                      Edit
-                    </button>
                   </motion.div>
                 );
               })}
             </AnimatePresence>
+
+            {!editingId && (
+              <button
+                type="button"
+                onClick={addOption}
+                className="flex items-center text-sm font-medium text-blue-600 hover:text-blue-700 mt-2"
+              >
+                <Plus className="w-4 h-4 mr-1" />
+                Add another option
+              </button>
+            )}
           </div>
         </div>
-
-        <div className="p-4 bg-white border-t border-gray-200">
-          <button
-            type="button"
-            onClick={addOption}
-            className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-900"
-          >
-            <Plus className="w-4 h-4 mr-2 text-gray-500" />
-            Add another option
-          </button>
-        </div>
-
-        {variants.length > 0 && editingId === null && (
           <div className="border-t border-gray-200">
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left text-gray-500">
@@ -352,6 +324,19 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                             placeholder="0.00"
                           />
                         </div>
+                        {(() => {
+                          const p = Number(variant.price);
+                          if (p > 0) {
+                            try {
+                              const pricing = calculatePricing(p, gstPercent || 0, discountDetails || { type: 'none' } as any);
+                              const finalPrice = pricing.finalUserBuy + (shippingCharges || 0);
+                              return <div className="text-[10px] mt-1 text-primary/80 font-medium whitespace-nowrap">Final: {formatCurrency(finalPrice)}</div>;
+                            } catch (e) {
+                              return null;
+                            }
+                          }
+                          return null;
+                        })()}
                       </td>
                       <td className="px-6 py-4">
                         <input
@@ -384,7 +369,6 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
               Total inventory at Shop location: {variants.reduce((acc, v) => acc + (parseInt(v.available) || 0), 0)} available
             </div>
           </div>
-        )}
       </div>
     </>
   );

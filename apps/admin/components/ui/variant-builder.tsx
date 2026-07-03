@@ -20,6 +20,7 @@ export interface VariantCombination {
   sku: string;
   shippingCharges: string;
   image?: string;
+  images?: string[];
 }
 
 interface VariantBuilderProps {
@@ -56,13 +57,20 @@ function generateCombinations(options: VariantOption[]): string[] {
 }
 
 const ImageSelectionModal = ({ 
-  isOpen, onClose, onSelect, productMedia = [], onAddProductMedia 
+  isOpen, onClose, onSelect, productMedia = [], onAddProductMedia, initialSelectedUrls = []
 }: {
-  isOpen: boolean; onClose: () => void; onSelect: (url: string) => void; 
+  isOpen: boolean; onClose: () => void; onSelect: (urls: string[]) => void; 
   productMedia?: MediaItem[]; onAddProductMedia?: (items: MediaItem[]) => void;
+  initialSelectedUrls?: string[];
 }) => {
-  const [selectedUrl, setSelectedUrl] = useState<string | null>(null);
+  const [selectedUrls, setSelectedUrls] = useState<string[]>(initialSelectedUrls);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedUrls(initialSelectedUrls);
+    }
+  }, [isOpen, initialSelectedUrls]);
 
   if (!isOpen) return null;
 
@@ -187,15 +195,23 @@ const ImageSelectionModal = ({
 
           {/* Grid */}
           <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-4">
-            {productMedia.map((media) => (
+            {productMedia.map((media) => {
+              const isSelected = selectedUrls.includes(media.url);
+              return (
               <div 
                 key={media.id} 
                 className="group relative cursor-pointer"
-                onClick={() => !media.isLoading && setSelectedUrl(media.url)}
+                onClick={() => {
+                  if (!media.isLoading) {
+                    setSelectedUrls(prev => 
+                      prev.includes(media.url) ? prev.filter(u => u !== media.url) : [...prev, media.url]
+                    );
+                  }
+                }}
               >
                 <div className={cn(
                   "aspect-square rounded-xl border overflow-hidden relative",
-                  selectedUrl === media.url ? "border-blue-500 ring-2 ring-blue-500" : "border-gray-200"
+                  isSelected ? "border-blue-500 ring-2 ring-blue-500" : "border-gray-200"
                 )}>
                   {media.isLoading ? (
                     <div className="w-full h-full flex items-center justify-center bg-gray-50">
@@ -209,9 +225,9 @@ const ImageSelectionModal = ({
                     <div className="absolute top-2 left-2 z-10">
                       <div className={cn(
                         "w-5 h-5 rounded border bg-white flex items-center justify-center",
-                        selectedUrl === media.url ? "border-blue-500 bg-blue-500" : "border-gray-300"
+                        isSelected ? "border-blue-500 bg-blue-500" : "border-gray-300"
                       )}>
-                        {selectedUrl === media.url && <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>}
+                        {isSelected && <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>}
                       </div>
                     </div>
                   )}
@@ -223,7 +239,7 @@ const ImageSelectionModal = ({
                   <p className="text-[10px] text-gray-500 uppercase mt-0.5">JPG</p>
                 </div>
               </div>
-            ))}
+            )})}
           </div>
         </div>
 
@@ -237,12 +253,10 @@ const ImageSelectionModal = ({
           </button>
           <button 
             onClick={() => {
-              if (selectedUrl) {
-                onSelect(selectedUrl);
-                onClose();
-              }
+              onSelect(selectedUrls);
+              onClose();
             }}
-            disabled={!selectedUrl}
+            disabled={selectedUrls.length === 0}
             className="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Done
@@ -314,7 +328,7 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
     if (editingId === id) setEditingId(null);
   };
 
-  const updateVariant = (id: string, field: keyof VariantCombination, value: string) => {
+  const updateVariant = (id: string, field: keyof VariantCombination, value: string | string[]) => {
     if (!onChangeVariants) return;
     onChangeVariants(variants.map(v => v.id === id ? { ...v, [field]: value } : v));
   };
@@ -344,9 +358,19 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
         onClose={() => setImageModalForVariant(null)}
         productMedia={productMedia}
         onAddProductMedia={onAddProductMedia}
-        onSelect={(url) => {
+        initialSelectedUrls={
+          imageModalForVariant 
+            ? variants.find(v => v.id === imageModalForVariant)?.images || (variants.find(v => v.id === imageModalForVariant)?.image ? [variants.find(v => v.id === imageModalForVariant)!.image!] : [])
+            : []
+        }
+        onSelect={(urls) => {
           if (imageModalForVariant) {
-            updateVariant(imageModalForVariant, 'image', url);
+            updateVariant(imageModalForVariant, 'images', urls as any);
+            if (urls.length > 0) {
+              updateVariant(imageModalForVariant, 'image', urls[0]);
+            } else {
+              updateVariant(imageModalForVariant, 'image', '' as any);
+            }
           }
         }}
       />
@@ -545,7 +569,16 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                           onClick={() => setImageModalForVariant(variant.id)}
                           className="w-10 h-10 border border-gray-200 rounded-md border-dashed overflow-hidden flex items-center justify-center bg-gray-50 text-blue-500 hover:border-blue-500 transition-colors relative"
                         >
-                          {variant.image ? (
+                          {variant.images?.length ? (
+                            <div className="relative w-full h-full">
+                              <img src={variant.images[0]} alt="Variant" className="w-full h-full object-cover" />
+                              {variant.images.length > 1 && (
+                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-[10px] text-white font-bold">
+                                  +{variant.images.length - 1}
+                                </div>
+                              )}
+                            </div>
+                          ) : variant.image ? (
                             <img src={variant.image} alt="Variant" className="w-full h-full object-cover" />
                           ) : (
                             <ImageIcon className="w-5 h-5" />

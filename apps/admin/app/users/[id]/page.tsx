@@ -39,11 +39,11 @@ function SecureDocViewer({ url, label, number, expiry }: { url: string; label: s
         </div>
       </div>
       {isImage ? (
-        <a href={displayUrl} target="_blank" rel="noopener noreferrer" className="block w-fit">
+        <a href={displayUrl} target="_blank" rel="noopener noreferrer" className="inline-block max-w-full">
           <img
             src={displayUrl}
             alt={label}
-            className="max-w-xs max-h-48 rounded-xl border border-border object-contain hover:border-primary/50 transition-colors"
+            className="max-w-full max-h-48 rounded-xl border border-border object-contain hover:border-primary/50 transition-colors"
           />
         </a>
       ) : (
@@ -183,37 +183,39 @@ export default function UserDetailPage() {
                     <InfoRow icon={FileText} label="IFSC Code" value={sp.bankAccount.ifsc ?? "—"} mono />
                   </>
                 )}
-                {sp.cancelCheck && (
-                  <SecureDocViewer url={typeof sp.cancelCheck === 'object' ? sp.cancelCheck.url : sp.cancelCheck} label="Cancelled Cheque" />
-                )}
-                {(sp?.drugLicenseUrl ?? user.drugLicenseUrl) && (
-                  <SecureDocViewer 
-                    url={sp?.drugLicenseUrl ?? user.drugLicenseUrl ?? ''} 
-                    label="License 1 (20B)" 
-                    number={sp?.drugLicenseNumber ?? user.drugLicenseNumber} 
-                    expiry={sp?.drugLicenseExpiry ?? user.drugLicenseExpiry}
-                  />
-                )}
-                {(sp?.drugLicenseUrl2 ?? user.drugLicenseUrl2) && (
-                  <SecureDocViewer 
-                    url={sp?.drugLicenseUrl2 ?? user.drugLicenseUrl2 ?? ''} 
-                    label="License 2 (21B)" 
-                    number={sp?.drugLicenseNumber2 ?? user.drugLicenseNumber2} 
-                    expiry={sp?.drugLicenseExpiry2 ?? user.drugLicenseExpiry2}
-                  />
-                )}
-                {(() => {
-                  // additionalDocuments may be on sp or at top-level user, and may be a JSON string
-                  let docs: any = sp.additionalDocuments ?? (user as any).additionalDocuments;
-                  if (typeof docs === 'string') {
-                    try { docs = JSON.parse(docs); } catch (e) { docs = [docs]; }
-                  }
-                  if (!docs || (Array.isArray(docs) && docs.length === 0)) return null;
-                  const docsArr = Array.isArray(docs) ? docs : [docs];
-                  return docsArr.map((docUrl: string | any, idx: number) => (
-                    <SecureDocViewer key={`doc-${idx}`} url={typeof docUrl === 'object' ? (docUrl.url ?? '') : docUrl} label={`Additional Document ${idx + 1}`} />
-                  ));
-                })()}
+                <div className="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4 pt-4 border-t border-border">
+                  {sp.cancelCheck && (
+                    <SecureDocViewer url={typeof sp.cancelCheck === 'object' ? sp.cancelCheck.url : sp.cancelCheck} label="Cancelled Cheque" />
+                  )}
+                  {(sp?.drugLicenseUrl ?? user.drugLicenseUrl) && (
+                    <SecureDocViewer 
+                      url={sp?.drugLicenseUrl ?? user.drugLicenseUrl ?? ''} 
+                      label="License 1 (20B)" 
+                      number={sp?.drugLicenseNumber ?? user.drugLicenseNumber} 
+                      expiry={sp?.drugLicenseExpiry ?? user.drugLicenseExpiry}
+                    />
+                  )}
+                  {(sp?.drugLicenseUrl2 ?? user.drugLicenseUrl2) && (
+                    <SecureDocViewer 
+                      url={sp?.drugLicenseUrl2 ?? user.drugLicenseUrl2 ?? ''} 
+                      label="License 2 (21B)" 
+                      number={sp?.drugLicenseNumber2 ?? user.drugLicenseNumber2} 
+                      expiry={sp?.drugLicenseExpiry2 ?? user.drugLicenseExpiry2}
+                    />
+                  )}
+                  {(() => {
+                    // additionalDocuments may be on sp or at top-level user, and may be a JSON string
+                    let docs: any = sp.additionalDocuments ?? (user as any).additionalDocuments;
+                    if (typeof docs === 'string') {
+                      try { docs = JSON.parse(docs); } catch (e) { docs = [docs]; }
+                    }
+                    if (!docs || (Array.isArray(docs) && docs.length === 0)) return null;
+                    const docsArr = Array.isArray(docs) ? docs : [docs];
+                    return docsArr.map((docUrl: string | any, idx: number) => (
+                      <SecureDocViewer key={`doc-${idx}`} url={typeof docUrl === 'object' ? (docUrl.url ?? '') : docUrl} label={`Additional Document ${idx + 1}`} />
+                    ));
+                  })()}
+                </div>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -221,22 +223,6 @@ export default function UserDetailPage() {
                 <InfoRow icon={FileText} label="GST Number" value={bp?.gstNumber ?? user.gstNumber ?? "—"} mono />
                 <InfoRow icon={FileText} label="PAN Number" value={bp?.panNumber ?? user.panNumber ?? "—"} mono />
                 
-                {(bp?.drugLicenseUrl ?? user.drugLicenseUrl) && (
-                  <SecureDocViewer 
-                    url={bp?.drugLicenseUrl ?? user.drugLicenseUrl ?? ''} 
-                    label="License 1 (20B)" 
-                    number={bp?.drugLicenseNumber ?? user.drugLicenseNumber} 
-                    expiry={bp?.drugLicenseExpiry ?? user.drugLicenseExpiry}
-                  />
-                )}
-                {(bp?.drugLicenseUrl2 ?? user.drugLicenseUrl2) && (
-                  <SecureDocViewer 
-                    url={bp?.drugLicenseUrl2 ?? user.drugLicenseUrl2 ?? ''} 
-                    label="License 2 (21B)" 
-                    number={bp?.drugLicenseNumber2 ?? user.drugLicenseNumber2} 
-                    expiry={bp?.drugLicenseExpiry2 ?? user.drugLicenseExpiry2}
-                  />
-                )}
                 <InfoRow icon={MapPin} label="Address" value={
                   bp?.address
                     ? (typeof bp.address === 'object'
@@ -246,6 +232,25 @@ export default function UserDetailPage() {
                 } className="sm:col-span-2" />
                 {bp?.email && <InfoRow icon={Mail} label="Email" value={bp.email} />}
                 {bp?.phone && <InfoRow icon={Phone} label="Phone" value={bp.phone} mono />}
+
+                <div className="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4 pt-4 border-t border-border">
+                  {(bp?.drugLicenseUrl ?? user.drugLicenseUrl) && (
+                    <SecureDocViewer 
+                      url={bp?.drugLicenseUrl ?? user.drugLicenseUrl ?? ''} 
+                      label="License 1 (20B)" 
+                      number={bp?.drugLicenseNumber ?? user.drugLicenseNumber} 
+                      expiry={bp?.drugLicenseExpiry ?? user.drugLicenseExpiry}
+                    />
+                  )}
+                  {(bp?.drugLicenseUrl2 ?? user.drugLicenseUrl2) && (
+                    <SecureDocViewer 
+                      url={bp?.drugLicenseUrl2 ?? user.drugLicenseUrl2 ?? ''} 
+                      label="License 2 (21B)" 
+                      number={bp?.drugLicenseNumber2 ?? user.drugLicenseNumber2} 
+                      expiry={bp?.drugLicenseExpiry2 ?? user.drugLicenseExpiry2}
+                    />
+                  )}
+                </div>
               </div>
             )}
           </motion.div>

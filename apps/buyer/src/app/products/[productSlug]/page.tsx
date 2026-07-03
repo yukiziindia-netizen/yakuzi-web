@@ -702,7 +702,19 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
         ];
 
   const selectedVariant = productVariants.find((v: any) => v.name === selectedVariantName);
-  const displayImages = selectedVariant?.image ? [selectedVariant.image, ...images.filter((img: string) => img !== selectedVariant.image)] : [...images];
+  
+  let displayImages = [...images];
+  if (selectedVariant) {
+    const variantImages = selectedVariant.images?.length > 0 
+      ? selectedVariant.images 
+      : (selectedVariant.image ? [selectedVariant.image] : []);
+      
+    if (variantImages.length > 0) {
+      // Put variant images first, then append any remaining product images
+      displayImages = [...variantImages, ...images.filter((img: string) => !variantImages.includes(img))];
+    }
+  }
+
   while (displayImages.length < 3 && displayImages.length > 0) {
     displayImages.push(displayImages[0]);
   }

@@ -184,7 +184,8 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
           name: v.name, 
           sku: v.sku,
           shippingCharges: Number(v.shippingCharges),
-          image: v.image
+          image: v.image,
+          images: v.images
         })) : undefined,
       };
 
@@ -329,12 +330,14 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
                 value={form.manufacturer}
                 onChange={e => setForm(f => ({ ...f, manufacturer: e.target.value }))}
               />
-              <Input
-                label="Product SKU"
-                placeholder="e.g. SKU-12345"
-                value={form.sku}
-                onChange={e => setForm(f => ({ ...f, sku: e.target.value }))}
-              />
+              {variants.length === 0 && (
+                <Input
+                  label="Product SKU"
+                  placeholder="e.g. SKU-12345"
+                  value={form.sku}
+                  onChange={e => setForm(f => ({ ...f, sku: e.target.value }))}
+                />
+              )}
               <Textarea
                 label="Product Specification"
                 placeholder="e.g. 500mg, Cotton, etc. (press Enter for new lines)"
@@ -342,13 +345,15 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
                 onChange={e => setForm(f => ({ ...f, specifications: e.target.value }))}
                 rows={4}
               />
-              <Input
-                label="Shipping Charges (₹)"
-                type="number"
-                placeholder="0"
-                value={form.shippingCharges}
-                onChange={e => setForm(f => ({ ...f, shippingCharges: e.target.value }))}
-              />
+              {variants.length === 0 && (
+                <Input
+                  label="Shipping Charges (₹)"
+                  type="number"
+                  placeholder="0"
+                  value={form.shippingCharges}
+                  onChange={e => setForm(f => ({ ...f, shippingCharges: e.target.value }))}
+                />
+              )}
             </div>
 
           </motion.div>

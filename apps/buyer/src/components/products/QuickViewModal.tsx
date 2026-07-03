@@ -64,20 +64,41 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
   const [showStockAlert, setShowStockAlert] = useState(false);
   const [showCustomOrder, setShowCustomOrder] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [selectedVariantName, setSelectedVariantName] = useState('');
+
+  const productVariants = displayProduct?.variants || [];
+
+  useEffect(() => {
+    if (productVariants.length > 0 && !selectedVariantName) {
+      setSelectedVariantName(productVariants[0].name);
+    }
+  }, [productVariants, selectedVariantName]);
 
   if (!displayProduct) return null;
 
-  const productImages =
-    displayProduct.images && displayProduct.images.length > 0
-      ? displayProduct.images.map((img: any) => img.url || img)
-      : [
-          displayProduct.image ||
-            `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent((displayProduct.name || 'PR').trim().split(/\s+/).length === 1 ? (displayProduct.name || 'PR').trim().substring(0, 2).toUpperCase() : ((displayProduct.name || 'PR').trim().split(/\s+/)[0][0] + (displayProduct.name || 'PR').trim().split(/\s+/)[(displayProduct.name || 'PR').trim().split(/\s+/).length - 1][0]).toUpperCase())}`,
-        ];
+  const selectedVariant = productVariants.find((v: any) => v.name === selectedVariantName);
+
+  let productImages = displayProduct.images && displayProduct.images.length > 0
+    ? displayProduct.images.map((img: any) => img.url || img)
+    : [displayProduct.image || `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent((displayProduct.name || 'PR').trim().split(/\s+/).length === 1 ? (displayProduct.name || 'PR').trim().substring(0, 2).toUpperCase() : ((displayProduct.name || 'PR').trim().split(/\s+/)[0][0] + (displayProduct.name || 'PR').trim().split(/\s+/)[(displayProduct.name || 'PR').trim().split(/\s+/).length - 1][0]).toUpperCase())}`];
+
+  if (selectedVariant) {
+    const variantImages = selectedVariant.images?.length > 0 
+      ? selectedVariant.images 
+      : (selectedVariant.image ? [selectedVariant.image] : []);
+      
+    if (variantImages.length > 0) {
+      productImages = [...variantImages, ...productImages.filter((img: string) => !variantImages.includes(img))];
+    }
+  }
 
   const activeImage = productImages[activeImageIndex % productImages.length];
 
-  const comparisonListings = listings.filter((l: any) => l.price != null);
+  const filteredListings = productVariants.length > 0 && selectedVariantName
+    ? listings.filter((l: any) => l.variantName === selectedVariantName || l.name === selectedVariantName || l.name?.includes(selectedVariantName))
+    : listings;
+
+  const comparisonListings = filteredListings.filter((l: any) => l.price != null);
   const displayPrice =
     comparisonListings.length > 0
       ? Math.min(...comparisonListings.map((l: any) => l.price))
@@ -260,6 +281,28 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                   </svg>
                 </button>
               </div>
+
+              {/* Variants Selector */}
+              {productVariants.length > 0 && (
+                <div className="flex flex-col gap-2 w-full pt-2">
+                  <span className="text-[12px] font-extrabold uppercase tracking-wider text-gray-700">Select Variant</span>
+                  <div className="flex flex-wrap gap-2">
+                    {productVariants.map((v: any) => (
+                      <button
+                        key={v.id || v.name}
+                        onClick={() => setSelectedVariantName(v.name)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 border ${
+                          selectedVariantName === v.name
+                            ? 'bg-[#854cbc] text-white border-[#854cbc] shadow-[0_4px_12px_rgba(133,76,188,0.2)]'
+                            : 'bg-white text-gray-600 border-gray-200 hover:border-[#854cbc] hover:text-[#854cbc]'
+                        }`}
+                      >
+                        {v.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Marketplace Offers Comparison List */}
               <div className="flex w-full flex-col gap-3">

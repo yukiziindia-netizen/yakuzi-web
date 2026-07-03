@@ -25,24 +25,24 @@ export const renderBuyerOfferBadge = (p: any) => {
   }
   const meta = p.discountMeta || {};
   if (p.discountType === "PTR_DISCOUNT") {
-    return <span className="text-[#333333] text-[11px] sm:text-[12px] font-medium tracking-wide whitespace-nowrap">{meta.discountPercent || 0}% off</span>;
+    return <span className="text-[#4a4a4a] text-[11px] sm:text-[12px] font-medium tracking-wide whitespace-nowrap">{meta.discountPercent || 0}% off</span>;
   }
   if (p.discountType === "SAME_PRODUCT_BONUS") {
-    return <span className="text-[#333333] text-[11px] sm:text-[12px] font-medium tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} Free</span>;
+    return <span className="text-[#4a4a4a] text-[11px] sm:text-[12px] font-medium tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} Free</span>;
   }
   if (p.discountType === "PTR_PLUS_SAME_PRODUCT_BONUS") {
-    return <div className="flex flex-col gap-0.5"><span className="text-[#333333] text-[11px] sm:text-[12px] font-medium tracking-wide whitespace-nowrap">{meta.discountPercent || 0}% off</span><span className="text-[#333333] text-[11px] sm:text-[12px] font-medium tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} Free</span></div>;
+    return <div className="flex flex-col gap-0.5"><span className="text-[#4a4a4a] text-[11px] sm:text-[12px] font-medium tracking-wide whitespace-nowrap">{meta.discountPercent || 0}% off</span><span className="text-[#4a4a4a] text-[11px] sm:text-[12px] font-medium tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} Free</span></div>;
   }
   if (p.discountType === "DIFFERENT_PRODUCT_BONUS") {
-    return <span className="text-[#333333] text-[11px] sm:text-[12px] font-medium tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} {meta.bonusProductName}</span>;
+    return <span className="text-[#4a4a4a] text-[11px] sm:text-[12px] font-medium tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} {meta.bonusProductName}</span>;
   }
   if (p.discountType === "PTR_PLUS_DIFFERENT_PRODUCT_BONUS") {
-    return <div className="flex flex-col gap-0.5"><span className="text-[#333333] text-[11px] sm:text-[12px] font-medium tracking-wide whitespace-nowrap">{meta.discountPercent || 0}% off</span><span className="text-[#333333] text-[11px] sm:text-[12px] font-medium tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} {meta.bonusProductName}</span></div>;
+    return <div className="flex flex-col gap-0.5"><span className="text-[#4a4a4a] text-[11px] sm:text-[12px] font-medium tracking-wide whitespace-nowrap">{meta.discountPercent || 0}% off</span><span className="text-[#4a4a4a] text-[11px] sm:text-[12px] font-medium tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} {meta.bonusProductName}</span></div>;
   }
   if (p.discountType === "SPECIAL_PRICE") {
     return <span className="text-emerald-600 text-[11px] sm:text-[12px] font-semibold tracking-wide whitespace-nowrap">Special Price: ₹{meta.specialPrice || 0}</span>;
   }
-  return <span className="text-[#333333] text-[11px] sm:text-[12px] font-medium tracking-wide whitespace-nowrap">{p.discountType.replace(/_/g, ' ')}</span>;
+  return <span className="text-[#4a4a4a] text-[11px] sm:text-[12px] font-medium tracking-wide whitespace-nowrap">{p.discountType.replace(/_/g, ' ')}</span>;
 };
 
 function GridProductCard({ product, index, onOpenReview }: { product: any; index: number; onOpenReview: (p: any) => void }) {
@@ -155,15 +155,15 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
         </div>
 
         {/* Image Container */}
-        <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`} className="relative w-full aspect-[4/5] overflow-hidden bg-white flex justify-center items-center border-none mb-0.5">
-           <img src={imageUrl} alt={productName} className="max-h-full max-w-full object-contain p-0.5 transform group-hover:scale-105 transition-transform duration-700 ease-out drop-shadow-md" />
+        <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`} className="relative w-full aspect-[3/4] mt-[-10px] sm:mt-[-12px] mb-[-4px] sm:mb-[-6px] overflow-hidden bg-white flex justify-center items-center border-none">
+           <img src={imageUrl} alt={productName} className="max-h-full max-w-full object-contain p-0 transform scale-[1.18] group-hover:scale-[1.25] transition-transform duration-700 ease-out drop-shadow-md" />
         </Link>
 
         {/* Details Section */}
         <div className="flex-1 flex flex-col justify-end gap-2 sm:gap-2.5 z-10 w-full mt-[-4px] pb-0.5">
            {/* Title Line */}
            <div className="flex items-center justify-between w-full gap-1 sm:gap-1.5">
-              <h3 className="text-[14px] sm:text-[15px] md:text-[16px] lg:text-[17px] xl:text-[14px] font-medium text-[#333333] truncate flex-1 text-left tracking-tight leading-tight">
+              <h3 className="text-[14px] sm:text-[15px] md:text-[16px] lg:text-[17px] xl:text-[14px] font-medium text-[#4a4a4a] truncate flex-1 text-left tracking-tight leading-tight">
                  {productName}
               </h3>
               <button 
@@ -177,14 +177,14 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
            {/* Price and Rating */}
            <div className="flex justify-between items-center w-full">
               <div className="flex items-baseline gap-1 sm:gap-1.5">
-                 <span className="text-[13px] sm:text-[14px] md:text-[15px] lg:text-[16px] xl:text-[14px] font-semibold text-[#333333] tracking-tight leading-none">
+                 <span className="text-[13px] sm:text-[14px] md:text-[15px] lg:text-[16px] xl:text-[14px] font-medium text-[#4a4a4a] tracking-tight leading-none">
                     {displayPrice}
                  </span>
                  <span className="text-[10px] sm:text-[11px] md:text-[12px] lg:text-[13px] xl:text-[11px] text-gray-400 line-through leading-none">{displayOriginalPrice}</span>
               </div>
               <div className="flex items-center gap-0.5 sm:gap-1">
                  <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 lg:w-4.5 lg:h-4.5 xl:w-3.5 xl:h-3.5 text-[#7B2FBE] fill-[#7B2FBE]" />
-                 <span className="text-[12px] sm:text-[13px] md:text-[14px] lg:text-[15px] xl:text-[13px] font-medium text-[#333333] leading-none">{rating}</span>
+                 <span className="text-[12px] sm:text-[13px] md:text-[14px] lg:text-[15px] xl:text-[13px] font-medium text-[#4a4a4a] leading-none">{rating}</span>
               </div>
            </div>
 

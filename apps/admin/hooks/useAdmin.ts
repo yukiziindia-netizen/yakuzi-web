@@ -93,7 +93,11 @@ export function useAffirmUserStatus() {
 
       return result;
     },
-    onSuccess: () => void qc.invalidateQueries({ queryKey: ["admin", "users"] }),
+    onSuccess: (_data, { userId }) => {
+      // Invalidate the list AND the individual user so detail page buttons update immediately
+      void qc.invalidateQueries({ queryKey: ["admin", "users"] });
+      void qc.invalidateQueries({ queryKey: ["admin", "user", userId] });
+    },
   });
 }
 

@@ -158,7 +158,7 @@ export default function AdminProductsPage() {
                           return (
                             <div className="space-y-0.5">
                               <div>PTR: <span className="font-medium">{formatCurrency(pr.ptr)}</span></div>
-                              {pr.discountPercent > 0 && <div className="text-green-600">-{pr.discountPercent}%</div>}
+                              {pr.discountPercent > 0 && <div className="text-green-600">PTR Disc: {pr.discountPercent}%</div>}
                               <div>Sell: <span className="font-semibold text-foreground">{formatCurrency(pr.perPtrWithGst)}</span></div>
                               {pr.get > 0 && <div><Badge variant="info">B{pr.buy}G{pr.get}</Badge></div>}
                             </div>

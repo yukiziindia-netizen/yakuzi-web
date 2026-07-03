@@ -175,7 +175,7 @@ export default function PremiumProductCard({
           className={`absolute -top-[16px] left-[4px] sm:left-[8px] bg-white border border-gray-400 font-normal text-gray-900 rounded-full z-20 whitespace-nowrap shadow-none w-fit px-2 h-[20px] sm:h-[22px] flex items-center justify-center ${discountTag.length > 12 ? 'text-[8px] xs:text-[9px] sm:text-[9.5px]' : 'text-[9px] xs:text-[10px] sm:text-[11.5px]'
             }`}
         >
-          {discountTag.replace(/ptr discount/i, 'off')}
+          {discountTag}
         </div>
       )}
 

@@ -24,8 +24,10 @@ export function PriceSection({
   // Use selling price if provided, otherwise use mrp
   const finalPrice = sellingPrice ?? mrp;
   
-  // Calculate discount if not provided
-  const calculatedDiscount = discountPercent ?? (mrp > finalPrice ? Math.round(((mrp - finalPrice) / mrp) * 100) : 0);
+  // Only use the explicitly provided discountPercent (PTR discount from seller).
+  // Do NOT fall back to (MRP - price)/MRP — that gives a simple MRP markdown,
+  // not the actual PTR discount %, which would mislead buyers.
+  const calculatedDiscount = discountPercent ?? 0;
 
   if (compact) {
     return (

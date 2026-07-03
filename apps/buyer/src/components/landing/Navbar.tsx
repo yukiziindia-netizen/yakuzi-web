@@ -112,6 +112,7 @@ export default function Navbar({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   const { data: categoriesData } = useCategories();
   const categories = Array.isArray(categoriesData) ? categoriesData : (categoriesData as any)?.data ?? [];
@@ -164,6 +165,10 @@ export default function Navbar({
   useEffect(() => {
     if (isMounted) {
       localStorage.setItem('yukizi_current_chat', JSON.stringify(chatMessages));
+    }
+    // Auto-scroll chat when messages change
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [chatMessages, isMounted]);
 
@@ -601,7 +606,7 @@ export default function Navbar({
                 <div className="w-full h-full bg-gradient-to-r from-[#8527bf] via-[#ae44eb] to-[#8d2bcd] rounded-2xl md:rounded-3xl shadow-[0_0_80px_rgba(174,68,235,0.75)] p-6 sm:p-8 md:p-10 flex flex-col">
                   {/* Chat Messages Area */}
                   {chatMessages.length > 0 && (
-                    <div className="flex-1 overflow-y-auto mb-4 flex flex-col gap-4 scrollbar-hide">
+                    <div ref={chatContainerRef} className="flex-1 overflow-y-auto mb-4 flex flex-col gap-4 scrollbar-hide">
                       {chatMessages.map((msg, idx) => (
                         <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                           <div className={`max-w-[80%] rounded-2xl px-4 py-2 ${msg.role === 'user' ? 'bg-white text-[#7f26d9]' : 'bg-[#562996] text-white border border-white/20'}`}>
@@ -747,7 +752,7 @@ export default function Navbar({
                                 </div>
                                 <button
                                   onClick={(e) => deleteSession(e, session.id)}
-                                  className="opacity-0 group-hover:opacity-100 p-2 text-white/40 hover:text-red-400 hover:bg-red-400/10 rounded-full transition-all"
+                                  className="p-2 text-white/40 hover:text-red-400 hover:bg-red-400/10 rounded-full transition-all"
                                   title="Delete Session"
                                 >
                                   <Trash2 className="w-4 h-4" />

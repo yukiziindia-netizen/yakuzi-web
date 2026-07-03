@@ -213,9 +213,15 @@ export function ProductForm({
     }
 
     try {
-      // Fetch the full product to ensure we get all variants and options
+      // Fetch the full product to ensure we get all variants, options, and extra fields
       const fullProduct = await getSellerProductById(suggestion.id);
       
+      // Sync sku and specifications from the full product (more complete data)
+      const resolvedSku = fullProduct?.sku ?? (suggestion as any).sku ?? "";
+      const resolvedSpecs = fullProduct?.specifications ?? (suggestion as any).specifications ?? "";
+      setValue("sku", resolvedSku, { shouldDirty: true });
+      setValue("specifications", resolvedSpecs, { shouldDirty: true });
+
       const optionsToUse = fullProduct?.options || suggestion.options;
       const variantsToUse = fullProduct?.variants || suggestion.variants;
 

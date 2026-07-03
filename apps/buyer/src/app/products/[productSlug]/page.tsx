@@ -382,7 +382,7 @@ function ComparisonOffersList({
         const sellerMoq = listing.moq || listing.minimumOrderQuantity || 1;
         const minQty = sellerMoq;
 
-        const discountPercent = listing.discount || 1.99;
+        // discountPercent not needed here — renderBuyerOfferBadge(listing) handles all discount types correctly
 
         const handleQtyChange = (newQty: number) => {
           if (cartItem) {

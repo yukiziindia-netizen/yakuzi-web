@@ -31,6 +31,7 @@ import {
   getEffectiveDiscountPercent,
   generateProductSlug,
 } from '@yukizi/utils';
+import { renderBuyerOfferBadge } from '@/components/landing/ProductCarousel';
 import type { Product } from '@yukizi/utils';
 import { usePlatformConfig } from '@/hooks/usePlatformConfig';
 import { useWishlist, useAddToWishlist, useRemoveFromWishlist } from '@/hooks/useWishlist';
@@ -277,10 +278,13 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                       listing.originalPrice ||
                       displayProduct.mrp ||
                       displayProduct.originalPrice;
+                    // Read PTR discount % directly from discountMeta — do NOT recalculate as simple (MRP-price)/MRP
+                    // which would show incorrect simple discount % instead of PTR discount %
+                    const discountMeta = listing.discountMeta || {};
                     const discountPercent =
-                      itemMrp && listing.price && itemMrp > listing.price
-                        ? Math.round(((itemMrp - listing.price) / itemMrp) * 100)
-                        : listing.discountMeta?.discountPercent || 20;
+                      discountMeta.discountPercent
+                        ? discountMeta.discountPercent
+                        : 0;
 
                     const handleQtyChange = (newQty: number) => {
                       if (itemQty === 0) {
@@ -299,8 +303,15 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                       >
                         {/* Left: Discount Badge & Price */}
                         <div className="flex min-w-[105px] items-center gap-1.5 sm:min-w-[130px] sm:gap-2">
-                          <div className="min-w-[50px] flex-shrink-0 select-none rounded-lg bg-[#864ac5] px-1.5 py-1 text-center text-[8px] font-black uppercase leading-none tracking-wider text-white sm:min-w-[55px] sm:px-2 sm:py-1.5 sm:text-[9px]">
-                            {discountPercent}% off
+                          {/* Offer Badge — shows correct type (PTR discount / Buy X Get Y / Special Price) */}
+                          <div className="min-w-[50px] flex-shrink-0 select-none">
+                            {renderBuyerOfferBadge(listing) || (
+                              discountPercent > 0 ? (
+                                <div className="rounded-lg bg-[#864ac5] px-1.5 py-1 text-center text-[8px] font-black uppercase leading-none tracking-wider text-white sm:px-2 sm:py-1.5 sm:text-[9px]">
+                                  {discountPercent}% off PTR
+                                </div>
+                              ) : null
+                            )}
                           </div>
                           <div className="flex min-w-0 flex-col">
                             <span className="truncate text-xs font-black leading-none text-gray-800 sm:text-[14px]">

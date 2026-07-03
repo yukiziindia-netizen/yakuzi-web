@@ -203,13 +203,16 @@ export default function UserDetailPage() {
                   />
                 )}
                 {(() => {
-                  let docs: any = sp.additionalDocuments;
+                  // additionalDocuments may be on sp or at top-level user, and may be a JSON string
+                  let docs: any = sp.additionalDocuments ?? (user as any).additionalDocuments;
                   if (typeof docs === 'string') {
                     try { docs = JSON.parse(docs); } catch (e) { docs = [docs]; }
                   }
-                  return Array.isArray(docs) && docs.length > 0 ? docs.map((docUrl: string | any, idx: number) => (
-                    <SecureDocViewer key={`doc-${idx}`} url={typeof docUrl === 'object' ? docUrl.url : docUrl} label={`Further Document ${idx + 1}`} />
-                  )) : null;
+                  if (!docs || (Array.isArray(docs) && docs.length === 0)) return null;
+                  const docsArr = Array.isArray(docs) ? docs : [docs];
+                  return docsArr.map((docUrl: string | any, idx: number) => (
+                    <SecureDocViewer key={`doc-${idx}`} url={typeof docUrl === 'object' ? (docUrl.url ?? '') : docUrl} label={`Additional Document ${idx + 1}`} />
+                  ));
                 })()}
               </div>
             ) : (

@@ -133,8 +133,8 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
         parsedVariants = incomingVariants.map((v: any) => ({
           id: v.id || Math.random().toString(36).substring(7),
           name: v.name,
-          price: v.price !== undefined ? String(v.price) : (v.options?.price ? String(v.options.price) : ""),
-          available: v.available !== undefined ? String(v.available) : (v.options?.available ? String(v.options.available) : "0"),
+          sku: v.sku !== undefined ? String(v.sku) : (v.options?.sku ? String(v.options.sku) : ""),
+          shippingCharges: v.shippingCharges !== undefined ? String(v.shippingCharges) : (v.options?.shippingCharges ? String(v.options.shippingCharges) : "0"),
           image: v.image || v.options?.image || undefined
         }));
         setVariants(parsedVariants);
@@ -182,8 +182,8 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
         options: options.length > 0 ? options.map(o => ({ name: o.name, values: o.values })) : undefined,
         variants: variants.length > 0 ? variants.map(v => ({ 
           name: v.name, 
-          price: Number(v.price), 
-          available: Number(v.available),
+          sku: v.sku,
+          shippingCharges: Number(v.shippingCharges),
           image: v.image
         })) : undefined,
       };
@@ -335,11 +335,12 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
                 value={form.sku}
                 onChange={e => setForm(f => ({ ...f, sku: e.target.value }))}
               />
-              <Input
+              <Textarea
                 label="Product Specification"
-                placeholder="e.g. 500mg, Cotton, etc."
+                placeholder="e.g. 500mg, Cotton, etc. (press Enter for new lines)"
                 value={form.specifications}
                 onChange={e => setForm(f => ({ ...f, specifications: e.target.value }))}
+                rows={4}
               />
               <Input
                 label="Shipping Charges (₹)"
@@ -353,6 +354,14 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
           </motion.div>
 
         </div>
+      </div>
+
+      {/* Bottom Save Button */}
+      <div className="flex items-center justify-end gap-3 pt-4 border-t border-border/40">
+        <Button variant="ghost" onClick={onClose} disabled={loading}>Discard</Button>
+        <Button onClick={handleSave} loading={loading} leftIcon={<Save className="h-4 w-4" />}>
+          Save
+        </Button>
       </div>
     </div>
   );

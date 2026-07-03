@@ -11,6 +11,7 @@ import { SuggestionForm } from "@/components/suggestions/suggestion-form";
 export default function MasterCatalogPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "draft">("all");
   const limit = 25;
   const { data: suggestionsData, isLoading } = useSuggestions({ page, limit, search: search || undefined });
   const deleteSuggestion = useDeleteSuggestion();
@@ -18,8 +19,17 @@ export default function MasterCatalogPage() {
   const [view, setView] = useState<'list' | 'form'>('list');
   const [editing, setEditing] = useState<any>(null);
 
-  const suggestions: any[] = Array.isArray(suggestionsData) ? suggestionsData : (suggestionsData?.data ?? []);
-  const total = suggestionsData?.total ?? suggestions.length;
+  const allSuggestions: any[] = Array.isArray(suggestionsData) ? suggestionsData : (suggestionsData?.data ?? []);
+  const total = suggestionsData?.total ?? allSuggestions.length;
+
+  const suggestions = allSuggestions.filter((s: any) => {
+    if (statusFilter === "active") return s.isActive !== false;
+    if (statusFilter === "draft")  return s.isActive === false;
+    return true;
+  });
+
+  const activeCount = allSuggestions.filter((s: any) => s.isActive !== false).length;
+  const draftCount  = allSuggestions.filter((s: any) => s.isActive === false).length;
 
   const openCreate = () => {
     setEditing(null);
@@ -84,19 +94,42 @@ export default function MasterCatalogPage() {
               <Input placeholder="Search catalog…" value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} leftIcon={<Search className="h-4 w-4" />} />
             </div>
 
+            <div className="flex gap-1.5">
+              {([
+                { key: "all",    label: "All",    count: allSuggestions.length },
+                { key: "active", label: "Active", count: activeCount },
+                { key: "draft",  label: "Draft",  count: draftCount },
+              ] as const).map(tab => (
+                <button
+                  key={tab.key}
+                  onClick={() => { setStatusFilter(tab.key); setPage(1); }}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${
+                    statusFilter === tab.key
+                      ? tab.key === "draft"
+                        ? "bg-muted text-foreground border-border shadow-sm"
+                        : "bg-primary text-white border-primary"
+                      : "border-border text-muted-foreground hover:bg-accent/60"
+                  }`}
+                >
+                  {tab.label}
+                  <span className="ml-1.5 opacity-70">({tab.count})</span>
+                </button>
+              ))}
+            </div>
+
             <div className="glass-card rounded-2xl overflow-hidden border border-border/50">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="border-b border-border/50 bg-muted/20">
-                      {["Product Details", "MRP", "Category", "Actions"].map(h => (
+                      {["Product Details", "MRP", "Category", "Status", "Actions"].map(h => (
                         <th key={h} className="px-5 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/30">
                     {suggestions.length === 0 ? (
-                      <tr><td colSpan={4} className="py-20 text-center text-sm text-muted-foreground">No catalog entries found. Import a CSV to get started.</td></tr>
+                      <tr><td colSpan={5} className="py-20 text-center text-sm text-muted-foreground">No catalog entries found.</td></tr>
                     ) : suggestions.map((s: any, i: number) => (
                       <motion.tr key={s.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }} className="hover:bg-accent/30 transition-colors group">
                         <td className="px-5 py-4">
@@ -111,6 +144,13 @@ export default function MasterCatalogPage() {
                             <Badge variant="outline" className="text-[10px] w-fit">{s.category?.name || s.category || "General"}</Badge>
                             {s.subCategory && <span className="text-[10px] text-muted-foreground px-1">{s.subCategory?.name || s.subCategory}</span>}
                           </div>
+                        </td>
+                        <td className="px-5 py-4">
+                          {s.isActive === false ? (
+                            <Badge variant="default" className="text-[10px]">Draft</Badge>
+                          ) : (
+                            <Badge variant="success" className="text-[10px]">Active</Badge>
+                          )}
                         </td>
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-1">
@@ -140,8 +180,12 @@ export default function MasterCatalogPage() {
                   <p className="text-2xl font-bold text-foreground">{total}</p>
                 </div>
                 <div className="p-4 bg-muted/30 rounded-xl">
-                  <p className="text-xs text-muted-foreground uppercase font-medium">Categories</p>
-                  <p className="text-2xl font-bold text-foreground">—</p>
+                  <p className="text-xs text-muted-foreground uppercase font-medium">Active</p>
+                  <p className="text-2xl font-bold text-green-600">{activeCount}</p>
+                </div>
+                <div className="p-4 bg-muted/30 rounded-xl col-span-2">
+                  <p className="text-xs text-muted-foreground uppercase font-medium">Draft</p>
+                  <p className="text-2xl font-bold text-foreground">{draftCount}</p>
                 </div>
               </div>
             </div>

@@ -199,7 +199,7 @@ export default function ProductCard({
         <div className={`flex items-center w-full ${displayDiscount ? 'justify-between' : 'justify-end'}`}>
           {displayDiscount && (
             <span className="text-[15px] sm:text-[16px] font-bold text-[#333333]">
-              {displayDiscount.toString().replace(/ptr discount/i, 'off')}
+              {displayDiscount}
             </span>
           )}
           <div className="-mr-2 sm:-mr-2.5">

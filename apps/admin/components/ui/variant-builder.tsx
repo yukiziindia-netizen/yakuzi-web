@@ -17,8 +17,8 @@ export interface VariantOption {
 export interface VariantCombination {
   id: string; // e.g. "Medium / Red"
   name: string;
-  price: string;
-  available: string;
+  sku: string;
+  shippingCharges: string;
   image?: string;
 }
 
@@ -285,8 +285,8 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
       return {
         id: Math.random().toString(36).substr(2, 9),
         name: comboName,
-        price: "0.00",
-        available: "0"
+        sku: "",
+        shippingCharges: "0"
       };
     });
 
@@ -527,8 +527,8 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                       </div>
                     </th>
                     <th scope="col" className="px-6 py-3 font-medium">Variant</th>
-                    <th scope="col" className="px-6 py-3 font-medium">Price</th>
-                    <th scope="col" className="px-6 py-3 font-medium">Available</th>
+                    <th scope="col" className="px-6 py-3 font-medium">SKU</th>
+                    <th scope="col" className="px-6 py-3 font-medium">Shipping Charges (₹)</th>
                     <th scope="col" className="px-6 py-3 font-medium">Publishing</th>
                   </tr>
                 </thead>
@@ -554,27 +554,27 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                         {variant.name}
                       </td>
                       <td className="px-6 py-4">
+                        <input
+                          type="text"
+                          value={variant.sku}
+                          onChange={(e) => updateVariant(variant.id, "sku", e.target.value)}
+                          className="focus:ring-blue-500 focus:border-blue-500 block w-28 sm:text-sm border-gray-300 rounded-md py-1.5 px-2"
+                          placeholder="SKU-001"
+                        />
+                      </td>
+                      <td className="px-6 py-4">
                         <div className="relative rounded-md shadow-sm">
                           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <span className="text-gray-500 sm:text-sm">₹</span>
                           </div>
                           <input
-                            type="text"
-                            value={variant.price}
-                            onChange={(e) => updateVariant(variant.id, "price", e.target.value)}
+                            type="number"
+                            value={variant.shippingCharges}
+                            onChange={(e) => updateVariant(variant.id, "shippingCharges", e.target.value)}
                             className="focus:ring-blue-500 focus:border-blue-500 block w-28 pl-9 sm:text-sm border-gray-300 rounded-md py-1.5"
-                            placeholder="0.00"
+                            placeholder="0"
                           />
                         </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <input
-                          type="number"
-                          value={variant.available}
-                          onChange={(e) => updateVariant(variant.id, "available", e.target.value)}
-                          className="focus:ring-blue-500 focus:border-blue-500 block w-24 sm:text-sm border-gray-300 rounded-md py-1.5"
-                          placeholder="0"
-                        />
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center text-gray-500">
@@ -595,7 +595,7 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
               </table>
             </div>
             <div className="p-4 bg-gray-50 text-sm text-gray-600 border-t border-gray-200">
-              Total inventory at Shop location: {variants.reduce((acc, v) => acc + (parseInt(v.available) || 0), 0)} available
+              {variants.length} variant{variants.length !== 1 ? "s" : ""} configured
             </div>
           </div>
         )}

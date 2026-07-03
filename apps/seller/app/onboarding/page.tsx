@@ -60,6 +60,7 @@ export default function SellerOnboardingPage() {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isAgreed, setIsAgreed] = useState(false);
 
   const [uploadingCheck, setUploadingCheck] = useState(false);
   const [uploadedCheckName, setUploadedCheckName] = useState("");
@@ -221,6 +222,11 @@ export default function SellerOnboardingPage() {
   const handleSubmit = async () => {
     if (!validate()) {
       toast.error("Please fill all required fields correctly");
+      return;
+    }
+
+    if (!isAgreed) {
+      toast.error("Please agree to the privacy policy before submitting");
       return;
     }
 
@@ -434,12 +440,26 @@ export default function SellerOnboardingPage() {
             </div>
 
             <div className="pt-8 border-t border-slate-100">
-               <div className="p-5 bg-blue-50 border border-blue-100 rounded-3xl flex gap-4 mb-8">
+               <div className="p-5 bg-blue-50 border border-blue-100 rounded-3xl flex gap-4 mb-6">
                 <AlertCircle className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
                 <p className="text-sm text-blue-700 font-medium leading-relaxed">
                   By submitting, you agree that the information provided is correct. Your profile will be verified by our compliance team. If any details are incorrect, your application may be rejected.
                 </p>
               </div>
+
+              <div className="flex items-start gap-3 mb-8 px-2">
+                <input 
+                  type="checkbox" 
+                  id="agreePrivacy" 
+                  checked={isAgreed}
+                  onChange={(e) => setIsAgreed(e.target.checked)}
+                  className="mt-1 w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary"
+                />
+                <label htmlFor="agreePrivacy" className="text-sm text-slate-600 font-medium leading-relaxed">
+                  I agree to the <a href="/privacy-policy" target="_blank" className="text-primary hover:underline">Privacy Policy</a> and consent to the processing of my business details for verification purposes.
+                </label>
+              </div>
+
               <Button size="lg" className="w-full h-16 rounded-2xl font-black text-xl shadow-xl shadow-primary/25" onClick={handleSubmit} loading={updateProfile.isPending}>
                 Submit Application <CheckCircle2 className="ml-2 w-6 h-6" />
               </Button>

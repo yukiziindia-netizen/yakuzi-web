@@ -39,7 +39,7 @@ export default async function HomePage({
           <div className="w-full flex-shrink-0 flex flex-col">
             <HeroSection />
           </div>
-          <div className="flex-1 min-h-[300px] overflow-hidden bg-transparent mt-4 sm:mt-6">
+          <div className="flex-1 min-h-[300px] overflow-hidden bg-transparent mt-0">
             <ProductCarousel initialProducts={initialProducts} />
           </div>
         </section>

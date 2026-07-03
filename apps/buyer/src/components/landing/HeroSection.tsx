@@ -188,15 +188,15 @@ export default function HeroSection({ title = 'YUKiZi' }: HeroSectionProps) {
       </div>
 
       {/* Bottom Slider Section */}
-      <div className="border-b border-gray-300 bg-[#e2e2e2] px-4 py-2">
-        <div className="mx-auto flex max-w-4xl items-center justify-center gap-4 md:gap-8">
+      <div className="border-b border-gray-300 bg-[#e2e2e2] px-4 py-1.5 sm:py-2">
+        <div className="mx-auto flex max-w-4xl items-center justify-center gap-2 xs:gap-3 md:gap-6">
           {/* Left Arrow */}
-          <button className="flex cursor-pointer items-center justify-center p-1 text-gray-500 transition-colors hover:text-gray-800">
-            <ChevronLeft size={20} strokeWidth={4} />
+          <button className="flex cursor-pointer items-center justify-center p-1 text-[#8c8c8c] transition-colors hover:text-gray-800">
+            <ChevronLeft size={28} strokeWidth={4.5} />
           </button>
 
           {/* Logos */}
-          <div className="flex flex-nowrap items-center justify-center gap-2.5 xs:gap-3.5 md:gap-12">
+          <div className="flex flex-nowrap items-center justify-center gap-4 xs:gap-6 md:gap-16">
             {isLoadingBrands ? (
               <span className="text-sm italic text-gray-400">Loading brands...</span>
             ) : (
@@ -205,25 +205,25 @@ export default function HeroSection({ title = 'YUKiZi' }: HeroSectionProps) {
                   key={brand.id}
                   src={brand.imageUrl}
                   alt={brand.name}
-                  className="h-[22px] xs:h-7 cursor-pointer object-contain mix-blend-multiply transition-transform hover:scale-110 md:h-12"
+                  className="h-[30px] xs:h-[36px] md:h-[54px] cursor-pointer object-contain mix-blend-multiply transition-transform hover:scale-110"
                 />
               ))
             )}
           </div>
 
           {/* Right Arrow */}
-          <button className="flex cursor-pointer items-center justify-center p-1 text-gray-500 transition-colors hover:text-gray-800">
-            <ChevronRight size={20} strokeWidth={4} />
+          <button className="flex cursor-pointer items-center justify-center p-1 text-[#8c8c8c] transition-colors hover:text-gray-800">
+            <ChevronRight size={28} strokeWidth={4.5} />
           </button>
         </div>
       </div>
 
       {/* Dots */}
-      <div className="flex justify-center gap-2 bg-white py-2 pb-4">
+      <div className="flex justify-center gap-2 bg-white pt-5 pb-1">
         <div className="h-2.5 w-2.5 cursor-pointer rounded-full bg-gray-400"></div>
-        <div className="h-2.5 w-2.5 cursor-pointer rounded-full bg-gray-200 transition-colors hover:bg-gray-400"></div>
-        <div className="h-2.5 w-2.5 cursor-pointer rounded-full bg-gray-200 transition-colors hover:bg-gray-400"></div>
-        <div className="h-2.5 w-2.5 cursor-pointer rounded-full bg-gray-200 transition-colors hover:bg-gray-400"></div>
+        <div className="h-2.5 w-2.5 cursor-pointer rounded-full bg-gray-400"></div>
+        <div className="h-2.5 w-2.5 cursor-pointer rounded-full bg-gray-400"></div>
+        <div className="h-2.5 w-2.5 cursor-pointer rounded-full bg-gray-400"></div>
       </div>
     </div>
   );

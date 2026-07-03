@@ -189,14 +189,14 @@ export default function HeroSection({ title = 'YUKiZi' }: HeroSectionProps) {
 
       {/* Bottom Slider Section */}
       <div className="border-b border-gray-300 bg-[#e2e2e2] px-4 py-1.5 sm:py-2">
-        <div className="mx-auto flex max-w-4xl items-center justify-center gap-2 xs:gap-3 md:gap-6">
+        <div className="mx-auto flex max-w-4xl items-center justify-center gap-3 xs:gap-3 md:gap-6">
           {/* Left Arrow */}
           <button className="flex cursor-pointer items-center justify-center p-1 text-[#8c8c8c] transition-colors hover:text-gray-800">
-            <ChevronLeft size={28} strokeWidth={4.5} />
+            <ChevronLeft className="h-[20px] w-[20px] xs:h-[24px] xs:w-[24px] md:h-[28px] md:w-[28px]" strokeWidth={4.5} />
           </button>
 
           {/* Logos */}
-          <div className="flex flex-nowrap items-center justify-center gap-4 xs:gap-6 md:gap-16">
+          <div className="flex flex-nowrap items-center justify-center gap-3 xs:gap-6 md:gap-16">
             {isLoadingBrands ? (
               <span className="text-sm italic text-gray-400">Loading brands...</span>
             ) : (
@@ -205,7 +205,7 @@ export default function HeroSection({ title = 'YUKiZi' }: HeroSectionProps) {
                   key={brand.id}
                   src={brand.imageUrl}
                   alt={brand.name}
-                  className="h-[30px] xs:h-[36px] md:h-[54px] cursor-pointer object-contain mix-blend-multiply transition-transform hover:scale-110"
+                  className="h-[24px] xs:h-[36px] md:h-[54px] cursor-pointer object-contain mix-blend-multiply transition-transform hover:scale-110"
                 />
               ))
             )}
@@ -213,7 +213,7 @@ export default function HeroSection({ title = 'YUKiZi' }: HeroSectionProps) {
 
           {/* Right Arrow */}
           <button className="flex cursor-pointer items-center justify-center p-1 text-[#8c8c8c] transition-colors hover:text-gray-800">
-            <ChevronRight size={28} strokeWidth={4.5} />
+            <ChevronRight className="h-[20px] w-[20px] xs:h-[24px] xs:w-[24px] md:h-[28px] md:w-[28px]" strokeWidth={4.5} />
           </button>
         </div>
       </div>

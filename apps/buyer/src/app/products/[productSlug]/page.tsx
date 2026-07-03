@@ -259,34 +259,34 @@ function ProductBannerCard({
   const isDesktop = variant === 'desktop';
 
   return (
-    <div className="relative w-full aspect-square rounded-[24px] bg-transparent flex items-center justify-center p-0 mt-4 lg:mt-0">
+    <div className="relative w-full aspect-[4/3] rounded-[24px] bg-transparent flex items-center justify-center p-0 mt-4 lg:mt-0 border border-gray-200/80 shadow-md">
       {/* Share Button on Top Left Corner */}
       <div className="absolute top-4 left-4 z-30">
         <ShareButton 
           productName={productName}
           productId={productId}
           productPrice={productPrice}
-          className="p-2.5 sm:p-3 bg-white rounded-full text-gray-600 focus:outline-none hover:scale-105 transition-all shadow-md hover:text-purple-600 border-none"
-          iconClassName="w-5 h-5"
+          className="p-2 bg-white rounded-full text-gray-600 focus:outline-none hover:scale-105 transition-all shadow-md hover:text-purple-600 border-none"
+          iconClassName="w-4 h-4"
         />
       </div>
 
-      {/* Vertical Thumbnails */}
-      <div className="absolute left-4 lg:left-6 bottom-8 lg:bottom-14 flex flex-col gap-3.5 lg:gap-5 z-20">
+      {/* Vertical Thumbnails at bottom left side */}
+      <div className="absolute left-3 lg:left-6 bottom-3 lg:bottom-6 flex flex-col gap-2 z-20">
         {images.slice(0, 3).map((img: string, idx: number) => (
           <button
             key={idx}
             type="button"
             onClick={() => setActiveImageIndex(idx)}
-            className={`w-12 h-12 lg:w-16 lg:h-16 rounded-xl overflow-hidden border bg-white/20 backdrop-blur-md shadow-md transition-all duration-200 focus:outline-none ${
+            className={`rounded-xl overflow-hidden border bg-white/20 backdrop-blur-md shadow-md transition-all duration-200 focus:outline-none w-10 h-10 sm:w-12 sm:h-12 ${
               activeImageIndex === idx ? 'border-white/90 scale-105 shadow-lg' : 'border-white/30 hover:border-white/60'
             }`}
           >
             <Image 
               src={img} 
               alt="" 
-              width={64}
-              height={64}
+              width={48}
+              height={48}
               className="w-full h-full object-cover" 
             />
           </button>
@@ -310,21 +310,21 @@ function ProductBannerCard({
       <button
         type="button"
         onClick={onBookmarkToggle}
-        className="absolute -right-[10px] sm:-right-[12px] top-[45%] z-30 focus:outline-none transition-transform hover:scale-105"
+        className={`absolute -right-[15px] sm:-right-[15px] ${isDesktop ? 'top-[45%]' : 'top-1/2 -translate-y-1/2'} z-30 focus:outline-none transition-transform hover:scale-105`}
       >
         <svg
-          width="44"
-          height="40"
-          viewBox="0 0 44 40"
+          width="30"
+          height="24"
+          viewBox="0 0 30 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
           className="overflow-visible drop-shadow-md"
         >
           <path
-            d="M0 0 H44 V40 H0 L12 20 Z"
+            d="M0 0 H30 V24 H0 L8 12 Z"
             fill={isBookmarked ? "#7B2FBE" : "#ffffff"}
             stroke="#7B2FBE"
-            strokeWidth="1.2"
+            strokeWidth="1.5"
             strokeLinejoin="round"
           />
         </svg>
@@ -822,7 +822,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
           <div className="flex items-center justify-between w-full px-1 mb-1">
             <div className="flex items-center gap-2">
               {isYukiziChoice && (
-                <div className="rounded-full bg-[#854cbc] px-4 py-1 text-[12px] font-bold tracking-wide text-white shadow-sm">
+                <div className="rounded-full bg-[#7B2FBE] px-4 py-1 text-[12px] font-bold tracking-wide text-white shadow-sm">
                   Yukizi Choice
                 </div>
               )}
@@ -833,7 +833,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
               )}
             </div>
             {isAd && (
-              <span className="text-[13px] text-gray-400 font-bold select-none">Ad</span>
+              <span className="text-[11px] text-gray-400 font-semibold select-none">Ad</span>
             )}
           </div>
 
@@ -1015,12 +1015,12 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
         {/* DESKTOP VIEW LAYOUT */}
         <div className="hidden lg:flex flex-col gap-6 w-full">
           {/* Header Row */}
-          <div className="grid grid-cols-[1.15fr_1fr] gap-10 items-center mt-6">
+          <div className="grid grid-cols-[1fr_1.25fr] gap-10 items-center mt-6">
             {/* Left Header */}
-            <div className="flex items-center justify-between w-full mb-2">
+            <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-2">
                 {isYukiziChoice && (
-                  <div className="rounded-full bg-[#854cbc] px-4 py-1 text-[12px] font-bold tracking-wide text-white shadow-sm">
+                  <div className="rounded-full bg-[#7B2FBE] px-4 py-1 text-[12px] font-bold tracking-wide text-white shadow-sm">
                     Yukizi Choice
                   </div>
                 )}
@@ -1031,7 +1031,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                 )}
               </div>
               {isAd && (
-                <span className="text-[13px] text-gray-400 font-bold select-none">Ad</span>
+                <span className="text-[11px] text-gray-400 font-semibold select-none">Ad</span>
               )}
             </div>
 
@@ -1067,7 +1067,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
           </div>
 
           {/* 2-Column Grid */}
-          <div className="grid grid-cols-[1.15fr_1fr] gap-10 items-start">
+          <div className="grid grid-cols-[1fr_1.25fr] gap-10 items-start">
             {/* Left Column */}
             <div className="flex flex-col gap-6">
               {/* Product Image Banner */}
@@ -1100,14 +1100,14 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
             <div className="flex flex-col">
               {/* Title Block */}
               <div className="flex items-start justify-between w-full mb-3">
-                <h1 className="text-2xl font-semibold text-gray-500 tracking-tight leading-tight max-w-[85%]">
+                <h1 className="text-2xl font-semibold text-[#4a4a4a] tracking-tight leading-tight max-w-[85%]">
                   {product.name}
                 </h1>
               </div>
 
               {/* Price details */}
               <div className="flex items-baseline gap-3 mb-2">
-                <span className="text-[26px] font-semibold text-gray-700 leading-none">
+                <span className="text-[26px] font-semibold text-[#4a4a4a] leading-none">
                   ₹{displayPrice?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                 </span>
                 {displayMrp && displayMrp > displayPrice && (
@@ -1126,8 +1126,8 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                 <div className="flex items-center gap-4">
                   <DeliveryTruckBadge text={product.deliveryText || "3 days"} className="w-[72px] h-auto text-gray-400" />
                   <div className="flex items-center gap-1">
-                    <Star className="w-5 h-5 fill-[#854cbc] text-[#854cbc]" />
-                    <span className="text-[15px] font-bold text-gray-900">{averageRating.toFixed(1)}</span>
+                    <Star className="w-5 h-5 fill-[#7B2FBE] text-[#7B2FBE]" />
+                    <span className="text-[15px] font-bold text-[#4a4a4a]">{averageRating.toFixed(1)}</span>
                   </div>
                 </div>
               </div>

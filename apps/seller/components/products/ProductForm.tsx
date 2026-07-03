@@ -113,6 +113,7 @@ export function ProductForm({
   const watchMaxMoq = watch("max_order_qty");
   const watchDiscount = watch("discount_form_details");
   const watchShippingCharges = watch("shipping_charges") || 0;
+  const watchTaxStatus = watch("is_tax_included") || false;
   const lastMrpRef = useRef<number>(0);
 
   // Real-time discount calculation when compare_at_price is added/updated
@@ -242,9 +243,11 @@ export function ProductForm({
         finalVariants = variantsToUse.map((v: any) => ({
           id: Math.random().toString(36).substr(2, 9),
           name: v.name,
-          price: v.price?.toString() || "0",
-          available: v.available?.toString() || "0",
-          image: v.image
+          price: v.price?.toString() || v.options?.price?.toString() || "0",
+          available: v.available?.toString() || v.options?.available?.toString() || "0",
+          image: v.image || v.options?.image,
+          sku: v.sku || v.options?.sku || "",
+          shippingCharges: v.shippingCharges?.toString() || v.options?.shippingCharges?.toString() || "0"
         }));
       }
       
@@ -279,9 +282,11 @@ export function ProductForm({
         finalVariantsFallback = suggestion.variants.map(v => ({
           id: Math.random().toString(36).substr(2, 9),
           name: v.name,
-          price: v.price?.toString() || "0",
-          available: v.available?.toString() || "0",
-          image: v.image
+          price: v.price?.toString() || v.options?.price?.toString() || "0",
+          available: v.available?.toString() || v.options?.available?.toString() || "0",
+          image: v.image || v.options?.image,
+          sku: v.sku || v.options?.sku || "",
+          shippingCharges: v.shippingCharges?.toString() || v.options?.shippingCharges?.toString() || "0"
         }));
       }
 
@@ -528,7 +533,7 @@ export function ProductForm({
           {/* Shipping & Delivery */}
           <div className="glass-card rounded-2xl p-6 space-y-4 relative z-[43] transition-opacity duration-300">
             <h2 className="font-semibold text-lg text-foreground border-b border-border/50 pb-2">Shipping & Delivery</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <div className="grid grid-cols-1 gap-4 pt-2">
               <Input 
                 label="Delivery Time (in days)" 
                 type="number"
@@ -536,14 +541,6 @@ export function ProductForm({
                 placeholder="e.g. 3" 
                 error={errors.delivery_text?.message} 
                 {...register("delivery_text")} 
-              />
-              <Input 
-                label="Shipping Charges (₹)" 
-                type="number"
-                min={0}
-                placeholder="0" 
-                error={errors.shipping_charges?.message} 
-                {...register("shipping_charges", { valueAsNumber: true })} 
               />
             </div>
           </div>
@@ -565,6 +562,7 @@ export function ProductForm({
               type="number" 
               step="0.01" 
               placeholder="3345"
+              disabled={true}
               error={errors.compare_at_price?.message} 
               {...register("compare_at_price", { valueAsNumber: true })} 
             />
@@ -648,6 +646,7 @@ export function ProductForm({
             gstPercent={watchGst}
             discountDetails={watchDiscount}
             shippingCharges={watchShippingCharges}
+            isTaxIncluded={watchTaxStatus}
           />
         </div>
 

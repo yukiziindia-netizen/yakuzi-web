@@ -27,6 +27,8 @@ export interface VariantCombination {
   price: string;
   available: string;
   image?: string;
+  sku?: string;
+  shippingCharges?: string;
 }
 
 interface VariantBuilderProps {
@@ -39,6 +41,7 @@ interface VariantBuilderProps {
   gstPercent?: number;
   discountDetails?: DiscountFormDetails;
   shippingCharges?: number;
+  isTaxIncluded?: boolean;
 }
 
 // Helper to generate cartesian product
@@ -76,7 +79,8 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
   onAddProductMedia,
   gstPercent,
   discountDetails,
-  shippingCharges
+  shippingCharges,
+  isTaxIncluded
 }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -96,13 +100,19 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
     const updatedVariants: VariantCombination[] = newCombinations.map(comboName => {
       const existing = variants.find(v => v.name === comboName);
       if (existing) {
-        return existing;
+        return {
+          ...existing,
+          sku: existing.sku || "",
+          shippingCharges: existing.shippingCharges || "0"
+        };
       }
-      return {
-        id: Math.random().toString(36).substr(2, 9),
-        name: comboName,
-        price: "0.00",
-        available: "0"
+      return { 
+        id: Math.random().toString(36).substring(2, 9), 
+        name: comboName, 
+        price: "", 
+        available: "",
+        sku: "",
+        shippingCharges: "0"
       };
     });
 
@@ -290,18 +300,28 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                 <thead className="text-xs text-gray-700 bg-gray-50 border-b border-gray-200">
                   <tr>
                     <th scope="col" className="px-6 py-3 font-medium">Variant</th>
+                    <th scope="col" className="px-6 py-3 font-medium">SKU</th>
                     <th scope="col" className="px-6 py-3 font-medium">Price</th>
+                    <th scope="col" className="px-6 py-3 font-medium">Shipping</th>
                     <th scope="col" className="px-6 py-3 font-medium">Stock</th>
                   </tr>
                 </thead>
                 <tbody>
                   {variants.map((variant) => (
                     <tr key={variant.id} className="bg-white border-b hover:bg-gray-50">
-                      <td className="px-6 py-4 font-medium text-gray-900 flex items-center gap-3">
+                      <td className="px-6 py-4 font-medium text-gray-900 align-middle">
                         {variant.name}
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="relative rounded-md shadow-sm">
+                      <td className="px-6 py-4 align-middle">
+                        <input
+                          type="text"
+                          value={variant.sku || "-"}
+                          disabled
+                          className="block w-32 px-3 sm:text-sm border-gray-300 rounded-md py-1.5 bg-gray-100 text-gray-500 cursor-not-allowed"
+                        />
+                      </td>
+                      <td className="px-6 py-4 align-middle">
+                        <div className="relative rounded-md shadow-sm w-32">
                           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <span className="text-gray-500 sm:text-sm">₹</span>
                           </div>
@@ -309,7 +329,7 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                             type="text"
                             value={variant.price}
                             onChange={(e) => updateVariant(variant.id, "price", e.target.value)}
-                            className="focus:ring-blue-500 focus:border-blue-500 block w-28 pl-9 sm:text-sm border-gray-300 rounded-md py-1.5"
+                            className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-9 pr-3 sm:text-sm border-gray-300 rounded-md py-1.5"
                             placeholder="0.00"
                           />
                         </div>
@@ -317,8 +337,26 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                           const p = Number(variant.price);
                           if (p > 0) {
                             try {
-                              const pricing = calculatePricing(p, gstPercent || 0, discountDetails || { type: 'none' } as any);
-                              const finalPrice = pricing.finalUserBuy + (shippingCharges || 0);
+                              let finalPrice = p;
+                              const discountType = discountDetails?.type || 'none';
+                              let discountAmount = 0;
+                              
+                              if (discountType === 'ptr_discount' || discountType === 'ptr_discount_and_same_product_bonus' || discountType === 'ptr_discount_and_different_product_bonus') {
+                                discountAmount = p * (discountDetails?.discountPercent || 0) / 100;
+                              }
+
+                              if (discountType === 'special_price') {
+                                finalPrice = discountDetails?.specialPrice || 0;
+                              } else {
+                                finalPrice = p - discountAmount;
+                              }
+
+                              if (!isTaxIncluded) {
+                                finalPrice += (finalPrice * (gstPercent || 0)) / 100;
+                              }
+
+                              finalPrice += (shippingCharges || Number(variant.shippingCharges) || 0);
+
                               return <div className="text-[10px] mt-1 text-primary/80 font-medium whitespace-nowrap">Final: {formatCurrency(finalPrice)}</div>;
                             } catch (e) {
                               return null;
@@ -327,12 +365,25 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                           return null;
                         })()}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 align-middle">
+                        <div className="relative rounded-md shadow-sm w-32">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span className="text-gray-500 sm:text-sm">₹</span>
+                          </div>
+                          <input
+                            type="text"
+                            value={variant.shippingCharges || "0"}
+                            disabled
+                            className="block w-full pl-9 pr-3 sm:text-sm border-gray-300 rounded-md py-1.5 bg-gray-100 text-gray-500 cursor-not-allowed"
+                          />
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 align-middle">
                         <input
                           type="number"
                           value={variant.available}
                           onChange={(e) => updateVariant(variant.id, "available", e.target.value)}
-                          className="focus:ring-blue-500 focus:border-blue-500 block w-24 sm:text-sm border-gray-300 rounded-md py-1.5"
+                          className="focus:ring-blue-500 focus:border-blue-500 block w-28 px-3 sm:text-sm border-gray-300 rounded-md py-1.5"
                           placeholder="0"
                         />
                       </td>

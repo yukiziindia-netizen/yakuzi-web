@@ -160,7 +160,7 @@ export const productFormSchema = z.object({
   }
   return true;
 }, {
-  message: 'PTR discount percentage is required for this discount type',
+  message: 'Discount percentage is required for this discount type',
   path: ['discount_form_details', 'discountPercent'],
 }).refine((data) => {
   const d = data.discount_form_details;

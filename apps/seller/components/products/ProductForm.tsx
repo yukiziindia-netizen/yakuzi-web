@@ -217,8 +217,8 @@ export function ProductForm({
       const fullProduct = await getSellerProductById(suggestion.id);
       
       // Sync sku and specifications from the full product (more complete data)
-      const resolvedSku = fullProduct?.sku ?? (suggestion as any).sku ?? "";
-      const resolvedSpecs = fullProduct?.specifications ?? (suggestion as any).specifications ?? "";
+      const resolvedSku = (fullProduct as any)?.sku ?? (suggestion as any).sku ?? "";
+      const resolvedSpecs = (fullProduct as any)?.specifications ?? (suggestion as any).specifications ?? "";
       setValue("sku", resolvedSku, { shouldDirty: true });
       setValue("specifications", resolvedSpecs, { shouldDirty: true });
 

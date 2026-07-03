@@ -77,7 +77,7 @@ export default function HeroSection({ title = 'YUKiZi' }: HeroSectionProps) {
                   className="-ml-[25%] h-full w-[150%] origin-center skew-x-[15deg] object-cover"
                 />
               )}
-              {banners[0]?.isAd && (
+              {(banners[0] as any)?.isAd && (
                 <div className="absolute top-3 left-4 z-20 skew-x-[15deg] bg-white/80 backdrop-blur-sm text-gray-700 px-1.5 py-0.5 rounded text-[11px] sm:text-[12px] font-medium shadow-sm">
                   Ad
                 </div>
@@ -118,7 +118,7 @@ export default function HeroSection({ title = 'YUKiZi' }: HeroSectionProps) {
                   </button>
                 )}
               </div>
-              {banners[1]?.isAd && (
+              {(banners[1] as any)?.isAd && (
                 <div className="absolute top-3 left-4 z-20 skew-x-[15deg] bg-white/80 backdrop-blur-sm text-gray-700 px-1.5 py-0.5 rounded text-[11px] sm:text-[12px] font-medium shadow-sm">
                   Ad
                 </div>
@@ -143,7 +143,7 @@ export default function HeroSection({ title = 'YUKiZi' }: HeroSectionProps) {
                   className="-ml-[25%] h-full w-[150%] origin-center skew-x-[15deg] object-cover"
                 />
               )}
-              {banners[2]?.isAd && (
+              {(banners[2] as any)?.isAd && (
                 <div className="absolute top-3 left-4 z-20 skew-x-[15deg] bg-white/80 backdrop-blur-sm text-gray-700 px-1.5 py-0.5 rounded text-[11px] sm:text-[12px] font-medium shadow-sm">
                   Ad
                 </div>

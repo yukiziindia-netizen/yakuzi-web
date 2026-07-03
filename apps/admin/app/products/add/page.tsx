@@ -83,7 +83,7 @@ export default function AddProductPage() {
         isAd: form.isAd,
         images: mediaItems.filter(m => !m.isLoading).map(m => m.url),
         options: options.length > 0 ? options.map(o => ({ name: o.name, values: o.values })) : undefined,
-        variants: variants.length > 0 ? variants.map(v => ({ 
+        variants: variants.length > 0 ? variants.map((v: any) => ({ 
           name: v.name, 
           price: Number(v.price), 
           available: Number(v.available),

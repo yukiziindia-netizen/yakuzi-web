@@ -213,9 +213,14 @@ export default function CartPage() {
                       <span>Subtotal ({items.length} items)</span>
                       <span className="font-medium">{formatCurrency(subtotal)}</span>
                     </div>
-                    <div className="border-t border-gray-100 pt-3 flex justify-between">
-                      <span className="font-bold text-gray-900">Total</span>
-                      <span className="font-bold text-gray-900 text-lg">{formatCurrency(total)}</span>
+                    <div className="border-t border-gray-100 pt-3">
+                      <div className="flex justify-between items-center">
+                        <span className="font-bold text-gray-900">Total Payable</span>
+                        <span className="font-bold text-gray-900 text-lg">{formatCurrency(total)}</span>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1 text-right">
+                        (Inclusive of tax, shipping, and platform fee)
+                      </p>
                     </div>
                   </div>
 

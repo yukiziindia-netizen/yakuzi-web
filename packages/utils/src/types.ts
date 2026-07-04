@@ -271,6 +271,9 @@ export interface Suggestion {
   description?: string;
   options?: any[];
   variants?: any[];
+  commissionPercent?: number | null;
+  fixedFee?: number | null;
+  commissionGstPercent?: number | null;
 }
 
 

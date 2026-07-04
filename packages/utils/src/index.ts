@@ -21,8 +21,6 @@ export type {
 // Pricing Engine
 export {
   calculatePricing,
-  calculatePTR,
-  getRetailMarginPercent,
   formatPricingSummary,
   requiresDiscountPercent,
   requiresBuyGet,

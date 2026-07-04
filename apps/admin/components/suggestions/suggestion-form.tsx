@@ -29,7 +29,10 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
     mrp: "",
     price: "",
     gstPercent: "",
-    shippingCharges: "0",
+    shippingCharges: "",
+    commissionPercent: "",
+    fixedFee: "",
+    commissionGstPercent: "",
     unit: "1",
     packSize: "1",
     minimumOrderQuantity: "1",
@@ -56,7 +59,10 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
         mrp: initialData.mrp ? String(initialData.mrp) : "",
         price: initialData.price ? String(initialData.price) : "",
         gstPercent: initialData.gstPercent ? String(initialData.gstPercent) : "",
-        shippingCharges: initialData.shippingCharges ? String(initialData.shippingCharges) : "0",
+        shippingCharges: initialData.shippingCharges ? String(initialData.shippingCharges) : "",
+        commissionPercent: initialData.commissionPercent ? String(initialData.commissionPercent) : "",
+        fixedFee: initialData.fixedFee ? String(initialData.fixedFee) : "",
+        commissionGstPercent: initialData.commissionGstPercent ? String(initialData.commissionGstPercent) : "",
         unit: initialData.unit || "1",
         packSize: initialData.packSize || "1",
         minimumOrderQuantity: initialData.minimumOrderQuantity ? String(initialData.minimumOrderQuantity) : "1",
@@ -170,6 +176,9 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
         price: form.price !== "" ? Number(form.price) : null,
         gstPercent: form.gstPercent !== "" ? Number(form.gstPercent) : null,
         shippingCharges: form.shippingCharges !== "" ? Number(form.shippingCharges) : 0,
+        commissionPercent: form.commissionPercent !== "" ? Number(form.commissionPercent) : null,
+        fixedFee: form.fixedFee !== "" ? Number(form.fixedFee) : null,
+        commissionGstPercent: form.commissionGstPercent !== "" ? Number(form.commissionGstPercent) : null,
         unit: form.unit,
         packSize: form.packSize,
         minimumOrderQuantity: form.minimumOrderQuantity !== "" ? Number(form.minimumOrderQuantity) : null,
@@ -324,7 +333,38 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
               </select>
             </div>
 
-            <div className="pt-2 space-y-4">
+              {/* Platform Fees */}
+              <div className="pt-6 mt-6 border-t border-gray-100">
+                <h3 className="text-sm font-semibold text-gray-900 mb-4">Platform Fees Override</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                  <Input
+                    type="number"
+                    label="Commission (%)"
+                    placeholder="e.g. 5"
+                    value={form.commissionPercent}
+                    onChange={e => setForm(f => ({ ...f, commissionPercent: e.target.value }))}
+                  />
+                  <Input
+                    type="number"
+                    label="Fixed Fee (₹)"
+                    placeholder="e.g. 20"
+                    value={form.fixedFee}
+                    onChange={e => setForm(f => ({ ...f, fixedFee: e.target.value }))}
+                  />
+                  <Input
+                    type="number"
+                    label="Commission GST (%)"
+                    placeholder="e.g. 18"
+                    value={form.commissionGstPercent}
+                    onChange={e => setForm(f => ({ ...f, commissionGstPercent: e.target.value }))}
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  Leave empty to use category default fees.
+                </p>
+              </div>
+
+            <div className="pt-6 mt-6 border-t border-gray-100 space-y-4">
               <Input
                 label="Company / Manufacturer *"
                 placeholder="e.g. Cipla"

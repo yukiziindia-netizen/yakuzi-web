@@ -16,6 +16,7 @@ interface Props {
   onChange: (value: DiscountFormDetails) => void;
   mrp: number;
   gstPercent: number;
+  platformFees?: { commissionPercent: number; fixedFee: number; commissionGstPercent: number };
   error?: string;
 }
 
@@ -24,7 +25,7 @@ const DISCOUNT_OPTIONS: { label: string; value: string }[] = [
   { label: "Discount", value: "ptr_discount" },
 ];
 
-export function DiscountSelector({ value, onChange, mrp, gstPercent, error }: Props) {
+export function DiscountSelector({ value, onChange, mrp, gstPercent, platformFees, error }: Props) {
   const showPercent = requiresDiscountPercent(value.type);
   const showBonus = requiresBuyGet(value.type);
   const showBonusName = requiresBonusProductName(value.type);
@@ -41,7 +42,7 @@ export function DiscountSelector({ value, onChange, mrp, gstPercent, error }: Pr
         get: value.get,
         bonusProductName: value.bonusProductName,
         specialPrice: value.specialPrice,
-      });
+      }, platformFees);
     } catch {
       return null;
     }
@@ -129,7 +130,44 @@ export function DiscountSelector({ value, onChange, mrp, gstPercent, error }: Pr
         )}
       </div>
 
-
+      {pricing && (
+        <div className="mt-4 p-4 rounded-lg border border-primary/20 bg-primary/5 space-y-2 text-sm">
+          <div className="font-medium text-primary mb-2">Expected Settlement Preview</div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Base Price (MRP)</span>
+            <span>{formatCurrency(pricing.basePrice)}</span>
+          </div>
+          {pricing.discountAmount > 0 && (
+            <div className="flex justify-between text-green-600">
+              <span>Discount ({pricing.discountPercent}%)</span>
+              <span>-{formatCurrency(pricing.discountAmount)}</span>
+            </div>
+          )}
+          <div className="flex justify-between font-medium">
+            <span>Discounted Selling Price</span>
+            <span>{formatCurrency(pricing.discountedPrice)}</span>
+          </div>
+          <div className="flex justify-between border-t pt-2 mt-2">
+            <span className="text-muted-foreground">Platform Commission ({pricing.commissionPercent}%)</span>
+            <span className="text-red-500">-{formatCurrency(pricing.commissionAmount)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Fixed Fee</span>
+            <span className="text-red-500">-{formatCurrency(pricing.fixedFee)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">GST on Platform Fees ({pricing.commissionGstPercent}%)</span>
+            <span className="text-red-500">-{formatCurrency(pricing.commissionGstAmount + pricing.fixedFeeGstAmount)}</span>
+          </div>
+          <div className="flex justify-between border-t pt-2 mt-2 font-bold text-base">
+            <span>Estimated Payout (per unit)</span>
+            <span className="text-green-600">{formatCurrency(pricing.sellerPayout)}</span>
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">
+            * Final customer pays {formatCurrency(pricing.finalCustomerPayable)} (includes {pricing.productGstPercent}% Product GST + Shipping if applicable). You are responsible for remitting Product GST to the government out of your payout.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

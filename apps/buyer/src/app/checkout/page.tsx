@@ -515,16 +515,16 @@ export default function CheckoutPage() {
             <hr style={{ border: 'none', borderTop: '1px solid #e8e8e8', margin: '12px 0' }} />
 
             {/* Grand Total */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-              <span style={{ fontSize: 18, fontWeight: 700, color: '#1a1a1a' }}>Total</span>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                <span style={{ fontSize: 12, color: '#888' }}>INR</span>
-                <span style={{ fontSize: 22, fontWeight: 700, color: '#1a1a1a' }}>₹{total.toLocaleString('en-IN')}</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                <span style={{ fontSize: 18, fontWeight: 700, color: '#1a1a1a' }}>Total Payable</span>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+                  <span style={{ fontSize: 12, color: '#888' }}>INR</span>
+                  <span style={{ fontSize: 22, fontWeight: 700, color: '#1a1a1a' }}>₹{total.toLocaleString('en-IN')}</span>
+                </div>
               </div>
-            </div>
-            <p style={{ fontSize: 12, color: '#888', marginTop: 4 }}>
-              Includes applicable taxes and shipping
-            </p>
+              <p style={{ fontSize: 12, color: '#888', marginTop: 4, textAlign: 'right' }}>
+                (Inclusive of tax, shipping, and platform fee)
+              </p>
           </div>
         </div>
       </main>

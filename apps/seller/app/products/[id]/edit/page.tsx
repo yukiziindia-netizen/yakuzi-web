@@ -40,24 +40,29 @@ export default function EditProductPage() {
                 stock: product.stock || 0,
                 min_order_qty: product.minimumOrderQuantity || 1,
                 max_order_qty: product.maximumOrderQuantity || 100,
+                gst_percent: product.gstPercent || (product as any).gst || 0,
+                compare_at_price: (product as any).compareAtPrice || 0,
+                is_tax_included: (product as any).isTaxIncluded || false,
+                shipping_charges: (product as any).shippingCharges || 0,
+                sku: (product as any).sku || (product as any).variant?.sku || "",
                 delivery_text: (product as any).deliveryText ? String(parseInt(String((product as any).deliveryText).match(/\d+/)?.[0] || "0") || "") : "",
-                image_list: Array.isArray(product.images) ? product.images.map((img: any) => typeof img === 'string' ? img : img.url).filter(Boolean) : [],
-                custom_extra_fields: product.extraFields || [],
-                discount_form_details: product.discountFormDetails || (product.discountType && (product.discount || product.discountMeta?.discountPercent || product.discountMeta?.specialPrice) ? {
-                  type: {
+                image_list: Array.isArray((product as any).images) ? (product as any).images.map((img: any) => typeof img === 'string' ? img : img.url).filter(Boolean) : [],
+                custom_extra_fields: (product as any).extraFields || [],
+                discount_form_details: (product as any).discountFormDetails || ((product as any).discountType && ((product as any).discount || (product as any).discountMeta?.discountPercent || (product as any).discountMeta?.specialPrice) ? {
+                  type: ({
                     "PTR_DISCOUNT": "ptr_discount",
                     "SAME_PRODUCT_BONUS": "same_product_bonus",
                     "PTR_PLUS_SAME_PRODUCT_BONUS": "ptr_discount_and_same_product_bonus",
                     "DIFFERENT_PRODUCT_BONUS": "different_product_bonus",
                     "PTR_PLUS_DIFFERENT_PRODUCT_BONUS": "ptr_discount_and_different_product_bonus",
                     "SPECIAL_PRICE": "special_price",
-                  }[product.discountType] || "none",
-                  ...product.discountMeta,
-                  discountPercent: product.discount || product.discountMeta?.discountPercent
+                  } as any)[(product as any).discountType] || "none",
+                  ...(product as any).discountMeta,
+                  discountPercent: (product as any).discount || (product as any).discountMeta?.discountPercent
                 } : { type: "none" }) as any,
               }} 
-              initialOptions={product.options || []}
-              initialVariants={product.variants || []}
+              initialOptions={(product as any).options || []}
+              initialVariants={(product as any).variants || []}
               initialCategoryName={typeof (product as any).category === 'object' ? (product as any).category?.name || (product as any).category?.id : (product as any).category}
               initialSubcategoryName={typeof (product as any).subCategory === 'object' ? (product as any).subCategory?.name || (product as any).subCategory?.id : (product as any).subCategory}
             />

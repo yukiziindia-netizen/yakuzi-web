@@ -87,6 +87,7 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
   isSuggestedProductSelected = false
 }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingVariantId, setEditingVariantId] = useState<string | null>(null);
 
   // Sync variants when options change
   useEffect(() => {
@@ -156,16 +157,7 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-2">Variants</h2>
-          {isSuggestedProductSelected && (
-            <button
-              type="button"
-              onClick={addOption}
-              className="flex items-center text-sm font-medium text-blue-600 hover:text-blue-700"
-            >
-              <Plus className="w-4 h-4 mr-1" />
-              Add options like size or color
-            </button>
-          )}
+
         </div>
       </div>
     );
@@ -302,10 +294,13 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                     <th scope="col" className="px-6 py-3 font-medium">Discount</th>
                     <th scope="col" className="px-6 py-3 font-medium">Shipping</th>
                     <th scope="col" className="px-6 py-3 font-medium">Stock</th>
+                    <th scope="col" className="px-6 py-3 font-medium text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {variants.map((variant) => (
+                  {variants.map((variant) => {
+                    const isVariantEditing = editingVariantId === variant.id;
+                    return (
                     <tr key={variant.id} className="bg-white border-b hover:bg-gray-50">
                       <td className="px-6 py-4 font-medium text-gray-900 align-middle">
                         {variant.name}
@@ -327,7 +322,11 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                             type="text"
                             value={variant.price}
                             onChange={(e) => updateVariant(variant.id, "price", e.target.value)}
-                            className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-9 pr-3 sm:text-sm border-gray-300 rounded-md py-1.5"
+                            disabled={!isVariantEditing}
+                            className={cn(
+                              "focus:ring-blue-500 focus:border-blue-500 block w-full pl-9 pr-3 sm:text-sm rounded-md py-1.5",
+                              isVariantEditing ? "border-gray-300 bg-white" : "border-transparent bg-transparent cursor-default"
+                            )}
                             placeholder="0.00"
                           />
                         </div>
@@ -372,7 +371,11 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                             type="text"
                             value={variant.compareAtPrice || ""}
                             onChange={(e) => updateVariant(variant.id, "compareAtPrice", e.target.value)}
-                            className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-9 pr-3 sm:text-sm border-gray-300 rounded-md py-1.5"
+                            disabled={!isVariantEditing}
+                            className={cn(
+                              "focus:ring-blue-500 focus:border-blue-500 block w-full pl-9 pr-3 sm:text-sm rounded-md py-1.5",
+                              isVariantEditing ? "border-gray-300 bg-white" : "border-transparent bg-transparent cursor-default"
+                            )}
                             placeholder="0.00"
                           />
                         </div>
@@ -386,7 +389,11 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                             type="text"
                             value={variant.discount || ""}
                             onChange={(e) => updateVariant(variant.id, "discount", e.target.value)}
-                            className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-9 pr-3 sm:text-sm border-gray-300 rounded-md py-1.5"
+                            disabled={!isVariantEditing}
+                            className={cn(
+                              "focus:ring-blue-500 focus:border-blue-500 block w-full pl-9 pr-3 sm:text-sm rounded-md py-1.5",
+                              isVariantEditing ? "border-gray-300 bg-white" : "border-transparent bg-transparent cursor-default"
+                            )}
                             placeholder="0"
                           />
                         </div>
@@ -409,12 +416,26 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                           type="number"
                           value={variant.available}
                           onChange={(e) => updateVariant(variant.id, "available", e.target.value)}
-                          className="focus:ring-blue-500 focus:border-blue-500 block w-28 px-3 sm:text-sm border-gray-300 rounded-md py-1.5"
+                          disabled={!isVariantEditing}
+                          className={cn(
+                            "focus:ring-blue-500 focus:border-blue-500 block w-28 px-3 sm:text-sm rounded-md py-1.5",
+                            isVariantEditing ? "border-gray-300 bg-white" : "border-transparent bg-transparent cursor-default"
+                          )}
                           placeholder="0"
                         />
                       </td>
+                      <td className="px-6 py-4 align-middle text-right">
+                        <button
+                          type="button"
+                          onClick={() => setEditingVariantId(isVariantEditing ? null : variant.id)}
+                          className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                        >
+                          {isVariantEditing ? "Save" : "Edit"}
+                        </button>
+                      </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

@@ -1,220 +1,189 @@
 // ─── Yukizi Centralized Pricing Engine ──────────────
 // All pricing calculations are done here. NO pricing logic in frontend components.
-// Matches legacy PHP/Node system with bug fixes noted inline.
-
-// ─── GST to Retail Margin Mapping ────────────────────
-// Legacy: {0: 18.12, 5: 23.81, 12: 28.57, 18: 32.20}
-// BUG FIX: GST 12% margin was 28.57 in legacy — corrected to 28.67
-
-const GST_RETAIL_MARGIN_MAP: Record<number, number> = {
-  0: 18.12,
-  5: 23.81,
-  12: 28.67, // Fixed from legacy 28.57
-  18: 32.20,
-};
+// Updated to Marketplace Pricing Engine
 
 export const VALID_GST_PERCENTAGES = [0, 5, 12, 18] as const;
 export type ValidGST = (typeof VALID_GST_PERCENTAGES)[number];
-
-/** Get the retail margin percentage for a given GST percentage */
-export function getRetailMarginPercent(gstPercent: number): number {
-  const margin = GST_RETAIL_MARGIN_MAP[gstPercent];
-  if (margin === undefined) {
-    throw new Error(`Invalid GST percentage: ${gstPercent}. Must be one of ${VALID_GST_PERCENTAGES.join(', ')}`);
-  }
-  return margin;
-}
-
-/** Calculate PTR from MRP and GST percentage.
- *  PTR = MRP - (MRP × RetailMargin / 100)
- */
-export function calculatePTR(mrp: number, gstPercent: number): number {
-  const retailMargin = getRetailMarginPercent(gstPercent);
-  return round2(mrp - (mrp * retailMargin / 100));
-}
 
 /** Round to 2 decimal places */
 function round2(n: number): number {
   return Math.round(n * 100) / 100;
 }
 
-// ─── Discount Types ─────────────────────────────────
-// 6 types matching legacy system exactly
-
+// ─── Discount Types (Legacy Compat) ─────────────────────────────────
 export type PricingDiscountType =
-  | 'none'                                             // Type 0: No discount
-  | 'ptr_discount'                                     // Type 1: PTR discount only
-  | 'same_product_bonus'                               // Type 2: Same product bonus (buy X get Y same)
-  | 'ptr_discount_and_same_product_bonus'              // Type 3: PTR discount + same product bonus
-  | 'different_product_bonus'                          // Type 4: Different product bonus
-  | 'ptr_discount_and_different_product_bonus'         // Type 5: PTR discount + different product bonus
-  | 'special_price';                                   // Type 6: Special/fixed price
+  | 'none'
+  | 'ptr_discount'
+  | 'same_product_bonus'
+  | 'ptr_discount_and_same_product_bonus'
+  | 'different_product_bonus'
+  | 'ptr_discount_and_different_product_bonus'
+  | 'special_price';
 
 export interface DiscountFormInput {
   type: PricingDiscountType;
-  /** PTR discount percentage (for types 1, 3, 5) */
   discountPercent?: number;
-  /** Buy quantity (for types 2, 3, 4, 5) */
   buy?: number;
-  /** Get quantity (for types 2, 3, 4, 5) */
   get?: number;
-  /** Bonus product name (for types 4, 5 — different product) */
   bonusProductName?: string;
-  /** Special/fixed price (for type 6) */
   specialPrice?: number;
-  /** Shipping charges (per unit) */
   shippingCharges?: number;
+  shippingGstPercent?: number;
+}
+
+export interface CategoryPlatformFees {
+  commissionPercent?: number;
+  fixedFee?: number;
+  commissionGstPercent?: number;
 }
 
 export interface PricingOutput {
-  /** MRP entered by seller */
-  mrp: number;
-  /** GST percentage */
-  gstPercent: number;
-  /** Retail margin percentage from GST map */
-  retailMarginPercent: number;
-  /** Base PTR = MRP - (MRP × retailMargin / 100) */
-  ptr: number;
-  /** Final PTR after any PTR discount */
-  finalPtr: number;
-  /** PTR discount percentage applied (0 if none) */
-  discountPercent: number;
-  /** PTR discount absolute value = ptr × discountPercent / 100 */
-  discountValue: number;
-  /** GST value = finalPtr × gstPercent / 100 */
-  gstValue: number;
-  /** Shipping charge per unit */
-  shippingCharges: number;
-  /** Per unit PTR including GST and shipping = finalPtr + gstValue + shippingCharges */
-  perPtrWithGst: number;
-  /** Items to pay for (buy quantity — NOT buy+get) */
+  // --- New Marketplace Fields ---
+  basePrice: number; // P (formerly MRP)
+  discountPercent: number; // D%
+  discountAmount: number; // P * D%
+  discountedPrice: number; // P - Discount
+  
+  productGstPercent: number; // G%
+  productGstAmount: number; // Discounted Price * G%
+  
+  shippingCharge: number; // S
+  shippingGstPercent: number; // Gs%
+  shippingGstAmount: number; // S * Gs%
+  shippingTotal: number; // S + S * Gs%
+
+  commissionPercent: number; // C%
+  commissionAmount: number; // Discounted Price * C%
+  commissionGstPercent: number; // Gc%
+  commissionGstAmount: number; // Commission * Gc%
+  
+  fixedFee: number; // F
+  fixedFeeGstAmount: number; // F * Gc%
+
+  totalPlatformFees: number; // Commission + CommGST + FixedFee + FixedGST
+
+  finalCustomerPayable: number; // Discounted Price + Product GST + Shipping Total
+  sellerPayout: number; // Discounted Price - TotalPlatformFees
+  
+  // --- Legacy Aliases for minimal breakage in UI/Cart ---
+  mrp: number; // alias for basePrice
+  gstPercent: number; // alias for productGstPercent
+  retailMarginPercent: number; // hardcoded 0
+  ptr: number; // alias for basePrice
+  finalPtr: number; // alias for discountedPrice
+  discountValue: number; // alias for discountAmount
+  gstValue: number; // alias for productGstAmount
+  shippingCharges: number; // alias for shippingCharge
+  perPtrWithGst: number; // alias for finalCustomerPayable
   itemsToPayFor: number;
-  /** Total units received (buy + get for same product bonus, else buy) */
   totalUnits: number;
-  /** Final user buy price = perPtrWithGst × itemsToPayFor */
-  finalUserBuy: number;
-  /** Final order value = same as finalUserBuy */
-  finalOrderValue: number;
-  /** Buy quantity */
+  finalUserBuy: number; // alias for finalCustomerPayable * buy
+  finalOrderValue: number; // alias for finalCustomerPayable * buy
   buy: number;
-  /** Get (bonus) quantity */
   get: number;
-  /** Bonus product name (for different product bonus) */
   bonusProductName: string;
-  /** The discount type used */
   discountType: PricingDiscountType;
 }
 
 /**
  * Main pricing calculation function.
- * All 6 discount types handled with legacy-accurate formulas.
- * Bug fixes applied (see inline comments).
+ * Calculates exactly according to the marketplace cost breakdown.
  */
 export function calculatePricing(
   mrp: number,
   gstPercent: number,
   discountInput: DiscountFormInput,
+  platformFees?: CategoryPlatformFees
 ): PricingOutput {
-  const retailMarginPercent = getRetailMarginPercent(gstPercent);
-  const ptr = calculatePTR(mrp, gstPercent);
-  const type = discountInput.type;
-
-  let finalPtr: number;
+  const basePrice = mrp;
   let discountPercent = 0;
+  let discountedPrice = basePrice;
   let buy = discountInput.buy ?? 1;
   let get = discountInput.get ?? 0;
+  const type = discountInput.type;
   let bonusProductName = discountInput.bonusProductName ?? '';
 
   switch (type) {
-    case 'none': {
-      discountPercent = 0;
-      finalPtr = ptr;
+    case 'ptr_discount':
+    case 'ptr_discount_and_same_product_bonus':
+    case 'ptr_discount_and_different_product_bonus':
+      discountPercent = discountInput.discountPercent ?? 0;
+      discountedPrice = round2(basePrice - (basePrice * discountPercent / 100));
+      break;
+    case 'special_price':
+      discountedPrice = discountInput.specialPrice ?? basePrice;
+      discountPercent = basePrice > 0 ? round2(((basePrice - discountedPrice) / basePrice) * 100) : 0;
       get = 0;
       break;
-    }
-
-    case 'ptr_discount': {
-      // Type 1: PTR discount only — no bonus
-      discountPercent = discountInput.discountPercent ?? 0;
-      finalPtr = round2(ptr - (ptr * discountPercent / 100));
-      get = 0;
-      break;
-    }
-
-    case 'same_product_bonus': {
-      // Type 2: Same product bonus — no PTR discount
-      // BUG FIX: Legacy used `userBuy = buy + get` — WRONG. itemsToPayFor = buy only.
-      finalPtr = ptr;
+    default:
       discountPercent = 0;
       break;
-    }
-
-    case 'ptr_discount_and_same_product_bonus': {
-      // Type 3: PTR discount + same product bonus
-      discountPercent = discountInput.discountPercent ?? 0;
-      finalPtr = round2(ptr - (ptr * discountPercent / 100));
-      break;
-    }
-
-    case 'different_product_bonus': {
-      // Type 4: Different product bonus — no PTR discount
-      finalPtr = ptr;
-      discountPercent = 0;
-      bonusProductName = discountInput.bonusProductName ?? '';
-      break;
-    }
-
-    case 'ptr_discount_and_different_product_bonus': {
-      // Type 5: PTR discount + different product bonus
-      discountPercent = discountInput.discountPercent ?? 0;
-      finalPtr = round2(ptr - (ptr * discountPercent / 100));
-      bonusProductName = discountInput.bonusProductName ?? '';
-      break;
-    }
-
-    case 'special_price': {
-      // Type 6: Special/fixed price — overrides PTR completely
-      finalPtr = discountInput.specialPrice ?? ptr;
-      discountPercent = 0;
-      get = 0;
-      break;
-    }
-
-    default: {
-      finalPtr = ptr;
-    }
   }
 
-  const discountValue = round2(ptr * discountPercent / 100);
-  const gstValue = round2(finalPtr * gstPercent / 100);
-  const shippingCharges = discountInput.shippingCharges ?? 0;
-  const perPtrWithGst = round2(finalPtr + gstValue + shippingCharges);
+  const discountAmount = round2(basePrice - discountedPrice);
+  const productGstAmount = round2(discountedPrice * (gstPercent / 100));
 
-  // itemsToPayFor = buy (NEVER buy + get — legacy bug fixed)
+  const shippingCharge = discountInput.shippingCharges ?? 0;
+  const shippingGstPercent = discountInput.shippingGstPercent ?? 18;
+  const shippingGstAmount = round2(shippingCharge * (shippingGstPercent / 100));
+  const shippingTotal = round2(shippingCharge + shippingGstAmount);
+
+  // Platform fees
+  const commissionPercent = platformFees?.commissionPercent ?? 0;
+  const commissionAmount = round2(discountedPrice * (commissionPercent / 100));
+  const commissionGstPercent = platformFees?.commissionGstPercent ?? 18;
+  const commissionGstAmount = round2(commissionAmount * (commissionGstPercent / 100));
+
+  const fixedFee = platformFees?.fixedFee ?? 0;
+  const fixedFeeGstAmount = round2(fixedFee * (commissionGstPercent / 100));
+
+  const totalPlatformFees = round2(commissionAmount + commissionGstAmount + fixedFee + fixedFeeGstAmount);
+
+  // Per Unit final payable
+  const finalCustomerPayable = round2(discountedPrice + productGstAmount + shippingTotal);
+
+  // Payout calculation (Seller pays platform fees out of discounted price)
+  const sellerPayout = round2(discountedPrice - totalPlatformFees);
+
   const itemsToPayFor = buy;
-  const finalUserBuy = round2(perPtrWithGst * itemsToPayFor);
-  const finalOrderValue = finalUserBuy;
+  const finalUserBuy = round2(finalCustomerPayable * itemsToPayFor);
 
-  // totalUnits calculation
-  const totalUnits = (type === 'same_product_bonus' || type === 'ptr_discount_and_same_product_bonus')
-    ? (buy + get)
-    : buy;
+  const totalUnits = (type === 'same_product_bonus' || type === 'ptr_discount_and_same_product_bonus') ? (buy + get) : buy;
 
   return {
-    mrp,
-    gstPercent,
-    retailMarginPercent,
-    ptr,
-    finalPtr,
+    basePrice,
     discountPercent,
-    discountValue,
-    gstValue,
-    shippingCharges,
-    perPtrWithGst,
+    discountAmount,
+    discountedPrice,
+    productGstPercent: gstPercent,
+    productGstAmount,
+    shippingCharge,
+    shippingGstPercent,
+    shippingGstAmount,
+    shippingTotal,
+    commissionPercent,
+    commissionAmount,
+    commissionGstPercent,
+    commissionGstAmount,
+    fixedFee,
+    fixedFeeGstAmount,
+    totalPlatformFees,
+    finalCustomerPayable,
+    sellerPayout,
+
+    mrp: basePrice,
+    gstPercent,
+    retailMarginPercent: 0,
+    ptr: basePrice,
+    finalPtr: discountedPrice,
+    discountValue: discountAmount,
+    gstValue: productGstAmount,
+    shippingCharges: shippingCharge,
+    perPtrWithGst: finalCustomerPayable,
     itemsToPayFor,
     totalUnits,
     finalUserBuy,
-    finalOrderValue,
+    finalOrderValue: finalUserBuy,
     buy,
     get,
     bonusProductName,
@@ -222,30 +191,31 @@ export function calculatePricing(
   };
 }
 
-
 // ─── Helpers ────────────────────────────────────────
 
 /** Format a pricing output into a human-readable summary for display */
 export function formatPricingSummary(p: PricingOutput): string {
   const lines = [
-    `MRP: ₹${p.mrp}`,
-    `GST: ${p.gstPercent}% (Retail Margin: ${p.retailMarginPercent}%)`,
-    `PTR: ₹${p.ptr}`,
+    `Base Price: ₹${p.basePrice}`,
   ];
 
   if (p.discountPercent > 0) {
-    lines.push(`PTR Discount: ${p.discountPercent}% (₹${p.discountValue})`);
+    lines.push(`Discount: ${p.discountPercent}% (₹${p.discountAmount})`);
   }
 
-  lines.push(`Final PTR: ₹${p.finalPtr}`);
-  lines.push(`GST Value: ₹${p.gstValue}`);
-  if (p.shippingCharges > 0) {
-    lines.push(`Shipping Charges: ₹${p.shippingCharges}`);
+  lines.push(`Discounted Price: ₹${p.discountedPrice}`);
+  lines.push(`Product GST: ₹${p.productGstAmount} (${p.productGstPercent}%)`);
+  
+  if (p.shippingCharge > 0) {
+    lines.push(`Shipping: ₹${p.shippingCharge} + ₹${p.shippingGstAmount} GST = ₹${p.shippingTotal}`);
   }
-  lines.push(`Price per unit (incl. GST & shipping): ₹${p.perPtrWithGst}`);
+
+  lines.push(`Customer Payable (per unit): ₹${p.finalCustomerPayable}`);
+  lines.push(`Platform Fees: ₹${p.totalPlatformFees}`);
+  lines.push(`Estimated Seller Payout (per unit): ₹${p.sellerPayout}`);
 
   if (p.get > 0) {
-    lines.push(`Buy ${p.buy} Get ${p.get} (${p.bonusProductName || 'same product'})`);
+    lines.push(`Bonus: Buy ${p.buy} Get ${p.get} (${p.bonusProductName || 'same product'})`);
   }
 
   lines.push(`Items to Pay For: ${p.itemsToPayFor}`);
@@ -254,14 +224,12 @@ export function formatPricingSummary(p: PricingOutput): string {
   return lines.join('\n');
 }
 
-/** Check if a discount type requires a PTR discount percentage */
 export function requiresDiscountPercent(type: PricingDiscountType): boolean {
   return type === 'ptr_discount'
     || type === 'ptr_discount_and_same_product_bonus'
     || type === 'ptr_discount_and_different_product_bonus';
 }
 
-/** Check if a discount type involves a bonus (buy/get) */
 export function requiresBuyGet(type: PricingDiscountType): boolean {
   return type === 'same_product_bonus'
     || type === 'ptr_discount_and_same_product_bonus'
@@ -269,23 +237,20 @@ export function requiresBuyGet(type: PricingDiscountType): boolean {
     || type === 'ptr_discount_and_different_product_bonus';
 }
 
-/** Check if a discount type involves a different product bonus */
 export function requiresBonusProductName(type: PricingDiscountType): boolean {
   return type === 'different_product_bonus'
     || type === 'ptr_discount_and_different_product_bonus';
 }
 
-/** Check if this is a special price type */
 export function isSpecialPriceType(type: PricingDiscountType): boolean {
   return type === 'special_price';
 }
 
-/** Get effective selling price for buyer display (per-unit final PTR incl GST) */
+/** Get effective selling price for buyer display (final payable per unit) */
 export function getSellingPrice(p: PricingOutput): number {
-  return p.perPtrWithGst;
+  return p.finalCustomerPayable;
 }
 
-/** Calculate effective discount percentage for display tag */
 export function getEffectiveDiscountPercent(mrp: number, sellingPrice: number): number {
   if (mrp <= 0 || sellingPrice <= 0 || sellingPrice >= mrp) return 0;
   const pct = round2(((mrp - sellingPrice) / mrp) * 100);

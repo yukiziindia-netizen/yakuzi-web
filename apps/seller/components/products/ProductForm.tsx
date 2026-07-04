@@ -48,6 +48,7 @@ export function ProductForm({
   const [searchQuery, setSearchQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedMasterId, setSelectedMasterId] = useState<string | null>(null);
+  const [selectedSuggestion, setSelectedSuggestion] = useState<Suggestion | null>(null);
   const [activeIndex, setActiveIndex] = useState(-1);
   const suggestionRef = useRef<HTMLDivElement>(null);
   const { data: suggestions = [] } = useSuggestionSearch(searchQuery, "master");
@@ -114,7 +115,27 @@ export function ProductForm({
   const watchDiscount = watch("discount_form_details");
   const watchShippingCharges = watch("shipping_charges") || 0;
   const watchTaxStatus = watch("is_tax_included") || false;
+  const watchCategories = watch("categories");
   const lastMrpRef = useRef<number>(0);
+
+  const selectedCat = watchCategories?.[0] ? allCategories?.find((c: any) => c.id === watchCategories[0]) : null;
+  const cat: any = selectedCat;
+  
+  // Platform fees logic: prioritize selected suggestion fees, then category fees.
+  let platformFees: any = undefined;
+  if (selectedSuggestion?.commissionPercent !== undefined && selectedSuggestion?.commissionPercent !== null) {
+    platformFees = {
+      commissionPercent: selectedSuggestion.commissionPercent,
+      fixedFee: selectedSuggestion.fixedFee || 0,
+      commissionGstPercent: selectedSuggestion.commissionGstPercent || 18,
+    };
+  } else if (cat) {
+    platformFees = {
+      commissionPercent: cat.commissionPercent || 0,
+      fixedFee: cat.fixedFee || 0,
+      commissionGstPercent: cat.commissionGstPercent || 18,
+    };
+  }
 
   // Real-time discount calculation when compare_at_price is added/updated
   useEffect(() => {
@@ -185,6 +206,7 @@ export function ProductForm({
 
     const handleSuggestionSelect = useCallback(async (suggestion: Suggestion) => {
     setSelectedMasterId(suggestion.id);
+    setSelectedSuggestion(suggestion);
     setValue("product_name", suggestion.productName, { shouldDirty: true });
     setValue("company_name", suggestion.companyName, { shouldDirty: true });
     
@@ -320,7 +342,8 @@ export function ProductForm({
           get: data.discount_form_details.get,
           bonusProductName: data.discount_form_details.bonusProductName,
           specialPrice: data.discount_form_details.specialPrice,
-        });
+          shippingCharges: data.shipping_charges,
+        }, platformFees);
         computedPricing = {
           ptr: p.ptr,
           finalPtr: p.finalPtr,
@@ -498,6 +521,9 @@ export function ProductForm({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input label="Product Name *" error={errors.product_name?.message} {...register("product_name")} disabled={!!selectedMasterId} />
               <Input label="Company / Manufacturer *" error={errors.company_name?.message} {...register("company_name")} disabled={!!selectedMasterId} />
+              {variants.length === 0 && (
+                <Input label="Product SKU" placeholder="e.g. SKU-12345" error={errors.sku?.message} {...register("sku")} disabled={!!selectedMasterId} />
+              )}
               <Input label="Product Specification" placeholder="e.g. 500mg, Cotton, etc." error={errors.specifications?.message} {...register("specifications")} disabled={!!selectedMasterId} />
             </div>
           </div>
@@ -541,12 +567,61 @@ export function ProductForm({
                 error={errors.delivery_text?.message} 
                 {...register("delivery_text")} 
               />
+              {variants.length === 0 && (
+                <Input 
+                  label="Shipping Charges (₹)" 
+                  type="number"
+                  min={0}
+                  placeholder="0" 
+                  error={errors.shipping_charges?.message} 
+                  {...register("shipping_charges", { valueAsNumber: true })} 
+                />
+              )}
             </div>
           </div>
 
         {/* Pricing */}
         <div className="glass-card rounded-2xl p-6 space-y-4 relative z-[43] transition-opacity duration-300">
           <h2 className="font-semibold text-lg text-foreground border-b border-border/50 pb-2">Pricing</h2>
+
+          {variants.length === 0 && (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <Input 
+                  label="Product Price (MRP) *" 
+                  type="number" 
+                  placeholder="1000"
+                  error={errors.product_price?.message} 
+                  {...register("product_price", { valueAsNumber: true })} 
+                  disabled={!!selectedMasterId}
+                />
+                <Input 
+                  label="Compare at Price (Optional)" 
+                  type="number" 
+                  placeholder="1200"
+                  error={errors.compare_at_price?.message} 
+                  {...register("compare_at_price", { valueAsNumber: true })} 
+                  disabled={!!selectedMasterId}
+                />
+              </div>
+
+              <div className="pt-2">
+                <Controller
+                  name="discount_form_details"
+                  control={control}
+                  render={({ field }) => (
+                    <DiscountSelector 
+                      value={field.value} 
+                      onChange={field.onChange} 
+                      mrp={watchMrp || 0}
+                      gstPercent={watchGst || 0}
+                      platformFees={platformFees}
+                    />
+                  )}
+                />
+              </div>
+            </>
+          )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
             <Input 

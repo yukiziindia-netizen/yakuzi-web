@@ -197,3 +197,23 @@
 .auto-scroll {
   animation: autoScroll 60s linear infinite;
 }
+
+/* ─── Custom Purple Scrollbar ─── */
+.purple-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.purple-scrollbar::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 10px;
+}
+.purple-scrollbar::-webkit-scrollbar-thumb {
+  background: #854cbc;
+  border-radius: 10px;
+}
+.purple-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #6d39a0;
+}
+.purple-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #854cbc #f3f4f6;
+}

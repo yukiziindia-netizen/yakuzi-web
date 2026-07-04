@@ -278,15 +278,15 @@ function ProductBannerCard({
             key={idx}
             type="button"
             onClick={() => setActiveImageIndex(idx)}
-            className={`rounded-xl overflow-hidden border bg-white/20 backdrop-blur-md shadow-md transition-all duration-200 focus:outline-none w-10 h-10 sm:w-12 sm:h-12 ${
+            className={`rounded-xl overflow-hidden border bg-white/20 backdrop-blur-md shadow-md transition-all duration-200 focus:outline-none w-10 h-10 sm:w-12 sm:h-12 lg:w-[72px] lg:h-[72px] ${
               activeImageIndex === idx ? 'border-white/90 scale-105 shadow-lg' : 'border-white/30 hover:border-white/60'
             }`}
           >
             <Image 
               src={img} 
               alt="" 
-              width={48}
-              height={48}
+              width={72}
+              height={72}
               className="w-full h-full object-cover" 
             />
           </button>
@@ -345,6 +345,7 @@ function ComparisonOffersList({
   toast,
   setShowStockAlert,
   productImage,
+  variant = 'mobile',
 }: {
   comparisonListings: any[];
   cartData: any;
@@ -357,6 +358,7 @@ function ComparisonOffersList({
   toast: any;
   setShowStockAlert: (val: boolean) => void;
   productImage?: string;
+  variant?: 'mobile' | 'desktop';
 }) {
   const cartItemMap = new Map<string, any>();
   if (cartData?.items) {
@@ -364,6 +366,8 @@ function ComparisonOffersList({
       if (item.productId) cartItemMap.set(item.productId, item);
     });
   }
+
+  const isDesktop = variant === 'desktop';
 
   if (!comparisonListings || comparisonListings.length === 0) {
     return (
@@ -374,7 +378,7 @@ function ComparisonOffersList({
   }
 
   return (
-    <div className="flex flex-col gap-3 w-full">
+    <div className={isDesktop ? "flex flex-col gap-2 w-full max-h-[340px] overflow-y-auto overflow-x-hidden pr-1 purple-scrollbar" : "flex flex-col gap-3 w-full"}>
       {comparisonListings.map((listing: any, index: number) => {
         const inStock = (listing.stock ?? 0) > 0;
         const cartItem = cartItemMap.get(listing.id);
@@ -413,73 +417,77 @@ function ComparisonOffersList({
         return (
           <div 
             key={listing.id} 
-            className="flex flex-row items-center justify-between py-2 px-2 sm:py-2.5 sm:px-6 rounded-2xl bg-[#eaeaea] border border-gray-200/60 hover:border-purple-200 transition-colors w-full gap-1 sm:gap-4 shadow-sm"
+            className={`transition-colors w-full bg-[#eaeaea] border border-gray-200/60 hover:border-purple-200 shadow-sm ${
+              isDesktop 
+                ? 'grid grid-cols-[60px_1fr_45px_60px_110px] gap-2 items-center py-1.5 px-3 rounded-xl' 
+                : 'flex flex-row items-center justify-between py-2 px-2 sm:py-2.5 sm:px-6 rounded-2xl gap-1 sm:gap-4'
+            }`}
           >
             {/* 1. Discount Badge */}
-            <div className="w-[15%] sm:flex-[1.2] flex justify-start flex-shrink-0 min-w-0">
+            <div className={isDesktop ? "" : "w-[15%] sm:flex-[1.2] flex justify-start flex-shrink-0 min-w-0"}>
               <div className="w-full overflow-hidden text-ellipsis whitespace-nowrap">
                 {renderBuyerOfferBadge(listing)}
               </div>
             </div>
 
             {/* 2. Price & Subtext */}
-            <div className="w-[25%] sm:flex-1 flex flex-col items-start text-left flex-shrink-0 min-w-0 pl-2 sm:pl-0">
-              <span className="text-[12px] sm:text-[18px] lg:text-[22px] font-bold text-gray-800 leading-none tracking-tight">
+            <div className={isDesktop ? "flex flex-col items-start text-left min-w-0" : "w-[25%] sm:flex-1 flex flex-col items-start text-left flex-shrink-0 min-w-0 pl-2 sm:pl-0"}>
+              <span className={isDesktop ? "text-[14px] font-bold text-gray-800 leading-none tracking-tight" : "text-[12px] sm:text-[18px] lg:text-[22px] font-bold text-gray-800 leading-none tracking-tight"}>
                 ₹{listing.price?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
               </span>
-              <span className="text-[8px] sm:text-[11px] text-gray-500 font-medium mt-1 leading-none whitespace-nowrap overflow-hidden text-ellipsis max-w-full">
+              <span className={isDesktop ? "text-[9px] text-gray-500 font-medium mt-0.5 leading-none whitespace-nowrap overflow-hidden text-ellipsis max-w-full" : "text-[8px] sm:text-[11px] text-gray-500 font-medium mt-1 leading-none whitespace-nowrap overflow-hidden text-ellipsis max-w-full"}>
                   {listing.moq > 1 ? `Min. purchase of ${listing.moq}` : ''}
               </span>
             </div>
 
             {/* 3. Star Rating */}
-            <div className="w-[12%] sm:flex-[0.8] flex items-center justify-center gap-0.5 sm:gap-2 flex-shrink-0">
-              <Star className="w-3.5 h-3.5 sm:w-5 sm:h-5 lg:w-7 lg:h-7 fill-[#854cbc] text-[#854cbc] flex-shrink-0" />
-              <span className="text-gray-800 font-bold text-[12px] sm:text-[18px] lg:text-[22px] leading-none">{listing.seller?.rating || '4.5'}</span>
+            <div className={isDesktop ? "flex items-center justify-center gap-1" : "w-[12%] sm:flex-[0.8] flex items-center justify-center gap-0.5 sm:gap-2 flex-shrink-0"}>
+              <Star className={isDesktop ? "w-[15px] h-[15px] fill-[#854cbc] text-[#854cbc] flex-shrink-0" : "w-3.5 h-3.5 sm:w-5 sm:h-5 lg:w-7 lg:h-7 fill-[#854cbc] text-[#854cbc] flex-shrink-0"} />
+              <span className={isDesktop ? "text-gray-800 font-bold text-[14px] leading-none" : "text-gray-800 font-bold text-[12px] sm:text-[18px] lg:text-[22px] leading-none"}>{listing.seller?.rating || '4.5'}</span>
             </div>
 
             {/* 4. Delivery badge */}
-            <div className="w-[18%] sm:flex-1 flex items-center justify-center flex-shrink-0">
-              <DeliveryTruckBadge text={listing.deliveryText || '3 days'} className="w-[50px] sm:w-[70px] lg:w-[84px] h-auto text-gray-500 flex-shrink-0" />
+            <div className={isDesktop ? "flex items-center justify-center" : "w-[18%] sm:flex-1 flex items-center justify-center flex-shrink-0"}>
+              <DeliveryTruckBadge text={listing.deliveryText || '3 days'} className={isDesktop ? "w-[56px] h-auto text-gray-500 flex-shrink-0" : "w-[50px] sm:w-[70px] lg:w-[84px] h-auto text-gray-500 flex-shrink-0"} />
             </div>
 
             {/* 5. Actions (Plus / Incremental / Reset) */}
-            <div className="w-[30%] sm:flex-1 flex items-center justify-end gap-1 sm:gap-3 flex-shrink-0 pr-3 sm:pr-0">
+            <div className={isDesktop ? "flex items-center justify-end gap-1.5" : "w-[30%] sm:flex-1 flex items-center justify-end gap-1 sm:gap-3 flex-shrink-0 pr-3 sm:pr-0"}>
               {inStock ? (
                 itemQty === 0 ? (
                   <button 
                     onClick={() => handleQtyChange(minQty)}
-                    className="text-orange-500 hover:text-orange-600 focus:outline-none transition-transform active:scale-90 p-1 sm:p-2"
+                    className="text-orange-500 hover:text-orange-600 focus:outline-none transition-transform active:scale-90 p-1"
                   >
-                    <svg className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 stroke-[2.5] lg:stroke-[3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className={isDesktop ? "w-6 h-6 stroke-[2.5]" : "w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 stroke-[2.5] lg:stroke-[3]"} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                     </svg>
                   </button>
                 ) : (
-                  <div className="flex items-center gap-1 sm:gap-3 lg:gap-4">
+                  <div className={isDesktop ? "flex items-center gap-1.5" : "flex items-center gap-1 sm:gap-3 lg:gap-4"}>
                     {/* Reset Button */}
                     <button 
                       onClick={() => { handleQtyChange(0); toast('Quantity reset', 'info'); }}
                       title="Reset quantity"
-                      className="text-[#48286b] hover:text-purple-900 transition-transform active:scale-90 focus:outline-none p-0.5 sm:p-1"
+                      className="text-[#48286b] hover:text-purple-900 transition-transform active:scale-90 focus:outline-none p-0.5"
                     >
-                      <svg className="w-4 h-4 sm:w-6 sm:h-6 lg:w-7 lg:h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <svg className={isDesktop ? "w-4 h-4" : "w-4 h-4 sm:w-6 sm:h-6 lg:w-7 lg:h-7"} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.85 1.05 6.5 2.5L21 8" />
                         <path d="M21 3v5h-5" />
                       </svg>
                     </button>
                     
                     {/* Quantity Control Pill */}
-                    <div className="flex items-center bg-[#48286b] rounded-xl sm:rounded-2xl overflow-hidden h-7 w-[68px] sm:h-9 sm:w-28 lg:h-11 lg:w-36 text-white shadow-sm select-none justify-between px-1 sm:px-2">
+                    <div className={isDesktop ? "flex items-center bg-[#48286b] rounded-lg overflow-hidden h-7.5 w-20 text-white shadow-sm select-none justify-between px-1" : "flex items-center bg-[#48286b] rounded-xl sm:rounded-2xl overflow-hidden h-7 w-[68px] sm:h-9 sm:w-28 lg:h-11 lg:w-36 text-white shadow-sm select-none justify-between px-1 sm:px-2"}>
                       <button 
-                        className="w-4 sm:w-8 lg:w-10 h-full flex items-center justify-center hover:bg-black/10 active:scale-95 transition-all text-white font-bold text-xs sm:text-xl lg:text-2xl pb-0.5 sm:pb-1"
+                        className={isDesktop ? "w-5 h-full flex items-center justify-center hover:bg-black/10 active:scale-95 transition-all text-white font-bold text-sm pb-0.5" : "w-4 sm:w-8 lg:w-10 h-full flex items-center justify-center hover:bg-black/10 active:scale-95 transition-all text-white font-bold text-xs sm:text-xl lg:text-2xl pb-0.5 sm:pb-1"}
                         onClick={() => handleQtyChange(itemQty - 1)}
                       >
                         -
                       </button>
-                      <span className="font-black text-[10px] sm:text-base lg:text-xl tracking-wide">{String(itemQty).padStart(2, '0')}</span>
+                      <span className={isDesktop ? "font-bold text-xs tracking-wide" : "font-black text-[10px] sm:text-base lg:text-xl tracking-wide"}>{String(itemQty).padStart(2, '0')}</span>
                       <button 
-                        className="w-4 sm:w-8 lg:w-10 h-full flex items-center justify-center hover:bg-black/10 active:scale-95 transition-all text-white font-bold text-xs sm:text-xl lg:text-2xl pb-0.5 sm:pb-1"
+                        className={isDesktop ? "w-5 h-full flex items-center justify-center hover:bg-black/10 active:scale-95 transition-all text-white font-bold text-sm pb-0.5" : "w-4 sm:w-8 lg:w-10 h-full flex items-center justify-center hover:bg-black/10 active:scale-95 transition-all text-white font-bold text-xs sm:text-xl lg:text-2xl pb-0.5 sm:pb-1"}
                         onClick={() => handleQtyChange(itemQty + 1)}
                       >
                         +
@@ -489,12 +497,12 @@ function ComparisonOffersList({
                 )
               ) : (
                 <>
-                  <span className="text-[9px] sm:text-[11px] font-bold text-red-500 whitespace-nowrap">Out of Stock</span>
+                  <span className={isDesktop ? "text-[10px] font-bold text-red-500 whitespace-nowrap" : "text-[9px] sm:text-[11px] font-bold text-red-500 whitespace-nowrap"}>Out of Stock</span>
                   <button 
                     onClick={() => setShowStockAlert(true)}
-                    className="w-6 h-6 sm:w-8.5 sm:h-8.5 rounded-full bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center border border-red-100 active:scale-95 transition-all focus:outline-none flex-shrink-0"
+                    className={isDesktop ? "w-7 h-7 rounded-full bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center border border-red-100 active:scale-95 transition-all focus:outline-none flex-shrink-0" : "w-6 h-6 sm:w-8.5 sm:h-8.5 rounded-full bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center border border-red-100 active:scale-95 transition-all focus:outline-none flex-shrink-0"}
                   >
-                    <Bell className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    <Bell className={isDesktop ? "w-3.5 h-3.5" : "w-3.5 h-3.5 sm:w-4 sm:h-4"} />
                   </button>
                 </>
               )}
@@ -1163,6 +1171,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
 
               {/* 8-row comparison list */}
               <ComparisonOffersList 
+                variant="desktop"
                 comparisonListings={comparisonListings}
                 cartData={cartData}
                 minOrderAmount={minOrderAmount}

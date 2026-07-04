@@ -124,6 +124,9 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                     const rawOriginalPrice = item.product?.originalPrice ?? item.product?.mrp ?? item.originalPrice ?? item.mrp;
                     const itemPrice = rawPrice != null ? rawPrice : 0;
                     const itemOriginalPrice = rawOriginalPrice != null ? rawOriginalPrice : 0;
+                    const discountPercent = (itemOriginalPrice > itemPrice && itemOriginalPrice > 0)
+                      ? Math.round(((itemOriginalPrice - itemPrice) / itemOriginalPrice) * 100)
+                      : 0;
                     const isNotAvailable = item.product?.sellerCount === 0 || item.product?.sellerOffers?.length === 0 || rawPrice == null;
                     
                     const titleWords = itemName.trim().split(' ').filter(Boolean);
@@ -205,64 +208,73 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                         </div>
 
                         {/* Middle Content */}
-                        <div className="flex-1 min-w-0 mt-1 flex flex-col gap-1.5">
-                          {/* Row 1: Move to Cart (left) & Refresh + Quantity Selector (right) */}
-                          <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3">
-                            <button
-                              onClick={() => handleAddToCart(item)}
-                              className="flex items-center gap-1 bg-[#f7941d] hover:bg-orange-600 text-white p-1.5 px-3 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-xs font-bold transition-all whitespace-nowrap shadow-sm"
-                            >
-                              <span className="hidden sm:inline">Move to Cart</span>
-                              <Plus className="w-3.5 h-3.5 sm:w-3.5 sm:h-3.5 text-white" strokeWidth={3} />
-                            </button>
-
-                            {/* Right actions: Refresh + Quantity Selector */}
-                            <div className="flex items-center gap-1 sm:gap-1.5">
-                              {/* Reset count button */}
-                              <button 
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  if (inCartItem) {
-                                    removeCartItem.mutate(inCartItem.id, {
-                                      onSuccess: () => {
-                                        toast('Quantity reset', 'success');
-                                      }
-                                    });
-                                  }
-                                }}
-                                className="text-[#48286b] hover:text-[#361e51] transition-colors p-1"
-                                title="Reset quantity"
-                                disabled={removeCartItem.isPending}
-                              >
-                                <RefreshCw className={`w-4 h-4 sm:w-4.5 sm:h-4.5 ${removeCartItem.isPending ? 'animate-spin' : ''}`} />
-                              </button>
-
-                              {/* Purple Quantity Selector Pill */}
-                              <div className="flex items-center bg-[#48286b] rounded-lg text-white shadow-sm h-7 sm:h-8 px-2 sm:px-2.5 gap-1.5 sm:gap-2 select-none">
-                                <button 
-                                  onClick={handleDecrement}
-                                  className="px-1.5 py-0.5 sm:px-2 sm:py-0.5 text-white hover:bg-white/10 rounded font-bold text-xs sm:text-sm"
-                                  disabled={cartQty === 0}
-                                >
-                                  -
-                                </button>
-                                <span className="text-xs sm:text-xs font-black px-0.5 sm:px-1 tracking-tighter min-w-[14px] sm:min-w-[16px] text-center">
-                                  {cartQty.toString().padStart(2, '0')}
-                                </span>
-                                <button 
+                        <div className="flex-1 min-w-0 mt-1 flex flex-col gap-1.5 justify-between">
+                          {/* Row 1: Product Name (left) & Actions (right) */}
+                          <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2">
+                            <h3 className="text-[16px] font-bold text-gray-700 leading-snug truncate text-left flex-1">{itemName}</h3>
+                            
+                            {/* Counter/Plus action */}
+                            <div className="flex items-center gap-1.5 flex-shrink-0">
+                              {cartQty === 0 ? (
+                                <button
                                   onClick={handleIncrement}
-                                  className="px-1.5 py-0.5 sm:px-2 sm:py-0.5 text-white hover:bg-white/10 rounded font-bold text-xs sm:text-sm"
+                                  className="text-[#f7941d] hover:text-orange-600 focus:outline-none transition-transform active:scale-90 p-1"
                                 >
-                                  +
+                                  <Plus className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={3} />
                                 </button>
-                              </div>
+                              ) : (
+                                <div className="flex items-center gap-1.5">
+                                  {/* Reset count button */}
+                                  <button 
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      if (inCartItem) {
+                                        removeCartItem.mutate(inCartItem.id, {
+                                          onSuccess: () => {
+                                            toast('Quantity reset', 'success');
+                                          }
+                                        });
+                                      }
+                                    }}
+                                    className="text-[#48286b] hover:text-[#361e51] transition-colors p-1"
+                                    title="Reset quantity"
+                                    disabled={removeCartItem.isPending}
+                                  >
+                                    <RefreshCw className={`w-4 h-4 sm:w-4.5 sm:h-4.5 ${removeCartItem.isPending ? 'animate-spin' : ''}`} />
+                                  </button>
+
+                                  {/* Purple Quantity Selector Pill */}
+                                  <div className="flex items-center bg-[#48286b] rounded-lg text-white shadow-sm h-7 sm:h-8 px-2 sm:px-2.5 gap-1.5 sm:gap-2 select-none">
+                                    <button 
+                                      onClick={handleDecrement}
+                                      className="px-1.5 py-0.5 sm:px-2 sm:py-0.5 text-white hover:bg-white/10 rounded font-bold text-xs sm:text-sm"
+                                    >
+                                      -
+                                    </button>
+                                    <span className="text-xs sm:text-xs font-black px-0.5 sm:px-1 tracking-tighter min-w-[14px] sm:min-w-[16px] text-center">
+                                      {cartQty.toString().padStart(2, '0')}
+                                    </span>
+                                    <button 
+                                      onClick={handleIncrement}
+                                      className="px-1.5 py-0.5 sm:px-2 sm:py-0.5 text-white hover:bg-white/10 rounded font-bold text-xs sm:text-sm"
+                                    >
+                                      +
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           </div>
 
-                          {/* Row 2: Product Name & Arrow Button */}
+                          {/* Row 2: Price & Quickview Button */}
                           <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2">
-                            <h3 className="text-[16px] font-bold text-gray-700 leading-snug truncate text-left flex-1">{itemName}</h3>
+                            <div className="flex items-baseline gap-2 text-left">
+                              <span className="text-[19px] font-black text-gray-900">{isNotAvailable ? 'N/A' : `₹${itemPrice.toLocaleString('en-IN')}`}</span>
+                              <span className="text-[14px] font-bold text-gray-400 line-through">{!isNotAvailable && itemOriginalPrice > 0 ? `₹${itemOriginalPrice.toLocaleString('en-IN')}` : ''}</span>
+                            </div>
+                            
+                            {/* Quickview Button */}
                             <button
                               onClick={(e) => {
                                 e.preventDefault();
@@ -275,16 +287,18 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                                 });
                               }}
                               className="w-5 h-5 sm:w-6 sm:h-6 bg-[#8c8c8c] rounded-full flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform shadow-sm"
+                              title="Quick view"
                             >
                               <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" strokeWidth={2.5} />
                             </button>
                           </div>
 
-                          {/* Row 3: Price & Rating */}
+                          {/* Row 3: Discount & Star Rating */}
                           <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2">
-                            <div className="flex items-baseline gap-2 text-left">
-                              <span className="text-[19px] font-black text-gray-900">{isNotAvailable ? 'N/A' : `₹${itemPrice.toLocaleString('en-IN')}`}</span>
-                              <span className="text-[14px] font-bold text-gray-400 line-through">{!isNotAvailable && itemOriginalPrice > 0 ? `₹${itemOriginalPrice.toLocaleString('en-IN')}` : ''}</span>
+                            <div className="text-left">
+                              {discountPercent > 0 && (
+                                <span className="text-xs sm:text-[13px] font-bold text-[#f7941d]">{discountPercent}% off</span>
+                              )}
                             </div>
                             <div className="flex items-center gap-[3px] sm:gap-[4px]">
                               <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-[#6342B4] text-[#6342B4]" />
@@ -293,7 +307,7 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                           </div>
 
                           {/* Row 4: Delivery */}
-                          <div className="flex justify-end w-full pr-1.5 sm:pr-3 mt-0.5">
+                          <div className="flex justify-end w-full pr-1.5 sm:pr-3">
                             <DeliveryTruckBadge text={deliveryTime} className="w-[80px] sm:w-[95px] text-[#9a9a9a]" />
                           </div>
                         </div>

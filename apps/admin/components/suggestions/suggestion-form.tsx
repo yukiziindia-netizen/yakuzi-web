@@ -33,6 +33,8 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
     commissionPercent: "",
     fixedFee: "",
     commissionGstPercent: "",
+    fixedFeeGstPercent: "",
+    shippingGstPercent: "",
     unit: "1",
     packSize: "1",
     minimumOrderQuantity: "1",
@@ -63,6 +65,8 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
         commissionPercent: initialData.commissionPercent ? String(initialData.commissionPercent) : "",
         fixedFee: initialData.fixedFee ? String(initialData.fixedFee) : "",
         commissionGstPercent: initialData.commissionGstPercent ? String(initialData.commissionGstPercent) : "",
+        fixedFeeGstPercent: initialData.fixedFeeGstPercent ? String(initialData.fixedFeeGstPercent) : "",
+        shippingGstPercent: initialData.shippingGstPercent ? String(initialData.shippingGstPercent) : "",
         unit: initialData.unit || "1",
         packSize: initialData.packSize || "1",
         minimumOrderQuantity: initialData.minimumOrderQuantity ? String(initialData.minimumOrderQuantity) : "1",
@@ -179,6 +183,8 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
         commissionPercent: form.commissionPercent !== "" ? Number(form.commissionPercent) : null,
         fixedFee: form.fixedFee !== "" ? Number(form.fixedFee) : null,
         commissionGstPercent: form.commissionGstPercent !== "" ? Number(form.commissionGstPercent) : null,
+        fixedFeeGstPercent: form.fixedFeeGstPercent !== "" ? Number(form.fixedFeeGstPercent) : null,
+        shippingGstPercent: form.shippingGstPercent !== "" ? Number(form.shippingGstPercent) : null,
         unit: form.unit,
         packSize: form.packSize,
         minimumOrderQuantity: form.minimumOrderQuantity !== "" ? Number(form.minimumOrderQuantity) : null,
@@ -194,6 +200,7 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
           name: v.name, 
           sku: v.sku,
           shippingCharges: Number(v.shippingCharges),
+          shippingGstPercent: v.shippingGstPercent !== "" ? Number(v.shippingGstPercent) : null,
           image: v.image,
           images: v.images
         })) : undefined,
@@ -334,35 +341,55 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
             </div>
 
               {/* Platform Fees */}
-              <div className="pt-6 mt-6 border-t border-gray-100">
-                <h3 className="text-sm font-semibold text-gray-900 mb-4">Platform Fees Override</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
-                  <Input
-                    type="number"
-                    label="Commission (%)"
-                    placeholder="e.g. 5"
-                    value={form.commissionPercent}
-                    onChange={e => setForm(f => ({ ...f, commissionPercent: e.target.value }))}
-                  />
-                  <Input
-                    type="number"
-                    label="Fixed Fee (₹)"
-                    placeholder="e.g. 20"
-                    value={form.fixedFee}
-                    onChange={e => setForm(f => ({ ...f, fixedFee: e.target.value }))}
-                  />
-                  <Input
-                    type="number"
-                    label="Commission GST (%)"
-                    placeholder="e.g. 18"
-                    value={form.commissionGstPercent}
-                    onChange={e => setForm(f => ({ ...f, commissionGstPercent: e.target.value }))}
-                  />
+                <div className="pt-6 mt-6 border-t border-gray-100">
+                <h3 className="text-sm font-semibold text-gray-900 mb-4">Platform Fees</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+                    <Input
+                      type="number"
+                      label="Commission (%)"
+                      placeholder="e.g. 5"
+                      value={form.commissionPercent}
+                      onChange={e => setForm(f => ({ ...f, commissionPercent: e.target.value }))}
+                    />
+                    <Input
+                      type="number"
+                      label="Fixed Fee (₹)"
+                      placeholder="e.g. 20"
+                      value={form.fixedFee}
+                      onChange={e => setForm(f => ({ ...f, fixedFee: e.target.value }))}
+                    />
+                  </div>
                 </div>
-                <p className="text-xs text-gray-500 mt-2">
-                  Leave empty to use category default fees.
-                </p>
-              </div>
+
+              {/* GST on Platform Fees */}
+                <div className="pt-6 mt-6 border-t border-gray-100">
+                <h3 className="text-sm font-semibold text-gray-900 mb-4">GST on Platform Fees</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                    <Input
+                      type="number"
+                      label="Commission GST (%)"
+                      placeholder="e.g. 18"
+                      value={form.commissionGstPercent}
+                      onChange={e => setForm(f => ({ ...f, commissionGstPercent: e.target.value }))}
+                    />
+                    <Input
+                      type="number"
+                      label="Fixed Fee GST (%)"
+                      placeholder="e.g. 18"
+                      value={form.fixedFeeGstPercent}
+                      onChange={e => setForm(f => ({ ...f, fixedFeeGstPercent: e.target.value }))}
+                    />
+                    {variants.length === 0 && (
+                      <Input
+                        type="number"
+                        label="Shipping GST (%)"
+                        placeholder="e.g. 18"
+                        value={form.shippingGstPercent}
+                        onChange={e => setForm(f => ({ ...f, shippingGstPercent: e.target.value }))}
+                      />
+                    )}
+                  </div>
+                </div>  
 
             <div className="pt-6 mt-6 border-t border-gray-100 space-y-4">
               <Input

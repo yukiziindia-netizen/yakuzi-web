@@ -131,41 +131,61 @@ export function DiscountSelector({ value, onChange, mrp, gstPercent, platformFee
       </div>
 
       {pricing && (
-        <div className="mt-4 p-4 rounded-lg border border-primary/20 bg-primary/5 space-y-2 text-sm">
-          <div className="font-medium text-primary mb-2">Expected Settlement Preview</div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Base Price (MRP)</span>
-            <span>{formatCurrency(pricing.basePrice)}</span>
+        <div className="mt-6 rounded-2xl border bg-card text-card-foreground shadow-sm overflow-hidden">
+          <div className="bg-muted/30 p-4 border-b">
+            <h3 className="font-semibold text-base flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+              Expected Settlement Preview
+            </h3>
           </div>
-          {pricing.discountAmount > 0 && (
-            <div className="flex justify-between text-green-600">
-              <span>Discount ({pricing.discountPercent}%)</span>
-              <span>-{formatCurrency(pricing.discountAmount)}</span>
+          <div className="p-5 space-y-3 text-sm">
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">Base Price (MRP)</span>
+              <span className="font-medium text-right min-w-[80px]">{formatCurrency(pricing.basePrice)}</span>
             </div>
-          )}
-          <div className="flex justify-between font-medium">
-            <span>Discounted Selling Price</span>
-            <span>{formatCurrency(pricing.discountedPrice)}</span>
+            
+            {pricing.discountAmount > 0 && (
+              <div className="flex justify-between items-center text-green-600">
+                <span>Discount ({pricing.discountPercent}%)</span>
+                <span className="font-medium text-right min-w-[80px]">- {formatCurrency(pricing.discountAmount)}</span>
+              </div>
+            )}
+            
+            <div className="flex justify-between items-center pt-2 border-t border-dashed">
+              <span className="font-medium text-foreground">Discounted Selling Price</span>
+              <span className="font-semibold text-right min-w-[80px]">{formatCurrency(pricing.discountedPrice)}</span>
+            </div>
+
+            <div className="pt-3 pb-1">
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Platform Deductions</div>
+              <div className="space-y-2 pl-2 border-l-2 border-muted">
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Platform Commission ({pricing.commissionPercent}%)</span>
+                  <span className="text-destructive font-medium text-right min-w-[80px]">- {formatCurrency(pricing.commissionAmount)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Fixed Fee</span>
+                  <span className="text-destructive font-medium text-right min-w-[80px]">- {formatCurrency(pricing.fixedFee)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">GST on Platform Fees</span>
+                  <span className="text-destructive font-medium text-right min-w-[80px]">- {formatCurrency(pricing.commissionGstAmount + pricing.fixedFeeGstAmount)}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center p-3 mt-4 bg-green-50 dark:bg-green-950/20 rounded-xl border border-green-100 dark:border-green-900/30">
+              <span className="font-bold text-base text-green-800 dark:text-green-300">Estimated Payout (per unit)</span>
+              <span className="font-bold text-lg text-green-700 dark:text-green-400 text-right min-w-[80px]">{formatCurrency(pricing.sellerPayout)}</span>
+            </div>
+            
+            <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg flex items-start gap-3 border border-blue-100 dark:border-blue-900/30">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500 mt-0.5 shrink-0"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+              <p className="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
+                <strong className="font-semibold">Note:</strong> Final customer pays <strong>{formatCurrency(pricing.finalCustomerPayable)}</strong> (includes {pricing.productGstPercent}% Product GST {pricing.shippingTotal > 0 ? `+ ${formatCurrency(pricing.shippingTotal)} Total Shipping` : ''}). You are responsible for remitting Product GST to the government out of your payout.
+              </p>
+            </div>
           </div>
-          <div className="flex justify-between border-t pt-2 mt-2">
-            <span className="text-muted-foreground">Platform Commission ({pricing.commissionPercent}%)</span>
-            <span className="text-red-500">-{formatCurrency(pricing.commissionAmount)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Fixed Fee</span>
-            <span className="text-red-500">-{formatCurrency(pricing.fixedFee)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">GST on Platform Fees ({pricing.commissionGstPercent}%)</span>
-            <span className="text-red-500">-{formatCurrency(pricing.commissionGstAmount + pricing.fixedFeeGstAmount)}</span>
-          </div>
-          <div className="flex justify-between border-t pt-2 mt-2 font-bold text-base">
-            <span>Estimated Payout (per unit)</span>
-            <span className="text-green-600">{formatCurrency(pricing.sellerPayout)}</span>
-          </div>
-          <p className="text-xs text-muted-foreground mt-2">
-            * Final customer pays {formatCurrency(pricing.finalCustomerPayable)} (includes {pricing.productGstPercent}% Product GST + Shipping if applicable). You are responsible for remitting Product GST to the government out of your payout.
-          </p>
         </div>
       )}
     </div>

@@ -128,12 +128,8 @@ export function ProductForm({
       commissionPercent: selectedSuggestion.commissionPercent,
       fixedFee: selectedSuggestion.fixedFee || 0,
       commissionGstPercent: selectedSuggestion.commissionGstPercent || 18,
-    };
-  } else if (cat) {
-    platformFees = {
-      commissionPercent: cat.commissionPercent || 0,
-      fixedFee: cat.fixedFee || 0,
-      commissionGstPercent: cat.commissionGstPercent || 18,
+      fixedFeeGstPercent: selectedSuggestion.fixedFeeGstPercent || 18,
+      shippingGstPercent: selectedSuggestion.shippingGstPercent || 18,
     };
   }
 

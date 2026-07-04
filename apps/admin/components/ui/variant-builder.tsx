@@ -19,6 +19,7 @@ export interface VariantCombination {
   name: string;
   sku: string;
   shippingCharges: string;
+  shippingGstPercent: string;
   image?: string;
   images?: string[];
 }
@@ -300,7 +301,8 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
         id: Math.random().toString(36).substr(2, 9),
         name: comboName,
         sku: "",
-        shippingCharges: "0"
+        shippingCharges: "0",
+        shippingGstPercent: ""
       };
     });
 
@@ -547,7 +549,8 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                   <tr>
                     <th scope="col" className="px-6 py-3 font-medium">Variant</th>
                     <th scope="col" className="px-6 py-3 font-medium">SKU</th>
-                    <th scope="col" className="px-6 py-3 font-medium">Shipping Charges (₹)</th>
+                    <th scope="col" className="px-6 py-3 font-medium">Shipping (₹)</th>
+                    <th scope="col" className="px-6 py-3 font-medium">Shipping GST (%)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -584,7 +587,7 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                           placeholder="SKU-001"
                         />
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <div className="relative rounded-md shadow-sm">
                           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <span className="text-gray-500 sm:text-sm">₹</span>
@@ -593,10 +596,19 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                             type="number"
                             value={variant.shippingCharges}
                             onChange={(e) => updateVariant(variant.id, "shippingCharges", e.target.value)}
-                            className="focus:ring-blue-500 focus:border-blue-500 block w-28 pl-9 sm:text-sm border-gray-300 rounded-md py-1.5"
+                            className="focus:ring-blue-500 focus:border-blue-500 block w-24 pl-7 sm:text-sm border-gray-300 rounded-md py-1.5"
                             placeholder="0"
                           />
                         </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <input
+                          type="number"
+                          value={variant.shippingGstPercent}
+                          onChange={(e) => updateVariant(variant.id, "shippingGstPercent", e.target.value)}
+                          className="focus:ring-blue-500 focus:border-blue-500 block w-20 sm:text-sm border-gray-300 rounded-md py-1.5 px-3"
+                          placeholder="e.g. 18"
+                        />
                       </td>
                     </tr>
                   ))}

@@ -35,6 +35,8 @@ export interface CategoryPlatformFees {
   commissionPercent?: number;
   fixedFee?: number;
   commissionGstPercent?: number;
+  fixedFeeGstPercent?: number;
+  shippingGstPercent?: number;
 }
 
 export interface PricingOutput {
@@ -124,7 +126,7 @@ export function calculatePricing(
   const productGstAmount = round2(discountedPrice * (gstPercent / 100));
 
   const shippingCharge = discountInput.shippingCharges ?? 0;
-  const shippingGstPercent = discountInput.shippingGstPercent ?? 18;
+  const shippingGstPercent = discountInput.shippingGstPercent ?? platformFees?.shippingGstPercent ?? 18;
   const shippingGstAmount = round2(shippingCharge * (shippingGstPercent / 100));
   const shippingTotal = round2(shippingCharge + shippingGstAmount);
 
@@ -135,7 +137,8 @@ export function calculatePricing(
   const commissionGstAmount = round2(commissionAmount * (commissionGstPercent / 100));
 
   const fixedFee = platformFees?.fixedFee ?? 0;
-  const fixedFeeGstAmount = round2(fixedFee * (commissionGstPercent / 100));
+  const fixedFeeGstPercent = platformFees?.fixedFeeGstPercent ?? 18;
+  const fixedFeeGstAmount = round2(fixedFee * (fixedFeeGstPercent / 100));
 
   const totalPlatformFees = round2(commissionAmount + commissionGstAmount + fixedFee + fixedFeeGstAmount);
 

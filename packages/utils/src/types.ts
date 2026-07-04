@@ -274,6 +274,8 @@ export interface Suggestion {
   commissionPercent?: number | null;
   fixedFee?: number | null;
   commissionGstPercent?: number | null;
+  fixedFeeGstPercent?: number | null;
+  shippingGstPercent?: number | null;
 }
 
 

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSellerProduct, useDeleteSellerProduct } from "@/hooks/useSeller";
@@ -72,7 +72,7 @@ export default function ProductDetailPage() {
                      <div><p className="text-xs text-muted-foreground font-medium uppercase">MRP</p><p className="font-semibold text-lg">{formatCurrency(product.mrp ?? product.price ?? 0)}</p></div>
                      <div><p className="text-xs text-muted-foreground font-medium uppercase">Manufacturer</p><p className="font-medium">{product.manufacturer || "-"}</p></div>
                      <div><p className="text-xs text-muted-foreground font-medium uppercase">Category</p><Badge className="uppercase mt-1">{product.category || product.categoryId || "-"}</Badge></div>
-                     <div><p className="text-xs text-muted-foreground font-medium uppercase">Expiry Date</p><p className="font-medium">{product.expiryDate ? formatDate(product.expiryDate) : "-"}</p></div>
+                     <div><p className="text-xs text-muted-foreground font-medium uppercase">SKU</p><p className="font-mono">{(product as any).variant?.sku || (product as any).sku || "-"}</p></div>
                    </div>
                  </div>
 

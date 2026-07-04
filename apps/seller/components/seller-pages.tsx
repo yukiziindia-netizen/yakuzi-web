@@ -1,10 +1,10 @@
 // ─── Orders Page ─────────────────────────────────────────────────────────────
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { formatCurrency, formatDate } from "@yukizi/utils";
-import { OrderStatusBadge, Button, Badge, StatCard } from "@/components/ui";
-import { Package, Warehouse, CreditCard, TrendingUp, AlertTriangle, CheckCircle, Clock, Eye, Loader2, ShoppingBag } from "lucide-react";
+import { OrderStatusBadge, Button, Badge, StatCard, Input } from "@/components/ui";
+import { Package, Warehouse, CreditCard, TrendingUp, AlertTriangle, CheckCircle, Clock, Eye, Loader2, ShoppingBag, Search } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, LineChart, Line } from "recharts";
 import {
   useSellerOrders,
@@ -28,24 +28,20 @@ import { subDays } from "date-fns";
 const ORDER_TABS = [
   { key: "all", label: "All Orders" },
   { key: "pending", label: "Pending" },
-  { key: "accepted", label: "Accepted" },
-  { key: "dispatched", label: "Dispatched" },
-  { key: "warehouse", label: "At Warehouse" },
-  { key: "shipped", label: "Shipped" },
   { key: "delivered", label: "Delivered" },
   { key: "cancelled", label: "Cancelled" },
 ] as const;
 
 type OrderTab = typeof ORDER_TABS[number]["key"];
 
-function OrderTable({ orders, settlements = [], showConfirm = false, updateFn }: { orders: any[]; settlements?: any[]; showConfirm?: boolean; updateFn?: any }) {
+export function OrderTable({ orders, settlements = [], showConfirm = false, updateFn }: { orders: any[]; settlements?: any[]; showConfirm?: boolean; updateFn?: any }) {
   if (orders.length === 0) {
     return <div className="p-8 text-center text-muted-foreground text-sm">No orders found</div>;
   }
   return (
     <div className="overflow-x-auto">
       <table className="w-full" aria-label="Seller orders">
-        <thead><tr className="border-b border-border/50 bg-muted/20">{["Order #", "Items", "Amount", "Settlement", "Action"].map(h => <th key={h} scope="col" className={cn("px-5 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider", h === "Action" && "text-right")}>{h}</th>)}</tr></thead>
+        <thead><tr className="border-b border-border/50 bg-muted/20">{["Order #", "Items", "Amount", "Status", "Settlement", "Action"].map(h => <th key={h} scope="col" className={cn("px-5 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider", h === "Action" && "text-right")}>{h}</th>)}</tr></thead>
         <tbody className="divide-y divide-border/30">
           {orders.map((o: any, i: number) => (
             <motion.tr key={o.orderId || o.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }} className="hover:bg-accent/30 transition-colors">
@@ -64,6 +60,16 @@ function OrderTable({ orders, settlements = [], showConfirm = false, updateFn }:
 
                     <td className="px-5 py-4">
                       {(() => {
+                        const oStatus = (order.orderStatus || order.status || "").toUpperCase();
+                        if (["DELIVERED", "RETURNED", "CANCELLED"].includes(oStatus)) {
+                           return <Badge variant={oStatus === "DELIVERED" ? "success" : "error"}>{oStatus}</Badge>;
+                        }
+                        return <Badge variant="default">IN PROGRESS</Badge>;
+                      })()}
+                    </td>
+
+                    <td className="px-5 py-4">
+                      {(() => {
                          const orderId = order.orderId || order.id;
                          const settlement = settlements.find(s => s.orderItem?.orderId === orderId);
                          const status = settlement?.payoutStatus || ((order.orderStatus === "DELIVERED" || order.status === "DELIVERED") ? "READY" : "PENDING");
@@ -75,7 +81,7 @@ function OrderTable({ orders, settlements = [], showConfirm = false, updateFn }:
                       })()}
                     </td>
                     <td className="px-5 py-4 text-right">
-                      <div className="flex gap-2 items-center">
+                      <div className="flex gap-2 items-center justify-end">
                         <Link href={`/orders/${order.orderId || order.id}`} title="View Order">
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:bg-primary/10 transition-colors">
                             <Eye className="h-4.5 w-4.5" />
@@ -168,10 +174,6 @@ export function OrdersContent() {
       const s = (o.orderStatus || o.status || "").toUpperCase();
       switch (tab) {
         case "pending": return s === "PLACED" || s === "PENDING";
-        case "accepted": return s === "ACCEPTED" || s === "CONFIRMED" || s === "PROCESSING";
-        case "dispatched": return s === "DISPATCHED_FROM_SELLER";
-        case "warehouse": return s === "RECEIVED_AT_WAREHOUSE" || s === "WAREHOUSE";
-        case "shipped": return s === "SHIPPED" || s === "TRANSIT";
         case "delivered": return s === "DELIVERED";
         case "cancelled": return s === "CANCELLED";
         default: return true;
@@ -275,15 +277,37 @@ export function OrdersContent() {
 
 
 export function InventoryContent() {
-  const { data: products, isLoading } = useSellerProducts();
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 500);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const { data: products, isLoading } = useSellerProducts({ search: debouncedSearch });
   const productsData = products as any;
   const inventoryItems = productsData?.data ?? [];
 
-  if (isLoading) return <div className="p-6 text-center text-muted-foreground">Loading inventory...</div>;
+  if (isLoading && !inventoryItems.length) return <div className="p-6 text-center text-muted-foreground">Loading inventory...</div>;
 
   return (
     <div className="space-y-6">
-      <div><h1 className="font-semibold text-2xl text-foreground">Inventory</h1><p className="text-sm text-muted-foreground mt-0.5">Track and manage your stock levels</p></div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="font-semibold text-2xl text-foreground">Inventory</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Track and manage your stock levels</p>
+        </div>
+        <div className="relative w-full sm:w-64 flex-shrink-0">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input 
+            placeholder="Search by name or SKU..." 
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9 bg-background/50 border-white/20 focus:bg-background"
+          />
+        </div>
+      </div>
       <div className="glass-card rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full" aria-label="Inventory">
@@ -327,7 +351,7 @@ function InventoryRow({ item, index }: { item: any, index: number }) {
   return (
     <motion.tr initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.07 }} className="hover:bg-accent/30 transition-colors">
       <td className="px-5 py-4 text-sm font-medium text-foreground">{item.name}</td>
-      <td className="px-5 py-4"><span className="font-mono text-xs text-muted-foreground bg-muted/30 px-1.5 py-0.5 rounded">{item.id.slice(0, 8)}</span></td>
+      <td className="px-5 py-4"><span className="font-mono text-xs text-muted-foreground bg-muted/30 px-1.5 py-0.5 rounded">{item.variant?.sku || item.sku || "—"}</span></td>
       <td className="px-5 py-4">
         <div className="flex items-center gap-2">
           <div className="relative flex items-center">

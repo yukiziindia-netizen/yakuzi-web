@@ -99,14 +99,14 @@ export default function ProductsPage() {
                 <table className="w-full" aria-label="Products">
                   <thead>
                     <tr className="border-b border-border/50 bg-muted/20">
-                      {["Product","Category","Price","Stock","GST","Offer","Actions"].map(h=>(
+                      {["Product","Category","SKU","Price","Stock","GST","Offer","Actions"].map(h=>(
                         <th key={h} scope="col" className="px-5 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/30">
                     {products.length===0 ? (
-                      <tr><td colSpan={7} className="py-12 text-center text-sm text-muted-foreground">No products found</td></tr>
+                      <tr><td colSpan={8} className="py-12 text-center text-sm text-muted-foreground">No products found</td></tr>
                     ) : products.map((p: any, i: number)=>(
                       <motion.tr key={p.id} initial={{opacity:0,y:6}} animate={{opacity:1,y:0}} transition={{delay:i*0.05}} className="hover:bg-accent/30 transition-colors">
                         <td className="px-5 py-4">
@@ -116,10 +116,12 @@ export default function ProductsPage() {
                           </div>
                         </td>
                         <td className="px-5 py-4"><Badge className="capitalize">{p.category}</Badge></td>
+                        <td className="px-5 py-4"><span className="font-mono text-xs text-muted-foreground bg-muted/30 px-1.5 py-0.5 rounded">{p.variant?.sku || p.sku || "—"}</span></td>
                         <td className="px-5 py-4">
                           <div className="text-sm font-semibold text-foreground">{formatCurrency(p.mrp ?? p.price ?? 0)}</div>
                           {p.sellingPrice != null && p.sellingPrice !== p.mrp && <div className="text-xs text-muted-foreground">Sell: {formatCurrency(p.sellingPrice)}</div>}
                         </td>
+
                         <td className="px-5 py-4">
                           <span className={`text-sm font-medium ${(p.stock ?? 0)>100?"text-green-600":(p.stock ?? 0)>0?"text-yellow-600":"text-red-500"}`}>
                             {p.stock} units

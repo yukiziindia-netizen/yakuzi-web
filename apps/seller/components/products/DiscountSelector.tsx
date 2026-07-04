@@ -129,46 +129,7 @@ export function DiscountSelector({ value, onChange, mrp, gstPercent, error }: Pr
         )}
       </div>
 
-      {/* Real-time Pricing Preview */}
-      {pricing && (
-        <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-1.5">
-          <p className="text-xs font-semibold text-primary uppercase tracking-wider">Pricing Preview</p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">PTR:</span>
-              <span className="font-medium">{formatCurrency(pricing.ptr)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Final PTR:</span>
-              <span className="font-medium">{formatCurrency(pricing.finalPtr)}</span>
-            </div>
-            {pricing.discountPercent > 0 && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Discount:</span>
-                <span className="font-medium text-green-600">{pricing.discountPercent}% ({formatCurrency(pricing.discountValue)})</span>
-              </div>
-            )}
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">GST ({pricing.gstPercent}%):</span>
-              <span className="font-medium">{formatCurrency(pricing.gstValue)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Per Unit:</span>
-              <span className="font-semibold">{formatCurrency(pricing.perPtrWithGst)}</span>
-            </div>
-            {pricing.get > 0 && (
-              <div className="flex justify-between col-span-2 sm:col-span-1">
-                <span className="text-muted-foreground">Scheme:</span>
-                <Badge variant="info">Buy {pricing.buy} Get {pricing.get}</Badge>
-              </div>
-            )}
-            <div className="flex justify-between col-span-2 sm:col-span-3 border-t border-primary/10 pt-1 mt-1">
-              <span className="text-muted-foreground font-medium">Buyer Pays:</span>
-              <span className="font-bold text-primary">{formatCurrency(pricing.finalUserBuy)} (for {pricing.totalUnits} units)</span>
-            </div>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 }

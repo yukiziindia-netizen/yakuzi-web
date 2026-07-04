@@ -115,6 +115,11 @@ export async function updateAdminOrderStatus(orderId: string, status: string) {
   return data.data;
 }
 
+export async function updateAdminShippingDocs(orderId: string, payload: { adminShippingLabelUrl?: string; adminInvoiceUrl?: string }) {
+  const { data } = await apiClient.patch<{ data: any }>(`/orders/${orderId}/admin-shipping-docs`, payload);
+  return data.data;
+}
+
 // ─── Payments ────────────────────────────────────────
 export async function getPayments(page = 1, limit = 50) {
   const { data } = await apiClient.get<any>(`/admin/payments?page=${page}&limit=${limit}`);
@@ -536,6 +541,15 @@ export async function uploadImage(file: File) {
   // Reusing blog-image endpoint for generic admin image uploads to get a direct URL
   const { data } = await apiClient.post<{ data: { url: string } }>("/storage/blog-image", formData);
   return data.data.url;
+}
+
+export async function uploadAdminOrderDocument(file: File) {
+  const formData = new FormData();
+  formData.append("file", file);
+  const { data } = await apiClient.post<any>("/storage/order-document", formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return data.data?.url ?? data.url ?? data;
 }
 
 export async function uploadSettlementProof(file: File) {

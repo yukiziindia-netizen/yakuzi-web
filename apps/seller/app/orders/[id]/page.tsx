@@ -155,12 +155,13 @@ export default function OrderDetailPage() {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{item.product?.name || item.name || item.productName}</p>
+                  <p className="text-sm font-medium text-foreground truncate">{item.product?.name || item.name || item.productName || item.sellerOffer?.name}</p>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     {item.sellerOffer?.variant?.name && <span>Variant: {item.sellerOffer.variant.name} </span>}
-                    {item.sellerOffer?.variant?.sku && <span>(SKU: {item.sellerOffer.variant.sku})</span>}
+                    {(item.sellerOffer?.variant?.sku || item.sellerOffer?.sku) && <span>(SKU: {item.sellerOffer.variant?.sku || item.sellerOffer?.sku})</span>}
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">Qty: {item.quantity} × {formatCurrency(item.unitPrice || item.price || 0)}</p>
+                  {item.sellerOffer?.shippingCharges != null && <p className="text-xs text-muted-foreground mt-0.5">Shipping Rate: {formatCurrency(item.sellerOffer.shippingCharges)}</p>}
                   {item.discount && <p className="text-xs text-green-600">Discount: {item.discount}</p>}
                 </div>
                 <p className="text-sm font-semibold text-foreground">{formatCurrency((item.quantity || 1) * (item.unitPrice || item.price || 0))}</p>
@@ -230,25 +231,25 @@ export default function OrderDetailPage() {
             <h3 className="text-sm font-medium text-foreground">Shipping Documents</h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground block">Invoice</label>
-                {mainOrder.invoiceUrl ? (
-                   <a href={mainOrder.invoiceUrl} target="_blank" className="text-xs text-primary underline">View Invoice</a>
+                <label className="text-xs font-medium text-muted-foreground block">Shipping Label</label>
+                {mainOrder.adminShippingLabelUrl ? (
+                   <a href={mainOrder.adminShippingLabelUrl} target="_blank" className="text-xs text-primary underline">Download Label</a>
                 ) : (
-                  <input type="file" accept=".pdf,image/*" onChange={(e) => setShippingFiles(p => ({...p, invoice: e.target.files?.[0] || null}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
+                  <span className="text-xs text-muted-foreground">Pending from admin</span>
                 )}
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground block">Manifest</label>
-                {mainOrder.manifestUrl ? (
-                   <a href={mainOrder.manifestUrl} target="_blank" className="text-xs text-primary underline">View Manifest</a>
+                <label className="text-xs font-medium text-muted-foreground block">Invoice</label>
+                {mainOrder.adminInvoiceUrl ? (
+                   <a href={mainOrder.adminInvoiceUrl} target="_blank" className="text-xs text-primary underline">Download Invoice</a>
                 ) : (
-                  <input type="file" accept=".pdf,image/*" onChange={(e) => setShippingFiles(p => ({...p, manifest: e.target.files?.[0] || null}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
+                  <span className="text-xs text-muted-foreground">Pending from admin</span>
                 )}
               </div>
             </div>
           </div>
 
-          {(!mainOrder.packageLength || !mainOrder.lengthImage || !mainOrder.invoiceUrl) && (
+          {(!mainOrder.packageLength || !mainOrder.lengthImage) && (
             <div className="pt-4 flex justify-end">
               <Button size="sm" onClick={handleShippingSubmit} loading={updateShipping.isPending}>
                 Save Shipping Details
@@ -321,14 +322,6 @@ export default function OrderDetailPage() {
               )}
             </div>
           </motion.div>
-
-          {/* Invoice */}
-          {mainOrder.invoiceUrl && (
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="glass-card rounded-2xl p-5 space-y-3">
-              <h3 className="font-semibold text-sm text-foreground flex items-center gap-2"><FileText className="h-4 w-4 text-primary" />Invoice</h3>
-              <a href={mainOrder.invoiceUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-primary underline hover:no-underline">View Invoice</a>
-            </motion.div>
-          )}
         </div>
       </div>
 

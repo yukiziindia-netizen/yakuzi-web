@@ -25,6 +25,8 @@ export interface VariantCombination {
   id: string; // e.g. "Medium / Red"
   name: string;
   price: string;
+  compareAtPrice?: string;
+  discount?: string;
   available: string;
   image?: string;
   sku?: string;
@@ -42,6 +44,7 @@ interface VariantBuilderProps {
   discountDetails?: DiscountFormDetails;
   shippingCharges?: number;
   isTaxIncluded?: boolean;
+  isSuggestedProductSelected?: boolean;
 }
 
 // Helper to generate cartesian product
@@ -80,7 +83,8 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
   gstPercent,
   discountDetails,
   shippingCharges,
-  isTaxIncluded
+  isTaxIncluded,
+  isSuggestedProductSelected = false
 }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -110,6 +114,8 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
         id: Math.random().toString(36).substring(2, 9), 
         name: comboName, 
         price: "", 
+        compareAtPrice: "",
+        discount: "",
         available: "",
         sku: "",
         shippingCharges: "0"
@@ -150,14 +156,16 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-2">Variants</h2>
-          <button
-            type="button"
-            onClick={addOption}
-            className="flex items-center text-sm font-medium text-blue-600 hover:text-blue-700"
-          >
-            <Plus className="w-4 h-4 mr-1" />
-            Add options like size or color
-          </button>
+          {isSuggestedProductSelected && (
+            <button
+              type="button"
+              onClick={addOption}
+              className="flex items-center text-sm font-medium text-blue-600 hover:text-blue-700"
+            >
+              <Plus className="w-4 h-4 mr-1" />
+              Add options like size or color
+            </button>
+          )}
         </div>
       </div>
     );
@@ -261,9 +269,6 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                     exit={{ opacity: 0 }}
                     className="flex items-center gap-3 group"
                   >
-                    <div className="p-2 text-gray-400 cursor-grab hover:text-gray-600">
-                      <GripVertical className="w-5 h-5" />
-                    </div>
                     <div className="flex-1 bg-white border border-gray-200 rounded-lg p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm hover:border-gray-300 transition-colors">
                       <div>
                         <p className="text-sm font-medium text-gray-900">{option.name}</p>
@@ -282,7 +287,7 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
               })}
             </AnimatePresence>
 
-            {!editingId && (
+            {!editingId && isSuggestedProductSelected && (
               <button
                 type="button"
                 onClick={addOption}
@@ -302,6 +307,8 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                     <th scope="col" className="px-6 py-3 font-medium">Variant</th>
                     <th scope="col" className="px-6 py-3 font-medium">SKU</th>
                     <th scope="col" className="px-6 py-3 font-medium">Price</th>
+                    <th scope="col" className="px-6 py-3 font-medium">Compare at price</th>
+                    <th scope="col" className="px-6 py-3 font-medium">Discount</th>
                     <th scope="col" className="px-6 py-3 font-medium">Shipping</th>
                     <th scope="col" className="px-6 py-3 font-medium">Stock</th>
                   </tr>
@@ -364,6 +371,34 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                           }
                           return null;
                         })()}
+                      </td>
+                      <td className="px-6 py-4 align-middle">
+                        <div className="relative rounded-md shadow-sm w-32">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span className="text-gray-500 sm:text-sm">₹</span>
+                          </div>
+                          <input
+                            type="text"
+                            value={variant.compareAtPrice || ""}
+                            onChange={(e) => updateVariant(variant.id, "compareAtPrice", e.target.value)}
+                            className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-9 pr-3 sm:text-sm border-gray-300 rounded-md py-1.5"
+                            placeholder="0.00"
+                          />
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 align-middle">
+                        <div className="relative rounded-md shadow-sm w-32">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span className="text-gray-500 sm:text-sm">%</span>
+                          </div>
+                          <input
+                            type="text"
+                            value={variant.discount || ""}
+                            onChange={(e) => updateVariant(variant.id, "discount", e.target.value)}
+                            className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-9 pr-3 sm:text-sm border-gray-300 rounded-md py-1.5"
+                            placeholder="0"
+                          />
+                        </div>
                       </td>
                       <td className="px-6 py-4 align-middle">
                         <div className="relative rounded-md shadow-sm w-32">

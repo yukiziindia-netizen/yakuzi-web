@@ -548,25 +548,7 @@ export function ProductForm({
         {/* Pricing */}
         <div className="glass-card rounded-2xl p-6 space-y-4 relative z-[43] transition-opacity duration-300">
           <h2 className="font-semibold text-lg text-foreground border-b border-border/50 pb-2">Pricing</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input 
-              label="Price (₹)" 
-              type="number" 
-              step="0.01" 
-              placeholder="0.00"
-              error={errors.product_price?.message} 
-              {...register("product_price", { valueAsNumber: true })} 
-            />
-            <Input 
-              label="Compare at price (MRP) (₹)" 
-              type="number" 
-              step="0.01" 
-              placeholder="3345"
-              disabled={true}
-              error={errors.compare_at_price?.message} 
-              {...register("compare_at_price", { valueAsNumber: true })} 
-            />
-          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
             <Input 
               label="Charge tax on this product (%)" 
@@ -597,43 +579,6 @@ export function ProductForm({
             </div>
         </div>
 
-        {/* Inventory */}
-        <div className="glass-card rounded-2xl p-6 space-y-4 relative z-[43] transition-opacity duration-300">
-          <h2 className="font-semibold text-lg text-foreground border-b border-border/50 pb-2">Inventory</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input 
-              label="Unit (e.g., Tablet, Bottle)" 
-              placeholder="1"
-              error={errors.unit?.message} 
-              {...register("unit")} 
-            />
-            <Input 
-              label="Pack Size (e.g., 10x10)" 
-              placeholder="1"
-              error={errors.pack_size?.message} 
-              {...register("pack_size")} 
-            />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-            <Input label="Minimum Order Qty *" type="number" min={1} error={errors.min_order_qty?.message} {...register("min_order_qty", { valueAsNumber: true })} />
-            <Input 
-              label="Current Stock *" 
-              type="number" 
-              min={1}
-              error={errors.stock?.message} 
-              {...register("stock", { valueAsNumber: true })} 
-              disabled={variants.length > 0}
-            />
-            <Input 
-              label="Maximum Order Qty *" 
-              type="number" 
-              min={watchMinMoq}
-              error={errors.max_order_qty?.message} 
-              {...register("max_order_qty", { valueAsNumber: true })} 
-            />
-          </div>
-        </div>
-
         {/* Variants */}
         <div className="glass-card rounded-2xl p-6 space-y-4 relative z-[42] transition-opacity duration-300">
           <VariantBuilder 
@@ -647,26 +592,11 @@ export function ProductForm({
             discountDetails={watchDiscount}
             shippingCharges={watchShippingCharges}
             isTaxIncluded={watchTaxStatus}
+            isSuggestedProductSelected={!!selectedMasterId}
           />
         </div>
 
-        {/* Discounts & Pricing Engine */}
-        <div className="glass-card rounded-2xl p-6 space-y-4 relative z-[41] transition-opacity duration-300">
-          <h2 className="font-semibold text-lg text-foreground border-b border-border/50 pb-2">Discount & Bonuses</h2>
-          <Controller
-            control={control}
-            name="discount_form_details"
-            render={({ field }: any) => (
-              <DiscountSelector
-                value={field.value}
-                onChange={field.onChange}
-                mrp={watchMrp}
-                gstPercent={watchGst}
-                error={(errors.discount_form_details as any)?.message || (errors.discount_form_details as any)?.discountPercent?.message || (errors.discount_form_details as any)?.buy?.message || (errors.discount_form_details as any)?.bonusProductName?.message || (errors.discount_form_details as any)?.specialPrice?.message}
-              />
-            )}
-          />
-        </div>
+
 
 
 

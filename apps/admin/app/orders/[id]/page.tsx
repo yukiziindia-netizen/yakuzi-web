@@ -9,7 +9,7 @@ import { AdminLayout } from "@/components/layout/admin-layout";
 import { Button, Badge, Modal, Input, Skeleton } from "@/components/ui";
 import { formatCurrency } from "@yukizi/utils";
 import { cn } from "@/lib/utils";
-import { useOrderById, useUpdateAdminOrderStatus, useCancelOrder } from "@/hooks/useAdmin";
+import { useOrderById, useUpdateAdminOrderStatus, useCancelOrder, useUpdateAdminShippingDocs, useUploadAdminOrderDocument } from "@/hooks/useAdmin";
 import toast from "react-hot-toast";
 
 const ORDER_STATUSES = [
@@ -30,8 +30,14 @@ export default function OrderDetailPage() {
   const { data: order, isLoading } = useOrderById(id);
   const updateStatus = useUpdateAdminOrderStatus();
   const cancelOrder = useCancelOrder();
+  
+  const updateShippingDocs = useUpdateAdminShippingDocs();
+  const uploadDoc = useUploadAdminOrderDocument();
+  
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
+  const [adminFiles, setAdminFiles] = useState<{ label: File | null; invoice: File | null }>({ label: null, invoice: null });
+  const [isUploadingDocs, setIsUploadingDocs] = useState(false);
 
   const handleStatusUpdate = async (status: string) => {
     try {
@@ -49,6 +55,33 @@ export default function OrderDetailPage() {
       setShowCancelModal(false);
     } catch {
       toast.error("Failed to cancel order");
+    }
+  };
+
+  const handleAdminDocsSubmit = async () => {
+    try {
+      setIsUploadingDocs(true);
+      let labelUrl = order.adminShippingLabelUrl;
+      let invoiceUrl = order.adminInvoiceUrl;
+
+      if (adminFiles.label) {
+        labelUrl = await uploadDoc.mutateAsync(adminFiles.label);
+      }
+      if (adminFiles.invoice) {
+        invoiceUrl = await uploadDoc.mutateAsync(adminFiles.invoice);
+      }
+
+      await updateShippingDocs.mutateAsync({
+        orderId: id,
+        payload: { adminShippingLabelUrl: labelUrl, adminInvoiceUrl: invoiceUrl }
+      });
+
+      toast.success("Shipping documents uploaded successfully");
+      setAdminFiles({ label: null, invoice: null });
+    } catch {
+      toast.error("Failed to upload shipping documents");
+    } finally {
+      setIsUploadingDocs(false);
     }
   };
 
@@ -455,6 +488,42 @@ export default function OrderDetailPage() {
                       )}
                     </div>
                   </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Admin Shipping Documents */}
+            {order.packageLength && (
+              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24 }} className="glass-card rounded-2xl p-6">
+                <h2 className="font-semibold text-foreground mb-4 flex items-center gap-2"><FileText className="h-4 w-4 text-primary" /> Admin Documents</h2>
+                
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-muted-foreground block">Shipping Label</label>
+                      {order.adminShippingLabelUrl ? (
+                         <a href={order.adminShippingLabelUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline">View Uploaded Label</a>
+                      ) : (
+                        <input type="file" accept=".pdf,image/*" onChange={(e) => setAdminFiles(p => ({...p, label: e.target.files?.[0] || null}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
+                      )}
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-muted-foreground block">Invoice</label>
+                      {order.adminInvoiceUrl ? (
+                         <a href={order.adminInvoiceUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline">View Uploaded Invoice</a>
+                      ) : (
+                        <input type="file" accept=".pdf,image/*" onChange={(e) => setAdminFiles(p => ({...p, invoice: e.target.files?.[0] || null}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
+                      )}
+                    </div>
+                  </div>
+
+                  {(!order.adminShippingLabelUrl || !order.adminInvoiceUrl) && (
+                    <div className="pt-2 flex justify-end">
+                      <Button size="sm" onClick={handleAdminDocsSubmit} loading={isUploadingDocs} disabled={!adminFiles.label && !adminFiles.invoice}>
+                        Upload Documents
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             )}

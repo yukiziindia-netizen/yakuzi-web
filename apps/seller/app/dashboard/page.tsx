@@ -1,10 +1,9 @@
-﻿"use client";
+"use client";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Package, ShoppingBag, TrendingUp, CreditCard, Star, AlertTriangle, Bell, BarChart3, Palmtree, Eye } from "lucide-react";
-import { StatCard, Button, OrderStatusBadge } from "@/components/ui";
-import { formatCurrency, formatDate } from "@yukizi/utils";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
+import { Package, ShoppingBag, TrendingUp, CreditCard, AlertTriangle, Bell, Palmtree } from "lucide-react";
+import { StatCard, Button } from "@/components/ui";
+import { formatCurrency } from "@yukizi/utils";
 import { useSellerDashboard, useToggleVacationMode, useSellerProfile, useSellerNotifications } from "@/hooks/useSeller";
 import { useSellerAuth } from "@/store";
 import toast from "react-hot-toast";
@@ -74,13 +73,7 @@ export default function SellerDashboard() {
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <DateRangePicker value={dateRange} onChange={setDateRange} align="end" />
-          {!isVacation && (
-            <Button size="sm" variant="outline" loading={toggleVacation.isPending}
-              onClick={() => { toggleVacation.mutate(true, { onSuccess: () => toast.success("Vacation mode activated! Your store is now hidden from buyers."), onError: () => toast.error("Failed to update vacation mode") }); }}
-              leftIcon={<Palmtree className="h-3.5 w-3.5" />}>
-              Vacation
-            </Button>
-          )}
+
           <Link href="/notifications" aria-label="Notifications" className="relative h-9 w-9 rounded-xl border border-border flex items-center justify-center text-muted-foreground hover:bg-accent/60 transition-colors">
             <Bell className="h-4 w-4" />
             {unreadCount > 0 && (
@@ -112,79 +105,7 @@ export default function SellerDashboard() {
         </motion.div>
       )}
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-2 space-y-6">
-          {/* Revenue chart */}
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass-card rounded-2xl p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div><h2 className="font-semibold text-foreground">Revenue</h2><p className="text-xs text-muted-foreground mt-0.5">Monthly revenue this year</p></div>
-              <BarChart3 className="h-5 w-5 text-muted-foreground" aria-hidden />
-            </div>
-            <div className="h-56">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={dashboardData?.chartData || []} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                  <XAxis dataKey="month" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
-                  <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={v => `${(v / 100000).toFixed(0)}L`} />
-                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "12px", fontSize: "12px" }} formatter={(v: number) => [formatCurrency(v), "Revenue"]} />
-                  <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </motion.div>
 
-          {/* Recent orders */}
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="glass-card rounded-2xl overflow-hidden">
-            <div className="flex items-center justify-between p-6 border-b border-border/50">
-              <div><h2 className="font-semibold text-foreground">Recent Orders</h2><p className="text-xs text-muted-foreground mt-0.5">Orders from your store</p></div>
-              <Link href="/orders"><Button variant="ghost" size="sm">View all</Button></Link>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full" aria-label="Recent orders">
-                <thead>
-                  <tr className="border-b border-border/50">
-                    {["Order #", "Amount", "Status", "Action"].map(h => (
-                      <th key={h} scope="col" className="px-5 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/30">
-                  {sellerOrders.map(o => (
-                    <tr key={o.orderId || o.id} className="hover:bg-accent/30 transition-colors">
-                      <td className="px-5 py-4"><span className="font-mono text-xs font-medium text-foreground">{(o.orderId || o.id || "").slice(0, 8).toUpperCase() || "—"}</span></td>
-
-                      <td className="px-5 py-4 text-sm font-semibold text-foreground">{formatCurrency(o.sellerTotal ?? o.totalAmount ?? o.total ?? 0)}</td>
-                      <td className="px-5 py-4"><OrderStatusBadge status={o.orderStatus || o.status} /></td>
-                      <td className="px-5 py-4">
-                        <Link href={`/orders/${o.orderId || o.id}`} title="Manage Order">
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:bg-primary/10 transition-colors">
-                            <Eye className="h-4.5 w-4.5" />
-                          </Button>
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-4">
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="glass-card rounded-2xl p-5">
-            <h3 className="font-semibold text-sm text-foreground mb-4">Quick Actions</h3>
-            <div className="space-y-2">
-              {[{ icon: Package, label: "Add New Product", href: "/products/new", c: "text-primary bg-primary/10" }, { icon: ShoppingBag, label: "Manage Orders", href: "/orders", c: "text-blue-600 bg-blue-50 dark:bg-blue-900/20" }, { icon: CreditCard, label: "Request Payout", href: "/payouts", c: "text-green-600 bg-green-50 dark:bg-green-900/20" }, { icon: Bell, label: "Notifications", href: "/notifications", c: "text-orange-600 bg-orange-50 dark:bg-orange-900/20" }].map(({ icon: Icon, label, href, c }) => (
-                <Link key={label} href={href} className="flex items-center gap-3 p-3 rounded-xl hover:bg-accent/60 transition-colors fr">
-                  <div className={`h-8 w-8 rounded-xl flex items-center justify-center ${c}`}><Icon className="h-4 w-4" aria-hidden /></div>
-                  <span className="text-sm font-medium text-foreground">{label}</span>
-                </Link>
-              ))}
-            </div>
-          </motion.div>
-        </div>
-      </div>
     </div>
   );
 }

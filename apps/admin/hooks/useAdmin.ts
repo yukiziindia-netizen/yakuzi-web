@@ -5,7 +5,7 @@ import {
   getAdminDashboard, getAdminUsers, getUserById, approveUser, rejectUser, blockUser, unblockUser,
   getBuyers, getSellers, updateUser, deleteUser, updateUserStatus, updateGstPanStatus,
   getAdminProducts, getAdminProductsFiltered, getProductById, disableProduct, enableProduct, deleteProduct, createProduct, updateProduct, approveProduct, rejectProduct,
-  getAdminOrders, getAdminOrdersFiltered, getOrderById, updateAdminOrderStatus, cancelOrder, getOrderInvoice,
+  getAdminOrders, getAdminOrdersFiltered, getOrderById, updateAdminOrderStatus, updateAdminShippingDocs, uploadAdminOrderDocument, cancelOrder, getOrderInvoice,
   getPayments, confirmPayment, rejectPayment,
   getSettlements, markSettlementPaid, getSellerSettlements, createSettlement, syncSettlements,
   getTickets, getTicketById, replyToTicket, updateTicketStatus,
@@ -127,6 +127,23 @@ export function useUpdateAdminOrderStatus() {
       void qc.invalidateQueries({ queryKey: ["admin", "orders"] });
       void qc.invalidateQueries({ queryKey: ["admin", "order", orderId] });
     },
+  });
+}
+
+export function useUpdateAdminShippingDocs() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ orderId, payload }: { orderId: string; payload: { adminShippingLabelUrl?: string; adminInvoiceUrl?: string } }) => updateAdminShippingDocs(orderId, payload),
+    onSuccess: (_, { orderId }) => {
+      void qc.invalidateQueries({ queryKey: ["admin", "orders"] });
+      void qc.invalidateQueries({ queryKey: ["admin", "order", orderId] });
+    },
+  });
+}
+
+export function useUploadAdminOrderDocument() {
+  return useMutation({
+    mutationFn: uploadAdminOrderDocument,
   });
 }
 

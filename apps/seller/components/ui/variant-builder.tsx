@@ -287,16 +287,7 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
               })}
             </AnimatePresence>
 
-            {!editingId && isSuggestedProductSelected && (
-              <button
-                type="button"
-                onClick={addOption}
-                className="flex items-center text-sm font-medium text-blue-600 hover:text-blue-700 mt-2"
-              >
-                <Plus className="w-4 h-4 mr-1" />
-                Add another option
-              </button>
-            )}
+
           </div>
         </div>
           <div className="border-t border-gray-200">

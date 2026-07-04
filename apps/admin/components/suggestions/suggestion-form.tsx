@@ -160,6 +160,7 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
   const handleSave = async () => {
     if (!form.title) return toast.error("Title is required");
     if (!form.categoryId) return toast.error("Category is required");
+    if (!form.manufacturer) return toast.error("Company / Manufacturer is required");
 
     try {
       const payload = {
@@ -325,7 +326,7 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
 
             <div className="pt-2 space-y-4">
               <Input
-                label="Manufacturer / Vendor"
+                label="Company / Manufacturer *"
                 placeholder="e.g. Cipla"
                 value={form.manufacturer}
                 onChange={e => setForm(f => ({ ...f, manufacturer: e.target.value }))}

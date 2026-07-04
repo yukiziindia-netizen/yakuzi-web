@@ -498,7 +498,6 @@ export function ProductForm({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input label="Product Name *" error={errors.product_name?.message} {...register("product_name")} disabled={!!selectedMasterId} />
               <Input label="Company / Manufacturer *" error={errors.company_name?.message} {...register("company_name")} disabled={!!selectedMasterId} />
-              <Input label="Product SKU" placeholder="e.g. SKU-12345" error={errors.sku?.message} {...register("sku")} disabled={!!selectedMasterId} />
               <Input label="Product Specification" placeholder="e.g. 500mg, Cotton, etc." error={errors.specifications?.message} {...register("specifications")} disabled={!!selectedMasterId} />
             </div>
           </div>

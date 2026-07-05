@@ -13,8 +13,13 @@ const EMOJI: Record<string,string> = {"eye-drops":"👁️",capsules:"🔴",tabl
 const PAGE_SIZE = 20;
 
 const renderOffer = (p: any) => {
-  if (!p.discountType) return <span className="text-xs text-muted-foreground">No offer</span>;
   const meta = p.discountMeta || {};
+  if (!p.discountType) {
+    if (meta.discountPercent) {
+      return <Badge className="bg-purple-600 hover:bg-purple-700 text-white font-bold">{meta.discountPercent}% Discount</Badge>;
+    }
+    return <span className="text-xs text-muted-foreground">No offer</span>;
+  }
   if (p.discountType === "PTR_DISCOUNT") {
     return <Badge className="bg-purple-600 hover:bg-purple-700 text-white font-bold">{meta.discountPercent || 0}% Discount</Badge>;
   }

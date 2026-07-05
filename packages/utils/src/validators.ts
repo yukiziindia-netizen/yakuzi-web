@@ -43,7 +43,7 @@ export function isValidPAN(pan: string): boolean {
   return /^[A-Z]{5}\d{4}[A-Z]{1}$/.test(pan);
 }
 
-// ─── Zod Schemas ────────────────────────────────────
+// --- Zod Schemas ------------------------------------
 
 export const phoneSchema = z
   .string()
@@ -72,7 +72,7 @@ export const panSchema = z
   .length(10, 'PAN must be 10 characters')
   .refine(isValidPAN, 'Invalid PAN number');
 
-// ─── Product Validation ────────────────────────────
+// --- Product Validation ----------------------------
 
 const validGstValues = VALID_GST_PERCENTAGES as readonly number[];
 
@@ -103,10 +103,11 @@ export const productFormSchema = z.object({
   pack_size: z.string().optional(),
   company_name: z.string().min(2, 'Company name is required'),
   sku: z.string().optional(),
+  serialNo: z.string().optional(),
   specifications: z.string().optional(),
   chemical_combination: z.string().optional(),
   categories: z.array(z.string()).min(1, 'Select at least one category'),
-  sub_categories: z.array(z.string()).optional(),
+  sub_categories: z.array(z.string()).min(1, 'Select at least one sub-category'),
   stock: z.preprocess((val) => Number(val) || 0, z.number().int()),
   min_order_qty: z.preprocess((val) => Number(val) || 0, z.number().int()),
   max_order_qty: z.preprocess((val) => Number(val) || 0, z.number().int()),

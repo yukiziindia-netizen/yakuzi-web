@@ -31,15 +31,14 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
     gstPercent: "",
     shippingCharges: "",
     commissionPercent: "",
-    fixedFee: "",
     commissionGstPercent: "",
-    fixedFeeGstPercent: "",
     shippingGstPercent: "",
     unit: "1",
     packSize: "1",
     minimumOrderQuantity: "1",
     manufacturer: "",
     sku: "",
+    serialNo: "",
     specifications: "",
     categoryId: "",
     subCategoryId: "",
@@ -63,15 +62,14 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
         gstPercent: initialData.gstPercent ? String(initialData.gstPercent) : "",
         shippingCharges: initialData.shippingCharges ? String(initialData.shippingCharges) : "",
         commissionPercent: initialData.commissionPercent ? String(initialData.commissionPercent) : "",
-        fixedFee: initialData.fixedFee ? String(initialData.fixedFee) : "",
         commissionGstPercent: initialData.commissionGstPercent ? String(initialData.commissionGstPercent) : "",
-        fixedFeeGstPercent: initialData.fixedFeeGstPercent ? String(initialData.fixedFeeGstPercent) : "",
         shippingGstPercent: initialData.shippingGstPercent ? String(initialData.shippingGstPercent) : "",
         unit: initialData.unit || "1",
         packSize: initialData.packSize || "1",
         minimumOrderQuantity: initialData.minimumOrderQuantity ? String(initialData.minimumOrderQuantity) : "1",
         manufacturer: initialData.manufacturer || "",
         sku: initialData.sku || "",
+        serialNo: initialData.serialNo || "",
         specifications: initialData.specifications || "",
         categoryId: initialData.categoryId || "",
         subCategoryId: initialData.subCategoryId || "",
@@ -144,7 +142,9 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
           id: v.id || Math.random().toString(36).substring(7),
           name: v.name,
           sku: v.sku !== undefined ? String(v.sku) : (v.options?.sku ? String(v.options.sku) : ""),
+          serialNo: v.serialNo !== undefined ? String(v.serialNo) : (v.options?.serialNo ? String(v.options.serialNo) : ""),
           shippingCharges: v.shippingCharges !== undefined ? String(v.shippingCharges) : (v.options?.shippingCharges ? String(v.options.shippingCharges) : "0"),
+          shippingGstPercent: v.shippingGstPercent !== undefined && v.shippingGstPercent !== null ? String(v.shippingGstPercent) : (v.options?.shippingGstPercent !== undefined && v.options?.shippingGstPercent !== null ? String(v.options.shippingGstPercent) : (initialData.shippingGstPercent !== undefined && initialData.shippingGstPercent !== null ? String(initialData.shippingGstPercent) : "")),
           image: v.image || v.options?.image || undefined
         }));
         setVariants(parsedVariants);
@@ -181,15 +181,14 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
         gstPercent: form.gstPercent !== "" ? Number(form.gstPercent) : null,
         shippingCharges: form.shippingCharges !== "" ? Number(form.shippingCharges) : 0,
         commissionPercent: form.commissionPercent !== "" ? Number(form.commissionPercent) : null,
-        fixedFee: form.fixedFee !== "" ? Number(form.fixedFee) : null,
         commissionGstPercent: form.commissionGstPercent !== "" ? Number(form.commissionGstPercent) : null,
-        fixedFeeGstPercent: form.fixedFeeGstPercent !== "" ? Number(form.fixedFeeGstPercent) : null,
         shippingGstPercent: form.shippingGstPercent !== "" ? Number(form.shippingGstPercent) : null,
         unit: form.unit,
         packSize: form.packSize,
         minimumOrderQuantity: form.minimumOrderQuantity !== "" ? Number(form.minimumOrderQuantity) : null,
         manufacturer: form.manufacturer,
         sku: form.sku,
+        serialNo: form.serialNo,
         specifications: form.specifications,
         categoryId: form.categoryId,
         subCategoryId: form.subCategoryId || undefined,
@@ -199,6 +198,7 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
         variants: variants.length > 0 ? variants.map(v => ({ 
           name: v.name, 
           sku: v.sku,
+          serialNo: v.serialNo,
           shippingCharges: Number(v.shippingCharges),
           shippingGstPercent: v.shippingGstPercent !== "" ? Number(v.shippingGstPercent) : null,
           image: v.image,
@@ -343,7 +343,7 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
               {/* Platform Fees */}
                 <div className="pt-6 mt-6 border-t border-gray-100">
                 <h3 className="text-sm font-semibold text-gray-900 mb-4">Platform Fees</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+                  <div className="grid grid-cols-1 gap-4 items-end">
                     <Input
                       type="number"
                       label="Commission (%)"
@@ -351,33 +351,19 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
                       value={form.commissionPercent}
                       onChange={e => setForm(f => ({ ...f, commissionPercent: e.target.value }))}
                     />
-                    <Input
-                      type="number"
-                      label="Fixed Fee (₹)"
-                      placeholder="e.g. 20"
-                      value={form.fixedFee}
-                      onChange={e => setForm(f => ({ ...f, fixedFee: e.target.value }))}
-                    />
                   </div>
                 </div>
 
               {/* GST on Platform Fees */}
                 <div className="pt-6 mt-6 border-t border-gray-100">
                 <h3 className="text-sm font-semibold text-gray-900 mb-4">GST on Platform Fees</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
                     <Input
                       type="number"
                       label="Commission GST (%)"
                       placeholder="e.g. 18"
                       value={form.commissionGstPercent}
                       onChange={e => setForm(f => ({ ...f, commissionGstPercent: e.target.value }))}
-                    />
-                    <Input
-                      type="number"
-                      label="Fixed Fee GST (%)"
-                      placeholder="e.g. 18"
-                      value={form.fixedFeeGstPercent}
-                      onChange={e => setForm(f => ({ ...f, fixedFeeGstPercent: e.target.value }))}
                     />
                     {variants.length === 0 && (
                       <Input
@@ -404,6 +390,14 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
                   placeholder="e.g. SKU-12345"
                   value={form.sku}
                   onChange={e => setForm(f => ({ ...f, sku: e.target.value }))}
+                />
+              )}
+              {variants.length === 0 && (
+                <Input
+                  label="Serial No"
+                  placeholder="e.g. SN-12345"
+                  value={form.serialNo}
+                  onChange={e => setForm(f => ({ ...f, serialNo: e.target.value }))}
                 />
               )}
               <Textarea

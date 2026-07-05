@@ -20,10 +20,13 @@ interface ProductCarouselProps {
 }
 
 export const renderBuyerOfferBadge = (p: any) => {
+  const meta = p.discountMeta || {};
   if (!p?.discountType) {
+    if (meta.discountPercent) {
+      return <span className="text-[#4a4a4a] text-[11px] sm:text-[12px] font-medium tracking-wide whitespace-nowrap">{meta.discountPercent}% off</span>;
+    }
     return null;
   }
-  const meta = p.discountMeta || {};
   if (p.discountType === "PTR_DISCOUNT") {
     return <span className="text-[#4a4a4a] text-[11px] sm:text-[12px] font-medium tracking-wide whitespace-nowrap">{meta.discountPercent || 0}% off</span>;
   }

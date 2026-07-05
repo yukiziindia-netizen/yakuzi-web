@@ -5,6 +5,7 @@ import { Plus, GripVertical, Image as ImageIcon, Search, ArrowDownUp, Grid2X2, X
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
+import { DiscountSelector } from "../products/DiscountSelector";
 import { calculatePricing, formatCurrency } from "@yukizi/utils";
 import type { DiscountFormDetails } from "@yukizi/utils";
 
@@ -27,9 +28,12 @@ export interface VariantCombination {
   price: string;
   compareAtPrice?: string;
   discount?: string;
+  discountDetails?: DiscountFormDetails;
+  gstPercent?: number;
   available: string;
   image?: string;
   sku?: string;
+  serialNo?: string;
   shippingCharges?: string;
 }
 
@@ -108,6 +112,7 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
         return {
           ...existing,
           sku: existing.sku || "",
+          serialNo: existing.serialNo || "",
           shippingCharges: existing.shippingCharges || "0"
         };
       }
@@ -119,6 +124,7 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
         discount: "",
         available: "",
         sku: "",
+        serialNo: "",
         shippingCharges: "0"
       };
     });
@@ -289,12 +295,13 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                   <tr>
                     <th scope="col" className="px-6 py-3 font-medium">Variant</th>
                     <th scope="col" className="px-6 py-3 font-medium">SKU</th>
+                    <th scope="col" className="px-6 py-3 font-medium">Serial No</th>
                     <th scope="col" className="px-6 py-3 font-medium">Price</th>
                     <th scope="col" className="px-6 py-3 font-medium">Compare at price</th>
+                    <th scope="col" className="px-6 py-3 font-medium">GST (%)</th>
                     <th scope="col" className="px-6 py-3 font-medium">Discount</th>
                     <th scope="col" className="px-6 py-3 font-medium">Shipping</th>
                     <th scope="col" className="px-6 py-3 font-medium">Stock</th>
-                    <th scope="col" className="px-6 py-3 font-medium text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -314,6 +321,14 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                         />
                       </td>
                       <td className="px-6 py-4 align-middle">
+                        <input
+                          type="text"
+                          value={variant.serialNo || "-"}
+                          disabled
+                          className="block w-32 px-3 sm:text-sm border-gray-300 rounded-md py-1.5 bg-gray-100 text-gray-500 cursor-not-allowed"
+                        />
+                      </td>
+                      <td className="px-6 py-4 align-middle">
                         <div className="relative rounded-md shadow-sm w-32">
                           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <span className="text-gray-500 sm:text-sm">₹</span>
@@ -322,11 +337,7 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                             type="text"
                             value={variant.price}
                             onChange={(e) => updateVariant(variant.id, "price", e.target.value)}
-                            disabled={!isVariantEditing}
-                            className={cn(
-                              "focus:ring-blue-500 focus:border-blue-500 block w-full pl-9 pr-3 sm:text-sm rounded-md py-1.5",
-                              isVariantEditing ? "border-gray-300 bg-white" : "border-transparent bg-transparent cursor-default"
-                            )}
+                            className="block w-full pl-7 pr-3 sm:text-sm border-gray-300 rounded-md py-1.5 border bg-white"
                             placeholder="0.00"
                           />
                         </div>
@@ -335,21 +346,26 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                           if (p > 0) {
                             try {
                               let finalPrice = p;
-                              const discountType = discountDetails?.type || 'none';
+                              const vGst = variant.gstPercent !== undefined ? Number(variant.gstPercent) : (gstPercent || 0);
+                              const vDiscountDetails = variant.discountDetails || discountDetails;
+                              
+                              const discountType = vDiscountDetails?.type || 'none';
                               let discountAmount = 0;
                               
-                              if (discountType === 'ptr_discount' || discountType === 'ptr_discount_and_same_product_bonus' || discountType === 'ptr_discount_and_different_product_bonus') {
-                                discountAmount = p * (discountDetails?.discountPercent || 0) / 100;
+                              if (variant.discount && Number(variant.discount) > 0) {
+                                discountAmount = p * (Number(variant.discount) / 100);
+                              } else if (discountType === 'ptr_discount' || discountType === 'ptr_discount_and_same_product_bonus' || discountType === 'ptr_discount_and_different_product_bonus') {
+                                discountAmount = p * (vDiscountDetails?.discountPercent || 0) / 100;
                               }
 
-                              if (discountType === 'special_price') {
-                                finalPrice = discountDetails?.specialPrice || 0;
+                              if (discountType === 'special_price' && !variant.discount) {
+                                finalPrice = vDiscountDetails?.specialPrice || 0;
                               } else {
                                 finalPrice = p - discountAmount;
                               }
 
                               if (!isTaxIncluded) {
-                                finalPrice += (finalPrice * (gstPercent || 0)) / 100;
+                                finalPrice += (finalPrice * vGst) / 100;
                               }
 
                               finalPrice += (shippingCharges || Number(variant.shippingCharges) || 0);
@@ -371,29 +387,33 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                             type="text"
                             value={variant.compareAtPrice || ""}
                             onChange={(e) => updateVariant(variant.id, "compareAtPrice", e.target.value)}
-                            disabled={!isVariantEditing}
-                            className={cn(
-                              "focus:ring-blue-500 focus:border-blue-500 block w-full pl-9 pr-3 sm:text-sm rounded-md py-1.5",
-                              isVariantEditing ? "border-gray-300 bg-white" : "border-transparent bg-transparent cursor-default"
-                            )}
+                            
+                            className="block w-32 pl-7 pr-3 sm:text-sm border-gray-300 rounded-md py-1.5 border bg-white"
                             placeholder="0.00"
                           />
                         </div>
                       </td>
                       <td className="px-6 py-4 align-middle">
-                        <div className="relative rounded-md shadow-sm w-32">
+                        <div className="relative rounded-md shadow-sm w-24">
+                          <input
+                            type="number"
+                            value={variant.gstPercent ?? ""}
+                            onChange={(e) => updateVariant(variant.id, "gstPercent", e.target.value)}
+                            className="block w-full px-3 sm:text-sm border-gray-300 rounded-md py-1.5 border bg-white"
+                            placeholder="0"
+                          />
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 align-middle">
+                        <div className="relative rounded-md shadow-sm w-24">
                           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <span className="text-gray-500 sm:text-sm">%</span>
                           </div>
                           <input
-                            type="text"
+                            type="number"
                             value={variant.discount || ""}
                             onChange={(e) => updateVariant(variant.id, "discount", e.target.value)}
-                            disabled={!isVariantEditing}
-                            className={cn(
-                              "focus:ring-blue-500 focus:border-blue-500 block w-full pl-9 pr-3 sm:text-sm rounded-md py-1.5",
-                              isVariantEditing ? "border-gray-300 bg-white" : "border-transparent bg-transparent cursor-default"
-                            )}
+                            className="block w-full pl-7 pr-3 sm:text-sm border-gray-300 rounded-md py-1.5 border bg-white"
                             placeholder="0"
                           />
                         </div>
@@ -412,26 +432,13 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                         </div>
                       </td>
                       <td className="px-6 py-4 align-middle">
-                        <input
-                          type="number"
-                          value={variant.available}
-                          onChange={(e) => updateVariant(variant.id, "available", e.target.value)}
-                          disabled={!isVariantEditing}
-                          className={cn(
-                            "focus:ring-blue-500 focus:border-blue-500 block w-28 px-3 sm:text-sm rounded-md py-1.5",
-                            isVariantEditing ? "border-gray-300 bg-white" : "border-transparent bg-transparent cursor-default"
-                          )}
-                          placeholder="0"
-                        />
-                      </td>
-                      <td className="px-6 py-4 align-middle text-right">
-                        <button
-                          type="button"
-                          onClick={() => setEditingVariantId(isVariantEditing ? null : variant.id)}
-                          className="text-sm font-medium text-blue-600 hover:text-blue-700"
-                        >
-                          {isVariantEditing ? "Save" : "Edit"}
-                        </button>
+                          <input
+                            type="number"
+                            value={variant.available}
+                            onChange={(e) => updateVariant(variant.id, "available", e.target.value)}
+                            className="block w-24 px-3 sm:text-sm border-gray-300 rounded-md py-1.5 border bg-white"
+                            placeholder="0"
+                          />
                       </td>
                     </tr>
                     );

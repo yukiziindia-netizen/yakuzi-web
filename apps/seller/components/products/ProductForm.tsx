@@ -258,15 +258,25 @@ export function ProductForm({
       }
 
       if (variantsToUse && Array.isArray(variantsToUse)) {
-        finalVariants = variantsToUse.map((v: any) => ({
-          id: Math.random().toString(36).substr(2, 9),
-          name: v.name,
-          price: v.price?.toString() || v.options?.price?.toString() || "0",
-          available: v.available?.toString() || v.options?.available?.toString() || "0",
-          image: v.image || v.options?.image,
-          sku: v.sku || v.options?.sku || "",
-          shippingCharges: v.shippingCharges?.toString() || v.options?.shippingCharges?.toString() || "0"
-        }));
+        const defaultGstP = Number((fullProduct as any)?.shippingGstPercent || suggestion.shippingGstPercent || 0);
+        finalVariants = variantsToUse.map((v: any) => {
+          const baseShipping = Number(v.shippingCharges?.toString() || v.options?.shippingCharges?.toString() || "0");
+          const vGstP = Number(v.shippingGstPercent?.toString() || v.options?.shippingGstPercent?.toString() || defaultGstP);
+          const totalShipping = baseShipping + (baseShipping * vGstP / 100);
+          return {
+            id: Math.random().toString(36).substr(2, 9),
+            name: v.name,
+            price: v.price?.toString() || v.options?.price?.toString() || "0",
+            compareAtPrice: v.compareAtPrice?.toString() || v.options?.compareAtPrice?.toString() || "0",
+            gstPercent: v.gstPercent?.toString() || v.options?.gstPercent?.toString() || "0",
+            discount: v.discount?.toString() || v.options?.discount?.toString() || "0",
+            available: v.available?.toString() || v.options?.available?.toString() || "0",
+            image: v.image || v.options?.image,
+            sku: v.sku || v.options?.sku || "",
+            serialNo: v.serialNo || v.options?.serialNo || "",
+            shippingCharges: totalShipping.toString()
+          };
+        });
       }
       
       // If options is empty but we have variants, reconstruct options to prevent VariantBuilder from clearing variants!
@@ -297,15 +307,25 @@ export function ProductForm({
       }
 
       if (suggestion.variants && Array.isArray(suggestion.variants)) {
-        finalVariantsFallback = suggestion.variants.map(v => ({
-          id: Math.random().toString(36).substr(2, 9),
-          name: v.name,
-          price: v.price?.toString() || v.options?.price?.toString() || "0",
-          available: v.available?.toString() || v.options?.available?.toString() || "0",
-          image: v.image || v.options?.image,
-          sku: v.sku || v.options?.sku || "",
-          shippingCharges: v.shippingCharges?.toString() || v.options?.shippingCharges?.toString() || "0"
-        }));
+        const defaultGstP = Number(suggestion.shippingGstPercent || 0);
+        finalVariantsFallback = suggestion.variants.map(v => {
+          const baseShipping = Number(v.shippingCharges?.toString() || v.options?.shippingCharges?.toString() || "0");
+          const vGstP = Number(v.shippingGstPercent?.toString() || v.options?.shippingGstPercent?.toString() || defaultGstP);
+          const totalShipping = baseShipping + (baseShipping * vGstP / 100);
+          return {
+            id: Math.random().toString(36).substr(2, 9),
+            name: v.name,
+            price: v.price?.toString() || v.options?.price?.toString() || "0",
+            compareAtPrice: v.compareAtPrice?.toString() || v.options?.compareAtPrice?.toString() || "0",
+            gstPercent: v.gstPercent?.toString() || v.options?.gstPercent?.toString() || "0",
+            discount: v.discount?.toString() || v.options?.discount?.toString() || "0",
+            available: v.available?.toString() || v.options?.available?.toString() || "0",
+            image: v.image || v.options?.image,
+            sku: v.sku || v.options?.sku || "",
+            serialNo: v.serialNo || v.options?.serialNo || "",
+            shippingCharges: totalShipping.toString()
+          };
+        });
       }
 
       if (finalOptionsFallback.length === 0 && finalVariantsFallback.length > 0) {
@@ -405,11 +425,12 @@ export function ProductForm({
       };
 
       const backendPayload: Record<string, any> = {
-        name: data.product_name,
-        mrp: data.product_price,
-        manufacturer: data.company_name,
-        ...(data.sku && { sku: data.sku }),
-        ...(data.specifications && { specifications: data.specifications }),
+          name: data.product_name,
+          mrp: data.product_price,
+          manufacturer: data.company_name,
+          ...(data.sku && { sku: data.sku }),
+          ...(data.serialNo && { serialNo: data.serialNo }),
+          ...(data.specifications && { specifications: data.specifications }),
         categoryId: data.categories[0],
         ...(data.sub_categories?.length && { subCategoryId: data.sub_categories[0] }),
         stock: data.stock,
@@ -431,7 +452,12 @@ export function ProductForm({
             name: v.name, 
             price: Number(v.price), 
             available: Number(v.available),
-            image: v.image
+            image: v.image,
+            sku: v.sku,
+            serialNo: v.serialNo,
+            gstPercent: v.gstPercent,
+            discountPercent: Number(v.discount) > 0 ? Number(v.discount) : undefined,
+            shippingCharges: Number(v.shippingCharges) || 0,
           })) 
         }),
       };
@@ -518,7 +544,10 @@ export function ProductForm({
               <Input label="Product Name *" error={errors.product_name?.message} {...register("product_name")} disabled={!!selectedMasterId} />
               <Input label="Company / Manufacturer *" error={errors.company_name?.message} {...register("company_name")} disabled={!!selectedMasterId} />
               {variants.length === 0 && (
-                <Input label="Product SKU" placeholder="e.g. SKU-12345" error={errors.sku?.message} {...register("sku")} disabled={!!selectedMasterId} />
+                <>
+                  <Input label="Product SKU" placeholder="e.g. SKU-12345" error={errors.sku?.message} {...register("sku")} disabled={!!selectedMasterId} />
+                  <Input label="Serial No" placeholder="e.g. SN-12345" error={errors.serialNo?.message} {...register("serialNo")} disabled />
+                </>
               )}
               <Input label="Product Specification" placeholder="e.g. 500mg, Cotton, etc." error={errors.specifications?.message} {...register("specifications")} disabled={!!selectedMasterId} />
             </div>
@@ -616,37 +645,47 @@ export function ProductForm({
                   )}
                 />
               </div>
-            </>
-          )}
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-            <Input 
-              label="Charge tax on this product (%)" 
-              type="number" 
-              placeholder="12"
-              error={errors.gst_percent?.message} 
-              {...register("gst_percent", { valueAsNumber: true })} 
-            />
-          </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-              <div className="space-y-1">
-                <label className="block text-[13px] font-semibold text-foreground/80 mb-1">Tax Status</label>
-                <Controller
-                  name="is_tax_included"
-                  control={control}
-                  render={({ field }) => (
-                    <select
-                      className="w-full bg-background border border-input rounded-xl px-4 py-2.5 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200"
-                      value={field.value ? "include" : "exclude"}
-                      onChange={(e) => field.onChange(e.target.value === "include")}
-                    >
-                      <option value="include">Include (Price includes tax)</option>
-                      <option value="exclude">Exclude (Price excludes tax)</option>
-                    </select>
-                  )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-border/50">
+                <Input
+                  label="Current Stock *"
+                  type="number"
+                  min={0}
+                  placeholder="0"
+                  error={errors.stock?.message}
+                  {...register("stock", { valueAsNumber: true })}
                 />
               </div>
-            </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <Input 
+                  label="Charge tax on this product (%)" 
+                  type="number" 
+                  placeholder="12"
+                  error={errors.gst_percent?.message} 
+                  {...register("gst_percent", { valueAsNumber: true })} 
+                />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <div className="space-y-1">
+                  <label className="block text-[13px] font-semibold text-foreground/80 mb-1">Tax Status</label>
+                  <Controller
+                    name="is_tax_included"
+                    control={control}
+                    render={({ field }) => (
+                      <select
+                        className="w-full bg-background border border-input rounded-xl px-4 py-2.5 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200"
+                        value={field.value ? "include" : "exclude"}
+                        onChange={(e) => field.onChange(e.target.value === "include")}
+                      >
+                        <option value="include">Include (Price includes tax)</option>
+                        <option value="exclude">Exclude (Price excludes tax)</option>
+                      </select>
+                    )}
+                  />
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Variants */}
@@ -680,3 +719,5 @@ export function ProductForm({
     </div>
   );
 }
+
+

@@ -18,6 +18,7 @@ export interface VariantCombination {
   id: string; // e.g. "Medium / Red"
   name: string;
   sku: string;
+  serialNo?: string;
   shippingCharges: string;
   shippingGstPercent: string;
   image?: string;
@@ -301,6 +302,7 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
         id: Math.random().toString(36).substr(2, 9),
         name: comboName,
         sku: "",
+        serialNo: "",
         shippingCharges: "0",
         shippingGstPercent: ""
       };
@@ -549,6 +551,7 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                   <tr>
                     <th scope="col" className="px-6 py-3 font-medium">Variant</th>
                     <th scope="col" className="px-6 py-3 font-medium">SKU</th>
+                    <th scope="col" className="px-6 py-3 font-medium">Serial No</th>
                     <th scope="col" className="px-6 py-3 font-medium">Shipping (₹)</th>
                     <th scope="col" className="px-6 py-3 font-medium">Shipping GST (%)</th>
                   </tr>
@@ -585,6 +588,15 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                           onChange={(e) => updateVariant(variant.id, "sku", e.target.value)}
                           className="focus:ring-blue-500 focus:border-blue-500 block w-28 sm:text-sm border-gray-300 rounded-md py-1.5 px-2"
                           placeholder="SKU-001"
+                        />
+                      </td>
+                      <td className="px-6 py-4">
+                        <input
+                          type="text"
+                          value={variant.serialNo || ""}
+                          onChange={(e) => updateVariant(variant.id, "serialNo", e.target.value)}
+                          className="focus:ring-blue-500 focus:border-blue-500 block w-28 sm:text-sm border-gray-300 rounded-md py-1.5 px-2"
+                          placeholder="SN-001"
                         />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">

@@ -89,6 +89,7 @@ export interface Product {
   minimumOrderQuantity?: number;
   maximumOrderQuantity?: number;
   gstPercent?: number;
+  shippingGstPercent?: number;
   expiryDate?: string;
   sellerId?: string;
   sellerName?: string;
@@ -259,6 +260,7 @@ export interface Suggestion {
   productName: string;
   companyName: string;
   sku?: string;
+  serialNo?: string;
   specifications?: string;
   chemicalCombination?: string;
   category?: string;
@@ -321,3 +323,4 @@ export type ProductPayload = {
   discount_form_details: DiscountFormDetails;
   discount_details?: DiscountDetails;
 };
+

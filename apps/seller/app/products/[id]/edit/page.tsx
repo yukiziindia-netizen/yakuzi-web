@@ -122,7 +122,15 @@ export default function EditProductPage() {
                   serialNo: v.serialNo || (listing as any)?.serialNo || "",
                   shippingCharges: (v.shippingCharges ?? (listing as any)?.shippingCharges ?? 0).toString(),
                   shippingGstPercent: Number(v.shippingGstPercent ?? (listing as any)?.shippingGstPercent ?? 0),
-                  finalShippingPrice: (v.finalShippingPrice ?? (listing as any)?.finalShippingPrice ?? "0").toString()
+                  finalShippingPrice: (() => {
+                    const rawShip = v.shippingCharges ?? (listing as any)?.shippingCharges ?? 0;
+                    const rawGst = v.shippingGstPercent ?? (listing as any)?.shippingGstPercent ?? 0;
+                    const calculated = Number(rawShip) + (Number(rawShip) * Number(rawGst) / 100);
+                    const actualFinal = v.finalShippingPrice ?? (listing as any)?.finalShippingPrice;
+                    return (actualFinal !== undefined && actualFinal !== null && String(actualFinal) !== "0")
+                      ? actualFinal.toString()
+                      : calculated.toString();
+                  })()
                 };
               })}
               initialCategoryName={typeof (product as any).category === 'object' ? (product as any).category?.name || (product as any).category?.id : (product as any).category}

@@ -262,8 +262,16 @@ export function ProductForm({
       }
 
       if (variantsToUse && Array.isArray(variantsToUse)) {
+        const defaultGstP = Number(fullProduct?.shippingGstPercent || suggestion.shippingGstPercent || 0);
         finalVariants = variantsToUse.map((v: any) => {
-          const baseShipping = Number(v.finalShippingPrice?.toString() || v.options?.finalShippingPrice?.toString() || v.shippingCharges?.toString() || v.options?.shippingCharges?.toString() || "0");
+          const shipCharges = Number(v.shippingCharges?.toString() || v.options?.shippingCharges?.toString() || "0");
+          const shipGst = Number(v.shippingGstPercent?.toString() || v.options?.shippingGstPercent?.toString() || defaultGstP);
+          const computedFinal = shipCharges + (shipCharges * shipGst / 100);
+          const rawFinal = v.finalShippingPrice?.toString() || v.options?.finalShippingPrice?.toString();
+          const finalShippingPriceVal = (rawFinal !== undefined && rawFinal !== null && String(rawFinal) !== "0") 
+            ? rawFinal 
+            : computedFinal.toString();
+          
           return {
             id: Math.random().toString(36).substr(2, 9),
             name: v.name,
@@ -275,7 +283,9 @@ export function ProductForm({
             image: v.image || v.options?.image,
             sku: v.sku || v.options?.sku || "",
             serialNo: v.serialNo || v.options?.serialNo || "",
-            shippingCharges: baseShipping.toString()
+            shippingCharges: shipCharges.toString(),
+            shippingGstPercent: shipGst,
+            finalShippingPrice: finalShippingPriceVal
           };
         });
       }
@@ -310,7 +320,14 @@ export function ProductForm({
       if (suggestion.variants && Array.isArray(suggestion.variants)) {
         const defaultGstP = Number(suggestion.shippingGstPercent || 0);
         finalVariantsFallback = suggestion.variants.map(v => {
-          const baseShipping = Number(v.finalShippingPrice?.toString() || v.options?.finalShippingPrice?.toString() || v.shippingCharges?.toString() || v.options?.shippingCharges?.toString() || "0");
+          const shipCharges = Number(v.shippingCharges?.toString() || v.options?.shippingCharges?.toString() || "0");
+          const shipGst = Number(v.shippingGstPercent?.toString() || v.options?.shippingGstPercent?.toString() || defaultGstP);
+          const computedFinal = shipCharges + (shipCharges * shipGst / 100);
+          const rawFinal = v.finalShippingPrice?.toString() || v.options?.finalShippingPrice?.toString();
+          const finalShippingPriceVal = (rawFinal !== undefined && rawFinal !== null && String(rawFinal) !== "0") 
+            ? rawFinal 
+            : computedFinal.toString();
+            
           return {
             id: Math.random().toString(36).substr(2, 9),
             name: v.name,
@@ -322,9 +339,9 @@ export function ProductForm({
             image: v.image || v.options?.image,
             sku: v.sku || v.options?.sku || "",
             serialNo: v.serialNo || v.options?.serialNo || "",
-            shippingCharges: v.shippingCharges?.toString() || v.options?.shippingCharges?.toString() || "0",
-            shippingGstPercent: Number(v.shippingGstPercent?.toString() || v.options?.shippingGstPercent?.toString() || defaultGstP),
-            finalShippingPrice: baseShipping.toString()
+            shippingCharges: shipCharges.toString(),
+            shippingGstPercent: shipGst,
+            finalShippingPrice: finalShippingPriceVal
           };
         });
       }

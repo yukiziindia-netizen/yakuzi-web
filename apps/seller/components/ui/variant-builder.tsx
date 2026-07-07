@@ -394,7 +394,11 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                                 finalPrice += (finalPrice * vGst) / 100;
                               }
 
-                              finalPrice += (shippingCharges || Number(variant.shippingCharges) || 0);
+                              const finalShip = (variant.finalShippingPrice !== undefined && variant.finalShippingPrice !== null && variant.finalShippingPrice !== "" && !isNaN(Number(variant.finalShippingPrice))) 
+                                ? Number(variant.finalShippingPrice) 
+                                : (shippingCharges || Number(variant.shippingCharges) || 0);
+
+                              finalPrice += finalShip;
 
                               return <div className="text-[10px] mt-1 text-primary/80 font-medium whitespace-nowrap">Final: {formatCurrency(finalPrice)}</div>;
                             } catch (e) {

@@ -36,7 +36,12 @@ export default function OrderDetailPage() {
   
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
-  const [adminFiles, setAdminFiles] = useState<{ label: File | null; invoice: File | null }>({ label: null, invoice: null });
+  const [adminFiles, setAdminFiles] = useState<{
+    label: File | null;
+    invoice: File | null;
+    manifest: File | null;
+    sellerInvoice: File | null;
+  }>({ label: null, invoice: null, manifest: null, sellerInvoice: null });
   const [isUploadingDocs, setIsUploadingDocs] = useState(false);
 
   const handleStatusUpdate = async (status: string) => {
@@ -63,6 +68,8 @@ export default function OrderDetailPage() {
       setIsUploadingDocs(true);
       let labelUrl = order.adminShippingLabelUrl;
       let invoiceUrl = order.adminInvoiceUrl;
+      let manifestUrl = order.manifestUrl;
+      let sellerInvoiceUrl = order.invoiceUrl;
 
       if (adminFiles.label) {
         labelUrl = await uploadDoc.mutateAsync(adminFiles.label);
@@ -70,14 +77,25 @@ export default function OrderDetailPage() {
       if (adminFiles.invoice) {
         invoiceUrl = await uploadDoc.mutateAsync(adminFiles.invoice);
       }
+      if (adminFiles.manifest) {
+        manifestUrl = await uploadDoc.mutateAsync(adminFiles.manifest);
+      }
+      if (adminFiles.sellerInvoice) {
+        sellerInvoiceUrl = await uploadDoc.mutateAsync(adminFiles.sellerInvoice);
+      }
 
       await updateShippingDocs.mutateAsync({
         orderId: id,
-        payload: { adminShippingLabelUrl: labelUrl, adminInvoiceUrl: invoiceUrl }
+        payload: { 
+          adminShippingLabelUrl: labelUrl, 
+          adminInvoiceUrl: invoiceUrl,
+          manifestUrl,
+          invoiceUrl: sellerInvoiceUrl
+        }
       });
 
       toast.success("Shipping documents uploaded successfully");
-      setAdminFiles({ label: null, invoice: null });
+      setAdminFiles({ label: null, invoice: null, manifest: null, sellerInvoice: null });
     } catch {
       toast.error("Failed to upload shipping documents");
     } finally {
@@ -492,7 +510,7 @@ export default function OrderDetailPage() {
               </motion.div>
             )}
 
-            {/* Admin Shipping Documents */}
+             {/* Admin Shipping Documents */}
             {order.packageLength && (
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24 }} className="glass-card rounded-2xl p-6">
                 <h2 className="font-semibold text-foreground mb-4 flex items-center gap-2"><FileText className="h-4 w-4 text-primary" /> Admin Documents</h2>
@@ -508,18 +526,34 @@ export default function OrderDetailPage() {
                       )}
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-xs font-medium text-muted-foreground block">Invoice</label>
+                      <label className="text-xs font-medium text-muted-foreground block">Admin Invoice</label>
                       {order.adminInvoiceUrl ? (
-                         <a href={order.adminInvoiceUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline">View Uploaded Invoice</a>
+                         <a href={order.adminInvoiceUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline">View Uploaded Admin Invoice</a>
                       ) : (
                         <input type="file" accept=".pdf,image/*" onChange={(e) => setAdminFiles(p => ({...p, invoice: e.target.files?.[0] || null}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
                       )}
                     </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-muted-foreground block">Manifest</label>
+                      {order.manifestUrl ? (
+                         <a href={order.manifestUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline">View Uploaded Manifest</a>
+                      ) : (
+                        <input type="file" accept=".pdf,image/*" onChange={(e) => setAdminFiles(p => ({...p, manifest: e.target.files?.[0] || null}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
+                      )}
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-muted-foreground block">Seller Invoice</label>
+                      {order.invoiceUrl ? (
+                         <a href={order.invoiceUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline">View Uploaded Seller Invoice</a>
+                      ) : (
+                        <input type="file" accept=".pdf,image/*" onChange={(e) => setAdminFiles(p => ({...p, sellerInvoice: e.target.files?.[0] || null}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
+                      )}
+                    </div>
                   </div>
 
-                  {(!order.adminShippingLabelUrl || !order.adminInvoiceUrl) && (
+                  {(!order.adminShippingLabelUrl || !order.adminInvoiceUrl || !order.manifestUrl || !order.invoiceUrl) && (
                     <div className="pt-2 flex justify-end">
-                      <Button size="sm" onClick={handleAdminDocsSubmit} loading={isUploadingDocs} disabled={!adminFiles.label && !adminFiles.invoice}>
+                      <Button size="sm" onClick={handleAdminDocsSubmit} loading={isUploadingDocs} disabled={!adminFiles.label && !adminFiles.invoice && !adminFiles.manifest && !adminFiles.sellerInvoice}>
                         Upload Documents
                       </Button>
                     </div>

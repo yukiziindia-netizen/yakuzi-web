@@ -31,6 +31,8 @@ export function ProductForm({
   initialVariants = [],
   initialCategoryName,
   initialSubcategoryName,
+  initialMasterId,
+  activeVariantId,
 }: { 
   defaultValues?: Partial<FormValues>; 
   productId?: string;
@@ -38,6 +40,8 @@ export function ProductForm({
   initialVariants?: any[];
   initialCategoryName?: string;
   initialSubcategoryName?: string;
+  initialMasterId?: string;
+  activeVariantId?: string;
 }) {
   const router = useRouter();
   const createProduct = useCreateSellerProduct();
@@ -47,7 +51,7 @@ export function ProductForm({
   // Suggestion autocomplete state
   const [searchQuery, setSearchQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [selectedMasterId, setSelectedMasterId] = useState<string | null>(null);
+  const [selectedMasterId, setSelectedMasterId] = useState<string | null>(initialMasterId || null);
   const [selectedSuggestion, setSelectedSuggestion] = useState<Suggestion | null>(null);
   const [activeIndex, setActiveIndex] = useState(-1);
   const suggestionRef = useRef<HTMLDivElement>(null);
@@ -258,23 +262,20 @@ export function ProductForm({
       }
 
       if (variantsToUse && Array.isArray(variantsToUse)) {
-        const defaultGstP = Number((fullProduct as any)?.shippingGstPercent || suggestion.shippingGstPercent || 0);
         finalVariants = variantsToUse.map((v: any) => {
-          const baseShipping = Number(v.shippingCharges?.toString() || v.options?.shippingCharges?.toString() || "0");
-          const vGstP = Number(v.shippingGstPercent?.toString() || v.options?.shippingGstPercent?.toString() || defaultGstP);
-          const totalShipping = baseShipping + (baseShipping * vGstP / 100);
+          const baseShipping = Number(v.finalShippingPrice?.toString() || v.options?.finalShippingPrice?.toString() || v.shippingCharges?.toString() || v.options?.shippingCharges?.toString() || "0");
           return {
             id: Math.random().toString(36).substr(2, 9),
             name: v.name,
             price: v.price?.toString() || v.options?.price?.toString() || "0",
             compareAtPrice: v.compareAtPrice?.toString() || v.options?.compareAtPrice?.toString() || "0",
             gstPercent: v.gstPercent?.toString() || v.options?.gstPercent?.toString() || "0",
-            discount: v.discount?.toString() || v.options?.discount?.toString() || "0",
+            discount: v.discount?.toString() ?? v.options?.discount?.toString() ?? "",
             available: v.available?.toString() || v.options?.available?.toString() || "0",
             image: v.image || v.options?.image,
             sku: v.sku || v.options?.sku || "",
             serialNo: v.serialNo || v.options?.serialNo || "",
-            shippingCharges: totalShipping.toString()
+            shippingCharges: baseShipping.toString()
           };
         });
       }
@@ -309,21 +310,21 @@ export function ProductForm({
       if (suggestion.variants && Array.isArray(suggestion.variants)) {
         const defaultGstP = Number(suggestion.shippingGstPercent || 0);
         finalVariantsFallback = suggestion.variants.map(v => {
-          const baseShipping = Number(v.shippingCharges?.toString() || v.options?.shippingCharges?.toString() || "0");
-          const vGstP = Number(v.shippingGstPercent?.toString() || v.options?.shippingGstPercent?.toString() || defaultGstP);
-          const totalShipping = baseShipping + (baseShipping * vGstP / 100);
+          const baseShipping = Number(v.finalShippingPrice?.toString() || v.options?.finalShippingPrice?.toString() || v.shippingCharges?.toString() || v.options?.shippingCharges?.toString() || "0");
           return {
             id: Math.random().toString(36).substr(2, 9),
             name: v.name,
             price: v.price?.toString() || v.options?.price?.toString() || "0",
             compareAtPrice: v.compareAtPrice?.toString() || v.options?.compareAtPrice?.toString() || "0",
-            gstPercent: v.gstPercent?.toString() || v.options?.gstPercent?.toString() || "0",
-            discount: v.discount?.toString() || v.options?.discount?.toString() || "0",
+            gstPercent: v.gstPercent?.toString() ?? v.options?.gstPercent?.toString() ?? "",
+            discount: v.discount?.toString() ?? v.options?.discount?.toString() ?? "",
             available: v.available?.toString() || v.options?.available?.toString() || "0",
             image: v.image || v.options?.image,
             sku: v.sku || v.options?.sku || "",
             serialNo: v.serialNo || v.options?.serialNo || "",
-            shippingCharges: totalShipping.toString()
+            shippingCharges: v.shippingCharges?.toString() || v.options?.shippingCharges?.toString() || "0",
+            shippingGstPercent: Number(v.shippingGstPercent?.toString() || v.options?.shippingGstPercent?.toString() || defaultGstP),
+            finalShippingPrice: baseShipping.toString()
           };
         });
       }
@@ -415,7 +416,30 @@ export function ProductForm({
       }
 
       // Map discount type if present
-      const mappedDiscountType = formDiscountType ? discountTypeMap[formDiscountType as keyof typeof discountTypeMap] : undefined;
+      let mappedDiscountType = formDiscountType ? discountTypeMap[formDiscountType as keyof typeof discountTypeMap] : undefined;
+      let payloadDiscountMeta = Object.keys(discountMeta).length > 0 ? discountMeta : null;
+
+      let payloadMrp = data.product_price;
+      let payloadStock = data.stock;
+      let payloadGst = data.gst_percent || 0;
+      let payloadShipping = data.shipping_charges || 0;
+
+      if (activeVariantId && variants.length > 0) {
+        const activeV = variants.find(v => v.id === activeVariantId);
+        if (activeV) {
+          if (activeV.price) payloadMrp = Number(activeV.price);
+          if (activeV.available) payloadStock = Number(activeV.available);
+          if (activeV.gstPercent) payloadGst = Number(activeV.gstPercent);
+          if (activeV.shippingCharges) payloadShipping = Number(activeV.shippingCharges);
+          if (activeV.discount) {
+            mappedDiscountType = "PTR_DISCOUNT";
+            payloadDiscountMeta = { discountPercent: Number(activeV.discount) };
+          } else {
+            mappedDiscountType = undefined;
+            payloadDiscountMeta = null;
+          }
+        }
+      }
 
       const mergedExtraFields = {
         ...extra_fields,
@@ -426,38 +450,44 @@ export function ProductForm({
 
       const backendPayload: Record<string, any> = {
           name: data.product_name,
-          mrp: data.product_price,
+          mrp: payloadMrp,
           manufacturer: data.company_name,
           ...(data.sku && { sku: data.sku }),
           ...(data.serialNo && { serialNo: data.serialNo }),
           ...(data.specifications && { specifications: data.specifications }),
         categoryId: data.categories[0],
         ...(data.sub_categories?.length && { subCategoryId: data.sub_categories[0] }),
-        stock: data.stock,
+        stock: payloadStock,
         expiryDate: new Date('2099-12-31').toISOString(),
         minimumOrderQuantity: data.min_order_qty,
         maximumOrderQuantity: data.max_order_qty,
-        gstPercent: data.gst_percent || 0,
+        gstPercent: payloadGst,
         isTaxIncluded: data.is_tax_included || false,
-        shippingCharges: data.shipping_charges || 0,
+        shippingCharges: payloadShipping,
         ...(data.delivery_text && { deliveryText: `${data.delivery_text} ${Number(data.delivery_text) === 1 ? 'day' : 'days'}` }),
         ...(realImages.length > 0 && { images: realImages }),
         ...(Object.keys(mergedExtraFields).length > 0 && { extraFields: mergedExtraFields }),
         discountType: mappedDiscountType || null,
-        discountMeta: Object.keys(discountMeta).length > 0 ? discountMeta : null,
+        discountMeta: payloadDiscountMeta,
         ...(selectedMasterId && { masterProductId: selectedMasterId }),
         ...(options.length > 0 && { options: options.map(o => ({ name: o.name, values: o.values })) }),
         ...((variants.filter(v => Number(v.price) > 0)).length > 0 && { 
           variants: variants.filter(v => Number(v.price) > 0).map(v => ({ 
+            id: v.id && v.id.includes('-') ? v.id : undefined,
             name: v.name, 
+            variantName: v.name,
             price: Number(v.price), 
             available: Number(v.available),
             image: v.image,
             sku: v.sku,
             serialNo: v.serialNo,
-            gstPercent: v.gstPercent,
+            gstPercent: Number(v.gstPercent) || 0,
+            gst: Number(v.gstPercent) || 0,
             discountPercent: Number(v.discount) > 0 ? Number(v.discount) : undefined,
+            discount: Number(v.discount) > 0 ? Number(v.discount) : undefined,
             shippingCharges: Number(v.shippingCharges) || 0,
+            shippingGstPercent: Number(v.shippingGstPercent) || 0,
+            finalShippingPrice: Number(v.finalShippingPrice) || Number((Number(v.shippingCharges || 0) + (Number(v.shippingCharges || 0) * Number(v.shippingGstPercent || 0) / 100)).toFixed(2)),
           })) 
         }),
       };
@@ -618,7 +648,6 @@ export function ProductForm({
                   placeholder="1000"
                   error={errors.product_price?.message} 
                   {...register("product_price", { valueAsNumber: true })} 
-                  disabled={!!selectedMasterId}
                 />
                 <Input 
                   label="Compare at Price (Optional)" 
@@ -626,7 +655,6 @@ export function ProductForm({
                   placeholder="1200"
                   error={errors.compare_at_price?.message} 
                   {...register("compare_at_price", { valueAsNumber: true })} 
-                  disabled={!!selectedMasterId}
                 />
               </div>
 
@@ -696,12 +724,21 @@ export function ProductForm({
             variants={variants}
             onChangeVariants={setVariants}
             productMedia={mediaItems}
-            onAddProductMedia={(items) => setMediaItems(prev => [...prev, ...items])}
+            onAddProductMedia={(items) => {
+              const newItems = items.filter(i => !mediaItems.some(existing => existing.url === i.url));
+              if (newItems.length > 0) {
+                const updatedMedia = [...mediaItems, ...newItems];
+                setMediaItems(updatedMedia);
+                setValue("image_list", updatedMedia.map(m => m.url), { shouldDirty: true, shouldValidate: true });
+              }
+            }}
             gstPercent={watchGst}
             discountDetails={watchDiscount}
             shippingCharges={watchShippingCharges}
             isTaxIncluded={watchTaxStatus}
             isSuggestedProductSelected={!!selectedMasterId}
+            activeVariantId={activeVariantId}
+            isEditMode={isEditing}
           />
         </div>
 

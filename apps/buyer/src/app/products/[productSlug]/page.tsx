@@ -33,7 +33,7 @@ import { usePlatformConfig } from '@/hooks/usePlatformConfig';
 import { useWishlist, useAddToWishlist, useRemoveFromWishlist } from '@/hooks/useWishlist';
 import { useProductReviews, useCreateReview } from '@/hooks/useReviews';
 import Navbar from '@/components/landing/Navbar';
-import { generateProductSlug, parseProductIdFromSlug } from '@yukizi/utils';
+import { generateProductSlug, parseProductIdFromSlug, calculatePricing } from '@yukizi/utils';
 import { ShareButton } from '@/components/shared/ShareButton';
 import WishlistIcon from '@/components/shared/WishlistIcon';
 import { renderBuyerOfferBadge } from '@/components/landing/ProductCarousel';
@@ -96,11 +96,26 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
   const isBestSeller = !!prod.isBestSeller;
   const isAd = isYukiziChoice || isBestSeller;
 
-  const price = prod.price;
+  const pricing = calculatePricing(
+    Number(prod.mrp || prod.originalPrice || 0),
+    Number(prod.gstPercent || 0),
+    {
+      type: prod.discountType || 'none',
+      discountPercent: prod.discountMeta?.discountPercent,
+      specialPrice: prod.discountMeta?.specialPrice,
+      buy: prod.discountMeta?.buy,
+      get: prod.discountMeta?.get,
+      bonusProductName: prod.discountMeta?.bonusProductName,
+      shippingCharges: prod.shippingCharges,
+      shippingGstPercent: prod.shippingGstPercent,
+    }
+  );
+
+  const price = pricing.finalCustomerPayable;
   const mrp = prod.mrp || prod.originalPrice;
   const rating = prod.rating || 4.5;
 
-  const isNotAvailable = prod.sellerCount === 0 || prod.sellerOffers?.length === 0 || price == null;
+  const isNotAvailable = prod.sellerCount === 0 || prod.sellerOffers?.length === 0 || price == null || price === 0;
   const displayPrice = isNotAvailable ? 'N/A' : `₹${Number(price).toLocaleString('en-IN')}`;
   const displayOriginalPrice = mrp != null && Number(mrp) > Number(price || 0) 
     ? `₹${Number(mrp).toLocaleString('en-IN')}` 
@@ -388,6 +403,21 @@ function ComparisonOffersList({
 
         // discountPercent not needed here — renderBuyerOfferBadge(listing) handles all discount types correctly
 
+        const pricing = calculatePricing(
+          Number(listing.mrp || listing.originalPrice || productMrp || 0),
+          Number(listing.gstPercent || 0),
+          {
+            type: listing.discountType || 'none',
+            discountPercent: listing.discountMeta?.discountPercent,
+            specialPrice: listing.discountMeta?.specialPrice,
+            buy: listing.discountMeta?.buy,
+            get: listing.discountMeta?.get,
+            bonusProductName: listing.discountMeta?.bonusProductName,
+            shippingCharges: listing.shippingCharges,
+            shippingGstPercent: listing.shippingGstPercent,
+          }
+        );
+
         const handleQtyChange = (newQty: number) => {
           if (cartItem) {
             if (newQty > 0) {
@@ -404,7 +434,7 @@ function ComparisonOffersList({
                 productId: listing.id,
                 quantity: newQty,
                 productName: productName,
-                price: listing.price,
+                price: pricing.finalCustomerPayable,
                 mrp: listing.mrp || listing.originalPrice || productMrp,
                 image: productImage,
                 imageUrl: productImage,
@@ -433,7 +463,7 @@ function ComparisonOffersList({
             {/* 2. Price & Subtext */}
             <div className={isDesktop ? "flex flex-col items-start text-left min-w-0" : "w-[25%] sm:flex-1 flex flex-col items-start text-left flex-shrink-0 min-w-0 pl-2 sm:pl-0"}>
               <span className={isDesktop ? "text-[14px] font-bold text-gray-800 leading-none tracking-tight" : "text-[12px] sm:text-[18px] lg:text-[22px] font-bold text-gray-800 leading-none tracking-tight"}>
-                ₹{listing.price?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                ₹{pricing.finalCustomerPayable.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
               </span>
               <span className={isDesktop ? "text-[9px] text-gray-500 font-medium mt-0.5 leading-none whitespace-nowrap overflow-hidden text-ellipsis max-w-full" : "text-[8px] sm:text-[11px] text-gray-500 font-medium mt-1 leading-none whitespace-nowrap overflow-hidden text-ellipsis max-w-full"}>
                   {listing.moq > 1 ? `Min. purchase of ${listing.moq}` : ''}

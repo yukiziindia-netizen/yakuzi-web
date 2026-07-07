@@ -34,7 +34,7 @@ export default function OrderDetailPage() {
     length: "", breadth: "", height: "", weight: "",
   });
   const [shippingFiles, setShippingFiles] = useState<Record<string, File | null>>({
-    lengthImg: null, breadthImg: null, heightImg: null, weightImg: null, invoice: null, manifest: null
+    lengthImg: null, breadthImg: null, heightImg: null, weightImg: null
   });
 
   if (isLoading) {
@@ -101,8 +101,6 @@ export default function OrderDetailPage() {
           breadthImage: urls.breadthImg,
           heightImage: urls.heightImg,
           weightImage: urls.weightImg,
-          invoiceUrl: urls.invoice,
-          manifestUrl: urls.manifest,
         }
       });
       toast.success("Shipping details saved successfully", { id: toastId });
@@ -229,7 +227,7 @@ export default function OrderDetailPage() {
 
           <div className="space-y-3 pt-2">
             <h3 className="text-sm font-medium text-foreground">Shipping Documents</h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-muted-foreground block">Shipping Label</label>
                 {mainOrder.adminShippingLabelUrl ? (
@@ -239,9 +237,25 @@ export default function OrderDetailPage() {
                 )}
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground block">Invoice</label>
+                <label className="text-xs font-medium text-muted-foreground block">Admin Invoice</label>
                 {mainOrder.adminInvoiceUrl ? (
-                   <a href={mainOrder.adminInvoiceUrl} target="_blank" className="text-xs text-primary underline">Download Invoice</a>
+                   <a href={mainOrder.adminInvoiceUrl} target="_blank" className="text-xs text-primary underline">Download Admin Invoice</a>
+                ) : (
+                  <span className="text-xs text-muted-foreground">Pending from admin</span>
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground block">Manifest</label>
+                {mainOrder.manifestUrl ? (
+                   <a href={mainOrder.manifestUrl} target="_blank" className="text-xs text-primary underline">Download Manifest</a>
+                ) : (
+                  <span className="text-xs text-muted-foreground">Pending from admin</span>
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground block">Seller Invoice</label>
+                {mainOrder.invoiceUrl ? (
+                   <a href={mainOrder.invoiceUrl} target="_blank" className="text-xs text-primary underline">Download Seller Invoice</a>
                 ) : (
                   <span className="text-xs text-muted-foreground">Pending from admin</span>
                 )}

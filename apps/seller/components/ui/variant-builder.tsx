@@ -35,6 +35,8 @@ export interface VariantCombination {
   sku?: string;
   serialNo?: string;
   shippingCharges?: string;
+  shippingGstPercent?: number;
+  finalShippingPrice?: string;
 }
 
 interface VariantBuilderProps {
@@ -49,6 +51,8 @@ interface VariantBuilderProps {
   shippingCharges?: number;
   isTaxIncluded?: boolean;
   isSuggestedProductSelected?: boolean;
+  activeVariantId?: string;
+  isEditMode?: boolean;
 }
 
 // Helper to generate cartesian product
@@ -88,7 +92,9 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
   discountDetails,
   shippingCharges,
   isTaxIncluded,
-  isSuggestedProductSelected = false
+  isSuggestedProductSelected = false,
+  activeVariantId,
+  isEditMode = false
 }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingVariantId, setEditingVariantId] = useState<string | null>(null);
@@ -113,7 +119,9 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
           ...existing,
           sku: existing.sku || "",
           serialNo: existing.serialNo || "",
-          shippingCharges: existing.shippingCharges || "0"
+          shippingCharges: existing.shippingCharges || "0",
+          shippingGstPercent: existing.shippingGstPercent || 0,
+          finalShippingPrice: existing.finalShippingPrice || "0"
         };
       }
       return { 
@@ -121,11 +129,14 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
         name: comboName, 
         price: "", 
         compareAtPrice: "",
-        discount: "",
+        discount: discountDetails?.discountPercent?.toString() || "",
+        gstPercent: gstPercent || undefined,
         available: "",
         sku: "",
         serialNo: "",
-        shippingCharges: "0"
+        shippingCharges: "0",
+        shippingGstPercent: 0,
+        finalShippingPrice: "0"
       };
     });
 
@@ -155,7 +166,18 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
 
   const updateVariant = (id: string, field: keyof VariantCombination, value: string) => {
     if (!onChangeVariants) return;
-    onChangeVariants(variants.map(v => v.id === id ? { ...v, [field]: value } : v));
+    onChangeVariants(variants.map(v => {
+      if (v.id === id) {
+        const updated = { ...v, [field]: value };
+        if (field === 'shippingCharges' || field === 'shippingGstPercent') {
+          const sc = Number(updated.shippingCharges || 0);
+          const gst = Number(updated.shippingGstPercent || 0);
+          updated.finalShippingPrice = (sc + (sc * gst / 100)).toFixed(2);
+        }
+        return updated;
+      }
+      return v;
+    }));
   };
 
   if (options.length === 0) {
@@ -272,13 +294,15 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                         <p className="text-sm font-medium text-gray-900">{option.name}</p>
                         <p className="text-sm text-gray-500 mt-0.5">{option.values.join(", ")}</p>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => setEditingId(option.id)}
-                        className="text-sm font-medium text-blue-600 hover:text-blue-700 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
-                      >
-                        Edit
-                      </button>
+                      {!activeVariantId && (
+                        <button
+                          type="button"
+                          onClick={() => setEditingId(option.id)}
+                          className="text-sm font-medium text-blue-600 hover:text-blue-700 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+                        >
+                          Edit
+                        </button>
+                      )}
                     </div>
                   </motion.div>
                 );
@@ -300,15 +324,16 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                     <th scope="col" className="px-6 py-3 font-medium">Compare at price</th>
                     <th scope="col" className="px-6 py-3 font-medium">GST (%)</th>
                     <th scope="col" className="px-6 py-3 font-medium">Discount</th>
-                    <th scope="col" className="px-6 py-3 font-medium">Shipping</th>
+                    <th scope="col" className="px-6 py-3 font-medium">Shipping (₹)</th>
                     <th scope="col" className="px-6 py-3 font-medium">Stock</th>
                   </tr>
                 </thead>
                 <tbody>
                   {variants.map((variant) => {
                     const isVariantEditing = editingVariantId === variant.id;
+                    const isDisabled = activeVariantId ? variant.id !== activeVariantId : false;
                     return (
-                    <tr key={variant.id} className="bg-white border-b hover:bg-gray-50">
+                    <tr key={variant.id} className={`border-b ${isDisabled ? 'bg-gray-50/50' : 'bg-white hover:bg-gray-50'}`}>
                       <td className="px-6 py-4 font-medium text-gray-900 align-middle">
                         {variant.name}
                       </td>
@@ -337,7 +362,8 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                             type="text"
                             value={variant.price}
                             onChange={(e) => updateVariant(variant.id, "price", e.target.value)}
-                            className="block w-full pl-7 pr-3 sm:text-sm border-gray-300 rounded-md py-1.5 border bg-white"
+                            disabled={isDisabled}
+                            className={`block w-full pl-7 pr-3 sm:text-sm border-gray-300 rounded-md py-1.5 border ${isDisabled ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'bg-white'}`}
                             placeholder="0.00"
                           />
                         </div>
@@ -387,8 +413,8 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                             type="text"
                             value={variant.compareAtPrice || ""}
                             onChange={(e) => updateVariant(variant.id, "compareAtPrice", e.target.value)}
-                            
-                            className="block w-32 pl-7 pr-3 sm:text-sm border-gray-300 rounded-md py-1.5 border bg-white"
+                            disabled={isDisabled}
+                            className={`block w-32 pl-7 pr-3 sm:text-sm border-gray-300 rounded-md py-1.5 border ${isDisabled ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'bg-white'}`}
                             placeholder="0.00"
                           />
                         </div>
@@ -399,7 +425,8 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                             type="number"
                             value={variant.gstPercent ?? ""}
                             onChange={(e) => updateVariant(variant.id, "gstPercent", e.target.value)}
-                            className="block w-full px-3 sm:text-sm border-gray-300 rounded-md py-1.5 border bg-white"
+                            disabled={isDisabled}
+                            className={`block w-full px-3 sm:text-sm border-gray-300 rounded-md py-1.5 border ${isDisabled ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'bg-white'}`}
                             placeholder="0"
                           />
                         </div>
@@ -413,7 +440,8 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                             type="number"
                             value={variant.discount || ""}
                             onChange={(e) => updateVariant(variant.id, "discount", e.target.value)}
-                            className="block w-full pl-7 pr-3 sm:text-sm border-gray-300 rounded-md py-1.5 border bg-white"
+                            disabled={isDisabled}
+                            className={`block w-full pl-7 pr-3 sm:text-sm border-gray-300 rounded-md py-1.5 border ${isDisabled ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'bg-white'}`}
                             placeholder="0"
                           />
                         </div>
@@ -425,9 +453,10 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                           </div>
                           <input
                             type="text"
-                            value={variant.shippingCharges || "0"}
-                            disabled
-                            className="block w-full pl-9 pr-3 sm:text-sm border-gray-300 rounded-md py-1.5 bg-gray-100 text-gray-500 cursor-not-allowed"
+                            value={variant.finalShippingPrice || "0"}
+                            onChange={(e) => updateVariant(variant.id, "finalShippingPrice", e.target.value)}
+                            disabled={isDisabled || isEditMode}
+                            className={`block w-full pl-9 pr-3 sm:text-sm border-gray-300 rounded-md py-1.5 border ${(isDisabled || isEditMode) ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'bg-white'}`}
                           />
                         </div>
                       </td>
@@ -436,7 +465,8 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                             type="number"
                             value={variant.available}
                             onChange={(e) => updateVariant(variant.id, "available", e.target.value)}
-                            className="block w-24 px-3 sm:text-sm border-gray-300 rounded-md py-1.5 border bg-white"
+                            disabled={isDisabled}
+                            className={`block w-24 px-3 sm:text-sm border-gray-300 rounded-md py-1.5 border ${isDisabled ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'bg-white'}`}
                             placeholder="0"
                           />
                       </td>

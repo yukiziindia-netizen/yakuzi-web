@@ -144,6 +144,7 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
           sku: v.sku !== undefined ? String(v.sku) : (v.options?.sku ? String(v.options.sku) : ""),
           serialNo: v.serialNo !== undefined ? String(v.serialNo) : (v.options?.serialNo ? String(v.options.serialNo) : ""),
           shippingCharges: v.shippingCharges !== undefined ? String(v.shippingCharges) : (v.options?.shippingCharges ? String(v.options.shippingCharges) : "0"),
+          finalShippingPrice: v.finalShippingPrice !== undefined ? String(v.finalShippingPrice) : (v.options?.finalShippingPrice ? String(v.options.finalShippingPrice) : undefined),
           shippingGstPercent: v.shippingGstPercent !== undefined && v.shippingGstPercent !== null ? String(v.shippingGstPercent) : (v.options?.shippingGstPercent !== undefined && v.options?.shippingGstPercent !== null ? String(v.options.shippingGstPercent) : (initialData.shippingGstPercent !== undefined && initialData.shippingGstPercent !== null ? String(initialData.shippingGstPercent) : "")),
           image: v.image || v.options?.image || undefined
         }));
@@ -200,6 +201,7 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
           sku: v.sku,
           serialNo: v.serialNo,
           shippingCharges: Number(v.shippingCharges),
+          finalShippingPrice: v.finalShippingPrice !== "" && v.finalShippingPrice !== undefined ? Number(v.finalShippingPrice) : undefined,
           shippingGstPercent: v.shippingGstPercent !== "" ? Number(v.shippingGstPercent) : null,
           image: v.image,
           images: v.images

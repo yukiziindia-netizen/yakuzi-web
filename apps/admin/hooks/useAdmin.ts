@@ -133,7 +133,15 @@ export function useUpdateAdminOrderStatus() {
 export function useUpdateAdminShippingDocs() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ orderId, payload }: { orderId: string; payload: { adminShippingLabelUrl?: string; adminInvoiceUrl?: string } }) => updateAdminShippingDocs(orderId, payload),
+    mutationFn: ({ orderId, payload }: { 
+      orderId: string; 
+      payload: { 
+        adminShippingLabelUrl?: string; 
+        adminInvoiceUrl?: string;
+        manifestUrl?: string;
+        invoiceUrl?: string;
+      } 
+    }) => updateAdminShippingDocs(orderId, payload),
     onSuccess: (_, { orderId }) => {
       void qc.invalidateQueries({ queryKey: ["admin", "orders"] });
       void qc.invalidateQueries({ queryKey: ["admin", "order", orderId] });

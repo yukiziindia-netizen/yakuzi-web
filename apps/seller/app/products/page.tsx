@@ -112,11 +112,19 @@ export default function ProductsPage() {
                   <tbody className="divide-y divide-border/30">
                     {products.length===0 ? (
                       <tr><td colSpan={8} className="py-12 text-center text-sm text-muted-foreground">No products found</td></tr>
-                    ) : products.map((p: any, i: number)=>(
+                    ) : products.map((p: any, i: number)=>{
+                      console.log("PRODUCT_DUMP", JSON.stringify(p, null, 2));
+                      return (
                       <motion.tr key={p.id} initial={{opacity:0,y:6}} animate={{opacity:1,y:0}} transition={{delay:i*0.05}} className="hover:bg-accent/30 transition-colors">
                         <td className="px-5 py-4">
                           <div>
-                            <div className="text-sm font-semibold text-foreground">{p.name}</div>
+                            <div className="text-sm font-semibold text-foreground">
+                              {p.variant?.name && p.name !== p.variant.name && !p.name.includes(p.variant.name) 
+                                ? `${p.name} - ${p.variant.name}` 
+                                : p.variantName && p.name !== p.variantName && !p.name.includes(p.variantName) 
+                                ? `${p.name} - ${p.variantName}` 
+                                : p.name}
+                            </div>
                             {p.genericName && <div className="text-xs text-muted-foreground font-mono">{p.genericName}</div>}
                           </div>
                         </td>
@@ -128,8 +136,8 @@ export default function ProductsPage() {
                         </td>
 
                         <td className="px-5 py-4">
-                          <span className={`text-sm font-medium ${(p.stock ?? 0)>100?"text-green-600":(p.stock ?? 0)>0?"text-yellow-600":"text-red-500"}`}>
-                            {p.stock} units
+                          <span className={`text-sm font-medium ${(p.available ?? p.variant?.available ?? p.stock ?? 0)>100?"text-green-600":(p.available ?? p.variant?.available ?? p.stock ?? 0)>0?"text-yellow-600":"text-red-500"}`}>
+                            {p.available ?? p.variant?.available ?? p.stock} units
                           </span>
                         </td>
                         <td className="px-5 py-4 text-sm font-medium text-muted-foreground">{p.gstPercent ?? p.gst ?? 0}%</td>
@@ -142,7 +150,8 @@ export default function ProductsPage() {
                           </div>
                         </td>
                       </motion.tr>
-                    ))}
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

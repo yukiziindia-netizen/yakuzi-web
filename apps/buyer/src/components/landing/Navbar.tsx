@@ -345,21 +345,21 @@ export default function Navbar({
             <div className="hidden sm:flex items-center w-full justify-between">
                 <div className="flex items-center h-full">
                   <Link href="/" className="shrink-0 flex items-center">
-                    <img src="/yukizi-logo-new.png" alt="YUKiZi" className="h-[28px] md:h-[32px] object-contain" />
+                    <img src="/yukizi-logo-new.png" alt="YUKiZi" className="h-[20px] md:h-[24px] object-contain" />
                   </Link>
 
                   <div className="flex items-center gap-1 md:gap-2 ml-2 md:ml-3 lg:ml-4">
                     {!isAuthenticated ? (
                       <button 
                         onClick={onLoginClick || (() => window.dispatchEvent(new CustomEvent('open-login')))} 
-                        className="text-white font-bold text-[14px] md:text-[15px] bg-white/20 hover:bg-white/30 px-3 md:px-4 py-1.5 md:py-2 rounded-lg transition-colors border border-white/20"
+                        className="text-white font-bold text-[12px] md:text-[13px] bg-white/20 hover:bg-white/30 px-2.5 md:px-3 py-1 md:py-1.5 rounded-lg transition-colors border border-white/20"
                       >
                         Start
                       </button>
                     ) : (
                       <>
                         <button onClick={() => setIsProfileOpen(true)} className="text-white hover:text-purple-300 transition-all duration-200 hover:scale-110 flex items-center">
-                          <User className="w-5 h-5 md:w-6 md:h-6 stroke-[2]" fill={isProfileOpen ? "currentColor" : "none"} />
+                          <User className="w-[24px] h-[24px] md:w-[26px] md:h-[26px] stroke-[2]" fill={isProfileOpen ? "currentColor" : "none"} />
                         </button>
                         {/* Vertical Divider between User and Bell */}
                         <div className="h-5 w-[1px] bg-white/20 ml-1 mr-3" />
@@ -374,11 +374,9 @@ export default function Navbar({
                               : "text-white hover:text-purple-300"
                           }`}
                         >
-                          <Bell className="w-5 h-5 md:w-6 md:h-6 stroke-[2]" fill={isNotificationsOpen ? "currentColor" : "none"} />
+                          <Bell className="w-[24px] h-[24px] md:w-[26px] md:h-[26px] stroke-[2]" fill={isNotificationsOpen ? "currentColor" : "none"} />
                           {unreadNotificationCount > 0 && (
-                            <span className="absolute -top-1 -right-1 w-3.5 h-3.5 md:w-4 md:h-4 bg-[#f7941d] text-white text-[9px] md:text-[10px] font-bold rounded-full flex items-center justify-center border border-[#562996]">
-                              {unreadNotificationCount}
-                            </span>
+                            <span className="absolute top-[-2px] right-[-2px] w-[7px] h-[7px] bg-[#f7941d] rounded-full border border-[#562996]" />
                           )}
                         </button>
                       </>
@@ -394,9 +392,9 @@ export default function Navbar({
                     setIsSearchChatOpen(!isSearchChatOpen);
                     setIsChatOpen(false);
                   }}
-                  className="w-full h-8 md:h-[34px] bg-white rounded-md text-gray-800 text-[13px] md:text-[14px] pl-3 md:pl-4 pr-8 md:pr-10 focus:outline-none cursor-pointer placeholder-gray-400 shadow-sm font-medium"
+                  className="w-full h-[28px] md:h-[30px] bg-white rounded-md text-gray-800 text-[11px] md:text-[12px] pl-2 md:pl-3 pr-7 md:pr-9 focus:outline-none cursor-pointer placeholder-gray-400 shadow-sm font-medium"
                 />
-                <Search className="w-4 h-4 text-gray-400 absolute right-3 md:right-4 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2]" />
+                <Search className="w-3.5 h-3.5 text-gray-400 absolute right-2.5 md:right-3.5 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2]" />
               </div>
             </div>
 
@@ -478,9 +476,13 @@ export default function Navbar({
               setIsChatOpen(!isChatOpen);
               setIsSearchChatOpen(false);
             }}
-            className="relative -mt-0.5 sm:-mt-1.5 md:-mt-2 z-20 w-12 h-12 xs:w-14 xs:h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gradient-to-b from-[#ffb040] to-[#ff8c00] rounded-xl xs:rounded-[18px] sm:rounded-2xl md:rounded-[1.5rem] flex items-center justify-center shadow-[0_4px_15px_rgba(255,176,64,0.4)] sm:shadow-[0_0_20px_rgba(255,176,64,0.5)] hover:-translate-y-1 sm:hover:-translate-y-2 transition-transform cursor-pointer shrink-0 mx-1 xs:mx-1.5 sm:mx-2 md:mx-2 border-[2px] border-[#fff5eb]"
+            className="relative -mt-0.5 sm:-mt-1.5 md:-mt-2 z-20 w-12 h-12 xs:w-14 xs:h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gradient-to-b from-[#ffb040] to-[#ff8c00] sm:from-[#ff883c] sm:to-[#ff883c] rounded-xl xs:rounded-[18px] sm:rounded-2xl md:rounded-[1.5rem] flex items-center justify-center shadow-[0_4px_15px_rgba(255,176,64,0.4)] sm:shadow-[0_4px_20px_rgba(255,94,0,0.45)] hover:-translate-y-1 sm:hover:-translate-y-2 transition-transform cursor-pointer shrink-0 mx-1 xs:mx-1.5 sm:mx-2 md:mx-2 border-[2px] border-[#fff5eb] sm:border-[1.5px] sm:border-[#ffa168]"
           >
             <Image src="/yukizi.jpg" alt="Mascot" width={96} height={96} className="w-full h-full object-cover rounded-[10px] xs:rounded-[16px] sm:rounded-2xl md:rounded-[1.5rem]" />
+            {/* Floating dots (Desktop only) */}
+            <div className="hidden sm:block absolute -top-[8px] left-[32%] w-[6px] h-[6px] bg-[#ff883c] rounded-[1px] shadow-[0_0_4px_rgba(255,136,60,0.6)] animate-pulse" />
+            <div className="hidden sm:block absolute -top-[18px] left-[48%] w-[8px] h-[8px] bg-[#ff883c] rounded-[1.5px] shadow-[0_0_5px_rgba(255,136,60,0.6)] animate-pulse" style={{ animationDelay: '0.2s' }} />
+            <div className="hidden sm:block absolute -top-[28px] left-[40%] w-[4px] h-[4px] bg-[#ff883c] rounded-[0.5px] shadow-[0_0_3px_rgba(255,136,60,0.6)] animate-pulse" style={{ animationDelay: '0.4s' }} />
           </div>
 
 
@@ -499,11 +501,11 @@ export default function Navbar({
               }`}
             >
               <Bookmark 
-                className="w-[18px] h-[18px] xs:w-[24px] xs:h-[24px] sm:w-7 sm:h-7 stroke-[2] rotate-90" 
+                className="w-[18px] h-[18px] xs:w-[24px] xs:h-[24px] sm:w-[26px] sm:h-[26px] md:w-[28px] md:h-[28px] stroke-[2] rotate-90" 
                 fill={isWishlistOpen || wishlistCount > 0 ? "currentColor" : "none"} 
               />
               {wishlistCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 bg-[#f7941d] text-white text-[8px] xs:text-[9px] sm:text-[10px] font-bold rounded-full flex items-center justify-center border border-white sm:border-[#562996]">
+                <span className="absolute -top-1 -right-1 w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 sm:text-[9px] bg-[#f7941d] text-white text-[8px] xs:text-[9px] font-bold rounded-full flex items-center justify-center border border-white sm:border-[#562996]">
                   {wishlistCount}
                 </span>
               )}
@@ -520,11 +522,11 @@ export default function Navbar({
               }`}
             >
               <ShoppingCart 
-                className="w-[18px] h-[18px] xs:w-[24px] xs:h-[24px] sm:w-7 sm:h-7 stroke-[2]" 
+                className="w-[18px] h-[18px] xs:w-[24px] xs:h-[24px] sm:w-[26px] sm:h-[26px] md:w-[28px] md:h-[28px] stroke-[2]" 
                 fill={isCartOpen ? "currentColor" : "none"}
               />
               {cartData?.items && cartData.items.length > 0 && (
-                <span className="absolute -top-1 -right-1 w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 bg-[#f7941d] text-white text-[8px] xs:text-[9px] sm:text-[10px] font-bold rounded-full flex items-center justify-center border border-white sm:border-[#562996]">
+                <span className="absolute -top-1 -right-1 w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 sm:text-[9px] bg-[#f7941d] text-white text-[8px] xs:text-[9px] font-bold rounded-full flex items-center justify-center border border-white sm:border-[#562996]">
                   {cartData.items.length}
                 </span>
               )}
@@ -541,7 +543,7 @@ export default function Navbar({
               }`}
             >
               <Package 
-                className="w-[24px] h-[24px] xs:w-[26px] xs:h-[26px] sm:w-7 sm:h-7 stroke-[2.5]" 
+                className="w-[24px] h-[24px] xs:w-[26px] xs:h-[26px] sm:w-[26px] sm:h-[26px] md:w-[28px] md:h-[28px] stroke-[2]" 
                 fill={isOrderDrawerOpen ? "currentColor" : "none"}
               />
             </button>
@@ -560,7 +562,7 @@ export default function Navbar({
               }`}
             >
               <Filter 
-                className="w-[18px] h-[18px] xs:w-[24px] xs:h-[24px] sm:w-7 sm:h-7 stroke-[2]" 
+                className="w-[18px] h-[18px] xs:w-[24px] xs:h-[24px] sm:w-[26px] sm:h-[26px] md:w-[28px] md:h-[28px] stroke-[2]" 
                 fill={sidebarView === "filters" ? "currentColor" : "none"}
               />
             </button>
@@ -576,9 +578,9 @@ export default function Navbar({
               }`}
             >
               {isMobileMenuOpen ? (
-                <X className="w-[18px] h-[18px] xs:w-[24px] xs:h-[24px] sm:w-7 sm:h-7 stroke-[2]" />
+                <X className="w-[18px] h-[18px] xs:w-[24px] xs:h-[24px] sm:w-[26px] sm:h-[26px] md:w-[28px] md:h-[28px] stroke-[2]" />
               ) : (
-                <Menu className="w-[18px] h-[18px] xs:w-[24px] xs:h-[24px] sm:w-7 sm:h-7 stroke-[2]" />
+                <Menu className="w-[18px] h-[18px] xs:w-[24px] xs:h-[24px] sm:w-[26px] sm:h-[26px] md:w-[28px] md:h-[28px] stroke-[2]" />
               )}
             </button>
           </div>

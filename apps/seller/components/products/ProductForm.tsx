@@ -9,14 +9,12 @@ import toast from "react-hot-toast";
 import { Button, Input, Textarea, Select, ExpiryPicker } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { ImageUploader } from "./ImageUploader";
-import { DiscountSelector } from "./DiscountSelector";
 import { CategorySelector } from "./CategorySelector";
 import { VariantBuilder, VariantOption, VariantCombination } from "../ui/variant-builder";
 import type { DiscountFormDetails, Suggestion } from "@yukizi/utils";
 import {
   productFormSchema,
   type ProductFormValues,
-  calculatePricing,
   VALID_GST_PERCENTAGES,
 } from "@yukizi/utils";
 import { useCreateSellerProduct, useUpdateSellerProduct, useSuggestionSearch, useCategories } from "@/hooks/useSeller";
@@ -33,6 +31,7 @@ export function ProductForm({
   initialSubcategoryName,
   initialMasterId,
   activeVariantId,
+  initialPlatformFees,
 }: { 
   defaultValues?: Partial<FormValues>; 
   productId?: string;
@@ -42,6 +41,7 @@ export function ProductForm({
   initialSubcategoryName?: string;
   initialMasterId?: string;
   activeVariantId?: string;
+  initialPlatformFees?: any;
 }) {
   const router = useRouter();
   const createProduct = useCreateSellerProduct();
@@ -126,7 +126,7 @@ export function ProductForm({
   const cat: any = selectedCat;
   
   // Platform fees logic: prioritize selected suggestion fees, then category fees.
-  let platformFees: any = undefined;
+  let platformFees: any = initialPlatformFees;
   if (selectedSuggestion?.commissionPercent !== undefined && selectedSuggestion?.commissionPercent !== null) {
     platformFees = {
       commissionPercent: selectedSuggestion.commissionPercent,
@@ -135,6 +135,28 @@ export function ProductForm({
       fixedFeeGstPercent: selectedSuggestion.fixedFeeGstPercent || 18,
       shippingGstPercent: selectedSuggestion.shippingGstPercent || 18,
     };
+  } else if (allCategories && watchCategories?.[0]) {
+    const selectedCategory = allCategories.find((c: any) => c.id === watchCategories[0]);
+    if (selectedCategory) {
+      let feesSource: any = selectedCategory;
+      const watchSubCategories = watch("sub_categories");
+      if (watchSubCategories?.[0] && selectedCategory.subcategories) {
+        const sub: any = selectedCategory.subcategories.find((s: any) => s.id === watchSubCategories[0]);
+        if (sub && sub.commissionPercent !== null && sub.commissionPercent !== undefined) {
+          feesSource = sub;
+        }
+      }
+      
+      if (feesSource.commissionPercent !== undefined && feesSource.commissionPercent !== null) {
+        platformFees = {
+          commissionPercent: feesSource.commissionPercent,
+          fixedFee: feesSource.fixedFee || 0,
+          commissionGstPercent: feesSource.commissionGstPercent || 18,
+          fixedFeeGstPercent: feesSource.fixedFeeGstPercent || 18,
+          shippingGstPercent: feesSource.shippingGstPercent || 18,
+        };
+      }
+    }
   }
 
   // Real-time discount calculation when compare_at_price is added/updated
@@ -213,12 +235,30 @@ export function ProductForm({
     if (suggestion.sku) {
       setValue("sku", suggestion.sku, { shouldDirty: true });
     }
+    if ((suggestion as any).serialNo) {
+      setValue("serialNo", (suggestion as any).serialNo, { shouldDirty: true });
+    }
     if (suggestion.specifications) {
       setValue("specifications", suggestion.specifications, { shouldDirty: true });
     }
     
     if (suggestion.mrp !== undefined) {
       setValue("product_price", suggestion.mrp, { shouldDirty: true });
+    }
+    if ((suggestion as any).gstPercent !== undefined) {
+      setValue("gst_percent", (suggestion as any).gstPercent, { shouldDirty: true });
+    }
+    const shippingGst = (suggestion as any).shippingGstPercent ?? 18;
+    const baseShip = (suggestion as any).shippingCharges ?? 0;
+    const computedFinalShip = Math.round(baseShip + (baseShip * shippingGst / 100));
+    const finalShip = (suggestion as any).finalShippingPrice !== undefined && (suggestion as any).finalShippingPrice !== null 
+      ? (suggestion as any).finalShippingPrice 
+      : computedFinalShip;
+    if (finalShip !== undefined) {
+      setValue("shipping_charges", finalShip, { shouldDirty: true });
+    }
+    if ((suggestion as any).isTaxIncluded !== undefined) {
+      setValue("is_tax_included", (suggestion as any).isTaxIncluded, { shouldDirty: true });
     }
     const compareAt = (suggestion as any).extraFields?.compare_at_price ? Number((suggestion as any).extraFields.compare_at_price) : 0;
     setValue("compare_at_price", compareAt, { shouldDirty: true });
@@ -366,75 +406,12 @@ export function ProductForm({
     try {
       const extra_fields = data.custom_extra_fields.reduce<Record<string, string>>((acc, curr) => ({ ...acc, [curr.key]: curr.value }), {});
 
-      // Compute pricing via centralized engine
-      let computedPricing: Record<string, any> = {};
-      try {
-        const p = calculatePricing(data.product_price, 0, {
-          type: data.discount_form_details.type,
-          discountPercent: data.discount_form_details.discountPercent,
-          buy: data.discount_form_details.buy,
-          get: data.discount_form_details.get,
-          bonusProductName: data.discount_form_details.bonusProductName,
-          specialPrice: data.discount_form_details.specialPrice,
-          shippingCharges: data.shipping_charges,
-        }, platformFees);
-        computedPricing = {
-          ptr: p.ptr,
-          finalPtr: p.finalPtr,
-          discountValue: p.discountValue,
-          gstValue: p.gstValue,
-          perPtrWithGst: p.perPtrWithGst,
-          itemsToPayFor: p.itemsToPayFor,
-          finalUserBuy: p.finalUserBuy,
-          finalOrderValue: p.finalOrderValue,
-          retailMarginPercent: p.retailMarginPercent,
-        };
-      } catch {
-        // Pricing calculation failed — continue with form details only
-      }
-
       // Filter out data URLs (base64) — only send real URLs
       const realImages = (data.image_list || []).filter((url) => url.startsWith("http"));
 
-      // Map discount form details to backend DTO format
-      // Map form discount types to backend enum values
-      const discountTypeMap: Record<string, string> = {
-        ptr_discount: "PTR_DISCOUNT",
-        same_product_bonus: "SAME_PRODUCT_BONUS",
-        ptr_discount_and_same_product_bonus: "PTR_PLUS_SAME_PRODUCT_BONUS",
-        different_product_bonus: "DIFFERENT_PRODUCT_BONUS",
-        ptr_discount_and_different_product_bonus: "PTR_PLUS_DIFFERENT_PRODUCT_BONUS",
-        special_price: "SPECIAL_PRICE",
-      };
-      const discountMeta: Record<string, any> = {};
-      const formDiscountType = data.discount_form_details?.type;
-      const df = data.discount_form_details;
-
-      if (formDiscountType === "ptr_discount") {
-        if (df?.discountPercent) discountMeta.discountPercent = df.discountPercent;
-      } else if (formDiscountType === "same_product_bonus") {
-        if (df?.buy) discountMeta.buy = df.buy;
-        if (df?.get) discountMeta.get = df.get;
-      } else if (formDiscountType === "different_product_bonus") {
-        if (df?.buy) discountMeta.buy = df.buy;
-        if (df?.get) discountMeta.get = df.get;
-        if (df?.bonusProductName) discountMeta.bonusProductName = df.bonusProductName;
-      } else if (formDiscountType === "ptr_discount_and_same_product_bonus") {
-        if (df?.discountPercent) discountMeta.discountPercent = df.discountPercent;
-        if (df?.buy) discountMeta.buy = df.buy;
-        if (df?.get) discountMeta.get = df.get;
-      } else if (formDiscountType === "ptr_discount_and_different_product_bonus") {
-        if (df?.discountPercent) discountMeta.discountPercent = df.discountPercent;
-        if (df?.buy) discountMeta.buy = df.buy;
-        if (df?.get) discountMeta.get = df.get;
-        if (df?.bonusProductName) discountMeta.bonusProductName = df.bonusProductName;
-      } else if (formDiscountType === "special_price") {
-        if (df?.specialPrice) discountMeta.specialPrice = df.specialPrice;
-      }
-
-      // Map discount type if present
-      let mappedDiscountType = formDiscountType ? discountTypeMap[formDiscountType as keyof typeof discountTypeMap] : undefined;
-      let payloadDiscountMeta = Object.keys(discountMeta).length > 0 ? discountMeta : null;
+      const discountPercent = data.discount_form_details?.discountPercent;
+      let mappedDiscountType = discountPercent && Number(discountPercent) > 0 ? "PTR_DISCOUNT" : undefined;
+      let payloadDiscountMeta = discountPercent && Number(discountPercent) > 0 ? { discountPercent: Number(discountPercent) } : null;
 
       let payloadMrp = data.product_price;
       let payloadStock = data.stock;
@@ -480,7 +457,8 @@ export function ProductForm({
         maximumOrderQuantity: data.max_order_qty,
         gstPercent: payloadGst,
         isTaxIncluded: data.is_tax_included || false,
-        shippingCharges: payloadShipping,
+        shippingCharges: data.is_tax_included ? payloadShipping : Math.round(payloadShipping / (1 + ((platformFees?.shippingGstPercent ?? 18) / 100))),
+        finalShippingPrice: payloadShipping,
         ...(data.delivery_text && { deliveryText: `${data.delivery_text} ${Number(data.delivery_text) === 1 ? 'day' : 'days'}` }),
         ...(realImages.length > 0 && { images: realImages }),
         ...(Object.keys(mergedExtraFields).length > 0 && { extraFields: mergedExtraFields }),
@@ -504,7 +482,7 @@ export function ProductForm({
             discount: Number(v.discount) > 0 ? Number(v.discount) : undefined,
             shippingCharges: Number(v.shippingCharges) || 0,
             shippingGstPercent: Number(v.shippingGstPercent) || 0,
-            finalShippingPrice: Number(v.finalShippingPrice) || Number((Number(v.shippingCharges || 0) + (Number(v.shippingCharges || 0) * Number(v.shippingGstPercent || 0) / 100)).toFixed(2)),
+            finalShippingPrice: Number(v.finalShippingPrice) || Math.round(Number(v.shippingCharges || 0) + (Number(v.shippingCharges || 0) * Number(v.shippingGstPercent || 0) / 100)),
           })) 
         }),
       };
@@ -593,7 +571,7 @@ export function ProductForm({
               {variants.length === 0 && (
                 <>
                   <Input label="Product SKU" placeholder="e.g. SKU-12345" error={errors.sku?.message} {...register("sku")} disabled={!!selectedMasterId} />
-                  <Input label="Serial No" placeholder="e.g. SN-12345" error={errors.serialNo?.message} {...register("serialNo")} disabled />
+                  <Input label="Serial No" placeholder="e.g. SN-12345" error={errors.serialNo?.message} {...register("serialNo")} disabled={!!selectedMasterId} />
                 </>
               )}
               <Input label="Product Specification" placeholder="e.g. 500mg, Cotton, etc." error={errors.specifications?.message} {...register("specifications")} disabled={!!selectedMasterId} />
@@ -640,14 +618,17 @@ export function ProductForm({
                 {...register("delivery_text")} 
               />
               {variants.length === 0 && (
-                <Input 
-                  label="Shipping Charges (₹)" 
-                  type="number"
-                  min={0}
-                  placeholder="0" 
-                  error={errors.shipping_charges?.message} 
-                  {...register("shipping_charges", { valueAsNumber: true })} 
-                />
+                <div className="space-y-1">
+                  <Input 
+                    label="Final Shipping Price (₹)" 
+                    type="number"
+                    min={0}
+                    placeholder="0" 
+                    error={errors.shipping_charges?.message} 
+                    {...register("shipping_charges", { valueAsNumber: true })} 
+                    disabled={!!selectedMasterId}
+                  />
+                </div>
               )}
             </div>
           </div>
@@ -675,19 +656,14 @@ export function ProductForm({
                 />
               </div>
 
-              <div className="pt-2">
-                <Controller
-                  name="discount_form_details"
-                  control={control}
-                  render={({ field }) => (
-                    <DiscountSelector 
-                      value={field.value} 
-                      onChange={field.onChange} 
-                      mrp={watchMrp || 0}
-                      gstPercent={watchGst || 0}
-                      platformFees={platformFees}
-                    />
-                  )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <Input
+                  label="Discount (%)"
+                  type="number"
+                  placeholder="0"
+                  min={0}
+                  max={100}
+                  {...register("discount_form_details.discountPercent", { valueAsNumber: true })}
                 />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-border/50">
@@ -702,33 +678,14 @@ export function ProductForm({
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                <Input 
-                  label="Charge tax on this product (%)" 
-                  type="number" 
-                  placeholder="12"
-                  error={errors.gst_percent?.message} 
-                  {...register("gst_percent", { valueAsNumber: true })} 
-                />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                <div className="space-y-1">
-                  <label className="block text-[13px] font-semibold text-foreground/80 mb-1">Tax Status</label>
-                  <Controller
-                    name="is_tax_included"
-                    control={control}
-                    render={({ field }) => (
-                      <select
-                        className="w-full bg-background border border-input rounded-xl px-4 py-2.5 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200"
-                        value={field.value ? "include" : "exclude"}
-                        onChange={(e) => field.onChange(e.target.value === "include")}
-                      >
-                        <option value="include">Include (Price includes tax)</option>
-                        <option value="exclude">Exclude (Price excludes tax)</option>
-                      </select>
-                    )}
+                  <Input 
+                    label="Charge tax on this product (%)" 
+                    type="number" 
+                    placeholder="12"
+                    error={errors.gst_percent?.message} 
+                    {...register("gst_percent", { valueAsNumber: true })} 
                   />
                 </div>
-              </div>
             </>
           )}
         </div>

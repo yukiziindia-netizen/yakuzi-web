@@ -16,7 +16,15 @@ interface Props {
   onChange: (value: DiscountFormDetails) => void;
   mrp: number;
   gstPercent: number;
-  platformFees?: { commissionPercent: number; fixedFee: number; commissionGstPercent: number };
+  shippingCharges?: number;
+  isTaxIncluded?: boolean;
+  platformFees?: {
+    commissionPercent?: number;
+    fixedFee?: number;
+    commissionGstPercent?: number;
+    fixedFeeGstPercent?: number;
+    shippingGstPercent?: number;
+  };
   error?: string;
 }
 
@@ -25,7 +33,16 @@ const DISCOUNT_OPTIONS: { label: string; value: string }[] = [
   { label: "Discount", value: "ptr_discount" },
 ];
 
-export function DiscountSelector({ value, onChange, mrp, gstPercent, platformFees, error }: Props) {
+export function DiscountSelector({
+  value,
+  onChange,
+  mrp,
+  gstPercent,
+  shippingCharges = 0,
+  isTaxIncluded = false,
+  platformFees,
+  error,
+}: Props) {
   const showPercent = requiresDiscountPercent(value.type);
   const showBonus = requiresBuyGet(value.type);
   const showBonusName = requiresBonusProductName(value.type);
@@ -33,7 +50,7 @@ export function DiscountSelector({ value, onChange, mrp, gstPercent, platformFee
 
   // Real-time pricing preview
   const pricing = useMemo(() => {
-    if (mrp <= 0 || ![0, 5, 12, 18].includes(gstPercent)) return null;
+    if (mrp <= 0 || !Number.isFinite(gstPercent)) return null;
     try {
       return calculatePricing(mrp, gstPercent, {
         type: value.type,
@@ -42,11 +59,14 @@ export function DiscountSelector({ value, onChange, mrp, gstPercent, platformFee
         get: value.get,
         bonusProductName: value.bonusProductName,
         specialPrice: value.specialPrice,
+        shippingCharges,
+        shippingGstPercent: platformFees?.shippingGstPercent,
+        isTaxIncluded,
       }, platformFees);
     } catch {
       return null;
     }
-  }, [mrp, gstPercent, value]);
+  }, [mrp, gstPercent, value, shippingCharges, isTaxIncluded, platformFees]);
 
   const handleTypeChange = (newType: DiscountType) => {
     onChange({
@@ -164,15 +184,25 @@ export function DiscountSelector({ value, onChange, mrp, gstPercent, platformFee
                   <span className="text-destructive font-medium text-right min-w-[80px]">- {formatCurrency(pricing.commissionAmount)}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Fixed Fee</span>
-                  <span className="text-destructive font-medium text-right min-w-[80px]">- {formatCurrency(pricing.fixedFee)}</span>
-                </div>
-                <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">GST on Platform Fees</span>
                   <span className="text-destructive font-medium text-right min-w-[80px]">- {formatCurrency(pricing.commissionGstAmount + pricing.fixedFeeGstAmount)}</span>
                 </div>
               </div>
             </div>
+
+            {pricing.shippingTotal > 0 && (
+              <div className="pt-3 pb-1 border-t border-dashed">
+                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Shipping</div>
+                <div className="space-y-2 pl-2 border-l-2 border-green-200 dark:border-green-800">
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Shipping Income</span>
+                    <span className="text-green-600 dark:text-green-400 font-medium text-right min-w-[80px]">
+                      + {formatCurrency(pricing.shippingTotal)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="flex justify-between items-center p-3 mt-4 bg-green-50 dark:bg-green-950/20 rounded-xl border border-green-100 dark:border-green-900/30">
               <span className="font-bold text-base text-green-800 dark:text-green-300">Estimated Payout (per unit)</span>
@@ -182,7 +212,7 @@ export function DiscountSelector({ value, onChange, mrp, gstPercent, platformFee
             <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg flex items-start gap-3 border border-blue-100 dark:border-blue-900/30">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500 mt-0.5 shrink-0"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
               <p className="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
-                <strong className="font-semibold">Note:</strong> Final customer pays <strong>{formatCurrency(pricing.finalCustomerPayable)}</strong> (includes {pricing.productGstPercent}% Product GST {pricing.shippingTotal > 0 ? `+ ${formatCurrency(pricing.shippingTotal)} Total Shipping` : ''}). You are responsible for remitting Product GST to the government out of your payout.
+                <strong className="font-semibold">Note:</strong> Final customer pays <strong>{formatCurrency(pricing.finalCustomerPayable)}</strong> (price {isTaxIncluded ? 'includes' : 'adds'} {pricing.productGstPercent}% Product GST{pricing.shippingTotal > 0 ? ` and adds ${formatCurrency(pricing.shippingTotal)} total shipping` : ''}). You are responsible for remitting Product GST to the government out of your payout.
               </p>
             </div>
           </div>

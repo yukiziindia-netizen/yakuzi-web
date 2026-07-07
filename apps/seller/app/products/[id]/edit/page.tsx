@@ -12,6 +12,27 @@ export default function EditProductPage() {
   const router = useRouter();
   const productId = params.id as string;
   const { data: product, isLoading, error } = useSellerProduct(productId);
+  const productAny = product as any;
+  const productVariants = productAny?.variants || [];
+  const productListings = productAny?.listings || [];
+  const activeVariantId =
+    product && productId !== product.id
+      ? productVariants.find((v: any) => {
+          const listing = productListings.find(
+            (l: any) => l.variantName === v.name || l.variantName === v.options?.name,
+          );
+          return listing?.id === productId || v.id === productId;
+        })?.id || productId
+      : undefined;
+  const activeVariant = activeVariantId
+    ? productVariants.find((v: any) => v.id === activeVariantId)
+    : undefined;
+  const activeListing = activeVariant
+    ? productListings.find((l: any) => l.variantName === activeVariant.name || l.variantName === activeVariant.options?.name)
+    : productListings.find((l: any) => l.id === productId);
+  const resolvedSku = productAny?.sku || activeVariant?.sku || activeVariant?.options?.sku || activeListing?.sku || productAny?.variant?.sku || "";
+  const resolvedSerialNo = productAny?.serialNo || activeVariant?.serialNo || activeVariant?.options?.serialNo || activeListing?.serialNo || productAny?.variant?.serialNo || "";
+  const resolvedSpecifications = productAny?.specifications || activeVariant?.specifications || activeVariant?.options?.specifications || activeListing?.specifications || "";
 
   return (
         <ErrorBoundary>
@@ -51,15 +72,19 @@ export default function EditProductPage() {
                 stock: product.stock || 0,
                 min_order_qty: product.minimumOrderQuantity || 1,
                 max_order_qty: product.maximumOrderQuantity || 100,
-                gst_percent: product.gstPercent || (product as any).gst || 0,
+                gst_percent: product.gstPercent ?? (product as any).gst ?? 0,
                 compare_at_price: (product as any).compareAtPrice || 0,
-                is_tax_included: (product as any).isTaxIncluded || false,
-                shipping_charges: (product as any).shippingCharges || 0,
-                sku: (product as any).sku || (product as any).variant?.sku || "",
+                is_tax_included: (product as any).masterProductId ? true : ((product as any).isTaxIncluded || false),
+                shipping_charges: (product as any).finalShippingPrice !== null && (product as any).finalShippingPrice !== undefined 
+                  ? (product as any).finalShippingPrice 
+                  : ((product as any).shippingCharges ? Math.round((product as any).shippingCharges * (1 + ((product as any).shippingGstPercent ?? 18) / 100)) : 0),
+                sku: resolvedSku,
+                serialNo: resolvedSerialNo,
+                specifications: resolvedSpecifications,
                 delivery_text: (product as any).deliveryText ? String(parseInt(String((product as any).deliveryText).match(/\d+/)?.[0] || "0") || "") : "",
                 image_list: Array.isArray((product as any).images) ? (product as any).images.map((img: any) => typeof img === 'string' ? img : img.url).filter(Boolean) : [],
                 custom_extra_fields: (product as any).extraFields || [],
-                discount_form_details: (product as any).discountFormDetails || ((product as any).discountType && ((product as any).discount || (product as any).discountMeta?.discountPercent || (product as any).discountMeta?.specialPrice) ? {
+                discount_form_details: (product as any).discountFormDetails || ((product as any).discountType ? {
                   type: ({
                     "PTR_DISCOUNT": "ptr_discount",
                     "SAME_PRODUCT_BONUS": "same_product_bonus",
@@ -69,19 +94,26 @@ export default function EditProductPage() {
                     "SPECIAL_PRICE": "special_price",
                   } as any)[(product as any).discountType] || "none",
                   ...(product as any).discountMeta,
-                  discountPercent: (product as any).discount || (product as any).discountMeta?.discountPercent
+                  discountPercent: (product as any).discount ?? (product as any).discountMeta?.discountPercent
                 } : { type: "none" }) as any,
               }} 
+              initialPlatformFees={{
+                commissionPercent: (product as any).commissionPercent ?? undefined,
+                fixedFee: (product as any).fixedFee ?? undefined,
+                commissionGstPercent: (product as any).commissionGstPercent ?? undefined,
+                fixedFeeGstPercent: (product as any).fixedFeeGstPercent ?? undefined,
+                shippingGstPercent: (product as any).shippingGstPercent ?? undefined,
+              }}
               initialOptions={((product as any).options && (product as any).options.length > 0) ? (product as any).options : (
-                ((product as any).variants && (product as any).variants.length > 0) ? [{
+                ((product as any).variants && ((product as any).variants.length > 1 || ((product as any).variants.length === 1 && !['Default', product.name].includes((product as any).variants[0].name)))) ? [{
                   id: Math.random().toString(36).substr(2, 9),
                   name: "Variant",
                   values: Array.from(new Set(((product as any).variants).map((v: any) => v.name || v.options?.name).filter(Boolean)))
                 }] : []
               )}
-              initialVariants={((product as any).variants || []).map((v: any) => {
-                const mainGst = product.gstPercent || (product as any).gst || 0;
-                const mainDiscount = (product as any).discountFormDetails?.discountPercent || (product as any).discountMeta?.discountPercent || (product as any).discount || 0;
+              initialVariants={((product as any).variants && ((product as any).variants.length > 1 || ((product as any).variants.length === 1 && !['Default', product.name].includes((product as any).variants[0].name)))) ? ((product as any).variants || []).map((v: any) => {
+                const mainGst = product.gstPercent ?? (product as any).gst ?? 0;
+                const mainDiscount = (product as any).discountFormDetails?.discountPercent ?? (product as any).discountMeta?.discountPercent ?? (product as any).discount ?? 0;
                 
                 // Try to find the corresponding listing to extract backend-calculated values
                 const listing = (product.listings || []).find((l: any) => l.variantName === v.name || l.variantName === v.options?.name);
@@ -100,7 +132,7 @@ export default function EditProductPage() {
                   }
                 }
 
-                const vGstRaw = v.gstPercent !== undefined && v.gstPercent !== null ? v.gstPercent : (v.options?.gstPercent !== undefined ? v.options?.gstPercent : (v.gst !== undefined ? v.gst : (v.gstValue !== undefined ? v.gstValue : derivedGst)));
+                const vGstRaw = v.gstPercent ?? v.options?.gstPercent ?? v.gst ?? v.gstValue ?? (listing as any)?.gstPercent ?? derivedGst;
                 const vGst = vGstRaw !== undefined && vGstRaw !== null ? vGstRaw : mainGst;
                 
                 const vDiscountRaw = v.discountPercent !== undefined && v.discountPercent !== null ? v.discountPercent : (v.discount !== undefined && v.discount !== null ? v.discount : (v.options?.discountPercent !== undefined ? v.options?.discountPercent : (v.options?.discount !== undefined ? v.options?.discount : (v.discountMeta?.discountPercent !== undefined ? v.discountMeta?.discountPercent : derivedDiscount))));
@@ -120,11 +152,11 @@ export default function EditProductPage() {
                   image: v.image,
                   sku: v.sku || (listing as any)?.sku || "",
                   serialNo: v.serialNo || (listing as any)?.serialNo || "",
-                  shippingCharges: (v.shippingCharges ?? (listing as any)?.shippingCharges ?? 0).toString(),
-                  shippingGstPercent: Number(v.shippingGstPercent ?? (listing as any)?.shippingGstPercent ?? 0),
+                  shippingCharges: (v.shippingCharges ?? (listing as any)?.shippingCharges ?? (product as any).shippingCharges ?? 0).toString(),
+                  shippingGstPercent: Number(v.shippingGstPercent ?? (listing as any)?.shippingGstPercent ?? (product as any).shippingGstPercent ?? 0),
                   finalShippingPrice: (() => {
-                    const rawShip = v.shippingCharges ?? (listing as any)?.shippingCharges ?? 0;
-                    const rawGst = v.shippingGstPercent ?? (listing as any)?.shippingGstPercent ?? 0;
+                    const rawShip = v.shippingCharges ?? (listing as any)?.shippingCharges ?? (product as any).shippingCharges ?? 0;
+                    const rawGst = v.shippingGstPercent ?? (listing as any)?.shippingGstPercent ?? (product as any).shippingGstPercent ?? 0;
                     const calculated = Number(rawShip) + (Number(rawShip) * Number(rawGst) / 100);
                     const actualFinal = v.finalShippingPrice ?? (listing as any)?.finalShippingPrice;
                     return (actualFinal !== undefined && actualFinal !== null && String(actualFinal) !== "0")
@@ -132,18 +164,11 @@ export default function EditProductPage() {
                       : calculated.toString();
                   })()
                 };
-              })}
+              }) : []}
               initialCategoryName={typeof (product as any).category === 'object' ? (product as any).category?.name || (product as any).category?.id : (product as any).category}
               initialSubcategoryName={typeof (product as any).subCategory === 'object' ? (product as any).subCategory?.name || (product as any).subCategory?.id : (product as any).subCategory}
-              initialMasterId={(product as any).masterProductId || undefined}
-              activeVariantId={
-                productId !== product.id 
-                  ? ((product as any).variants || []).find((v: any) => {
-                      const l = (product.listings || []).find((l: any) => l.variantName === v.name || l.variantName === v.options?.name);
-                      return l?.id === productId || v.id === productId;
-                    })?.id || productId
-                  : undefined
-              }
+              initialMasterId={(product as any).masterProductId || (product as any).id || undefined}
+              activeVariantId={activeVariantId}
             />
           )}
         </div>

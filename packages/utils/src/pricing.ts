@@ -29,6 +29,7 @@ export interface DiscountFormInput {
   specialPrice?: number;
   shippingCharges?: number;
   shippingGstPercent?: number;
+  isTaxIncluded?: boolean;
 }
 
 export interface CategoryPlatformFees {
@@ -102,7 +103,7 @@ export function calculatePricing(
   let discountedPrice = basePrice;
   let buy = discountInput.buy ?? 1;
   let get = discountInput.get ?? 0;
-  const type = discountInput.type;
+  const type = String(discountInput.type || 'none').toLowerCase() as PricingDiscountType;
   let bonusProductName = discountInput.bonusProductName ?? '';
 
   switch (type) {
@@ -123,12 +124,24 @@ export function calculatePricing(
   }
 
   const discountAmount = round2(basePrice - discountedPrice);
-  const productGstAmount = round2(discountedPrice * (gstPercent / 100));
+  const isTaxIncluded = discountInput.isTaxIncluded ?? false;
+  const productGstAmount =
+    isTaxIncluded && gstPercent > 0
+      ? round2(discountedPrice - discountedPrice / (1 + gstPercent / 100))
+      : round2(discountedPrice * (gstPercent / 100));
 
   const shippingCharge = discountInput.shippingCharges ?? 0;
   const shippingGstPercent = discountInput.shippingGstPercent ?? platformFees?.shippingGstPercent ?? 18;
-  const shippingGstAmount = round2(shippingCharge * (shippingGstPercent / 100));
-  const shippingTotal = round2(shippingCharge + shippingGstAmount);
+  let shippingTotal = shippingCharge;
+  let shippingGstAmount = 0;
+  
+  if (isTaxIncluded) {
+     shippingGstAmount = round2(shippingCharge - (shippingCharge / (1 + shippingGstPercent / 100)));
+     shippingTotal = shippingCharge;
+  } else {
+     shippingGstAmount = round2(shippingCharge * (shippingGstPercent / 100));
+     shippingTotal = round2(shippingCharge + shippingGstAmount);
+  }
 
   // Platform fees
   const commissionPercent = platformFees?.commissionPercent ?? 0;
@@ -143,10 +156,12 @@ export function calculatePricing(
   const totalPlatformFees = round2(commissionAmount + commissionGstAmount + fixedFee + fixedFeeGstAmount);
 
   // Per Unit final payable
-  const finalCustomerPayable = round2(discountedPrice + productGstAmount + shippingTotal);
+  const finalCustomerPayable = round2(
+    discountedPrice + (isTaxIncluded ? 0 : productGstAmount) + shippingTotal
+  );
 
-  // Payout calculation (Seller pays platform fees out of discounted price)
-  const sellerPayout = round2(discountedPrice - totalPlatformFees);
+  // Payout calculation (seller remits product GST when it is included in price, and receives shipping total)
+  const sellerPayout = round2(discountedPrice + shippingTotal - (isTaxIncluded ? productGstAmount : 0) - totalPlatformFees);
 
   const itemsToPayFor = buy;
   const finalUserBuy = round2(finalCustomerPayable * itemsToPayFor);

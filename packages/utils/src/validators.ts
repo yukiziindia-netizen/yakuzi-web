@@ -157,7 +157,7 @@ export const productFormSchema = z.object({
   const d = data.discount_form_details;
   // Types that require discount percent
   if (['ptr_discount', 'ptr_discount_and_same_product_bonus', 'ptr_discount_and_different_product_bonus'].includes(d.type)) {
-    if (d.discountPercent === undefined || d.discountPercent <= 0) return false;
+    if (d.discountPercent === undefined || d.discountPercent < 0) return false;
   }
   return true;
 }, {

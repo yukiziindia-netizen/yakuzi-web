@@ -3,6 +3,8 @@ import HeroSection from '@/components/landing/HeroSection';
 import ProductCarousel from '@/components/landing/ProductCarousel';
 import { getProducts } from '@yukizi/api-client';
 
+export const dynamic = 'force-dynamic';
+
 export default async function HomePage({
   searchParams,
 }: {

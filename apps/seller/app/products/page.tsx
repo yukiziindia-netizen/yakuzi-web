@@ -3,13 +3,35 @@ import { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Plus, Search, Edit, Trash2, Eye } from "lucide-react";
 import { Button, Input, Badge, ApprovalBadge, Skeleton, Pagination } from "@/components/ui";
-import { formatCurrency } from "@yukizi/utils";
+import { formatCurrency, calculatePricing } from "@yukizi/utils";
 import { cn } from "@/lib/utils";
 import { useSellerProducts, useDeleteSellerProduct } from "@/hooks/useSeller";
 import Link from "next/link";
 
 
 const EMOJI: Record<string,string> = {"eye-drops":"👁️",capsules:"🔴",tablets:"💊",syrups:"🧪",vitamins:"🌟",default:"💊"};
+
+const computeSellingPrice = (p: any): number => {
+  try {
+    const mrp = p.mrp ?? p.price ?? 0;
+    const gst = p.gstPercent ?? p.gst ?? 0;
+    const discountType = p.discountType || (p.discountMeta?.discountPercent ? 'PTR_DISCOUNT' : null);
+    const discountMeta = p.discountMeta || {};
+    const result = calculatePricing(mrp, gst, {
+      type: discountType === 'PTR_DISCOUNT' ? 'ptr_discount' : (discountType ? discountType.toLowerCase() : 'none'),
+      discountPercent: discountMeta.discountPercent,
+      specialPrice: discountMeta.specialPrice,
+      shippingCharges: p.isTaxIncluded
+        ? (p.shippingCharges ?? 0)
+        : Math.round(((p.finalShippingPrice ?? p.shippingCharges ?? 0) / (1 + ((p.shippingGstPercent ?? 18) / 100))) * 100) / 100,
+      isTaxIncluded: p.isTaxIncluded ?? false,
+    });
+    return result.finalCustomerPayable;
+  } catch {
+    return p.mrp ?? p.price ?? 0;
+  }
+};
+
 const PAGE_SIZE = 20;
 
 const renderOffer = (p: any) => {
@@ -131,8 +153,8 @@ export default function ProductsPage() {
                         <td className="px-5 py-4"><Badge className="capitalize">{p.category}</Badge></td>
                         <td className="px-5 py-4"><span className="font-mono text-xs text-muted-foreground bg-muted/30 px-1.5 py-0.5 rounded">{p.variant?.sku || p.sku || "—"}</span></td>
                         <td className="px-5 py-4">
-                          <div className="text-sm font-semibold text-foreground">{formatCurrency(p.mrp ?? p.price ?? 0)}</div>
-                          {p.sellingPrice != null && p.sellingPrice !== p.mrp && <div className="text-xs text-muted-foreground">Sell: {formatCurrency(p.sellingPrice)}</div>}
+                          <div className="text-sm font-semibold text-foreground">{formatCurrency(computeSellingPrice(p))}</div>
+                          <div className="text-xs text-muted-foreground line-through">MRP {formatCurrency(p.mrp ?? p.price ?? 0)}</div>
                         </td>
 
                         <td className="px-5 py-4">

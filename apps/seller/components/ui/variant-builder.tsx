@@ -294,15 +294,6 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                         <p className="text-sm font-medium text-gray-900">{option.name}</p>
                         <p className="text-sm text-gray-500 mt-0.5">{option.values.join(", ")}</p>
                       </div>
-                      {!activeVariantId && (
-                        <button
-                          type="button"
-                          onClick={() => setEditingId(option.id)}
-                          className="text-sm font-medium text-blue-600 hover:text-blue-700 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
-                        >
-                          Edit
-                        </button>
-                      )}
                     </div>
                   </motion.div>
                 );
@@ -459,8 +450,8 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                             type="text"
                             value={variant.finalShippingPrice || "0"}
                             onChange={(e) => updateVariant(variant.id, "finalShippingPrice", e.target.value)}
-                            disabled={isDisabled || isEditMode}
-                            className={`block w-full pl-9 pr-3 sm:text-sm border-gray-300 rounded-md py-1.5 border ${(isDisabled || isEditMode) ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'bg-white'}`}
+                            disabled={true}
+                            className="block w-full pl-9 pr-3 sm:text-sm border-gray-300 rounded-md py-1.5 border bg-gray-100 text-gray-500 cursor-not-allowed"
                           />
                         </div>
                       </td>

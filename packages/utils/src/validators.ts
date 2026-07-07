@@ -86,11 +86,11 @@ export const discountFormDetailsSchema = z.object({
     'ptr_discount_and_different_product_bonus',
     'special_price',
   ]),
-  discountPercent: z.number().min(0).max(100).optional(),
-  buy: z.number().int().min(1).optional(),
-  get: z.number().int().min(1).optional(),
+  discountPercent: z.preprocess((val) => (val === '' || val === null || isNaN(Number(val))) ? undefined : Number(val), z.number().min(0).max(100).optional()),
+  buy: z.preprocess((val) => (val === '' || val === null || isNaN(Number(val))) ? undefined : Number(val), z.number().int().min(1).optional()),
+  get: z.preprocess((val) => (val === '' || val === null || isNaN(Number(val))) ? undefined : Number(val), z.number().int().min(1).optional()),
   bonusProductName: z.string().optional(),
-  specialPrice: z.number().min(0).optional(),
+  specialPrice: z.preprocess((val) => (val === '' || val === null || isNaN(Number(val))) ? undefined : Number(val), z.number().min(0).optional()),
 });
 
 export const productFormSchema = z.object({

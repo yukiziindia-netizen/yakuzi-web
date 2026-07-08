@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { ImageUploader } from "./ImageUploader";
 import { CategorySelector } from "./CategorySelector";
 import { VariantBuilder, VariantOption, VariantCombination } from "../ui/variant-builder";
+import { PayoutBreakdownModal } from "./PayoutBreakdownModal";
 import type { DiscountFormDetails, Suggestion } from "@yukizi/utils";
 import {
   productFormSchema,
@@ -51,6 +52,7 @@ export function ProductForm({
   // Suggestion autocomplete state
   const [searchQuery, setSearchQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showPayoutModal, setShowPayoutModal] = useState(false);
   const [selectedMasterId, setSelectedMasterId] = useState<string | null>(initialMasterId || null);
   const [selectedSuggestion, setSelectedSuggestion] = useState<Suggestion | null>(null);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -65,7 +67,7 @@ export function ProductForm({
       product_price: 0,
       compare_at_price: 0,
       gst_percent: 12,
-      is_tax_included: false,
+      is_tax_included: true,
       unit: "1",
       pack_size: "1",
       company_name: "",
@@ -456,8 +458,8 @@ export function ProductForm({
         minimumOrderQuantity: data.min_order_qty,
         maximumOrderQuantity: data.max_order_qty,
         gstPercent: payloadGst,
-        isTaxIncluded: data.is_tax_included || false,
-        shippingCharges: data.is_tax_included ? payloadShipping : Math.round(payloadShipping / (1 + ((platformFees?.shippingGstPercent ?? 18) / 100))),
+        isTaxIncluded: true,
+        shippingCharges: payloadShipping,
         finalShippingPrice: payloadShipping,
         ...(data.delivery_text && { deliveryText: `${data.delivery_text} ${Number(data.delivery_text) === 1 ? 'day' : 'days'}` }),
         ...(realImages.length > 0 && { images: realImages }),
@@ -647,13 +649,6 @@ export function ProductForm({
                   error={errors.product_price?.message} 
                   {...register("product_price", { valueAsNumber: true })} 
                 />
-                <Input 
-                  label="Compare at Price (Optional)" 
-                  type="number" 
-                  placeholder="1200"
-                  error={errors.compare_at_price?.message} 
-                  {...register("compare_at_price", { valueAsNumber: true })} 
-                />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
@@ -723,10 +718,24 @@ export function ProductForm({
 
         {/* Submit */}
         <div className="flex justify-end gap-3 sticky bottom-6 z-[100] p-4 bg-background/80 backdrop-blur-xl border border-border rounded-2xl shadow-lg">
+          <Button type="button" variant="info" onClick={() => setShowPayoutModal(true)}>Estimate Payout</Button>
           <Button type="button" variant="outline" onClick={() => router.push("/products")} disabled={isSubmitting}>Cancel</Button>
           <Button type="submit" loading={isSubmitting}>{isEditing ? "Update Product" : "Add Product"}</Button>
         </div>
       </form>
+      
+      <PayoutBreakdownModal
+        isOpen={showPayoutModal}
+        onClose={() => setShowPayoutModal(false)}
+        productName={getValues("product_name")}
+        isTaxIncluded={watchTaxStatus}
+        platformFees={platformFees}
+        mrp={watchMrp}
+        gstPercent={watchGst}
+        shippingCharges={watchShippingCharges}
+        discountDetails={watchDiscount}
+        variants={variants}
+      />
     </div>
   );
 }

@@ -55,6 +55,8 @@ export interface PricingOutput {
   shippingGstAmount: number; // S * Gs%
   shippingTotal: number; // S + S * Gs%
 
+  grossTotal: number; // Base Price + Shipping Total
+
   commissionPercent: number; // C%
   commissionAmount: number; // Discounted Price * C%
   commissionGstPercent: number; // Gc%
@@ -100,36 +102,14 @@ export function calculatePricing(
 ): PricingOutput {
   const basePrice = mrp;
   let discountPercent = 0;
-  let discountedPrice = basePrice;
   let buy = discountInput.buy ?? 1;
   let get = discountInput.get ?? 0;
   const type = String(discountInput.type || 'none').toLowerCase() as PricingDiscountType;
   let bonusProductName = discountInput.bonusProductName ?? '';
 
-  switch (type) {
-    case 'ptr_discount':
-    case 'ptr_discount_and_same_product_bonus':
-    case 'ptr_discount_and_different_product_bonus':
-      discountPercent = discountInput.discountPercent ?? 0;
-      discountedPrice = round2(basePrice - (basePrice * discountPercent / 100));
-      break;
-    case 'special_price':
-      discountedPrice = discountInput.specialPrice ?? basePrice;
-      discountPercent = basePrice > 0 ? round2(((basePrice - discountedPrice) / basePrice) * 100) : 0;
-      get = 0;
-      break;
-    default:
-      discountPercent = 0;
-      break;
-  }
-
-  const discountAmount = round2(basePrice - discountedPrice);
   const isTaxIncluded = discountInput.isTaxIncluded ?? false;
-  const productGstAmount =
-    isTaxIncluded && gstPercent > 0
-      ? round2(discountedPrice - discountedPrice / (1 + gstPercent / 100))
-      : round2(discountedPrice * (gstPercent / 100));
 
+  // 1. Calculate Shipping
   const shippingCharge = discountInput.shippingCharges ?? 0;
   const shippingGstPercent = discountInput.shippingGstPercent ?? platformFees?.shippingGstPercent ?? 18;
   let shippingTotal = shippingCharge;
@@ -143,7 +123,40 @@ export function calculatePricing(
      shippingTotal = round2(shippingCharge + shippingGstAmount);
   }
 
-  // Platform fees
+  // 2. Gross Product (Base + GST)
+  const grossProduct = isTaxIncluded ? basePrice : round2(basePrice + (basePrice * gstPercent / 100));
+  const grossTotal = round2(grossProduct + shippingTotal);
+
+  // 3. Discount Amount on Gross Total
+  let discountAmount = 0;
+  const normalizedType = type ? type.toLowerCase() : 'none';
+  switch (normalizedType) {
+    case 'ptr_discount':
+    case 'ptr_discount_and_same_product_bonus':
+    case 'ptr_discount_and_different_product_bonus':
+      discountPercent = discountInput.discountPercent ?? 0;
+      discountAmount = round2(grossTotal * (discountPercent / 100));
+      break;
+    default:
+      discountPercent = 0;
+      discountAmount = 0;
+      break;
+  }
+
+  // 4. Discounted Gross Product & Shipping
+  const discountedGrossProduct = round2(grossProduct - (grossProduct * (discountPercent / 100)));
+  const discountedShipping = round2(shippingTotal - (shippingTotal * (discountPercent / 100)));
+
+  // 5. Product GST Amount based on discounted gross
+  const productGstAmount = round2(discountedGrossProduct - (discountedGrossProduct / (1 + gstPercent / 100)));
+
+  // 6. Discounted Base Price (excluding GST)
+  const discountedPrice = round2(discountedGrossProduct - productGstAmount);
+
+  // 7. Final Customer Payable
+  const finalCustomerPayable = round2(discountedGrossProduct + discountedShipping);
+
+  // 8. Platform Fees (on discounted base price)
   const commissionPercent = platformFees?.commissionPercent ?? 0;
   const commissionAmount = round2(discountedPrice * (commissionPercent / 100));
   const commissionGstPercent = platformFees?.commissionGstPercent ?? 18;
@@ -155,18 +168,14 @@ export function calculatePricing(
 
   const totalPlatformFees = round2(commissionAmount + commissionGstAmount + fixedFee + fixedFeeGstAmount);
 
-  // Per Unit final payable
-  const finalCustomerPayable = round2(
-    discountedPrice + (isTaxIncluded ? 0 : productGstAmount) + shippingTotal
-  );
-
-  // Payout calculation (seller remits product GST when it is included in price, and receives shipping total)
-  const sellerPayout = round2(discountedPrice + shippingTotal - (isTaxIncluded ? productGstAmount : 0) - totalPlatformFees);
+  // 9. Seller Payout
+  // Seller receives Final Customer Payable minus Shipping (deduction), Product GST (to remit), and Platform Fees.
+  const sellerPayout = round2(finalCustomerPayable - shippingTotal - productGstAmount - totalPlatformFees);
 
   const itemsToPayFor = buy;
   const finalUserBuy = round2(finalCustomerPayable * itemsToPayFor);
 
-  const totalUnits = (type === 'same_product_bonus' || type === 'ptr_discount_and_same_product_bonus') ? (buy + get) : buy;
+  const totalUnits = (normalizedType === 'same_product_bonus' || normalizedType === 'ptr_discount_and_same_product_bonus') ? (buy + get) : buy;
 
   return {
     basePrice,
@@ -187,6 +196,7 @@ export function calculatePricing(
     fixedFeeGstAmount,
     totalPlatformFees,
     finalCustomerPayable,
+    grossTotal,
     sellerPayout,
 
     mrp: basePrice,
@@ -274,3 +284,5 @@ export function getEffectiveDiscountPercent(mrp: number, sellingPrice: number): 
   const pct = round2(((mrp - sellingPrice) / mrp) * 100);
   return pct > 0 && pct < 100 ? pct : 0;
 }
+
+

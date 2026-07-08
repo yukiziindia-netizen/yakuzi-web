@@ -100,14 +100,15 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
     Number(prod.mrp || prod.originalPrice || 0),
     Number(prod.gstPercent || 0),
     {
-      type: prod.discountType || 'none',
+      type: prod.discountType || (prod.discountMeta?.discountPercent ? 'ptr_discount' : 'none'),
       discountPercent: prod.discountMeta?.discountPercent,
       specialPrice: prod.discountMeta?.specialPrice,
       buy: prod.discountMeta?.buy,
       get: prod.discountMeta?.get,
       bonusProductName: prod.discountMeta?.bonusProductName,
-      shippingCharges: prod.shippingCharges,
-      shippingGstPercent: prod.shippingGstPercent,
+      shippingCharges: prod.finalShippingPrice ?? prod.shippingCharges ?? 0,
+      shippingGstPercent: 0,
+      isTaxIncluded: true,
     }
   );
 
@@ -361,6 +362,9 @@ function ComparisonOffersList({
   setShowStockAlert,
   productImage,
   variant = 'mobile',
+  productGstPercent,
+  productShippingCharges,
+  productIsTaxIncluded,
 }: {
   comparisonListings: any[];
   cartData: any;
@@ -374,6 +378,9 @@ function ComparisonOffersList({
   setShowStockAlert: (val: boolean) => void;
   productImage?: string;
   variant?: 'mobile' | 'desktop';
+  productGstPercent?: number;
+  productShippingCharges?: number;
+  productIsTaxIncluded?: boolean;
 }) {
   const cartItemMap = new Map<string, any>();
   if (cartData?.items) {
@@ -405,16 +412,17 @@ function ComparisonOffersList({
 
         const pricing = calculatePricing(
           Number(listing.mrp || listing.originalPrice || productMrp || 0),
-          Number(listing.gstPercent || 0),
+          Number(listing.gstPercent ?? productGstPercent ?? 0),
           {
-            type: listing.discountType || 'none',
+            type: listing.discountType || (listing.discountMeta?.discountPercent ? 'ptr_discount' : 'none'),
             discountPercent: listing.discountMeta?.discountPercent,
             specialPrice: listing.discountMeta?.specialPrice,
             buy: listing.discountMeta?.buy,
             get: listing.discountMeta?.get,
             bonusProductName: listing.discountMeta?.bonusProductName,
-            shippingCharges: listing.shippingCharges,
-            shippingGstPercent: listing.shippingGstPercent,
+            shippingCharges: listing.finalShippingPrice ?? listing.shippingCharges ?? productShippingCharges ?? 0,
+            shippingGstPercent: 0,
+            isTaxIncluded: true,
           }
         );
 
@@ -936,6 +944,9 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
             toast={toast}
             setShowStockAlert={setShowStockAlert}
             productImage={displayImages[0]}
+            productGstPercent={product.gstPercent}
+            productShippingCharges={product.shippingCharges}
+            productIsTaxIncluded={product.isTaxIncluded}
           />
 
           {/* Accordions */}
@@ -1213,6 +1224,9 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                 toast={toast}
                 setShowStockAlert={setShowStockAlert}
                 productImage={displayImages[0]}
+                productGstPercent={product.gstPercent}
+                productShippingCharges={product.shippingCharges}
+                productIsTaxIncluded={product.isTaxIncluded}
               />
             </div>
           </div>

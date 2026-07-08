@@ -34,7 +34,6 @@ export default function AdminSettlementsPage() {
     dateFrom: dateRange?.from?.toISOString(),
     dateTo: dateRange?.to?.toISOString(),
   });
-  const { data: deliveredData, isLoading: loadingOrders } = useAdminOrdersFiltered({ status: "DELIVERED", limit: 50 });
   const markPaid = useMarkSettlementPaid();
   const syncSettlements = useSyncSettlements();
 
@@ -46,36 +45,16 @@ export default function AdminSettlementsPage() {
   const fileInputRef = useState<HTMLInputElement | null>(null); // Actually I'll use useRef below
 
   const settlements = Array.isArray(settlementsData) ? settlementsData : (settlementsData?.data ?? []);
-  const deliveredOrders = Array.isArray(deliveredData) ? deliveredData : (deliveredData?.data ?? []);
 
   // Merge Settlements and Unsettled Orders for display
   const displayItems = useMemo(() => {
-    // Start with already ledgered settlements
-    const items = settlements.map((s: any) => ({ ...s, viewType: "LEDGERED" }));
-
-    // Find delivered orders that don't have settlements for their items yet
-    deliveredOrders.forEach((order: any) => {
-      const orderItems = order.items || order.orderItems || [];
-      orderItems.forEach((item: any) => {
-          // Check if this item is already in the settlements ledger
-          const alreadyInLedger = settlements.some((s: any) => s.orderItemId === item.id);
-          if (!alreadyInLedger) {
-            items.push({
-              id: `pending::${item.id}::${order.id}::${item.sellerId || item.seller?.id || order.sellerId}`,
-              createdAt: order.createdAt,
-              orderItem: { ...item, orderId: order.id },
-              seller: item.seller || order.seller,
-              amount: item.totalPrice,
-              commission: 0,
-              payoutStatus: "PENDING_ENTRY",
-              viewType: "READY"
-            });
-          }
-        });
-      });
-
-      return items.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  }, [settlements, deliveredOrders]);
+    // The backend now automatically includes PROJECTED entries
+    const items = settlements.map((s: any) => ({ 
+      ...s, 
+      viewType: s.payoutStatus === "PROJECTED" ? "READY" : "LEDGERED" 
+    }));
+    return items;
+  }, [settlements]);
 
   const totalSettlements = settlementsData?.total ?? displayItems.length;
   const totalPages = Math.max(1, Math.ceil(totalSettlements / limit));
@@ -111,18 +90,16 @@ export default function AdminSettlementsPage() {
     e.preventDefault();
     if (!proofUrl) return toast.error("Please upload payout proof");
     
-    const loadingId = toast.loading(selectedId.startsWith("pending::") ? "Finalizing entry & payment..." : "Processing payment...");
+    const loadingId = toast.loading(selectedId.startsWith("projected-") ? "Finalizing entry & payment..." : "Processing payment...");
     
     try {
       let settlementId = selectedId;
 
       // Handle automatic sync and payment for items NOT in ledger yet
-      if (selectedId.startsWith("pending::")) {
-        // ID format: pending::orderItemId::orderId::sellerId
-        const parts = selectedId.split("::");
+      if (selectedId.startsWith("projected-")) {
+        // ID format: projected-orderItemId
+        const parts = selectedId.split("-");
         const orderItemId = parts[1];
-        const orderId = parts[2];
-        const sellerId = parts[3];
         
         // 1. Trigger sync to create the record - handles wrapped or direct array responses
         const response = await syncSettlements.mutateAsync();
@@ -180,7 +157,7 @@ export default function AdminSettlementsPage() {
     }
   };
 
-  if (isLoadingSettlements || loadingOrders) {
+  if (isLoadingSettlements) {
     return (
       <AdminLayout>
         <div className="min-h-[60vh] flex items-center justify-center">
@@ -280,8 +257,8 @@ export default function AdminSettlementsPage() {
                       <div className="text-sm font-bold text-primary">{formatCurrency(s.amount)}</div>
                     </td>
                     <td className="px-5 py-4">
-                      <Badge variant={s.payoutStatus === "PAID" ? "success" : (s.payoutStatus === "PENDING" || s.payoutStatus === "PENDING_ENTRY") ? "warning" : "info"}>
-                        {s.payoutStatus === "PENDING_ENTRY" ? "PENDING" : s.payoutStatus}
+                      <Badge variant={s.payoutStatus === "PAID" ? "success" : (s.payoutStatus === "PENDING" || s.payoutStatus === "PROJECTED") ? "warning" : "info"}>
+                        {s.payoutStatus === "PROJECTED" ? "PENDING" : s.payoutStatus}
                       </Badge>
                     </td>
                     <td className="px-5 py-4 text-right">

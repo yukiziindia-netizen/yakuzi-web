@@ -68,14 +68,15 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
     Number(product?.mrp || product?.originalPrice || 0),
     Number(product?.gstPercent || 0),
     {
-      type: product?.discountType || 'none',
+      type: product?.discountType || (product?.discountMeta?.discountPercent ? 'ptr_discount' : 'none'),
       discountPercent: product?.discountMeta?.discountPercent,
       specialPrice: product?.discountMeta?.specialPrice,
       buy: product?.discountMeta?.buy,
       get: product?.discountMeta?.get,
       bonusProductName: product?.discountMeta?.bonusProductName,
-      shippingCharges: product?.shippingCharges,
-      shippingGstPercent: product?.shippingGstPercent,
+      shippingCharges: product?.finalShippingPrice ?? product?.shippingCharges ?? 0,
+      shippingGstPercent: 0,
+      isTaxIncluded: true,
     }
   );
 
@@ -85,8 +86,9 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
   
   const isNotAvailable = product?.sellerCount === 0 || product?.sellerOffers?.length === 0 || price == null || price === 0;
   const displayPrice = isNotAvailable ? 'N/A' : `₹${Number(price).toLocaleString('en-IN')}`;
-  const displayOriginalPrice = mrp != null && Number(mrp) > Number(price || 0) 
-    ? `₹${Number(mrp).toLocaleString('en-IN')}` 
+  const grossTotal = pricing?.grossTotal ?? (mrp != null ? Number(mrp) : 0);
+  const displayOriginalPrice = grossTotal > Number(price || 0) 
+    ? `₹${Number(grossTotal).toLocaleString('en-IN')}` 
     : '';
   
   const displayDelivery = product?.deliveryText || product?.deliveryTime || '3 days';

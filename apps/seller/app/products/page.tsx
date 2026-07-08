@@ -21,10 +21,9 @@ const computeSellingPrice = (p: any): number => {
       type: discountType === 'PTR_DISCOUNT' ? 'ptr_discount' : (discountType ? discountType.toLowerCase() : 'none'),
       discountPercent: discountMeta.discountPercent,
       specialPrice: discountMeta.specialPrice,
-      shippingCharges: p.isTaxIncluded
-        ? (p.shippingCharges ?? 0)
-        : Math.round(((p.finalShippingPrice ?? p.shippingCharges ?? 0) / (1 + ((p.shippingGstPercent ?? 18) / 100))) * 100) / 100,
-      isTaxIncluded: p.isTaxIncluded ?? false,
+      shippingCharges: p.finalShippingPrice ?? p.shippingCharges ?? 0,
+      shippingGstPercent: 0,
+      isTaxIncluded: true,
     });
     return result.finalCustomerPayable;
   } catch {
@@ -154,7 +153,6 @@ export default function ProductsPage() {
                         <td className="px-5 py-4"><span className="font-mono text-xs text-muted-foreground bg-muted/30 px-1.5 py-0.5 rounded">{p.variant?.sku || p.sku || "—"}</span></td>
                         <td className="px-5 py-4">
                           <div className="text-sm font-semibold text-foreground">{formatCurrency(computeSellingPrice(p))}</div>
-                          <div className="text-xs text-muted-foreground line-through">MRP {formatCurrency(p.mrp ?? p.price ?? 0)}</div>
                         </td>
 
                         <td className="px-5 py-4">

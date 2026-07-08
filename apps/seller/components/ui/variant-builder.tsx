@@ -312,7 +312,6 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                     <th scope="col" className="px-6 py-3 font-medium">SKU</th>
                     <th scope="col" className="px-6 py-3 font-medium">Serial No</th>
                     <th scope="col" className="px-6 py-3 font-medium">Price</th>
-                    <th scope="col" className="px-6 py-3 font-medium">Compare at price</th>
                     <th scope="col" className="px-6 py-3 font-medium">GST (%)</th>
                     <th scope="col" className="px-6 py-3 font-medium">Discount</th>
                     <th scope="col" className="px-6 py-3 font-medium">Shipping (₹)</th>
@@ -362,34 +361,27 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                           const p = Number(variant.price);
                           if (p > 0) {
                             try {
-                              let finalPrice = p;
                               const vGst = variant.gstPercent !== undefined ? Number(variant.gstPercent) : (gstPercent || 0);
-                              const vDiscountDetails = variant.discountDetails || discountDetails;
-                              
-                              const discountType = vDiscountDetails?.type || 'none';
-                              let discountAmount = 0;
-                              
-                              if (variant.discount && Number(variant.discount) > 0) {
-                                discountAmount = p * (Number(variant.discount) / 100);
-                              } else if (discountType === 'ptr_discount' || discountType === 'ptr_discount_and_same_product_bonus' || discountType === 'ptr_discount_and_different_product_bonus') {
-                                discountAmount = p * (vDiscountDetails?.discountPercent || 0) / 100;
-                              }
-
-                              if (discountType === 'special_price' && !variant.discount) {
-                                finalPrice = vDiscountDetails?.specialPrice || 0;
-                              } else {
-                                finalPrice = p - discountAmount;
-                              }
-
-                              if (!isTaxIncluded) {
-                                finalPrice += (finalPrice * vGst) / 100;
-                              }
+                              const grossProduct = isTaxIncluded ? p : p + (p * vGst / 100);
 
                               const finalShip = (variant.finalShippingPrice !== undefined && variant.finalShippingPrice !== null && variant.finalShippingPrice !== "" && !isNaN(Number(variant.finalShippingPrice))) 
                                 ? Number(variant.finalShippingPrice) 
                                 : (shippingCharges || Number(variant.shippingCharges) || 0);
 
-                              finalPrice += finalShip;
+                              const grossTotal = grossProduct + finalShip;
+
+                              const vDiscountDetails = variant.discountDetails || discountDetails;
+                              const discountType = vDiscountDetails?.type || 'none';
+                              let discountPercent = 0;
+                              
+                              if (variant.discount && Number(variant.discount) > 0) {
+                                discountPercent = Number(variant.discount);
+                              } else if (discountType === 'ptr_discount' || discountType === 'ptr_discount_and_same_product_bonus' || discountType === 'ptr_discount_and_different_product_bonus') {
+                                discountPercent = vDiscountDetails?.discountPercent || 0;
+                              }
+
+                              const discountAmount = grossTotal * (discountPercent / 100);
+                              const finalPrice = grossTotal - discountAmount;
 
                               return <div className="text-[10px] mt-1 text-primary/80 font-medium whitespace-nowrap">Final: {formatCurrency(finalPrice)}</div>;
                             } catch (e) {
@@ -398,21 +390,6 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                           }
                           return null;
                         })()}
-                      </td>
-                      <td className="px-6 py-4 align-middle">
-                        <div className="relative rounded-md shadow-sm w-32">
-                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <span className="text-gray-500 sm:text-sm">₹</span>
-                          </div>
-                          <input
-                            type="text"
-                            value={variant.compareAtPrice || ""}
-                            onChange={(e) => updateVariant(variant.id, "compareAtPrice", e.target.value)}
-                            disabled={isDisabled}
-                            className={`block w-32 pl-7 pr-3 sm:text-sm border-gray-300 rounded-md py-1.5 border ${isDisabled ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'bg-white'}`}
-                            placeholder="0.00"
-                          />
-                        </div>
                       </td>
                       <td className="px-6 py-4 align-middle">
                         <div className="relative rounded-md shadow-sm w-24">

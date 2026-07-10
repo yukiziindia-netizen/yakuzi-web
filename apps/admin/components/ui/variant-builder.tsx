@@ -343,7 +343,7 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
         if (field === 'shippingCharges' || field === 'shippingGstPercent') {
           const sc = Number(updated.shippingCharges || 0);
           const gst = Number(updated.shippingGstPercent || 0);
-          const pricing = calculatePricing(0, 0, { type: 'none', shippingCharges: sc, shippingGstPercent: gst, isTaxIncluded: true });
+          const pricing = calculatePricing(0, 0, { type: 'none', shippingCharges: sc, shippingGstPercent: gst, isTaxIncluded: false });
           updated.finalShippingPrice = pricing.shippingTotal.toString();
         }
         return updated;
@@ -645,7 +645,7 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                           </div>
                           <input
                             type="text"
-                            value={variant.finalShippingPrice || calculatePricing(0, 0, { type: 'none', shippingCharges: Number(variant.shippingCharges || 0), shippingGstPercent: Number(variant.shippingGstPercent || 0), isTaxIncluded: true }).shippingTotal.toString()}
+                            value={variant.finalShippingPrice || calculatePricing(0, 0, { type: 'none', shippingCharges: Number(variant.shippingCharges || 0), shippingGstPercent: Number(variant.shippingGstPercent || 0), isTaxIncluded: false }).shippingTotal.toString()}
                             disabled
                             className="block w-28 pl-7 sm:text-sm border-gray-300 rounded-md py-1.5 bg-gray-50 text-gray-500 cursor-not-allowed"
                           />

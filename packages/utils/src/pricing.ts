@@ -100,7 +100,8 @@ export function calculatePricing(
   discountInput: DiscountFormInput,
   platformFees?: CategoryPlatformFees
 ): PricingOutput {
-  const basePrice = mrp;
+  const basePrice = Number(mrp) || 0;
+  const gstPct = Number(gstPercent) || 0;
   let discountPercent = 0;
   let buy = discountInput.buy ?? 1;
   let get = discountInput.get ?? 0;
@@ -110,8 +111,8 @@ export function calculatePricing(
   const isTaxIncluded = discountInput.isTaxIncluded ?? false;
 
   // 1. Calculate Shipping
-  const shippingCharge = discountInput.shippingCharges ?? 0;
-  const shippingGstPercent = discountInput.shippingGstPercent ?? platformFees?.shippingGstPercent ?? 18;
+  const shippingCharge = Number(discountInput.shippingCharges ?? 0);
+  const shippingGstPercent = Number(discountInput.shippingGstPercent ?? platformFees?.shippingGstPercent ?? 18);
   let shippingTotal = shippingCharge;
   let shippingGstAmount = 0;
   
@@ -124,7 +125,7 @@ export function calculatePricing(
   }
 
   // 2. Gross Product (Base + GST)
-  const grossProduct = isTaxIncluded ? basePrice : round2(basePrice + (basePrice * gstPercent / 100));
+  const grossProduct = isTaxIncluded ? basePrice : round2(basePrice + (basePrice * gstPct / 100));
   const grossTotal = round2(grossProduct + shippingTotal);
 
   // 3. Discount Amount on Gross Total
@@ -148,7 +149,7 @@ export function calculatePricing(
   const discountedShipping = round2(shippingTotal - (shippingTotal * (discountPercent / 100)));
 
   // 5. Product GST Amount based on discounted gross
-  const productGstAmount = round2(discountedGrossProduct - (discountedGrossProduct / (1 + gstPercent / 100)));
+  const productGstAmount = round2(discountedGrossProduct - (discountedGrossProduct / (1 + gstPct / 100)));
 
   // 6. Discounted Base Price (excluding GST)
   const discountedPrice = round2(discountedGrossProduct - productGstAmount);
@@ -182,7 +183,7 @@ export function calculatePricing(
     discountPercent,
     discountAmount,
     discountedPrice,
-    productGstPercent: gstPercent,
+    productGstPercent: gstPct,
     productGstAmount,
     shippingCharge,
     shippingGstPercent,
@@ -200,7 +201,7 @@ export function calculatePricing(
     sellerPayout,
 
     mrp: basePrice,
-    gstPercent,
+    gstPercent: gstPct,
     retailMarginPercent: 0,
     ptr: basePrice,
     finalPtr: discountedPrice,

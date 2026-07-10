@@ -359,7 +359,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                           <div className="flex min-w-0 flex-col">
                             <span className="truncate text-xs font-black leading-none text-gray-800 sm:text-[14px]">
                               ₹
-                              {listing.price?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                              {Math.round(listing.price || 0).toLocaleString('en-IN')}
                             </span>
                             <span className="mt-1 truncate text-[8px] font-bold leading-none text-gray-400 sm:mt-1.5 sm:text-[9px]">
                               {listing.moq > 1

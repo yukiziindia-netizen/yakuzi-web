@@ -122,7 +122,7 @@ export default function AdminProductsPage() {
             <table className="w-full" aria-label="Products">
               <thead>
                 <tr className="border-b border-border/50 bg-muted/20">
-                  {["Product", "Manufacturer", "Category", "MRP", "Pricing", "Stock", "Min Qty", "Max Qty", "Approval", "Status", "Actions"].map(h => (
+                  {["Product", "Manufacturer", "Category", "Pricing", "Stock", "Min Qty", "Max Qty", "Approval", "Status", "Actions"].map(h => (
                     <th key={h} scope="col" className="px-5 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
@@ -148,23 +148,8 @@ export default function AdminProductsPage() {
                     </td>
                     <td className="px-5 py-4 text-sm text-muted-foreground">{p.manufacturer ?? "—"}</td>
                     <td className="px-5 py-4"><Badge className="capitalize">{p.category?.name ?? "—"}</Badge></td>
-                    <td className="px-5 py-4 text-sm font-semibold text-foreground">{formatCurrency(p.mrp ?? p.price ?? 0)}</td>
-                    <td className="px-5 py-4 text-xs text-muted-foreground">
-                      {(() => {
-                        const dd = p.discountDetails || p.discountFormDetails;
-                        if (!dd || !p.gstPercent) return <span className="text-muted-foreground/50">—</span>;
-                        try {
-                          const pr = calculatePricing(p.mrp ?? 0, p.gstPercent, dd);
-                          return (
-                            <div className="space-y-0.5">
-                              <div>PTR: <span className="font-medium">{formatCurrency(pr.ptr)}</span></div>
-                              {pr.discountPercent > 0 && <div className="text-green-600">PTR Disc: {pr.discountPercent}%</div>}
-                              <div>Sell: <span className="font-semibold text-foreground">{formatCurrency(pr.perPtrWithGst)}</span></div>
-                              {pr.get > 0 && <div><Badge variant="info">B{pr.buy}G{pr.get}</Badge></div>}
-                            </div>
-                          );
-                        } catch { return <span className="text-muted-foreground/50">—</span>; }
-                      })()}
+                    <td className="px-5 py-4 text-sm font-semibold text-foreground">
+                      {p.finalCustomerPayable != null ? formatCurrency(Number(p.finalCustomerPayable)) : <span className="text-muted-foreground/50">—</span>}
                     </td>
                     <td className="px-5 py-4 text-sm text-muted-foreground">{p.batches?.reduce((s: number, b: any) => s + (b.stock ?? 0), 0) ?? p.stock ?? 0}</td>
                     <td className="px-5 py-4 text-sm text-muted-foreground">{p.minimumOrderQuantity ?? 1}</td>

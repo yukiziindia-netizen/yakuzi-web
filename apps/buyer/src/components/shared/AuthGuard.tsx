@@ -34,7 +34,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       const isLegacyVerified = user.verificationStatus === 'VERIFIED';
       const isVerified = isApproved || isBuyerProfileVerified || isLegacyVerified;
 
-      const allowedPaths = ['/onboarding', '/profile', '/support', '/products', '/cart', '/blogs', '/notifications', '/wishlist'];
+      const allowedPaths = ['/onboarding', '/profile', '/support', '/products', '/blogs', '/notifications', '/wishlist'];
       if (!isVerified && !allowedPaths.some(p => pathname.startsWith(p))) {
         router.push('/onboarding');
       }

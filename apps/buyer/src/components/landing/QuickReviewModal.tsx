@@ -296,7 +296,7 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                           </div>
                           <div className="flex flex-col min-w-0">
                             <span className="text-xs sm:text-[14px] font-black leading-none text-gray-800 truncate">
-                              ₹{listing.price?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                              ₹{Math.round(listing.price || 0).toLocaleString('en-IN')}
                             </span>
                             <span className="mt-1 sm:mt-1.5 text-[8px] sm:text-[9px] font-bold leading-none text-gray-400 truncate">
                               {listing.moq > 1

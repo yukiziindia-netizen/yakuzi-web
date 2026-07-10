@@ -56,7 +56,7 @@ export default function PaymentsPage() {
               className="bg-white/60 p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-white shadow-lg"
             >
               <p className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Total Outstanding</p>
-              <p className="text-2xl sm:text-3xl font-bold text-gray-900">₹{totalPending.toLocaleString('en-IN')}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900">₹{Number(totalPending).toLocaleString('en-IN')}</p>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -140,7 +140,7 @@ export default function PaymentsPage() {
                       <div className="flex items-center gap-6 sm:gap-8 lg:gap-12 lg:border-l lg:pl-12 border-gray-100">
                         <div className="space-y-2 min-w-[120px]">
                           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Amount</p>
-                          <p className="text-2xl font-bold text-gray-900">₹{payment.amount.toLocaleString('en-IN')}</p>
+                          <p className="text-2xl font-bold text-gray-900">₹{Math.round(Number(payment.amount)).toLocaleString('en-IN')}</p>
                         </div>
 
                         <Link

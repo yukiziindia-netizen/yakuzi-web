@@ -43,7 +43,7 @@ export const renderBuyerOfferBadge = (p: any) => {
     return <div className="flex flex-col gap-0.5"><span className="text-[#4a4a4a] text-[11px] sm:text-[12px] font-medium tracking-wide whitespace-nowrap">{meta.discountPercent || 0}% off</span><span className="text-[#4a4a4a] text-[11px] sm:text-[12px] font-medium tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} {meta.bonusProductName}</span></div>;
   }
   if (p.discountType === "SPECIAL_PRICE") {
-    return <span className="text-emerald-600 text-[11px] sm:text-[12px] font-semibold tracking-wide whitespace-nowrap">Special Price: ₹{meta.specialPrice || 0}</span>;
+    return <span className="text-emerald-600 text-[11px] sm:text-[12px] font-semibold tracking-wide whitespace-nowrap">Special Price: ₹{Math.round(Number(meta.specialPrice) || 0)}</span>;
   }
   return <span className="text-[#4a4a4a] text-[11px] sm:text-[12px] font-medium tracking-wide whitespace-nowrap">{p.discountType.replace(/_/g, ' ')}</span>;
 };
@@ -85,10 +85,10 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
   const rating = product?.rating || 4.5;
   
   const isNotAvailable = product?.sellerCount === 0 || product?.sellerOffers?.length === 0 || price == null || price === 0;
-  const displayPrice = isNotAvailable ? 'N/A' : `₹${Number(price).toLocaleString('en-IN')}`;
+  const displayPrice = isNotAvailable ? 'N/A' : `₹${Math.round(Number(price)).toLocaleString('en-IN')}`;
   const grossTotal = pricing?.grossTotal ?? (mrp != null ? Number(mrp) : 0);
   const displayOriginalPrice = grossTotal > Number(price || 0) 
-    ? `₹${Number(grossTotal).toLocaleString('en-IN')}` 
+    ? `₹${Math.round(Number(grossTotal)).toLocaleString('en-IN')}` 
     : '';
   
   const displayDelivery = product?.deliveryText || product?.deliveryTime || '3 days';

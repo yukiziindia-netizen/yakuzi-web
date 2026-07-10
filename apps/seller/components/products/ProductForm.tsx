@@ -17,6 +17,7 @@ import {
   productFormSchema,
   type ProductFormValues,
   VALID_GST_PERCENTAGES,
+  calculatePricing
 } from "@yukizi/utils";
 import { useCreateSellerProduct, useUpdateSellerProduct, useSuggestionSearch, useCategories } from "@/hooks/useSeller";
 import { getSellerProductById } from "@/api/seller.api";
@@ -220,12 +221,9 @@ export function ProductForm({
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isDirty]);
 
-  // Sync variant stock to current stock
+  // Sync variants into form data so Zod validation knows if variants exist
   useEffect(() => {
-    if (variants && variants.length > 0) {
-      const totalStock = variants.reduce((acc, v) => acc + (parseInt(v.available) || 0), 0);
-      setValue("stock", totalStock, { shouldValidate: true, shouldDirty: true });
-    }
+    setValue("variants", variants, { shouldValidate: true });
   }, [variants, setValue]);
 
     const handleSuggestionSelect = useCallback(async (suggestion: Suggestion) => {
@@ -252,7 +250,9 @@ export function ProductForm({
     }
     const shippingGst = (suggestion as any).shippingGstPercent ?? 18;
     const baseShip = (suggestion as any).shippingCharges ?? 0;
-    const computedFinalShip = Math.round(baseShip + (baseShip * shippingGst / 100));
+    const isTaxIncludedForSug = (suggestion as any).isTaxIncluded ?? false;
+    const computedPricing = calculatePricing(0, 0, { type: 'none', shippingCharges: baseShip, shippingGstPercent: shippingGst, isTaxIncluded: isTaxIncludedForSug });
+    const computedFinalShip = computedPricing.shippingTotal;
     const finalShip = (suggestion as any).finalShippingPrice !== undefined && (suggestion as any).finalShippingPrice !== null 
       ? (suggestion as any).finalShippingPrice 
       : computedFinalShip;
@@ -308,7 +308,8 @@ export function ProductForm({
         finalVariants = variantsToUse.map((v: any) => {
           const shipCharges = Number(v.shippingCharges?.toString() || v.options?.shippingCharges?.toString() || "0");
           const shipGst = Number(v.shippingGstPercent?.toString() || v.options?.shippingGstPercent?.toString() || defaultGstP);
-          const computedFinal = shipCharges + (shipCharges * shipGst / 100);
+          const isTaxInc = (fullProduct as any)?.isTaxIncluded ?? (suggestion as any).isTaxIncluded ?? false;
+          const computedFinal = calculatePricing(0, 0, { type: 'none', shippingCharges: shipCharges, shippingGstPercent: shipGst, isTaxIncluded: isTaxInc }).shippingTotal;
           const rawFinal = v.finalShippingPrice?.toString() || v.options?.finalShippingPrice?.toString();
           const finalShippingPriceVal = (rawFinal !== undefined && rawFinal !== null && String(rawFinal) !== "0") 
             ? rawFinal 
@@ -364,7 +365,8 @@ export function ProductForm({
         finalVariantsFallback = suggestion.variants.map(v => {
           const shipCharges = Number(v.shippingCharges?.toString() || v.options?.shippingCharges?.toString() || "0");
           const shipGst = Number(v.shippingGstPercent?.toString() || v.options?.shippingGstPercent?.toString() || defaultGstP);
-          const computedFinal = shipCharges + (shipCharges * shipGst / 100);
+          const isTaxInc = (suggestion as any).isTaxIncluded ?? false;
+          const computedFinal = calculatePricing(0, 0, { type: 'none', shippingCharges: shipCharges, shippingGstPercent: shipGst, isTaxIncluded: isTaxInc }).shippingTotal;
           const rawFinal = v.finalShippingPrice?.toString() || v.options?.finalShippingPrice?.toString();
           const finalShippingPriceVal = (rawFinal !== undefined && rawFinal !== null && String(rawFinal) !== "0") 
             ? rawFinal 
@@ -423,10 +425,13 @@ export function ProductForm({
       if (activeVariantId && variants.length > 0) {
         const activeV = variants.find(v => v.id === activeVariantId);
         if (activeV) {
-          if (activeV.price) payloadMrp = Number(activeV.price);
-          if (activeV.available) payloadStock = Number(activeV.available);
-          if (activeV.gstPercent) payloadGst = Number(activeV.gstPercent);
-          if (activeV.shippingCharges) payloadShipping = Number(activeV.shippingCharges);
+          // Since the main inputs are hidden when variants exist, 
+          // we must take the edited values from the variant table
+          payloadMrp = Number(activeV.price) || payloadMrp;
+          payloadStock = Number(activeV.available) || 0;
+          payloadGst = Number(activeV.gstPercent) || 0;
+          payloadShipping = Number(activeV.shippingCharges) || 0;
+          
           if (activeV.discount) {
             mappedDiscountType = "PTR_DISCOUNT";
             payloadDiscountMeta = { discountPercent: Number(activeV.discount) };
@@ -468,8 +473,8 @@ export function ProductForm({
         discountMeta: payloadDiscountMeta,
         ...(selectedMasterId && { masterProductId: selectedMasterId }),
         ...(options.length > 0 && { options: options.map(o => ({ name: o.name, values: o.values })) }),
-        ...((variants.filter(v => Number(v.price) > 0)).length > 0 && { 
-          variants: variants.filter(v => Number(v.price) > 0).map(v => ({ 
+        ...((variants.filter(v => Number(v.price) > 0 && (!activeVariantId || v.id === activeVariantId))).length > 0 && { 
+          variants: variants.filter(v => Number(v.price) > 0 && (!activeVariantId || v.id === activeVariantId)).map(v => ({ 
             id: v.id && v.id.includes('-') ? v.id : undefined,
             name: v.name, 
             variantName: v.name,
@@ -484,7 +489,7 @@ export function ProductForm({
             discount: Number(v.discount) > 0 ? Number(v.discount) : undefined,
             shippingCharges: Number(v.shippingCharges) || 0,
             shippingGstPercent: Number(v.shippingGstPercent) || 0,
-            finalShippingPrice: Number(v.finalShippingPrice) || Math.round(Number(v.shippingCharges || 0) + (Number(v.shippingCharges || 0) * Number(v.shippingGstPercent || 0) / 100)),
+            finalShippingPrice: Number(v.finalShippingPrice) || calculatePricing(0, 0, { type: 'none', shippingCharges: Number(v.shippingCharges || 0), shippingGstPercent: Number(v.shippingGstPercent || 0), isTaxIncluded: true }).shippingTotal,
           })) 
         }),
       };
@@ -496,7 +501,7 @@ export function ProductForm({
         await createProduct.mutateAsync(backendPayload as any);
         toast.success("Product added successfully");
       }
-      router.push("/products");
+      if (isEditing) router.back(); else router.push("/products");
     } catch (err: any) {
       const errorMsg = err?.response?.data?.message || err.message || "Something went wrong saving the product";
       toast.error(Array.isArray(errorMsg) ? errorMsg.join(", ") : errorMsg);
@@ -508,7 +513,7 @@ export function ProductForm({
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={() => {
           if (isDirty && !window.confirm("You have unsaved changes. Discard?")) return;
-          router.push("/products");
+          if (isEditing) router.back(); else router.push("/products");
         }}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
@@ -719,7 +724,7 @@ export function ProductForm({
         {/* Submit */}
         <div className="flex justify-end gap-3 sticky bottom-6 z-[100] p-4 bg-background/80 backdrop-blur-xl border border-border rounded-2xl shadow-lg">
           <Button type="button" variant="info" onClick={() => setShowPayoutModal(true)}>Estimate Payout</Button>
-          <Button type="button" variant="outline" onClick={() => router.push("/products")} disabled={isSubmitting}>Cancel</Button>
+          <Button type="button" variant="outline" onClick={() => isEditing ? router.back() : router.push("/products")} disabled={isSubmitting}>Cancel</Button>
           <Button type="submit" loading={isSubmitting}>{isEditing ? "Update Product" : "Add Product"}</Button>
         </div>
       </form>

@@ -1,29 +1,37 @@
 "use client";
 import React from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { ProductForm } from "@/components/products/ProductForm";
 import { useSellerProduct } from "@/hooks/useSeller";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { calculatePricing } from "@yukizi/utils";
 
 export default function EditProductPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const variantParam = searchParams.get("variant");
   const productId = params.id as string;
   const { data: product, isLoading, error } = useSellerProduct(productId);
   const productAny = product as any;
   const productVariants = productAny?.variants || [];
   const productListings = productAny?.listings || [];
-  const activeVariantId =
-    product && productId !== product.id
-      ? productVariants.find((v: any) => {
-          const listing = productListings.find(
-            (l: any) => l.variantName === v.name || l.variantName === v.options?.name,
-          );
-          return listing?.id === productId || v.id === productId;
-        })?.id || productId
-      : undefined;
+
+  let activeVariantId = undefined;
+  if (variantParam) {
+    activeVariantId = productVariants.find((v: any) => v.name === variantParam || v.options?.name === variantParam)?.id;
+  }
+  if (!activeVariantId && product && productId !== product.id) {
+    activeVariantId = productVariants.find((v: any) => {
+      const listing = productListings.find(
+        (l: any) => l.variantName === v.name || l.variantName === v.options?.name || l.variantId === v.id || (l.variant && l.variant.id === v.id) || (l.name && typeof l.name === 'string' && typeof v.name === 'string' && l.name.includes(v.name))
+      );
+      return listing?.id === productId || v.id === productId;
+    })?.id || productId;
+  }
+
   const activeVariant = activeVariantId
     ? productVariants.find((v: any) => v.id === activeVariantId)
     : undefined;
@@ -77,25 +85,25 @@ export default function EditProductPage() {
                 is_tax_included: (product as any).masterProductId ? true : ((product as any).isTaxIncluded || false),
                 shipping_charges: (product as any).finalShippingPrice !== null && (product as any).finalShippingPrice !== undefined 
                   ? (product as any).finalShippingPrice 
-                  : ((product as any).shippingCharges ? Math.round((product as any).shippingCharges * (1 + ((product as any).shippingGstPercent ?? 18) / 100)) : 0),
+                  : ((product as any).shippingCharges ? calculatePricing(0, 0, { type: 'none', shippingCharges: (product as any).shippingCharges, shippingGstPercent: ((product as any).shippingGstPercent ?? 18), isTaxIncluded: true }).shippingTotal : 0),
                 sku: resolvedSku,
                 serialNo: resolvedSerialNo,
                 specifications: resolvedSpecifications,
                 delivery_text: (product as any).deliveryText ? String(parseInt(String((product as any).deliveryText).match(/\d+/)?.[0] || "0") || "") : "",
                 image_list: Array.isArray((product as any).images) ? (product as any).images.map((img: any) => typeof img === 'string' ? img : img.url).filter(Boolean) : [],
                 custom_extra_fields: (product as any).extraFields || [],
-                discount_form_details: (product as any).discountFormDetails || ((product as any).discountType ? {
-                  type: ({
+                discount_form_details: (product as any).discountFormDetails || {
+                  type: (product as any).discountType ? ({
                     "PTR_DISCOUNT": "ptr_discount",
                     "SAME_PRODUCT_BONUS": "same_product_bonus",
                     "PTR_PLUS_SAME_PRODUCT_BONUS": "ptr_discount_and_same_product_bonus",
                     "DIFFERENT_PRODUCT_BONUS": "different_product_bonus",
                     "PTR_PLUS_DIFFERENT_PRODUCT_BONUS": "ptr_discount_and_different_product_bonus",
                     "SPECIAL_PRICE": "special_price",
-                  } as any)[(product as any).discountType] || "none",
+                  } as any)[(product as any).discountType] || "none" : "none",
                   ...(product as any).discountMeta,
-                  discountPercent: (product as any).discount ?? (product as any).discountMeta?.discountPercent
-                } : { type: "none" }) as any,
+                  discountPercent: Number((product as any).discount ?? (product as any).discountMeta?.discountPercent ?? 0) || undefined
+                } as any,
               }} 
               initialPlatformFees={{
                 commissionPercent: (product as any).commissionPercent ?? undefined,
@@ -116,49 +124,40 @@ export default function EditProductPage() {
                 const mainDiscount = (product as any).discountFormDetails?.discountPercent ?? (product as any).discountMeta?.discountPercent ?? (product as any).discount ?? 0;
                 
                 // Try to find the corresponding listing to extract backend-calculated values
-                const listing = (product.listings || []).find((l: any) => l.variantName === v.name || l.variantName === v.options?.name);
+                const listing = (product.listings || []).find((l: any) => l.variantName === v.name || l.variantName === v.options?.name || l.variantId === v.id || (l.variant && l.variant.id === v.id) || (l.name && typeof l.name === 'string' && typeof v.name === 'string' && l.name.includes(v.name)));
                 let derivedDiscount;
-                let derivedGst;
                 
                 if (listing) {
                   derivedDiscount = listing.discountMeta?.discountPercent ?? (listing as any).discountPercent ?? (listing as any).discount;
-                  
-                  if ((listing as any).basePrice && (listing as any).mrp) {
-                    const discountVal = derivedDiscount ?? mainDiscount;
-                    const dPrice = discountVal ? (listing as any).mrp * (1 - discountVal / 100) : (listing as any).mrp;
-                    if (dPrice > 0) {
-                      derivedGst = Math.round((((listing as any).basePrice / dPrice) - 1) * 100);
-                    }
-                  }
                 }
 
-                const vGstRaw = v.gstPercent ?? v.options?.gstPercent ?? v.gst ?? v.gstValue ?? (listing as any)?.gstPercent ?? derivedGst;
+                const vGstRaw = (listing as any)?.gstPercent ?? (listing as any)?.gst ?? v.gstPercent ?? v.options?.gstPercent ?? v.gst ?? v.gstValue;
                 const vGst = vGstRaw !== undefined && vGstRaw !== null ? vGstRaw : mainGst;
                 
-                const vDiscountRaw = v.discountPercent !== undefined && v.discountPercent !== null ? v.discountPercent : (v.discount !== undefined && v.discount !== null ? v.discount : (v.options?.discountPercent !== undefined ? v.options?.discountPercent : (v.options?.discount !== undefined ? v.options?.discount : (v.discountMeta?.discountPercent !== undefined ? v.discountMeta?.discountPercent : derivedDiscount))));
+                const vDiscountRaw = derivedDiscount ?? v.discountPercent ?? v.discount ?? v.options?.discountPercent ?? v.options?.discount ?? v.discountMeta?.discountPercent;
                 const vDiscount = vDiscountRaw !== undefined && vDiscountRaw !== null ? vDiscountRaw : mainDiscount;
 
-                const vPrice = v.price ?? (listing as any)?.mrp ?? (listing as any)?.price ?? "";
-                const vCompareAt = v.compareAtPrice ?? (listing as any)?.compareAtPrice ?? "";
+                const vPrice = (listing as any)?.mrp ?? (listing as any)?.price ?? v.price ?? "";
+                const vCompareAt = (listing as any)?.compareAtPrice ?? v.compareAtPrice ?? "";
 
                 return {
-                  id: v.id || Math.random().toString(36).substr(2, 9),
+                  id: v.id || (listing?.id === productId ? productId : Math.random().toString(36).substr(2, 9)),
                   name: v.name,
                   price: vPrice.toString(),
                   compareAtPrice: vCompareAt.toString(),
                   gstPercent: vGst.toString(),
                   discount: vDiscount.toString(),
-                  available: (v.available ?? (listing as any)?.stock ?? 0).toString(),
+                  available: ((listing as any)?.stock ?? v.available ?? 0).toString(),
                   image: v.image,
-                  sku: v.sku || (listing as any)?.sku || "",
-                  serialNo: v.serialNo || (listing as any)?.serialNo || "",
-                  shippingCharges: (v.shippingCharges ?? (listing as any)?.shippingCharges ?? (product as any).shippingCharges ?? 0).toString(),
-                  shippingGstPercent: Number(v.shippingGstPercent ?? (listing as any)?.shippingGstPercent ?? (product as any).shippingGstPercent ?? 0),
+                  sku: (listing as any)?.sku || v.sku || "",
+                  serialNo: (listing as any)?.serialNo || v.serialNo || "",
+                  shippingCharges: ((listing as any)?.shippingCharges ?? v.shippingCharges ?? (product as any).shippingCharges ?? 0).toString(),
+                  shippingGstPercent: Number((listing as any)?.shippingGstPercent ?? v.shippingGstPercent ?? (product as any).shippingGstPercent ?? 0),
                   finalShippingPrice: (() => {
-                    const rawShip = v.shippingCharges ?? (listing as any)?.shippingCharges ?? (product as any).shippingCharges ?? 0;
-                    const rawGst = v.shippingGstPercent ?? (listing as any)?.shippingGstPercent ?? (product as any).shippingGstPercent ?? 0;
-                    const calculated = Number(rawShip) + (Number(rawShip) * Number(rawGst) / 100);
-                    const actualFinal = v.finalShippingPrice ?? (listing as any)?.finalShippingPrice;
+                    const rawShip = (listing as any)?.shippingCharges ?? v.shippingCharges ?? (product as any).shippingCharges ?? 0;
+                    const rawGst = (listing as any)?.shippingGstPercent ?? v.shippingGstPercent ?? (product as any).shippingGstPercent ?? 0;
+                    const calculated = calculatePricing(0, 0, { type: 'none', shippingCharges: Number(rawShip), shippingGstPercent: Number(rawGst), isTaxIncluded: true }).shippingTotal;
+                    const actualFinal = (listing as any)?.finalShippingPrice ?? v.finalShippingPrice;
                     return (actualFinal !== undefined && actualFinal !== null && String(actualFinal) !== "0")
                       ? actualFinal.toString()
                       : calculated.toString();

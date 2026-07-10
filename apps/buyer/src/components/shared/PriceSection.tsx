@@ -33,7 +33,7 @@ export function PriceSection({
     return (
       <div className="space-y-1">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-bold text-gray-400 line-through">₹{mrp.toLocaleString('en-IN')}</span>
+          <span className="text-sm font-bold text-gray-400 line-through">₹{Number(mrp).toLocaleString('en-IN')}</span>
           {calculatedDiscount > 0 && (
             <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded">
               {calculatedDiscount}% OFF
@@ -41,11 +41,11 @@ export function PriceSection({
           )}
         </div>
         <div className="text-base font-black text-gray-900">
-          ₹{finalPrice.toLocaleString('en-IN')}
+          ₹{Math.round(Number(finalPrice)).toLocaleString('en-IN')}
         </div>
         {showPTR && ptr && (
           <div className="text-xs text-gray-500 font-medium">
-            PTR: ₹{ptr.toLocaleString('en-IN')}
+            PTR: ₹{Number(ptr).toLocaleString('en-IN')}
           </div>
         )}
       </div>
@@ -56,12 +56,12 @@ export function PriceSection({
     <div className="space-y-3">
       <div className="flex items-baseline gap-4">
         <span className="text-4xl font-bold text-gray-900">
-          ₹{finalPrice.toLocaleString('en-IN')}
+          ₹{Number(finalPrice).toLocaleString('en-IN')}
         </span>
         {mrp > finalPrice && (
           <>
             <span className="text-xl text-gray-400 line-through">
-              ₹{mrp.toLocaleString('en-IN')}
+              ₹{Number(mrp).toLocaleString('en-IN')}
             </span>
             {calculatedDiscount > 0 && (
               <span className="text-sm font-bold text-green-600 bg-green-50 px-3 py-1 rounded-2xl">
@@ -80,7 +80,7 @@ export function PriceSection({
 
       {showPTR && ptr && (
         <p className="text-sm text-gray-600 font-medium">
-          PTR: ₹{ptr.toLocaleString('en-IN')}
+          PTR: ₹{Number(ptr).toLocaleString('en-IN')}
         </p>
       )}
 

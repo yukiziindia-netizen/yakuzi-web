@@ -210,8 +210,8 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
                     <div className="flex justify-between items-end">
                       <div>
                         <div className="flex items-baseline gap-2">
-                          <span className="text-[21px] font-black text-gray-800">₹{price.toLocaleString('en-IN')}</span>
-                          {discount > 0 && <span className="text-[14px] text-gray-400 line-through">₹{mrp.toLocaleString('en-IN')}</span>}
+                          <span className="text-[21px] font-black text-gray-800">₹{Math.round(Number(price)).toLocaleString('en-IN')}</span>
+                          {discount > 0 && <span className="text-[14px] text-gray-400 line-through">₹{Math.round(Number(mrp)).toLocaleString('en-IN')}</span>}
                         </div>
                         {discount > 0 && <span className="text-sm text-gray-500 font-semibold">{discount}% off</span>}
                       </div>

@@ -146,7 +146,10 @@ export function OrdersContent() {
   const totalOrderAmount = useMemo(() => {
     return allOrders.reduce((sum, order) => {
       const items = order.items || order.orderItems || [];
-      const orderSellerSum = items.reduce((iSum: number, item: any) => iSum + (item.totalPrice || (item.price * (item.quantity || 1))), 0);
+      const orderSellerSum = items.reduce((iSum: number, item: any) => {
+        const itemTotal = item.totalPrice ? Number(item.totalPrice) : (Number(item.price || item.unitPrice || 0) * Number(item.quantity || 1));
+        return iSum + itemTotal;
+      }, 0);
       return sum + orderSellerSum;
     }, 0);
   }, [allOrders]);

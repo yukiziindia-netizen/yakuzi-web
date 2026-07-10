@@ -37,7 +37,6 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
     bestSelling: searchParams.get('isBestSelling') === 'true',
     discount: searchParams.get('discountRange') || "All",
     location: searchParams.get('location') || "All",
-    discountType: searchParams.get('discountType') || "All",
     minPrice: Number(searchParams.get('minPrice') || 0),
     maxPrice: Number(searchParams.get('maxPrice') || 10000),
   });
@@ -51,7 +50,6 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
     if (updated.bestSelling) params.set('isBestSelling', 'true'); else params.delete('isBestSelling');
     if (updated.discount && updated.discount !== 'All') params.set('discountRange', updated.discount); else params.delete('discountRange');
     if (updated.location && updated.location !== 'All') params.set('location', updated.location); else params.delete('location');
-    if (updated.discountType && updated.discountType !== 'All') params.set('discountType', updated.discountType); else params.delete('discountType');
     params.set('minPrice', String(updated.minPrice));
     params.set('maxPrice', String(updated.maxPrice));
     router.push(`?${params.toString()}`, { scroll: false });
@@ -62,7 +60,6 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
     price: true,
     discount: true,
     location: true,
-    discountType: true,
   });
 
   const toggleSection = (section: keyof typeof openSections) => {
@@ -171,8 +168,8 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                   {title}
                 </h3>
                 <div className="flex items-end gap-1.5 leading-none mb-1">
-                  <span className="text-[15px] font-medium text-gray-800">{isNotAvailable ? 'N/A' : `₹${price.toLocaleString('en-IN')}`}</span>
-                  <span className="text-[9px] text-gray-400 line-through pb-0.5">{!isNotAvailable && originalPrice > 0 ? `₹${originalPrice.toLocaleString('en-IN')}` : ''}</span>
+                  <span className="text-[15px] font-medium text-gray-800">{isNotAvailable ? 'N/A' : `₹${Math.round(Number(price)).toLocaleString('en-IN')}`}</span>
+                  <span className="text-[9px] text-gray-400 line-through pb-0.5">{!isNotAvailable && originalPrice > 0 ? `₹${Math.round(Number(originalPrice)).toLocaleString('en-IN')}` : ''}</span>
                 </div>
                 <span className="text-[9px] font-bold text-gray-800">
                   {discount}
@@ -388,41 +385,6 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
           </div>
 
           <div className="border-t border-gray-200 mb-4" />
-
-          {/* Discount Type Accordion */}
-          <div className="space-y-4">
-            <button 
-              onClick={() => toggleSection("discountType")}
-              className="flex items-center justify-between w-full font-bold text-gray-800 text-[16px]"
-            >
-              Discount Type
-              {openSections.discountType ? <ChevronUp className="w-4 h-4 text-gray-500" strokeWidth={3} /> : <ChevronDown className="w-4 h-4 text-gray-500" strokeWidth={3} />}
-            </button>
-            <AnimatePresence>
-              {openSections.discountType && (
-                <motion.div 
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  className="overflow-hidden"
-                >
-                  <div className="space-y-3 pt-1">
-                    {["All", "Upclom", "Fuill"].map(opt => (
-                      <label key={opt} className="flex items-center gap-3 cursor-pointer group" onClick={(e) => {
-                        e.preventDefault();
-                        handleFilterChange('discountType', filters.discountType === opt && opt !== "All" ? "All" : opt);
-                      }}>
-                        <div className={`w-[18px] h-[18px] rounded-full border-2 flex items-center justify-center transition-colors ${filters.discountType === opt ? "border-[#854cbc]" : "border-gray-200 group-hover:border-[#854cbc]/50"}`}>
-                           {filters.discountType === opt && <div className="w-2 h-2 rounded-full bg-[#854cbc]" />}
-                        </div>
-                        <span className="text-[15px] text-gray-700 font-medium">{opt}</span>
-                      </label>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
 
         </div>
       </div>

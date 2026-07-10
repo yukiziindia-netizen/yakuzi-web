@@ -22,7 +22,6 @@ export default async function HomePage({
       isBestSelling: searchParams?.isBestSelling === 'true' ? true : undefined,
       discountRange: searchParams?.discountRange && searchParams.discountRange !== 'All' ? searchParams.discountRange : undefined,
       location: searchParams?.location && searchParams.location !== 'All' ? searchParams.location : undefined,
-      discountType: searchParams?.discountType && searchParams.discountType !== 'All' ? searchParams.discountType : undefined,
     });
     if (res && res.data && Array.isArray(res.data)) {
       initialProducts = res.data;

@@ -82,8 +82,13 @@ export function PayoutBreakdownModal({
         };
       });
     } else {
+      let mappedDiscount = discountDetails || {};
+      if (mappedDiscount.discountPercent > 0 && (!mappedDiscount.type || mappedDiscount.type === 'none')) {
+        mappedDiscount = { ...mappedDiscount, type: 'ptr_discount' };
+      }
+      
       const discountInput = {
-        ...discountDetails,
+        ...mappedDiscount,
         shippingCharges,
         shippingGstPercent: 0, // Since product form handles shipping GST into finalShippingPrice (if we were using it), wait: for simple products, ProductForm doesn't calculate finalShippingPrice inline for UI, but it submits it. Actually, wait. Let's just use 0 here too because the user entered `shippingCharges` which they intend to be the final shipping cost.
         isTaxIncluded

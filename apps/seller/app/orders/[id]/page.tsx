@@ -5,10 +5,10 @@ import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   ArrowLeft, Package,
-  Upload, FileText, CreditCard, AlertTriangle,
+  Upload, FileText, CreditCard, AlertTriangle, Calculator
 } from "lucide-react";
 import { Button, Badge, OrderStatusBadge } from "@/components/ui";
-import { formatCurrency, formatDate } from "@yukizi/utils";
+import { formatCurrency, formatDate, calculatePricing } from "@yukizi/utils";
 import {
   useSellerOrder, useAcceptSellerOrder, useRejectSellerOrder, useUpdateSellerOrderStatus,
   useUploadOrderDocument, useUpdateShippingDetails
@@ -137,145 +137,221 @@ export default function OrderDetailPage() {
 
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Order Items */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="lg:col-span-2 glass-card rounded-2xl overflow-hidden">
-          <div className="p-5 border-b border-border/50">
-            <h2 className="font-semibold text-foreground">Items ({items.length})</h2>
-          </div>
-          <div className="divide-y divide-border/30">
-            {items.map((item: any, i: number) => (
-              <div key={i} className="flex items-center gap-4 p-5">
-                <div className="h-14 w-14 rounded-xl bg-muted flex items-center justify-center flex-shrink-0">
-                  {item.product?.images?.[0]?.url || item.image ? (
-                    <img src={item.product?.images?.[0]?.url || item.image} alt={item.product?.name || item.name || item.productName} className="h-14 w-14 rounded-xl object-cover" />
-                  ) : (
-                    <Package className="h-6 w-6 text-muted-foreground" />
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{item.product?.name || item.name || item.productName || item.sellerOffer?.name}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {item.sellerOffer?.variant?.name && <span>Variant: {item.sellerOffer.variant.name} </span>}
-                    {(item.sellerOffer?.variant?.sku || item.sellerOffer?.sku) && <span>(SKU: {item.sellerOffer.variant?.sku || item.sellerOffer?.sku})</span>}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Qty: {item.quantity} × {formatCurrency(item.unitPrice || item.price || 0)}</p>
-                  {item.sellerOffer?.shippingCharges != null && <p className="text-xs text-muted-foreground mt-0.5">Shipping Rate: {formatCurrency(item.sellerOffer.shippingCharges)}</p>}
-                  {item.discount && <p className="text-xs text-green-600">Discount: {item.discount}</p>}
-                </div>
-                <p className="text-sm font-semibold text-foreground">{formatCurrency((item.quantity || 1) * (item.unitPrice || item.price || 0))}</p>
-              </div>
-            ))}
-            {items.length === 0 && (
-              <div className="p-8 text-center text-muted-foreground text-sm">No items found</div>
-            )}
-          </div>
-          {/* Totals */}
-          <div className="p-5 border-t border-border/50 space-y-2">
-            <div className="flex justify-between text-sm"><span className="text-muted-foreground">Subtotal</span><span className="text-foreground">{formatCurrency(mainOrder.totalAmount || mainOrder.subtotal ?? mainOrder.total ?? 0)}</span></div>
-            {mainOrder.gstAmount != null && <div className="flex justify-between text-sm"><span className="text-muted-foreground">GST</span><span className="text-foreground">{formatCurrency(mainOrder.gstAmount)}</span></div>}
-            {mainOrder.shippingAmount != null && <div className="flex justify-between text-sm"><span className="text-muted-foreground">Shipping</span><span className="text-foreground">{formatCurrency(mainOrder.shippingAmount)}</span></div>}
-            <div className="flex justify-between text-base font-semibold pt-2 border-t border-border/30"><span>Total</span><span>{formatCurrency(mainOrder.totalAmount || mainOrder.finalAmount ?? mainOrder.total ?? 0)}</span></div>
-          </div>
-        </motion.div>
-
-        {/* Shipping & Fulfillment */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="lg:col-span-2 glass-card rounded-2xl overflow-hidden p-5 space-y-4">
-          <div className="border-b border-border/50 pb-4">
-            <h2 className="font-semibold text-foreground flex items-center gap-2"><Package className="h-4 w-4 text-primary" />Shipping & Fulfillment</h2>
-            <p className="text-sm text-muted-foreground mt-1">Enter dimensions and upload mandatory images before marking the order as shipped.</p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Length (cm)</label>
-              <input type="number" step="0.01" className="w-full bg-background border border-input rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none" value={shippingData.length} onChange={(e) => setShippingData({...shippingData, length: e.target.value})} disabled={!!mainOrder.packageLength} placeholder={mainOrder.packageLength?.toString() || "0"} />
+        {/* Main Content Column */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Order Items */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="glass-card rounded-2xl overflow-hidden">
+            <div className="p-5 border-b border-border/50">
+              <h2 className="font-semibold text-foreground">Items ({items.length})</h2>
             </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Breadth (cm)</label>
-              <input type="number" step="0.01" className="w-full bg-background border border-input rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none" value={shippingData.breadth} onChange={(e) => setShippingData({...shippingData, breadth: e.target.value})} disabled={!!mainOrder.packageBreadth} placeholder={mainOrder.packageBreadth?.toString() || "0"} />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Height (cm)</label>
-              <input type="number" step="0.01" className="w-full bg-background border border-input rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none" value={shippingData.height} onChange={(e) => setShippingData({...shippingData, height: e.target.value})} disabled={!!mainOrder.packageHeight} placeholder={mainOrder.packageHeight?.toString() || "0"} />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Weight (kg)</label>
-              <input type="number" step="0.01" className="w-full bg-background border border-input rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none" value={shippingData.weight} onChange={(e) => setShippingData({...shippingData, weight: e.target.value})} disabled={!!mainOrder.packageWeight} placeholder={mainOrder.packageWeight?.toString() || "0"} />
-            </div>
-          </div>
-
-          <div className="space-y-3 pt-2">
-            <h3 className="text-sm font-medium text-foreground">Dimension Proofs (Mandatory)</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[
-                { key: 'lengthImg', label: 'Length Proof' },
-                { key: 'breadthImg', label: 'Breadth Proof' },
-                { key: 'heightImg', label: 'Height Proof' },
-                { key: 'weightImg', label: 'Weight Proof' }
-              ].map(f => (
-                <div key={f.key} className="space-y-1.5">
-                  <label className="text-xs font-medium text-muted-foreground block">{f.label}</label>
-                  {(mainOrder as any)[f.key.replace('Img', 'Image')] ? (
-                     <a href={(mainOrder as any)[f.key.replace('Img', 'Image')]} target="_blank" className="text-xs text-primary underline">View Uploaded</a>
-                  ) : (
-                    <input type="file" accept="image/*" onChange={(e) => setShippingFiles(p => ({...p, [f.key]: e.target.files?.[0] || null}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
-                  )}
+            <div className="divide-y divide-border/30">
+              {items.map((item: any, i: number) => (
+                <div key={i} className="flex items-center gap-4 p-5">
+                  <div className="h-14 w-14 rounded-xl bg-muted flex items-center justify-center flex-shrink-0">
+                    {item.product?.images?.[0]?.url || item.image || item.sellerOffer?.images?.[0] || item.sellerOffer?.variant?.catalogProduct?.images?.[0]?.url ? (
+                      <img src={item.product?.images?.[0]?.url || item.image || item.sellerOffer?.images?.[0] || item.sellerOffer?.variant?.catalogProduct?.images?.[0]?.url} alt={item.product?.name || item.name || item.productName || item.sellerOffer?.name} className="h-14 w-14 rounded-xl object-cover" />
+                    ) : (
+                      <Package className="h-6 w-6 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{item.product?.name || item.name || item.productName || item.sellerOffer?.name}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {item.sellerOffer?.variant?.name && <span>Variant: {item.sellerOffer.variant.name} </span>}
+                      {(item.sellerOffer?.variant?.sku || item.sellerOffer?.sku) && <span>(SKU: {item.sellerOffer.variant?.sku || item.sellerOffer?.sku})</span>}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Qty: {item.quantity} × {formatCurrency(item.unitPrice || item.price || 0)}</p>
+                    {item.discount && <p className="text-xs text-green-600">Discount: {item.discount}</p>}
+                  </div>
+                  <p className="text-sm font-semibold text-foreground">{formatCurrency((item.quantity || 1) * (item.unitPrice || item.price || 0))}</p>
                 </div>
               ))}
+              {items.length === 0 && (
+                <div className="p-8 text-center text-muted-foreground text-sm">No items found</div>
+              )}
             </div>
-          </div>
+            {/* Totals */}
+            <div className="p-5 border-t border-border/50 space-y-2">
+              <div className="flex justify-between text-sm"><span className="text-muted-foreground">Subtotal</span><span className="text-foreground">{formatCurrency(items.reduce((sum, item) => sum + (item.quantity || 1) * (item.unitPrice || item.price || 0), 0))}</span></div>
+              {mainOrder.gstAmount != null && <div className="flex justify-between text-sm"><span className="text-muted-foreground">GST</span><span className="text-foreground">{formatCurrency(mainOrder.gstAmount)}</span></div>}
+              <div className="flex justify-between text-base font-semibold pt-2 border-t border-border/30"><span>Total</span><span>{formatCurrency(items.reduce((sum, item) => sum + (item.quantity || 1) * (item.unitPrice || item.price || 0), 0) + (mainOrder.gstAmount || 0))}</span></div>
+            </div>
+          </motion.div>
 
-          <div className="space-y-3 pt-2">
-            <h3 className="text-sm font-medium text-foreground">Shipping Documents</h3>
+          {/* Shipping & Fulfillment */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glass-card rounded-2xl overflow-hidden p-5 space-y-4">
+            <div className="border-b border-border/50 pb-4">
+              <h2 className="font-semibold text-foreground flex items-center gap-2"><Package className="h-4 w-4 text-primary" />Shipping & Fulfillment</h2>
+              <p className="text-sm text-muted-foreground mt-1">Enter dimensions and upload mandatory images before marking the order as shipped.</p>
+            </div>
+
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground block">Shipping Label</label>
-                {mainOrder.adminShippingLabelUrl ? (
-                   <a href={mainOrder.adminShippingLabelUrl} target="_blank" className="text-xs text-primary underline">Download Label</a>
-                ) : (
-                  <span className="text-xs text-muted-foreground">Pending from admin</span>
-                )}
+                <label className="text-xs font-medium text-muted-foreground">Length (cm)</label>
+                <input type="number" step="0.01" className="w-full bg-background border border-input rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none" value={shippingData.length} onChange={(e) => setShippingData({...shippingData, length: e.target.value})} disabled={!!mainOrder.packageLength} placeholder={mainOrder.packageLength?.toString() || "0"} />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground block">Admin Invoice</label>
-                {mainOrder.adminInvoiceUrl ? (
-                   <a href={mainOrder.adminInvoiceUrl} target="_blank" className="text-xs text-primary underline">Download Admin Invoice</a>
-                ) : (
-                  <span className="text-xs text-muted-foreground">Pending from admin</span>
-                )}
+                <label className="text-xs font-medium text-muted-foreground">Breadth (cm)</label>
+                <input type="number" step="0.01" className="w-full bg-background border border-input rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none" value={shippingData.breadth} onChange={(e) => setShippingData({...shippingData, breadth: e.target.value})} disabled={!!mainOrder.packageBreadth} placeholder={mainOrder.packageBreadth?.toString() || "0"} />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground block">Manifest</label>
-                {mainOrder.manifestUrl ? (
-                   <a href={mainOrder.manifestUrl} target="_blank" className="text-xs text-primary underline">Download Manifest</a>
-                ) : (
-                  <span className="text-xs text-muted-foreground">Pending from admin</span>
-                )}
+                <label className="text-xs font-medium text-muted-foreground">Height (cm)</label>
+                <input type="number" step="0.01" className="w-full bg-background border border-input rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none" value={shippingData.height} onChange={(e) => setShippingData({...shippingData, height: e.target.value})} disabled={!!mainOrder.packageHeight} placeholder={mainOrder.packageHeight?.toString() || "0"} />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground block">Seller Invoice</label>
-                {mainOrder.invoiceUrl ? (
-                   <a href={mainOrder.invoiceUrl} target="_blank" className="text-xs text-primary underline">Download Seller Invoice</a>
-                ) : (
-                  <span className="text-xs text-muted-foreground">Pending from admin</span>
-                )}
+                <label className="text-xs font-medium text-muted-foreground">Weight (kg)</label>
+                <input type="number" step="0.01" className="w-full bg-background border border-input rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none" value={shippingData.weight} onChange={(e) => setShippingData({...shippingData, weight: e.target.value})} disabled={!!mainOrder.packageWeight} placeholder={mainOrder.packageWeight?.toString() || "0"} />
               </div>
             </div>
-          </div>
 
-          {(!mainOrder.packageLength || !mainOrder.lengthImage) && (
-            <div className="pt-4 flex justify-end">
-              <Button size="sm" onClick={handleShippingSubmit} loading={updateShipping.isPending}>
-                Save Shipping Details
-              </Button>
+            <div className="space-y-3 pt-2">
+              <h3 className="text-sm font-medium text-foreground">Dimension Proofs (Mandatory)</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                  { key: 'lengthImg', label: 'Length Proof' },
+                  { key: 'breadthImg', label: 'Breadth Proof' },
+                  { key: 'heightImg', label: 'Height Proof' },
+                  { key: 'weightImg', label: 'Weight Proof' }
+                ].map(f => (
+                  <div key={f.key} className="space-y-1.5">
+                    <label className="text-xs font-medium text-muted-foreground block">{f.label}</label>
+                    {(mainOrder as any)[f.key.replace('Img', 'Image')] ? (
+                       <a href={(mainOrder as any)[f.key.replace('Img', 'Image')]} target="_blank" className="text-xs text-primary underline">View Uploaded</a>
+                    ) : (
+                      <input type="file" accept="image/*" onChange={(e) => setShippingFiles(p => ({...p, [f.key]: e.target.files?.[0] || null}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
-          )}
-        </motion.div>
+
+            <div className="space-y-3 pt-2">
+              <h3 className="text-sm font-medium text-foreground">Shipping Documents</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground block">Shipping Label</label>
+                  {mainOrder.adminShippingLabelUrl ? (
+                     <a href={mainOrder.adminShippingLabelUrl} target="_blank" className="text-xs text-primary underline">Download Label</a>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">Pending from admin</span>
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground block">Admin Invoice</label>
+                  {mainOrder.adminInvoiceUrl ? (
+                     <a href={mainOrder.adminInvoiceUrl} target="_blank" className="text-xs text-primary underline">Download Admin Invoice</a>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">Pending from admin</span>
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground block">Manifest</label>
+                  {mainOrder.manifestUrl ? (
+                     <a href={mainOrder.manifestUrl} target="_blank" className="text-xs text-primary underline">Download Manifest</a>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">Pending from admin</span>
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground block">Seller Invoice</label>
+                  {mainOrder.invoiceUrl ? (
+                     <a href={mainOrder.invoiceUrl} target="_blank" className="text-xs text-primary underline">Download Seller Invoice</a>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">Pending from admin</span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {(!mainOrder.packageLength || !mainOrder.lengthImage) && (
+              <div className="pt-4 flex justify-end">
+                <Button size="sm" onClick={handleShippingSubmit} loading={updateShipping.isPending}>
+                  Save Shipping Details
+                </Button>
+              </div>
+            )}
+          </motion.div>
+        </div>
 
         {/* Sidebar Info */}
         <div className="space-y-4">
 
+          {/* Estimated Calculation */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="glass-card rounded-2xl p-5 space-y-3">
+            <h3 className="font-semibold text-sm text-foreground flex items-center gap-2">
+              <Calculator className="h-4 w-4 text-primary" />
+              Estimated Payout Breakdown
+            </h3>
+            
+            {(() => {
+              const firstItem = items[0] || {};
+              const displayProductGstPercent = firstItem.sellerOffer?.gstPercent !== undefined ? Number(firstItem.sellerOffer.gstPercent) : 0;
+              const displayCommissionPercent = firstItem.sellerOffer?.variant?.catalogProduct?.commissionPercent ? Number(firstItem.sellerOffer.variant.catalogProduct.commissionPercent) : 5;
+              const displayCommissionGstPercent = firstItem.sellerOffer?.variant?.catalogProduct?.commissionGstPercent ? Number(firstItem.sellerOffer.variant.catalogProduct.commissionGstPercent) : 18;
 
+              const est = items.reduce((acc, item) => {
+                const qty = item.quantity || 1;
+                
+                const mrp = item.sellerOffer?.mrp ? Number(item.sellerOffer.mrp) : 0;
+                const gstPercent = item.sellerOffer?.gstPercent !== undefined ? Number(item.sellerOffer.gstPercent) : 0;
+                const shippingCharges = item.sellerOffer?.finalShippingPrice ? Number(item.sellerOffer.finalShippingPrice) : (item.sellerOffer?.shippingCharges ? Number(item.sellerOffer.shippingCharges) : 0);
+                
+                const discountDetails = item.sellerOffer?.discountMeta || {};
+                const mappedDiscount = {
+                  ...discountDetails,
+                  type: item.sellerOffer?.discountType || discountDetails.type || 'none',
+                  isTaxIncluded: item.sellerOffer?.isTaxIncluded || false,
+                  shippingCharges,
+                  shippingGstPercent: 0
+                };
+                
+                const platformFees = {
+                  commissionPercent: item.sellerOffer?.variant?.catalogProduct?.commissionPercent ? Number(item.sellerOffer.variant.catalogProduct.commissionPercent) : 5, // fallback to 5% if missing for display
+                  commissionGstPercent: item.sellerOffer?.variant?.catalogProduct?.commissionGstPercent ? Number(item.sellerOffer.variant.catalogProduct.commissionGstPercent) : 18
+                };
+                
+                const pricing = calculatePricing(mrp, gstPercent, mappedDiscount, platformFees);
+
+                return {
+                  customerFinalPrice: acc.customerFinalPrice + (pricing.finalCustomerPayable * qty),
+                  commission: acc.commission + (pricing.commissionAmount * qty),
+                  commissionGst: acc.commissionGst + (pricing.commissionGstAmount * qty),
+                  productGst: acc.productGst + (pricing.productGstAmount * qty),
+                  shipping: acc.shipping + (shippingCharges * qty),
+                  netPayout: acc.netPayout + (pricing.sellerPayout * qty)
+                };
+              }, { customerFinalPrice: 0, commission: 0, commissionGst: 0, productGst: 0, shipping: 0, netPayout: 0 });
+
+              return (
+                <div className="space-y-2 mt-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Customer Final Price</span>
+                    <span className="text-foreground">{formatCurrency(est.customerFinalPrice)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Platform Commission ({displayCommissionPercent}%)</span>
+                    <span className="text-red-500">-{formatCurrency(est.commission)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">GST on Fees ({displayCommissionGstPercent}%)</span>
+                    <span className="text-red-500">-{formatCurrency(est.commissionGst)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Product GST (to remit) ({displayProductGstPercent}%)</span>
+                    <span className="text-red-500">-{formatCurrency(est.productGst)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Shipping (Deducted)</span>
+                    <span className="text-red-500">-{formatCurrency(est.shipping)}</span>
+                  </div>
+                  <div className="flex justify-between text-base font-semibold pt-2 border-t border-border/30">
+                    <span className="text-primary">Estimated Payout</span>
+                    <span className="text-primary">{formatCurrency(est.netPayout)}</span>
+                  </div>
+                </div>
+              );
+            })()}
+          </motion.div>
 
           {/* Payment Info */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass-card rounded-2xl p-5 space-y-3">

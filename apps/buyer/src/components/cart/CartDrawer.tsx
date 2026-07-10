@@ -273,8 +273,8 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                         {/* Price & Rating */}
                         <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2">
                           <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className="text-[19px] font-black text-gray-900">{isNotAvailable ? 'N/A' : `₹${(itemPrice * quantity).toLocaleString('en-IN')}`}</span>
-                            <span className="text-[14px] font-bold text-gray-400 line-through">{!isNotAvailable && itemOriginalPrice > 0 ? `₹${(itemOriginalPrice * quantity).toLocaleString('en-IN')}` : ''}</span>
+                            <span className="text-[19px] font-black text-gray-900">{isNotAvailable ? 'N/A' : `₹${Math.round(Number(itemPrice * quantity)).toLocaleString('en-IN')}`}</span>
+                            <span className="text-[14px] font-bold text-gray-400 line-through">{!isNotAvailable && itemOriginalPrice > 0 ? `₹${Math.round(Number(itemOriginalPrice * quantity)).toLocaleString('en-IN')}` : ''}</span>
                           </div>
                           <div className="flex items-center gap-[3px] sm:gap-[4px]">
                             <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-[#6342B4] text-[#6342B4]" />
@@ -333,7 +333,7 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
               {/* Subtotal row */}
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[17px] font-semibold text-gray-400 uppercase tracking-widest">Subtotal</span>
-                <span className="text-[28px] font-black text-gray-900">₹{Math.round(cart?.total ?? 0).toLocaleString('en-IN')}</span>
+                <span className="text-[28px] font-black text-gray-900">₹{Math.round(Number(cart?.total ?? 0)).toLocaleString('en-IN')}</span>
               </div>
               {items.length > 0 && (
                 <p className="text-[15px] text-gray-400 mb-4">

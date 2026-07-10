@@ -270,8 +270,8 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                           {/* Row 2: Price & Quickview Button */}
                           <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2">
                             <div className="flex items-baseline gap-2 text-left">
-                              <span className="text-[19px] font-black text-gray-900">{isNotAvailable ? 'N/A' : `₹${itemPrice.toLocaleString('en-IN')}`}</span>
-                              <span className="text-[14px] font-bold text-gray-400 line-through">{!isNotAvailable && itemOriginalPrice > 0 ? `₹${itemOriginalPrice.toLocaleString('en-IN')}` : ''}</span>
+                              <span className="text-[19px] font-black text-gray-900">{isNotAvailable ? 'N/A' : `₹${Math.round(Number(itemPrice)).toLocaleString('en-IN')}`}</span>
+                              <span className="text-[14px] font-bold text-gray-400 line-through">{!isNotAvailable && itemOriginalPrice > 0 ? `₹${Math.round(Number(itemOriginalPrice)).toLocaleString('en-IN')}` : ''}</span>
                             </div>
                             
                             {/* Quickview Button */}

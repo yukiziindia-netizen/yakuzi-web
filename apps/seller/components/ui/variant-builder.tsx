@@ -5,7 +5,6 @@ import { Plus, GripVertical, Image as ImageIcon, Search, ArrowDownUp, Grid2X2, X
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
-import { DiscountSelector } from "../products/DiscountSelector";
 import { calculatePricing, formatCurrency } from "@yukizi/utils";
 import type { DiscountFormDetails } from "@yukizi/utils";
 
@@ -99,55 +98,10 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingVariantId, setEditingVariantId] = useState<string | null>(null);
 
-  // Sync variants when options change
-  useEffect(() => {
-    const newCombinations = generateCombinations(options);
-    
-    // If no valid combinations, clear variants
-    if (newCombinations.length === 0) {
-      if (variants.length > 0 && onChangeVariants) {
-        onChangeVariants([]);
-      }
-      return;
-    }
-
-    // Map new combinations, preserving existing data if the name matches
-    const updatedVariants: VariantCombination[] = newCombinations.map(comboName => {
-      const existing = variants.find(v => v.name === comboName);
-      if (existing) {
-        return {
-          ...existing,
-          sku: existing.sku || "",
-          serialNo: existing.serialNo || "",
-          shippingCharges: existing.shippingCharges || "0",
-          shippingGstPercent: existing.shippingGstPercent || 0,
-          finalShippingPrice: existing.finalShippingPrice || "0"
-        };
-      }
-      return { 
-        id: Math.random().toString(36).substring(2, 9), 
-        name: comboName, 
-        price: "", 
-        compareAtPrice: "",
-        discount: discountDetails?.discountPercent?.toString() || "",
-        gstPercent: gstPercent || undefined,
-        available: "",
-        sku: "",
-        serialNo: "",
-        shippingCharges: "0",
-        shippingGstPercent: 0,
-        finalShippingPrice: "0"
-      };
-    });
-
-    // Only call onChange if the variants actually changed structurally
-    const currentNames = variants.map(v => v.name).join("|");
-    const newNames = updatedVariants.map(v => v.name).join("|");
-    
-    if (currentNames !== newNames && onChangeVariants) {
-      onChangeVariants(updatedVariants);
-    }
-  }, [options, variants, onChangeVariants]);
+  // Auto-generation of variants on option change has been removed.
+  // We now synchronously update variants when option values are added or deleted,
+  // preventing previously disabled variants from automatically reappearing when
+  // the component mounts or when unrelated options change.
 
   const addOption = () => {
     const newId = Math.random().toString(36).substr(2, 9);
@@ -156,12 +110,95 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
   };
 
   const updateOption = (id: string, updates: Partial<VariantOption>) => {
-    onChangeOptions(options.map((opt) => (opt.id === id ? { ...opt, ...updates } : opt)));
+    const oldOption = options.find(opt => opt.id === id);
+    if (!oldOption) return;
+
+    const newOptions = options.map((opt) => (opt.id === id ? { ...opt, ...updates } : opt));
+    onChangeOptions(newOptions);
+
+    if (updates.values && onChangeVariants) {
+      // Find what was added or removed
+      const oldVals = oldOption.values || [];
+      const newVals = updates.values;
+      
+      const addedVals = newVals.filter(v => !oldVals.includes(v));
+      const removedVals = oldVals.filter(v => !newVals.includes(v));
+
+      let currentVariants = [...variants];
+
+      // If values were removed, delete affected variants
+      if (removedVals.length > 0) {
+        const optionIndex = options.findIndex(opt => opt.id === id);
+        currentVariants = currentVariants.filter(v => {
+          const parts = v.name.split(' / ');
+          if (parts.length > optionIndex) {
+            return !removedVals.includes(parts[optionIndex]);
+          }
+          return true;
+        });
+      }
+
+      // If values were added, generate new combinations ONLY for the added values
+      if (addedVals.length > 0) {
+        // Pretend this option only has the newly added values
+        const addedOptions = newOptions.map(opt => 
+          opt.id === id ? { ...opt, values: addedVals } : opt
+        );
+        const newCombinations = generateCombinations(addedOptions);
+        
+        const newVariants: VariantCombination[] = newCombinations.map(comboName => ({
+          id: Math.random().toString(36).substring(2, 9), 
+          name: comboName, 
+          price: "", 
+          compareAtPrice: "",
+          discount: discountDetails?.discountPercent?.toString() || "",
+          gstPercent: gstPercent || undefined,
+          available: "",
+          sku: "",
+          serialNo: "",
+          shippingCharges: "0",
+          shippingGstPercent: 0,
+          finalShippingPrice: "0"
+        }));
+        
+        currentVariants = [...currentVariants, ...newVariants];
+      }
+
+      onChangeVariants(currentVariants);
+    }
   };
 
   const deleteOption = (id: string) => {
-    onChangeOptions(options.filter((opt) => opt.id !== id));
+    const optionIndex = options.findIndex(opt => opt.id === id);
+    const newOptions = options.filter((opt) => opt.id !== id);
+    onChangeOptions(newOptions);
     if (editingId === id) setEditingId(null);
+
+    // Update existing variants to remove the deleted option's part
+    if (onChangeVariants) {
+      if (newOptions.length === 0) {
+        onChangeVariants([]);
+      } else {
+        const updatedVariants = variants.map(v => {
+          const parts = v.name.split(' / ');
+          if (parts.length > optionIndex) {
+            parts.splice(optionIndex, 1);
+          }
+          return { ...v, name: parts.join(' / ') };
+        });
+        
+        // Deduplicate variants that might now have the same name
+        const deduplicated: VariantCombination[] = [];
+        const seen = new Set();
+        for (const v of updatedVariants) {
+          if (!seen.has(v.name)) {
+            seen.add(v.name);
+            deduplicated.push(v);
+          }
+        }
+        onChangeVariants(deduplicated);
+      }
+    }
   };
 
   const updateVariant = (id: string, field: keyof VariantCombination, value: string) => {
@@ -172,7 +209,8 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
         if (field === 'shippingCharges' || field === 'shippingGstPercent') {
           const sc = Number(updated.shippingCharges || 0);
           const gst = Number(updated.shippingGstPercent || 0);
-          updated.finalShippingPrice = (sc + (sc * gst / 100)).toFixed(2);
+          const pricing = calculatePricing(0, 0, { type: 'none', shippingCharges: sc, shippingGstPercent: gst, isTaxIncluded });
+          updated.finalShippingPrice = pricing.shippingTotal.toString();
         }
         return updated;
       }
@@ -311,7 +349,7 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                     <th scope="col" className="px-6 py-3 font-medium">Variant</th>
                     <th scope="col" className="px-6 py-3 font-medium">SKU</th>
                     <th scope="col" className="px-6 py-3 font-medium">Serial No</th>
-                    <th scope="col" className="px-6 py-3 font-medium">Price</th>
+                    <th scope="col" className="px-6 py-3 font-medium">Base Price (MRP)</th>
                     <th scope="col" className="px-6 py-3 font-medium">GST (%)</th>
                     <th scope="col" className="px-6 py-3 font-medium">Discount</th>
                     <th scope="col" className="px-6 py-3 font-medium">Shipping (₹)</th>
@@ -362,28 +400,29 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                           if (p > 0) {
                             try {
                               const vGst = variant.gstPercent !== undefined ? Number(variant.gstPercent) : (gstPercent || 0);
-                              const grossProduct = isTaxIncluded ? p : p + (p * vGst / 100);
-
-                              const finalShip = (variant.finalShippingPrice !== undefined && variant.finalShippingPrice !== null && variant.finalShippingPrice !== "" && !isNaN(Number(variant.finalShippingPrice))) 
-                                ? Number(variant.finalShippingPrice) 
-                                : (shippingCharges || Number(variant.shippingCharges) || 0);
-
-                              const grossTotal = grossProduct + finalShip;
-
+                              
                               const vDiscountDetails = variant.discountDetails || discountDetails;
                               const discountType = vDiscountDetails?.type || 'none';
                               let discountPercent = 0;
-                              
                               if (variant.discount && Number(variant.discount) > 0) {
                                 discountPercent = Number(variant.discount);
                               } else if (discountType === 'ptr_discount' || discountType === 'ptr_discount_and_same_product_bonus' || discountType === 'ptr_discount_and_different_product_bonus') {
                                 discountPercent = vDiscountDetails?.discountPercent || 0;
                               }
 
-                              const discountAmount = grossTotal * (discountPercent / 100);
-                              const finalPrice = grossTotal - discountAmount;
+                              const finalShip = (variant.finalShippingPrice !== undefined && variant.finalShippingPrice !== null && variant.finalShippingPrice !== "" && !isNaN(Number(variant.finalShippingPrice))) 
+                                ? Number(variant.finalShippingPrice) 
+                                : (shippingCharges || Number(variant.shippingCharges) || 0);
 
-                              return <div className="text-[10px] mt-1 text-primary/80 font-medium whitespace-nowrap">Final: {formatCurrency(finalPrice)}</div>;
+                              const pricing = calculatePricing(p, vGst, {
+                                type: discountPercent > 0 ? 'ptr_discount' : discountType,
+                                discountPercent: discountPercent,
+                                shippingCharges: finalShip,
+                                shippingGstPercent: variant.shippingGstPercent || 0,
+                                isTaxIncluded: isTaxIncluded
+                              });
+
+                              return <div className="text-[10px] mt-1 text-primary/80 font-medium whitespace-nowrap">Final: {formatCurrency(pricing.finalCustomerPayable)}</div>;
                             } catch (e) {
                               return null;
                             }

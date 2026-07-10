@@ -165,7 +165,7 @@ export default function ProductsPage() {
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-1">
                             <Link href={`/products/${p.id}`} aria-label={`View ${p.name}`} className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent/60 transition-colors"><Eye className="h-3.5 w-3.5"/></Link>
-                            <Link href={`/products/${p.id}/edit`} aria-label={`Edit ${p.name}`} className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent/60 transition-colors"><Edit className="h-3.5 w-3.5"/></Link>
+                            <Link href={`/products/${p.id}/edit${p.variantName || p.variant?.name ? `?variant=${encodeURIComponent(p.variantName || p.variant?.name)}` : ''}`} aria-label={`Edit ${p.name}`} className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent/60 transition-colors"><Edit className="h-3.5 w-3.5"/></Link>
                             <button onClick={() => deleteProduct.mutate(p.id)} aria-label={`Delete ${p.name}`} className="h-7 w-7 rounded-lg flex items-center justify-center text-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"><Trash2 className="h-3.5 w-3.5"/></button>
                           </div>
                         </td>

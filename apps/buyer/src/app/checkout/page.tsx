@@ -243,8 +243,6 @@ export default function CheckoutPage() {
           <div className="co-topbar-inner" style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', height: 56, gap: 6 }}>
             <Link href="/" style={{ fontSize: 17, fontWeight: 700, color: '#1a1a1a', textDecoration: 'none' }}>Yukizi</Link>
             <span style={{ color: '#ccc', fontSize: 18 }}>/</span>
-            <Link href="/cart" style={{ fontSize: 13, color: '#0066cc', textDecoration: 'none' }}>Cart</Link>
-            <span style={{ color: '#ccc' }}>&#8250;</span>
             <span style={{ fontSize: 13, color: '#555', fontWeight: 500 }}>Information</span>
             <span style={{ color: '#ccc' }}>&#8250;</span>
             <span style={{ fontSize: 13, color: '#bbb' }}>Shipping</span>
@@ -499,7 +497,7 @@ export default function CheckoutPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: 14, color: '#555' }}>Subtotal</span>
-                <span style={{ fontSize: 14, color: '#1a1a1a', fontWeight: 500 }}>₹{subtotal.toLocaleString('en-IN')}</span>
+                <span style={{ fontSize: 14, color: '#1a1a1a', fontWeight: 500 }}>₹{Math.round(Number(subtotal)).toLocaleString('en-IN')}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
@@ -519,7 +517,7 @@ export default function CheckoutPage() {
                 <span style={{ fontSize: 18, fontWeight: 700, color: '#1a1a1a' }}>Total Payable</span>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
                   <span style={{ fontSize: 12, color: '#888' }}>INR</span>
-                  <span style={{ fontSize: 22, fontWeight: 700, color: '#1a1a1a' }}>₹{total.toLocaleString('en-IN')}</span>
+                  <span style={{ fontSize: 22, fontWeight: 700, color: '#1a1a1a' }}>₹{Math.round(Number(total)).toLocaleString('en-IN')}</span>
                 </div>
               </div>
               <p style={{ fontSize: 12, color: '#888', marginTop: 4, textAlign: 'right' }}>

@@ -166,7 +166,7 @@ export default function SearchBar({ isOpen = false, onClose }: SearchBarProps) {
                           </div>
                           <div className="flex-1 text-left">
                             <p className="text-sm font-bold text-gray-900 truncate">{product.name}</p>
-                            <p className="text-xs text-gray-400 font-medium">?{product.price.toLocaleString('en-IN')}</p>
+                            <p className="text-xs text-gray-400 font-medium">?{Math.round(Number(product.price)).toLocaleString('en-IN')}</p>
                           </div>
                           <ArrowRight className="w-4 h-4 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity" />
                         </button>

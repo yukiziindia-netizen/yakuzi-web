@@ -104,7 +104,7 @@ export default function PaymentIdPage({ params }: { params: { orderId: string } 
                   <div className="space-y-4">
                     <div>
                       <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Total Bill Amount</p>
-                      <p className="text-3xl font-black text-gray-900 tracking-tight">₹{amount.toLocaleString('en-IN')}</p>
+                      <p className="text-3xl font-black text-gray-900 tracking-tight">₹{Math.round(Number(amount)).toLocaleString('en-IN')}</p>
                     </div>
                     <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
                       <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status</span>

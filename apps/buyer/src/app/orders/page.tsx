@@ -138,7 +138,7 @@ function OrdersPageContent() {
                         orderId={orderNumber}
                         date={orderDate}
                         status={order.orderStatus || order.status || 'PLACED'}
-                        total={`₹${totalAmount.toLocaleString('en-IN')}`}
+                        total={`₹${Math.round(Number(totalAmount)).toLocaleString('en-IN')}`}
                         itemCount={itemCount}
                         productName={productName}
                         productImage={productImage}

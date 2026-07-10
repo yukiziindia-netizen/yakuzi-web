@@ -117,9 +117,9 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
   const rating = prod.rating || 4.5;
 
   const isNotAvailable = prod.sellerCount === 0 || prod.sellerOffers?.length === 0 || price == null || price === 0;
-  const displayPrice = isNotAvailable ? 'N/A' : `₹${Number(price).toLocaleString('en-IN')}`;
+  const displayPrice = isNotAvailable ? 'N/A' : `₹${Math.round(Number(price)).toLocaleString('en-IN')}`;
   const displayOriginalPrice = mrp != null && Number(mrp) > Number(price || 0) 
-    ? `₹${Number(mrp).toLocaleString('en-IN')}` 
+    ? `₹${Math.round(Number(mrp)).toLocaleString('en-IN')}` 
     : '';
   
   const displayDelivery = prod.deliveryText || prod.deliveryTime || '3 days';
@@ -471,7 +471,7 @@ function ComparisonOffersList({
             {/* 2. Price & Subtext */}
             <div className={isDesktop ? "flex flex-col items-start text-left min-w-0" : "w-[25%] sm:flex-1 flex flex-col items-start text-left flex-shrink-0 min-w-0 pl-2 sm:pl-0"}>
               <span className={isDesktop ? "text-[14px] font-bold text-gray-800 leading-none tracking-tight" : "text-[12px] sm:text-[18px] lg:text-[22px] font-bold text-gray-800 leading-none tracking-tight"}>
-                ₹{pricing.finalCustomerPayable.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                ₹{Math.round(pricing.finalCustomerPayable).toLocaleString('en-IN')}
               </span>
               <span className={isDesktop ? "text-[9px] text-gray-500 font-medium mt-0.5 leading-none whitespace-nowrap overflow-hidden text-ellipsis max-w-full" : "text-[8px] sm:text-[11px] text-gray-500 font-medium mt-1 leading-none whitespace-nowrap overflow-hidden text-ellipsis max-w-full"}>
                   {listing.moq > 1 ? `Min. purchase of ${listing.moq}` : ''}
@@ -778,12 +778,12 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
   const listings = product.listings || [];
   const validListings = listings.filter((l: any) => l.price != null);
   const displayPrice =
-    validListings.length > 0 ? Math.min(...validListings.map((l: any) => l.price)) : product.price;
-  const displayMrp =
-    validListings.find((l: any) => l.mrp || l.originalPrice)?.mrp ||
+    validListings.length > 0 ? Math.round(Math.min(...validListings.map((l: any) => l.price))) : Math.round(Number(product.price || 0));
+  const rawMrp = validListings.find((l: any) => l.mrp || l.originalPrice)?.mrp ||
     validListings.find((l: any) => l.mrp || l.originalPrice)?.originalPrice ||
     product.mrp ||
     product.originalPrice;
+  const displayMrp = rawMrp ? Math.round(Number(rawMrp)) : 0;
   const relatedProducts = relatedProductsData?.data || [];
 
   // Filter listings based on the selected variant
@@ -1157,11 +1157,11 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
               {/* Price details */}
               <div className="flex items-baseline gap-3 mb-2">
                 <span className="text-[26px] font-semibold text-[#4a4a4a] leading-none">
-                  ₹{displayPrice?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                  ₹{displayPrice ? Math.round(displayPrice).toLocaleString('en-IN') : '0'}
                 </span>
                 {displayMrp && displayMrp > displayPrice && (
                   <span className="text-[13px] font-bold text-gray-400 line-through leading-none">
-                    ₹{displayMrp?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    ₹{displayMrp ? Math.round(displayMrp).toLocaleString('en-IN') : '0'}
                   </span>
                 )}
               </div>

@@ -209,7 +209,7 @@ export default function OrderIdPage({ params }: { params: { orderId: string } })
                         {order.name && <p className="text-xs text-gray-400 font-bold">{order.name}</p>}
                       </div>
                     </div>
-                    <p className="text-xl font-bold text-gray-900">₹{totalAmount.toLocaleString('en-IN')}</p>
+                    <p className="text-xl font-bold text-gray-900">₹{Math.round(Number(totalAmount)).toLocaleString('en-IN')}</p>
                   </div>
 
                   {shippingAddress && (
@@ -262,12 +262,12 @@ export default function OrderIdPage({ params }: { params: { orderId: string } })
                                 <div className="flex items-center gap-2 mt-0.5">
                                   <span className="text-xs text-gray-400 font-bold">Qty: {item.quantity || 1}</span>
                                   <span className="text-[10px] text-gray-300">•</span>
-                                  <span className="text-xs text-gray-400 font-bold">₹{(item.price || item.unitPrice || (itemTotal / (item.quantity || 1))).toLocaleString('en-IN')}/unit</span>
+                                  <span className="text-xs text-gray-400 font-bold">₹{(item.price || item.unitPrice || (itemTotal / (item.quantity || 1))).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/unit</span>
                                 </div>
                               </div>
                             </div>
                             <div className="text-right">
-                              <p className="font-bold text-gray-900 tracking-tight">₹{itemTotal.toLocaleString('en-IN')}</p>
+                              <p className="font-bold text-gray-900 tracking-tight">₹{Math.round(Number(itemTotal)).toLocaleString('en-IN')}</p>
                             </div>
                           </Link>
                       );

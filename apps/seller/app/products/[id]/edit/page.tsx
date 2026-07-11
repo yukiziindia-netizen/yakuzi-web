@@ -83,8 +83,8 @@ export default function EditProductPage() {
                 gst_percent: product.gstPercent ?? (product as any).gst ?? 0,
                 compare_at_price: (product as any).compareAtPrice || 0,
                 is_tax_included: (product as any).masterProductId ? true : ((product as any).isTaxIncluded || false),
-                shipping_charges: (product as any).shippingCharges !== null && (product as any).shippingCharges !== undefined 
-                  ? (product as any).shippingCharges 
+                shipping_charges: (product as any).finalShippingPrice !== null && (product as any).finalShippingPrice !== undefined 
+                  ? (product as any).finalShippingPrice 
                   : 0,
                 sku: resolvedSku,
                 serialNo: resolvedSerialNo,

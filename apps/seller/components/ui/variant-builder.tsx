@@ -464,9 +464,12 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                           <input
                             type="text"
                             value={(() => {
+                              if (variant.finalShippingPrice !== undefined && variant.finalShippingPrice !== null && variant.finalShippingPrice !== "" && variant.finalShippingPrice !== "0") {
+                                return variant.finalShippingPrice.toString();
+                              }
                               const sc = (variant.shippingCharges !== undefined && variant.shippingCharges !== null && variant.shippingCharges !== "") ? Number(variant.shippingCharges) : (shippingCharges || 0);
-                              const gst = (variant.shippingGstPercent !== undefined && variant.shippingGstPercent !== null && variant.shippingGstPercent !== 0 && variant.shippingGstPercent !== "" as any) ? Number(variant.shippingGstPercent) : (shippingGstPercent || 18);
-                              const computed = calculatePricing(0, 0, { type: 'none', shippingCharges: sc, shippingGstPercent: gst, isTaxIncluded: false }).shippingTotal;
+                              const gst = (variant.shippingGstPercent !== undefined && variant.shippingGstPercent !== null && variant.shippingGstPercent !== 0 && variant.shippingGstPercent !== "" as any) ? Number(variant.shippingGstPercent) : (shippingGstPercent || 0);
+                              const computed = calculatePricing(0, 0, { type: 'none', shippingCharges: sc, shippingGstPercent: gst, isTaxIncluded }).shippingTotal;
                               return computed.toString();
                             })()}
                             onChange={(e) => updateVariant(variant.id, "finalShippingPrice", e.target.value)}

@@ -777,27 +777,53 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
 
   const listings = product.listings || [];
   const validListings = listings.filter((l: any) => l.price != null);
-  const displayPrice =
-    validListings.length > 0 ? Math.round(Math.min(...validListings.map((l: any) => l.price))) : Math.round(Number(product.price || 0));
-  const rawMrp = validListings.find((l: any) => l.mrp || l.originalPrice)?.mrp ||
-    validListings.find((l: any) => l.mrp || l.originalPrice)?.originalPrice ||
-    product.mrp ||
-    product.originalPrice;
-  const displayMrp = rawMrp ? Math.round(Number(rawMrp)) : 0;
   const relatedProducts = relatedProductsData?.data || [];
 
   // Filter listings based on the selected variant
   const filteredListings =
     productVariants.length > 0 && selectedVariantName
-      ? listings.filter(
+      ? validListings.filter(
           (l: any) =>
             l.variantName === selectedVariantName ||
             l.name === selectedVariantName ||
             l.name?.includes(selectedVariantName),
         )
-      : listings;
+      : validListings;
 
   const comparisonListings = filteredListings || [];
+
+  let bestPricing: any = null;
+  if (comparisonListings.length > 0) {
+    let minPayable = Infinity;
+    for (const listing of comparisonListings) {
+      const pricing = calculatePricing(
+        Number(listing.mrp || listing.originalPrice || product.mrp || product.originalPrice || 0),
+        Number(listing.gstPercent ?? product.gstPercent ?? 0),
+        {
+          type: listing.discountType || (listing.discountMeta?.discountPercent ? 'ptr_discount' : 'none'),
+          discountPercent: listing.discountMeta?.discountPercent,
+          specialPrice: listing.discountMeta?.specialPrice,
+          buy: listing.discountMeta?.buy,
+          get: listing.discountMeta?.get,
+          bonusProductName: listing.discountMeta?.bonusProductName,
+          shippingCharges: listing.finalShippingPrice ?? listing.shippingCharges ?? product.shippingCharges ?? 0,
+          shippingGstPercent: 0,
+          isTaxIncluded: true,
+        }
+      );
+      if (pricing.finalCustomerPayable < minPayable) {
+        minPayable = pricing.finalCustomerPayable;
+        bestPricing = pricing;
+      }
+    }
+  }
+
+  const displayPrice = bestPricing ? Math.round(bestPricing.finalCustomerPayable) : Math.round(Number(product.price || 0));
+  const rawMrp = comparisonListings.find((l: any) => l.mrp || l.originalPrice)?.mrp ||
+    comparisonListings.find((l: any) => l.mrp || l.originalPrice)?.originalPrice ||
+    product.mrp ||
+    product.originalPrice;
+  const displayMrp = rawMrp ? Math.round(Number(rawMrp)) : 0;
 
   // Wishlist / Bookmark logic
   const isBookmarked = wishlistSet.has(product.id);

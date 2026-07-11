@@ -76,7 +76,7 @@ export const panSchema = z
 
 const validGstValues = VALID_GST_PERCENTAGES as readonly number[];
 
-export const discountFormDetailsSchema = z.object({
+export const discountFormDetailsSchemaRaw = z.object({
   type: z.enum([
     'none',
     'ptr_discount',
@@ -93,11 +93,25 @@ export const discountFormDetailsSchema = z.object({
   specialPrice: z.preprocess((val) => (val === '' || val === null || isNaN(Number(val))) ? undefined : Number(val), z.number().min(0).optional()),
 });
 
+export const discountFormDetailsSchema = z.preprocess((val: any) => {
+  if (!val) return { type: 'none' };
+  const d = { ...val };
+  // Auto-downgrade type if the UI cleared the fields
+  if (['ptr_discount', 'ptr_discount_and_same_product_bonus', 'ptr_discount_and_different_product_bonus'].includes(d.type)) {
+    if (d.discountPercent === undefined || d.discountPercent === null || d.discountPercent === '' || isNaN(Number(d.discountPercent)) || Number(d.discountPercent) <= 0) {
+      if (d.type === 'ptr_discount') d.type = 'none';
+      if (d.type === 'ptr_discount_and_same_product_bonus') d.type = 'same_product_bonus';
+      if (d.type === 'ptr_discount_and_different_product_bonus') d.type = 'different_product_bonus';
+    }
+  }
+  return d;
+}, discountFormDetailsSchemaRaw);
+
 export const productFormSchema = z.object({
   product_name: z.string().min(2, 'Product name must be at least 2 characters'),
-  product_price: z.preprocess((val) => Number(val) || 0, z.number()),
-  compare_at_price: z.preprocess((val) => Number(val) || 0, z.number()).optional(),
-  gst_percent: z.preprocess((val) => Number(val) || 0, z.number()).optional(),
+  product_price: z.preprocess((val) => Number(val) || 0, z.number().min(0)),
+  compare_at_price: z.preprocess((val) => Number(val) || 0, z.number().min(0).optional()),
+  gst_percent: z.preprocess((val) => (val === '' || val === null || isNaN(Number(val))) ? undefined : Number(val), z.number().min(0).optional()),
   is_tax_included: z.boolean().default(false).optional(),
   unit: z.string().optional(),
   pack_size: z.string().optional(),
@@ -108,11 +122,11 @@ export const productFormSchema = z.object({
   chemical_combination: z.string().optional(),
   categories: z.array(z.string()).min(1, 'Select at least one category'),
   sub_categories: z.array(z.string()).min(1, 'Select at least one sub-category'),
-  stock: z.preprocess((val) => Number(val) || 0, z.number().int()),
-  min_order_qty: z.preprocess((val) => Number(val) || 0, z.number().int()),
-  max_order_qty: z.preprocess((val) => Number(val) || 0, z.number().int()),
+  stock: z.preprocess((val) => Number(val) || 0, z.number().int().min(0)),
+  min_order_qty: z.preprocess((val) => Number(val) || 0, z.number().int().min(1)),
+  max_order_qty: z.preprocess((val) => Number(val) || 0, z.number().int().min(1)),
   delivery_text: z.string().optional(),
-  shipping_charges: z.preprocess((val) => Number(val) || 0, z.number()).optional(),
+  shipping_charges: z.preprocess((val) => (val === '' || val === null || isNaN(Number(val))) ? undefined : Number(val), z.number().min(0).optional()),
   image_list: z.array(z.string()).optional().default([]),
   custom_extra_fields: z.array(z.object({ key: z.string().min(1), value: z.string().min(1) })),
   discount_form_details: discountFormDetailsSchema,

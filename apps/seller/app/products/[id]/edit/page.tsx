@@ -83,9 +83,9 @@ export default function EditProductPage() {
                 gst_percent: product.gstPercent ?? (product as any).gst ?? 0,
                 compare_at_price: (product as any).compareAtPrice || 0,
                 is_tax_included: (product as any).masterProductId ? true : ((product as any).isTaxIncluded || false),
-                shipping_charges: (product as any).finalShippingPrice !== null && (product as any).finalShippingPrice !== undefined 
-                  ? (product as any).finalShippingPrice 
-                  : ((product as any).shippingCharges ? calculatePricing(0, 0, { type: 'none', shippingCharges: (product as any).shippingCharges, shippingGstPercent: ((product as any).shippingGstPercent ?? 18), isTaxIncluded: true }).shippingTotal : 0),
+                shipping_charges: (product as any).shippingCharges !== null && (product as any).shippingCharges !== undefined 
+                  ? (product as any).shippingCharges 
+                  : 0,
                 sku: resolvedSku,
                 serialNo: resolvedSerialNo,
                 specifications: resolvedSpecifications,
@@ -102,7 +102,7 @@ export default function EditProductPage() {
                     "SPECIAL_PRICE": "special_price",
                   } as any)[(product as any).discountType] || "none" : "none",
                   ...(product as any).discountMeta,
-                  discountPercent: Number((product as any).discount ?? (product as any).discountMeta?.discountPercent ?? 0) || undefined
+                  discountPercent: Number((product as any).discount ?? (product as any).discountMeta?.discountPercent ?? 0) ?? undefined
                 } as any,
               }} 
               initialPlatformFees={{
@@ -132,10 +132,7 @@ export default function EditProductPage() {
                 }
 
                 const vGstRaw = (listing as any)?.gstPercent ?? (listing as any)?.gst ?? v.gstPercent ?? v.options?.gstPercent ?? v.gst ?? v.gstValue;
-                const vGst = vGstRaw !== undefined && vGstRaw !== null ? vGstRaw : mainGst;
-                
                 const vDiscountRaw = derivedDiscount ?? v.discountPercent ?? v.discount ?? v.options?.discountPercent ?? v.options?.discount ?? v.discountMeta?.discountPercent;
-                const vDiscount = vDiscountRaw !== undefined && vDiscountRaw !== null ? vDiscountRaw : mainDiscount;
 
                 const vPrice = (listing as any)?.mrp ?? (listing as any)?.price ?? v.price ?? "";
                 const vCompareAt = (listing as any)?.compareAtPrice ?? v.compareAtPrice ?? "";
@@ -145,23 +142,15 @@ export default function EditProductPage() {
                   name: v.name,
                   price: vPrice.toString(),
                   compareAtPrice: vCompareAt.toString(),
-                  gstPercent: vGst.toString(),
-                  discount: vDiscount.toString(),
+                  gstPercent: vGstRaw !== undefined && vGstRaw !== null ? vGstRaw.toString() : "",
+                  discount: vDiscountRaw !== undefined && vDiscountRaw !== null ? vDiscountRaw.toString() : "",
                   available: ((listing as any)?.stock ?? v.available ?? 0).toString(),
                   image: v.image,
                   sku: (listing as any)?.sku || v.sku || "",
                   serialNo: (listing as any)?.serialNo || v.serialNo || "",
-                  shippingCharges: ((listing as any)?.shippingCharges ?? v.shippingCharges ?? (product as any).shippingCharges ?? 0).toString(),
-                  shippingGstPercent: Number((listing as any)?.shippingGstPercent ?? v.shippingGstPercent ?? (product as any).shippingGstPercent ?? 0),
-                  finalShippingPrice: (() => {
-                    const rawShip = (listing as any)?.shippingCharges ?? v.shippingCharges ?? (product as any).shippingCharges ?? 0;
-                    const rawGst = (listing as any)?.shippingGstPercent ?? v.shippingGstPercent ?? (product as any).shippingGstPercent ?? 0;
-                    const calculated = calculatePricing(0, 0, { type: 'none', shippingCharges: Number(rawShip), shippingGstPercent: Number(rawGst), isTaxIncluded: true }).shippingTotal;
-                    const actualFinal = (listing as any)?.finalShippingPrice ?? v.finalShippingPrice;
-                    return (actualFinal !== undefined && actualFinal !== null && String(actualFinal) !== "0")
-                      ? actualFinal.toString()
-                      : calculated.toString();
-                  })()
+                  shippingCharges: ((listing as any)?.shippingCharges !== undefined && (listing as any)?.shippingCharges !== null) ? (listing as any).shippingCharges.toString() : (v.shippingCharges !== undefined && v.shippingCharges !== null ? v.shippingCharges.toString() : ""),
+                  shippingGstPercent: Number((listing as any)?.shippingGstPercent ?? v.shippingGstPercent ?? 0),
+                  finalShippingPrice: ((listing as any)?.finalShippingPrice !== undefined && (listing as any)?.finalShippingPrice !== null) ? (listing as any).finalShippingPrice.toString() : (v.finalShippingPrice !== undefined && v.finalShippingPrice !== null ? v.finalShippingPrice.toString() : "")
                 };
               }) : []}
               initialCategoryName={typeof (product as any).category === 'object' ? (product as any).category?.name || (product as any).category?.id : (product as any).category}

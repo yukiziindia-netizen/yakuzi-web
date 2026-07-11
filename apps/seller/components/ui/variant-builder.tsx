@@ -48,6 +48,7 @@ interface VariantBuilderProps {
   gstPercent?: number;
   discountDetails?: DiscountFormDetails;
   shippingCharges?: number;
+  shippingGstPercent?: number;
   isTaxIncluded?: boolean;
   isSuggestedProductSelected?: boolean;
   activeVariantId?: string;
@@ -90,6 +91,7 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
   gstPercent,
   discountDetails,
   shippingCharges,
+  shippingGstPercent,
   isTaxIncluded,
   isSuggestedProductSelected = false,
   activeVariantId,
@@ -399,7 +401,7 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                           const p = Number(variant.price);
                           if (p > 0) {
                             try {
-                              const vGst = variant.gstPercent !== undefined ? Number(variant.gstPercent) : (gstPercent || 0);
+                              const vGst = (variant.gstPercent !== undefined && variant.gstPercent !== null) ? Number(variant.gstPercent) : (gstPercent || 0);
                               
                               const vDiscountDetails = variant.discountDetails || discountDetails;
                               const discountType = vDiscountDetails?.type || 'none';
@@ -410,17 +412,14 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                                 discountPercent = vDiscountDetails?.discountPercent || 0;
                               }
 
-                              const finalShip = (variant.finalShippingPrice !== undefined && variant.finalShippingPrice !== null && variant.finalShippingPrice !== "" && !isNaN(Number(variant.finalShippingPrice))) 
-                                ? Number(variant.finalShippingPrice) 
-                                : (shippingCharges || Number(variant.shippingCharges) || 0);
-
                               const pricing = calculatePricing(p, vGst, {
                                 type: discountPercent > 0 ? 'ptr_discount' : discountType,
                                 discountPercent: discountPercent,
-                                shippingCharges: finalShip,
-                                shippingGstPercent: variant.shippingGstPercent || 0,
+                                shippingCharges: (variant.shippingCharges !== undefined && variant.shippingCharges !== null && variant.shippingCharges !== "" && !isNaN(Number(variant.shippingCharges))) ? Number(variant.shippingCharges) : (shippingCharges || 0),
+                                shippingGstPercent: (variant.shippingGstPercent !== undefined && variant.shippingGstPercent !== null && variant.shippingGstPercent !== 0 && variant.shippingGstPercent !== "" as any) ? Number(variant.shippingGstPercent) : (shippingGstPercent || 0),
                                 isTaxIncluded: isTaxIncluded
                               });
+
 
                               return <div className="text-[10px] mt-1 text-primary/80 font-medium whitespace-nowrap">Final: {formatCurrency(pricing.finalCustomerPayable)}</div>;
                             } catch (e) {
@@ -438,7 +437,7 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                             onChange={(e) => updateVariant(variant.id, "gstPercent", e.target.value)}
                             disabled={isDisabled}
                             className={`block w-full px-3 sm:text-sm border-gray-300 rounded-md py-1.5 border ${isDisabled ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'bg-white'}`}
-                            placeholder="0"
+                            placeholder={gstPercent ? gstPercent.toString() : "0"}
                           />
                         </div>
                       </td>
@@ -453,7 +452,7 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                             onChange={(e) => updateVariant(variant.id, "discount", e.target.value)}
                             disabled={isDisabled}
                             className={`block w-full pl-7 pr-3 sm:text-sm border-gray-300 rounded-md py-1.5 border ${isDisabled ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'bg-white'}`}
-                            placeholder="0"
+                            placeholder={discountDetails?.discountPercent ? discountDetails.discountPercent.toString() : "0"}
                           />
                         </div>
                       </td>
@@ -464,7 +463,12 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                           </div>
                           <input
                             type="text"
-                            value={variant.finalShippingPrice || "0"}
+                            value={(() => {
+                              const sc = (variant.shippingCharges !== undefined && variant.shippingCharges !== null && variant.shippingCharges !== "") ? Number(variant.shippingCharges) : (shippingCharges || 0);
+                              const gst = (variant.shippingGstPercent !== undefined && variant.shippingGstPercent !== null && variant.shippingGstPercent !== 0 && variant.shippingGstPercent !== "" as any) ? Number(variant.shippingGstPercent) : (shippingGstPercent || 18);
+                              const computed = calculatePricing(0, 0, { type: 'none', shippingCharges: sc, shippingGstPercent: gst, isTaxIncluded: false }).shippingTotal;
+                              return computed.toString();
+                            })()}
                             onChange={(e) => updateVariant(variant.id, "finalShippingPrice", e.target.value)}
                             disabled={true}
                             className="block w-full pl-9 pr-3 sm:text-sm border-gray-300 rounded-md py-1.5 border bg-gray-100 text-gray-500 cursor-not-allowed"

@@ -463,9 +463,9 @@ export function ProductForm({
         minimumOrderQuantity: data.min_order_qty,
         maximumOrderQuantity: data.max_order_qty,
         gstPercent: payloadGst,
-        isTaxIncluded: true,
+        isTaxIncluded: false,
         shippingCharges: payloadShipping,
-        finalShippingPrice: payloadShipping,
+        finalShippingPrice: calculatePricing(0, 0, { type: 'none', shippingCharges: payloadShipping, shippingGstPercent: payloadGst, isTaxIncluded: false }).shippingTotal,
         ...(data.delivery_text && { deliveryText: `${data.delivery_text} ${Number(data.delivery_text) === 1 ? 'day' : 'days'}` }),
         ...(realImages.length > 0 && { images: realImages }),
         ...(Object.keys(mergedExtraFields).length > 0 && { extraFields: mergedExtraFields }),
@@ -489,7 +489,7 @@ export function ProductForm({
             discount: Number(v.discount) > 0 ? Number(v.discount) : undefined,
             shippingCharges: Number(v.shippingCharges) || 0,
             shippingGstPercent: Number(v.shippingGstPercent) || 0,
-            finalShippingPrice: Number(v.finalShippingPrice) || calculatePricing(0, 0, { type: 'none', shippingCharges: Number(v.shippingCharges || 0), shippingGstPercent: Number(v.shippingGstPercent || 0), isTaxIncluded: true }).shippingTotal,
+            finalShippingPrice: calculatePricing(0, 0, { type: 'none', shippingCharges: Number(v.shippingCharges || 0), shippingGstPercent: Number(v.shippingGstPercent || 0), isTaxIncluded: false }).shippingTotal,
           })) 
         }),
       };
@@ -627,7 +627,7 @@ export function ProductForm({
               {variants.length === 0 && (
                 <div className="space-y-1">
                   <Input 
-                    label="Final Shipping Price (₹)" 
+                    label="Base Shipping Price (₹)" 
                     type="number"
                     min={0}
                     placeholder="0" 

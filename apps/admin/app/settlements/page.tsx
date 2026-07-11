@@ -23,10 +23,7 @@ export default function AdminSettlementsPage() {
   const [page, setPage] = useState(1);
   const limit = 20;
 
-  const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: subDays(new Date(), 30),
-    to: new Date(),
-  });
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
   const { data: settlementsData, isLoading: isLoadingSettlements } = useSettlements({
     page,
@@ -164,6 +161,7 @@ export default function AdminSettlementsPage() {
           <div className="text-center space-y-2">
             <Loader2 className="h-8 w-8 text-primary animate-spin mx-auto" />
             <p className="text-sm text-muted-foreground">Loading settlements…</p>
+            <pre className="text-xs">{JSON.stringify(settlementsData)}</pre>
           </div>
         </div>
       </AdminLayout>
@@ -248,8 +246,8 @@ export default function AdminSettlementsPage() {
                     <td className="px-5 py-4">
                       <div className="flex flex-col">
                         <span className="text-sm font-mono text-foreground font-semibold">#{s.orderItem?.orderId?.substring(0, 8).toUpperCase() || s.id.substring(0, 8)}</span>
-                        <div className="text-[11px] text-primary/80 font-medium mt-1 truncate w-48" title={s.orderItem?.product?.name}>
-                          📦 {s.orderItem?.product?.name ?? "Product Details Unavailable"}
+                        <div className="text-[11px] text-primary/80 font-medium mt-1 truncate w-48" title={s.orderItem?.sellerOffer?.name || s.orderItem?.product?.name}>
+                          📦 {s.orderItem?.sellerOffer?.name || s.orderItem?.product?.name || "Product Details Unavailable"}
                         </div>
                       </div>
                     </td>

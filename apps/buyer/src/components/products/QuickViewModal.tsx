@@ -208,20 +208,10 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
               </div>
 
               {/* Product Banner Halftone Card */}
+              {/* Product Banner Card Container (clean background, overflow hidden to respect rounded corners) */}
               <div
-                className="relative flex aspect-[4/3.2] w-full items-center justify-center rounded-xl border border-purple-400/20 bg-gradient-to-br from-[#854dff] via-[#b336e8] to-[#ff2b9a] p-6 shadow-md"
-                style={{
-                  backgroundImage: `
-                    radial-gradient(rgba(255, 255, 255, 0.15) 1.5px, transparent 1.5px),
-                    linear-gradient(135deg, #854dff 0%, #b336e8 50%, #ff2b9a 100%)
-                  `,
-                  backgroundSize: '12px 12px, 100% 100%',
-                }}
+                className="relative flex aspect-[4/3.2] w-full items-center justify-center rounded-xl border border-gray-200 bg-gray-50 shadow-sm overflow-hidden"
               >
-                {/* Abstract slashes for action look */}
-                <div className="pointer-events-none absolute bottom-0 right-0 top-0 w-1/3 origin-bottom-right skew-x-12 transform bg-gradient-to-l from-pink-500/20 to-transparent" />
-                <div className="pointer-events-none absolute -bottom-10 -right-10 h-64 w-64 rounded-full bg-pink-500/10 blur-2xl" />
-
                 {/* Interactive Thumbnail Gallery overlay on the left (aligned bottom-left) */}
                 <div className="absolute left-4 bottom-4 z-20 flex flex-col gap-2">
                   {productImages.map((img: string, idx: number) => (
@@ -245,13 +235,13 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                   ))}
                 </div>
 
-                {/* Main Product Image (fills the card, centered) */}
-                <div className="absolute inset-0 z-10 flex items-center justify-center p-2">
+                {/* Main Product Image (fills the card container exactly) */}
+                <div className="absolute inset-0 z-10 flex items-center justify-center">
                   <Image
                     src={activeImage}
                     alt={displayProduct.name}
                     fill
-                    className="object-contain transition-transform duration-500 hover:scale-105"
+                    className="object-cover transition-transform duration-500 hover:scale-105"
                     priority
                   />
                 </div>

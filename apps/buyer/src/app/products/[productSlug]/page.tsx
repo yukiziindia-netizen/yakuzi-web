@@ -52,7 +52,7 @@ function Accordion({
     <div className="border-b border-gray-100 py-3">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between text-left text-xs sm:text-[13px] font-extrabold uppercase tracking-wider text-gray-700 focus:outline-none"
+        className="flex w-full items-center justify-between text-left text-xs sm:text-[13px] xl:text-[14px] 2xl:text-[15px] font-extrabold uppercase tracking-wider text-gray-700 focus:outline-none"
       >
         {title}
         {isOpen ? (
@@ -69,7 +69,7 @@ function Accordion({
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden"
           >
-            <div className="purple-scroll relative max-h-[70px] overflow-y-auto pr-4 pt-2 text-xs sm:text-[13px] font-semibold leading-relaxed text-gray-600">
+            <div className="purple-scroll relative max-h-[70px] overflow-y-auto pr-4 pt-2 text-xs sm:text-[13px] xl:text-[14px] 2xl:text-[15px] font-semibold leading-relaxed text-gray-600">
               {content}
             </div>
           </motion.div>
@@ -452,98 +452,149 @@ function ComparisonOffersList({
           }
         };
 
+        const getListingDiscountText = (listing: any) => {
+          const meta = listing.discountMeta || {};
+          if (!listing?.discountType) {
+            if (meta.discountPercent) {
+              return `${meta.discountPercent}% off`;
+            }
+            return null;
+          }
+          if (listing.discountType === "PTR_DISCOUNT") {
+            return `${meta.discountPercent || 0}% off`;
+          }
+          if (listing.discountType === "SAME_PRODUCT_BONUS") {
+            return `Buy ${meta.buy || 0} Get ${meta.get || 0} Free`;
+          }
+          if (listing.discountType === "PTR_PLUS_SAME_PRODUCT_BONUS") {
+            return `${meta.discountPercent || 0}% off`;
+          }
+          if (listing.discountType === "DIFFERENT_PRODUCT_BONUS") {
+            return `Buy ${meta.buy || 0} Get ${meta.get || 0} Free`;
+          }
+          if (listing.discountType === "PTR_PLUS_DIFFERENT_PRODUCT_BONUS") {
+            return `${meta.discountPercent || 0}% off`;
+          }
+          if (listing.discountType === "SPECIAL_PRICE") {
+            return `Special Price`;
+          }
+          return listing.discountType.replace(/_/g, ' ');
+        };
+
+        const getListingSubtext = (listing: any) => {
+          const meta = listing.discountMeta || {};
+          if (listing.discountType === "PTR_PLUS_SAME_PRODUCT_BONUS" || listing.discountType === "SAME_PRODUCT_BONUS") {
+            return `${meta.discountPercent || 0}% off on purchase of ${meta.buy || 3}`;
+          }
+          if (listing.moq > 1) {
+            return `Min. purchase of ${listing.moq}`;
+          }
+          return '';
+        };
+
+        const discountText = getListingDiscountText(listing);
+        const subText = getListingSubtext(listing);
+
         return (
           <div 
             key={listing.id} 
-            className={`transition-colors w-full bg-[#eaeaea] border border-gray-200/60 hover:border-purple-200 shadow-sm ${
-              isDesktop 
-                ? 'grid grid-cols-[60px_1fr_45px_60px_110px] gap-2 items-center py-1.5 px-3 rounded-xl' 
-                : 'flex flex-row items-center justify-between py-2 px-2 sm:py-2.5 sm:px-6 rounded-2xl gap-1 sm:gap-4'
-            }`}
+            className="transition-colors w-full bg-[#eaeaea] border border-gray-200/60 hover:border-purple-200 shadow-sm grid grid-cols-[auto_1fr_auto] gap-3 sm:gap-4 items-center py-2.5 px-3 sm:py-3.5 sm:px-6 xl:py-4 xl:px-8 rounded-xl sm:rounded-2xl"
           >
             {/* 1. Discount Badge */}
-            <div className={isDesktop ? "" : "w-[15%] sm:flex-[1.2] flex justify-start flex-shrink-0 min-w-0"}>
-              <div className="w-full overflow-hidden text-ellipsis whitespace-nowrap">
-                {renderBuyerOfferBadge(listing)}
-              </div>
+            <div className="flex justify-start flex-shrink-0 min-w-0">
+              {discountText ? (
+                <div className="bg-[#854cbc] text-white px-2 py-0.5 sm:px-2.5 sm:py-1 xl:px-3.5 xl:py-1.5 2xl:px-4 2xl:py-2 rounded font-bold text-[10px] sm:text-[13px] xl:text-[14px] 2xl:text-[16px] tracking-wide whitespace-nowrap flex items-center justify-center shadow-sm">
+                  {discountText}
+                </div>
+              ) : (
+                <div className="w-[10px]" />
+              )}
             </div>
 
             {/* 2. Price & Subtext */}
-            <div className={isDesktop ? "flex flex-col items-start text-left min-w-0" : "w-[25%] sm:flex-1 flex flex-col items-start text-left flex-shrink-0 min-w-0 pl-2 sm:pl-0"}>
-              <span className={isDesktop ? "text-[14px] font-bold text-gray-800 leading-none tracking-tight" : "text-[12px] sm:text-[18px] lg:text-[22px] font-bold text-gray-800 leading-none tracking-tight"}>
+            <div className="flex flex-col items-start justify-center min-w-0 text-left">
+              <span className="text-[13px] sm:text-[18px] md:text-[20px] xl:text-[22px] 2xl:text-[25px] font-bold text-gray-800 leading-none tracking-tight">
                 ₹{Math.round(pricing.finalCustomerPayable).toLocaleString('en-IN')}
               </span>
-              <span className={isDesktop ? "text-[9px] text-gray-500 font-medium mt-0.5 leading-none whitespace-nowrap overflow-hidden text-ellipsis max-w-full" : "text-[8px] sm:text-[11px] text-gray-500 font-medium mt-1 leading-none whitespace-nowrap overflow-hidden text-ellipsis max-w-full"}>
-                  {listing.moq > 1 ? `Min. purchase of ${listing.moq}` : ''}
-              </span>
-            </div>
-
-            {/* 3. Star Rating */}
-            <div className={isDesktop ? "flex items-center justify-center gap-1" : "w-[12%] sm:flex-[0.8] flex items-center justify-center gap-0.5 sm:gap-2 flex-shrink-0"}>
-              <Star className={isDesktop ? "w-[15px] h-[15px] fill-[#854cbc] text-[#854cbc] flex-shrink-0" : "w-3.5 h-3.5 sm:w-5 sm:h-5 lg:w-7 lg:h-7 fill-[#854cbc] text-[#854cbc] flex-shrink-0"} />
-              <span className={isDesktop ? "text-gray-800 font-bold text-[14px] leading-none" : "text-gray-800 font-bold text-[12px] sm:text-[18px] lg:text-[22px] leading-none"}>{listing.seller?.rating || '4.5'}</span>
-            </div>
-
-            {/* 4. Delivery badge */}
-            <div className={isDesktop ? "flex items-center justify-center" : "w-[18%] sm:flex-1 flex items-center justify-center flex-shrink-0"}>
-              <DeliveryTruckBadge text={listing.deliveryText || '3 days'} className={isDesktop ? "w-[56px] h-auto text-gray-500 flex-shrink-0" : "w-[50px] sm:w-[70px] lg:w-[84px] h-auto text-gray-500 flex-shrink-0"} />
-            </div>
-
-            {/* 5. Actions (Plus / Incremental / Reset) */}
-            <div className={isDesktop ? "flex items-center justify-end gap-1.5" : "w-[30%] sm:flex-1 flex items-center justify-end gap-1 sm:gap-3 flex-shrink-0 pr-3 sm:pr-0"}>
-              {inStock ? (
-                itemQty === 0 ? (
-                  <button 
-                    onClick={() => handleQtyChange(minQty)}
-                    className="text-orange-500 hover:text-orange-600 focus:outline-none transition-transform active:scale-90 p-1"
-                  >
-                    <svg className={isDesktop ? "w-6 h-6 stroke-[2.5]" : "w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 stroke-[2.5] lg:stroke-[3]"} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                    </svg>
-                  </button>
-                ) : (
-                  <div className={isDesktop ? "flex items-center gap-1.5" : "flex items-center gap-1 sm:gap-3 lg:gap-4"}>
-                    {/* Reset Button */}
-                    <button 
-                      onClick={() => { handleQtyChange(0); toast('Quantity reset', 'info'); }}
-                      title="Reset quantity"
-                      className="text-[#48286b] hover:text-purple-900 transition-transform active:scale-90 focus:outline-none p-0.5"
-                    >
-                      <svg className={isDesktop ? "w-4 h-4" : "w-4 h-4 sm:w-6 sm:h-6 lg:w-7 lg:h-7"} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.85 1.05 6.5 2.5L21 8" />
-                        <path d="M21 3v5h-5" />
-                      </svg>
-                    </button>
-                    
-                    {/* Quantity Control Pill */}
-                    <div className={isDesktop ? "flex items-center bg-[#48286b] rounded-lg overflow-hidden h-7.5 w-20 text-white shadow-sm select-none justify-between px-1" : "flex items-center bg-[#48286b] rounded-xl sm:rounded-2xl overflow-hidden h-7 w-[68px] sm:h-9 sm:w-28 lg:h-11 lg:w-36 text-white shadow-sm select-none justify-between px-1 sm:px-2"}>
-                      <button 
-                        className={isDesktop ? "w-5 h-full flex items-center justify-center hover:bg-black/10 active:scale-95 transition-all text-white font-bold text-sm pb-0.5" : "w-4 sm:w-8 lg:w-10 h-full flex items-center justify-center hover:bg-black/10 active:scale-95 transition-all text-white font-bold text-xs sm:text-xl lg:text-2xl pb-0.5 sm:pb-1"}
-                        onClick={() => handleQtyChange(itemQty - 1)}
-                      >
-                        -
-                      </button>
-                      <span className={isDesktop ? "font-bold text-xs tracking-wide" : "font-black text-[10px] sm:text-base lg:text-xl tracking-wide"}>{String(itemQty).padStart(2, '0')}</span>
-                      <button 
-                        className={isDesktop ? "w-5 h-full flex items-center justify-center hover:bg-black/10 active:scale-95 transition-all text-white font-bold text-sm pb-0.5" : "w-4 sm:w-8 lg:w-10 h-full flex items-center justify-center hover:bg-black/10 active:scale-95 transition-all text-white font-bold text-xs sm:text-xl lg:text-2xl pb-0.5 sm:pb-1"}
-                        onClick={() => handleQtyChange(itemQty + 1)}
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                )
-              ) : (
-                <>
-                  <span className={isDesktop ? "text-[10px] font-bold text-red-500 whitespace-nowrap" : "text-[9px] sm:text-[11px] font-bold text-red-500 whitespace-nowrap"}>Out of Stock</span>
-                  <button 
-                    onClick={() => setShowStockAlert(true)}
-                    className={isDesktop ? "w-7 h-7 rounded-full bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center border border-red-100 active:scale-95 transition-all focus:outline-none flex-shrink-0" : "w-6 h-6 sm:w-8.5 sm:h-8.5 rounded-full bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center border border-red-100 active:scale-95 transition-all focus:outline-none flex-shrink-0"}
-                  >
-                    <Bell className={isDesktop ? "w-3.5 h-3.5" : "w-3.5 h-3.5 sm:w-4 sm:h-4"} />
-                  </button>
-                </>
+              {subText && (
+                <span className="text-[8px] sm:text-[11px] xl:text-[13px] 2xl:text-[14px] text-gray-500 font-medium mt-1 leading-none whitespace-nowrap overflow-hidden text-ellipsis max-w-full">
+                  {subText}
+                </span>
               )}
+            </div>
+
+            {/* 3. Right side group (Rating, Delivery, Actions) */}
+            <div className="flex items-center gap-3.5 sm:gap-5 xl:gap-6 2xl:gap-7 flex-shrink-0 justify-end">
+              {/* Star Rating */}
+              <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
+                <Star className="w-4 h-4 sm:w-5 sm:h-5 md:w-5.5 md:h-5.5 xl:w-6 xl:h-6 2xl:w-6.5 2xl:h-6.5 fill-[#854cbc] text-[#854cbc] flex-shrink-0" />
+                <span className="text-gray-800 font-bold text-[13px] sm:text-[18px] md:text-[20px] xl:text-[22px] 2xl:text-[25px] leading-none">
+                  {listing.seller?.rating || '4.5'}
+                </span>
+              </div>
+
+              {/* Delivery badge */}
+              <div className="flex items-center flex-shrink-0">
+                <DeliveryTruckBadge 
+                  text={listing.deliveryText || '3 days'} 
+                  className="w-[58px] sm:w-[75px] md:w-[85px] xl:w-[95px] 2xl:w-[110px] h-auto text-gray-500 flex-shrink-0" 
+                />
+              </div>
+
+              {/* Actions (Plus / Incremental / Reset) */}
+              <div className="flex items-center justify-end flex-shrink-0">
+                {inStock ? (
+                  itemQty === 0 ? (
+                    <button 
+                      onClick={() => handleQtyChange(minQty)}
+                      className="text-orange-500 hover:text-orange-600 focus:outline-none transition-transform active:scale-90 p-1"
+                    >
+                      <Plus className="w-6 h-6 sm:w-8 sm:h-8 md:w-9 md:h-9 xl:w-10 xl:h-10 2xl:w-11 2xl:h-11" strokeWidth={3} />
+                    </button>
+                  ) : (
+                    <div className="flex items-center gap-1.5 sm:gap-3 xl:gap-4">
+                      {/* Reset Button */}
+                      <button 
+                        onClick={() => { handleQtyChange(0); toast('Quantity reset', 'info'); }}
+                        title="Reset quantity"
+                        className="text-[#48286b] hover:text-purple-900 transition-transform active:scale-90 focus:outline-none p-0.5"
+                      >
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 xl:w-7 xl:h-7 2xl:w-8 2xl:h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.85 1.05 6.5 2.5L21 8" />
+                          <path d="M21 3v5h-5" />
+                        </svg>
+                      </button>
+                      
+                      {/* Quantity Control Pill */}
+                      <div className="flex items-center bg-[#48286b] rounded-lg sm:rounded-xl overflow-hidden h-7 w-[68px] sm:h-9 sm:w-28 md:h-10 md:w-32 xl:h-11 xl:w-36 2xl:h-12 2xl:w-40 text-white shadow-sm select-none justify-between px-1 sm:px-2 xl:px-3">
+                        <button 
+                          className="w-4 sm:w-8 h-full flex items-center justify-center hover:bg-black/10 active:scale-95 transition-all text-white font-bold text-xs sm:text-xl xl:text-2xl 2xl:text-3xl pb-0.5"
+                          onClick={() => handleQtyChange(itemQty - 1)}
+                        >
+                          -
+                        </button>
+                        <span className="font-bold text-[10px] sm:text-base xl:text-lg 2xl:text-xl tracking-wide">{String(itemQty).padStart(2, '0')}</span>
+                        <button 
+                          className="w-4 sm:w-8 h-full flex items-center justify-center hover:bg-black/10 active:scale-95 transition-all text-white font-bold text-xs sm:text-xl xl:text-2xl 2xl:text-3xl pb-0.5"
+                          onClick={() => handleQtyChange(itemQty + 1)}
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  )
+                ) : (
+                  <div className="flex items-center gap-1.5 sm:gap-2 xl:gap-3">
+                    <span className="text-[10px] sm:text-[13px] xl:text-[14px] 2xl:text-[16px] font-bold text-red-500 whitespace-nowrap">Out of Stock</span>
+                    <button 
+                      onClick={() => setShowStockAlert(true)}
+                      className="w-6 h-6 sm:w-8.5 sm:h-8.5 xl:w-9 xl:h-9 2xl:w-10 2xl:h-10 rounded-full bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center border border-red-100 active:scale-95 transition-all focus:outline-none flex-shrink-0"
+                    >
+                      <Bell className="w-3.5 h-3.5 sm:w-4 sm:h-4 xl:w-4.5 xl:h-4.5 2xl:w-5 2xl:h-5" />
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         );
@@ -1037,7 +1088,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
 
               <button
                 type="button"
-                className="bg-[#854cbc] hover:bg-purple-800 text-white rounded-xl px-4 py-2 sm:px-5 sm:py-2.5 text-xs font-bold shadow-sm transition-colors whitespace-nowrap"
+                className="bg-[#854cbc] hover:bg-[#723eab] text-white rounded-[6px] px-6 py-2 text-[12px] sm:text-[13px] font-medium transition-colors whitespace-nowrap"
               >
                 See all reviews
               </button>
@@ -1110,29 +1161,29 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
               )}
             </div>
 
-            {/* Right Header */}
-            <div className="hide-scrollbar flex items-center gap-1.5 text-[11px] font-semibold tracking-wide text-gray-400">
-              <Link href="/" className="transition-colors hover:text-[#854cbc]">
+            {/* Right Header - Breadcrumbs */}
+            <div className="hide-scrollbar flex items-center gap-1 text-[13px] sm:text-[14px] xl:text-[15px] 2xl:text-[16px] font-medium text-gray-600">
+              <Link href="/" className="transition-colors hover:text-[#854cbc] text-gray-600">
                 Home
               </Link>
-              <span>&gt;</span>
+              <span className="text-gray-400 mx-1">&gt;</span>
               {product.category && (
                 <>
                   <Link
                     href={`/category/${product.category.slug || product.category.id}`}
-                    className="transition-colors hover:text-[#854cbc]"
+                    className="transition-colors hover:text-[#854cbc] text-gray-600"
                   >
                     {product.category.name || 'Category'}
                   </Link>
-                  <span>&gt;</span>
+                  <span className="text-gray-400 mx-1">&gt;</span>
                 </>
               )}
               {product.subCategory && (
                 <>
-                  <span className="cursor-pointer transition-colors hover:text-[#854cbc]">
+                  <span className="cursor-pointer transition-colors hover:text-[#854cbc] text-gray-600">
                     {product.subCategory.name}
                   </span>
-                  <span>&gt;</span>
+                  <span className="text-gray-400 mx-1">&gt;</span>
                 </>
               )}
               <span className="max-w-[200px] truncate text-gray-700">
@@ -1174,35 +1225,44 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
             {/* Right Column */}
             <div className="flex flex-col">
               {/* Title Block */}
-              <div className="flex items-start justify-between w-full mb-3">
-                <h1 className="text-2xl font-semibold text-[#4a4a4a] tracking-tight leading-tight max-w-[85%]">
+              <div className="flex items-start justify-between w-full mb-4">
+                <h1 className="text-[22px] sm:text-[26px] xl:text-[30px] 2xl:text-[34px] font-bold text-gray-700 tracking-tight leading-tight max-w-[95%]">
                   {product.name}
                 </h1>
               </div>
 
-              {/* Price details */}
-              <div className="flex items-baseline gap-3 mb-2">
-                <span className="text-[26px] font-semibold text-[#4a4a4a] leading-none">
-                  ₹{displayPrice ? Math.round(displayPrice).toLocaleString('en-IN') : '0'}
-                </span>
-                {displayMrp && displayMrp > displayPrice && (
-                  <span className="text-[13px] font-bold text-gray-400 line-through leading-none">
-                    ₹{displayMrp ? Math.round(displayMrp).toLocaleString('en-IN') : '0'}
-                  </span>
-                )}
-              </div>
-
-              {/* Discount / rating line */}
-              <div className="flex items-center justify-between w-full border-b border-gray-100 pb-5 mb-5">
-                <div className="flex items-center gap-2">
-                  {renderBuyerOfferBadge(product)}
+              {/* Price & Details Row */}
+              <div className="flex items-end justify-between w-full border-b border-gray-100 pb-4 mb-4">
+                {/* Left: Price & Discount */}
+                <div className="flex flex-col items-start justify-end">
+                  <div className="flex items-baseline gap-2.5">
+                    <span className="text-[28px] sm:text-[32px] xl:text-[36px] 2xl:text-[40px] font-extrabold text-[#333333] leading-none">
+                      ₹{displayPrice ? Math.round(displayPrice).toLocaleString('en-IN') : '0'}
+                    </span>
+                    {displayMrp && displayMrp > displayPrice ? (
+                      <span className="text-[14px] sm:text-[16px] xl:text-[18px] 2xl:text-[20px] font-bold text-gray-400 line-through leading-none">
+                        ₹{displayMrp ? Math.round(displayMrp).toLocaleString('en-IN') : '0'}
+                      </span>
+                    ) : null}
+                  </div>
+                  {product.discountMeta?.discountPercent ? (
+                    <span className="text-[14px] sm:text-[16px] xl:text-[18px] 2xl:text-[20px] font-bold text-gray-800 mt-2 leading-none">
+                      {product.discountMeta.discountPercent}% off
+                    </span>
+                  ) : null}
                 </div>
-                
-                <div className="flex items-center gap-4">
-                  <DeliveryTruckBadge text={product.deliveryText || "3 days"} className="w-[72px] h-auto text-gray-400" />
-                  <div className="flex items-center gap-1">
-                    <Star className="w-5 h-5 fill-[#7B2FBE] text-[#7B2FBE]" />
-                    <span className="text-[15px] font-bold text-[#4a4a4a]">{averageRating.toFixed(1)}</span>
+
+                {/* Right: Truck & Rating */}
+                <div className="flex items-center gap-4 sm:gap-5 xl:gap-6 pb-0.5">
+                  <DeliveryTruckBadge 
+                    text={product.deliveryText || "3 days"} 
+                    className="w-[85px] sm:w-[95px] xl:w-[110px] 2xl:w-[125px] h-auto text-gray-500 flex-shrink-0" 
+                  />
+                  <div className="flex items-center gap-1 xl:gap-1.5">
+                    <Star className="w-5.5 h-5.5 xl:w-6.5 xl:h-6.5 2xl:w-7 2xl:h-7 fill-[#7B2FBE] text-[#7B2FBE] flex-shrink-0" />
+                    <span className="text-[18px] sm:text-[20px] xl:text-[22px] 2xl:text-[24px] font-bold text-gray-800 leading-none">
+                      {averageRating.toFixed(1)}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -1307,7 +1367,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
 
                 <button
                   type="button"
-                  className="bg-[#854cbc] hover:bg-purple-800 text-white rounded-xl px-5 py-2.5 text-xs font-bold shadow-sm transition-colors whitespace-nowrap"
+                  className="bg-[#854cbc] hover:bg-[#723eab] text-white rounded-[6px] px-6 py-2 text-[12px] sm:text-[13px] font-medium transition-colors whitespace-nowrap"
                 >
                   See all reviews
                 </button>

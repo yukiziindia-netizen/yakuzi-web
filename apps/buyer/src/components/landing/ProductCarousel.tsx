@@ -23,29 +23,29 @@ export const renderBuyerOfferBadge = (p: any) => {
   const meta = p.discountMeta || {};
   if (!p?.discountType) {
     if (meta.discountPercent) {
-      return <span className="text-[#333333] text-[15px] sm:text-[16px] font-bold tracking-wide whitespace-nowrap">{meta.discountPercent}% off</span>;
+      return <span className="text-[#333333] text-[15px] sm:text-[16px] font-medium tracking-wide whitespace-nowrap">{meta.discountPercent}% off</span>;
     }
     return null;
   }
   if (p.discountType === "PTR_DISCOUNT") {
-    return <span className="text-[#333333] text-[15px] sm:text-[16px] font-bold tracking-wide whitespace-nowrap">{meta.discountPercent || 0}% off</span>;
+    return <span className="text-[#333333] text-[15px] sm:text-[16px] font-medium tracking-wide whitespace-nowrap">{meta.discountPercent || 0}% off</span>;
   }
   if (p.discountType === "SAME_PRODUCT_BONUS") {
-    return <span className="text-[#333333] text-[15px] sm:text-[16px] font-bold tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} Free</span>;
+    return <span className="text-[#333333] text-[15px] sm:text-[16px] font-medium tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} Free</span>;
   }
   if (p.discountType === "PTR_PLUS_SAME_PRODUCT_BONUS") {
-    return <div className="flex flex-col gap-0.5"><span className="text-[#333333] text-[15px] sm:text-[16px] font-bold tracking-wide whitespace-nowrap">{meta.discountPercent || 0}% off</span><span className="text-[#333333] text-[15px] sm:text-[16px] font-bold tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} Free</span></div>;
+    return <div className="flex flex-col gap-0.5"><span className="text-[#333333] text-[15px] sm:text-[16px] font-medium tracking-wide whitespace-nowrap">{meta.discountPercent || 0}% off</span><span className="text-[#333333] text-[15px] sm:text-[16px] font-medium tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} Free</span></div>;
   }
   if (p.discountType === "DIFFERENT_PRODUCT_BONUS") {
-    return <span className="text-[#333333] text-[15px] sm:text-[16px] font-bold tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} {meta.bonusProductName}</span>;
+    return <span className="text-[#333333] text-[15px] sm:text-[16px] font-medium tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} {meta.bonusProductName}</span>;
   }
   if (p.discountType === "PTR_PLUS_DIFFERENT_PRODUCT_BONUS") {
-    return <div className="flex flex-col gap-0.5"><span className="text-[#333333] text-[15px] sm:text-[16px] font-bold tracking-wide whitespace-nowrap">{meta.discountPercent || 0}% off</span><span className="text-[#333333] text-[15px] sm:text-[16px] font-bold tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} {meta.bonusProductName}</span></div>;
+    return <div className="flex flex-col gap-0.5"><span className="text-[#333333] text-[15px] sm:text-[16px] font-medium tracking-wide whitespace-nowrap">{meta.discountPercent || 0}% off</span><span className="text-[#333333] text-[15px] sm:text-[16px] font-medium tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} {meta.bonusProductName}</span></div>;
   }
   if (p.discountType === "SPECIAL_PRICE") {
-    return <span className="text-emerald-600 text-[15px] sm:text-[16px] font-bold tracking-wide whitespace-nowrap">Special Price: ₹{Math.round(Number(meta.specialPrice) || 0)}</span>;
+    return <span className="text-emerald-600 text-[15px] sm:text-[16px] font-medium tracking-wide whitespace-nowrap">Special Price: ₹{Math.round(Number(meta.specialPrice) || 0)}</span>;
   }
-  return <span className="text-[#333333] text-[15px] sm:text-[16px] font-bold tracking-wide whitespace-nowrap">{p.discountType.replace(/_/g, ' ')}</span>;
+  return <span className="text-[#333333] text-[15px] sm:text-[16px] font-medium tracking-wide whitespace-nowrap">{p.discountType.replace(/_/g, ' ')}</span>;
 };
 
 function GridProductCard({ product, index, onOpenReview }: { product: any; index: number; onOpenReview: (p: any) => void }) {
@@ -128,26 +128,26 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
 
       {/* Container */}
       <div 
-        className={`bg-white rounded-[12px] sm:rounded-[12px] p-4 sm:p-5 hover:shadow-[0_8px_30px_rgb(133,76,188,0.15)] hover:ring-1 hover:ring-primary/50 transition-all duration-300 group flex flex-col relative border ${isYukiziChoice ? 'border-[#7B2FBE]/30 shadow-[0_0_12px_rgba(123,47,190,0.15)]' : 'border-gray-300 shadow-sm'} w-full h-full overflow-hidden`}
+        className={`bg-white rounded-[12px] sm:rounded-[12px] p-3 sm:p-3.5 hover:shadow-[0_8px_30px_rgb(133,76,188,0.15)] hover:ring-1 hover:ring-primary/50 transition-all duration-300 group flex flex-col relative border ${isYukiziChoice ? 'border-[#7B2FBE]/30 shadow-[0_0_12px_rgba(123,47,190,0.15)]' : 'border-gray-300 shadow-sm'} w-full h-full overflow-hidden`}
       >
         {/* Top action icons */}
-        <div className="flex justify-end items-center w-full absolute top-1 sm:top-1.5 left-0 pl-4 sm:pl-5 pr-1 sm:pr-1.5 z-20">
-          {!isNotAvailable && (
-          <button 
-            className="text-[#ff8952] hover:text-[#ff7536] transition-colors z-10 p-1 flex items-center justify-center" 
-            onClick={(e) => { 
-              e.preventDefault(); 
-              const targetProductId = product.bestListingId || currentProductId;
-              addToCart(
-                { productId: targetProductId, quantity: 1, price, originalPrice: mrp, ...product },
-                { onSuccess: () => toast('Added to cart', 'success') }
-              );
-            }}
-          >
-             <Plus className="w-5.5 h-5.5 sm:w-6 sm:h-6" strokeWidth={2.5} />
-          </button>
-          )}
-        </div>
+        {!isNotAvailable && (
+          <div className="absolute top-0.5 sm:top-1 right-0.5 sm:right-1 z-20">
+            <button 
+              className="text-[#ff8952] hover:text-[#ff7536] transition-colors p-0.5 flex items-center justify-center" 
+              onClick={(e) => { 
+                e.preventDefault(); 
+                const targetProductId = product.bestListingId || currentProductId;
+                addToCart(
+                  { productId: targetProductId, quantity: 1, price, originalPrice: mrp, ...product },
+                  { onSuccess: () => toast('Added to cart', 'success') }
+                );
+              }}
+            >
+               <Plus className="w-4.5 h-4.5 sm:w-5 sm:h-5" strokeWidth={2.5} />
+            </button>
+          </div>
+        )}
 
         {/* Right Edge Ribbon (Wishlist/Save) */}
         <div
@@ -175,7 +175,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
         </div>
 
         {/* Image Container */}
-        <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`} className="relative w-full aspect-[4/5] mt-[-16px] sm:mt-[-20px] mb-[-6px] sm:mb-[-8px] overflow-hidden bg-white flex justify-center items-center border-none">
+        <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`} className="relative w-full aspect-[4/5] mt-[-12px] sm:mt-[-14px] mb-[-4px] sm:mb-[-6px] overflow-hidden bg-white flex justify-center items-center border-none">
            <img src={imageUrl} alt={productName} className="max-h-full max-w-full object-contain p-0.5 transform scale-[1.18] group-hover:scale-[1.25] transition-transform duration-700 ease-out drop-shadow-md" />
         </Link>
 
@@ -183,28 +183,28 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
         <div className="flex-1 flex flex-col justify-end gap-2 sm:gap-2.5 z-10 w-full mt-0 pb-0.5">
            {/* Title Line */}
            <div className="flex items-center justify-between w-full gap-2">
-              <h3 className="text-[17px] sm:text-[18px] md:text-[19px] lg:text-[20px] xl:text-[18px] font-semibold text-[#333333] truncate flex-1 text-left tracking-tight leading-tight">
+              <h3 className="text-[17px] sm:text-[18px] md:text-[19px] lg:text-[20px] xl:text-[18px] font-medium text-[#333333] truncate flex-1 text-left tracking-tight leading-tight">
                  {productName}
               </h3>
               <button 
                  onClick={(e) => { e.preventDefault(); onOpenReview(product); }}
-                 className="w-5.5 h-5.5 sm:w-6 sm:h-6 md:w-6.5 md:h-6.5 bg-[#8c8c8c] rounded-full flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform shadow-sm z-20 -mr-1.5 sm:-mr-2"
+                 className="w-4.5 h-4.5 sm:w-5 sm:h-5 bg-[#8c8c8c] rounded-full flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform shadow-sm z-20 -mr-1 sm:-mr-1.5"
               >
-                 <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" strokeWidth={2.5} />
+                 <ArrowUpRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white" strokeWidth={2.5} />
               </button>
            </div>
            
            {/* Price and Rating */}
            <div className="flex justify-between items-center w-full">
               <div className="flex items-baseline gap-1 sm:gap-1.5">
-                 <span className="text-[17px] sm:text-[18px] md:text-[19px] lg:text-[20px] xl:text-[18px] font-bold text-[#333333] tracking-tight leading-none">
+                 <span className="text-[17px] sm:text-[18px] md:text-[19px] lg:text-[20px] xl:text-[18px] font-medium text-[#333333] tracking-tight leading-none">
                     {displayPrice}
                  </span>
                  <span className="text-[12px] sm:text-[13px] md:text-[14px] text-gray-400 line-through leading-none">{displayOriginalPrice}</span>
               </div>
               <div className="flex items-center gap-1 -mr-1 sm:-mr-1.5">
                  <Star className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-[#7B2FBE] fill-[#7B2FBE]" />
-                 <span className="text-[14px] sm:text-[15px] md:text-[16px] font-semibold text-[#333333] leading-none">{rating}</span>
+                 <span className="text-[14px] sm:text-[15px] md:text-[16px] font-medium text-[#333333] leading-none">{rating}</span>
               </div>
            </div>
 
@@ -254,7 +254,7 @@ export default function ProductCarousel({ slot = 'HOMEPAGE_CAROUSEL', categoryId
   
   if (!products || products.length === 0) {
     return (
-      <div className="w-full max-w-[1600px] mx-auto px-4 py-16 text-center text-gray-400 font-medium border border-dashed border-gray-200 rounded-2xl bg-gray-50/50">
+      <div className="w-full max-w-[1600px] 2xl:max-w-[1840px] mx-auto px-4 py-16 text-center text-gray-400 font-medium border border-dashed border-gray-200 rounded-2xl bg-gray-50/50">
         No products available.
       </div>
     );
@@ -263,7 +263,7 @@ export default function ProductCarousel({ slot = 'HOMEPAGE_CAROUSEL', categoryId
   const slicedProducts = [...products];
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto px-2 sm:px-4 lg:px-6 mb-8 sm:mb-12 pt-4">
+    <div className="w-full max-w-[1600px] 2xl:max-w-[1840px] mx-auto px-2 sm:px-4 lg:px-6 mb-8 sm:mb-12 pt-4">
       {/* 
         Grid Setup:
         - Mobile (sm/xs): 2 columns

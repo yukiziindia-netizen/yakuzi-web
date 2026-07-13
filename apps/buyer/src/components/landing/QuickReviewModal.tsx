@@ -219,11 +219,11 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                 </div>
 
                 {/* Main Product Image */}
-                <div className="relative flex h-[80%] w-[70%] items-center justify-center ml-[25%]">
+                <div className="absolute inset-0 w-full h-full flex items-center justify-center z-10 p-4">
                   <img
                     src={activeImage}
                     alt={displayProduct.name}
-                    className="max-h-full max-w-full object-contain p-2 transition-transform duration-500 hover:scale-105"
+                    className="max-h-full max-w-full object-contain transition-transform duration-500 hover:scale-105"
                   />
                 </div>
 

@@ -151,7 +151,7 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
             onClick={onClose}
           >
             {/* Ambient Backdrop */}
-            <div className="absolute inset-0 bg-black/10 backdrop-blur-sm backdrop-saturate-[1.8]" />
+            <div className="absolute inset-0 bg-black/50" />
 
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -175,9 +175,9 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                 </div>
               </div>
 
-              {/* Product Banner Card Container (clean background) */}
+              {/* Product Banner Card Container (custom purple background) */}
               <div
-                className="relative flex aspect-[4/3.2] w-full items-center justify-center rounded-xl border border-gray-200 bg-gray-50 shadow-sm"
+                className="relative flex aspect-[4/3.2] w-full items-center justify-center rounded-xl border border-[#562996]/20 bg-[#562996] shadow-sm"
               >
                 {/* Share Button on Top Left Corner */}
                 <div className="absolute -left-3.5 -top-3.5 z-30">

@@ -172,7 +172,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
             onClick={onClose}
           >
             {/* Ambient Backdrop */}
-            <div className="absolute inset-0 bg-black/10 backdrop-blur-sm backdrop-saturate-[1.8]" />
+            <div className="absolute inset-0 bg-black/50" />
 
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -208,9 +208,9 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
               </div>
 
               {/* Product Banner Halftone Card */}
-              {/* Product Banner Card Container (clean background) */}
+              {/* Product Banner Card Container (custom purple background) */}
               <div
-                className="relative flex aspect-[4/3.2] w-full items-center justify-center rounded-xl border border-gray-200 bg-gray-50 shadow-sm"
+                className="relative flex aspect-[4/3.2] w-full items-center justify-center rounded-xl border border-[#562996]/20 bg-[#562996] shadow-sm"
               >
                 {/* Interactive Thumbnail Gallery overlay on the left (aligned bottom-left) */}
                 <div className="absolute left-4 bottom-4 z-20 flex flex-col gap-2">

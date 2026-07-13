@@ -140,7 +140,7 @@ export default function SupportDrawer({ isOpen, onClose }: SupportDrawerProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={handleClose}
-            className="fixed inset-0 bg-[#6342B4]/35 z-[100] backdrop-blur-none"
+            className="fixed inset-0 bg-black/50 z-[100]"
           />
 
           {/* Drawer Panel */}

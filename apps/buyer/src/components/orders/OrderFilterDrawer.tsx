@@ -37,7 +37,7 @@ export function OrderFilterDrawer({ isOpen, onClose, filters, onApplyFilters }: 
     <>
       {/* Backdrop for filter drawer (darkens the Order Drawer) */}
       <div 
-        className="fixed inset-0 bg-[#6342B4]/35 z-[100] transition-opacity" 
+        className="fixed inset-0 bg-black/50 z-[100] transition-opacity" 
         onClick={onClose}
       />
 

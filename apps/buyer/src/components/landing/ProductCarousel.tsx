@@ -106,14 +106,14 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
   return (
     <div className="relative mt-3 sm:mt-4 group flex flex-col h-full">
       {/* Yukizi Choice & Best Seller Tags */}
-      <div className="absolute -top-[12px] left-3 sm:left-3.5 flex items-center gap-1.5 z-30">
+      <div className="absolute -top-[12px] left-1.5 sm:left-2 flex items-center gap-1.5 z-30">
         {isYukiziChoice && (
-          <div className="bg-[#7B2FBE] text-white px-3.5 py-1 rounded-full font-semibold text-[11px] sm:text-[12px] md:text-[13px] shadow-sm tracking-wide flex items-center justify-center">
+          <div className="bg-[#7B2FBE] text-white px-3.5 py-0.5 rounded-full font-semibold text-[11px] sm:text-[12px] md:text-[13px] shadow-sm tracking-wide flex items-center justify-center">
             Yukizi Choice
           </div>
         )}
         {isBestSeller && (
-          <div className="bg-[#4a4a4a] text-white px-3.5 py-1 rounded-full font-semibold text-[11px] sm:text-[12px] md:text-[13px] shadow-sm tracking-wide flex items-center justify-center">
+          <div className="bg-[#4a4a4a] text-white px-3.5 py-0.5 rounded-full font-semibold text-[11px] sm:text-[12px] md:text-[13px] shadow-sm tracking-wide flex items-center justify-center">
             Best Seller
           </div>
         )}
@@ -128,10 +128,10 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
 
       {/* Container */}
       <div 
-        className={`bg-white rounded-[12px] sm:rounded-[12px] p-4 sm:p-5 hover:shadow-[0_8px_30px_rgb(133,76,188,0.15)] hover:ring-1 hover:ring-primary/50 transition-all duration-300 group flex flex-col relative border ${isYukiziChoice ? 'border-[#7B2FBE] shadow-[0_0_15px_rgba(123,47,190,0.25)]' : 'border-gray-300 shadow-sm'} w-full h-full overflow-hidden`}
+        className={`bg-white rounded-[12px] sm:rounded-[12px] p-4 sm:p-5 hover:shadow-[0_8px_30px_rgb(133,76,188,0.15)] hover:ring-1 hover:ring-primary/50 transition-all duration-300 group flex flex-col relative border ${isYukiziChoice ? 'border-[#7B2FBE]/30 shadow-[0_0_12px_rgba(123,47,190,0.15)]' : 'border-gray-300 shadow-sm'} w-full h-full overflow-hidden`}
       >
         {/* Top action icons */}
-        <div className="flex justify-end items-center w-full absolute top-2 sm:top-2.5 left-0 pl-4 sm:pl-5 pr-1 sm:pr-1.5 z-20">
+        <div className="flex justify-end items-center w-full absolute top-1 sm:top-1.5 left-0 pl-4 sm:pl-5 pr-1 sm:pr-1.5 z-20">
           {!isNotAvailable && (
           <button 
             className="text-[#ff8952] hover:text-[#ff7536] transition-colors z-10 p-1 flex items-center justify-center" 
@@ -144,35 +144,10 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
               );
             }}
           >
-             <Plus className="w-7 h-7 sm:w-8 sm:h-8" strokeWidth={2.5} />
+             <Plus className="w-5.5 h-5.5 sm:w-6 sm:h-6" strokeWidth={2.5} />
           </button>
           )}
         </div>
-
-        {/* Share Button (Top Left - Conditionally rendered below tag like in screenshot) */}
-        {isYukiziChoice && (
-          <div className="absolute top-[26px] left-[12px] z-20">
-            <button 
-              className="text-[#8c8c8c] hover:text-[#4a4a4a] transition-colors p-1 flex items-center justify-center"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (navigator.share) {
-                  navigator.share({
-                    title: 'Yukizi',
-                    text: `Check out ${productName} on Yukizi`,
-                    url: window.location.origin + `/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`
-                  }).catch(() => {});
-                } else {
-                  navigator.clipboard.writeText(window.location.origin + `/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`);
-                  toast('Product link copied!', 'success');
-                }
-              }}
-            >
-              <Share2 className="w-[18px] h-[18px] sm:w-[20px] sm:h-[20px]" strokeWidth={2} />
-            </button>
-          </div>
-        )}
 
         {/* Right Edge Ribbon (Wishlist/Save) */}
         <div

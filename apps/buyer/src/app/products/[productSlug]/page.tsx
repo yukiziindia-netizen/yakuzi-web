@@ -52,7 +52,7 @@ function Accordion({
     <div className="border-b border-gray-100 py-3">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between text-left text-xs sm:text-[13px] xl:text-[14px] 2xl:text-[15px] font-extrabold uppercase tracking-wider text-gray-700 focus:outline-none"
+        className="flex w-full items-center justify-between text-left text-xs sm:text-[13px] xl:text-[14px] 2xl:text-[15px] font-normal uppercase tracking-wider text-gray-500 focus:outline-none"
       >
         {title}
         {isOpen ? (
@@ -69,7 +69,7 @@ function Accordion({
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden"
           >
-            <div className="purple-scroll relative max-h-[70px] overflow-y-auto pr-4 pt-2 text-xs sm:text-[13px] xl:text-[14px] 2xl:text-[15px] font-semibold leading-relaxed text-gray-600">
+            <div className="purple-scroll relative max-h-[70px] overflow-y-auto pr-4 pt-2 text-xs sm:text-[13px] xl:text-[14px] 2xl:text-[15px] font-normal leading-relaxed text-gray-500">
               {content}
             </div>
           </motion.div>
@@ -210,7 +210,7 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
         <div className="flex-1 flex flex-col justify-end gap-0.5 sm:gap-0.5 z-10 w-full mt-0 pb-0.5">
            {/* Title Line */}
            <div className="flex items-center justify-between w-full gap-1 sm:gap-1.5">
-              <h3 className="text-[12px] sm:text-[13px] md:text-[14px] lg:text-[15px] xl:text-[13px] font-medium text-[#333333] truncate flex-1 text-left tracking-tight leading-tight">
+              <h3 className="text-[12px] sm:text-[13px] md:text-[14px] lg:text-[15px] xl:text-[13px] font-medium text-gray-500 truncate flex-1 text-left tracking-tight leading-tight">
                  {productName}
               </h3>
               <Link 
@@ -224,14 +224,14 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
            {/* Price and Rating */}
            <div className="flex justify-between items-center w-full">
               <div className="flex items-baseline gap-1 sm:gap-1.5">
-                 <span className="text-[13px] sm:text-[14px] md:text-[15px] lg:text-[16px] xl:text-[14px] font-semibold text-[#333333] tracking-tight leading-none">
+                 <span className="text-[13px] sm:text-[14px] md:text-[15px] lg:text-[16px] xl:text-[14px] font-semibold text-gray-500 tracking-tight leading-none">
                     {displayPrice}
                  </span>
                  <span className="text-[10px] sm:text-[11px] md:text-[12px] lg:text-[13px] xl:text-[11px] text-gray-400 line-through leading-none">{displayOriginalPrice}</span>
               </div>
               <div className="flex items-center gap-0.5 sm:gap-1 -mr-1 sm:-mr-1.5 md:-mr-1.5 lg:-mr-2 xl:-mr-1.5">
                  <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 lg:w-4 lg:h-4 xl:w-3.5 xl:h-3.5 text-[#8b5cf6] fill-[#8b5cf6]" />
-                 <span className="text-[12px] sm:text-[13px] md:text-[14px] lg:text-[15px] xl:text-[13px] font-medium text-[#333333] leading-none">{rating}</span>
+                 <span className="text-[12px] sm:text-[13px] md:text-[14px] lg:text-[15px] xl:text-[13px] font-medium text-gray-500 leading-none">{rating}</span>
               </div>
            </div>
 
@@ -1055,7 +1055,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
 
           {/* Related Products */}
           <div className="mt-4 border-t border-gray-100 pt-6">
-            <h2 className="mb-4 text-base font-bold text-gray-600 uppercase tracking-wider">Related Products</h2>
+            <h2 className="mb-4 text-[16px] sm:text-[18px] font-bold text-gray-500">Related Products</h2>
             <div className="grid grid-cols-2 gap-x-3.5 gap-y-[28px] pb-4">
               {relatedProducts.slice(0, 4).map((prod: any, idx: number) => (
                 <RelatedProductCard key={prod.id} prod={prod} index={idx} />
@@ -1333,7 +1333,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
           <div className="grid grid-cols-[1.15fr_1fr] gap-10 border-t border-gray-100 pt-8 mt-6">
             {/* Left: Related Products */}
             <div className="flex flex-col gap-4">
-              <h2 className="text-lg font-bold text-gray-700 uppercase tracking-wider">Related Products</h2>
+              <h2 className="text-[20px] sm:text-[22px] xl:text-[24px] 2xl:text-[26px] font-bold text-gray-500">Related Products</h2>
               <div className="grid grid-cols-3 gap-5 pb-4">
                 {relatedProducts.map((prod: any, idx: number) => (
                   <RelatedProductCard key={prod.id} prod={prod} index={idx} />
@@ -1343,7 +1343,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
 
             {/* Right: Reviews */}
             <div className="flex flex-col">
-              <h2 className="text-lg font-bold text-gray-700 uppercase tracking-wider mb-4">Reviews</h2>
+              <h2 className="text-[20px] sm:text-[22px] xl:text-[24px] 2xl:text-[26px] font-bold text-gray-500 mb-4">Reviews</h2>
               
               <div className="mb-6 flex items-center justify-between w-full">
                 <div>

@@ -208,9 +208,9 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
               </div>
 
               {/* Product Banner Halftone Card */}
-              {/* Product Banner Card Container (clean background, overflow hidden to respect rounded corners) */}
+              {/* Product Banner Card Container (clean background) */}
               <div
-                className="relative flex aspect-[4/3.2] w-full items-center justify-center rounded-xl border border-gray-200 bg-gray-50 shadow-sm overflow-hidden"
+                className="relative flex aspect-[4/3.2] w-full items-center justify-center rounded-xl border border-gray-200 bg-gray-50 shadow-sm"
               >
                 {/* Interactive Thumbnail Gallery overlay on the left (aligned bottom-left) */}
                 <div className="absolute left-4 bottom-4 z-20 flex flex-col gap-2">
@@ -235,8 +235,8 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                   ))}
                 </div>
 
-                {/* Main Product Image (fills the card container exactly) */}
-                <div className="absolute inset-0 z-10 flex items-center justify-center">
+                {/* Main Product Image (fills the card container exactly, with overflow-hidden to respect rounded corners) */}
+                <div className="absolute inset-0 z-10 rounded-xl overflow-hidden">
                   <Image
                     src={activeImage}
                     alt={displayProduct.name}
@@ -247,23 +247,24 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                 </div>
 
                 {/* Ribbon Bookmark flag on the right edge */}
+                {/* Ribbon Bookmark flag on the right edge (half inside, half outside) */}
                 <button
                   type="button"
                   onClick={handleBookmarkToggle}
-                  className="absolute -right-[10px] top-[45%] z-20 transition-transform hover:scale-105 focus:outline-none"
+                  className="absolute -right-[18px] top-[45%] z-20 transition-transform hover:scale-105 focus:outline-none"
                 >
                   <svg
-                    width="44"
-                    height="40"
-                    viewBox="0 0 44 40"
+                    width="36"
+                    height="32"
+                    viewBox="0 0 36 32"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
                     className="overflow-visible drop-shadow-sm"
                   >
                     <path
-                      d="M0 0 H44 L33 20 L44 40 H0 Z"
-                      fill={isBookmarked ? '#864ac5' : '#ffffff'}
-                      stroke={isBookmarked ? '#864ac5' : '#9ca3af'}
+                      d="M36 0 H0 L9 16 L0 32 H36 Z"
+                      fill={isBookmarked ? '#854cbc' : '#ffffff'}
+                      stroke="#854cbc"
                       strokeWidth="2.5"
                       strokeLinejoin="round"
                       strokeLinecap="round"

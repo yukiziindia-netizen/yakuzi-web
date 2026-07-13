@@ -254,7 +254,7 @@ export default function ProductCarousel({ slot = 'HOMEPAGE_CAROUSEL', categoryId
   
   if (!products || products.length === 0) {
     return (
-      <div className="w-full max-w-[1600px] 2xl:max-w-[1840px] mx-auto px-4 py-16 text-center text-gray-400 font-medium border border-dashed border-gray-200 rounded-2xl bg-gray-50/50">
+      <div className="w-full max-w-full mx-auto px-4 py-16 text-center text-gray-400 font-medium border border-dashed border-gray-200 rounded-2xl bg-gray-50/50">
         No products available.
       </div>
     );
@@ -263,7 +263,7 @@ export default function ProductCarousel({ slot = 'HOMEPAGE_CAROUSEL', categoryId
   const slicedProducts = [...products];
 
   return (
-    <div className="w-full max-w-[1600px] 2xl:max-w-[1840px] mx-auto px-2 sm:px-4 lg:px-6 mb-8 sm:mb-12 pt-4">
+    <div className="w-full max-w-full mx-auto px-2 sm:px-4 lg:px-6 mb-8 sm:mb-12 pt-4">
       {/* 
         Grid Setup:
         - Mobile (sm/xs): 2 columns

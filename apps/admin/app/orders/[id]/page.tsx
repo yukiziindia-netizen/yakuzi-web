@@ -103,6 +103,20 @@ export default function OrderDetailPage() {
     }
   };
 
+  const handleShippingLockToggle = async () => {
+    try {
+      await updateShippingDocs.mutateAsync({
+        orderId: id,
+        payload: { 
+          isShippingLocked: !order.isShippingLocked
+        }
+      });
+      toast.success(order.isShippingLocked ? "Shipping details unlocked" : "Shipping details locked");
+    } catch {
+      toast.error("Failed to toggle shipping lock");
+    }
+  };
+
   if (isLoading) {
     return (
       <AdminLayout>
@@ -456,7 +470,18 @@ export default function OrderDetailPage() {
             {/* Shipping & Fulfillment Details */}
             {(order.packageLength || order.invoiceUrl) && (
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.23 }} className="glass-card rounded-2xl p-6">
-                <h2 className="font-semibold text-foreground mb-4 flex items-center gap-2"><Package className="h-4 w-4 text-primary" /> Shipping Details</h2>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="font-semibold text-foreground flex items-center gap-2"><Package className="h-4 w-4 text-primary" /> Shipping Details</h2>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-medium text-muted-foreground">{order.isShippingLocked ? "Locked" : "Unlocked"}</span>
+                    <button 
+                      onClick={handleShippingLockToggle}
+                      className={cn("relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 transition-colors duration-200", order.isShippingLocked ? "bg-red-500" : "bg-muted-foreground/40")}
+                    >
+                      <span className={cn("pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out", order.isShippingLocked ? "translate-x-2" : "-translate-x-2")} />
+                    </button>
+                  </div>
+                </div>
                 <div className="space-y-4">
                   {order.packageLength && (
                     <div className="grid grid-cols-2 gap-3 pb-3 border-b border-border/30">
@@ -502,6 +527,11 @@ export default function OrderDetailPage() {
                       {order.weightImage && (
                         <a href={order.weightImage} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg text-[10px] font-bold text-primary transition-colors">
                           Weight Proof <ExternalLink className="h-3 w-3" />
+                        </a>
+                      )}
+                      {order.packedPictureUrl && (
+                        <a href={order.packedPictureUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg text-[10px] font-bold text-primary transition-colors">
+                          <FileText className="h-3 w-3" /> Packed Picture
                         </a>
                       )}
                     </div>

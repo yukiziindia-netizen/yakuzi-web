@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
@@ -36,6 +36,20 @@ export default function OrderDetailPage() {
   const [shippingFiles, setShippingFiles] = useState<Record<string, File | null>>({
     lengthImg: null, breadthImg: null, heightImg: null, weightImg: null
   });
+  const [finalDocs, setFinalDocs] = useState<{ manifest: File | null; packedPicture: File | null }>({ manifest: null, packedPicture: null });
+  const [isUploadingFinalDocs, setIsUploadingDocs] = useState(false);
+
+  useEffect(() => {
+    if (order) {
+      const main = order.order || order.data || order;
+      setShippingData({
+        length: main.packageLength?.toString() || "",
+        breadth: main.packageBreadth?.toString() || "",
+        height: main.packageHeight?.toString() || "",
+        weight: main.packageWeight?.toString() || "",
+      });
+    }
+  }, [order]);
 
   if (isLoading) {
     return <div className="min-h-[60vh] flex items-center justify-center text-muted-foreground">Loading order details...</div>;
@@ -73,7 +87,12 @@ export default function OrderDetailPage() {
     if (!shippingData.length || !shippingData.breadth || !shippingData.height || !shippingData.weight) {
       toast.error("Please enter all dimensions"); return;
     }
-    if (!shippingFiles.lengthImg || !shippingFiles.breadthImg || !shippingFiles.heightImg || !shippingFiles.weightImg) {
+    const hasLengthImg = shippingFiles.lengthImg || mainOrder.lengthImage;
+    const hasBreadthImg = shippingFiles.breadthImg || mainOrder.breadthImage;
+    const hasHeightImg = shippingFiles.heightImg || mainOrder.heightImage;
+    const hasWeightImg = shippingFiles.weightImg || mainOrder.weightImage;
+
+    if (!hasLengthImg || !hasBreadthImg || !hasHeightImg || !hasWeightImg) {
       toast.error("All 4 dimension images are mandatory"); return;
     }
 
@@ -97,15 +116,45 @@ export default function OrderDetailPage() {
           packageBreadth: parseFloat(shippingData.breadth),
           packageHeight: parseFloat(shippingData.height),
           packageWeight: parseFloat(shippingData.weight),
-          lengthImage: urls.lengthImg,
-          breadthImage: urls.breadthImg,
-          heightImage: urls.heightImg,
-          weightImage: urls.weightImg,
+          ...(urls.lengthImg && { lengthImage: urls.lengthImg }),
+          ...(urls.breadthImg && { breadthImage: urls.breadthImg }),
+          ...(urls.heightImg && { heightImage: urls.heightImg }),
+          ...(urls.weightImg && { weightImage: urls.weightImg }),
         }
       });
       toast.success("Shipping details saved successfully", { id: toastId });
     } catch (e: any) {
       toast.error(e?.message || "Failed to save shipping details", { id: toastId });
+    }
+  };
+
+  const handleFinalDocsSubmit = async () => {
+    if (!finalDocs.manifest || !finalDocs.packedPicture) {
+      toast.error("Both Manifest and Packed Picture are required");
+      return;
+    }
+    setIsUploadingDocs(true);
+    try {
+      const manifestFd = new FormData();
+      manifestFd.append("file", finalDocs.manifest);
+      const manifestUrl = await uploadDoc.mutateAsync(manifestFd);
+
+      const packedFd = new FormData();
+      packedFd.append("file", finalDocs.packedPicture);
+      const packedPictureUrl = await uploadDoc.mutateAsync(packedFd);
+
+      await updateShipping.mutateAsync({
+        orderId: id,
+        payload: {
+          manifestUrl,
+          packedPictureUrl
+        }
+      });
+      toast.success("Final shipping documents uploaded successfully");
+    } catch (e: any) {
+      toast.error("Failed to upload documents");
+    } finally {
+      setIsUploadingDocs(false);
     }
   };
 
@@ -194,19 +243,19 @@ export default function OrderDetailPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-muted-foreground">Length (cm)</label>
-                <input type="number" step="0.01" className="w-full bg-background border border-input rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none" value={shippingData.length} onChange={(e) => setShippingData({...shippingData, length: e.target.value})} disabled={!!mainOrder.packageLength} placeholder={mainOrder.packageLength?.toString() || "0"} />
+                <input type="number" step="0.01" className="w-full bg-background border border-input rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none disabled:opacity-50" value={shippingData.length} onChange={(e) => setShippingData({...shippingData, length: e.target.value})} disabled={mainOrder.isShippingLocked} placeholder={mainOrder.packageLength?.toString() || "0"} />
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-muted-foreground">Breadth (cm)</label>
-                <input type="number" step="0.01" className="w-full bg-background border border-input rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none" value={shippingData.breadth} onChange={(e) => setShippingData({...shippingData, breadth: e.target.value})} disabled={!!mainOrder.packageBreadth} placeholder={mainOrder.packageBreadth?.toString() || "0"} />
+                <input type="number" step="0.01" className="w-full bg-background border border-input rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none disabled:opacity-50" value={shippingData.breadth} onChange={(e) => setShippingData({...shippingData, breadth: e.target.value})} disabled={mainOrder.isShippingLocked} placeholder={mainOrder.packageBreadth?.toString() || "0"} />
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-muted-foreground">Height (cm)</label>
-                <input type="number" step="0.01" className="w-full bg-background border border-input rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none" value={shippingData.height} onChange={(e) => setShippingData({...shippingData, height: e.target.value})} disabled={!!mainOrder.packageHeight} placeholder={mainOrder.packageHeight?.toString() || "0"} />
+                <input type="number" step="0.01" className="w-full bg-background border border-input rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none disabled:opacity-50" value={shippingData.height} onChange={(e) => setShippingData({...shippingData, height: e.target.value})} disabled={mainOrder.isShippingLocked} placeholder={mainOrder.packageHeight?.toString() || "0"} />
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-muted-foreground">Weight (kg)</label>
-                <input type="number" step="0.01" className="w-full bg-background border border-input rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none" value={shippingData.weight} onChange={(e) => setShippingData({...shippingData, weight: e.target.value})} disabled={!!mainOrder.packageWeight} placeholder={mainOrder.packageWeight?.toString() || "0"} />
+                <input type="number" step="0.01" className="w-full bg-background border border-input rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none disabled:opacity-50" value={shippingData.weight} onChange={(e) => setShippingData({...shippingData, weight: e.target.value})} disabled={mainOrder.isShippingLocked} placeholder={mainOrder.packageWeight?.toString() || "0"} />
               </div>
             </div>
 
@@ -221,11 +270,14 @@ export default function OrderDetailPage() {
                 ].map(f => (
                   <div key={f.key} className="space-y-1.5">
                     <label className="text-xs font-medium text-muted-foreground block">{f.label}</label>
-                    {(mainOrder as any)[f.key.replace('Img', 'Image')] ? (
-                       <a href={(mainOrder as any)[f.key.replace('Img', 'Image')]} target="_blank" className="text-xs text-primary underline">View Uploaded</a>
-                    ) : (
-                      <input type="file" accept="image/*" onChange={(e) => setShippingFiles(p => ({...p, [f.key]: e.target.files?.[0] || null}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
-                    )}
+                    <div className="space-y-2">
+                      {(mainOrder as any)[f.key.replace('Img', 'Image')] && (
+                         <a href={(mainOrder as any)[f.key.replace('Img', 'Image')]} target="_blank" className="text-xs text-primary underline block">View Uploaded</a>
+                      )}
+                      {!mainOrder.isShippingLocked && (
+                        <input type="file" accept="image/*" onChange={(e) => setShippingFiles(p => ({...p, [f.key]: e.target.files?.[0] || null}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20 disabled:opacity-50" />
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -255,7 +307,7 @@ export default function OrderDetailPage() {
                   {mainOrder.manifestUrl ? (
                      <a href={mainOrder.manifestUrl} target="_blank" className="text-xs text-primary underline">Download Manifest</a>
                   ) : (
-                    <span className="text-xs text-muted-foreground">Pending from admin</span>
+                    <span className="text-xs text-muted-foreground">Uploaded with Final Docs</span>
                   )}
                 </div>
                 <div className="space-y-1.5">
@@ -269,13 +321,44 @@ export default function OrderDetailPage() {
               </div>
             </div>
 
-            {(!mainOrder.packageLength || !mainOrder.lengthImage) && (
+            {!mainOrder.isShippingLocked && (
               <div className="pt-4 flex justify-end">
                 <Button size="sm" onClick={handleShippingSubmit} loading={updateShipping.isPending}>
                   Save Shipping Details
                 </Button>
               </div>
             )}
+
+            {/* Final Shipping Documents */}
+            <div className="space-y-3 pt-6 border-t border-border/50">
+              <h3 className="text-sm font-medium text-foreground">Final Shipping Documents</h3>
+              <p className="text-xs text-muted-foreground">Upload the final manifest and a picture of the packed box. These will be visible to the admin.</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground block">Manifest</label>
+                  {mainOrder.manifestUrl ? (
+                    <a href={mainOrder.manifestUrl} target="_blank" className="text-xs text-primary underline">View Uploaded Manifest</a>
+                  ) : (
+                    <input type="file" accept="application/pdf,image/*" onChange={(e) => setFinalDocs(p => ({...p, manifest: e.target.files?.[0] || null}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground block">Packed Picture</label>
+                  {mainOrder.packedPictureUrl ? (
+                    <a href={mainOrder.packedPictureUrl} target="_blank" className="text-xs text-primary underline">View Uploaded Picture</a>
+                  ) : (
+                    <input type="file" accept="image/*" onChange={(e) => setFinalDocs(p => ({...p, packedPicture: e.target.files?.[0] || null}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
+                  )}
+                </div>
+              </div>
+              {(!mainOrder.manifestUrl || !mainOrder.packedPictureUrl) && (
+                <div className="pt-2 flex justify-end">
+                  <Button size="sm" variant="outline" onClick={handleFinalDocsSubmit} loading={isUploadingFinalDocs}>
+                    Upload Final Documents
+                  </Button>
+                </div>
+              )}
+            </div>
           </motion.div>
         </div>
 

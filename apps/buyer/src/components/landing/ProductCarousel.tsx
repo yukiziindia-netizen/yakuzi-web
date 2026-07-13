@@ -23,29 +23,29 @@ export const renderBuyerOfferBadge = (p: any) => {
   const meta = p.discountMeta || {};
   if (!p?.discountType) {
     if (meta.discountPercent) {
-      return <span className="text-[#4a4a4a] text-[11px] sm:text-[12px] font-medium tracking-wide whitespace-nowrap">{meta.discountPercent}% off</span>;
+      return <span className="text-[#333333] text-[15px] sm:text-[16px] font-bold tracking-wide whitespace-nowrap">{meta.discountPercent}% off</span>;
     }
     return null;
   }
   if (p.discountType === "PTR_DISCOUNT") {
-    return <span className="text-[#4a4a4a] text-[11px] sm:text-[12px] font-medium tracking-wide whitespace-nowrap">{meta.discountPercent || 0}% off</span>;
+    return <span className="text-[#333333] text-[15px] sm:text-[16px] font-bold tracking-wide whitespace-nowrap">{meta.discountPercent || 0}% off</span>;
   }
   if (p.discountType === "SAME_PRODUCT_BONUS") {
-    return <span className="text-[#4a4a4a] text-[11px] sm:text-[12px] font-medium tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} Free</span>;
+    return <span className="text-[#333333] text-[15px] sm:text-[16px] font-bold tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} Free</span>;
   }
   if (p.discountType === "PTR_PLUS_SAME_PRODUCT_BONUS") {
-    return <div className="flex flex-col gap-0.5"><span className="text-[#4a4a4a] text-[11px] sm:text-[12px] font-medium tracking-wide whitespace-nowrap">{meta.discountPercent || 0}% off</span><span className="text-[#4a4a4a] text-[11px] sm:text-[12px] font-medium tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} Free</span></div>;
+    return <div className="flex flex-col gap-0.5"><span className="text-[#333333] text-[15px] sm:text-[16px] font-bold tracking-wide whitespace-nowrap">{meta.discountPercent || 0}% off</span><span className="text-[#333333] text-[15px] sm:text-[16px] font-bold tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} Free</span></div>;
   }
   if (p.discountType === "DIFFERENT_PRODUCT_BONUS") {
-    return <span className="text-[#4a4a4a] text-[11px] sm:text-[12px] font-medium tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} {meta.bonusProductName}</span>;
+    return <span className="text-[#333333] text-[15px] sm:text-[16px] font-bold tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} {meta.bonusProductName}</span>;
   }
   if (p.discountType === "PTR_PLUS_DIFFERENT_PRODUCT_BONUS") {
-    return <div className="flex flex-col gap-0.5"><span className="text-[#4a4a4a] text-[11px] sm:text-[12px] font-medium tracking-wide whitespace-nowrap">{meta.discountPercent || 0}% off</span><span className="text-[#4a4a4a] text-[11px] sm:text-[12px] font-medium tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} {meta.bonusProductName}</span></div>;
+    return <div className="flex flex-col gap-0.5"><span className="text-[#333333] text-[15px] sm:text-[16px] font-bold tracking-wide whitespace-nowrap">{meta.discountPercent || 0}% off</span><span className="text-[#333333] text-[15px] sm:text-[16px] font-bold tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} {meta.bonusProductName}</span></div>;
   }
   if (p.discountType === "SPECIAL_PRICE") {
-    return <span className="text-emerald-600 text-[11px] sm:text-[12px] font-semibold tracking-wide whitespace-nowrap">Special Price: ₹{Math.round(Number(meta.specialPrice) || 0)}</span>;
+    return <span className="text-emerald-600 text-[15px] sm:text-[16px] font-bold tracking-wide whitespace-nowrap">Special Price: ₹{Math.round(Number(meta.specialPrice) || 0)}</span>;
   }
-  return <span className="text-[#4a4a4a] text-[11px] sm:text-[12px] font-medium tracking-wide whitespace-nowrap">{p.discountType.replace(/_/g, ' ')}</span>;
+  return <span className="text-[#333333] text-[15px] sm:text-[16px] font-bold tracking-wide whitespace-nowrap">{p.discountType.replace(/_/g, ' ')}</span>;
 };
 
 function GridProductCard({ product, index, onOpenReview }: { product: any; index: number; onOpenReview: (p: any) => void }) {
@@ -106,14 +106,14 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
   return (
     <div className="relative mt-3 sm:mt-4 group flex flex-col h-full">
       {/* Yukizi Choice & Best Seller Tags */}
-      <div className="absolute -top-[11px] left-2 sm:left-2 flex items-center gap-1 z-30">
+      <div className="absolute -top-[12px] left-3 sm:left-3.5 flex items-center gap-1.5 z-30">
         {isYukiziChoice && (
-          <div className="bg-[#7B2FBE] text-white px-2.5 sm:px-3 py-0.5 rounded-full font-semibold text-[10px] sm:text-[11px] shadow-sm tracking-wide flex items-center justify-center">
+          <div className="bg-[#7B2FBE] text-white px-3.5 py-1 rounded-full font-semibold text-[11px] sm:text-[12px] md:text-[13px] shadow-sm tracking-wide flex items-center justify-center">
             Yukizi Choice
           </div>
         )}
         {isBestSeller && (
-          <div className="bg-[#4a4a4a] text-white px-1.5 sm:px-2 py-0.5 rounded-full font-semibold text-[9px] sm:text-[10px] shadow-sm tracking-wide flex items-center justify-center">
+          <div className="bg-[#4a4a4a] text-white px-3.5 py-1 rounded-full font-semibold text-[11px] sm:text-[12px] md:text-[13px] shadow-sm tracking-wide flex items-center justify-center">
             Best Seller
           </div>
         )}
@@ -121,17 +121,17 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
 
       {/* Ad Tag */}
       {isAd && (
-        <div className="absolute -top-5 right-0 text-[10px] sm:text-[11px] text-gray-500 font-medium z-20">
+        <div className="absolute -top-5 right-0 text-[12px] sm:text-[13px] text-gray-500 font-semibold z-20">
           Ad
         </div>
       )}
 
       {/* Container */}
       <div 
-        className={`bg-white rounded-[12px] sm:rounded-[12px] p-2.5 sm:p-3 hover:shadow-[0_8px_30px_rgb(133,76,188,0.15)] hover:ring-1 hover:ring-primary/50 transition-all duration-300 group flex flex-col relative border ${isYukiziChoice ? 'border-[#7B2FBE] shadow-[0_0_15px_rgba(123,47,190,0.25)]' : 'border-gray-300 shadow-sm'} w-full h-full overflow-hidden`}
+        className={`bg-white rounded-[12px] sm:rounded-[12px] p-4 sm:p-5 hover:shadow-[0_8px_30px_rgb(133,76,188,0.15)] hover:ring-1 hover:ring-primary/50 transition-all duration-300 group flex flex-col relative border ${isYukiziChoice ? 'border-[#7B2FBE] shadow-[0_0_15px_rgba(123,47,190,0.25)]' : 'border-gray-300 shadow-sm'} w-full h-full overflow-hidden`}
       >
         {/* Top action icons */}
-        <div className="flex justify-end items-center w-full absolute top-1 sm:top-1.5 left-0 pl-2.5 sm:pl-3 pr-0.5 sm:pr-1 z-20">
+        <div className="flex justify-end items-center w-full absolute top-2 sm:top-2.5 left-0 pl-4 sm:pl-5 pr-1 sm:pr-1.5 z-20">
           {!isNotAvailable && (
           <button 
             className="text-[#ff8952] hover:text-[#ff7536] transition-colors z-10 p-1 flex items-center justify-center" 
@@ -144,10 +144,35 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
               );
             }}
           >
-             <Plus className="w-5 h-5 sm:w-5 sm:h-5" strokeWidth={2.5} />
+             <Plus className="w-7 h-7 sm:w-8 sm:h-8" strokeWidth={2.5} />
           </button>
           )}
         </div>
+
+        {/* Share Button (Top Left - Conditionally rendered below tag like in screenshot) */}
+        {isYukiziChoice && (
+          <div className="absolute top-[26px] left-[12px] z-20">
+            <button 
+              className="text-[#8c8c8c] hover:text-[#4a4a4a] transition-colors p-1 flex items-center justify-center"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (navigator.share) {
+                  navigator.share({
+                    title: 'Yukizi',
+                    text: `Check out ${productName} on Yukizi`,
+                    url: window.location.origin + `/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`
+                  }).catch(() => {});
+                } else {
+                  navigator.clipboard.writeText(window.location.origin + `/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`);
+                  toast('Product link copied!', 'success');
+                }
+              }}
+            >
+              <Share2 className="w-[18px] h-[18px] sm:w-[20px] sm:h-[20px]" strokeWidth={2} />
+            </button>
+          </div>
+        )}
 
         {/* Right Edge Ribbon (Wishlist/Save) */}
         <div
@@ -170,41 +195,41 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
             isFilled={isSaved} 
             preserveAspectRatio="none" 
             fill={isSaved ? '#C5A880' : '#FAF5EB'} 
-            className="w-[24px] h-[18px] xs:w-[24px] xs:h-[18px] sm:w-[24px] sm:h-[18px] text-[#C5A880]" 
+            className="w-[32px] h-[28px] xs:w-[32px] xs:h-[28px] sm:w-[32px] sm:h-[28px] text-[#C5A880]" 
           />
         </div>
 
         {/* Image Container */}
-        <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`} className="relative w-full aspect-[3/4] mt-[-10px] sm:mt-[-12px] mb-[-4px] sm:mb-[-6px] overflow-hidden bg-white flex justify-center items-center border-none">
-           <img src={imageUrl} alt={productName} className="max-h-full max-w-full object-contain p-0 transform scale-[1.18] group-hover:scale-[1.25] transition-transform duration-700 ease-out drop-shadow-md" />
+        <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`} className="relative w-full aspect-[4/5] mt-[-16px] sm:mt-[-20px] mb-[-6px] sm:mb-[-8px] overflow-hidden bg-white flex justify-center items-center border-none">
+           <img src={imageUrl} alt={productName} className="max-h-full max-w-full object-contain p-0.5 transform scale-[1.18] group-hover:scale-[1.25] transition-transform duration-700 ease-out drop-shadow-md" />
         </Link>
 
         {/* Details Section */}
-        <div className="flex-1 flex flex-col justify-end gap-2 sm:gap-2.5 z-10 w-full mt-[-4px] pb-0.5">
+        <div className="flex-1 flex flex-col justify-end gap-2 sm:gap-2.5 z-10 w-full mt-0 pb-0.5">
            {/* Title Line */}
-           <div className="flex items-center justify-between w-full gap-1 sm:gap-1.5">
-              <h3 className="text-[14px] sm:text-[15px] md:text-[16px] lg:text-[17px] xl:text-[14px] font-medium text-[#4a4a4a] truncate flex-1 text-left tracking-tight leading-tight">
+           <div className="flex items-center justify-between w-full gap-2">
+              <h3 className="text-[17px] sm:text-[18px] md:text-[19px] lg:text-[20px] xl:text-[18px] font-semibold text-[#333333] truncate flex-1 text-left tracking-tight leading-tight">
                  {productName}
               </h3>
               <button 
                  onClick={(e) => { e.preventDefault(); onOpenReview(product); }}
-                 className="w-5 h-5 sm:w-5 sm:h-5 md:w-5 md:h-5 lg:w-5 lg:h-5 xl:w-5 xl:h-5 bg-[#8c8c8c] rounded-full flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform shadow-sm z-20"
+                 className="w-5.5 h-5.5 sm:w-6 sm:h-6 md:w-6.5 md:h-6.5 bg-[#8c8c8c] rounded-full flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform shadow-sm z-20 -mr-1.5 sm:-mr-2"
               >
-                 <ArrowUpRight className="w-3.5 h-3.5 sm:w-3.5 sm:h-3.5 md:w-3.5 md:h-3.5 lg:w-3.5 lg:h-3.5 xl:w-3.5 xl:h-3.5 text-white" strokeWidth={2.5} />
+                 <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" strokeWidth={2.5} />
               </button>
            </div>
            
            {/* Price and Rating */}
            <div className="flex justify-between items-center w-full">
               <div className="flex items-baseline gap-1 sm:gap-1.5">
-                 <span className="text-[13px] sm:text-[14px] md:text-[15px] lg:text-[16px] xl:text-[14px] font-medium text-[#4a4a4a] tracking-tight leading-none">
+                 <span className="text-[17px] sm:text-[18px] md:text-[19px] lg:text-[20px] xl:text-[18px] font-bold text-[#333333] tracking-tight leading-none">
                     {displayPrice}
                  </span>
-                 <span className="text-[10px] sm:text-[11px] md:text-[12px] lg:text-[13px] xl:text-[11px] text-gray-400 line-through leading-none">{displayOriginalPrice}</span>
+                 <span className="text-[12px] sm:text-[13px] md:text-[14px] text-gray-400 line-through leading-none">{displayOriginalPrice}</span>
               </div>
-              <div className="flex items-center gap-0.5 sm:gap-1">
-                 <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 lg:w-4.5 lg:h-4.5 xl:w-3.5 xl:h-3.5 text-[#7B2FBE] fill-[#7B2FBE]" />
-                 <span className="text-[12px] sm:text-[13px] md:text-[14px] lg:text-[15px] xl:text-[13px] font-medium text-[#4a4a4a] leading-none">{rating}</span>
+              <div className="flex items-center gap-1 -mr-1 sm:-mr-1.5">
+                 <Star className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-[#7B2FBE] fill-[#7B2FBE]" />
+                 <span className="text-[14px] sm:text-[15px] md:text-[16px] font-semibold text-[#333333] leading-none">{rating}</span>
               </div>
            </div>
 
@@ -213,8 +238,8 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
               <div className="flex items-center gap-1">
                  {renderBuyerOfferBadge(product)}
               </div>
-              <div>
-                 <DeliveryTruckBadge text={displayDelivery} className="w-[55px] sm:w-[60px] md:w-[65px] lg:w-[70px] xl:w-[58px] h-auto text-[#8c8c8c]" />
+              <div className="-mr-1 sm:-mr-1.5">
+                 <DeliveryTruckBadge text={displayDelivery} className="w-[85px] sm:w-[90px] md:w-[95px] h-auto text-[#8c8c8c]" />
               </div>
            </div>
         </div>
@@ -271,7 +296,7 @@ export default function ProductCarousel({ slot = 'HOMEPAGE_CAROUSEL', categoryId
         - Large Desktop (lg): 6 columns
         - Extra Large Desktop (xl): 7 columns
       */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-x-2.5 gap-y-[28px] md:gap-3 lg:gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-x-5 gap-y-8 md:gap-6 lg:gap-7">
         {slicedProducts.map((product, index) => (
           <GridProductCard 
             key={`${product?.id || 'prod'}-${index}`} 

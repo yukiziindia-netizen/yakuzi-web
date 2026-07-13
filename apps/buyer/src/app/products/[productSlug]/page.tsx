@@ -503,9 +503,16 @@ function ComparisonOffersList({
             {/* 1. Discount Badge */}
             <div className="flex-shrink-0 min-w-0">
               {discountText ? (
-                <div className="bg-[#854cbc] text-white px-1.5 py-0.5 sm:px-2 sm:py-0.5 xl:px-2.5 xl:py-1 2xl:px-3 2xl:py-1 rounded font-bold text-[10px] sm:text-[13px] xl:text-[14px] 2xl:text-[16px] tracking-wide whitespace-nowrap flex items-center justify-center gap-1 shadow-sm">
+                <div className="bg-[#854cbc] text-white px-1.5 py-0.5 sm:px-2.5 sm:py-0.5 xl:px-3 xl:py-1 2xl:px-3.5 2xl:py-1 rounded font-bold tracking-wide whitespace-nowrap flex items-center justify-center gap-0.5 sm:gap-1 shadow-sm">
                   {discountText.split(' ').map((part: string, pIdx: number) => (
-                    <span key={pIdx} className="inline-block text-[10px] sm:text-[13px] xl:text-[14px] 2xl:text-[16px]">
+                    <span 
+                      key={pIdx} 
+                      className={
+                        pIdx === 0 
+                          ? "text-[10px] sm:text-[13.5px] xl:text-[14.5px] 2xl:text-[16.5px] font-bold" 
+                          : "text-[7.5px] sm:text-[10.5px] xl:text-[11.5px] 2xl:text-[12.5px] font-medium opacity-90"
+                      }
+                    >
                       {part}
                     </span>
                   ))}
@@ -870,12 +877,16 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
     }
   }
 
-  const displayPrice = bestPricing ? Math.round(bestPricing.finalCustomerPayable) : Math.round(Number(product.price || 0));
+  const displayPrice = bestPricing ? bestPricing.finalCustomerPayable : Number(product.price || 0);
   const rawMrp = comparisonListings.find((l: any) => l.mrp || l.originalPrice)?.mrp ||
     comparisonListings.find((l: any) => l.mrp || l.originalPrice)?.originalPrice ||
     product.mrp ||
     product.originalPrice;
-  const displayMrp = rawMrp ? Math.round(Number(rawMrp)) : 0;
+  let displayMrp = rawMrp ? Number(rawMrp) : 0;
+  const discountPercent = product.discountMeta?.discountPercent;
+  if ((!displayMrp || displayMrp <= displayPrice) && discountPercent && discountPercent > 0) {
+    displayMrp = displayPrice / (1 - discountPercent / 100);
+  }
 
   // Wishlist / Bookmark logic
   const isBookmarked = wishlistSet.has(product.id);
@@ -1237,12 +1248,12 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                 {/* Left: Price & Discount */}
                 <div className="flex flex-col items-start justify-end">
                   <div className="flex items-baseline gap-2.5">
-                    <span className="text-[28px] sm:text-[32px] xl:text-[36px] 2xl:text-[40px] font-medium text-[#333333] leading-none">
-                      ₹{displayPrice ? Math.round(displayPrice).toLocaleString('en-IN') : '0'}
+                    <span className="text-[24px] sm:text-[28px] xl:text-[30px] 2xl:text-[32px] font-medium text-[#333333] leading-none">
+                      ₹{displayPrice ? Number(displayPrice).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
                     </span>
                     {displayMrp && displayMrp > displayPrice ? (
-                      <span className="text-[14px] sm:text-[16px] xl:text-[18px] 2xl:text-[20px] font-bold text-gray-400 line-through leading-none">
-                        ₹{displayMrp ? Math.round(displayMrp).toLocaleString('en-IN') : '0'}
+                      <span className="text-[12px] sm:text-[14px] xl:text-[15px] 2xl:text-[16px] font-bold text-gray-400 line-through leading-none">
+                        ₹{displayMrp ? Number(displayMrp).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
                       </span>
                     ) : null}
                   </div>

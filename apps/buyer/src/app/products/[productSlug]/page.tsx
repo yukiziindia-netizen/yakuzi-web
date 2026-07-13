@@ -498,7 +498,7 @@ function ComparisonOffersList({
         return (
           <div 
             key={listing.id} 
-            className="transition-colors w-full bg-[#eaeaea] border border-gray-200/60 hover:border-purple-200 shadow-sm flex items-center justify-between py-1 px-2.5 sm:py-1.5 sm:px-4 xl:py-2 xl:px-6 rounded-lg sm:rounded-xl"
+            className="transition-colors w-full bg-[#eaeaea] border border-gray-200/60 hover:border-purple-200 shadow-sm flex items-center justify-between py-1 px-2.5 sm:py-1.5 sm:px-4 xl:py-2 xl:px-6 rounded-[6px]"
           >
             {/* 1. Discount Badge */}
             <div className="flex-shrink-0 min-w-0">

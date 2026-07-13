@@ -498,13 +498,17 @@ function ComparisonOffersList({
         return (
           <div 
             key={listing.id} 
-            className="transition-colors w-full bg-[#eaeaea] border border-gray-200/60 hover:border-purple-200 shadow-sm grid grid-cols-[auto_1fr_auto] gap-3 sm:gap-4 items-center py-2.5 px-3 sm:py-3.5 sm:px-6 xl:py-4 xl:px-8 rounded-xl sm:rounded-2xl"
+            className="transition-colors w-full bg-[#eaeaea] border border-gray-200/60 hover:border-purple-200 shadow-sm flex items-center justify-between py-1 px-2.5 sm:py-1.5 sm:px-4 xl:py-2 xl:px-6 rounded-lg sm:rounded-xl"
           >
             {/* 1. Discount Badge */}
-            <div className="flex justify-start flex-shrink-0 min-w-0">
+            <div className="flex-shrink-0 min-w-0">
               {discountText ? (
-                <div className="bg-[#854cbc] text-white px-2 py-0.5 sm:px-2.5 sm:py-1 xl:px-3.5 xl:py-1.5 2xl:px-4 2xl:py-2 rounded font-bold text-[10px] sm:text-[13px] xl:text-[14px] 2xl:text-[16px] tracking-wide whitespace-nowrap flex items-center justify-center shadow-sm">
-                  {discountText}
+                <div className="bg-[#854cbc] text-white px-1.5 py-0.5 sm:px-2 sm:py-0.5 xl:px-2.5 xl:py-1 2xl:px-3 2xl:py-1 rounded font-bold text-[10px] sm:text-[13px] xl:text-[14px] 2xl:text-[16px] tracking-wide whitespace-nowrap flex items-center justify-center gap-1 shadow-sm">
+                  {discountText.split(' ').map((part: string, pIdx: number) => (
+                    <span key={pIdx} className="inline-block text-[10px] sm:text-[13px] xl:text-[14px] 2xl:text-[16px]">
+                      {part}
+                    </span>
+                  ))}
                 </div>
               ) : (
                 <div className="w-[10px]" />
@@ -513,7 +517,7 @@ function ComparisonOffersList({
 
             {/* 2. Price & Subtext */}
             <div className="flex flex-col items-start justify-center min-w-0 text-left">
-              <span className="text-[13px] sm:text-[18px] md:text-[20px] xl:text-[22px] 2xl:text-[25px] font-bold text-gray-800 leading-none tracking-tight">
+              <span className="text-[11px] sm:text-[15px] md:text-[17px] xl:text-[19px] 2xl:text-[21px] font-medium text-gray-800 leading-none tracking-tight">
                 ₹{Math.round(pricing.finalCustomerPayable).toLocaleString('en-IN')}
               </span>
               {subText && (
@@ -523,78 +527,75 @@ function ComparisonOffersList({
               )}
             </div>
 
-            {/* 3. Right side group (Rating, Delivery, Actions) */}
-            <div className="flex items-center gap-3.5 sm:gap-5 xl:gap-6 2xl:gap-7 flex-shrink-0 justify-end">
-              {/* Star Rating */}
-              <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
-                <Star className="w-4 h-4 sm:w-5 sm:h-5 md:w-5.5 md:h-5.5 xl:w-6 xl:h-6 2xl:w-6.5 2xl:h-6.5 fill-[#854cbc] text-[#854cbc] flex-shrink-0" />
-                <span className="text-gray-800 font-bold text-[13px] sm:text-[18px] md:text-[20px] xl:text-[22px] 2xl:text-[25px] leading-none">
-                  {listing.seller?.rating || '4.5'}
-                </span>
-              </div>
+            {/* 3. Star Rating */}
+            <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
+              <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-4.5 md:h-4.5 xl:w-5 xl:h-5 2xl:w-5.5 2xl:h-5.5 fill-[#854cbc] text-[#854cbc] flex-shrink-0" />
+              <span className="text-gray-800 font-bold text-[11px] sm:text-[14px] md:text-[16px] xl:text-[18px] 2xl:text-[20px] leading-none">
+                {listing.seller?.rating || '4.5'}
+              </span>
+            </div>
 
-              {/* Delivery badge */}
-              <div className="flex items-center flex-shrink-0">
-                <DeliveryTruckBadge 
-                  text={listing.deliveryText || '3 days'} 
-                  className="w-[58px] sm:w-[75px] md:w-[85px] xl:w-[95px] 2xl:w-[110px] h-auto text-gray-500 flex-shrink-0" 
-                />
-              </div>
+            {/* 4. Delivery badge */}
+            <div className="flex items-center flex-shrink-0">
+              <DeliveryTruckBadge 
+                text={listing.deliveryText || '3 days'} 
+                className="w-[48px] sm:w-[62px] md:w-[70px] xl:w-[78px] 2xl:w-[88px] h-auto text-gray-500 flex-shrink-0" 
+              />
+            </div>
 
-              {/* Actions (Plus / Incremental / Reset) */}
-              <div className="flex items-center justify-end flex-shrink-0">
-                {inStock ? (
-                  itemQty === 0 ? (
-                    <button 
-                      onClick={() => handleQtyChange(minQty)}
-                      className="text-orange-500 hover:text-orange-600 focus:outline-none transition-transform active:scale-90 p-1"
-                    >
-                      <Plus className="w-6 h-6 sm:w-8 sm:h-8 md:w-9 md:h-9 xl:w-10 xl:h-10 2xl:w-11 2xl:h-11" strokeWidth={3} />
-                    </button>
-                  ) : (
-                    <div className="flex items-center gap-1.5 sm:gap-3 xl:gap-4">
-                      {/* Reset Button */}
-                      <button 
-                        onClick={() => { handleQtyChange(0); toast('Quantity reset', 'info'); }}
-                        title="Reset quantity"
-                        className="text-[#48286b] hover:text-purple-900 transition-transform active:scale-90 focus:outline-none p-0.5"
-                      >
-                        <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 xl:w-7 xl:h-7 2xl:w-8 2xl:h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.85 1.05 6.5 2.5L21 8" />
-                          <path d="M21 3v5h-5" />
-                        </svg>
-                      </button>
-                      
-                      {/* Quantity Control Pill */}
-                      <div className="flex items-center bg-[#48286b] rounded-lg sm:rounded-xl overflow-hidden h-7 w-[68px] sm:h-9 sm:w-28 md:h-10 md:w-32 xl:h-11 xl:w-36 2xl:h-12 2xl:w-40 text-white shadow-sm select-none justify-between px-1 sm:px-2 xl:px-3">
-                        <button 
-                          className="w-4 sm:w-8 h-full flex items-center justify-center hover:bg-black/10 active:scale-95 transition-all text-white font-bold text-xs sm:text-xl xl:text-2xl 2xl:text-3xl pb-0.5"
-                          onClick={() => handleQtyChange(itemQty - 1)}
-                        >
-                          -
-                        </button>
-                        <span className="font-bold text-[10px] sm:text-base xl:text-lg 2xl:text-xl tracking-wide">{String(itemQty).padStart(2, '0')}</span>
-                        <button 
-                          className="w-4 sm:w-8 h-full flex items-center justify-center hover:bg-black/10 active:scale-95 transition-all text-white font-bold text-xs sm:text-xl xl:text-2xl 2xl:text-3xl pb-0.5"
-                          onClick={() => handleQtyChange(itemQty + 1)}
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-                  )
+            {/* 5. Actions (Plus / Incremental / Reset) */}
+            <div className="flex items-center justify-end flex-shrink-0">
+              {inStock ? (
+                itemQty === 0 ? (
+                  <button 
+                    onClick={() => handleQtyChange(minQty)}
+                    className="text-orange-500 hover:text-orange-600 focus:outline-none transition-transform active:scale-90 p-0.5"
+                  >
+                    <Plus className="w-4.5 h-4.5 sm:w-5.5 sm:h-5.5 md:w-6 md:h-6 xl:w-6.5 xl:h-6.5 2xl:w-7 2xl:h-7" strokeWidth={3} />
+                  </button>
                 ) : (
-                  <div className="flex items-center gap-1.5 sm:gap-2 xl:gap-3">
-                    <span className="text-[10px] sm:text-[13px] xl:text-[14px] 2xl:text-[16px] font-bold text-red-500 whitespace-nowrap">Out of Stock</span>
+                  <div className="flex items-center gap-1.5 sm:gap-3 xl:gap-4">
+                    {/* Reset Button */}
                     <button 
-                      onClick={() => setShowStockAlert(true)}
-                      className="w-6 h-6 sm:w-8.5 sm:h-8.5 xl:w-9 xl:h-9 2xl:w-10 2xl:h-10 rounded-full bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center border border-red-100 active:scale-95 transition-all focus:outline-none flex-shrink-0"
+                      onClick={() => { handleQtyChange(0); toast('Quantity reset', 'info'); }}
+                      title="Reset quantity"
+                      className="text-[#48286b] hover:text-purple-900 transition-transform active:scale-90 focus:outline-none p-0.5"
                     >
-                      <Bell className="w-3.5 h-3.5 sm:w-4 sm:h-4 xl:w-4.5 xl:h-4.5 2xl:w-5 2xl:h-5" />
+                      <svg className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5 xl:w-5.5 xl:h-5.5 2xl:w-6 2xl:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.85 1.05 6.5 2.5L21 8" />
+                        <path d="M21 3v5h-5" />
+                      </svg>
                     </button>
+                    
+                    {/* Quantity Control Pill */}
+                    <div className="flex items-center bg-[#48286b] rounded-lg sm:rounded-xl overflow-hidden h-6 w-[60px] sm:h-7.5 sm:w-24 md:h-8 md:w-26 xl:h-8.5 xl:w-30 2xl:h-9 2xl:w-34 text-white shadow-sm select-none justify-between px-1 sm:px-2 xl:px-3">
+                      <button 
+                        className="w-4 sm:w-8 h-full flex items-center justify-center hover:bg-black/10 active:scale-95 transition-all text-white font-bold text-[10px] sm:text-lg xl:text-xl 2xl:text-2xl pb-0.5"
+                        onClick={() => handleQtyChange(itemQty - 1)}
+                      >
+                        -
+                      </button>
+                      <span className="font-bold text-[9px] sm:text-sm xl:text-base 2xl:text-lg tracking-wide">{String(itemQty).padStart(2, '0')}</span>
+                      <button 
+                        className="w-4 sm:w-8 h-full flex items-center justify-center hover:bg-black/10 active:scale-95 transition-all text-white font-bold text-[10px] sm:text-lg xl:text-xl 2xl:text-2xl pb-0.5"
+                        onClick={() => handleQtyChange(itemQty + 1)}
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
-                )}
-              </div>
+                )
+              ) : (
+                <div className="flex items-center gap-1.5 sm:gap-2 xl:gap-3">
+                  <span className="text-[10px] sm:text-[13px] xl:text-[14px] 2xl:text-[16px] font-bold text-red-500 whitespace-nowrap">Out of Stock</span>
+                  <button 
+                    onClick={() => setShowStockAlert(true)}
+                    className="w-6 h-6 sm:w-8.5 sm:h-8.5 xl:w-9 xl:h-9 2xl:w-10 2xl:h-10 rounded-full bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center border border-red-100 active:scale-95 transition-all focus:outline-none flex-shrink-0"
+                  >
+                    <Bell className="w-3.5 h-3.5 sm:w-4 sm:h-4 xl:w-4.5 xl:h-4.5 2xl:w-5 2xl:h-5" />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         );
@@ -1226,7 +1227,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
             <div className="flex flex-col">
               {/* Title Block */}
               <div className="flex items-start justify-between w-full mb-4">
-                <h1 className="text-[22px] sm:text-[26px] xl:text-[30px] 2xl:text-[34px] font-bold text-gray-700 tracking-tight leading-tight max-w-[95%]">
+                <h1 className="text-[22px] sm:text-[26px] xl:text-[30px] 2xl:text-[34px] font-bold text-gray-500 tracking-tight leading-tight max-w-[95%]">
                   {product.name}
                 </h1>
               </div>
@@ -1236,7 +1237,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                 {/* Left: Price & Discount */}
                 <div className="flex flex-col items-start justify-end">
                   <div className="flex items-baseline gap-2.5">
-                    <span className="text-[28px] sm:text-[32px] xl:text-[36px] 2xl:text-[40px] font-extrabold text-[#333333] leading-none">
+                    <span className="text-[28px] sm:text-[32px] xl:text-[36px] 2xl:text-[40px] font-medium text-[#333333] leading-none">
                       ₹{displayPrice ? Math.round(displayPrice).toLocaleString('en-IN') : '0'}
                     </span>
                     {displayMrp && displayMrp > displayPrice ? (

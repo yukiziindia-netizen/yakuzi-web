@@ -35,7 +35,7 @@ export default async function HomePage({
     <main className="w-full bg-white min-h-screen relative pb-24 sm:pb-32">
       <HomeNavbar />
       
-      <div className="w-full max-w-full bg-white overflow-hidden flex flex-col relative min-h-screen">
+      <div className="w-full max-w-[1600px] 2xl:max-w-none mx-auto bg-white overflow-hidden flex flex-col relative min-h-screen">
         <section className="flex-1 flex flex-col w-full">
           <div className="w-full flex-shrink-0 flex flex-col">
             <HeroSection />

@@ -178,13 +178,13 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="no-scrollbar relative flex max-h-[90vh] w-full max-w-[500px] flex-col gap-4 overflow-y-auto rounded-[32px] border border-white/40 bg-white/95 p-4 shadow-[0_25px_60px_-12px_rgba(0,0,0,0.25),0_0_0_1px_rgba(255,255,255,0.1)] backdrop-blur-sm sm:gap-5 sm:p-6"
+              className="no-scrollbar relative flex max-h-[90vh] w-full max-w-[95%] xs:max-w-[500px] sm:max-w-[560px] md:max-w-[590px] flex-col gap-4 overflow-y-auto rounded-2xl border border-white/40 bg-white/95 p-4 shadow-[0_25px_60px_-12px_rgba(0,0,0,0.25),0_0_0_1px_rgba(255,255,255,0.1)] backdrop-blur-sm sm:gap-5 sm:p-6"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header section with Title & Share */}
               <div className="relative flex w-full flex-col gap-2 pt-3">
                 <div className="flex w-full items-start justify-between">
-                  <h2 className="max-w-[85%] text-[20px] font-black leading-tight tracking-tight text-gray-800">
+                  <h2 className="max-w-[85%] text-[20px] font-black leading-tight tracking-tight text-gray-500">
                     {displayProduct.name}
                   </h2>
                   <button
@@ -209,7 +209,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
 
               {/* Product Banner Halftone Card */}
               <div
-                className="relative flex aspect-[4/3] w-full items-center justify-center rounded-[24px] border border-purple-400/20 bg-gradient-to-br from-[#854dff] via-[#b336e8] to-[#ff2b9a] p-6 shadow-md"
+                className="relative flex aspect-[4/3.2] w-full items-center justify-center rounded-xl border border-purple-400/20 bg-gradient-to-br from-[#854dff] via-[#b336e8] to-[#ff2b9a] p-6 shadow-md"
                 style={{
                   backgroundImage: `
                     radial-gradient(rgba(255, 255, 255, 0.15) 1.5px, transparent 1.5px),
@@ -222,13 +222,13 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                 <div className="pointer-events-none absolute bottom-0 right-0 top-0 w-1/3 origin-bottom-right skew-x-12 transform bg-gradient-to-l from-pink-500/20 to-transparent" />
                 <div className="pointer-events-none absolute -bottom-10 -right-10 h-64 w-64 rounded-full bg-pink-500/10 blur-2xl" />
 
-                {/* Interactive Thumbnail Gallery overlay on the left */}
-                <div className="absolute left-4 top-1/2 z-20 flex -translate-y-1/2 flex-col gap-2">
+                {/* Interactive Thumbnail Gallery overlay on the left (aligned bottom-left) */}
+                <div className="absolute left-4 bottom-4 z-20 flex flex-col gap-2">
                   {productImages.map((img: string, idx: number) => (
                     <button
                       key={idx}
                       onClick={() => setActiveImageIndex(idx)}
-                      className={`h-11 w-11 overflow-hidden rounded-lg border-2 bg-white/15 shadow-sm backdrop-blur-sm transition-all duration-200 ${
+                      className={`h-14 w-14 overflow-hidden rounded-lg border-2 bg-white/15 shadow-sm backdrop-blur-sm transition-all duration-200 ${
                         activeImageIndex === idx
                           ? 'scale-105 border-orange-500 shadow-md'
                           : 'border-white/30 hover:border-white/60'
@@ -237,21 +237,21 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                       <Image
                         src={img}
                         alt=""
-                        width={44}
-                        height={44}
+                        width={56}
+                        height={56}
                         className="h-full w-full object-cover"
                       />
                     </button>
                   ))}
                 </div>
 
-                {/* Main Product Image */}
-                <div className="relative ml-[25%] flex h-[80%] w-[70%] items-center justify-center">
+                {/* Main Product Image (fills the card, centered) */}
+                <div className="absolute inset-0 z-10 flex items-center justify-center p-2">
                   <Image
                     src={activeImage}
                     alt={displayProduct.name}
                     fill
-                    className="object-contain p-2 transition-transform duration-500 hover:scale-105"
+                    className="object-contain transition-transform duration-500 hover:scale-105"
                     priority
                   />
                 </div>
@@ -342,50 +342,54 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                     return (
                       <div
                         key={listing.id}
-                        className="flex w-full flex-row items-center justify-between gap-1.5 sm:gap-2 rounded-2xl border border-gray-100/80 bg-gray-50 p-2.5 transition-colors hover:bg-gray-100/70 sm:p-3.5"
+                        className="flex w-full flex-row items-center justify-between gap-2.5 rounded-xl bg-gray-200 p-2.5 transition-colors hover:bg-gray-300/60 sm:p-3"
                       >
-                        {/* Left: Discount Badge & Price */}
-                        <div className="flex min-w-[105px] items-center gap-1.5 sm:min-w-[130px] sm:gap-2">
-                          {/* Offer Badge — shows correct type (PTR discount / Buy X Get Y / Special Price) */}
-                          <div className="min-w-[50px] flex-shrink-0 select-none">
-                            {renderBuyerOfferBadge(listing) || (
-                              discountPercent > 0 ? (
-                                <div className="rounded-lg bg-[#864ac5] px-1.5 py-1 text-center text-[8px] font-black uppercase leading-none tracking-wider text-white sm:px-2 sm:py-1.5 sm:text-[9px]">
-                                  {discountPercent}% off PTR
-                                </div>
-                              ) : null
-                            )}
-                          </div>
-                          <div className="flex min-w-0 flex-col">
-                            <span className="truncate text-xs font-black leading-none text-gray-800 sm:text-[14px]">
-                              ₹
-                              {Math.round(listing.price || 0).toLocaleString('en-IN')}
-                            </span>
-                            <span className="mt-1 truncate text-[8px] font-bold leading-none text-gray-400 sm:mt-1.5 sm:text-[9px]">
-                              {listing.moq > 1
-                                ? `${listing.moq * 10}% off on purchase of ${listing.moq}`
-                                : 'MOQ: 1'}
-                            </span>
+                        {/* 1. Offer Badge */}
+                        <div className="flex-shrink-0 select-none">
+                          <div className="rounded bg-[#864ac5] px-2 py-1 text-center text-[10px] font-black uppercase leading-none tracking-wider text-white sm:px-2.5 sm:py-1.5 sm:text-[11px]">
+                            {discountPercent > 0 
+                              ? `${discountPercent}% off` 
+                              : (listing.discountType === "SAME_PRODUCT_BONUS" 
+                                  ? `Buy ${discountMeta.buy || 0} Get ${discountMeta.get || 0} Free`
+                                  : (listing.discountType === "SPECIAL_PRICE"
+                                      ? `Special`
+                                      : `${discountPercent || 0}% off`
+                                    )
+                                )
+                            }
                           </div>
                         </div>
 
-                        {/* Middle: Star Rating & Delivery badge */}
-                        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-                          <div className="flex flex-shrink-0 items-center gap-0.5">
-                            <Star className="h-3 w-3 fill-[#864ac5] text-[#864ac5] sm:h-3.5 sm:w-3.5" />
-                            <span className="text-[10px] font-black leading-none text-gray-800 sm:text-[12px]">
-                              {listing.seller?.rating || '4.5'}
+                        {/* 2. Price */}
+                        <div className="flex flex-col min-w-0">
+                          <span className="truncate text-xs font-black leading-none text-gray-800 sm:text-[14px]">
+                            ₹{Math.round(listing.price || 0).toLocaleString('en-IN')}
+                          </span>
+                          {listing.moq > 1 && (
+                            <span className="mt-1 truncate text-[8px] font-bold leading-none text-gray-400 sm:mt-1.5 sm:text-[9px]">
+                              {listing.moq * 10}% off on purchase of {listing.moq}
                             </span>
-                          </div>
+                          )}
+                        </div>
 
+                        {/* 3. Star Rating */}
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <Star className="h-3 w-3 fill-[#864ac5] text-[#864ac5] sm:h-3.5 sm:w-3.5" />
+                          <span className="text-[10px] font-black leading-none text-gray-800 sm:text-[12px]">
+                            {listing.seller?.rating || '4.5'}
+                          </span>
+                        </div>
+
+                        {/* 4. Delivery badge */}
+                        <div className="flex-shrink-0">
                           <DeliveryTruckBadge
                             text={listing.deliveryText || listing.deliveryTime || '3 days'}
-                            className="h-auto w-[50px] flex-shrink-0 text-gray-400 sm:w-[60px]"
+                            className="h-auto w-[55px] text-gray-400 sm:w-[65px]"
                           />
                         </div>
 
-                        {/* Right: Actions */}
-                        <div className="flex flex-shrink-0 items-center gap-2 sm:gap-3">
+                        {/* 5. Actions */}
+                        <div className="flex flex-shrink-0 items-center justify-end min-w-[32px]">
                           {inStock ? (
                             itemQty > 0 ? (
                               <div className="flex h-7 w-20 select-none items-center justify-between overflow-hidden rounded-xl bg-[#48286b] text-[10px] font-black text-white shadow-sm sm:h-8">

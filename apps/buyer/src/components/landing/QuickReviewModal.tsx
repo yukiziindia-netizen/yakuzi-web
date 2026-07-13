@@ -157,13 +157,13 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="no-scrollbar relative flex max-h-[90vh] w-full max-w-[500px] flex-col gap-4 sm:gap-5 overflow-y-auto rounded-[32px] border border-white/40 bg-white/95 p-4 sm:p-6 shadow-[0_25px_60px_-12px_rgba(0,0,0,0.25),0_0_0_1px_rgba(255,255,255,0.1)] backdrop-blur-sm"
+              className="no-scrollbar relative flex max-h-[90vh] w-full max-w-[95%] xs:max-w-[500px] sm:max-w-[560px] md:max-w-[590px] flex-col gap-4 sm:gap-5 overflow-y-auto rounded-2xl border border-white/40 bg-white/95 p-4 sm:p-6 shadow-[0_25px_60px_-12px_rgba(0,0,0,0.25),0_0_0_1px_rgba(255,255,255,0.1)] backdrop-blur-sm"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header section with Title & Share */}
               <div className="relative flex w-full flex-col pt-3">
                 <div className="flex w-full items-start justify-between">
-                  <h2 className="max-w-[85%] text-[20px] font-black leading-tight tracking-tight text-gray-800">
+                  <h2 className="max-w-[85%] text-[20px] font-black leading-tight tracking-tight text-gray-500">
                     {displayProduct.name}
                   </h2>
                   <button
@@ -177,7 +177,7 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
 
               {/* Product Banner Halftone Card */}
               <div
-                className="relative flex aspect-[4/3] w-full items-center justify-center rounded-[24px] border border-purple-400/20 bg-gradient-to-br from-[#854dff] via-[#b336e8] to-[#ff2b9a] p-6 shadow-md"
+                className="relative flex aspect-[4/3.2] w-full items-center justify-center rounded-xl border border-purple-400/20 bg-gradient-to-br from-[#854dff] via-[#b336e8] to-[#ff2b9a] p-6 shadow-md"
                 style={{
                   backgroundImage: `
                     radial-gradient(rgba(255, 255, 255, 0.15) 1.5px, transparent 1.5px),
@@ -201,13 +201,13 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                   />
                 </div>
 
-                {/* Interactive Thumbnail Gallery overlay on the left */}
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-2">
+                {/* Interactive Thumbnail Gallery overlay on the left (aligned bottom-left) */}
+                <div className="absolute left-4 bottom-4 z-20 flex flex-col gap-2">
                   {productImages.map((img: string, idx: number) => (
                     <button
                       key={idx}
                       onClick={() => setActiveImageIndex(idx)}
-                      className={`h-11 w-11 overflow-hidden rounded-lg border-2 bg-white/15 shadow-sm backdrop-blur-sm transition-all duration-200 ${
+                      className={`h-14 w-14 overflow-hidden rounded-lg border-2 bg-white/15 shadow-sm backdrop-blur-sm transition-all duration-200 ${
                         activeImageIndex === idx
                           ? 'scale-105 border-orange-500 shadow-md'
                           : 'border-white/30 hover:border-white/60'
@@ -218,8 +218,8 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                   ))}
                 </div>
 
-                {/* Main Product Image */}
-                <div className="absolute inset-0 w-full h-full flex items-center justify-center z-10 p-4">
+                {/* Main Product Image (fills the card, centered) */}
+                <div className="absolute inset-0 z-10 flex items-center justify-center p-2">
                   <img
                     src={activeImage}
                     alt={displayProduct.name}
@@ -269,10 +269,11 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                       listing.originalPrice ||
                       displayProduct.mrp ||
                       displayProduct.originalPrice;
+                    const discountMeta = listing.discountMeta || {};
                     const discountPercent =
                       itemMrp && listing.price && itemMrp > listing.price
                         ? Math.round(((itemMrp - listing.price) / itemMrp) * 100)
-                        : listing.discountMeta?.discountPercent || 20;
+                        : discountMeta.discountPercent || 20;
 
                     const handleQtyChange = (newQty: number) => {
                       if (itemQty === 0) {
@@ -287,45 +288,57 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                     return (
                       <div
                         key={listing.id}
-                        className="flex w-full flex-row items-center justify-between gap-1.5 sm:gap-2 rounded-2xl border border-gray-100/80 bg-gray-50 p-2.5 sm:p-3.5 transition-colors hover:bg-gray-100/70"
+                        className="flex w-full flex-row items-center justify-between gap-2.5 rounded-xl bg-gray-200 p-2.5 transition-colors hover:bg-gray-300/60 sm:p-3"
                       >
-                        {/* Left: Discount Badge & Price */}
-                        <div className="flex min-w-[105px] sm:min-w-[130px] items-center gap-1.5 sm:gap-2">
-                          <div className="min-w-[50px] sm:min-w-[55px] flex items-center justify-center flex-shrink-0">
-                            {renderBuyerOfferBadge(listing)}
-                          </div>
-                          <div className="flex flex-col min-w-0">
-                            <span className="text-xs sm:text-[14px] font-black leading-none text-gray-800 truncate">
-                              ₹{Math.round(listing.price || 0).toLocaleString('en-IN')}
-                            </span>
-                            <span className="mt-1 sm:mt-1.5 text-[8px] sm:text-[9px] font-bold leading-none text-gray-400 truncate">
-                              {listing.moq > 1
-                                ? `${listing.moq * 10}% off on purchase of ${listing.moq}`
-                                : 'MOQ: 1'}
-                            </span>
+                        {/* 1. Offer Badge */}
+                        <div className="flex-shrink-0 select-none">
+                          <div className="rounded bg-[#864ac5] px-2 py-1 text-center text-[10px] font-black uppercase leading-none tracking-wider text-white sm:px-2.5 sm:py-1.5 sm:text-[11px]">
+                            {discountPercent > 0 
+                              ? `${discountPercent}% off` 
+                              : (listing.discountType === "SAME_PRODUCT_BONUS" 
+                                  ? `Buy ${discountMeta.buy || 0} Get ${discountMeta.get || 0} Free`
+                                  : (listing.discountType === "SPECIAL_PRICE"
+                                      ? `Special`
+                                      : `${discountPercent || 0}% off`
+                                    )
+                                )
+                            }
                           </div>
                         </div>
 
-                        {/* Middle: Star Rating & Delivery badge */}
-                        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-                          <div className="flex items-center gap-0.5 flex-shrink-0">
-                            <Star className="h-3 w-3 sm:h-3.5 sm:w-3.5 fill-[#854cbc] text-[#854cbc]" />
-                            <span className="text-[10px] sm:text-[12px] font-black leading-none text-gray-800">
-                              {listing.seller?.rating || '4.5'}
+                        {/* 2. Price */}
+                        <div className="flex flex-col min-w-0">
+                          <span className="truncate text-xs font-black leading-none text-gray-800 sm:text-[14px]">
+                            ₹{Math.round(listing.price || 0).toLocaleString('en-IN')}
+                          </span>
+                          {listing.moq > 1 && (
+                            <span className="mt-1 truncate text-[8px] font-bold leading-none text-gray-400 sm:mt-1.5 sm:text-[9px]">
+                              {listing.moq * 10}% off on purchase of {listing.moq}
                             </span>
-                          </div>
+                          )}
+                        </div>
 
+                        {/* 3. Star Rating */}
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <Star className="h-3 w-3 fill-[#864ac5] text-[#864ac5] sm:h-3.5 sm:w-3.5" />
+                          <span className="text-[10px] font-black leading-none text-gray-800 sm:text-[12px]">
+                            {listing.seller?.rating || '4.5'}
+                          </span>
+                        </div>
+
+                        {/* 4. Delivery badge */}
+                        <div className="flex-shrink-0">
                           <DeliveryTruckBadge
                             text={listing.deliveryText || listing.deliveryTime || '3 days'}
-                            className="h-auto w-[50px] sm:w-[60px] text-gray-400 flex-shrink-0"
+                            className="h-auto w-[55px] text-gray-400 sm:w-[65px]"
                           />
                         </div>
 
-                        {/* Right: Actions */}
-                        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                        {/* 5. Actions */}
+                        <div className="flex flex-shrink-0 items-center justify-end min-w-[32px]">
                           {inStock ? (
                             itemQty > 0 ? (
-                              <div className="flex h-7 w-20 sm:h-8 select-none items-center justify-between overflow-hidden rounded-xl bg-[#48286b] text-[10px] sm:text-[11px] font-black text-white shadow-sm">
+                              <div className="flex h-7 w-20 select-none items-center justify-between overflow-hidden rounded-xl bg-[#48286b] text-[10px] font-black text-white shadow-sm sm:h-8">
                                 <button
                                   className="h-full px-2 sm:px-2.5 text-xs font-extrabold text-white/80 transition-all hover:bg-black/10 hover:text-white active:scale-95"
                                   onClick={() => handleQtyChange(itemQty - 1)}
@@ -353,7 +366,7 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                             ) : (
                               <button
                                 onClick={() => handleQtyChange(minQty)}
-                                className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-orange-500 text-white shadow-md transition-all hover:bg-orange-600 focus:outline-none active:scale-95"
+                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-500 text-white shadow-md transition-all hover:bg-orange-600 focus:outline-none active:scale-95 sm:h-8 sm:w-8"
                               >
                                 <Plus className="h-4 w-4 sm:h-4.5 sm:w-4.5 stroke-[3]" />
                               </button>

@@ -368,7 +368,7 @@ export default function OrderDetailPage() {
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="glass-card rounded-2xl p-5 space-y-3">
             <h3 className="font-semibold text-sm text-foreground flex items-center gap-2">
               <Calculator className="h-4 w-4 text-primary" />
-              Estimated Payout Breakdown
+              Estimated Payout Breakdown (Per Unit)
             </h3>
             
             {(() => {
@@ -376,35 +376,49 @@ export default function OrderDetailPage() {
               const displayProductGstPercent = firstItem.sellerOffer?.gstPercent !== undefined ? Number(firstItem.sellerOffer.gstPercent) : 0;
               const displayCommissionPercent = firstItem.sellerOffer?.variant?.catalogProduct?.commissionPercent ? Number(firstItem.sellerOffer.variant.catalogProduct.commissionPercent) : 5;
               const displayCommissionGstPercent = firstItem.sellerOffer?.variant?.catalogProduct?.commissionGstPercent ? Number(firstItem.sellerOffer.variant.catalogProduct.commissionGstPercent) : 18;
-              const est = items.reduce((acc, item) => {
-                const qty = Number(item.quantity) || 1;
-                
-                const offer = item.sellerOffer || {};
-                const product = offer.catalogProduct || {};
-                
-                // Base selling price matches backend logic: orderItem.price fallback to mrp - discount
-                const baseSellingPrice = Number(item.unitPrice || item.price || (offer.mrp ? Number(offer.mrp) - Number(offer.discount || 0) : 0));
-                const finalShippingPrice = Number(offer.finalShippingPrice ?? offer.shippingCharges ?? 0);
-                
-                const commissionPercent = Number(product.commissionPercent ?? product.category?.commissionPercent ?? 5);
-                const commissionGstPercent = Number(product.commissionGstPercent ?? product.category?.commissionGstPercent ?? 18);
-                
-                const grossAmount = (baseSellingPrice * qty) + finalShippingPrice;
-                const commissionAmount = grossAmount * (commissionPercent / 100);
-                const commissionGstAmount = commissionAmount * (commissionGstPercent / 100);
-                
-                const totalDeductions = commissionAmount + commissionGstAmount + finalShippingPrice;
-                const netPayout = Math.max(0, grossAmount - totalDeductions);
+              
+              const offer = firstItem.sellerOffer || {};
+              const product = offer.catalogProduct || {};
+              
+              // Base selling price matches backend logic: orderItem.price fallback to mrp - discount
+              const baseSellingPrice = Number(firstItem.unitPrice || firstItem.price || (offer.mrp ? Number(offer.mrp) - Number(offer.discount || 0) : 0));
+              const finalShippingPrice = Number(offer.finalShippingPrice ?? offer.shippingCharges ?? 0);
+              const itemQty = Number(firstItem.quantity) || 1;
+              const perUnitShipping = finalShippingPrice / itemQty;
+              
+              const productGstPercent = offer.gstPercent !== undefined ? Number(offer.gstPercent) : 0;
+              const commissionPercent = Number(product.commissionPercent ?? product.category?.commissionPercent ?? 5);
+              const commissionGstPercent = Number(product.commissionGstPercent ?? product.category?.commissionGstPercent ?? 18);
+              const fixedFee = Number(product.fixedFee ?? product.category?.fixedFee ?? 0);
+              const fixedFeeGstPercent = Number(product.fixedFeeGstPercent ?? product.category?.fixedFeeGstPercent ?? 18);
 
-                return {
-                  customerFinalPrice: acc.customerFinalPrice + grossAmount,
-                  commission: acc.commission + commissionAmount,
-                  commissionGst: acc.commissionGst + commissionGstAmount,
-                  productGst: 0, // Not deducted in backend payout calculator
-                  shipping: acc.shipping + finalShippingPrice,
-                  netPayout: acc.netPayout + netPayout
-                };
-              }, { customerFinalPrice: 0, commission: 0, commissionGst: 0, productGst: 0, shipping: 0, netPayout: 0 });
+              const pricing = calculatePricing(
+                baseSellingPrice,
+                productGstPercent,
+                {
+                  type: 'none',
+                  isTaxIncluded: true,
+                  shippingCharges: perUnitShipping,
+                  shippingGstPercent: 0, 
+                  buy: 1
+                },
+                {
+                  commissionPercent,
+                  commissionGstPercent,
+                  fixedFee,
+                  fixedFeeGstPercent,
+                  shippingGstPercent: 0
+                }
+              );
+
+              const est = {
+                customerFinalPrice: pricing.finalUserBuy,
+                commission: pricing.commissionAmount,
+                commissionGst: pricing.commissionGstAmount,
+                productGst: pricing.productGstAmount,
+                shipping: perUnitShipping,
+                netPayout: pricing.sellerPayout
+              };
 
               return (
                 <div className="space-y-2 mt-2">
@@ -425,7 +439,7 @@ export default function OrderDetailPage() {
                     <span className="text-red-500">-{formatCurrency(est.shipping)}</span>
                   </div>
                   <div className="flex justify-between text-base font-semibold pt-2 border-t border-border/30">
-                    <span>Estimated Payout</span>
+                    <span>Estimated Payout (Inc. Product GST)</span>
                     <span className="text-green-600 font-bold">{formatCurrency(est.netPayout)}</span>
                   </div>
                 </div>

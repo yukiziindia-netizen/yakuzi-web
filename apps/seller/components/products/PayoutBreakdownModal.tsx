@@ -197,16 +197,13 @@ export function PayoutBreakdownModal({
                           <span>GST on Fees ({item.pricing.commissionGstPercent}%)</span>
                           <span>-{formatCurrency(item.pricing.commissionGstAmount + item.pricing.fixedFeeGstAmount)}</span>
                         </div>
-                        <div className="flex justify-between text-red-500/80">
-                          <span title="GST to be remitted">Product GST (to remit) ({item.pricing.productGstPercent}%)</span>
-                          <span>-{formatCurrency(item.pricing.productGstAmount)}</span>
-                        </div>
+
                         <div className="flex justify-between text-red-500/80">
                           <span title="Shipping handled by platform">Shipping (Deducted)</span>
                           <span>-{formatCurrency(item.pricing.shippingTotal)}</span>
                         </div>
                         <div className="flex justify-between font-bold text-primary pt-2 border-t border-border border-dashed text-base">
-                          <span>Estimated Payout</span>
+                          <span>Estimated Payout (Inc. Product GST)</span>
                           <span>{formatCurrency(item.pricing.sellerPayout)}</span>
                         </div>
                       </div>

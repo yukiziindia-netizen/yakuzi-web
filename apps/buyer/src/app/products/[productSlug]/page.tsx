@@ -1232,6 +1232,16 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                 <Accordion title="SHIPPING & RETURN INFO" />
                 <Accordion title="ADDITIONAL INFO" />
               </div>
+
+              {/* Related Products - moved inside left column to avoid XL height gaps */}
+              <div className="flex flex-col gap-4 border-t border-gray-100 pt-8 mt-6">
+                <h2 className="text-[20px] sm:text-[22px] xl:text-[24px] 2xl:text-[26px] font-bold text-gray-500">Related Products</h2>
+                <div className="grid grid-cols-3 gap-5 pb-4">
+                  {relatedProducts.map((prod: any, idx: number) => (
+                    <RelatedProductCard key={prod.id} prod={prod} index={idx} />
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* Right Column */}
@@ -1326,106 +1336,93 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                 productShippingCharges={product.shippingCharges}
                 productIsTaxIncluded={product.isTaxIncluded}
               />
-            </div>
-          </div>
 
-          {/* Bottom Section: Related Products & Reviews */}
-          <div className="grid grid-cols-[1.15fr_1fr] gap-10 border-t border-gray-100 pt-8 mt-6">
-            {/* Left: Related Products */}
-            <div className="flex flex-col gap-4">
-              <h2 className="text-[20px] sm:text-[22px] xl:text-[24px] 2xl:text-[26px] font-bold text-gray-500">Related Products</h2>
-              <div className="grid grid-cols-3 gap-5 pb-4">
-                {relatedProducts.map((prod: any, idx: number) => (
-                  <RelatedProductCard key={prod.id} prod={prod} index={idx} />
-                ))}
-              </div>
-            </div>
-
-            {/* Right: Reviews */}
-            <div className="flex flex-col">
-              <h2 className="text-[20px] sm:text-[22px] xl:text-[24px] 2xl:text-[26px] font-bold text-gray-500 mb-4">Reviews</h2>
-              
-              <div className="mb-6 flex items-center justify-between w-full">
-                <div>
-                  <div className="mb-1 flex items-center gap-3">
-                    <div className="flex gap-1 text-[#854cbc]">
-                      {[1, 2, 3, 4, 5].map((starVal) => {
-                        const fillPercent = Math.max(0, Math.min(100, (averageRating - (starVal - 1)) * 100));
-                        return (
-                          <div key={starVal} className="relative h-6 w-6">
-                            <Star
-                              size={24}
-                              fill="none"
-                              stroke="currentColor"
-                              className="absolute text-[#854cbc]"
-                            />
-                            {fillPercent > 0 && (
-                              <div className="absolute inset-0 overflow-hidden" style={{ width: `${fillPercent}%` }}>
-                                <Star size={24} fill="currentColor" className="text-[#854cbc]" />
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
+              {/* Reviews - moved inside right column to avoid XL height gaps */}
+              <div className="flex flex-col border-t border-gray-100 pt-8 mt-6">
+                <h2 className="text-[20px] sm:text-[22px] xl:text-[24px] 2xl:text-[26px] font-bold text-gray-500 mb-4">Reviews</h2>
+                
+                <div className="mb-6 flex items-center justify-between w-full">
+                  <div>
+                    <div className="mb-1 flex items-center gap-3">
+                      <div className="flex gap-1 text-[#854cbc]">
+                        {[1, 2, 3, 4, 5].map((starVal) => {
+                          const fillPercent = Math.max(0, Math.min(100, (averageRating - (starVal - 1)) * 100));
+                          return (
+                            <div key={starVal} className="relative h-6 w-6">
+                              <Star
+                                size={24}
+                                fill="none"
+                                stroke="currentColor"
+                                className="absolute text-[#854cbc]"
+                              />
+                              {fillPercent > 0 && (
+                                <div className="absolute inset-0 overflow-hidden" style={{ width: `${fillPercent}%` }}>
+                                  <Star size={24} fill="currentColor" className="text-[#854cbc]" />
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <span className="text-[28px] font-black leading-none text-gray-800">
+                        {averageRating.toFixed(1)}
+                      </span>
                     </div>
-                    <span className="text-[28px] font-black leading-none text-gray-800">
-                      {averageRating.toFixed(1)}
-                    </span>
+                    <p className="text-[13px] font-medium text-gray-400">
+                      {averageRating.toFixed(1)} out of 5 stars (based on {totalReviews} review{totalReviews !== 1 ? 's' : ''})
+                    </p>
                   </div>
-                  <p className="text-[13px] font-medium text-gray-400">
-                    {averageRating.toFixed(1)} out of 5 stars (based on {totalReviews} review{totalReviews !== 1 ? 's' : ''})
-                  </p>
+
+                  <button
+                    type="button"
+                    className="bg-[#854cbc] hover:bg-[#723eab] text-white rounded-[6px] px-6 py-2 text-[12px] sm:text-[13px] font-medium transition-colors whitespace-nowrap"
+                  >
+                    See all reviews
+                  </button>
                 </div>
 
-                <button
-                  type="button"
-                  className="bg-[#854cbc] hover:bg-[#723eab] text-white rounded-[6px] px-6 py-2 text-[12px] sm:text-[13px] font-medium transition-colors whitespace-nowrap"
-                >
-                  See all reviews
-                </button>
-              </div>
-
-              {/* Review Cards Carousel */}
-              <div className="hide-scrollbar flex flex-col gap-4 overflow-x-auto pb-2 sm:flex-row">
-                {reviewsList.map((rev: any) => {
-                  const reviewImage = rev.image || rev.imageUrl;
-                  return (
-                    <div key={rev.id} className="flex min-w-[280px] flex-1 flex-row justify-between gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                      <div className="flex flex-col justify-between flex-1">
-                        <p className="mb-4 text-[11px] font-medium leading-relaxed text-gray-500">
-                          {rev.comment}
-                        </p>
-                        <div>
-                          <div className="mb-1.5 flex gap-0.5 text-[#b165f1]">
-                            {[1, 2, 3, 4, 5].map((i) => (
-                              <Star key={i} size={14} fill={i <= rev.rating ? "currentColor" : "none"} className={i <= rev.rating ? "text-[#b165f1]" : "text-gray-200"} />
-                            ))}
-                          </div>
-                          <p className="text-[10px] font-semibold text-gray-400">
-                            - {rev.userName || 'Anonymous'}, {new Date(rev.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                {/* Review Cards Carousel */}
+                <div className="hide-scrollbar flex flex-col gap-4 overflow-x-auto pb-2 sm:flex-row">
+                  {reviewsList.map((rev: any) => {
+                    const reviewImage = rev.image || rev.imageUrl;
+                    return (
+                      <div key={rev.id} className="flex min-w-[280px] flex-1 flex-row justify-between gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                        <div className="flex flex-col justify-between flex-1">
+                          <p className="mb-4 text-[11px] font-medium leading-relaxed text-gray-500">
+                            {rev.comment}
                           </p>
+                          <div>
+                            <div className="mb-1.5 flex gap-0.5 text-[#b165f1]">
+                              {[1, 2, 3, 4, 5].map((i) => (
+                                <Star key={i} size={14} fill={i <= rev.rating ? "currentColor" : "none"} className={i <= rev.rating ? "text-[#b165f1]" : "text-gray-200"} />
+                              ))}
+                            </div>
+                            <p className="text-[10px] font-semibold text-gray-400">
+                              - {rev.userName || 'Anonymous'}, {new Date(rev.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                            </p>
+                          </div>
                         </div>
+                        {reviewImage && (
+                          <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden flex-shrink-0 self-center border border-gray-100 bg-white">
+                            <img src={reviewImage} alt="Review attachment" className="w-full h-full object-cover" />
+                          </div>
+                        )}
                       </div>
-                      {reviewImage && (
-                        <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden flex-shrink-0 self-center border border-gray-100 bg-white">
-                          <img src={reviewImage} alt="Review attachment" className="w-full h-full object-cover" />
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
 
-              {/* Review Submission Form */}
-              <ReviewSubmissionForm 
-                rating={rating}
-                setRating={setRating}
-                reviewTitle={reviewTitle}
-                setReviewTitle={setReviewTitle}
-                reviewComment={reviewComment}
-                setReviewComment={setReviewComment}
-                onSubmit={handleReviewSubmit}
-              />
+                {/* Review Submission Form */}
+                <ReviewSubmissionForm 
+                  rating={rating}
+                  setRating={setRating}
+                  reviewTitle={reviewTitle}
+                  setReviewTitle={setReviewTitle}
+                  reviewComment={reviewComment}
+                  setReviewComment={setReviewComment}
+                  onSubmit={handleReviewSubmit}
+                />
+              </div>
             </div>
           </div>
         </div>

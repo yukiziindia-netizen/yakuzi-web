@@ -151,7 +151,7 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
             onClick={onClose}
           >
             {/* Ambient Backdrop */}
-            <div className="absolute inset-0 bg-black/10 backdrop-blur-sm backdrop-saturate-[1.8]" />
+            <div className="absolute inset-0 bg-black/50" />
 
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -175,21 +175,10 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                 </div>
               </div>
 
-              {/* Product Banner Halftone Card */}
+              {/* Product Banner Card Container (custom purple background) */}
               <div
-                className="relative flex aspect-[4/3.2] w-full items-center justify-center rounded-xl border border-purple-400/20 bg-gradient-to-br from-[#854dff] via-[#b336e8] to-[#ff2b9a] p-6 shadow-md"
-                style={{
-                  backgroundImage: `
-                    radial-gradient(rgba(255, 255, 255, 0.15) 1.5px, transparent 1.5px),
-                    linear-gradient(135deg, #854dff 0%, #b336e8 50%, #ff2b9a 100%)
-                  `,
-                  backgroundSize: '12px 12px, 100% 100%',
-                }}
+                className="relative flex aspect-[4/3.2] w-full items-center justify-center rounded-xl border border-[#562996]/20 bg-[#562996] shadow-sm"
               >
-                {/* Abstract slashes for action look */}
-                <div className="pointer-events-none absolute bottom-0 right-0 top-0 w-1/3 origin-bottom-right skew-x-12 transform bg-gradient-to-l from-pink-500/20 to-transparent" />
-                <div className="pointer-events-none absolute -bottom-10 -right-10 h-64 w-64 rounded-full bg-pink-500/10 blur-2xl" />
-
                 {/* Share Button on Top Left Corner */}
                 <div className="absolute -left-3.5 -top-3.5 z-30">
                   <ShareButton
@@ -218,35 +207,37 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                   ))}
                 </div>
 
-                {/* Main Product Image (fills the card, centered) */}
-                <div className="absolute inset-0 z-10 flex items-center justify-center p-2">
+                {/* Main Product Image (fills the card container exactly, with overflow-hidden to respect rounded corners) */}
+                <div className="absolute inset-0 z-10 rounded-xl overflow-hidden">
                   <img
                     src={activeImage}
                     alt={displayProduct.name}
-                    className="max-h-full max-w-full object-contain transition-transform duration-500 hover:scale-105"
+                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                   />
                 </div>
 
                 {/* Ribbon Bookmark flag on the right edge */}
+                {/* Ribbon Bookmark flag on the right edge (half inside, half outside) */}
                 <button
                   type="button"
                   onClick={handleBookmarkToggle}
-                  className="absolute -right-[10px] top-[45%] z-20 transition-transform hover:scale-105 focus:outline-none"
+                  className="absolute -right-[18px] top-[45%] z-20 transition-transform hover:scale-105 focus:outline-none"
                 >
                   <svg
-                    width="44"
-                    height="40"
-                    viewBox="0 0 44 40"
+                    width="36"
+                    height="32"
+                    viewBox="0 0 36 32"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
                     className="overflow-visible drop-shadow-sm"
                   >
                     <path
-                      d="M44 0 H0 L11 20 L0 40 H44 V0 Z"
+                      d="M36 0 H0 L9 16 L0 32 H36 Z"
                       fill={isBookmarked ? '#854cbc' : '#ffffff'}
-                      stroke={isBookmarked ? '#854cbc' : '#9ca3af'}
+                      stroke="#854cbc"
                       strokeWidth="2.5"
                       strokeLinejoin="round"
+                      strokeLinecap="round"
                     />
                   </svg>
                 </button>

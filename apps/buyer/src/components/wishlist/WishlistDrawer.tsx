@@ -64,7 +64,7 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-[#6342B4]/35 z-[100] backdrop-blur-none"
+            className="fixed inset-0 bg-black/50 z-[100]"
           />
 
           {/* Drawer Panel */}

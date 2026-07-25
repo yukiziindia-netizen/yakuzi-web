@@ -1,7 +1,8 @@
 import HomeNavbar from '@/components/landing/HomeNavbar';
 import HeroSection from '@/components/landing/HeroSection';
 import ProductCarousel from '@/components/landing/ProductCarousel';
-import { getProducts } from '@yukizi/api-client';
+import ComingSoon from '@/components/landing/ComingSoon';
+import { getProducts, getComingSoonStatus } from '@yukizi/api-client';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +11,17 @@ export default async function HomePage({
 }: {
   searchParams: any;
 }) {
+  let isComingSoon = true;
+  try {
+    isComingSoon = await getComingSoonStatus();
+  } catch (e) {
+    console.error("[HomePage] Failed to fetch coming soon status, defaulting to true:", e);
+  }
+
+  if (isComingSoon) {
+    return <ComingSoon />;
+  }
+
   let initialProducts: any[] = [];
   try {
     const search = searchParams?.search;
@@ -48,3 +60,4 @@ export default async function HomePage({
     </main>
   );
 }
+

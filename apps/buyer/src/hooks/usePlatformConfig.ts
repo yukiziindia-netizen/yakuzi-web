@@ -10,7 +10,10 @@ const DEFAULTS: PlatformConfig = {
   shipping_fee: 250,
   default_moq: 1,
   max_order_qty: 100,
+  comingSoonMode: true,
+  maintenanceMode: false,
 };
+
 
 export function usePlatformConfig() {
   return useQuery({

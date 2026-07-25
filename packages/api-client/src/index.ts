@@ -156,9 +156,11 @@ export {
 // Platform Config
 export {
   getPlatformConfig,
+  getComingSoonStatus,
   invalidateConfigCache,
   type PlatformConfig,
 } from './modules/config.api';
+
 
 // Blogs
 export {

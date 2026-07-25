@@ -1,4 +1,5 @@
-﻿"use client";
+"use client";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -6,19 +7,36 @@ import { Users, Package, ShoppingBag, TrendingUp, AlertTriangle, CheckCircle, Cl
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { StatCard, Badge, StatusBadge, Button } from "@/components/ui";
 import { formatCurrency, formatCompact } from "@yukizi/utils";
-import { useAdminDashboard } from "@/hooks/useAdmin";
-
-import React from "react";
+import { useAdminDashboard, usePlatformSettings, useUpdatePlatformSettings } from "@/hooks/useAdmin";
+import toast from "react-hot-toast";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { DateRange } from "react-day-picker";
 import { subDays } from "date-fns";
 
 export default function AdminDashboardPage() {
   const router = useRouter();
-  const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
+  const { data: settingsData } = usePlatformSettings();
+  const updateSettings = useUpdatePlatformSettings();
+  const comingSoonActive = settingsData?.comingSoonMode ?? true;
+
+  const handleToggleComingSoon = async () => {
+    try {
+      const nextState = !comingSoonActive;
+      await updateSettings.mutateAsync({
+        ...(settingsData || {}),
+        comingSoonMode: nextState,
+      });
+      toast.success(nextState ? "Buyer Coming Soon mode ACTIVATED" : "Buyer Coming Soon mode DISABLED");
+    } catch {
+      toast.error("Failed to update Coming Soon status");
+    }
+  };
+
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: subDays(new Date(), 30),
     to: new Date(),
   });
+
 
   const { data: d, isLoading } = useAdminDashboard({
     dateFrom: dateRange?.from?.toISOString(),
@@ -59,13 +77,48 @@ export default function AdminDashboardPage() {
   return (
     <AdminLayout>
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="font-semibold text-2xl text-foreground">Platform Overview</h1>
           <p className="text-sm text-muted-foreground mt-0.5">Monitor the entire Yukizi ecosystem</p>
         </div>
-        <DateRangePicker value={dateRange} onChange={setDateRange} align="end" />
+        <div className="flex items-center gap-3">
+          <DateRangePicker value={dateRange} onChange={setDateRange} align="end" />
+        </div>
       </div>
+
+      {/* Coming Soon Banner Toggle Widget */}
+      <div className="mb-6 p-4 rounded-2xl glass-card bg-gradient-to-r from-purple-500/10 via-primary/10 to-indigo-500/10 border border-primary/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+        <div className="flex items-center gap-3.5">
+          <div className="h-10 w-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary flex-shrink-0">
+            <Clock className="h-5 w-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-foreground text-sm">Buyer App "Coming Soon" Screen</span>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${comingSoonActive ? "bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30" : "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"}`}>
+                {comingSoonActive ? "ACTIVE (COMING SOON DISPLAYED)" : "DISABLED (FULL STORE LIVE)"}
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {comingSoonActive
+                ? "Buyers currently see the Coming Soon landing screen. Toggle OFF to reveal the live store."
+                : "Buyers can browse and order normally. Toggle ON to activate the Coming Soon screen."}
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={handleToggleComingSoon}
+          disabled={updateSettings.isPending}
+          className={`relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${comingSoonActive ? "bg-primary" : "bg-muted"}`}
+          role="switch"
+          aria-checked={comingSoonActive}
+          title="Toggle Coming Soon Mode"
+        >
+          <span className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${comingSoonActive ? "translate-x-5" : "translate-x-0"}`} />
+        </button>
+      </div>
+
 
       {/* Critical alerts */}
       {(stats.pendingOrders > 0 || stats.openTickets > 0 || stats.pendingProductRequests > 0) && (

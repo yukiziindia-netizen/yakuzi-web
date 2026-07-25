@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Shield, Bell, Globe, Key } from "lucide-react";
@@ -29,6 +29,7 @@ export default function AdminSettingsPage() {
         expressLogin: s.expressLogin ?? true,
         creditLineOrders: s.creditLineOrders ?? true,
         maintenanceMode: s.maintenanceMode ?? false,
+        comingSoonMode: s.comingSoonMode ?? true,
       });
     }
   }, [settingsData]);
@@ -78,11 +79,13 @@ export default function AdminSettingsPage() {
   ];
 
   const FEATURE_FLAGS = [
+    { key: "comingSoonMode", label: "Buyer App Coming Soon Mode", desc: "Display Coming Soon section on buyer application (Active by default)" },
     { key: "allowSellerRegistration", label: "New Seller Registrations", desc: "Allow new sellers to register" },
     { key: "expressLogin", label: "Express Login", desc: "OTP-based login without signup" },
     { key: "creditLineOrders", label: "Credit Line Orders", desc: "30-day credit for verified buyers" },
     { key: "maintenanceMode", label: "Maintenance Mode", desc: "Take platform offline for maintenance" },
   ];
+
 
   return (
     <AdminLayout>

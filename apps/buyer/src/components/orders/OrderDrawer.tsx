@@ -6,6 +6,10 @@ import { OrderedProductsDrawer } from './OrderedProductsDrawer';
 import { useOrderById, useOrders } from '@/hooks/useOrders';
 import { useAuth } from '@yukizi/api-client';
 import type { OrderFilters } from './OrderFilterDrawer';
+import { useAddToWishlist, useWishlist, useRemoveFromWishlist } from '@/hooks/useWishlist';
+import { useToast } from '@/components/shared/Toast';
+import WishlistIcon from '@/components/shared/WishlistIcon';
+
 
 function formatImageUrl(url: any): string | undefined {
   if (!url) return undefined;
@@ -29,6 +33,12 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isOrderedProductsOpen, setIsOrderedProductsOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+
+  const { data: wishlistData } = useWishlist();
+  const { mutate: addToWishlist } = useAddToWishlist();
+  const { mutate: removeFromWishlist } = useRemoveFromWishlist();
+  const { toast } = useToast();
+
 
   useEffect(() => {
     setSelectedOrderId(null);
@@ -186,16 +196,18 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
                 {items.map((item: any, index: number) => {
                   const product = item.sellerOffer || item.product || {};
                   const name = product.name || product.variant?.catalogProduct?.name || 'Unknown Product';
-                  const fallbackImage = `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent((name || 'PR').trim().split(/\\s+/).length === 1 ? (name || 'PR').trim().substring(0,2).toUpperCase() : ((name || 'PR').trim().split(/\\s+/)[0][0] + (name || 'PR').trim().split(/\\s+/)[(name || 'PR').trim().split(/\\s+/).length - 1][0]).toUpperCase())}`;
+                  const fallbackImage = `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent((name || 'PR').trim().split(/\s+/).length === 1 ? (name || 'PR').trim().substring(0,2).toUpperCase() : ((name || 'PR').trim().split(/\\s+/)[0][0] + (name || 'PR').trim().split(/\\s+/)[(name || 'PR').trim().split(/\\s+/).length - 1][0]).toUpperCase())}`;
                   const imageUrl = formatImageUrl(product.variant?.catalogProduct?.images?.[0]) || product?.images?.[0]?.url || product?.images?.[0] || product?.image || fallbackImage;
+                  
+                  const currentProductId = product?.id || item?.productId || `prod-${index}`;
+                  const isSaved = wishlistData?.items?.some(
+                    (wItem: any) => wItem.productId === currentProductId || wItem.product?.id === currentProductId || wItem.id === currentProductId
+                  );
                   
                   return (
                     <div key={item.id || index} onClick={() => setIsOrderedProductsOpen(true)} className="min-w-[150px] border border-gray-100 rounded-xl p-3 relative shadow-sm hover:shadow-md transition-shadow bg-white snap-center cursor-pointer">
-                      <div className="flex justify-between items-start mb-2">
-                        <button className="text-gray-400 hover:text-gray-600">
-                          <Share2 className="w-4 h-4" />
-                        </button>
-                        <button className="text-orange-400 hover:text-orange-500">
+                      <div className="flex justify-end items-start mb-2">
+                        <button className="text-orange-400 hover:text-orange-500" onClick={(e) => e.stopPropagation()}>
                           <Plus className="w-4 h-4" />
                         </button>
                       </div>
@@ -206,8 +218,28 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
                             alt={name} 
                          />
                       </div>
-                      <div className="absolute right-0 top-1/2 -translate-y-1/2">
-                         <div className="bg-purple-600 w-1.5 h-4 rounded-l-sm"></div>
+                      <div
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          if (isSaved) {
+                            removeFromWishlist(currentProductId, {
+                              onSuccess: () => toast('Removed from wishlist', 'info')
+                            });
+                          } else {
+                            addToWishlist(product, {
+                              onSuccess: () => toast('Added to wishlist', 'success')
+                            });
+                          }
+                        }}
+                        className="absolute right-0 top-1/2 -translate-y-1/2 z-20 cursor-pointer hover:scale-105 transition-transform"
+                      >
+                        <WishlistIcon 
+                          isFilled={isSaved} 
+                          preserveAspectRatio="none" 
+                          className={`w-[24px] h-[18px] text-[#7B2FBE] ${isSaved ? 'fill-[#7B2FBE]' : 'fill-none'}`} 
+                        />
                       </div>
                       <div className="flex justify-between items-center mt-2 border-t border-gray-50 pt-2">
                          <span className="text-xs text-gray-500 font-medium truncate w-20">{name}</span>

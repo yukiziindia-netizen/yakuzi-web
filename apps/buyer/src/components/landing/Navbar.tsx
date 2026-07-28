@@ -544,7 +544,7 @@ export default function Navbar({
             >
               <Package 
                 className="w-[24px] h-[24px] xs:w-[26px] xs:h-[26px] sm:w-[26px] sm:h-[26px] md:w-[28px] md:h-[28px] stroke-[2]" 
-                fill={isOrderDrawerOpen ? "currentColor" : "none"}
+                fill="none"
               />
             </button>
 

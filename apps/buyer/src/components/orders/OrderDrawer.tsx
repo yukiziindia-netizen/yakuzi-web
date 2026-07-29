@@ -117,7 +117,7 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
       <div 
         className={`fixed inset-0 w-full h-full bg-[#fcfcfc] z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'} overflow-y-auto`}
       >
-        <div className="w-full max-w-7xl mx-auto min-h-screen bg-[#fcfcfc] relative flex flex-col px-4 sm:px-6 md:px-8 py-6">
+        <div className="w-full min-h-screen bg-[#fcfcfc] relative flex flex-col px-4 sm:px-6 md:px-8 py-6">
           {/* Close Button */}
           <button onClick={onClose} className="absolute top-6 right-6 p-2 text-gray-400 hover:text-gray-900 bg-white hover:bg-gray-100 rounded-full z-50 transition-colors border border-gray-200 shadow-sm">
             <X className="w-6 h-6" />

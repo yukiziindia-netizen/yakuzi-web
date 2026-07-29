@@ -43,7 +43,7 @@ export function OrderFilterDrawer({ isOpen, onClose, filters, onApplyFilters }: 
 
       {/* Filter Drawer Panel (styled as a full-page overlay) */}
       <div className="fixed inset-0 w-full h-full bg-white z-[110] flex flex-col overflow-hidden animate-slide-in-right">
-        <div className="max-w-4xl mx-auto w-full min-h-screen bg-white relative flex flex-col overflow-hidden">
+        <div className="w-full min-h-screen bg-white relative flex flex-col overflow-hidden">
           {/* Close Button */}
           <button onClick={onClose} className="absolute top-6 right-6 p-2 text-gray-400 hover:text-gray-900 bg-white/80 rounded-full z-[80] transition-colors border border-gray-100 shadow-sm">
             <X className="w-6 h-6" />

@@ -16,6 +16,8 @@ import { useBuyerInvoices } from '@/hooks/useBuyerProfile';
 import { useToast } from '@/components/shared/Toast';
 import { formatCurrency, formatDate } from '@yukizi/utils';
 
+export const dynamic = 'force-dynamic';
+
 export default function CreditPage() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [invoicePage, setInvoicePage] = useState(1);

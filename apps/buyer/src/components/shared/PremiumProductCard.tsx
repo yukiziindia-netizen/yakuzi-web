@@ -198,109 +198,109 @@ export default function PremiumProductCard({
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
         >
-        {hasItems ? (
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <button
-              type="button"
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={removeFromCart}
-              className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-black/5 transition-colors"
-            >
-              <RotateCw className="w-4 h-4 text-gray-800" strokeWidth={2.5} />
-            </button>
-            <div className="flex items-center gap-0.5 xs:gap-1 bg-black rounded-[8px] sm:rounded-[10px] pl-0.5 pr-0.5 py-0.5 sm:pl-1 sm:pr-1 sm:py-1 shadow-md animate-in fade-in zoom-in-90 duration-200">
+          {hasItems ? (
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <button
                 type="button"
                 onPointerDown={(e) => e.stopPropagation()}
-                onClick={count === 1 ? removeFromCart : decrement}
-                className="w-5 h-5 sm:w-6 sm:h-6 rounded flex items-center justify-center text-white hover:bg-white/20 active:scale-90 transition-all"
+                onClick={removeFromCart}
+                className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-black/5 transition-colors"
               >
-                {count === 1 ? (
-                  <Trash2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-red-400" strokeWidth={2.5} />
-                ) : (
-                  <Minus className="w-3 h-3 sm:w-3.5 sm:h-3.5" strokeWidth={3} />
-                )}
+                <RotateCw className="w-4 h-4 text-gray-800" strokeWidth={2.5} />
               </button>
-
-              {isEditingQty ? (
-                <input
-                  ref={inputRef}
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  value={editValue}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/\D/g, '');
-                    setEditValue(val);
-                  }}
-                  onBlur={() => {
-                    const parsed = parseInt(editValue, 10);
-                    if (!isNaN(parsed)) {
-                      const finalQty = Math.max(0, Math.min(parsed, stock));
-                      // If it's less than MOQ but more than 0, snap to MOQ
-                      const reportedQty = (finalQty > 0 && finalQty < moq) ? moq : finalQty;
-                      
-                      setCount(reportedQty);
-                      notifyCartChange(reportedQty > 0 ? reportedQty : null);
-                      setEditValue(String(reportedQty));
-                    } else {
-                      setEditValue(String(count));
-                    }
-                    setIsEditingQty(false);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      (e.target as any).blur();
-                    }
-                  }}
-                  className="w-10 min-w-10 bg-white/10 text-white text-[13px] font-bold text-center tabular-nums outline-none border-b border-white/40 rounded px-1 appearance-none"
-                  autoFocus
-                />
-              ) : (
+              <div className="flex items-center gap-0.5 xs:gap-1 bg-black rounded-[8px] sm:rounded-[10px] pl-0.5 pr-0.5 py-0.5 sm:pl-1 sm:pr-1 sm:py-1 shadow-md animate-in fade-in zoom-in-90 duration-200">
                 <button
                   type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    actionClicked.current = true;
-                    setEditValue(String(count));
-                    setIsEditingQty(true);
-                    setTimeout(() => inputRef.current?.select(), 0);
-                  }}
-                  className="text-white text-[11px] sm:text-[13px] font-bold min-w-[24px] sm:min-w-[32px] px-1 text-center tabular-nums select-none cursor-text hover:bg-white/10 rounded transition-all"
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={count === 1 ? removeFromCart : decrement}
+                  className="w-5 h-5 sm:w-6 sm:h-6 rounded flex items-center justify-center text-white hover:bg-white/20 active:scale-90 transition-all"
                 >
-                  {count}
+                  {count === 1 ? (
+                    <Trash2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-red-400" strokeWidth={2.5} />
+                  ) : (
+                    <Minus className="w-3 h-3 sm:w-3.5 sm:h-3.5" strokeWidth={3} />
+                  )}
                 </button>
-              )}
 
-              <button
-                type="button"
-                onPointerDown={(e) => e.stopPropagation()}
-                onClick={increment}
-                disabled={count >= stock}
-                className="w-5 h-5 sm:w-6 sm:h-6 rounded flex items-center justify-center text-white hover:bg-white/20 active:scale-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-              >
-                <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5" strokeWidth={3} />
-              </button>
+                {isEditingQty ? (
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={editValue}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, '');
+                      setEditValue(val);
+                    }}
+                    onBlur={() => {
+                      const parsed = parseInt(editValue, 10);
+                      if (!isNaN(parsed)) {
+                        const finalQty = Math.max(0, Math.min(parsed, stock));
+                        // If it's less than MOQ but more than 0, snap to MOQ
+                        const reportedQty = (finalQty > 0 && finalQty < moq) ? moq : finalQty;
+
+                        setCount(reportedQty);
+                        notifyCartChange(reportedQty > 0 ? reportedQty : null);
+                        setEditValue(String(reportedQty));
+                      } else {
+                        setEditValue(String(count));
+                      }
+                      setIsEditingQty(false);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        (e.target as any).blur();
+                      }
+                    }}
+                    className="w-10 min-w-10 bg-white/10 text-white text-[13px] font-bold text-center tabular-nums outline-none border-b border-white/40 rounded px-1 appearance-none"
+                    autoFocus
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      actionClicked.current = true;
+                      setEditValue(String(count));
+                      setIsEditingQty(true);
+                      setTimeout(() => inputRef.current?.select(), 0);
+                    }}
+                    className="text-white text-[11px] sm:text-[13px] font-bold min-w-[24px] sm:min-w-[32px] px-1 text-center tabular-nums select-none cursor-text hover:bg-white/10 rounded transition-all"
+                  >
+                    {count}
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={increment}
+                  disabled={count >= stock}
+                  className="w-5 h-5 sm:w-6 sm:h-6 rounded flex items-center justify-center text-white hover:bg-white/20 active:scale-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5" strokeWidth={3} />
+                </button>
+              </div>
             </div>
-          </div>
-        ) : (
-          <StockBasedButton
-            stock={stock}
-            moq={moq}
-            onAddToCart={handleAddToCart}
-            onNotifyStockAlert={() => {
-              actionClicked.current = true;
-              if (productId && onToggleWaitlist) {
-                onToggleWaitlist(productId);
-              }
-            }}
-            disabled={isLoadingCart}
-            isLoading={isLoadingCart}
-            isWaitlisted={isWaitlisted}
-          />
-        )}
-      </div>
+          ) : (
+            <StockBasedButton
+              stock={stock}
+              moq={moq}
+              onAddToCart={handleAddToCart}
+              onNotifyStockAlert={() => {
+                actionClicked.current = true;
+                if (productId && onToggleWaitlist) {
+                  onToggleWaitlist(productId);
+                }
+              }}
+              disabled={isLoadingCart}
+              isLoading={isLoadingCart}
+              isWaitlisted={isWaitlisted}
+            />
+          )}
+        </div>
       )}
 
       {/* Image Section */}
@@ -382,7 +382,7 @@ export default function PremiumProductCard({
             </span>
             <span className="text-[11px] xs:text-[12px] sm:text-[14px] font-[900] text-gray-800 text-center flex-1">{moq}</span>
             <span className="text-[11px] xs:text-[12px] sm:text-[14px] font-[900] text-gray-900 truncate flex-1 text-right">
-               {product?.sellerCount === 0 ? (
+              {product?.sellerCount === 0 ? (
                 <span className="text-[9px] text-gray-400 font-bold">NOT AVAILABLE</span>
               ) : (
                 <>₹{Math.round(Number(price))}</>

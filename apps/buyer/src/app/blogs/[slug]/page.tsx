@@ -8,6 +8,8 @@ import Navbar from '@/components/landing/Navbar';
 import LoginModal from '@/components/landing/LoginModal';
 import { useBlogBySlug } from '@/hooks/useBlogs';
 
+export const dynamic = 'force-dynamic';
+
 export default function BlogDetailPage() {
   const params = useParams();
   const slug = Array.isArray(params?.slug) ? params.slug[0] : params?.slug;

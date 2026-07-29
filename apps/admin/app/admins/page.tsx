@@ -1,12 +1,12 @@
 "use client";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Plus, Pencil, Trash2, Shield } from "lucide-react";
+import { Search, Plus, Pencil, Trash2, Shield, UserCheck } from "lucide-react";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { Button, Badge, Input, Modal } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
-import { useAdmins, useCreateAdmin, useUpdateAdmin, useDeleteAdmin } from "@/hooks/useAdmin";
+import { useAdmins, useCreateAdmin, useUpdateAdmin, useDeleteAdmin, useAffirmUserStatus } from "@/hooks/useAdmin";
 
 const PERMISSION_LABELS: Record<string, string> = {
   "1": "View Users", "2": "Manage Users", "3": "View Products", "4": "Manage Products",
@@ -26,6 +26,7 @@ export default function AdminManagementPage() {
   const createAdmin = useCreateAdmin();
   const updateAdmin = useUpdateAdmin();
   const deleteAdmin = useDeleteAdmin();
+  const updateStatus = useAffirmUserStatus();
   const [showModal, setShowModal] = useState(false);
   const [editingAdmin, setEditingAdmin] = useState<any>(null);
   const [form, setForm] = useState({ name: "", phone: "", department: "General", permissions: "" });
@@ -35,6 +36,15 @@ export default function AdminManagementPage() {
   const filtered = admins.filter((a: any) =>
     !search || (a.name ?? "").toLowerCase().includes(search.toLowerCase()) || (a.phone ?? "").includes(search)
   );
+
+  const handleApprove = async (admin: any) => {
+    try {
+      await updateStatus.mutateAsync({ userId: admin.id, action: "approve" });
+      toast.success(`Admin ${admin.phone || admin.name} approved`);
+    } catch {
+      toast.error("Failed to approve admin");
+    }
+  };
 
   const openCreate = () => {
     setEditingAdmin(null);
@@ -153,6 +163,11 @@ export default function AdminManagementPage() {
                     <td className="px-5 py-4 text-xs text-muted-foreground text-center">{admin.createdAt ? new Date(admin.createdAt).toLocaleDateString("en-IN") : "—"}</td>
                     <td className="px-5 py-4">
                       <div className="flex items-center justify-center gap-1">
+                        {admin.status === "PENDING" && (
+                          <Button variant="ghost" size="icon" onClick={() => handleApprove(admin)} title="Approve Admin">
+                            <UserCheck className="h-3.5 w-3.5 text-green-500" />
+                          </Button>
+                        )}
                         <Button variant="ghost" size="icon" onClick={() => openEdit(admin)}><Pencil className="h-3.5 w-3.5" /></Button>
                         <Button variant="ghost" size="icon" onClick={() => handleDelete(admin)}><Trash2 className="h-3.5 w-3.5 text-red-500" /></Button>
                       </div>

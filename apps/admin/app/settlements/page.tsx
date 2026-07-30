@@ -94,9 +94,8 @@ export default function AdminSettlementsPage() {
 
       // Handle automatic sync and payment for items NOT in ledger yet
       if (selectedId.startsWith("projected-")) {
-        // ID format: projected-orderItemId
-        const parts = selectedId.split("-");
-        const orderItemId = parts[1];
+        // ID format: projected-orderItemId (preserve entire UUID with dashes)
+        const orderItemId = selectedId.replace(/^projected-/, "");
         
         // 1. Trigger sync to create the record - handles wrapped or direct array responses
         const response = await syncSettlements.mutateAsync();

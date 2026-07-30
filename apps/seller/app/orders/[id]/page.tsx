@@ -199,25 +199,103 @@ export default function OrderDetailPage() {
                   (typeof item.product?.images?.[0] === 'string' ? item.product.images[0] : item.product?.images?.[0]?.url) ||
                   (typeof item.sellerOffer?.variant?.catalogProduct?.images?.[0] === 'string' ? item.sellerOffer.variant.catalogProduct.images[0] : item.sellerOffer?.variant?.catalogProduct?.images?.[0]?.url) ||
                   (typeof item.sellerOffer?.images?.[0] === 'string' ? item.sellerOffer.images[0] : item.sellerOffer?.images?.[0]?.url);
+
+                const offer = item.sellerOffer || {};
+                const product = offer.catalogProduct || item.product || {};
+                
+                const baseSellingPrice = Number(item.unitPrice || item.price || (offer.mrp ? Number(offer.mrp) - Number(offer.discount || 0) : 0));
+                const finalShippingPrice = Number(offer.finalShippingPrice ?? offer.shippingCharges ?? 0);
+                const itemQty = Number(item.quantity) || 1;
+                const perUnitShipping = finalShippingPrice / itemQty;
+                
+                const productGstPercent = offer.gstPercent !== undefined ? Number(offer.gstPercent) : 0;
+                const commissionPercent = Number(product.commissionPercent ?? product.category?.commissionPercent ?? offer.commissionPercent ?? 5);
+                const commissionGstPercent = Number(product.commissionGstPercent ?? product.category?.commissionGstPercent ?? offer.commissionGstPercent ?? 18);
+                const fixedFee = Number(product.fixedFee ?? product.category?.fixedFee ?? 0);
+                const fixedFeeGstPercent = Number(product.fixedFeeGstPercent ?? product.category?.fixedFeeGstPercent ?? 18);
+
+                const pricing = calculatePricing(
+                  baseSellingPrice,
+                  productGstPercent,
+                  {
+                    type: 'none',
+                    isTaxIncluded: true,
+                    shippingCharges: perUnitShipping,
+                    shippingGstPercent: 0,
+                    buy: 1
+                  },
+                  {
+                    commissionPercent,
+                    commissionGstPercent,
+                    fixedFee,
+                    fixedFeeGstPercent,
+                    shippingGstPercent: 0
+                  }
+                );
+
+                const totalItemPrice = Number(item.totalPrice ?? ((item.unitPrice || item.price || 0) * itemQty));
+                const itemCommission = pricing.commissionAmount * itemQty;
+                const itemCommissionGst = pricing.commissionGstAmount * itemQty;
+                const itemShipping = perUnitShipping * itemQty;
+                const itemNetPayout = pricing.sellerPayout * itemQty;
+
                 return (
-                <div key={i} className="flex items-center gap-4 p-5">
-                  <div className="h-14 w-14 rounded-xl bg-muted flex items-center justify-center flex-shrink-0">
-                    {itemImage ? (
-                      <img src={itemImage} alt={item.product?.name || item.name || item.productName || item.sellerOffer?.name} className="h-14 w-14 rounded-xl object-cover" />
-                    ) : (
-                      <Package className="h-6 w-6 text-muted-foreground" />
-                    )}
+                <div key={i} className="p-5 space-y-3">
+                  <div className="flex items-center gap-4">
+                    <div className="h-14 w-14 rounded-xl bg-muted flex items-center justify-center flex-shrink-0">
+                      {itemImage ? (
+                        <img src={itemImage} alt={item.product?.name || item.name || item.productName || item.sellerOffer?.name} className="h-14 w-14 rounded-xl object-cover" />
+                      ) : (
+                        <Package className="h-6 w-6 text-muted-foreground" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{item.product?.name || item.name || item.productName || item.sellerOffer?.name}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {item.sellerOffer?.variant?.name && <span>Variant: {item.sellerOffer.variant.name} </span>}
+                        {(item.sellerOffer?.variant?.sku || item.sellerOffer?.sku) && <span>(SKU: {item.sellerOffer.variant?.sku || item.sellerOffer?.sku})</span>}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">Qty: {item.quantity} × {formatCurrency(item.unitPrice || item.price || 0)}</p>
+                      {item.discount > 0 && <p className="text-xs text-green-600">Discount: {item.discount}%</p>}
+                    </div>
+                    <p className="text-sm font-semibold text-foreground">{formatCurrency(totalItemPrice)}</p>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{item.product?.name || item.name || item.productName || item.sellerOffer?.name}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {item.sellerOffer?.variant?.name && <span>Variant: {item.sellerOffer.variant.name} </span>}
-                      {(item.sellerOffer?.variant?.sku || item.sellerOffer?.sku) && <span>(SKU: {item.sellerOffer.variant?.sku || item.sellerOffer?.sku})</span>}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">Qty: {item.quantity} × {formatCurrency(item.unitPrice || item.price || 0)}</p>
-                    {item.discount > 0 && <p className="text-xs text-green-600">Discount: {item.discount}%</p>}
+
+                  {/* Estimated Payout Section for Product */}
+                  <div className="pt-3 border-t border-border/40 bg-accent/20 dark:bg-accent/10 rounded-xl p-3.5 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-foreground">
+                        <Calculator className="h-3.5 w-3.5 text-primary" />
+                        <span>Estimated Payout Breakdown</span>
+                      </div>
+                      <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded-md border border-emerald-200/60 dark:border-emerald-800/40">
+                        Net Payout: {formatCurrency(itemNetPayout)}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs pt-1">
+                      <div className="bg-background/80 p-2 rounded-lg border border-border/30">
+                        <span className="text-[10px] text-muted-foreground block font-medium">Selling Price</span>
+                        <span className="font-semibold text-foreground">{formatCurrency(totalItemPrice)}</span>
+                      </div>
+                      <div className="bg-background/80 p-2 rounded-lg border border-border/30">
+                        <span className="text-[10px] text-muted-foreground block font-medium">Platform Fee ({commissionPercent}%)</span>
+                        <span className="font-semibold text-red-500">-{formatCurrency(itemCommission)}</span>
+                      </div>
+                      <div className="bg-background/80 p-2 rounded-lg border border-border/30">
+                        <span className="text-[10px] text-muted-foreground block font-medium">GST on Fee ({commissionGstPercent}%)</span>
+                        <span className="font-semibold text-red-500">-{formatCurrency(itemCommissionGst)}</span>
+                      </div>
+                      <div className="bg-background/80 p-2 rounded-lg border border-border/30">
+                        <span className="text-[10px] text-muted-foreground block font-medium">Shipping</span>
+                        <span className="font-semibold text-red-500">-{formatCurrency(itemShipping)}</span>
+                      </div>
+                      <div className="bg-emerald-50/80 dark:bg-emerald-950/40 p-2 rounded-lg border border-emerald-200/60 dark:border-emerald-800/40 col-span-2 sm:col-span-1">
+                        <span className="text-[10px] text-emerald-700 dark:text-emerald-400 block font-bold">Est. Payout</span>
+                        <span className="font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(itemNetPayout)}</span>
+                      </div>
+                    </div>
                   </div>
-                  <p className="text-sm font-semibold text-foreground">{formatCurrency((item.quantity || 1) * (item.unitPrice || item.price || 0))}</p>
                 </div>
                 );
               })}
@@ -226,11 +304,51 @@ export default function OrderDetailPage() {
               )}
             </div>
             {/* Totals */}
-            <div className="p-5 border-t border-border/50 space-y-2">
-              <div className="flex justify-between text-sm"><span className="text-muted-foreground">Subtotal</span><span className="text-foreground">{formatCurrency(items.reduce((sum, item) => sum + (Number(item.quantity) || 1) * (Number(item.unitPrice) || Number(item.price) || 0), 0))}</span></div>
-              {mainOrder.gstAmount != null && <div className="flex justify-between text-sm"><span className="text-muted-foreground">GST</span><span className="text-foreground">{formatCurrency(Number(mainOrder.gstAmount))}</span></div>}
-              <div className="flex justify-between text-base font-semibold pt-2 border-t border-border/30"><span>Total</span><span>{formatCurrency(items.reduce((sum, item) => sum + (Number(item.quantity) || 1) * (Number(item.unitPrice) || Number(item.price) || 0), 0) + (Number(mainOrder.gstAmount) || 0))}</span></div>
-            </div>
+            {(() => {
+              let totalCommission = 0;
+              let totalCommissionGst = 0;
+              let totalShipping = 0;
+              let totalNetPayout = 0;
+
+              items.forEach((item: any) => {
+                const offer = item.sellerOffer || {};
+                const product = offer.catalogProduct || item.product || {};
+                const baseSellingPrice = Number(item.unitPrice || item.price || (offer.mrp ? Number(offer.mrp) - Number(offer.discount || 0) : 0));
+                const itemQty = Number(item.quantity) || 1;
+                const perUnitShipping = Number(offer.finalShippingPrice ?? offer.shippingCharges ?? 0) / itemQty;
+                const productGstPercent = offer.gstPercent !== undefined ? Number(offer.gstPercent) : 0;
+                const commissionPercent = Number(product.commissionPercent ?? product.category?.commissionPercent ?? offer.commissionPercent ?? 5);
+                const commissionGstPercent = Number(product.commissionGstPercent ?? product.category?.commissionGstPercent ?? offer.commissionGstPercent ?? 18);
+                const fixedFee = Number(product.fixedFee ?? product.category?.fixedFee ?? 0);
+                const fixedFeeGstPercent = Number(product.fixedFeeGstPercent ?? product.category?.fixedFeeGstPercent ?? 18);
+
+                const pricing = calculatePricing(
+                  baseSellingPrice,
+                  productGstPercent,
+                  { type: 'none', isTaxIncluded: true, shippingCharges: perUnitShipping, shippingGstPercent: 0, buy: 1 },
+                  { commissionPercent, commissionGstPercent, fixedFee, fixedFeeGstPercent, shippingGstPercent: 0 }
+                );
+
+                totalCommission += pricing.commissionAmount * itemQty;
+                totalCommissionGst += pricing.commissionGstAmount * itemQty;
+                totalShipping += perUnitShipping * itemQty;
+                totalNetPayout += pricing.sellerPayout * itemQty;
+              });
+
+              const subtotal = items.reduce((sum, item) => sum + (Number(item.quantity) || 1) * (Number(item.unitPrice) || Number(item.price) || 0), 0);
+              const grandTotal = subtotal + (Number(mainOrder.gstAmount) || 0);
+
+              return (
+                <div className="p-5 border-t border-border/50 space-y-2 bg-muted/10">
+                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">Subtotal</span><span className="text-foreground">{formatCurrency(subtotal)}</span></div>
+                  {mainOrder.gstAmount != null && <div className="flex justify-between text-sm"><span className="text-muted-foreground">GST</span><span className="text-foreground">{formatCurrency(Number(mainOrder.gstAmount))}</span></div>}
+                  <div className="flex justify-between text-sm text-red-500"><span>Platform Fees & Taxes</span><span>-{formatCurrency(totalCommission + totalCommissionGst)}</span></div>
+                  <div className="flex justify-between text-sm text-red-500"><span>Total Shipping (Deducted)</span><span>-{formatCurrency(totalShipping)}</span></div>
+                  <div className="flex justify-between text-sm font-semibold text-emerald-600 dark:text-emerald-400"><span>Total Estimated Payout</span><span className="font-bold">{formatCurrency(totalNetPayout)}</span></div>
+                  <div className="flex justify-between text-base font-semibold pt-2 border-t border-border/30"><span>Total Order Amount</span><span>{formatCurrency(grandTotal)}</span></div>
+                </div>
+              );
+            })()}
           </motion.div>
 
           {/* Shipping & Fulfillment */}
@@ -364,88 +482,6 @@ export default function OrderDetailPage() {
 
         {/* Sidebar Info */}
         <div className="space-y-4">
-          {/* Estimated Calculation */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="glass-card rounded-2xl p-5 space-y-3">
-            <h3 className="font-semibold text-sm text-foreground flex items-center gap-2">
-              <Calculator className="h-4 w-4 text-primary" />
-              Estimated Payout Breakdown (Per Unit)
-            </h3>
-            
-            {(() => {
-              const firstItem = items[0] || {};
-              const displayProductGstPercent = firstItem.sellerOffer?.gstPercent !== undefined ? Number(firstItem.sellerOffer.gstPercent) : 0;
-              const displayCommissionPercent = firstItem.sellerOffer?.variant?.catalogProduct?.commissionPercent ? Number(firstItem.sellerOffer.variant.catalogProduct.commissionPercent) : 5;
-              const displayCommissionGstPercent = firstItem.sellerOffer?.variant?.catalogProduct?.commissionGstPercent ? Number(firstItem.sellerOffer.variant.catalogProduct.commissionGstPercent) : 18;
-              
-              const offer = firstItem.sellerOffer || {};
-              const product = offer.catalogProduct || {};
-              
-              // Base selling price matches backend logic: orderItem.price fallback to mrp - discount
-              const baseSellingPrice = Number(firstItem.unitPrice || firstItem.price || (offer.mrp ? Number(offer.mrp) - Number(offer.discount || 0) : 0));
-              const finalShippingPrice = Number(offer.finalShippingPrice ?? offer.shippingCharges ?? 0);
-              const itemQty = Number(firstItem.quantity) || 1;
-              const perUnitShipping = finalShippingPrice / itemQty;
-              
-              const productGstPercent = offer.gstPercent !== undefined ? Number(offer.gstPercent) : 0;
-              const commissionPercent = Number(product.commissionPercent ?? product.category?.commissionPercent ?? 5);
-              const commissionGstPercent = Number(product.commissionGstPercent ?? product.category?.commissionGstPercent ?? 18);
-              const fixedFee = Number(product.fixedFee ?? product.category?.fixedFee ?? 0);
-              const fixedFeeGstPercent = Number(product.fixedFeeGstPercent ?? product.category?.fixedFeeGstPercent ?? 18);
-
-              const pricing = calculatePricing(
-                baseSellingPrice,
-                productGstPercent,
-                {
-                  type: 'none',
-                  isTaxIncluded: true,
-                  shippingCharges: perUnitShipping,
-                  shippingGstPercent: 0, 
-                  buy: 1
-                },
-                {
-                  commissionPercent,
-                  commissionGstPercent,
-                  fixedFee,
-                  fixedFeeGstPercent,
-                  shippingGstPercent: 0
-                }
-              );
-
-              const est = {
-                customerFinalPrice: pricing.finalUserBuy,
-                commission: pricing.commissionAmount,
-                commissionGst: pricing.commissionGstAmount,
-                productGst: pricing.productGstAmount,
-                shipping: perUnitShipping,
-                netPayout: pricing.sellerPayout
-              };
-
-              return (
-                <div className="space-y-2 mt-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Customer Final Price</span>
-                    <span className="text-foreground">{formatCurrency(est.customerFinalPrice)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Platform Commission ({displayCommissionPercent}%)</span>
-                    <span className="text-red-500">-{formatCurrency(est.commission)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">GST on Fees ({displayCommissionGstPercent}%)</span>
-                    <span className="text-red-500">-{formatCurrency(est.commissionGst)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Shipping (Deducted)</span>
-                    <span className="text-red-500">-{formatCurrency(est.shipping)}</span>
-                  </div>
-                  <div className="flex justify-between text-base font-semibold pt-2 border-t border-border/30">
-                    <span>Estimated Payout (Inc. Product GST)</span>
-                    <span className="text-green-600 font-bold">{formatCurrency(est.netPayout)}</span>
-                  </div>
-                </div>
-              );
-            })()}
-          </motion.div>
           {/* Payment Info */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass-card rounded-2xl p-5 space-y-3">
             <h3 className="font-semibold text-sm text-foreground flex items-center gap-2"><CreditCard className="h-4 w-4 text-primary" />Payment</h3>

@@ -2,12 +2,12 @@
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft, Package, Truck, CheckCircle, XCircle, Clock, CreditCard, FileText, User, MapPin, Phone, Building2, Mail, ExternalLink, Navigation } from "lucide-react";
+import { ArrowLeft, Package, Truck, CheckCircle, XCircle, Clock, CreditCard, FileText, User, MapPin, Phone, Building2, Mail, ExternalLink, Navigation, Calculator } from "lucide-react";
 
 
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { Button, Badge, Modal, Input, Skeleton } from "@/components/ui";
-import { formatCurrency } from "@yukizi/utils";
+import { formatCurrency, calculatePricing } from "@yukizi/utils";
 import { cn } from "@/lib/utils";
 import { useOrderById, useUpdateAdminOrderStatus, useCancelOrder, useUpdateAdminShippingDocs, useUploadAdminOrderDocument } from "@/hooks/useAdmin";
 import toast from "react-hot-toast";
@@ -230,40 +230,172 @@ export default function OrderDetailPage() {
               {items.length === 0 ? (
                 <div className="py-12 text-center text-sm text-muted-foreground">No items</div>
               ) : items.map((item: any, i: number) => {
-                const itemImage = item.sellerOffer?.variant?.catalogProduct?.images?.[0]?.url || item.product?.images?.[0] || item.image;
+                const itemImage = 
+                  (typeof item.image === 'string' ? item.image : item.image?.url) ||
+                  (typeof item.product?.images?.[0] === 'string' ? item.product.images[0] : item.product?.images?.[0]?.url) ||
+                  (typeof item.sellerOffer?.catalogProduct?.images?.[0] === 'string' ? item.sellerOffer.catalogProduct.images[0] : item.sellerOffer?.catalogProduct?.images?.[0]?.url) ||
+                  (typeof item.sellerOffer?.variant?.catalogProduct?.images?.[0] === 'string' ? item.sellerOffer.variant.catalogProduct.images[0] : item.sellerOffer?.variant?.catalogProduct?.images?.[0]?.url) ||
+                  (typeof item.sellerOffer?.images?.[0] === 'string' ? item.sellerOffer.images[0] : item.sellerOffer?.images?.[0]?.url);
                 const itemName = item.sellerOffer?.name ?? item.product?.name ?? item.productName ?? "Product";
                 const itemManufacturer = item.sellerOffer?.manufacturer ?? item.product?.manufacturer ?? item.manufacturer ?? "—";
+                
+                // Calculate seller estimated payout matching platform calculation formula
+                const offer = item.sellerOffer || {};
+                const product = offer.catalogProduct || item.product || {};
+                
+                const baseSellingPrice = Number(item.unitPrice || item.price || (offer.mrp ? Number(offer.mrp) - Number(offer.discount || 0) : 0));
+                const finalShippingPrice = Number(offer.finalShippingPrice ?? offer.shippingCharges ?? item.shippingFee ?? item.shippingCharges ?? (order.shippingFee ? Number(order.shippingFee) / items.length : 0));
+                const itemQty = Number(item.quantity) || 1;
+                const perUnitShipping = finalShippingPrice / itemQty;
+                
+                const productGstPercent = offer.gstPercent !== undefined ? Number(offer.gstPercent) : 0;
+                const commissionPercent = Number(product.commissionPercent ?? product.category?.commissionPercent ?? offer.commissionPercent ?? 5);
+                const commissionGstPercent = Number(product.commissionGstPercent ?? product.category?.commissionGstPercent ?? offer.commissionGstPercent ?? 18);
+                const fixedFee = Number(product.fixedFee ?? product.category?.fixedFee ?? 0);
+                const fixedFeeGstPercent = Number(product.fixedFeeGstPercent ?? product.category?.fixedFeeGstPercent ?? 18);
+
+                const pricing = calculatePricing(
+                  baseSellingPrice,
+                  productGstPercent,
+                  {
+                    type: 'none',
+                    isTaxIncluded: true,
+                    shippingCharges: perUnitShipping,
+                    shippingGstPercent: 0,
+                    buy: 1
+                  },
+                  {
+                    commissionPercent,
+                    commissionGstPercent,
+                    fixedFee,
+                    fixedFeeGstPercent,
+                    shippingGstPercent: 0
+                  }
+                );
+
+                const totalItemPrice = Number(item.totalPrice ?? item.price ?? (baseSellingPrice * itemQty));
+                const itemCommission = pricing.commissionAmount * itemQty;
+                const itemCommissionGst = pricing.commissionGstAmount * itemQty;
+                const itemShipping = perUnitShipping * itemQty;
+                const itemNetPayout = pricing.sellerPayout * itemQty;
+
                 return (
-                <div key={item.id || i} className="px-6 py-4 flex items-center gap-4">
-                  {itemImage ? (
-                    <div className="h-12 w-12 rounded-xl overflow-hidden border border-border flex-shrink-0">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={itemImage} alt={itemName} className="w-full h-full object-cover" />
-                    </div>
-                  ) : (
-                    <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-lg flex-shrink-0">💊</div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate">{itemName}</p>
-                    <p className="text-xs text-muted-foreground">{itemManufacturer} · Qty: {item.quantity ?? 1}</p>
-                    {item.discountType && <p className="text-xs text-primary mt-0.5">Discount: {item.discountType} {item.discountValue ? `(${item.discountValue})` : ""}</p>}
-                  </div>
-                  <div className="text-right flex-shrink-0">
-                    <p className="text-sm font-semibold text-foreground">{formatCurrency(item.totalPrice ?? item.price ?? 0)}</p>
-                    {item.mrp && item.totalPrice && item.mrp * (item.quantity ?? 1) > item.totalPrice && (
-                      <p className="text-xs text-muted-foreground line-through">{formatCurrency(item.mrp * (item.quantity ?? 1))}</p>
+                <div key={item.id || i} className="px-6 py-4 space-y-3">
+                  <div className="flex items-center gap-4">
+                    {itemImage ? (
+                      <div className="h-12 w-12 rounded-xl overflow-hidden border border-border flex-shrink-0">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={itemImage} alt={itemName} className="w-full h-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-lg flex-shrink-0">💊</div>
                     )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-foreground truncate">{itemName}</p>
+                      <p className="text-xs text-muted-foreground">{itemManufacturer} · Qty: {item.quantity ?? 1}</p>
+                      {item.discountType && <p className="text-xs text-primary mt-0.5">Discount: {item.discountType} {item.discountValue ? `(${item.discountValue})` : ""}</p>}
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-sm font-semibold text-foreground">{formatCurrency(totalItemPrice)}</p>
+                      {item.mrp && item.totalPrice && item.mrp * (item.quantity ?? 1) > item.totalPrice && (
+                        <p className="text-xs text-muted-foreground line-through">{formatCurrency(item.mrp * (item.quantity ?? 1))}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Estimated Payout Section for Product */}
+                  <div className="pt-3 border-t border-border/40 bg-accent/20 dark:bg-accent/10 rounded-xl p-3.5 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-foreground">
+                        <Calculator className="h-3.5 w-3.5 text-primary" />
+                        <span>Estimated Payout Breakdown</span>
+                      </div>
+                      <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded-md border border-emerald-200/60 dark:border-emerald-800/40">
+                        Net Payout: {formatCurrency(itemNetPayout)}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs pt-1">
+                      <div className="bg-background/80 p-2 rounded-lg border border-border/30">
+                        <span className="text-[10px] text-muted-foreground block font-medium">Selling Price</span>
+                        <span className="font-semibold text-foreground">{formatCurrency(totalItemPrice)}</span>
+                      </div>
+                      <div className="bg-background/80 p-2 rounded-lg border border-border/30">
+                        <span className="text-[10px] text-muted-foreground block font-medium">Platform Fee ({commissionPercent}%)</span>
+                        <span className="font-semibold text-red-500">-{formatCurrency(itemCommission)}</span>
+                      </div>
+                      <div className="bg-background/80 p-2 rounded-lg border border-border/30">
+                        <span className="text-[10px] text-muted-foreground block font-medium">GST on Fee ({commissionGstPercent}%)</span>
+                        <span className="font-semibold text-red-500">-{formatCurrency(itemCommissionGst)}</span>
+                      </div>
+                      <div className="bg-background/80 p-2 rounded-lg border border-border/30">
+                        <span className="text-[10px] text-muted-foreground block font-medium">Shipping</span>
+                        <span className="font-semibold text-red-500">-{formatCurrency(itemShipping)}</span>
+                      </div>
+                      <div className="bg-emerald-50/80 dark:bg-emerald-950/40 p-2 rounded-lg border border-emerald-200/60 dark:border-emerald-800/40 col-span-2 sm:col-span-1">
+                        <span className="text-[10px] text-emerald-700 dark:text-emerald-400 block font-bold">Est. Seller Payout</span>
+                        <span className="font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(itemNetPayout)}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 );
               })}
             </div>
-            <div className="p-6 border-t border-border/50 bg-muted/10">
-              <div className="flex items-center justify-between">
-                <span className="font-semibold text-foreground">Total</span>
-                <span className="text-xl font-bold text-foreground">{formatCurrency(order.totalAmount ?? 0)}</span>
-              </div>
-            </div>
+
+            {/* Order Totals Summary */}
+            {(() => {
+              let totalCommission = 0;
+              let totalCommissionGst = 0;
+              let totalShipping = 0;
+              let totalNetPayout = 0;
+
+              items.forEach((item: any) => {
+                const offer = item.sellerOffer || {};
+                const product = offer.catalogProduct || item.product || {};
+                const baseSellingPrice = Number(item.unitPrice || item.price || (offer.mrp ? Number(offer.mrp) - Number(offer.discount || 0) : 0));
+                const itemQty = Number(item.quantity) || 1;
+                const perUnitShipping = Number(offer.finalShippingPrice ?? offer.shippingCharges ?? item.shippingFee ?? item.shippingCharges ?? (order.shippingFee ? Number(order.shippingFee) / items.length : 0)) / itemQty;
+                const productGstPercent = offer.gstPercent !== undefined ? Number(offer.gstPercent) : 0;
+                const commissionPercent = Number(product.commissionPercent ?? product.category?.commissionPercent ?? offer.commissionPercent ?? 5);
+                const commissionGstPercent = Number(product.commissionGstPercent ?? product.category?.commissionGstPercent ?? offer.commissionGstPercent ?? 18);
+                const fixedFee = Number(product.fixedFee ?? product.category?.fixedFee ?? 0);
+                const fixedFeeGstPercent = Number(product.fixedFeeGstPercent ?? product.category?.fixedFeeGstPercent ?? 18);
+
+                const pricing = calculatePricing(
+                  baseSellingPrice,
+                  productGstPercent,
+                  { type: 'none', isTaxIncluded: true, shippingCharges: perUnitShipping, shippingGstPercent: 0, buy: 1 },
+                  { commissionPercent, commissionGstPercent, fixedFee, fixedFeeGstPercent, shippingGstPercent: 0 }
+                );
+
+                totalCommission += pricing.commissionAmount * itemQty;
+                totalCommissionGst += pricing.commissionGstAmount * itemQty;
+                totalShipping += perUnitShipping * itemQty;
+                totalNetPayout += pricing.sellerPayout * itemQty;
+              });
+
+              return (
+                <div className="p-6 border-t border-border/50 bg-muted/10 space-y-3">
+                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <span>Platform Commission & Taxes</span>
+                    <span className="font-semibold text-red-500">-{formatCurrency(totalCommission + totalCommissionGst)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <span>Total Shipping (Deducted)</span>
+                    <span className="font-semibold text-red-500">-{formatCurrency(totalShipping)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                    <span>Total Estimated Seller Payout</span>
+                    <span className="font-bold">{formatCurrency(totalNetPayout)}</span>
+                  </div>
+                  <div className="flex items-center justify-between pt-2 border-t border-border/30">
+                    <span className="font-bold text-foreground text-base">Total Order Value</span>
+                    <span className="text-xl font-bold text-foreground">{formatCurrency(order.totalAmount ?? 0)}</span>
+                  </div>
+                </div>
+              );
+            })()}
           </motion.div>
 
           {/* Sidebar - Buyer + Payment Info */}

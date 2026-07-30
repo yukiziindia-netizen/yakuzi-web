@@ -390,13 +390,13 @@ export default function UsersPage() {
                                 </button>
                               )}
 
-                              {(u.status === "PENDING" && (u.role === "ADMIN" || u.buyerProfile?.gstNumber || u.buyerProfile?.panNumber || u.sellerProfile?.gstNumber || u.sellerProfile?.panNumber || u.gstNumber || u.panNumber)) && (
+                              {u.status === "PENDING" && (
                                 <>
-                                  <button onClick={(e) => { e.stopPropagation(); void handleAction(u.id, u.phone, "approve"); }} aria-label="Approve" title="Approve"
+                                  <button onClick={(e) => { e.stopPropagation(); void handleAction(u.id, u.phone, "approve"); }} aria-label="Approve" title="Approve user"
                                     className="h-7 w-7 rounded-lg flex items-center justify-center text-green-500 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors">
                                     <UserCheck className="h-3.5 w-3.5" />
                                   </button>
-                                  <button onClick={(e) => { e.stopPropagation(); void handleAction(u.id, u.phone, "reject"); }} aria-label="Reject" title="Reject"
+                                  <button onClick={(e) => { e.stopPropagation(); void handleAction(u.id, u.phone, "reject"); }} aria-label="Reject" title="Reject user"
                                     className="h-7 w-7 rounded-lg flex items-center justify-center text-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
                                     <UserX className="h-3.5 w-3.5" />
                                   </button>

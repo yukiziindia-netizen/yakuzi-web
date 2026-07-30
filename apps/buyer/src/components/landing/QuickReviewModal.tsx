@@ -208,12 +208,14 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                 </div>
 
                 {/* Main Product Image (fills the card container exactly, with overflow-hidden to respect rounded corners) */}
-                <div className="absolute inset-0 z-10 rounded-xl overflow-hidden">
-                  <img
-                    src={activeImage}
-                    alt={displayProduct.name}
-                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                  />
+                <div className="absolute inset-0 z-10 rounded-xl overflow-hidden p-4 bg-white">
+                  <div className="relative w-full h-full flex items-center justify-center">
+                    <img
+                      src={activeImage}
+                      alt={displayProduct.name}
+                      className="max-h-full max-w-full object-contain transition-transform duration-500 hover:scale-105"
+                    />
+                  </div>
                 </div>
 
                 {/* Ribbon Bookmark flag on the right edge */}

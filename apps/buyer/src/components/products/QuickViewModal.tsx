@@ -236,14 +236,16 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                 </div>
 
                 {/* Main Product Image (fills the card container exactly, with overflow-hidden to respect rounded corners) */}
-                <div className="absolute inset-0 z-10 rounded-xl overflow-hidden">
-                  <Image
-                    src={activeImage}
-                    alt={displayProduct.name}
-                    fill
-                    className="object-cover transition-transform duration-500 hover:scale-105"
-                    priority
-                  />
+                <div className="absolute inset-0 z-10 rounded-xl overflow-hidden p-4 bg-white">
+                  <div className="relative w-full h-full">
+                    <Image
+                      src={activeImage}
+                      alt={displayProduct.name}
+                      fill
+                      className="object-contain transition-transform duration-500 hover:scale-105"
+                      priority
+                    />
+                  </div>
                 </div>
 
                 {/* Ribbon Bookmark flag on the right edge */}

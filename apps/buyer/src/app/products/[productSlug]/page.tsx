@@ -321,15 +321,17 @@ function ProductBannerCard({
       </div>
 
       {/* Main Image */}
-      <div className="absolute inset-0 w-full h-full rounded-[24px] overflow-hidden">
+      <div className="absolute inset-0 w-full h-full rounded-[24px] overflow-hidden p-4 sm:p-6 bg-white">
         {activeImage && (
-          <Image
-            src={activeImage}
-            alt={productName}
-            fill
-            className="object-cover w-full h-full hover:scale-105 transition-transform duration-500"
-            priority
-          />
+          <div className="relative w-full h-full">
+            <Image
+              src={activeImage}
+              alt={productName}
+              fill
+              className="object-contain hover:scale-105 transition-transform duration-500"
+              priority
+            />
+          </div>
         )}
       </div>
 

@@ -385,7 +385,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                         <div className="flex flex-shrink-0 items-center justify-end min-w-[32px]">
                           {inStock ? (
                             itemQty > 0 ? (
-                              <div className="flex h-7 w-20 select-none items-center justify-between overflow-hidden rounded-xl bg-[#48286b] text-[10px] font-black text-white shadow-sm sm:h-8">
+                              <div className="flex h-7 w-20 select-none items-center justify-between overflow-hidden rounded-[8px] bg-[#48286b] text-[10px] font-black text-white shadow-sm sm:h-8">
                                 <button
                                   className="h-full px-2 sm:px-2.5 text-xs font-extrabold text-white/80 transition-all hover:bg-black/10 hover:text-white active:scale-95"
                                   onClick={() => handleQtyChange(itemQty - 1)}

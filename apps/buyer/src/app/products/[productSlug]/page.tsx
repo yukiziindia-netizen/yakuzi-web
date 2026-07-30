@@ -592,7 +592,7 @@ function ComparisonOffersList({
                     </button>
 
                     {/* Quantity Control Pill */}
-                    <div className="flex items-center bg-[#48286b] rounded-lg sm:rounded-xl overflow-hidden h-6 w-[60px] sm:h-7.5 sm:w-24 md:h-8 md:w-26 xl:h-8.5 xl:w-30 2xl:h-9 2xl:w-34 text-white shadow-sm select-none justify-between px-1 sm:px-2 xl:px-3">
+                    <div className="flex items-center bg-[#48286b] rounded-[8px] overflow-hidden h-6 w-[60px] sm:h-7.5 sm:w-24 md:h-8 md:w-26 xl:h-8.5 xl:w-30 2xl:h-9 2xl:w-34 text-white shadow-sm select-none justify-between px-1 sm:px-2 xl:px-3">
                       <button
                         className="w-4 sm:w-8 h-full flex items-center justify-center hover:bg-black/10 active:scale-95 transition-all text-white font-bold text-[10px] sm:text-lg xl:text-xl 2xl:text-2xl pb-0.5"
                         onClick={() => handleQtyChange(itemQty - 1)}

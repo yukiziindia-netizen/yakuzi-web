@@ -208,7 +208,7 @@ export default function PremiumProductCard({
               >
                 <RotateCw className="w-4 h-4 text-gray-800" strokeWidth={2.5} />
               </button>
-              <div className="flex items-center gap-0.5 xs:gap-1 bg-black rounded-[8px] sm:rounded-[10px] pl-0.5 pr-0.5 py-0.5 sm:pl-1 sm:pr-1 sm:py-1 shadow-md animate-in fade-in zoom-in-90 duration-200">
+              <div className="flex items-center gap-0.5 xs:gap-1 bg-[#48286b] rounded-[8px] pl-0.5 pr-0.5 py-0.5 sm:pl-1 sm:pr-1 sm:py-1 shadow-md animate-in fade-in zoom-in-90 duration-200">
                 <button
                   type="button"
                   onPointerDown={(e) => e.stopPropagation()}
@@ -269,7 +269,7 @@ export default function PremiumProductCard({
                     }}
                     className="text-white text-[11px] sm:text-[13px] font-bold min-w-[24px] sm:min-w-[32px] px-1 text-center tabular-nums select-none cursor-text hover:bg-white/10 rounded transition-all"
                   >
-                    {count}
+                    {String(count).padStart(2, '0')}
                   </button>
                 )}
 

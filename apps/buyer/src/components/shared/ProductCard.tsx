@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Share2, Plus, Minus, Star, Truck, Loader2, ArrowUpRight } from 'lucide-react';
+import { Share2, Plus, Minus, Star, Truck, Loader2, ArrowUpRight, RotateCw } from 'lucide-react';
 import { useState } from 'react';
 import { ShareButton } from './ShareButton';
 import WishlistIcon from '@/components/shared/WishlistIcon';
@@ -84,6 +84,13 @@ export default function ProductCard({
     onCartChange?.(newQty > 0 ? newQty : null);
   };
 
+  const handleResetClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (isLoadingCart) return;
+    onCartChange?.(null);
+  };
+
   const handleBookmarkClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onBookmark?.(!isBookmarked);
@@ -119,18 +126,31 @@ export default function ProductCard({
       >
 
       {/* Top action icons (Cart quantity controls / Waitlist / Plus button) */}
-      <div className="flex justify-end items-center absolute top-2 right-2 z-20">
+      <div className="flex justify-end items-center absolute top-1 right-1 z-20">
         {cartQuantity && cartQuantity > 0 ? (
-          <div className="flex items-center gap-1.5 bg-[#1A253C]/10 rounded-full px-2 py-0.5 border border-[#1A253C]/20" onClick={(e) => e.stopPropagation()}>
-             <button onClick={handleMinusClick} className="text-[#1A253C] hover:text-[#1A253C]/80 transition-colors disabled:opacity-50" disabled={isLoadingCart}>
-               <Minus className="w-3.5 h-3.5" strokeWidth={2.5} />
+          <div className="flex items-center gap-1" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+             {/* Reset Button */}
+             <button
+               onClick={handleResetClick}
+               title="Reset quantity"
+               className="text-[#48286b] hover:text-purple-900 transition-all active:scale-90 focus:outline-none p-0.5"
+               disabled={isLoadingCart}
+             >
+               <RotateCw className="w-3.5 h-3.5" strokeWidth={3} />
              </button>
-             <span className="text-xs font-bold text-[#1A253C] min-w-[12px] text-center">
-               {isLoadingCart ? <Loader2 className="w-3 h-3 animate-spin mx-auto" /> : cartQuantity}
-             </span>
-             <button onClick={handlePlusClick} className="text-[#1A253C] hover:text-[#1A253C]/80 transition-colors disabled:opacity-50" disabled={isLoadingCart || cartQuantity >= stock}>
-               <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
-             </button>
+
+             {/* Quantity Control Pill */}
+             <div className="flex items-center bg-[#48286b] rounded-[6px] overflow-hidden h-6 text-white shadow-sm select-none justify-between px-1 gap-1">
+                <button onClick={handleMinusClick} className="text-white hover:bg-white/10 w-4.5 h-4.5 flex items-center justify-center rounded transition-colors disabled:opacity-50" disabled={isLoadingCart}>
+                  <Minus className="w-2.5 h-2.5" strokeWidth={3} />
+                </button>
+                <span className="text-[10px] font-black tracking-wide min-w-[12px] text-center">
+                  {isLoadingCart ? <Loader2 className="w-2.5 h-2.5 animate-spin mx-auto" /> : String(cartQuantity).padStart(2, '0')}
+                </span>
+                <button onClick={handlePlusClick} className="text-white hover:bg-white/10 w-4.5 h-4.5 flex items-center justify-center rounded transition-colors disabled:opacity-50" disabled={isLoadingCart || cartQuantity >= stock}>
+                  <Plus className="w-2.5 h-2.5" strokeWidth={3} />
+                </button>
+             </div>
           </div>
         ) : isOutOfStock ? (
           <button 
@@ -149,10 +169,10 @@ export default function ProductCard({
         ) : (
           <button 
             onClick={handlePlusClick} 
-            className="w-7 h-7 rounded-full bg-white/90 shadow-sm border border-gray-200 flex items-center justify-center text-[#ff8952] hover:text-[#ff7536] hover:bg-white transition-all"
+            className="text-orange-500 hover:text-orange-600 transition-all focus:outline-none p-1"
             disabled={isLoadingCart}
           >
-            {isLoadingCart ? <Loader2 className="w-4 h-4 animate-spin" strokeWidth={2} /> : <Plus className="w-4 h-4" strokeWidth={2.5} />}
+            {isLoadingCart ? <Loader2 className="w-5 h-5 animate-spin" strokeWidth={2} /> : <Plus className="w-5 h-5" strokeWidth={3} />}
           </button>
         )}
       </div>

@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Loader2, Share2, Plus, ArrowUpRight, Star, Truck, Bookmark } from 'lucide-react';
+import { Loader2, Share2, Plus, Minus, RotateCw, ArrowUpRight, Star, Truck, Bookmark } from 'lucide-react';
 import Link from 'next/link';
 import { getProducts } from '@yukizi/api-client';
 import { generateProductSlug, calculatePricing } from '@yukizi/utils';
 import QuickReviewModal from './QuickReviewModal';
-import { useAddToCart } from '@/hooks/useCart';
+import { useAddToCart, useCart, useUpdateCartItem, useRemoveCartItem } from '@/hooks/useCart';
 import { useAddToWishlist, useWishlist, useRemoveFromWishlist } from '@/hooks/useWishlist';
 import { useToast } from '@/components/shared/Toast';
 import WishlistIcon from '@/components/shared/WishlistIcon';
@@ -49,13 +49,64 @@ export const renderBuyerOfferBadge = (p: any) => {
 };
 
 function GridProductCard({ product, index, onOpenReview }: { product: any; index: number; onOpenReview: (p: any) => void }) {
+  const { data: cartData } = useCart();
   const { mutate: addToCart } = useAddToCart();
+  const { mutate: updateCartItem } = useUpdateCartItem();
+  const { mutate: removeCartItem } = useRemoveCartItem();
   const { mutate: addToWishlist } = useAddToWishlist();
   const { mutate: removeFromWishlist } = useRemoveFromWishlist();
   const { data: wishlistData } = useWishlist();
   const { toast } = useToast();
 
   const currentProductId = product?.id || `prod-${index}`;
+  const targetProductId = product.bestListingId || currentProductId;
+
+  // Find if this product is in the cart
+  const cartItem = cartData?.items?.find(
+    (item: any) => item.productId === targetProductId || item.product?.id === targetProductId || item.id === targetProductId
+  );
+  const cartQuantity = cartItem?.quantity || 0;
+
+  const handlePlusClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (cartItem) {
+      updateCartItem({
+        itemId: cartItem.id,
+        quantity: cartQuantity + 1,
+      });
+    } else {
+      addToCart(
+        { productId: targetProductId, quantity: 1, price: finalPrice, originalPrice: finalOriginalPrice || mrpVal, ...product },
+        { onSuccess: () => toast('Added to cart', 'success') }
+      );
+    }
+  };
+
+  const handleMinusClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (cartItem) {
+      if (cartQuantity > 1) {
+        updateCartItem({
+          itemId: cartItem.id,
+          quantity: cartQuantity - 1,
+        });
+      } else if (cartQuantity === 1) {
+        removeCartItem(cartItem.id);
+      }
+    }
+  };
+
+  const handleResetClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (cartItem) {
+      removeCartItem(cartItem.id, {
+        onSuccess: () => toast('Removed from cart', 'info')
+      });
+    }
+  };
   const isSaved = wishlistData?.items?.some(
     (item: any) => item.productId === currentProductId || item.product?.id === currentProductId || item.id === currentProductId
   );
@@ -148,20 +199,45 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
 
         {/* Top Right Plus / Cart Button */}
         {!isNotAvailable && (
-          <div className="absolute top-2 right-2 z-20">
-            <button 
-              className="w-7 h-7 rounded-full bg-white/90 shadow-sm border border-gray-200 flex items-center justify-center text-[#ff8952] hover:text-[#ff7536] hover:bg-white transition-all" 
-              onClick={(e) => { 
-                e.preventDefault(); 
-                const targetProductId = product.bestListingId || currentProductId;
-                addToCart(
-                  { productId: targetProductId, quantity: 1, price: finalPrice, originalPrice: finalOriginalPrice || mrpVal, ...product },
-                  { onSuccess: () => toast('Added to cart', 'success') }
-                );
-              }}
-            >
-               <Plus className="w-4 h-4" strokeWidth={2.5} />
-            </button>
+          <div className="absolute top-1 right-1 z-20">
+            {cartQuantity > 0 ? (
+              <div className="flex items-center gap-1" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                 {/* Reset Button */}
+                 <button
+                   onClick={handleResetClick}
+                   title="Reset quantity"
+                   className="text-[#48286b] hover:text-purple-900 transition-all active:scale-90 focus:outline-none p-0.5"
+                 >
+                   <RotateCw className="w-3.5 h-3.5" strokeWidth={3} />
+                 </button>
+
+                 {/* Quantity Control Pill */}
+                 <div className="flex items-center bg-[#48286b] rounded-[6px] overflow-hidden h-6 text-white shadow-sm select-none justify-between px-1 gap-1">
+                    <button 
+                      onClick={handleMinusClick} 
+                      className="text-white hover:bg-white/10 w-4.5 h-4.5 flex items-center justify-center rounded transition-colors"
+                    >
+                      <Minus className="w-2.5 h-2.5" strokeWidth={3} />
+                    </button>
+                    <span className="text-[10px] font-black tracking-wide min-w-[12px] text-center">
+                      {String(cartQuantity).padStart(2, '0')}
+                    </span>
+                    <button 
+                      onClick={handlePlusClick} 
+                      className="text-white hover:bg-white/10 w-4.5 h-4.5 flex items-center justify-center rounded transition-colors"
+                    >
+                      <Plus className="w-2.5 h-2.5" strokeWidth={3} />
+                    </button>
+                 </div>
+              </div>
+            ) : (
+              <button 
+                className="text-orange-500 hover:text-orange-600 transition-all focus:outline-none p-1" 
+                onClick={handlePlusClick}
+              >
+                <Plus className="w-5 h-5" strokeWidth={3} />
+              </button>
+            )}
           </div>
         )}
 

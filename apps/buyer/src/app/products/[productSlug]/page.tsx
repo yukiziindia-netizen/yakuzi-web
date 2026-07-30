@@ -96,42 +96,46 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
   const isBestSeller = !!prod.isBestSeller;
   const isAd = isYukiziChoice || isBestSeller;
 
-  const pricing = calculatePricing(
-    Number(prod.mrp || prod.originalPrice || 0),
-    Number(prod.gstPercent || 0),
+  // 1. Extract pre-calculated selling price if available
+  const rawPrice = prod?.price ?? prod?.finalCustomerPayable ?? prod?.sellingPrice ?? prod?.sellerOffers?.[0]?.finalCustomerPayable ?? prod?.sellerOffers?.[0]?.mrp;
+  const directPrice = (rawPrice != null && !isNaN(Number(rawPrice))) ? Number(rawPrice) : 0;
+  
+  // 2. Extract MRP / original price from all candidate fields
+  const rawMrp = prod?.mrp ?? prod?.originalPrice ?? prod?.sellerOffers?.[0]?.mrp ?? prod?.lowestPrice ?? prod?.price;
+  const mrpVal = (rawMrp != null && !isNaN(Number(rawMrp))) ? Number(rawMrp) : 0;
+
+  // 3. Compute pricing via calculatePricing if MRP is available
+  const pricing = mrpVal > 0 ? calculatePricing(
+    mrpVal,
+    Number(prod?.gstPercent || 0),
     {
-      type: prod.discountType || (prod.discountMeta?.discountPercent ? 'ptr_discount' : 'none'),
-      discountPercent: prod.discountMeta?.discountPercent,
-      specialPrice: prod.discountMeta?.specialPrice,
-      buy: prod.discountMeta?.buy,
-      get: prod.discountMeta?.get,
-      bonusProductName: prod.discountMeta?.bonusProductName,
-      shippingCharges: prod.finalShippingPrice ?? prod.shippingCharges ?? 0,
+      type: prod?.discountType || (prod?.discountMeta?.discountPercent ? 'ptr_discount' : 'none'),
+      discountPercent: prod?.discountMeta?.discountPercent,
+      specialPrice: prod?.discountMeta?.specialPrice,
+      buy: prod?.discountMeta?.buy,
+      get: prod?.discountMeta?.get,
+      bonusProductName: prod?.discountMeta?.bonusProductName,
+      shippingCharges: prod?.finalShippingPrice ?? prod?.shippingCharges ?? 0,
       shippingGstPercent: 0,
       isTaxIncluded: true,
     }
-  );
+  ) : null;
 
-  const price = pricing.finalCustomerPayable;
-  const mrp = prod.mrp || prod.originalPrice;
-  const rating = prod.rating || 4.5;
+  const computedPrice = (pricing?.finalCustomerPayable != null && pricing.finalCustomerPayable > 0) 
+    ? Number(pricing.finalCustomerPayable) 
+    : 0;
 
-  const isNotAvailable = prod.sellerCount === 0 || prod.sellerOffers?.length === 0 || price == null || price === 0;
-  const hasVariantPrice = !isNotAvailable && price != null && price > 0;
-  const fallbackPrice = prod.price || prod.mrp || prod.originalPrice || 0;
-  const fallbackOriginalPrice = (prod.price && prod.mrp && Number(prod.mrp) > Number(prod.price)) ? prod.mrp : 0;
-
-  const finalPrice = hasVariantPrice ? price : fallbackPrice;
-  const finalOriginalPrice = hasVariantPrice 
-    ? (pricing?.grossTotal ?? (mrp != null ? Number(mrp) : 0)) 
-    : fallbackOriginalPrice;
+  const finalPrice = directPrice > 0 ? directPrice : (computedPrice > 0 ? computedPrice : mrpVal);
+  const finalOriginalPrice = mrpVal > finalPrice ? mrpVal : 0;
+  const rating = prod?.rating || 4.5;
+  const isNotAvailable = (prod?.sellerCount === 0 || prod?.hasSellers === false) && finalPrice <= 0 && mrpVal <= 0;
 
   const displayPrice = finalPrice > 0 
-    ? `₹${Math.round(Number(finalPrice)).toLocaleString('en-IN')}` 
-    : 'N/A';
+    ? `₹${Math.round(finalPrice).toLocaleString('en-IN')}` 
+    : (mrpVal > 0 ? `₹${Math.round(mrpVal).toLocaleString('en-IN')}` : 'N/A');
 
-  const displayOriginalPrice = (finalOriginalPrice > 0 && Number(finalOriginalPrice) > Number(finalPrice))
-    ? `₹${Math.round(Number(finalOriginalPrice)).toLocaleString('en-IN')}`
+  const displayOriginalPrice = (finalOriginalPrice > 0 && finalOriginalPrice > finalPrice)
+    ? `₹${Math.round(finalOriginalPrice).toLocaleString('en-IN')}`
     : '';
 
   const displayDelivery = prod.deliveryText || prod.deliveryTime || '3 days';
@@ -182,7 +186,7 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
                 e.preventDefault();
                 e.stopPropagation();
                 addToCart(
-                  { productId: currentProductId, quantity: 1, price, originalPrice: mrp, ...prod },
+                  { productId: currentProductId, quantity: 1, price: finalPrice, originalPrice: finalOriginalPrice || mrpVal, ...prod },
                   { onSuccess: () => toast('Added to cart', 'success') }
                 );
               }}
@@ -845,8 +849,8 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
 
   const totalReviews = reviewsData?.total || (reviewsData?.data && reviewsData.data.length > 0 ? reviewsData.data.length : reviewsList.length);
 
-  const listings = product.listings || [];
-  const validListings = listings.filter((l: any) => l.price != null);
+  const listings = product.listings || product.sellerOffers || product.offers || [];
+  const validListings = listings.filter((l: any) => l.price != null || l.mrp != null);
   const relatedProducts = relatedProductsData?.data || [];
 
   // Filter listings based on the selected variant
@@ -866,31 +870,55 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
   if (comparisonListings.length > 0) {
     let minPayable = Infinity;
     for (const listing of comparisonListings) {
-      const pricing = calculatePricing(
-        Number(listing.mrp || listing.originalPrice || product.mrp || product.originalPrice || 0),
-        Number(listing.gstPercent ?? product.gstPercent ?? 0),
-        {
-          type: listing.discountType || (listing.discountMeta?.discountPercent ? 'ptr_discount' : 'none'),
-          discountPercent: listing.discountMeta?.discountPercent,
-          specialPrice: listing.discountMeta?.specialPrice,
-          buy: listing.discountMeta?.buy,
-          get: listing.discountMeta?.get,
-          bonusProductName: listing.discountMeta?.bonusProductName,
-          shippingCharges: listing.finalShippingPrice ?? listing.shippingCharges ?? product.shippingCharges ?? 0,
-          shippingGstPercent: 0,
-          isTaxIncluded: true,
+      const listingMrp = Number(listing.mrp || listing.originalPrice || product.mrp || product.originalPrice || 0);
+      if (listingMrp > 0) {
+        const pricing = calculatePricing(
+          listingMrp,
+          Number(listing.gstPercent ?? product.gstPercent ?? 0),
+          {
+            type: listing.discountType || (listing.discountMeta?.discountPercent ? 'ptr_discount' : 'none'),
+            discountPercent: listing.discountMeta?.discountPercent,
+            specialPrice: listing.discountMeta?.specialPrice,
+            buy: listing.discountMeta?.buy,
+            get: listing.discountMeta?.get,
+            bonusProductName: listing.discountMeta?.bonusProductName,
+            shippingCharges: listing.finalShippingPrice ?? listing.shippingCharges ?? product.shippingCharges ?? 0,
+            shippingGstPercent: 0,
+            isTaxIncluded: true,
+          }
+        );
+        if (pricing.finalCustomerPayable < minPayable) {
+          minPayable = pricing.finalCustomerPayable;
+          bestPricing = pricing;
         }
-      );
-      if (pricing.finalCustomerPayable < minPayable) {
-        minPayable = pricing.finalCustomerPayable;
-        bestPricing = pricing;
+      } else if (listing.price != null && Number(listing.price) > 0 && Number(listing.price) < minPayable) {
+        minPayable = Number(listing.price);
+        bestPricing = { finalCustomerPayable: Number(listing.price) };
       }
     }
   }
 
-  const displayPrice = bestPricing ? bestPricing.finalCustomerPayable : Number(product.price || 0);
-  const rawMrp = comparisonListings.find((l: any) => l.mrp || l.originalPrice)?.mrp ||
-    comparisonListings.find((l: any) => l.mrp || l.originalPrice)?.originalPrice ||
+  // If selected variant has no listings, compute overall best price from validListings
+  let overallBestPrice = 0;
+  if (validListings.length > 0) {
+    const candidatePrices = validListings
+      .map((l: any) => Number(l.price ?? l.basePrice ?? l.mrp ?? 0))
+      .filter((p: number) => !isNaN(p) && p > 0);
+    if (candidatePrices.length > 0) {
+      overallBestPrice = Math.min(...candidatePrices);
+    }
+  }
+
+  const rawFallbackPrice = product.price ?? product.finalCustomerPayable ?? product.mrp ?? product.originalPrice ?? overallBestPrice;
+  const fallbackPriceVal = Number(rawFallbackPrice);
+  const displayPrice = (bestPricing && bestPricing.finalCustomerPayable > 0) 
+    ? Number(bestPricing.finalCustomerPayable) 
+    : (overallBestPrice > 0 
+      ? overallBestPrice 
+      : (!isNaN(fallbackPriceVal) && fallbackPriceVal > 0 ? fallbackPriceVal : 0));
+
+  const rawMrp = (comparisonListings.length > 0 ? comparisonListings : validListings).find((l: any) => l.mrp || l.originalPrice)?.mrp ||
+    (comparisonListings.length > 0 ? comparisonListings : validListings).find((l: any) => l.mrp || l.originalPrice)?.originalPrice ||
     product.mrp ||
     product.originalPrice;
   let displayMrp = rawMrp ? Number(rawMrp) : 0;
@@ -1269,7 +1297,9 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                 <div className="flex flex-col items-start justify-end">
                   <div className="flex items-baseline gap-2.5">
                     <span className="text-[24px] sm:text-[28px] xl:text-[30px] 2xl:text-[32px] font-medium text-[#333333] leading-none">
-                      ₹{displayPrice ? Number(displayPrice).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
+                      {displayPrice > 0 
+                        ? `₹${Number(displayPrice).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` 
+                        : 'N/A'}
                     </span>
                     {displayMrp && displayMrp > displayPrice ? (
                       <span className="text-[12px] sm:text-[14px] xl:text-[15px] 2xl:text-[16px] font-bold text-gray-400 line-through leading-none">

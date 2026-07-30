@@ -56,8 +56,18 @@ export default function ProductCard({
 }: ProductCardProps) {
   const isOutOfStock = stock <= 0;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const displayPrice = typeof price === 'number' ? `₹${price.toFixed(2)}` : price;
-  const displayOriginalPrice = typeof originalPrice === 'number' ? `₹${originalPrice.toFixed(2)}` : (originalPrice || `₹${(Number(price) * 1.2).toFixed(2)}`);
+  
+  const numPrice = Number(price);
+  const numOriginalPrice = Number(originalPrice);
+  
+  const displayPrice = !isNaN(numPrice) && numPrice > 0 
+    ? `₹${numPrice.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}` 
+    : (typeof price === 'string' && price ? price : 'N/A');
+    
+  const displayOriginalPrice = !isNaN(numOriginalPrice) && numOriginalPrice > (numPrice || 0)
+    ? `₹${numOriginalPrice.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`
+    : (originalPrice ? String(originalPrice) : '');
+    
   const displayDiscount = discount;
   const showAd = isYukiziChoice || isBestSeller;
 

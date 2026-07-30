@@ -64,8 +64,17 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
   const isBestSeller = !!product?.isBestSeller;
   const isAd = isYukiziChoice || isBestSeller;
 
-  const pricing = calculatePricing(
-    Number(product?.mrp || product?.originalPrice || 0),
+  // 1. Extract pre-calculated selling price if available
+  const rawPrice = product?.price ?? product?.finalCustomerPayable ?? product?.sellingPrice ?? product?.sellerOffers?.[0]?.finalCustomerPayable ?? product?.sellerOffers?.[0]?.mrp;
+  const directPrice = (rawPrice != null && !isNaN(Number(rawPrice))) ? Number(rawPrice) : 0;
+  
+  // 2. Extract MRP / original price from all candidate fields
+  const rawMrp = product?.mrp ?? product?.originalPrice ?? product?.sellerOffers?.[0]?.mrp ?? product?.lowestPrice ?? product?.price;
+  const mrpVal = (rawMrp != null && !isNaN(Number(rawMrp))) ? Number(rawMrp) : 0;
+
+  // 3. Compute pricing via calculatePricing if MRP is available
+  const pricing = mrpVal > 0 ? calculatePricing(
+    mrpVal,
     Number(product?.gstPercent || 0),
     {
       type: product?.discountType || (product?.discountMeta?.discountPercent ? 'ptr_discount' : 'none'),
@@ -78,28 +87,23 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
       shippingGstPercent: 0,
       isTaxIncluded: true,
     }
-  );
+  ) : null;
 
-  const price = pricing.finalCustomerPayable;
-  const mrp = product?.mrp || product?.originalPrice;
+  const computedPrice = (pricing?.finalCustomerPayable != null && pricing.finalCustomerPayable > 0) 
+    ? Number(pricing.finalCustomerPayable) 
+    : 0;
+
+  const finalPrice = directPrice > 0 ? directPrice : (computedPrice > 0 ? computedPrice : mrpVal);
+  const finalOriginalPrice = mrpVal > finalPrice ? mrpVal : 0;
   const rating = product?.rating || 4.5;
-
-  const isNotAvailable = product?.sellerCount === 0 || product?.sellerOffers?.length === 0 || price == null || price === 0;
-  const hasVariantPrice = !isNotAvailable && price != null && price > 0;
-  const fallbackPrice = product?.price || product?.mrp || product?.originalPrice || 0;
-  const fallbackOriginalPrice = (product?.price && product?.mrp && Number(product.mrp) > Number(product.price)) ? product.mrp : 0;
-
-  const finalPrice = hasVariantPrice ? price : fallbackPrice;
-  const finalOriginalPrice = hasVariantPrice 
-    ? (pricing?.grossTotal ?? (mrp != null ? Number(mrp) : 0)) 
-    : fallbackOriginalPrice;
+  const isNotAvailable = (product?.sellerCount === 0 || product?.hasSellers === false) && finalPrice <= 0 && mrpVal <= 0;
 
   const displayPrice = finalPrice > 0 
-    ? `₹${Math.round(Number(finalPrice)).toLocaleString('en-IN')}` 
-    : 'N/A';
+    ? `₹${Math.round(finalPrice).toLocaleString('en-IN')}` 
+    : (mrpVal > 0 ? `₹${Math.round(mrpVal).toLocaleString('en-IN')}` : 'N/A');
 
-  const displayOriginalPrice = (finalOriginalPrice > 0 && Number(finalOriginalPrice) > Number(finalPrice))
-    ? `₹${Math.round(Number(finalOriginalPrice)).toLocaleString('en-IN')}`
+  const displayOriginalPrice = (finalOriginalPrice > 0 && finalOriginalPrice > finalPrice)
+    ? `₹${Math.round(finalOriginalPrice).toLocaleString('en-IN')}`
     : '';
 
   const displayDelivery = product?.deliveryText || product?.deliveryTime || '3 days';
@@ -151,7 +155,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
                 e.preventDefault(); 
                 const targetProductId = product.bestListingId || currentProductId;
                 addToCart(
-                  { productId: targetProductId, quantity: 1, price, originalPrice: mrp, ...product },
+                  { productId: targetProductId, quantity: 1, price: finalPrice, originalPrice: finalOriginalPrice || mrpVal, ...product },
                   { onSuccess: () => toast('Added to cart', 'success') }
                 );
               }}

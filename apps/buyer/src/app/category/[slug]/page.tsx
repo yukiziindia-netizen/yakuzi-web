@@ -3,6 +3,8 @@ import CategoryBanner from '@/components/landing/CategoryBanner';
 import ProductCarousel from '@/components/landing/ProductCarousel';
 import { getCategories, getProducts } from '@yukizi/api-client';
 
+export const dynamic = 'force-dynamic';
+
 export default async function CategoryPage({ 
   params,
   searchParams,

@@ -6,8 +6,7 @@ interface CategoryBannerProps {
 }
 
 export default function CategoryBanner({ title, imageUrl }: CategoryBannerProps) {
-  // Using a static image as fallback for now, but accepting a prop for dynamic future use
-  const bgImage = imageUrl || "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&q=80&w=2000";
+  const bgImage = imageUrl || "https://placehold.co/1920x1080/f3f4f6/9ca3af?text=Category+Banner";
 
   return (
     <div className="relative w-full h-[250px] md:h-[350px] lg:h-[450px] overflow-hidden group mt-4 md:mt-6 px-4 md:px-8 max-w-[1600px] mx-auto">

@@ -117,9 +117,21 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
   const rating = prod.rating || 4.5;
 
   const isNotAvailable = prod.sellerCount === 0 || prod.sellerOffers?.length === 0 || price == null || price === 0;
-  const displayPrice = isNotAvailable ? 'N/A' : `₹${Math.round(Number(price)).toLocaleString('en-IN')}`;
-  const displayOriginalPrice = mrp != null && Number(mrp) > Number(price || 0)
-    ? `₹${Math.round(Number(mrp)).toLocaleString('en-IN')}`
+  const hasVariantPrice = !isNotAvailable && price != null && price > 0;
+  const fallbackPrice = prod.price || prod.mrp || prod.originalPrice || 0;
+  const fallbackOriginalPrice = (prod.price && prod.mrp && Number(prod.mrp) > Number(prod.price)) ? prod.mrp : 0;
+
+  const finalPrice = hasVariantPrice ? price : fallbackPrice;
+  const finalOriginalPrice = hasVariantPrice 
+    ? (pricing?.grossTotal ?? (mrp != null ? Number(mrp) : 0)) 
+    : fallbackOriginalPrice;
+
+  const displayPrice = finalPrice > 0 
+    ? `₹${Math.round(Number(finalPrice)).toLocaleString('en-IN')}` 
+    : 'N/A';
+
+  const displayOriginalPrice = (finalOriginalPrice > 0 && Number(finalOriginalPrice) > Number(finalPrice))
+    ? `₹${Math.round(Number(finalOriginalPrice)).toLocaleString('en-IN')}`
     : '';
 
   const displayDelivery = prod.deliveryText || prod.deliveryTime || '3 days';

@@ -144,22 +144,32 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                 <AnimatePresence initial={false}>
                   {items.map((item: any, idx: number) => {
                     const itemName = item.product?.name ?? item.productName ?? item.name ?? 'Product';
-                  const rawPrice = item.product?.price ?? item.price;
-                  const rawOriginalPrice = item.product?.originalPrice ?? item.product?.mrp ?? item.originalPrice ?? item.mrp;
-                  const itemPrice = rawPrice != null ? rawPrice : 0;
-                  const itemOriginalPrice = rawOriginalPrice != null ? rawOriginalPrice : 0;
-                  const isNotAvailable = item.product?.sellerCount === 0 || item.product?.sellerOffers?.length === 0 || rawPrice == null;
-                  const itemImageRaw = item.product?.images?.[0] || item.imageUrl || item.image;
-                  const titleWords = itemName.trim().split(' ').filter(Boolean);
-                  const initials = titleWords.length === 1 
-                    ? itemName.trim().substring(0,2).toUpperCase() 
-                    : (titleWords[0][0] + titleWords[titleWords.length - 1][0]).toUpperCase();
-                  const resolvedImage = typeof itemImageRaw === 'object' && itemImageRaw?.url ? itemImageRaw.url : itemImageRaw;
-                  const itemImage = (!resolvedImage || resolvedImage === '/products/pharma_bottle.png')
-                    ? `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent(initials)}`
-                    : resolvedImage;
-                  const isYukiziChoice = item.isYukiziChoice ?? (idx % 3 === 0);
-                  const quantity = item.quantity ?? 1;
+                    const quantity = item.quantity ?? 1;
+                    const rawPrice = item.product?.price ?? item.price;
+                    const rawOriginalPrice = item.product?.originalPrice ?? item.product?.mrp ?? item.originalPrice ?? item.mrp;
+                    const itemPrice = rawPrice != null ? rawPrice : 0;
+                    const itemOriginalPrice = rawOriginalPrice != null ? rawOriginalPrice : 0;
+                    const isNotAvailable = item.product?.sellerCount === 0 || item.product?.sellerOffers?.length === 0 || rawPrice == null;
+
+                    const fallbackPrice = item.product?.price || item.product?.mrp || item.product?.originalPrice || item.price || item.mrp || 0;
+                    const fallbackOriginalPrice = (item.product?.price && item.product?.mrp && Number(item.product.mrp) > Number(item.product.price)) ? item.product.mrp : 0;
+                    
+                    const hasVariantPrice = !isNotAvailable && itemPrice > 0;
+                    const finalPrice = hasVariantPrice ? itemPrice : fallbackPrice;
+                    const finalOriginalPrice = hasVariantPrice ? itemOriginalPrice : fallbackOriginalPrice;
+
+                    const displayPriceText = finalPrice > 0 ? `₹${Math.round(Number(finalPrice * quantity)).toLocaleString('en-IN')}` : 'N/A';
+                    const displayOriginalPriceText = (finalOriginalPrice > 0 && Number(finalOriginalPrice) > Number(finalPrice)) ? `₹${Math.round(Number(finalOriginalPrice * quantity)).toLocaleString('en-IN')}` : '';
+                    const itemImageRaw = item.product?.images?.[0] || item.imageUrl || item.image;
+                    const titleWords = itemName.trim().split(' ').filter(Boolean);
+                    const initials = titleWords.length === 1 
+                      ? itemName.trim().substring(0,2).toUpperCase() 
+                      : (titleWords[0][0] + titleWords[titleWords.length - 1][0]).toUpperCase();
+                    const resolvedImage = typeof itemImageRaw === 'object' && itemImageRaw?.url ? itemImageRaw.url : itemImageRaw;
+                    const itemImage = (!resolvedImage || resolvedImage === '/products/pharma_bottle.png')
+                      ? `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent(initials)}`
+                      : resolvedImage;
+                    const isYukiziChoice = item.isYukiziChoice ?? (idx % 3 === 0);
 
                   return (
                     <motion.div
@@ -273,8 +283,8 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                         {/* Price & Rating */}
                         <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2">
                           <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className="text-[19px] font-black text-gray-900">{isNotAvailable ? 'N/A' : `₹${Math.round(Number(itemPrice * quantity)).toLocaleString('en-IN')}`}</span>
-                            <span className="text-[14px] font-bold text-gray-400 line-through">{!isNotAvailable && itemOriginalPrice > 0 ? `₹${Math.round(Number(itemOriginalPrice * quantity)).toLocaleString('en-IN')}` : ''}</span>
+                            <span className="text-[19px] font-black text-gray-900">{displayPriceText}</span>
+                            <span className="text-[14px] font-bold text-gray-400 line-through">{displayOriginalPriceText}</span>
                           </div>
                           <div className="flex items-center gap-[3px] sm:gap-[4px]">
                             <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-[#6342B4] text-[#6342B4]" />

@@ -124,10 +124,21 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                     const rawOriginalPrice = item.product?.originalPrice ?? item.product?.mrp ?? item.originalPrice ?? item.mrp;
                     const itemPrice = rawPrice != null ? rawPrice : 0;
                     const itemOriginalPrice = rawOriginalPrice != null ? rawOriginalPrice : 0;
-                    const discountPercent = (itemOriginalPrice > itemPrice && itemOriginalPrice > 0)
-                      ? Math.round(((itemOriginalPrice - itemPrice) / itemOriginalPrice) * 100)
-                      : 0;
                     const isNotAvailable = item.product?.sellerCount === 0 || item.product?.sellerOffers?.length === 0 || rawPrice == null;
+
+                    const fallbackPrice = item.product?.price || item.product?.mrp || item.product?.originalPrice || item.price || item.mrp || 0;
+                    const fallbackOriginalPrice = (item.product?.price && item.product?.mrp && Number(item.product.mrp) > Number(item.product.price)) ? item.product.mrp : 0;
+                    
+                    const hasVariantPrice = !isNotAvailable && itemPrice > 0;
+                    const finalPrice = hasVariantPrice ? itemPrice : fallbackPrice;
+                    const finalOriginalPrice = hasVariantPrice ? itemOriginalPrice : fallbackOriginalPrice;
+
+                    const displayPriceText = finalPrice > 0 ? `₹${Math.round(Number(finalPrice)).toLocaleString('en-IN')}` : 'N/A';
+                    const displayOriginalPriceText = (finalOriginalPrice > 0 && Number(finalOriginalPrice) > Number(finalPrice)) ? `₹${Math.round(Number(finalOriginalPrice)).toLocaleString('en-IN')}` : '';
+
+                    const discountPercent = (finalOriginalPrice > finalPrice && finalOriginalPrice > 0)
+                      ? Math.round(((finalOriginalPrice - finalPrice) / finalOriginalPrice) * 100)
+                      : 0;
                     
                     const titleWords = itemName.trim().split(' ').filter(Boolean);
                     const initials = titleWords.length === 1 
@@ -270,8 +281,8 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                           {/* Row 2: Price & Quickview Button */}
                           <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2">
                             <div className="flex items-baseline gap-2 text-left">
-                              <span className="text-[19px] font-black text-gray-900">{isNotAvailable ? 'N/A' : `₹${Math.round(Number(itemPrice)).toLocaleString('en-IN')}`}</span>
-                              <span className="text-[14px] font-bold text-gray-400 line-through">{!isNotAvailable && itemOriginalPrice > 0 ? `₹${Math.round(Number(itemOriginalPrice)).toLocaleString('en-IN')}` : ''}</span>
+                              <span className="text-[19px] font-black text-gray-900">{displayPriceText}</span>
+                              <span className="text-[14px] font-bold text-gray-400 line-through">{displayOriginalPriceText}</span>
                             </div>
                             
                             {/* Quickview Button */}

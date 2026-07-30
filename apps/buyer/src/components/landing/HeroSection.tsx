@@ -15,9 +15,9 @@ export default function HeroSection({ title = 'YUKiZi' }: HeroSectionProps) {
 
   const banners = Array.isArray(bannersData) ? bannersData.filter((b) => b.isActive !== false) : [];
   const displayHeroBanners = [
-    banners[0]?.imageUrl || '/hero1.jpg',
-    banners[1]?.imageUrl || '/hero2.jpg',
-    banners[2]?.imageUrl || '/hero3.jpg',
+    banners[0]?.imageUrl || 'https://placehold.co/800x600/f3f4f6/9ca3af?text=Banner+1',
+    banners[1]?.imageUrl || 'https://placehold.co/800x600/f3f4f6/9ca3af?text=Banner+2',
+    banners[2]?.imageUrl || 'https://placehold.co/800x600/f3f4f6/9ca3af?text=Banner+3',
   ];
 
   const categories = Array.isArray(categoriesData)
@@ -67,14 +67,14 @@ export default function HeroSection({ title = 'YUKiZi' }: HeroSectionProps) {
                   <img
                     src={displayHeroBanners[0]}
                     alt={banners[0]?.title || "Anime character"}
-                    className="-ml-[25%] h-full w-[150%] origin-center skew-x-[15deg] object-cover"
+                    className="-ml-[40%] h-full w-[180%] origin-center skew-x-[15deg] object-cover scale-[1.1]"
                   />
                 </a>
               ) : (
                 <img
                   src={displayHeroBanners[0]}
                   alt="Anime character"
-                  className="-ml-[25%] h-full w-[150%] origin-center skew-x-[15deg] object-cover"
+                  className="-ml-[40%] h-full w-[180%] origin-center skew-x-[15deg] object-cover scale-[1.1]"
                 />
               )}
               {(banners[0] as any)?.isAd && (
@@ -92,14 +92,14 @@ export default function HeroSection({ title = 'YUKiZi' }: HeroSectionProps) {
                   <img
                     src={displayHeroBanners[1]}
                     alt={banners[1]?.title || "Group of characters"}
-                    className="-ml-[25%] h-full w-[150%] origin-center skew-x-[15deg] object-cover"
+                    className="-ml-[40%] h-full w-[180%] origin-center skew-x-[15deg] object-cover scale-[1.1]"
                   />
                 </a>
               ) : (
                 <img
                   src={displayHeroBanners[1]}
                   alt="Group of characters"
-                  className="-ml-[25%] h-full w-[150%] origin-center skew-x-[15deg] object-cover"
+                  className="-ml-[40%] h-full w-[180%] origin-center skew-x-[15deg] object-cover scale-[1.1]"
                 />
               )}
               <div className="absolute bottom-4 left-1/2 z-20 -translate-x-1/2 skew-x-[15deg]">
@@ -133,14 +133,14 @@ export default function HeroSection({ title = 'YUKiZi' }: HeroSectionProps) {
                   <img
                     src={displayHeroBanners[2]}
                     alt={banners[2]?.title || "Character"}
-                    className="-ml-[25%] h-full w-[150%] origin-center skew-x-[15deg] object-cover"
+                    className="-ml-[40%] h-full w-[180%] origin-center skew-x-[15deg] object-cover scale-[1.1]"
                   />
                 </a>
               ) : (
                 <img
                   src={displayHeroBanners[2]}
                   alt="Character"
-                  className="-ml-[25%] h-full w-[150%] origin-center skew-x-[15deg] object-cover"
+                  className="-ml-[40%] h-full w-[180%] origin-center skew-x-[15deg] object-cover scale-[1.1]"
                 />
               )}
               {(banners[2] as any)?.isAd && (

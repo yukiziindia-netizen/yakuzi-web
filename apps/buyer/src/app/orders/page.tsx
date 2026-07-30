@@ -13,6 +13,8 @@ import AuthGuard from '@/components/shared/AuthGuard';
 import { useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 import { OrderDrawer } from '@/components/orders/OrderDrawer';
+import dynamicComponent from 'next/dynamic';
+const Footer = dynamicComponent(() => import('@/components/landing/Footer'), { ssr: false });
 
 
 
@@ -175,6 +177,7 @@ function OrdersPageContent() {
         </motion.div>
       </div>
       <OrderDrawer isOpen={!!drawerOrderId} onClose={() => setDrawerOrderId(null)} orderId={drawerOrderId} />
+      <Footer />
 </main>
     </AuthGuard>
   );

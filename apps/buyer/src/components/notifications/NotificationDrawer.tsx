@@ -247,7 +247,7 @@ export default function NotificationDrawer({ isOpen, onClose }: { isOpen: boolea
                       {/* Price row */}
                       <div className="flex items-baseline gap-2">
                         <span className="text-[16px] font-extrabold text-gray-800 leading-none">
-                          ₹{productPrice || 'N/A'}
+                          {productPrice ? `₹${Math.round(Number(productPrice)).toLocaleString('en-IN')}` : 'N/A'}
                         </span>
                         {hasDiscount && (
                           <span className="text-[11px] text-gray-400 line-through leading-none">

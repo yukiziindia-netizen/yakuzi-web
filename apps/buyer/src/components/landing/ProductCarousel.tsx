@@ -85,10 +85,21 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
   const rating = product?.rating || 4.5;
 
   const isNotAvailable = product?.sellerCount === 0 || product?.sellerOffers?.length === 0 || price == null || price === 0;
-  const displayPrice = isNotAvailable ? 'N/A' : `₹${Math.round(Number(price)).toLocaleString('en-IN')}`;
-  const grossTotal = pricing?.grossTotal ?? (mrp != null ? Number(mrp) : 0);
-  const displayOriginalPrice = grossTotal > Number(price || 0)
-    ? `₹${Math.round(Number(grossTotal)).toLocaleString('en-IN')}`
+  const hasVariantPrice = !isNotAvailable && price != null && price > 0;
+  const fallbackPrice = product?.price || product?.mrp || product?.originalPrice || 0;
+  const fallbackOriginalPrice = (product?.price && product?.mrp && Number(product.mrp) > Number(product.price)) ? product.mrp : 0;
+
+  const finalPrice = hasVariantPrice ? price : fallbackPrice;
+  const finalOriginalPrice = hasVariantPrice 
+    ? (pricing?.grossTotal ?? (mrp != null ? Number(mrp) : 0)) 
+    : fallbackOriginalPrice;
+
+  const displayPrice = finalPrice > 0 
+    ? `₹${Math.round(Number(finalPrice)).toLocaleString('en-IN')}` 
+    : 'N/A';
+
+  const displayOriginalPrice = (finalOriginalPrice > 0 && Number(finalOriginalPrice) > Number(finalPrice))
+    ? `₹${Math.round(Number(finalOriginalPrice)).toLocaleString('en-IN')}`
     : '';
 
   const displayDelivery = product?.deliveryText || product?.deliveryTime || '3 days';

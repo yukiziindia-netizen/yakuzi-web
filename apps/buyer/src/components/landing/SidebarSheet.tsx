@@ -118,6 +118,16 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
             const price = rawPrice != null ? rawPrice : 0;
             const originalPrice = rawOriginalPrice != null ? rawOriginalPrice : 0;
             const isNotAvailable = item.product?.sellerCount === 0 || item.product?.sellerOffers?.length === 0 || rawPrice == null;
+
+            const fallbackPrice = item.product?.price || item.product?.mrp || item.product?.originalPrice || item.price || item.mrp || 0;
+            const fallbackOriginalPrice = (item.product?.price && item.product?.mrp && Number(item.product.mrp) > Number(item.product.price)) ? item.product.mrp : 0;
+            
+            const hasVariantPrice = !isNotAvailable && price > 0;
+            const finalPrice = hasVariantPrice ? price : fallbackPrice;
+            const finalOriginalPrice = hasVariantPrice ? originalPrice : fallbackOriginalPrice;
+            
+            const displayPriceText = finalPrice > 0 ? `₹${Math.round(Number(finalPrice)).toLocaleString('en-IN')}` : 'N/A';
+            const displayOriginalPriceText = (finalOriginalPrice > 0 && Number(finalOriginalPrice) > Number(finalPrice)) ? `₹${Math.round(Number(finalOriginalPrice)).toLocaleString('en-IN')}` : '';
             const discount = item.discount;
             const rating = isCart ? (item.rating || 4.5) : item.rating;
             const quantity = isCart ? (item.quantity ?? 1) : item.quantity;
@@ -168,8 +178,8 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                   {title}
                 </h3>
                 <div className="flex items-end gap-1.5 leading-none mb-1">
-                  <span className="text-[15px] font-medium text-gray-800">{isNotAvailable ? 'N/A' : `₹${Math.round(Number(price)).toLocaleString('en-IN')}`}</span>
-                  <span className="text-[9px] text-gray-400 line-through pb-0.5">{!isNotAvailable && originalPrice > 0 ? `₹${Math.round(Number(originalPrice)).toLocaleString('en-IN')}` : ''}</span>
+                  <span className="text-[15px] font-medium text-gray-800">{displayPriceText}</span>
+                  <span className="text-[9px] text-gray-400 line-through pb-0.5">{displayOriginalPriceText}</span>
                 </div>
                 <span className="text-[9px] font-bold text-gray-800">
                   {discount}

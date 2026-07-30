@@ -2,6 +2,8 @@ import HomeNavbar from '@/components/landing/HomeNavbar';
 import HeroSection from '@/components/landing/HeroSection';
 import ProductCarousel from '@/components/landing/ProductCarousel';
 import ComingSoon from '@/components/landing/ComingSoon';
+import dynamicComponent from 'next/dynamic';
+const Footer = dynamicComponent(() => import('@/components/landing/Footer'), { ssr: false });
 import { getProducts, getComingSoonStatus } from '@yukizi/api-client';
 
 export const dynamic = 'force-dynamic';
@@ -57,6 +59,7 @@ export default async function HomePage({
           </div>
         </section>
       </div>
+      <Footer />
     </main>
   );
 }

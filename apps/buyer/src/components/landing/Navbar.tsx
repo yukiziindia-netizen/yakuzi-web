@@ -97,6 +97,35 @@ export default function Navbar({
   const [sidebarView, setSidebarView] = useState<SidebarView>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [isFooterVisible, setIsFooterVisible] = useState(false);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const scrollHeight = document.documentElement.scrollHeight;
+      const clientHeight = document.documentElement.clientHeight;
+      const isNearBottom = currentScrollY + clientHeight >= scrollHeight - 120;
+
+      if (isNearBottom) {
+        setIsFooterVisible(true);
+      } else if (currentScrollY <= 50) {
+        setIsFooterVisible(false);
+      } else {
+        if (currentScrollY > lastScrollY) {
+          setIsFooterVisible(true);
+        } else if (currentScrollY < lastScrollY) {
+          setIsFooterVisible(false);
+        }
+      }
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
+
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isSearchChatOpen, setIsSearchChatOpen] = useState(false);
@@ -337,7 +366,9 @@ export default function Navbar({
 
   return (
     <>
-      <nav className="fixed bottom-0 left-0 right-0 z-[90] flex justify-center items-end sm:items-center pointer-events-none px-2 pb-4 sm:pb-6 md:pb-4 sm:px-6 w-full">
+      <nav className={`fixed bottom-0 left-0 right-0 z-[90] flex justify-center items-end sm:items-center pointer-events-none px-2 pb-4 sm:pb-6 md:pb-4 sm:px-6 w-full transition-transform duration-500 ease-out ${
+        /* isFooterVisible ? '-translate-y-[410px] sm:-translate-y-[290px] md:-translate-y-[210px] lg:-translate-y-[200px]' : */ 'translate-y-0'
+      }`}>
         <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-6 md:gap-2 pointer-events-auto flex-nowrap justify-center w-full max-w-[1200px] px-1 sm:px-4 relative z-10">
           {/* Left Segment: Logo, Profile, Notifications, Search */}
           <div className="flex items-center bg-white sm:bg-[#562996] rounded-xl pl-[2px] pr-1 xs:pl-1 xs:pr-1.5 sm:px-4 md:px-6 h-[48px] sm:h-[60px] md:h-[64px] shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl flex-[1.3] sm:flex-1 max-w-[480px] justify-between overflow-hidden min-w-0 border border-gray-100 sm:border-0">

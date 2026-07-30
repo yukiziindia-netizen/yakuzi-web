@@ -3,7 +3,8 @@
 import { motion } from 'framer-motion';
 import { Package, Truck, ChevronLeft, Calendar, FileText, Loader2, AlertCircle, XCircle, CheckCircle2, CreditCard } from 'lucide-react';
 import Navbar from '@/components/landing/Navbar';
-import Footer from '@/components/landing/Footer';
+import dynamicComponent from 'next/dynamic';
+const Footer = dynamicComponent(() => import('@/components/landing/Footer'), { ssr: false });
 import Timeline from '@/components/shared/Timeline';
 import { useToast } from '@/components/shared/Toast';
 import Link from 'next/link';

@@ -1295,7 +1295,9 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
             {/* Review Cards Carousel */}
             <div className="hide-scrollbar flex flex-col gap-4 overflow-x-auto pb-2 sm:flex-row">
               {reviewsList.map((rev: any) => {
-                const reviewImage = rev.image || rev.imageUrl;
+                const reviewImagesList = (rev.images && rev.images.length > 0)
+                  ? rev.images
+                  : (rev.image ? [rev.image] : (rev.imageUrl ? [rev.imageUrl] : []));
                 return (
                   <div key={rev.id} className="flex min-w-[280px] flex-1 flex-row justify-between gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
                     <div className="flex flex-col justify-between flex-1">
@@ -1313,9 +1315,13 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                         </p>
                       </div>
                     </div>
-                    {reviewImage && (
-                      <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden flex-shrink-0 self-center border border-gray-100 bg-white">
-                        <img src={reviewImage} alt="Review attachment" className="w-full h-full object-cover" />
+                    {reviewImagesList.length > 0 && (
+                      <div className="flex gap-1.5 flex-wrap flex-shrink-0 self-center">
+                        {reviewImagesList.map((imgUrl: string, idx: number) => (
+                          <div key={idx} className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border border-gray-100 bg-white">
+                            <img src={imgUrl} alt={`Review photo ${idx + 1}`} className="w-full h-full object-cover" />
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
@@ -1573,7 +1579,9 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                 {/* Review Cards Carousel */}
                 <div className="hide-scrollbar flex flex-col gap-4 overflow-x-auto pb-2 sm:flex-row">
                   {reviewsList.map((rev: any) => {
-                    const reviewImage = rev.image || rev.imageUrl;
+                    const reviewImagesList = (rev.images && rev.images.length > 0)
+                      ? rev.images
+                      : (rev.image ? [rev.image] : (rev.imageUrl ? [rev.imageUrl] : []));
                     return (
                       <div key={rev.id} className="flex min-w-[280px] flex-1 flex-row justify-between gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
                         <div className="flex flex-col justify-between flex-1">
@@ -1591,9 +1599,13 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                             </p>
                           </div>
                         </div>
-                        {reviewImage && (
-                          <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden flex-shrink-0 self-center border border-gray-100 bg-white">
-                            <img src={reviewImage} alt="Review attachment" className="w-full h-full object-cover" />
+                        {reviewImagesList.length > 0 && (
+                          <div className="flex gap-1.5 flex-wrap flex-shrink-0 self-center">
+                            {reviewImagesList.map((imgUrl: string, idx: number) => (
+                              <div key={idx} className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border border-gray-100 bg-white">
+                                <img src={imgUrl} alt={`Review photo ${idx + 1}`} className="w-full h-full object-cover" />
+                              </div>
+                            ))}
                           </div>
                         )}
                       </div>

@@ -816,40 +816,16 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
   const isBestSeller = !!product.isBestSeller;
   const isAd = isYukiziChoice || isBestSeller;
 
+  const unwrapImage = (img: any): string => (typeof img === 'string' ? img : img?.url || '');
+
   const images =
     product.images && product.images.length > 0
-      ? product.images.map((img: any) => img.url || img)
+      ? product.images.map(unwrapImage).filter(Boolean)
       : [
         `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent((product.name || 'PR').trim().split(/\s+/).length === 1 ? (product.name || 'PR').trim().substring(0, 2).toUpperCase() : ((product.name || 'PR').trim().split(/\s+/)[0][0] + (product.name || 'PR').trim().split(/\s+/)[(product.name || 'PR').trim().split(/\s+/).length - 1][0]).toUpperCase())}`,
       ];
 
   const selectedVariant = productVariants.find((v: any) => v.name === selectedVariantName);
-
-  let displayImages = [...images];
-  if (selectedVariant) {
-    const variantImages = selectedVariant.images?.length > 0
-      ? selectedVariant.images
-      : (selectedVariant.image ? [selectedVariant.image] : []);
-
-    if (variantImages.length > 0) {
-      // Put variant images first, then append any remaining product images
-      displayImages = [...variantImages, ...images.filter((img: string) => !variantImages.includes(img))];
-    }
-  }
-
-  while (displayImages.length < 3 && displayImages.length > 0) {
-    displayImages.push(displayImages[0]);
-  }
-
-  const reviewsList = reviewsData?.data && reviewsData.data.length > 0
-    ? reviewsData.data
-    : getMockReviewsForProduct(product?.name || 'Product', product?.category?.name || 'Item', images[0]);
-
-  const averageRating = reviewsData?.averageRating || (reviewsData?.data && reviewsData.data.length > 0
-    ? (reviewsData.data.reduce((acc: number, curr: any) => acc + curr.rating, 0) / reviewsData.data.length)
-    : 4.5);
-
-  const totalReviews = reviewsData?.total || (reviewsData?.data && reviewsData.data.length > 0 ? reviewsData.data.length : reviewsList.length);
 
   const listings = product.listings || product.sellerOffers || product.offers || [];
   const validListings = listings.filter((l: any) => l.price != null || l.mrp != null);
@@ -867,6 +843,34 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
       : validListings;
 
   const comparisonListings = filteredListings || [];
+
+  let displayImages = [...images];
+  const rawVariantImages = selectedVariant?.images?.length > 0
+    ? selectedVariant.images
+    : (selectedVariant?.image 
+      ? [selectedVariant.image] 
+      : (comparisonListings[0]?.images?.length > 0 
+        ? comparisonListings[0].images 
+        : (comparisonListings[0]?.image ? [comparisonListings[0].image] : [])));
+
+  const variantImages = (rawVariantImages || []).map(unwrapImage).filter(Boolean);
+  if (variantImages.length > 0) {
+    displayImages = [...variantImages, ...images.filter((img: string) => !variantImages.includes(img))];
+  }
+
+  while (displayImages.length < 3 && displayImages.length > 0) {
+    displayImages.push(displayImages[0]);
+  }
+
+  const reviewsList = reviewsData?.data && reviewsData.data.length > 0
+    ? reviewsData.data
+    : getMockReviewsForProduct(product?.name || 'Product', product?.category?.name || 'Item', images[0]);
+
+  const averageRating = reviewsData?.averageRating || (reviewsData?.data && reviewsData.data.length > 0
+    ? (reviewsData.data.reduce((acc: number, curr: any) => acc + curr.rating, 0) / reviewsData.data.length)
+    : 4.5);
+
+  const totalReviews = reviewsData?.total || (reviewsData?.data && reviewsData.data.length > 0 ? reviewsData.data.length : reviewsList.length);
 
   let bestPricing: any = null;
   if (comparisonListings.length > 0) {
@@ -928,6 +932,13 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
   if ((!displayMrp || displayMrp <= displayPrice) && discountPercent && discountPercent > 0) {
     displayMrp = displayPrice / (1 - discountPercent / 100);
   }
+
+  // Calculate active discount percent dynamically for header badge
+  const activeListing = comparisonListings[0];
+  const activeDiscountPercent = 
+    activeListing?.discountMeta?.discountPercent ??
+    product.discountMeta?.discountPercent ??
+    (displayMrp > displayPrice && displayMrp > 0 ? Math.round(((displayMrp - displayPrice) / displayMrp) * 100) : null);
 
   // Wishlist / Bookmark logic
   const isBookmarked = wishlistSet.has(product.id);
@@ -1309,9 +1320,9 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                       </span>
                     ) : null}
                   </div>
-                  {product.discountMeta?.discountPercent ? (
+                  {activeDiscountPercent && activeDiscountPercent > 0 ? (
                     <span className="text-[14px] sm:text-[16px] xl:text-[18px] 2xl:text-[20px] font-bold text-gray-800 mt-2 leading-none">
-                      {product.discountMeta.discountPercent}% off
+                      {activeDiscountPercent}% off
                     </span>
                   ) : null}
                 </div>

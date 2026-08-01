@@ -10,6 +10,7 @@ export const ReviewSchema = z.object({
   userName: z.string().optional(),
   rating: z.number().min(1).max(5),
   comment: z.string().optional(),
+  images: z.array(z.string()).optional(),
   createdAt: z.string(),
 });
 
@@ -25,6 +26,7 @@ export const CreateReviewSchema = z.object({
   catalogProductId: z.string(),
   rating: z.number().min(1).max(5),
   comment: z.string().optional(),
+  images: z.array(z.string()).optional(),
 });
 
 // ─── Types ──────────────────────────────────────────

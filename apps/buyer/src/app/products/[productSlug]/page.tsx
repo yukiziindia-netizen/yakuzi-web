@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Share2,
@@ -33,6 +33,7 @@ import { usePlatformConfig } from '@/hooks/usePlatformConfig';
 import { useWishlist, useAddToWishlist, useRemoveFromWishlist } from '@/hooks/useWishlist';
 import { useProductReviews, useCreateReview } from '@/hooks/useReviews';
 import { useBuyerProfile } from '@/hooks/useBuyerProfile';
+import { uploadReviewImage } from '@yukizi/api-client';
 import Navbar from '@/components/landing/Navbar';
 import { generateProductSlug, parseProductIdFromSlug, calculatePricing } from '@yukizi/utils';
 import { ShareButton } from '@/components/shared/ShareButton';
@@ -636,6 +637,8 @@ function ReviewSubmissionForm({
   setReviewTitle,
   reviewComment,
   setReviewComment,
+  reviewImages,
+  setReviewImages,
   onSubmit,
 }: {
   rating: number;
@@ -644,8 +647,43 @@ function ReviewSubmissionForm({
   setReviewTitle: (t: string) => void;
   reviewComment: string;
   setReviewComment: (c: string) => void;
+  reviewImages: string[];
+  setReviewImages: React.Dispatch<React.SetStateAction<string[]>>;
   onSubmit: (e: React.FormEvent) => void;
 }) {
+  const { toast } = useToast();
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = async (files: FileList | File[]) => {
+    if (!files || files.length === 0) return;
+    setIsUploadingImage(true);
+    try {
+      const fileList = Array.from(files);
+      for (const file of fileList) {
+        if (!file.type.startsWith('image/')) {
+          toast('Please select an image file', 'error');
+          continue;
+        }
+        const res = await uploadReviewImage(file);
+        const url = res.url;
+        if (url) {
+          setReviewImages((prev) => [...prev, url]);
+          toast('Photo uploaded successfully!', 'success');
+        }
+      }
+    } catch (err: any) {
+      toast(err?.response?.data?.message || err?.message || 'Failed to upload photo', 'error');
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
+  const handleRemoveImage = (indexToRemove: number) => {
+    setReviewImages((prev) => prev.filter((_, idx) => idx !== indexToRemove));
+  };
+
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4 border border-gray-200 rounded-2xl bg-white p-5 shadow-sm mt-6">
       <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wide">Your overall rating</h3>
@@ -694,14 +732,69 @@ function ReviewSubmissionForm({
       {/* Dropzone Photo Uploader */}
       <div className="flex flex-col gap-1.5">
         <label className="text-[11px] font-bold text-gray-500 uppercase">Do you have photos to share?</label>
-        <div className="border border-dashed border-gray-300 rounded-xl bg-gray-50 p-6 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-gray-100/70 transition-colors">
-          <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
+        
+        <input
+          type="file"
+          ref={fileInputRef}
+          accept="image/*"
+          multiple
+          onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
+          className="hidden"
+        />
+
+        <div
+          onClick={() => fileInputRef.current?.click()}
+          onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+          onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
+          onDrop={(e) => {
+            e.preventDefault();
+            setIsDragging(false);
+            if (e.dataTransfer.files) handleFileUpload(e.dataTransfer.files);
+          }}
+          className={`border border-dashed rounded-xl p-5 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors ${
+            isDragging
+              ? 'border-[#854cbc] bg-purple-50/80'
+              : 'border-gray-300 bg-gray-50 hover:bg-gray-100/70'
+          }`}
+        >
+          {isUploadingImage ? (
+            <Loader2 className="w-7 h-7 text-[#854cbc] animate-spin" />
+          ) : (
+            <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          )}
           <span className="text-[10px] text-gray-400 font-bold text-center">
-            Drag & Drop your picture or <span className="text-[#854cbc] underline">Browse</span>
+            {isUploadingImage ? (
+              <span className="text-[#854cbc]">Uploading photo...</span>
+            ) : (
+              <>Drag & Drop your picture or <span className="text-[#854cbc] underline">Browse</span></>
+            )}
           </span>
         </div>
+
+        {/* Uploaded Image Previews */}
+        {reviewImages.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-2">
+            {reviewImages.map((imgUrl, idx) => (
+              <div key={idx} className="relative w-14 h-14 rounded-lg overflow-hidden border border-gray-200 group">
+                <Image src={imgUrl} alt={`Review photo ${idx + 1}`} fill className="object-cover" />
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveImage(idx);
+                  }}
+                  className="absolute top-1 right-1 bg-black/60 hover:bg-red-600 text-white rounded-full p-0.5 transition-colors"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Submit Button */}
@@ -768,7 +861,39 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
   const [rating, setRating] = useState(0);
   const [reviewTitle, setReviewTitle] = useState('');
   const [reviewComment, setReviewComment] = useState('');
+  const [reviewImages, setReviewImages] = useState<string[]>([]);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [showStockAlert, setShowStockAlert] = useState(false);
+
+  const handleFileUpload = async (files: FileList | File[]) => {
+    if (!files || files.length === 0) return;
+    setIsUploadingImage(true);
+    try {
+      const fileList = Array.from(files);
+      for (const file of fileList) {
+        if (!file.type.startsWith('image/')) {
+          toast('Please select an image file', 'error');
+          continue;
+        }
+        const res = await uploadReviewImage(file);
+        const url = res.url;
+        if (url) {
+          setReviewImages((prev) => [...prev, url]);
+          toast('Photo uploaded successfully!', 'success');
+        }
+      }
+    } catch (err: any) {
+      toast(err?.response?.data?.message || err?.message || 'Failed to upload photo', 'error');
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
+  const handleRemoveImage = (indexToRemove: number) => {
+    setReviewImages((prev) => prev.filter((_, idx) => idx !== indexToRemove));
+  };
 
   const { data: relatedProductsData } = useProducts({
     categoryId: product?.category?.id,
@@ -980,12 +1105,14 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
       catalogProductId: product.id,
       rating,
       comment,
+      images: reviewImages,
     }, {
       onSuccess: () => {
         toast('Review submitted successfully!', 'success');
         setRating(0);
         setReviewTitle('');
         setReviewComment('');
+        setReviewImages([]);
       },
       onError: (err: any) => {
         const errorMsg = err?.response?.data?.message || err?.message || 'Failed to submit review';
@@ -1204,6 +1331,8 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
               setReviewTitle={setReviewTitle}
               reviewComment={reviewComment}
               setReviewComment={setReviewComment}
+              reviewImages={reviewImages}
+              setReviewImages={setReviewImages}
               onSubmit={handleReviewSubmit}
             />
           </div>
@@ -1480,6 +1609,8 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                   setReviewTitle={setReviewTitle}
                   reviewComment={reviewComment}
                   setReviewComment={setReviewComment}
+                  reviewImages={reviewImages}
+                  setReviewImages={setReviewImages}
                   onSubmit={handleReviewSubmit}
                 />
               </div>

@@ -32,6 +32,7 @@ import { useToast } from '@/components/shared/Toast';
 import { usePlatformConfig } from '@/hooks/usePlatformConfig';
 import { useWishlist, useAddToWishlist, useRemoveFromWishlist } from '@/hooks/useWishlist';
 import { useProductReviews, useCreateReview } from '@/hooks/useReviews';
+import { useBuyerProfile } from '@/hooks/useBuyerProfile';
 import Navbar from '@/components/landing/Navbar';
 import { generateProductSlug, parseProductIdFromSlug, calculatePricing } from '@yukizi/utils';
 import { ShareButton } from '@/components/shared/ShareButton';
@@ -759,6 +760,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
 
   const product = (productData as any)?.data || productData;
 
+  const { data: userProfile } = useBuyerProfile();
   const { data: reviewsData } = useProductReviews(product?.id || '');
   const { mutate: submitReview } = useCreateReview();
 
@@ -962,6 +964,11 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
 
   const handleReviewSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!userProfile) {
+      toast('Please log in to submit a review', 'error');
+      // setIsLoginOpen(true); // Uncomment if login modal exists
+      return;
+    }
     if (rating === 0) {
       toast('Please select a rating star', 'error');
       return;
@@ -980,8 +987,9 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
         setReviewTitle('');
         setReviewComment('');
       },
-      onError: () => {
-        toast('Failed to submit review', 'error');
+      onError: (err: any) => {
+        const errorMsg = err?.response?.data?.message || err?.message || 'Failed to submit review';
+        toast(Array.isArray(errorMsg) ? errorMsg[0] : errorMsg, 'error');
       }
     });
   };

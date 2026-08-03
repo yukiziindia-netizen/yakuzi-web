@@ -9,8 +9,8 @@ export default function CategoryBanner({ title, imageUrl }: CategoryBannerProps)
   const bgImage = imageUrl || "https://placehold.co/1920x1080/f3f4f6/9ca3af?text=Category+Banner";
 
   return (
-    <div className="relative w-full h-[250px] md:h-[350px] lg:h-[450px] overflow-hidden group mt-4 md:mt-6 px-4 md:px-8 max-w-[1600px] 2xl:max-w-none mx-auto">
-      <div className="relative w-full h-full rounded-sm overflow-hidden">
+    <div className="relative w-full h-[250px] md:h-[350px] lg:h-[450px] overflow-hidden group w-full">
+      <div className="relative w-full h-full overflow-hidden">
         {/* Background Image */}
         <div 
           className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"

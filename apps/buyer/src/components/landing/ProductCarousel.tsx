@@ -145,19 +145,16 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
     : 0;
 
   const finalPrice = directPrice > 0 ? directPrice : (computedPrice > 0 ? computedPrice : mrpVal);
-  const discountPercent = product?.discountMeta?.discountPercent || 0;
-  const finalOriginalPrice = mrpVal > finalPrice
-    ? mrpVal
-    : (discountPercent > 0 ? finalPrice / (1 - discountPercent / 100) : 0);
+  const finalOriginalPrice = mrpVal > finalPrice ? mrpVal : 0;
   const rating = product?.rating || 4.5;
   const isNotAvailable = (product?.sellerCount === 0 || product?.hasSellers === false) && finalPrice <= 0 && mrpVal <= 0;
 
   const displayPrice = finalPrice > 0 
-    ? `₹${Math.round(finalPrice).toLocaleString('en-IN')}` 
-    : (mrpVal > 0 ? `₹${Math.round(mrpVal).toLocaleString('en-IN')}` : 'N/A');
+    ? `₹${Math.round(finalPrice)}` 
+    : (mrpVal > 0 ? `₹${Math.round(mrpVal)}` : 'N/A');
 
   const displayOriginalPrice = (finalOriginalPrice > 0 && finalOriginalPrice > finalPrice)
-    ? `₹${Math.round(finalOriginalPrice).toLocaleString('en-IN')}`
+    ? `₹${Math.round(finalOriginalPrice)}`
     : '';
 
   const displayDelivery = product?.deliveryText || product?.deliveryTime || '3 days';
@@ -374,7 +371,7 @@ export default function ProductCarousel({ slot = 'HOMEPAGE_CAROUSEL', categoryId
         - Columns: 2 cols (mobile), 3 cols (sm), 4 cols (md), 5 cols (lg), 6 cols (xl/2xl)
         - Gap: gap-4 (16px)
       */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-7 gap-4">
         {slicedProducts.map((product, index) => (
           <GridProductCard
             key={`${product?.id || 'prod'}-${index}`}

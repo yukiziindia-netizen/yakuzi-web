@@ -84,7 +84,7 @@ export default async function CategoryPage({
     <main className="w-full bg-white min-h-screen relative pb-24 sm:pb-32">
       <HomeNavbar />
       
-      <div className="w-full max-w-[1600px] mx-auto bg-white overflow-hidden flex flex-col relative min-h-screen">
+      <div className="w-full max-w-[1600px] 2xl:max-w-none mx-auto bg-white overflow-hidden flex flex-col relative min-h-screen">
         <section className="flex-1 flex flex-col w-full">
           {/* Mobile Header (Category Name & Breadcrumb) */}
           <div className="flex flex-col px-4 sm:hidden pt-4 pb-2">

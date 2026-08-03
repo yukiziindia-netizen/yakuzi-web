@@ -48,11 +48,15 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
   const allOrders = Array.isArray(ordersData) ? ordersData : ((ordersData as any)?.data || (ordersData as any)?.data?.orders || []);
 
   const items = React.useMemo(() => {
-    return allOrders.flatMap((o: any) => {
+    const list = allOrders.flatMap((o: any) => {
       const oItems = o.items || o.orderItems || [];
       return oItems.map((item: any) => ({ ...item, order: o }));
     });
-  }, [allOrders]);
+    if (orderId) {
+      return list.filter((item: any) => item.orderId === orderId || item.order?.id === orderId);
+    }
+    return list;
+  }, [allOrders, orderId]);
   
   // We use the first order or the specific orderId for the header info
   const headerOrder = allOrders.find((o: any) => o.id === orderId) || allOrders[0] || {};
@@ -141,7 +145,7 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
             <div>
               <h3 className="text-sm sm:text-base font-black text-[#1e1e1e] mb-1">Ship to</h3>
               <div className="text-[12px] font-bold text-gray-500 leading-relaxed space-y-0.5">
-                <p className="text-gray-855 font-black">{(headerOrder as any).user?.name || shipHeader.name || 'Name Surname'}</p>
+                <p className="text-gray-855 font-black">{(headerOrder as any).user?.name || headerOrder?.address?.name || shipHeader.name || 'Name Surname'}</p>
                 {headerShippingAddress ? (
                   headerShippingAddress.split(', ').map((addrPart: string, sIdx: number) => (
                     <p key={sIdx}>{addrPart}</p>

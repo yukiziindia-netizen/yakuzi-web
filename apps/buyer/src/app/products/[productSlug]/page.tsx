@@ -128,16 +128,20 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
     : 0;
 
   const finalPrice = directPrice > 0 ? directPrice : (computedPrice > 0 ? computedPrice : mrpVal);
-  const finalOriginalPrice = mrpVal > finalPrice ? mrpVal : 0;
+  const discountPercent = Number(prod?.discountMeta?.discountPercent || 0);
+  let finalOriginalPrice = mrpVal > finalPrice ? mrpVal : 0;
+  if (finalOriginalPrice === 0 && discountPercent > 0 && finalPrice > 0) {
+    finalOriginalPrice = Math.round(finalPrice / (1 - discountPercent / 100));
+  }
   const rating = prod?.rating || 4.5;
   const isNotAvailable = (prod?.sellerCount === 0 || prod?.hasSellers === false) && finalPrice <= 0 && mrpVal <= 0;
 
   const displayPrice = finalPrice > 0 
-    ? `₹${Math.round(finalPrice).toLocaleString('en-IN')}` 
-    : (mrpVal > 0 ? `₹${Math.round(mrpVal).toLocaleString('en-IN')}` : 'N/A');
+    ? `₹${Math.round(finalPrice)}` 
+    : (mrpVal > 0 ? `₹${Math.round(mrpVal)}` : 'N/A');
 
   const displayOriginalPrice = (finalOriginalPrice > 0 && finalOriginalPrice > finalPrice)
-    ? `₹${Math.round(finalOriginalPrice).toLocaleString('en-IN')}`
+    ? `₹${Math.round(finalOriginalPrice)}`
     : '';
 
   const displayDelivery = prod.deliveryText || prod.deliveryTime || '3 days';

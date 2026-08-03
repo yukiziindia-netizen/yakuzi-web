@@ -61,11 +61,11 @@ export default function ProductCard({
   const numOriginalPrice = Number(originalPrice);
   
   const displayPrice = !isNaN(numPrice) && numPrice > 0 
-    ? `₹${numPrice.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}` 
+    ? `₹${Math.round(numPrice)}` 
     : (typeof price === 'string' && price ? price : 'N/A');
     
   const displayOriginalPrice = !isNaN(numOriginalPrice) && numOriginalPrice > (numPrice || 0)
-    ? `₹${numOriginalPrice.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`
+    ? `₹${Math.round(numOriginalPrice)}`
     : (originalPrice ? String(originalPrice) : '');
     
   const displayDiscount = discount;

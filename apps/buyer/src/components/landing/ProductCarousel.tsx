@@ -145,16 +145,20 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
     : 0;
 
   const finalPrice = directPrice > 0 ? directPrice : (computedPrice > 0 ? computedPrice : mrpVal);
-  const finalOriginalPrice = mrpVal > finalPrice ? mrpVal : 0;
+  const discountPercent = Number(product?.discountMeta?.discountPercent || 0);
+  let finalOriginalPrice = mrpVal > finalPrice ? mrpVal : 0;
+  if (finalOriginalPrice === 0 && discountPercent > 0 && finalPrice > 0) {
+    finalOriginalPrice = Math.round(finalPrice / (1 - discountPercent / 100));
+  }
   const rating = product?.rating || 4.5;
   const isNotAvailable = (product?.sellerCount === 0 || product?.hasSellers === false) && finalPrice <= 0 && mrpVal <= 0;
 
   const displayPrice = finalPrice > 0 
-    ? `₹${Math.round(finalPrice).toLocaleString('en-IN')}` 
-    : (mrpVal > 0 ? `₹${Math.round(mrpVal).toLocaleString('en-IN')}` : 'N/A');
+    ? `₹${Math.round(finalPrice)}` 
+    : (mrpVal > 0 ? `₹${Math.round(mrpVal)}` : 'N/A');
 
   const displayOriginalPrice = (finalOriginalPrice > 0 && finalOriginalPrice > finalPrice)
-    ? `₹${Math.round(finalOriginalPrice).toLocaleString('en-IN')}`
+    ? `₹${Math.round(finalOriginalPrice)}`
     : '';
 
   const displayDelivery = product?.deliveryText || product?.deliveryTime || '3 days';
@@ -267,7 +271,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
         </div>
 
         {/* Image Container - Fixed 190px/200px height matching Samplr */}
-        <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`} className="relative w-full h-[190px] sm:h-[200px] bg-[#f8f8f8] overflow-hidden flex justify-center items-center shrink-0 border-b border-gray-100">
+        <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`} className="relative w-full h-[190px] sm:h-[200px] bg-white overflow-hidden flex justify-center items-center shrink-0 border-b border-gray-100">
            <img src={imageUrl} alt={productName} className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300 ease-out" />
         </Link>
 
@@ -280,7 +284,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
               </div>
               <div className="flex items-start justify-between w-full gap-1.5">
                  <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`} className="flex-1">
-                   <h3 className="text-[13px] sm:text-[14px] font-medium text-[#333333] leading-snug line-clamp-2 hover:text-[#7B2FBE] transition-colors">
+                   <h3 className="text-[13px] sm:text-[14px] font-medium text-[#333333] leading-snug line-clamp-1 hover:text-[#7B2FBE] transition-colors">
                       {productName}
                    </h3>
                  </Link>
@@ -371,7 +375,7 @@ export default function ProductCarousel({ slot = 'HOMEPAGE_CAROUSEL', categoryId
         - Columns: 2 cols (mobile), 3 cols (sm), 4 cols (md), 5 cols (lg), 6 cols (xl/2xl)
         - Gap: gap-4 (16px)
       */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-7 gap-4">
         {slicedProducts.map((product, index) => (
           <GridProductCard
             key={`${product?.id || 'prod'}-${index}`}

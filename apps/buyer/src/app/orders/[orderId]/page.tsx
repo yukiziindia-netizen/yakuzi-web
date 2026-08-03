@@ -207,7 +207,7 @@ export default function OrderIdPage({ params }: { params: { orderId: string } })
                       </div>
                       <div>
                         <p className="text-sm font-bold text-gray-900">{orderItems.length} Items</p>
-                        {order.name && <p className="text-xs text-gray-400 font-bold">{order.name}</p>}
+                        {(order.address as any)?.name && <p className="text-xs text-gray-400 font-bold">{(order.address as any).name}</p>}
                       </div>
                     </div>
                     <p className="text-xl font-bold text-gray-900">₹{Math.round(Number(totalAmount)).toLocaleString('en-IN')}</p>
@@ -216,6 +216,7 @@ export default function OrderIdPage({ params }: { params: { orderId: string } })
                   {shippingAddress && (
                     <div className="p-6 bg-white/40 rounded-3xl border border-white shadow-sm">
                       <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Ship to</p>
+                      {(order.address as any)?.name && <p className="text-sm font-black text-gray-800 mb-1">{(order.address as any).name}</p>}
                       <p className="text-sm font-bold text-gray-800 leading-relaxed">{shippingAddress}</p>
                     </div>
                   )}

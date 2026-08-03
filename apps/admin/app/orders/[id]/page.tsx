@@ -249,10 +249,8 @@ export default function OrderDetailPage() {
                 const perUnitShipping = finalShippingPrice / itemQty;
                 
                 const productGstPercent = offer.gstPercent !== undefined ? Number(offer.gstPercent) : 0;
-                const commissionPercent = Number(product.commissionPercent ?? product.category?.commissionPercent ?? offer.commissionPercent ?? 5);
-                const commissionGstPercent = Number(product.commissionGstPercent ?? product.category?.commissionGstPercent ?? offer.commissionGstPercent ?? 18);
-                const fixedFee = Number(product.fixedFee ?? product.category?.fixedFee ?? 0);
-                const fixedFeeGstPercent = Number(product.fixedFeeGstPercent ?? product.category?.fixedFeeGstPercent ?? 18);
+                const fallbackCommPct = Number(product.commissionPercent ?? product.category?.commissionPercent ?? offer.commissionPercent ?? 5);
+                const fallbackCommGstPct = Number(product.commissionGstPercent ?? product.category?.commissionGstPercent ?? offer.commissionGstPercent ?? 18);
 
                 const pricing = calculatePricing(
                   baseSellingPrice,
@@ -265,19 +263,32 @@ export default function OrderDetailPage() {
                     buy: 1
                   },
                   {
-                    commissionPercent,
-                    commissionGstPercent,
-                    fixedFee,
-                    fixedFeeGstPercent,
+                    commissionPercent: fallbackCommPct,
+                    commissionGstPercent: fallbackCommGstPct,
+                    fixedFee: 0,
+                    fixedFeeGstPercent: 18,
                     shippingGstPercent: 0
                   }
                 );
 
                 const totalItemPrice = Number(item.totalPrice ?? item.price ?? (baseSellingPrice * itemQty));
-                const itemCommission = pricing.commissionAmount * itemQty;
-                const itemCommissionGst = pricing.commissionGstAmount * itemQty;
-                const itemShipping = perUnitShipping * itemQty;
-                const itemNetPayout = pricing.sellerPayout * itemQty;
+
+                const payout = item.estimatedPayout || (item.settlement ? {
+                  grossAmount: Number(item.settlement.grossAmount || totalItemPrice),
+                  commission: Number(item.settlement.commission || 0),
+                  commissionGst: Number(item.settlement.commissionGst || 0),
+                  finalShippingPrice: finalShippingPrice,
+                  netPayout: Number(item.settlement.netPayout || item.settlement.amount || 0),
+                  commissionPercent: Number(product.commissionPercent ?? 0),
+                  commissionGstPercent: Number(product.commissionGstPercent ?? 18),
+                } : null);
+
+                const itemCommission = payout ? payout.commission : (pricing.commissionAmount * itemQty);
+                const itemCommissionGst = payout ? payout.commissionGst : (pricing.commissionGstAmount * itemQty);
+                const itemShipping = payout ? payout.finalShippingPrice : (perUnitShipping * itemQty);
+                const itemNetPayout = payout ? payout.netPayout : (pricing.sellerPayout * itemQty);
+                const commissionPercent = payout?.commissionPercent ?? fallbackCommPct;
+                const commissionGstPercent = payout?.commissionGstPercent ?? fallbackCommGstPct;
 
                 return (
                 <div key={item.id || i} className="px-6 py-4 space-y-3">
@@ -356,23 +367,38 @@ export default function OrderDetailPage() {
                 const baseSellingPrice = Number(item.unitPrice || item.price || (offer.mrp ? Number(offer.mrp) - Number(offer.discount || 0) : 0));
                 const itemQty = Number(item.quantity) || 1;
                 const perUnitShipping = Number(offer.finalShippingPrice ?? offer.shippingCharges ?? item.shippingFee ?? item.shippingCharges ?? (order.shippingFee ? Number(order.shippingFee) / items.length : 0)) / itemQty;
-                const productGstPercent = offer.gstPercent !== undefined ? Number(offer.gstPercent) : 0;
-                const commissionPercent = Number(product.commissionPercent ?? product.category?.commissionPercent ?? offer.commissionPercent ?? 5);
-                const commissionGstPercent = Number(product.commissionGstPercent ?? product.category?.commissionGstPercent ?? offer.commissionGstPercent ?? 18);
-                const fixedFee = Number(product.fixedFee ?? product.category?.fixedFee ?? 0);
-                const fixedFeeGstPercent = Number(product.fixedFeeGstPercent ?? product.category?.fixedFeeGstPercent ?? 18);
 
-                const pricing = calculatePricing(
-                  baseSellingPrice,
-                  productGstPercent,
-                  { type: 'none', isTaxIncluded: true, shippingCharges: perUnitShipping, shippingGstPercent: 0, buy: 1 },
-                  { commissionPercent, commissionGstPercent, fixedFee, fixedFeeGstPercent, shippingGstPercent: 0 }
-                );
+                const payout = item.estimatedPayout || (item.settlement ? {
+                  commission: Number(item.settlement.commission || 0),
+                  commissionGst: Number(item.settlement.commissionGst || 0),
+                  finalShippingPrice: Number(offer.finalShippingPrice ?? offer.shippingCharges ?? 0),
+                  netPayout: Number(item.settlement.netPayout || item.settlement.amount || 0),
+                } : null);
 
-                totalCommission += pricing.commissionAmount * itemQty;
-                totalCommissionGst += pricing.commissionGstAmount * itemQty;
-                totalShipping += perUnitShipping * itemQty;
-                totalNetPayout += pricing.sellerPayout * itemQty;
+                if (payout) {
+                  totalCommission += payout.commission;
+                  totalCommissionGst += payout.commissionGst;
+                  totalShipping += payout.finalShippingPrice;
+                  totalNetPayout += payout.netPayout;
+                } else {
+                  const productGstPercent = offer.gstPercent !== undefined ? Number(offer.gstPercent) : 0;
+                  const commissionPercent = Number(product.commissionPercent ?? product.category?.commissionPercent ?? offer.commissionPercent ?? 5);
+                  const commissionGstPercent = Number(product.commissionGstPercent ?? product.category?.commissionGstPercent ?? offer.commissionGstPercent ?? 18);
+                  const fixedFee = Number(product.fixedFee ?? product.category?.fixedFee ?? 0);
+                  const fixedFeeGstPercent = Number(product.fixedFeeGstPercent ?? product.category?.fixedFeeGstPercent ?? 18);
+
+                  const pricing = calculatePricing(
+                    baseSellingPrice,
+                    productGstPercent,
+                    { type: 'none', isTaxIncluded: true, shippingCharges: perUnitShipping, shippingGstPercent: 0, buy: 1 },
+                    { commissionPercent, commissionGstPercent, fixedFee, fixedFeeGstPercent, shippingGstPercent: 0 }
+                  );
+
+                  totalCommission += pricing.commissionAmount * itemQty;
+                  totalCommissionGst += pricing.commissionGstAmount * itemQty;
+                  totalShipping += perUnitShipping * itemQty;
+                  totalNetPayout += pricing.sellerPayout * itemQty;
+                }
               });
 
               return (

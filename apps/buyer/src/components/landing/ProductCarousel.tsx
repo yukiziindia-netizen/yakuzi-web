@@ -145,7 +145,10 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
     : 0;
 
   const finalPrice = directPrice > 0 ? directPrice : (computedPrice > 0 ? computedPrice : mrpVal);
-  const finalOriginalPrice = mrpVal > finalPrice ? mrpVal : 0;
+  const discountPercent = product?.discountMeta?.discountPercent || 0;
+  const finalOriginalPrice = mrpVal > finalPrice
+    ? mrpVal
+    : (discountPercent > 0 ? finalPrice / (1 - discountPercent / 100) : 0);
   const rating = product?.rating || 4.5;
   const isNotAvailable = (product?.sellerCount === 0 || product?.hasSellers === false) && finalPrice <= 0 && mrpVal <= 0;
 

@@ -264,9 +264,9 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                       displayProduct.originalPrice;
                     const discountMeta = listing.discountMeta || {};
                     const discountPercent =
-                      itemMrp && listing.price && itemMrp > listing.price
-                        ? Math.round(((itemMrp - listing.price) / itemMrp) * 100)
-                        : discountMeta.discountPercent || 20;
+                      discountMeta.discountPercent
+                        ? discountMeta.discountPercent
+                        : 0;
 
                     const handleQtyChange = (newQty: number) => {
                       if (itemQty === 0) {

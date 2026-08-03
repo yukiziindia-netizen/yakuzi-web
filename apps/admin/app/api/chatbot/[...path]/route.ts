@@ -51,3 +51,21 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ path
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
+  try {
+    const resolvedParams = await params;
+    const targetUrl = `${CHATBOT_URL}/${resolvedParams.path.join("/")}`;
+    
+    const response = await fetch(targetUrl, {
+      method: "DELETE",
+    });
+
+    const data = await response.json();
+    return NextResponse.json(data, { status: response.status });
+  } catch (error: any) {
+    console.error("Chatbot Proxy Error:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+

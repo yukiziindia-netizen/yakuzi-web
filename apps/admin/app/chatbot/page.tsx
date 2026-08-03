@@ -54,14 +54,33 @@ export default function ChatbotAdminPage() {
     setConfirmDialog({
       isOpen: true,
       title: "Delete Job",
-      message: "Are you sure you want to delete this job record? This action cannot be undone.",
+      message: "Are you sure you want to delete this job record? The chatbot's training memory will be updated automatically.",
       onConfirm: async () => {
         try {
           await apiClient.delete(`/chatbot/job-history/${id}`);
-          toast.success("Job deleted from history");
+          toast.success("Job deleted and AI chatbot memory synced");
           fetchJobStatus();
         } catch (err) {
           toast.error("Failed to delete job");
+        }
+      }
+    });
+  };
+
+  const handleClearAllHistory = async () => {
+    setConfirmDialog({
+      isOpen: true,
+      title: "Clear All Training History & Memory",
+      message: "Are you sure you want to clear all training history and remove all training memory from the AI chatbot? The chatbot will be reset to its default persona.",
+      onConfirm: async () => {
+        try {
+          await apiClient.delete("/chatbot/job-history");
+          toast.success("Training history cleared & AI chatbot memory reset!");
+          setJobId("");
+          setJobStatus(null);
+          fetchJobStatus();
+        } catch (err) {
+          toast.error("Failed to clear training history");
         }
       }
     });
@@ -354,9 +373,20 @@ export default function ChatbotAdminPage() {
 
         {/* Training History */}
         <div className="glass p-6 rounded-2xl border border-white/20">
-          <h2 className="text-lg font-semibold flex items-center gap-2 mb-4">
-            Training History
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              Training History
+            </h2>
+            {jobHistory.length > 0 && (
+              <button
+                onClick={handleClearAllHistory}
+                className="flex items-center gap-1.5 text-xs font-medium text-red-500 hover:text-red-600 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-500/10"
+                title="Clear all training history and reset AI chatbot memory to default"
+              >
+                <Trash2 className="h-3.5 w-3.5" /> Clear All & Reset Memory
+              </button>
+            )}
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
               <thead>
@@ -370,10 +400,11 @@ export default function ChatbotAdminPage() {
               <tbody className="divide-y divide-border/50">
                 {jobHistory.length === 0 ? (
                   <tr>
-                    <td colSpan={3} className="py-8 text-center text-muted-foreground">
-                      No training history found. Start training to see jobs here.
+                    <td colSpan={4} className="py-8 text-center text-muted-foreground">
+                      No training history found. Training memory is reset to default.
                     </td>
                   </tr>
+
                 ) : (
                   jobHistory.map((job: any) => (
                     <tr key={job.id} className="hover:bg-accent/20">

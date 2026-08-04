@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getCart, addToCart, updateCartItem, removeCartItem, clearCart, useAuth } from '@yukizi/api-client';
+import { getCart, addToCart, updateCartItem, removeCartItem, clearCart, useAuth, api } from '@yukizi/api-client';
 import { localCart } from '@/lib/local-cart';
 import { useEffect, useState } from 'react';
 
@@ -22,7 +22,29 @@ export function useCart() {
     queryFn: async () => {
       // Local cart is the strict source of truth for the UI until Checkout.
       // This prevents "ghost items" from the backend magically reappearing after a local deletion.
-      return localCart.get();
+      const local = localCart.get();
+      if (local.items.length === 0) return local;
+
+      const ids = local.items.map((i: any) => i.productId).filter(Boolean);
+      try {
+        const res = await api.post('/products/validate-ids', { ids });
+        const activeIds = res.data?.data || [];
+        const activeItems = local.items.filter((item: any) => activeIds.includes(item.productId));
+        if (activeItems.length !== local.items.length) {
+          const newCart = {
+            ...local,
+            items: activeItems,
+            subtotal: activeItems.reduce((sum, item) => sum + (item.price || item.product?.price || 0) * item.quantity, 0),
+          };
+          newCart.total = newCart.subtotal;
+          localCart.set(newCart);
+          return newCart;
+        }
+      } catch (e) {
+        console.error("Failed to validate local cart items", e);
+      }
+
+      return local;
     },
     staleTime: 15 * 1000,
     gcTime: 60 * 1000,

@@ -1,7 +1,7 @@
-﻿'use client';
+'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getWishlist, addToWishlist as backendAddToWishlist, removeFromWishlist as backendRemoveFromWishlist, useAuth } from '@yukizi/api-client';
+import { getWishlist, addToWishlist as backendAddToWishlist, removeFromWishlist as backendRemoveFromWishlist, useAuth, api } from '@yukizi/api-client';
 import { localWishlist } from '@/lib/local-wishlist';
 import { useEffect } from 'react';
 
@@ -21,19 +21,41 @@ export function useWishlist() {
     queryKey: ['wishlist', isAuthenticated],
     queryFn: async () => {
       const local = localWishlist.get();
-      if (local.items.length > 0) return local;
+      let list = local;
 
-      if (isAuthenticated) {
+      if (local.items.length === 0 && isAuthenticated) {
         try {
           const backend = await getWishlist();
           if (backend.items.length > 0) {
-            return backend;
+            list = backend;
           }
         } catch (e) {
           console.error("Failed to fetch backend wishlist", e);
         }
       }
-      return local;
+
+      if (list.items.length > 0) {
+        const ids = list.items.map((i: any) => i.productId).filter(Boolean);
+        try {
+          const res = await api.post('/products/validate-ids', { ids });
+          const activeIds = res.data?.data || [];
+          const activeItems = list.items.filter((item: any) => activeIds.includes(item.productId));
+          if (activeItems.length !== list.items.length) {
+            const newList = {
+              items: activeItems,
+              total: activeItems.length,
+            };
+            if (list === local) {
+              localWishlist.set(newList);
+            }
+            list = newList;
+          }
+        } catch (e) {
+          console.error("Failed to validate wishlist items", e);
+        }
+      }
+
+      return list;
     },
     staleTime: 15 * 1000,
     gcTime: 60 * 1000,

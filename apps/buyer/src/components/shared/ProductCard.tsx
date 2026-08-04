@@ -199,11 +199,6 @@ export default function ProductCard({
       {/* Details Section - Compact layout with zero extra vertical spacing */}
       <div className="flex flex-col gap-1.5 p-[8px] sm:p-[10px] bg-white w-full">
         <div>
-          {/* Category / Subtitle */}
-          <div className="text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-0.5 truncate leading-none">
-            YUKIZI
-          </div>
-
           {/* Title */}
           <h3 className="text-[13px] sm:text-[14px] font-medium text-[#333333] leading-snug line-clamp-2 hover:text-[#7B2FBE] transition-colors">
             {name}

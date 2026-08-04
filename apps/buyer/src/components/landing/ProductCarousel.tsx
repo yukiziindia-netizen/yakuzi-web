@@ -275,19 +275,15 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
            <img src={imageUrl} alt={productName} className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300 ease-out" />
         </Link>
 
-        {/* Details Section - Compact layout with zero extra vertical spacing */}
-        <div className="flex flex-col gap-1.5 p-[8px] sm:p-[10px] bg-white w-full">
-           {/* Brand Subtitle & Title Line */}
-           <div>
-              <div className="text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-0.5 truncate leading-none">
-                 {product?.brandName || product?.categoryName || product?.brand || 'YUKIZI'}
-              </div>
-              <div className="flex items-start justify-between w-full gap-1.5">
-                 <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`} className="flex-1">
-                   <h3 className="text-[13px] sm:text-[14px] font-medium text-[#333333] leading-snug line-clamp-1 hover:text-[#7B2FBE] transition-colors">
-                      {productName}
-                   </h3>
-                 </Link>
+         <div className="flex flex-col gap-1.5 p-[8px] sm:p-[10px] bg-white w-full">
+            {/* Brand Subtitle & Title Line */}
+            <div>
+               <div className="flex items-start justify-between w-full gap-1.5">
+                  <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`} className="flex-1">
+                    <h3 className="text-[13px] sm:text-[14px] font-medium text-[#333333] leading-snug line-clamp-1 hover:text-[#7B2FBE] transition-colors">
+                       {productName}
+                    </h3>
+                  </Link>
                  <button 
                     onClick={(e) => { e.preventDefault(); onOpenReview(product); }}
                     className="w-5 h-5 bg-[#8c8c8c] rounded-full flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform shadow-sm shrink-0"

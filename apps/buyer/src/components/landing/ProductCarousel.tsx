@@ -311,7 +311,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
                   </Link>
                   <button 
                      onClick={(e) => { e.preventDefault(); onOpenReview(product); }}
-                     className="flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform shrink-0"
+                     className="flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform shrink-0 -mr-[4px] sm:-mr-[6px]"
                      title="Quick view"
                   >
                      <Eye className="w-4 h-4 text-gray-400 hover:text-gray-600" />

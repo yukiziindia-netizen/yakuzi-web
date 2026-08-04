@@ -573,9 +573,10 @@ export default function Navbar({
                   : "text-[#562996] sm:text-white sm:hover:text-purple-300"
               }`}
             >
-              <Package 
-                className="w-[24px] h-[24px] xs:w-[26px] xs:h-[26px] sm:w-[26px] sm:h-[26px] md:w-[28px] md:h-[28px] stroke-[2]" 
-                fill="none"
+              <img
+                src="/icons/save box button.png"
+                alt="Orders"
+                className="w-[56px] h-[56px] xs:w-[60px] xs:h-[60px] sm:w-[64px] sm:h-[64px] md:w-[68px] md:h-[68px] object-contain brightness-0 invert"
               />
             </button>
 

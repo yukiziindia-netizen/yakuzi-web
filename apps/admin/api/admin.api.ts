@@ -121,6 +121,7 @@ export async function updateAdminShippingDocs(orderId: string, payload: {
   manifestUrl?: string;
   invoiceUrl?: string;
   isShippingLocked?: boolean;
+  sellerId?: string;
 }) {
   const { data } = await apiClient.patch<{ data: any }>(`/orders/${orderId}/admin-shipping-docs`, payload);
   return data.data;

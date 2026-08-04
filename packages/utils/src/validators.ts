@@ -146,6 +146,19 @@ export const productFormSchema = z.object({
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Minimum 1 required', path: ['max_order_qty'] });
     }
   }
+
+  // Check for duplicate variant names
+  if (data.variants && data.variants.length > 1) {
+    const names = data.variants.map((v: any) => v.name?.trim().toLowerCase()).filter(Boolean);
+    const uniqueNames = new Set(names);
+    if (names.length !== uniqueNames.size) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Duplicate variant names are not allowed',
+        path: ['variants'],
+      });
+    }
+  }
 }).refine((data) => {
   if (data.variants && data.variants.length > 0) return true;
   if (data.product_price <= 0) return true;

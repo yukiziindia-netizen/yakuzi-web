@@ -141,6 +141,7 @@ export function useUpdateAdminShippingDocs() {
         manifestUrl?: string;
         invoiceUrl?: string;
         isShippingLocked?: boolean;
+        sellerId?: string;
       } 
     }) => updateAdminShippingDocs(orderId, payload),
     onSuccess: (_, { orderId }) => {

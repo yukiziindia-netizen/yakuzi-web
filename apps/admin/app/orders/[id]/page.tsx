@@ -36,12 +36,12 @@ export default function OrderDetailPage() {
   
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
-  const [adminFiles, setAdminFiles] = useState<{
+  const [adminFiles, setAdminFiles] = useState<Record<string, {
     label: File | null;
     invoice: File | null;
     manifest: File | null;
     sellerInvoice: File | null;
-  }>({ label: null, invoice: null, manifest: null, sellerInvoice: null });
+  }>>({});
   const [isUploadingDocs, setIsUploadingDocs] = useState(false);
 
   const handleStatusUpdate = async (status: string) => {
@@ -63,25 +63,26 @@ export default function OrderDetailPage() {
     }
   };
 
-  const handleAdminDocsSubmit = async () => {
+  const handleAdminDocsSubmit = async (sellerId: string, sellerGroup: any) => {
     try {
       setIsUploadingDocs(true);
-      let labelUrl = order.adminShippingLabelUrl;
-      let invoiceUrl = order.adminInvoiceUrl;
-      let manifestUrl = order.manifestUrl;
-      let sellerInvoiceUrl = order.invoiceUrl;
+      const filesForSeller = adminFiles[sellerId] || { label: null, invoice: null, manifest: null, sellerInvoice: null };
+      let labelUrl = sellerGroup.adminShippingLabelUrl;
+      let invoiceUrl = sellerGroup.adminInvoiceUrl;
+      let manifestUrl = sellerGroup.manifestUrl;
+      let sellerInvoiceUrl = sellerGroup.invoiceUrl;
 
-      if (adminFiles.label) {
-        labelUrl = await uploadDoc.mutateAsync(adminFiles.label);
+      if (filesForSeller.label) {
+        labelUrl = await uploadDoc.mutateAsync(filesForSeller.label);
       }
-      if (adminFiles.invoice) {
-        invoiceUrl = await uploadDoc.mutateAsync(adminFiles.invoice);
+      if (filesForSeller.invoice) {
+        invoiceUrl = await uploadDoc.mutateAsync(filesForSeller.invoice);
       }
-      if (adminFiles.manifest) {
-        manifestUrl = await uploadDoc.mutateAsync(adminFiles.manifest);
+      if (filesForSeller.manifest) {
+        manifestUrl = await uploadDoc.mutateAsync(filesForSeller.manifest);
       }
-      if (adminFiles.sellerInvoice) {
-        sellerInvoiceUrl = await uploadDoc.mutateAsync(adminFiles.sellerInvoice);
+      if (filesForSeller.sellerInvoice) {
+        sellerInvoiceUrl = await uploadDoc.mutateAsync(filesForSeller.sellerInvoice);
       }
 
       await updateShippingDocs.mutateAsync({
@@ -90,12 +91,16 @@ export default function OrderDetailPage() {
           adminShippingLabelUrl: labelUrl, 
           adminInvoiceUrl: invoiceUrl,
           manifestUrl,
-          invoiceUrl: sellerInvoiceUrl
+          invoiceUrl: sellerInvoiceUrl,
+          sellerId
         }
       });
 
       toast.success("Shipping documents uploaded successfully");
-      setAdminFiles({ label: null, invoice: null, manifest: null, sellerInvoice: null });
+      setAdminFiles(prev => ({
+        ...prev,
+        [sellerId]: { label: null, invoice: null, manifest: null, sellerInvoice: null }
+      }));
     } catch {
       toast.error("Failed to upload shipping documents");
     } finally {
@@ -103,15 +108,16 @@ export default function OrderDetailPage() {
     }
   };
 
-  const handleShippingLockToggle = async () => {
+  const handleShippingLockToggle = async (sellerId: string, currentLockStatus: boolean) => {
     try {
       await updateShippingDocs.mutateAsync({
         orderId: id,
         payload: { 
-          isShippingLocked: !order.isShippingLocked
+          isShippingLocked: !currentLockStatus,
+          sellerId
         }
       });
-      toast.success(order.isShippingLocked ? "Shipping details unlocked" : "Shipping details locked");
+      toast.success(currentLockStatus ? "Shipping details unlocked" : "Shipping details locked");
     } catch {
       toast.error("Failed to toggle shipping lock");
     }
@@ -153,6 +159,48 @@ export default function OrderDetailPage() {
   const currentStatusIdx = ORDER_STATUSES.findIndex(s => s.key === normalizedStatus);
   const items: any[] = order.items ?? order.orderItems ?? [];
   const isCancelled = order.orderStatus === "CANCELLED";
+
+  const itemsBySeller = order ? order.items.reduce((acc: any, item: any) => {
+    const sId = item.sellerId;
+    if (!acc[sId]) {
+      acc[sId] = {
+        seller: item.seller,
+        items: [],
+        packageLength: item.packageLength,
+        packageBreadth: item.packageBreadth,
+        packageHeight: item.packageHeight,
+        packageWeight: item.packageWeight,
+        lengthImage: item.lengthImage,
+        breadthImage: item.breadthImage,
+        heightImage: item.heightImage,
+        weightImage: item.weightImage,
+        invoiceUrl: item.invoiceUrl,
+        manifestUrl: item.manifestUrl,
+        adminShippingLabelUrl: item.adminShippingLabelUrl,
+        adminInvoiceUrl: item.adminInvoiceUrl,
+        packedPictureUrl: item.packedPictureUrl,
+        isShippingLocked: item.isShippingLocked,
+      };
+    }
+    acc[sId].items.push(item);
+    if (item.packageLength && !acc[sId].packageLength) {
+      acc[sId].packageLength = item.packageLength;
+      acc[sId].packageBreadth = item.packageBreadth;
+      acc[sId].packageHeight = item.packageHeight;
+      acc[sId].packageWeight = item.packageWeight;
+      acc[sId].lengthImage = item.lengthImage;
+      acc[sId].breadthImage = item.breadthImage;
+      acc[sId].heightImage = item.heightImage;
+      acc[sId].weightImage = item.weightImage;
+      acc[sId].invoiceUrl = item.invoiceUrl;
+      acc[sId].manifestUrl = item.manifestUrl;
+      acc[sId].adminShippingLabelUrl = item.adminShippingLabelUrl;
+      acc[sId].adminInvoiceUrl = item.adminInvoiceUrl;
+      acc[sId].packedPictureUrl = item.packedPictureUrl;
+      acc[sId].isShippingLocked = item.isShippingLocked;
+    }
+    return acc;
+  }, {}) : {};
 
   return (
     <AdminLayout>
@@ -625,130 +673,145 @@ export default function OrderDetailPage() {
               </motion.div>
             )}
 
-            {/* Shipping & Fulfillment Details */}
-            {(order.packageLength || order.invoiceUrl) && (
-              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.23 }} className="glass-card rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="font-semibold text-foreground flex items-center gap-2"><Package className="h-4 w-4 text-primary" /> Shipping Details</h2>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-medium text-muted-foreground">{order.isShippingLocked ? "Locked" : "Unlocked"}</span>
-                    <button 
-                      onClick={handleShippingLockToggle}
-                      className={cn("relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 transition-colors duration-200", order.isShippingLocked ? "bg-red-500" : "bg-muted-foreground/40")}
-                    >
-                      <span className={cn("pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out", order.isShippingLocked ? "translate-x-2" : "-translate-x-2")} />
-                    </button>
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  {order.packageLength && (
-                    <div className="grid grid-cols-2 gap-3 pb-3 border-b border-border/30">
-                      <div>
-                        <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-1">Dimensions (L×B×H)</p>
-                        <p className="text-sm font-semibold text-foreground">{order.packageLength} × {order.packageBreadth} × {order.packageHeight} cm</p>
+            {/* Shipping & Fulfillment Details (Grouped by Seller) */}
+            {Object.values(itemsBySeller).map((sellerGroup: any) => {
+              const sellerId = sellerGroup.seller.id;
+              const sellerName = sellerGroup.seller.companyName || sellerGroup.seller.name || "Seller";
+              const filesForSeller = adminFiles[sellerId] || { label: null, invoice: null, manifest: null, sellerInvoice: null };
+
+              return (
+                <div key={sellerId} className="space-y-4 border border-border/40 p-4 rounded-2xl bg-accent/5">
+                  <p className="text-xs font-bold text-primary uppercase tracking-wider mb-1">Seller: {sellerName}</p>
+
+                  {(sellerGroup.packageLength || sellerGroup.invoiceUrl) ? (
+                    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.23 }} className="glass-card rounded-2xl p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h2 className="font-semibold text-foreground flex items-center gap-2"><Package className="h-4 w-4 text-primary" /> Shipping Details</h2>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-medium text-muted-foreground">{sellerGroup.isShippingLocked ? "Locked" : "Unlocked"}</span>
+                          <button 
+                            onClick={() => handleShippingLockToggle(sellerId, sellerGroup.isShippingLocked)}
+                            className={cn("relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 transition-colors duration-200", sellerGroup.isShippingLocked ? "bg-red-500" : "bg-muted-foreground/40")}
+                          >
+                            <span className={cn("pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out", sellerGroup.isShippingLocked ? "translate-x-2" : "-translate-x-2")} />
+                          </button>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-1">Weight</p>
-                        <p className="text-sm font-semibold text-foreground">{order.packageWeight} kg</p>
+                      <div className="space-y-4">
+                        {sellerGroup.packageLength && (
+                          <div className="grid grid-cols-2 gap-3 pb-3 border-b border-border/30">
+                            <div>
+                              <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-1">Dimensions (L×B×H)</p>
+                              <p className="text-sm font-semibold text-foreground">{sellerGroup.packageLength} × {sellerGroup.packageBreadth} × {sellerGroup.packageHeight} cm</p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-1">Weight</p>
+                              <p className="text-sm font-semibold text-foreground">{sellerGroup.packageWeight} kg</p>
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="space-y-2">
+                          <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Documents</p>
+                          <div className="flex flex-wrap gap-2">
+                            {sellerGroup.invoiceUrl && (
+                              <a href={sellerGroup.invoiceUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg text-[10px] font-bold text-primary transition-colors">
+                                <FileText className="h-3 w-3" /> Invoice
+                              </a>
+                            )}
+                            {sellerGroup.manifestUrl && (
+                              <a href={sellerGroup.manifestUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg text-[10px] font-bold text-primary transition-colors">
+                                <FileText className="h-3 w-3" /> Manifest
+                              </a>
+                            )}
+                            {sellerGroup.lengthImage && (
+                              <a href={sellerGroup.lengthImage} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg text-[10px] font-bold text-primary transition-colors">
+                                Length Proof <ExternalLink className="h-3 w-3" />
+                              </a>
+                            )}
+                            {sellerGroup.breadthImage && (
+                              <a href={sellerGroup.breadthImage} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg text-[10px] font-bold text-primary transition-colors">
+                                Breadth Proof <ExternalLink className="h-3 w-3" />
+                              </a>
+                            )}
+                            {sellerGroup.heightImage && (
+                              <a href={sellerGroup.heightImage} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg text-[10px] font-bold text-primary transition-colors">
+                                Height Proof <ExternalLink className="h-3 w-3" />
+                              </a>
+                            )}
+                            {sellerGroup.weightImage && (
+                              <a href={sellerGroup.weightImage} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg text-[10px] font-bold text-primary transition-colors">
+                                Weight Proof <ExternalLink className="h-3 w-3" />
+                              </a>
+                            )}
+                            {sellerGroup.packedPictureUrl && (
+                              <a href={sellerGroup.packedPictureUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg text-[10px] font-bold text-primary transition-colors">
+                                <FileText className="h-3 w-3" /> Packed Picture
+                              </a>
+                            )}
+                          </div>
+                        </div>
                       </div>
+                    </motion.div>
+                  ) : (
+                    <div className="glass-card rounded-2xl p-6 text-center text-xs text-muted-foreground">
+                      No shipping details provided by this seller yet.
                     </div>
                   )}
 
-                  <div className="space-y-2">
-                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Documents</p>
-                    <div className="flex flex-wrap gap-2">
-                      {order.invoiceUrl && (
-                        <a href={order.invoiceUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg text-[10px] font-bold text-primary transition-colors">
-                          <FileText className="h-3 w-3" /> Invoice
-                        </a>
-                      )}
-                      {order.manifestUrl && (
-                        <a href={order.manifestUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg text-[10px] font-bold text-primary transition-colors">
-                          <FileText className="h-3 w-3" /> Manifest
-                        </a>
-                      )}
-                      {order.lengthImage && (
-                        <a href={order.lengthImage} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg text-[10px] font-bold text-primary transition-colors">
-                          Length Proof <ExternalLink className="h-3 w-3" />
-                        </a>
-                      )}
-                      {order.breadthImage && (
-                        <a href={order.breadthImage} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg text-[10px] font-bold text-primary transition-colors">
-                          Breadth Proof <ExternalLink className="h-3 w-3" />
-                        </a>
-                      )}
-                      {order.heightImage && (
-                        <a href={order.heightImage} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg text-[10px] font-bold text-primary transition-colors">
-                          Height Proof <ExternalLink className="h-3 w-3" />
-                        </a>
-                      )}
-                      {order.weightImage && (
-                        <a href={order.weightImage} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg text-[10px] font-bold text-primary transition-colors">
-                          Weight Proof <ExternalLink className="h-3 w-3" />
-                        </a>
-                      )}
-                      {order.packedPictureUrl && (
-                        <a href={order.packedPictureUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg text-[10px] font-bold text-primary transition-colors">
-                          <FileText className="h-3 w-3" /> Packed Picture
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
+                  {sellerGroup.packageLength && (
+                    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24 }} className="glass-card rounded-2xl p-6">
+                      <h2 className="font-semibold text-foreground mb-4 flex items-center gap-2"><FileText className="h-4 w-4 text-primary" /> Admin Documents</h2>
+                      
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-medium text-muted-foreground block">Shipping Label</label>
+                            {sellerGroup.adminShippingLabelUrl ? (
+                              <a href={sellerGroup.adminShippingLabelUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline">View Uploaded Label</a>
+                            ) : (
+                              <input type="file" accept=".pdf,image/*" onChange={(e) => setAdminFiles(p => ({...p, [sellerId]: { ...filesForSeller, label: e.target.files?.[0] || null }}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
+                            )}
+                          </div>
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-medium text-muted-foreground block">Admin Invoice</label>
+                            {sellerGroup.adminInvoiceUrl ? (
+                              <a href={sellerGroup.adminInvoiceUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline">View Uploaded Admin Invoice</a>
+                            ) : (
+                              <input type="file" accept=".pdf,image/*" onChange={(e) => setAdminFiles(p => ({...p, [sellerId]: { ...filesForSeller, invoice: e.target.files?.[0] || null }}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
+                            )}
+                          </div>
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-medium text-muted-foreground block">Manifest</label>
+                            {sellerGroup.manifestUrl ? (
+                              <a href={sellerGroup.manifestUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline">View Uploaded Manifest</a>
+                            ) : (
+                              <input type="file" accept=".pdf,image/*" onChange={(e) => setAdminFiles(p => ({...p, [sellerId]: { ...filesForSeller, manifest: e.target.files?.[0] || null }}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
+                            )}
+                          </div>
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-medium text-muted-foreground block">Seller Invoice</label>
+                            {sellerGroup.invoiceUrl ? (
+                              <a href={sellerGroup.invoiceUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline">View Uploaded Seller Invoice</a>
+                            ) : (
+                              <input type="file" accept=".pdf,image/*" onChange={(e) => setAdminFiles(p => ({...p, [sellerId]: { ...filesForSeller, sellerInvoice: e.target.files?.[0] || null }}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
+                            )}
+                          </div>
+                        </div>
 
-             {/* Admin Shipping Documents */}
-            {order.packageLength && (
-              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24 }} className="glass-card rounded-2xl p-6">
-                <h2 className="font-semibold text-foreground mb-4 flex items-center gap-2"><FileText className="h-4 w-4 text-primary" /> Admin Documents</h2>
-                
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-medium text-muted-foreground block">Shipping Label</label>
-                      {order.adminShippingLabelUrl ? (
-                         <a href={order.adminShippingLabelUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline">View Uploaded Label</a>
-                      ) : (
-                        <input type="file" accept=".pdf,image/*" onChange={(e) => setAdminFiles(p => ({...p, label: e.target.files?.[0] || null}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
-                      )}
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-medium text-muted-foreground block">Admin Invoice</label>
-                      {order.adminInvoiceUrl ? (
-                         <a href={order.adminInvoiceUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline">View Uploaded Admin Invoice</a>
-                      ) : (
-                        <input type="file" accept=".pdf,image/*" onChange={(e) => setAdminFiles(p => ({...p, invoice: e.target.files?.[0] || null}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
-                      )}
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-medium text-muted-foreground block">Manifest</label>
-                      {order.manifestUrl ? (
-                         <a href={order.manifestUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline">View Uploaded Manifest</a>
-                      ) : (
-                        <input type="file" accept=".pdf,image/*" onChange={(e) => setAdminFiles(p => ({...p, manifest: e.target.files?.[0] || null}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
-                      )}
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-medium text-muted-foreground block">Seller Invoice</label>
-                      {order.invoiceUrl ? (
-                         <a href={order.invoiceUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline">View Uploaded Seller Invoice</a>
-                      ) : (
-                        <input type="file" accept=".pdf,image/*" onChange={(e) => setAdminFiles(p => ({...p, sellerInvoice: e.target.files?.[0] || null}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
-                      )}
-                    </div>
-                  </div>
-
-                  {(!order.adminShippingLabelUrl || !order.adminInvoiceUrl || !order.manifestUrl || !order.invoiceUrl) && (
-                    <div className="pt-2 flex justify-end">
-                      <Button size="sm" onClick={handleAdminDocsSubmit} loading={isUploadingDocs} disabled={!adminFiles.label && !adminFiles.invoice && !adminFiles.manifest && !adminFiles.sellerInvoice}>
-                        Upload Documents
-                      </Button>
-                    </div>
+                        {(!sellerGroup.adminShippingLabelUrl || !sellerGroup.adminInvoiceUrl || !sellerGroup.manifestUrl || !sellerGroup.invoiceUrl) && (
+                          <div className="pt-2 flex justify-end">
+                            <Button size="sm" onClick={() => handleAdminDocsSubmit(sellerId, sellerGroup)} loading={isUploadingDocs} disabled={!filesForSeller.label && !filesForSeller.invoice && !filesForSeller.manifest && !filesForSeller.sellerInvoice}>
+                              Upload Documents
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
                   )}
                 </div>
-              </motion.div>
-            )}
+              );
+            })}
 
             {/* Seller Info */}
             {order.seller && (

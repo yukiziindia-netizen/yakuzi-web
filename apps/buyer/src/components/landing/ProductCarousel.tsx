@@ -222,7 +222,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
         className={`bg-white rounded-[6px] hover:shadow-md transition-shadow duration-200 group flex flex-col relative border ${isYukiziChoice ? 'border-[#7B2FBE]/40 shadow-[0_2px_8px_rgba(123,47,190,0.15)]' : 'border-[#ddd] shadow-[0_2px_8px_rgba(0,0,0,0.06)]'} w-full h-auto overflow-hidden`}
       >
            {/* Top Right Plus / Cart Button / Waitlist Bell */}
-        <div className="absolute top-1 right-1 z-20">
+        <div className="absolute top-1 right-0.5 z-20">
           {showBellIcon ? (
             <button 
               onClick={handleToggleWaitlist}

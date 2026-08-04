@@ -128,7 +128,7 @@ export default function ProductCard({
       >
 
       {/* Top action icons (Cart quantity controls / Waitlist / Plus button) */}
-      <div className="flex justify-end items-center absolute top-1 right-1 z-20">
+      <div className="flex justify-end items-center absolute top-1 right-0.5 z-20">
         {cartQuantity && cartQuantity > 0 ? (
           <div className="flex items-center gap-1" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
              {/* Reset Button */}

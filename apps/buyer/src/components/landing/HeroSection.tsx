@@ -2,6 +2,7 @@
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useCategories, useBrands, useBanners } from '@/hooks/useProducts';
 
 interface HeroSectionProps {
@@ -168,8 +169,9 @@ export default function HeroSection({ title = 'YUKiZi' }: HeroSectionProps) {
             {categories.map((category: any, index: number) => {
               const isHighlighted = index % 4 === 2;
               return (
-                <span
+                <Link
                   key={category.id || index}
+                  href={`/category/${category.slug || category.id}`}
                   className={
                     isHighlighted
                       ? 'cursor-pointer rounded-full bg-[#a379cf] px-2.5 py-0.5 text-white shadow-sm transition-colors hover:bg-[#854cbc]'
@@ -177,7 +179,7 @@ export default function HeroSection({ title = 'YUKiZi' }: HeroSectionProps) {
                   }
                 >
                   {category.name}
-                </span>
+                </Link>
               );
             })}
             {categories.length === 0 && (

@@ -1254,7 +1254,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
           <hr className="border-gray-100" />
 
           {/* Product Title */}
-          <h1 className="text-xl font-bold text-gray-800 leading-tight">
+          <h1 className="text-xl font-medium text-gray-800 leading-tight">
             {product.name}
           </h1>
 
@@ -1448,7 +1448,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
             </div>
 
             {/* Right Header - Breadcrumbs */}
-            <div className="hide-scrollbar flex items-center gap-1 text-[13px] sm:text-[14px] xl:text-[15px] 2xl:text-[16px] font-medium text-gray-600">
+            <div className="hide-scrollbar flex items-center gap-1 text-[13px] sm:text-[14px] xl:text-[15px] 2xl:text-[16px] font-normal text-gray-600">
               <Link href="/" className="transition-colors hover:text-[#854cbc] text-gray-600">
                 Home
               </Link>
@@ -1522,7 +1522,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
             <div className="flex flex-col">
               {/* Title Block */}
               <div className="flex items-start justify-between w-full mb-4">
-                <h1 className="text-[22px] sm:text-[26px] xl:text-[30px] 2xl:text-[34px] font-bold text-gray-500 tracking-tight leading-tight max-w-[95%]">
+                <h1 className="text-[22px] sm:text-[26px] xl:text-[30px] 2xl:text-[34px] font-medium text-gray-500 tracking-tight leading-tight max-w-[95%]">
                   {product.name}
                 </h1>
               </div>

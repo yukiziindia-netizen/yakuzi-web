@@ -507,13 +507,14 @@ export default function Navbar({
               setIsChatOpen(!isChatOpen);
               setIsSearchChatOpen(false);
             }}
-            className="relative -mt-0.5 sm:-mt-1.5 md:-mt-2 z-20 w-12 h-12 xs:w-14 xs:h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gradient-to-b from-[#ffb040] to-[#ff8c00] sm:from-[#ff883c] sm:to-[#ff883c] rounded-xl xs:rounded-[18px] sm:rounded-2xl md:rounded-[1.5rem] flex items-center justify-center shadow-[0_4px_15px_rgba(255,176,64,0.4)] sm:shadow-[0_4px_20px_rgba(255,94,0,0.45)] hover:-translate-y-1 sm:hover:-translate-y-2 transition-transform cursor-pointer shrink-0 mx-1 xs:mx-1.5 sm:mx-2 md:mx-2 border-[2px] border-[#fff5eb] sm:border-[1.5px] sm:border-[#ffa168]"
+            className="relative -mt-0.5 sm:-mt-1.5 md:-mt-2 z-20 w-12 h-12 xs:w-14 xs:h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-[#f76409] rounded-xl xs:rounded-[18px] sm:rounded-2xl md:rounded-[1.5rem] flex items-center justify-center shadow-[0_4px_15px_rgba(247,100,9,0.4)] sm:shadow-[0_4px_20px_rgba(247,100,9,0.45)] hover:-translate-y-1 sm:hover:-translate-y-2 transition-transform cursor-pointer shrink-0 mx-1 xs:mx-1.5 sm:mx-2 md:mx-2 border-[4px] xs:border-[5px] sm:border-[6px] md:border-[7px] border-[#ffa168]"
           >
-            <Image src="/yukizi.jpg" alt="Mascot" width={96} height={96} className="w-full h-full object-cover rounded-[10px] xs:rounded-[16px] sm:rounded-2xl md:rounded-[1.5rem]" />
-            {/* Floating dots (Desktop only) */}
-            <div className="hidden sm:block absolute -top-[8px] left-[32%] w-[6px] h-[6px] bg-[#ff883c] rounded-[1px] shadow-[0_0_4px_rgba(255,136,60,0.6)] animate-pulse" />
-            <div className="hidden sm:block absolute -top-[18px] left-[48%] w-[8px] h-[8px] bg-[#ff883c] rounded-[1.5px] shadow-[0_0_5px_rgba(255,136,60,0.6)] animate-pulse" style={{ animationDelay: '0.2s' }} />
-            <div className="hidden sm:block absolute -top-[28px] left-[40%] w-[4px] h-[4px] bg-[#ff883c] rounded-[0.5px] shadow-[0_0_3px_rgba(255,136,60,0.6)] animate-pulse" style={{ animationDelay: '0.4s' }} />
+            <Image src="/yukizi.jpg" alt="Mascot" width={96} height={96} className="w-full h-full object-cover rounded-[6px] xs:rounded-[10px] sm:rounded-xl md:rounded-[1.1rem]" />
+            
+            {/* Top dots (Desktop only) */}
+            <div className="hidden sm:block absolute -top-[14px] left-[32%] w-[6px] h-[6px] bg-[#ffa168] rounded-[1px] shadow-[0_0_4px_rgba(255,161,104,0.6)]" />
+            <div className="hidden sm:block absolute -top-[26px] left-[48%] w-[8px] h-[8px] bg-[#ffa168] rounded-[1.5px] shadow-[0_0_5px_rgba(255,161,104,0.6)]" />
+            <div className="hidden sm:block absolute -top-[38px] left-[40%] w-[4px] h-[4px] bg-[#ffa168] rounded-[0.5px] shadow-[0_0_3px_rgba(255,161,104,0.6)]" />
           </div>
 
 

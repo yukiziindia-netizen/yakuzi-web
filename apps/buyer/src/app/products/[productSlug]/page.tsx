@@ -88,6 +88,9 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
   const { mutate: addToWishlist } = useAddToWishlist();
   const { mutate: removeFromWishlist } = useRemoveFromWishlist();
   const { data: wishlistData } = useWishlist();
+  const { data: waitlistData } = useWaitlist();
+  const { mutate: addToWaitlist } = useAddToWaitlist();
+  const { mutate: removeFromWaitlist } = useRemoveFromWaitlist();
   const { toast } = useToast();
 
   const currentProductId = prod?.id || `prod-${index}`;
@@ -135,7 +138,25 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
     finalOriginalPrice = Math.round(finalPrice / (1 - discountPercent / 100));
   }
   const rating = prod?.rating || 4.5;
-  const isNotAvailable = (prod?.sellerCount === 0 || prod?.hasSellers === false) && finalPrice <= 0 && mrpVal <= 0;
+  const hasNoSellers = prod?.sellerCount === 0 || prod?.hasSellers === false;
+  const isNotAvailable = hasNoSellers && finalPrice <= 0 && mrpVal <= 0;
+  const showBellIcon = hasNoSellers || (prod?.stock !== undefined && prod.stock <= 0);
+
+  const isWaitlisted = waitlistData?.some((item: any) => item.productId === currentProductId) || false;
+
+  const handleToggleWaitlist = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (isWaitlisted) {
+      removeFromWaitlist(currentProductId, {
+        onSuccess: () => toast('Removed from waitlist', 'info')
+      });
+    } else {
+      addToWaitlist(currentProductId, {
+        onSuccess: () => toast('Added to waitlist', 'success')
+      });
+    }
+  };
 
   const displayPrice = finalPrice > 0 
     ? `₹${Math.round(finalPrice)}` 
@@ -238,43 +259,49 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
       <div
         className={`bg-white rounded-[6px] sm:rounded-[6px] p-2.5 sm:p-3 hover:shadow-[0_8px_30px_rgb(133,76,188,0.15)] hover:ring-1 hover:ring-primary/50 transition-all duration-300 group flex flex-col relative border ${isYukiziChoice ? 'border-[#8b5cf6] shadow-[0_0_15px_rgba(139,92,246,0.4)]' : 'border-gray-300 shadow-sm'} w-full h-full overflow-hidden`}
       >
-        {/* Top action icons */}
+           {/* Top action icons */}
         <div className="flex justify-end items-center w-full absolute top-1 sm:top-1.5 left-0 pl-2.5 sm:pl-3 pr-0.5 sm:pr-1 z-20">
-          {!isNotAvailable && (
-            cartQuantity && cartQuantity > 0 ? (
-              <div className="flex items-center gap-1" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-                 {/* Reset Button */}
-                 <button
-                   onClick={handleResetClick}
-                   title="Reset quantity"
-                   className="text-[#48286b] hover:text-purple-900 transition-all active:scale-90 focus:outline-none p-0.5"
-                   disabled={isLoadingCart}
-                 >
-                   <RotateCw className="w-3.5 h-3.5" strokeWidth={3} />
-                 </button>
+          {showBellIcon ? (
+            <button 
+              onClick={handleToggleWaitlist}
+              className={`transition-colors p-1 rounded-full ${isWaitlisted ? 'text-red-500 bg-red-50' : 'text-gray-400 hover:text-red-500 hover:bg-red-50'}`}
+              title={isWaitlisted ? "Remove from waitlist" : "Notify me when available"}
+            >
+              <Bell className="w-5 h-5" fill={isWaitlisted ? "currentColor" : "none"} strokeWidth={2.5} />
+            </button>
+          ) : cartQuantity && cartQuantity > 0 ? (
+            <div className="flex items-center gap-1" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+               {/* Reset Button */}
+               <button
+                 onClick={handleResetClick}
+                 title="Reset quantity"
+                 className="text-[#48286b] hover:text-purple-900 transition-all active:scale-90 focus:outline-none p-0.5"
+                 disabled={isLoadingCart}
+               >
+                 <RotateCw className="w-3.5 h-3.5" strokeWidth={3} />
+               </button>
 
-                 {/* Quantity Control Pill */}
-                 <div className="flex items-center bg-[#48286b] rounded-[6px] overflow-hidden h-6 text-white shadow-sm select-none justify-between px-1 gap-1">
-                    <button onClick={handleMinusClick} className="text-white hover:bg-white/10 w-4.5 h-4.5 flex items-center justify-center rounded transition-colors disabled:opacity-50" disabled={isLoadingCart}>
-                      <Minus className="w-2.5 h-2.5" strokeWidth={3} />
-                    </button>
-                    <span className="text-[10px] font-black tracking-wide min-w-[12px] text-center">
-                      {isLoadingCart ? <Loader2 className="w-2.5 h-2.5 animate-spin mx-auto" /> : String(cartQuantity).padStart(2, '0')}
-                    </span>
-                    <button onClick={handlePlusClick} className="text-white hover:bg-white/10 w-4.5 h-4.5 flex items-center justify-center rounded transition-colors disabled:opacity-50" disabled={isLoadingCart || cartQuantity >= (prod.stock || 999)}>
-                      <Plus className="w-2.5 h-2.5" strokeWidth={3} />
-                    </button>
-                 </div>
-              </div>
-            ) : (
-              <button
-                className="text-black hover:text-black/80 transition-colors z-10 p-1 flex items-center justify-center"
-                disabled={isLoadingCart}
-                onClick={handlePlusClick}
-              >
-                {isLoadingCart ? <Loader2 className="w-5 h-5 animate-spin" strokeWidth={2} /> : <Plus className="w-5 h-5 sm:w-5 sm:h-5" strokeWidth={2.5} />}
-              </button>
-            )
+               {/* Quantity Control Pill */}
+               <div className="flex items-center bg-[#48286b] rounded-[6px] overflow-hidden h-6 text-white shadow-sm select-none justify-between px-1 gap-1">
+                  <button onClick={handleMinusClick} className="text-white hover:bg-white/10 w-4.5 h-4.5 flex items-center justify-center rounded transition-colors disabled:opacity-50" disabled={isLoadingCart}>
+                    <Minus className="w-2.5 h-2.5" strokeWidth={3} />
+                  </button>
+                  <span className="text-[10px] font-black tracking-wide min-w-[12px] text-center">
+                    {isLoadingCart ? <Loader2 className="w-2.5 h-2.5 animate-spin mx-auto" /> : String(cartQuantity).padStart(2, '0')}
+                  </span>
+                  <button onClick={handlePlusClick} className="text-white hover:bg-white/10 w-4.5 h-4.5 flex items-center justify-center rounded transition-colors disabled:opacity-50" disabled={isLoadingCart || cartQuantity >= (prod.stock || 999)}>
+                    <Plus className="w-2.5 h-2.5" strokeWidth={3} />
+                  </button>
+               </div>
+            </div>
+          ) : (
+            <button
+              className="text-black hover:text-black/80 transition-colors z-10 p-1 flex items-center justify-center"
+              disabled={isLoadingCart}
+              onClick={handlePlusClick}
+            >
+              {isLoadingCart ? <Loader2 className="w-5 h-5 animate-spin" strokeWidth={2} /> : <Plus className="w-5 h-5 sm:w-5 sm:h-5" strokeWidth={2.5} />}
+            </button>
           )}
         </div>
 

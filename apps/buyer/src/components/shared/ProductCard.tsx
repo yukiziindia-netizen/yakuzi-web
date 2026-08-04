@@ -30,6 +30,7 @@ interface ProductCardProps {
   isYukiziChoice?: boolean;
   isBestSeller?: boolean;
   isAd?: boolean;
+  hasSellers?: boolean;
 }
 
 export default function ProductCard({
@@ -52,9 +53,10 @@ export default function ProductCard({
   onToggleWaitlist,
   isYukiziChoice = true,
   isBestSeller = false,
-  isAd = true
+  isAd = true,
+  hasSellers = true
 }: ProductCardProps) {
-  const isOutOfStock = stock <= 0;
+  const isOutOfStock = stock <= 0 || hasSellers === false;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   
   const numPrice = Number(price);

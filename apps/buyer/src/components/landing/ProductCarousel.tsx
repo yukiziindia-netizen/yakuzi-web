@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Loader2, Share2, Plus, Minus, RotateCw, Eye, Star, Truck, Bookmark } from 'lucide-react';
+import { Loader2, Share2, Plus, Minus, RotateCw, Eye, Star, Truck, Bookmark, Bell } from 'lucide-react';
 import Link from 'next/link';
 import { getProducts } from '@yukizi/api-client';
 import { generateProductSlug, calculatePricing } from '@yukizi/utils';
 import QuickReviewModal from './QuickReviewModal';
 import { useAddToCart, useCart, useUpdateCartItem, useRemoveCartItem } from '@/hooks/useCart';
 import { useAddToWishlist, useWishlist, useRemoveFromWishlist } from '@/hooks/useWishlist';
+import { useWaitlist, useAddToWaitlist, useRemoveFromWaitlist } from '@/hooks/useProducts';
 import { useToast } from '@/components/shared/Toast';
 import WishlistIcon from '@/components/shared/WishlistIcon';
 import { DeliveryTruckBadge } from '@/components/shared/DeliveryTruckBadge';
@@ -56,6 +57,9 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
   const { mutate: addToWishlist } = useAddToWishlist();
   const { mutate: removeFromWishlist } = useRemoveFromWishlist();
   const { data: wishlistData } = useWishlist();
+  const { data: waitlistData } = useWaitlist();
+  const { mutate: addToWaitlist } = useAddToWaitlist();
+  const { mutate: removeFromWaitlist } = useRemoveFromWaitlist();
   const { toast } = useToast();
 
   const currentProductId = product?.id || `prod-${index}`;
@@ -151,7 +155,25 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
     finalOriginalPrice = Math.round(finalPrice / (1 - discountPercent / 100));
   }
   const rating = product?.rating || 4.5;
-  const isNotAvailable = (product?.sellerCount === 0 || product?.hasSellers === false) && finalPrice <= 0 && mrpVal <= 0;
+  const hasNoSellers = product?.sellerCount === 0 || product?.hasSellers === false;
+  const isNotAvailable = hasNoSellers && finalPrice <= 0 && mrpVal <= 0;
+  const showBellIcon = hasNoSellers || (product?.stock !== undefined && product.stock <= 0);
+
+  const isWaitlisted = waitlistData?.some((item: any) => item.productId === currentProductId) || false;
+
+  const handleToggleWaitlist = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (isWaitlisted) {
+      removeFromWaitlist(currentProductId, {
+        onSuccess: () => toast('Removed from waitlist', 'info')
+      });
+    } else {
+      addToWaitlist(currentProductId, {
+        onSuccess: () => toast('Added to waitlist', 'success')
+      });
+    }
+  };
 
   const displayPrice = finalPrice > 0 
     ? `₹${Math.round(finalPrice)}` 
@@ -196,54 +218,58 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
         </div>
       )}
 
-      {/* Container - Samplr.in exact 6px border radius, #ddd border, 0 2px 8px shadow */}
       <div 
         className={`bg-white rounded-[6px] hover:shadow-md transition-shadow duration-200 group flex flex-col relative border ${isYukiziChoice ? 'border-[#7B2FBE]/40 shadow-[0_2px_8px_rgba(123,47,190,0.15)]' : 'border-[#ddd] shadow-[0_2px_8px_rgba(0,0,0,0.06)]'} w-full h-auto overflow-hidden`}
       >
+           {/* Top Right Plus / Cart Button / Waitlist Bell */}
+        <div className="absolute top-1 right-1 z-20">
+          {showBellIcon ? (
+            <button 
+              onClick={handleToggleWaitlist}
+              className={`transition-colors p-1 rounded-full ${isWaitlisted ? 'text-red-500 bg-red-50' : 'text-gray-400 hover:text-red-500 hover:bg-red-50'}`}
+              title={isWaitlisted ? "Remove from waitlist" : "Notify me when available"}
+            >
+              <Bell className="w-5 h-5" fill={isWaitlisted ? "currentColor" : "none"} strokeWidth={2.5} />
+            </button>
+          ) : cartQuantity > 0 ? (
+            <div className="flex items-center gap-1" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+               {/* Reset Button */}
+               <button
+                 onClick={handleResetClick}
+                 title="Reset quantity"
+                 className="text-[#48286b] hover:text-purple-900 transition-all active:scale-90 focus:outline-none p-0.5"
+               >
+                 <RotateCw className="w-3.5 h-3.5" strokeWidth={3} />
+               </button>
 
-        {/* Top Right Plus / Cart Button */}
-        {!isNotAvailable && (
-          <div className="absolute top-1 right-1 z-20">
-            {cartQuantity > 0 ? (
-              <div className="flex items-center gap-1" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-                 {/* Reset Button */}
-                 <button
-                   onClick={handleResetClick}
-                   title="Reset quantity"
-                   className="text-[#48286b] hover:text-purple-900 transition-all active:scale-90 focus:outline-none p-0.5"
-                 >
-                   <RotateCw className="w-3.5 h-3.5" strokeWidth={3} />
-                 </button>
-
-                 {/* Quantity Control Pill */}
-                 <div className="flex items-center bg-[#48286b] rounded-[6px] overflow-hidden h-6 text-white shadow-sm select-none justify-between px-1 gap-1">
-                    <button 
-                      onClick={handleMinusClick} 
-                      className="text-white hover:bg-white/10 w-4.5 h-4.5 flex items-center justify-center rounded transition-colors"
-                    >
-                      <Minus className="w-2.5 h-2.5" strokeWidth={3} />
-                    </button>
-                    <span className="text-[10px] font-black tracking-wide min-w-[12px] text-center">
-                      {String(cartQuantity).padStart(2, '0')}
-                    </span>
-                    <button 
-                      onClick={handlePlusClick} 
-                      className="text-white hover:bg-white/10 w-4.5 h-4.5 flex items-center justify-center rounded transition-colors"
-                    >
-                      <Plus className="w-2.5 h-2.5" strokeWidth={3} />
-                    </button>
-                 </div>
-              </div>
-            ) : (
-              <button 
-                className="text-black hover:text-black/80 transition-all focus:outline-none p-1" 
-                onClick={handlePlusClick}
-              >
-                <Plus className="w-5 h-5" strokeWidth={3} />
-              </button>
-            )}
-          </div>
-        )}
+               {/* Quantity Control Pill */}
+               <div className="flex items-center bg-[#48286b] rounded-[6px] overflow-hidden h-6 text-white shadow-sm select-none justify-between px-1 gap-1">
+                  <button 
+                    onClick={handleMinusClick} 
+                    className="text-white hover:bg-white/10 w-4.5 h-4.5 flex items-center justify-center rounded transition-colors"
+                  >
+                    <Minus className="w-2.5 h-2.5" strokeWidth={3} />
+                  </button>
+                  <span className="text-[10px] font-black tracking-wide min-w-[12px] text-center">
+                    {String(cartQuantity).padStart(2, '0')}
+                  </span>
+                  <button 
+                    onClick={handlePlusClick} 
+                    className="text-white hover:bg-white/10 w-4.5 h-4.5 flex items-center justify-center rounded transition-colors"
+                  >
+                    <Plus className="w-2.5 h-2.5" strokeWidth={3} />
+                  </button>
+               </div>
+            </div>
+          ) : (
+            <button 
+              className="text-black hover:text-black/80 transition-all focus:outline-none p-1" 
+              onClick={handlePlusClick}
+            >
+              <Plus className="w-5 h-5" strokeWidth={3} />
+            </button>
+          )}
+        </div>
 
         {/* Right Edge Wishlist Ribbon */}
         <div

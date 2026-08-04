@@ -264,7 +264,7 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
           {showBellIcon ? (
             <button 
               onClick={handleToggleWaitlist}
-              className={`transition-colors p-1 rounded-full ${isWaitlisted ? 'text-red-500 bg-red-50' : 'text-gray-400 hover:text-red-500 hover:bg-red-50'}`}
+              className={`transition-colors p-1 rounded-full ${isWaitlisted ? 'text-red-500 bg-red-50' : 'text-black hover:text-black/80 hover:bg-black/5'}`}
               title={isWaitlisted ? "Remove from waitlist" : "Notify me when available"}
             >
               <Bell className="w-5 h-5" fill={isWaitlisted ? "currentColor" : "none"} strokeWidth={2.5} />

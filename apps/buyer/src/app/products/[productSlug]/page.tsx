@@ -11,6 +11,7 @@ import {
   ChevronUp,
   Bell,
   RotateCcw,
+  RotateCw,
   Minus,
   Search,
   User,
@@ -156,6 +157,60 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
   const fallbackImage = `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent(getInitials(productName))}`;
   const imageUrl = prod.images?.[0]?.url || prod.images?.[0] || prod.image || fallbackImage;
 
+  const { data: cartData, isLoading: isLoadingCart } = useCart();
+  const { mutate: updateCartItem } = useUpdateCartItem();
+  const { mutate: removeCartItem } = useRemoveCartItem();
+
+  const targetProductId = prod.bestListingId || currentProductId;
+  const cartItem = cartData?.items?.find(
+    (item: any) => item.productId === targetProductId || item.product?.id === targetProductId || item.id === targetProductId
+  );
+  const cartQuantity = cartItem?.quantity || 0;
+
+  const handlePlusClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (isLoadingCart) return;
+    if (cartItem) {
+      updateCartItem({
+        itemId: cartItem.id,
+        quantity: cartQuantity + 1,
+      });
+    } else {
+      addToCart(
+        { productId: targetProductId, quantity: 1, price: finalPrice, originalPrice: finalOriginalPrice || mrpVal, ...prod },
+        { onSuccess: () => toast('Added to cart', 'success') }
+      );
+    }
+  };
+
+  const handleMinusClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (isLoadingCart) return;
+    if (cartItem) {
+      if (cartQuantity > 1) {
+        updateCartItem({
+          itemId: cartItem.id,
+          quantity: cartQuantity - 1,
+        });
+      } else if (cartQuantity === 1) {
+        removeCartItem(cartItem.id);
+      }
+    }
+  };
+
+  const handleResetClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (isLoadingCart) return;
+    if (cartItem) {
+      removeCartItem(cartItem.id, {
+        onSuccess: () => toast('Removed from cart', 'info')
+      });
+    }
+  };
+
   return (
     <div className={`relative mt-3 sm:mt-4 group flex flex-col h-full ${isMenuOpen ? 'z-50' : 'z-auto'}`}>
       {/* Yukizi Choice & Best Seller Tags */}
@@ -186,19 +241,40 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
         {/* Top action icons */}
         <div className="flex justify-end items-center w-full absolute top-1 sm:top-1.5 left-0 pl-2.5 sm:pl-3 pr-0.5 sm:pr-1 z-20">
           {!isNotAvailable && (
-            <button
-              className="text-[#ff8952] hover:text-[#ff7536] transition-colors z-10 p-1 flex items-center justify-center"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                addToCart(
-                  { productId: currentProductId, quantity: 1, price: finalPrice, originalPrice: finalOriginalPrice || mrpVal, ...prod },
-                  { onSuccess: () => toast('Added to cart', 'success') }
-                );
-              }}
-            >
-              <Plus className="w-5 h-5 sm:w-5 sm:h-5" strokeWidth={2.5} />
-            </button>
+            cartQuantity && cartQuantity > 0 ? (
+              <div className="flex items-center gap-1" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                 {/* Reset Button */}
+                 <button
+                   onClick={handleResetClick}
+                   title="Reset quantity"
+                   className="text-[#48286b] hover:text-purple-900 transition-all active:scale-90 focus:outline-none p-0.5"
+                   disabled={isLoadingCart}
+                 >
+                   <RotateCw className="w-3.5 h-3.5" strokeWidth={3} />
+                 </button>
+
+                 {/* Quantity Control Pill */}
+                 <div className="flex items-center bg-[#48286b] rounded-[6px] overflow-hidden h-6 text-white shadow-sm select-none justify-between px-1 gap-1">
+                    <button onClick={handleMinusClick} className="text-white hover:bg-white/10 w-4.5 h-4.5 flex items-center justify-center rounded transition-colors disabled:opacity-50" disabled={isLoadingCart}>
+                      <Minus className="w-2.5 h-2.5" strokeWidth={3} />
+                    </button>
+                    <span className="text-[10px] font-black tracking-wide min-w-[12px] text-center">
+                      {isLoadingCart ? <Loader2 className="w-2.5 h-2.5 animate-spin mx-auto" /> : String(cartQuantity).padStart(2, '0')}
+                    </span>
+                    <button onClick={handlePlusClick} className="text-white hover:bg-white/10 w-4.5 h-4.5 flex items-center justify-center rounded transition-colors disabled:opacity-50" disabled={isLoadingCart || cartQuantity >= (prod.stock || 999)}>
+                      <Plus className="w-2.5 h-2.5" strokeWidth={3} />
+                    </button>
+                 </div>
+              </div>
+            ) : (
+              <button
+                className="text-black hover:text-black/80 transition-colors z-10 p-1 flex items-center justify-center"
+                disabled={isLoadingCart}
+                onClick={handlePlusClick}
+              >
+                {isLoadingCart ? <Loader2 className="w-5 h-5 animate-spin" strokeWidth={2} /> : <Plus className="w-5 h-5 sm:w-5 sm:h-5" strokeWidth={2.5} />}
+              </button>
+            )
           )}
         </div>
 
@@ -579,7 +655,7 @@ function ComparisonOffersList({
                 itemQty === 0 ? (
                   <button
                     onClick={() => handleQtyChange(minQty)}
-                    className="text-orange-500 hover:text-orange-600 focus:outline-none transition-transform active:scale-90 p-0.5"
+                    className="text-black hover:text-black/80 focus:outline-none transition-transform active:scale-90 p-0.5"
                   >
                     <Plus className="w-4.5 h-4.5 sm:w-5.5 sm:h-5.5 md:w-6 md:h-6 xl:w-6.5 xl:h-6.5 2xl:w-7 2xl:h-7" strokeWidth={3} />
                   </button>

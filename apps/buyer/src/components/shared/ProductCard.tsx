@@ -169,7 +169,7 @@ export default function ProductCard({
         ) : (
           <button 
             onClick={handlePlusClick} 
-            className="text-orange-500 hover:text-orange-600 transition-all focus:outline-none p-1"
+            className="text-black hover:text-black/80 transition-all focus:outline-none p-1"
             disabled={isLoadingCart}
           >
             {isLoadingCart ? <Loader2 className="w-5 h-5 animate-spin" strokeWidth={2} /> : <Plus className="w-5 h-5" strokeWidth={3} />}
@@ -187,7 +187,7 @@ export default function ProductCard({
       </div>
 
       {/* Product Image - Fixed 190px/200px height matching Samplr */}
-      <div className="relative w-full h-[190px] sm:h-[200px] bg-[#f8f8f8] overflow-hidden flex justify-center items-center shrink-0 border-b border-gray-100">
+      <div className="relative w-full h-[190px] sm:h-[200px] bg-[#f8f8f8] overflow-hidden flex justify-center items-center shrink-0">
         <Image
           src={image}
           alt={name}

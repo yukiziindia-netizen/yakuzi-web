@@ -236,7 +236,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
               </div>
             ) : (
               <button 
-                className="text-orange-500 hover:text-orange-600 transition-all focus:outline-none p-1" 
+                className="text-black hover:text-black/80 transition-all focus:outline-none p-1" 
                 onClick={handlePlusClick}
               >
                 <Plus className="w-5 h-5" strokeWidth={3} />
@@ -271,7 +271,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
         </div>
 
         {/* Image Container - Fixed 190px/200px height matching Samplr */}
-        <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`} className="relative w-full h-[190px] sm:h-[200px] bg-white overflow-hidden flex justify-center items-center shrink-0 border-b border-gray-100">
+        <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`} className="relative w-full h-[190px] sm:h-[200px] bg-white overflow-hidden flex justify-center items-center shrink-0">
            <img src={imageUrl} alt={productName} className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300 ease-out" />
         </Link>
 

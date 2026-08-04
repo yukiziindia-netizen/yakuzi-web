@@ -229,7 +229,7 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                               {cartQty === 0 ? (
                                 <button
                                   onClick={handleIncrement}
-                                  className="text-[#f7941d] hover:text-orange-600 focus:outline-none transition-transform active:scale-90 p-1"
+                                  className="text-black hover:text-black/80 focus:outline-none transition-transform active:scale-90 p-1"
                                 >
                                   <Plus className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={3} />
                                 </button>

@@ -417,7 +417,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                             ) : (
                               <button
                                 onClick={() => handleQtyChange(minQty)}
-                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-500 text-white shadow-md transition-all hover:bg-orange-600 focus:outline-none active:scale-95 sm:h-8 sm:w-8"
+                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-black text-white shadow-md transition-all hover:bg-black/80 focus:outline-none active:scale-95 sm:h-8 sm:w-8"
                               >
                                 <Plus className="h-4 w-4 sm:h-4.5 sm:w-4.5 stroke-[3]" />
                               </button>

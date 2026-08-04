@@ -249,7 +249,7 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
                               </div>
                            </div>
                          ) : (
-                           <Plus className="w-6 h-6 text-[#f9884e]" strokeWidth={3} />
+                           <Plus className="w-6 h-6 text-black" strokeWidth={3} />
                          )}
                          <ArrowUpRight className="w-5 h-5 text-gray-400 mt-0.5" strokeWidth={3} />
                        </div>

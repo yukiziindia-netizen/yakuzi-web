@@ -37,9 +37,9 @@ export function StockBasedButton({
 
   // Icon color mapping (no fill, just icon color)
   const iconColorMap = {
-    'good': 'text-orange-500 hover:text-orange-600',
-    'selling-fast': 'text-orange-500 hover:text-orange-600',
-    'low': 'text-orange-500 hover:text-orange-600',
+    'good': 'text-black hover:text-black/80',
+    'selling-fast': 'text-black hover:text-black/80',
+    'low': 'text-black hover:text-black/80',
     'out-of-stock': 'text-red-500 cursor-not-allowed',
   };
 

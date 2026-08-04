@@ -207,7 +207,7 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
                   return (
                     <div key={item.id || index} onClick={() => setIsOrderedProductsOpen(true)} className="min-w-[150px] border border-gray-100 rounded-xl p-3 relative shadow-sm hover:shadow-md transition-shadow bg-white snap-center cursor-pointer">
                       <div className="flex justify-end items-start mb-2">
-                        <button className="text-orange-400 hover:text-orange-500" onClick={(e) => e.stopPropagation()}>
+                        <button className="text-black hover:text-black/80" onClick={(e) => e.stopPropagation()}>
                           <Plus className="w-4 h-4" />
                         </button>
                       </div>

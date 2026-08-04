@@ -278,7 +278,7 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                             className="flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform"
                             title="Quick view"
                           >
-                            <Eye className="w-5 h-5 text-gray-400 hover:text-gray-600" />
+                            <Eye className="w-4 h-4 text-gray-400 hover:text-gray-600" />
                           </button>
                         </div>
                         {/* Price & Rating */}

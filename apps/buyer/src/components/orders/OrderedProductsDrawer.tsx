@@ -251,7 +251,7 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
                          ) : (
                            <Plus className="w-6 h-6 text-black" strokeWidth={3} />
                          )}
-                          <Eye className="w-5 h-5 text-gray-400 mt-0.5" />
+                          <Eye className="w-4 h-4 text-gray-400 mt-0.5" />
                        </div>
                      </div>
  

@@ -185,7 +185,7 @@ export default function ProductCard({
         onClick={handleBookmarkClick}
         className="absolute right-0 top-[40%] -translate-y-1/2 z-20 cursor-pointer hover:scale-105 transition-transform"
       >
-        <WishlistIcon isFilled={isBookmarked} preserveAspectRatio="none" className="w-[32px] h-[32px]" />
+        <WishlistIcon isFilled={isBookmarked} preserveAspectRatio="none" className="w-[24px] h-[24px]" />
       </div>
 
       {/* Product Image - Fixed 190px/200px height matching Samplr */}
@@ -230,7 +230,7 @@ export default function ProductCard({
               {displayDiscount}
             </span>
           ) : <div></div>}
-          <div>
+          <div className="-mr-[6px] sm:-mr-[8px]">
             <DeliveryTruckBadge text={deliveryTime} className="w-[75px] h-auto text-[#8c8c8c]" />
           </div>
         </div>

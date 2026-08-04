@@ -323,7 +323,7 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
           }}
           className="absolute right-0 top-[40%] -translate-y-1/2 z-20 cursor-pointer hover:scale-105 transition-transform"
         >
-          <WishlistIcon isFilled={isSaved} preserveAspectRatio="none" className="w-[32px] h-[32px]" />
+          <WishlistIcon isFilled={isSaved} preserveAspectRatio="none" className="w-[24px] h-[24px]" />
         </div>
 
         {/* Image Container */}
@@ -343,7 +343,7 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
               className="flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform z-20 -mr-2 sm:-mr-2.5 md:-mr-2.5 lg:-mr-3 xl:-mr-2.5"
               title="Quick view"
             >
-              <Eye className="w-5 h-5 text-gray-400 hover:text-gray-600" />
+              <Eye className="w-4 h-4 text-gray-400 hover:text-gray-600" />
             </Link>
           </div>
 
@@ -366,7 +366,7 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
             <div className="flex items-center gap-1">
               {renderBuyerOfferBadge(prod)}
             </div>
-            <div className="-mr-1 sm:-mr-1.5 md:-mr-1.5 lg:-mr-2 xl:-mr-1.5">
+            <div className="-mr-[6px] sm:-mr-[8px]">
               <DeliveryTruckBadge text={displayDelivery} className="w-[55px] sm:w-[60px] md:w-[65px] lg:w-[70px] xl:w-[58px] h-auto text-[#8c8c8c]" />
             </div>
           </div>

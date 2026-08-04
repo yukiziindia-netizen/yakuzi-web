@@ -244,7 +244,7 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
                       <div className="flex justify-between items-center mt-2 border-t border-gray-50 pt-2">
                          <span className="text-xs text-gray-500 font-medium truncate w-20">{name}</span>
                           <button className="flex items-center justify-center hover:scale-110 transition-transform" title="Quick view">
-                            <Eye className="w-4 h-4 text-gray-400 hover:text-gray-600" />
+                            <Eye className="w-3.5 h-3.5 text-gray-400 hover:text-gray-600" />
                           </button>
                       </div>
                     </div>

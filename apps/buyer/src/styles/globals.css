@@ -217,3 +217,19 @@
   scrollbar-width: thin;
   scrollbar-color: #854cbc #f3f4f6;
 }
+
+/* Save Icon Masks for Navbar */
+.save-icon-mask {
+  display: inline-block;
+  vertical-align: middle;
+  background-color: currentColor;
+  mask: url('/icons/navbar/save_trimmed.png') no-repeat center / contain;
+  -webkit-mask: url('/icons/navbar/save_trimmed.png') no-repeat center / contain;
+}
+.save-icon-active-mask {
+  display: inline-block;
+  vertical-align: middle;
+  background-color: currentColor;
+  mask: url('/icons/navbar/activesave_trimmed.png') no-repeat center / contain;
+  -webkit-mask: url('/icons/navbar/activesave_trimmed.png') no-repeat center / contain;
+}

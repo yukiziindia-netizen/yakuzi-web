@@ -524,7 +524,7 @@ export default function Navbar({
 
             <button 
               onClick={() => setIsWishlistOpen(true)} 
-              className={`relative transition-all duration-200 hover:scale-110 ${
+              className={`relative transition-all duration-200 hover:scale-110 flex items-center justify-center ${
                 isWishlistOpen
                   ? "text-[#562996] sm:text-white scale-110 opacity-100"
                   : isAnyDrawerOpen
@@ -532,10 +532,10 @@ export default function Navbar({
                   : "text-[#562996] sm:text-white sm:hover:text-purple-300"
               }`}
             >
-              <img 
-                src={isWishlistOpen || wishlistCount > 0 ? "/icons/navbar/activesave_trimmed.png" : "/icons/navbar/save_trimmed.png"} 
-                alt="wishlist"
-                className="w-[18px] h-[18px] xs:w-[24px] xs:h-[24px] sm:w-[26px] sm:h-[26px] md:w-[28px] md:h-[28px] object-contain" 
+              <span 
+                className={`w-[18px] h-[18px] xs:w-[24px] xs:h-[24px] sm:w-[26px] sm:h-[26px] md:w-[28px] md:h-[28px] shrink-0 ${
+                  isWishlistOpen || wishlistCount > 0 ? "save-icon-active-mask" : "save-icon-mask"
+                }`}
               />
               {wishlistCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 sm:text-[9px] bg-[#f7941d] text-white text-[8px] xs:text-[9px] font-bold rounded-full flex items-center justify-center border border-white sm:border-[#562996]">

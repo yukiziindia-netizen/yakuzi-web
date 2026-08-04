@@ -291,7 +291,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
           <WishlistIcon 
             isFilled={isSaved} 
             preserveAspectRatio="none" 
-            className="w-[32px] h-[32px]" 
+            className="w-[24px] h-[24px]" 
           />
         </div>
 
@@ -314,7 +314,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
                      className="flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform shrink-0"
                      title="Quick view"
                   >
-                     <Eye className="w-5 h-5 text-gray-400 hover:text-gray-600" />
+                     <Eye className="w-4 h-4 text-gray-400 hover:text-gray-600" />
                   </button>
               </div>
            </div>
@@ -340,7 +340,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
               <div className="flex items-center gap-1">
                  {renderBuyerOfferBadge(product)}
               </div>
-              <div>
+              <div className="-mr-[6px] sm:-mr-[8px]">
                  <DeliveryTruckBadge text={displayDelivery} className="w-[75px] h-auto text-[#8c8c8c]" />
               </div>
            </div>

@@ -186,7 +186,7 @@ export default function NotificationDrawer({ isOpen, onClose }: { isOpen: boolea
                         <div className="absolute top-2 right-2 flex flex-col items-center gap-1">
                           <Link href={`/products/${generateProductSlug(product.name, product.id)}`}>
                              <button className="text-gray-400 hover:text-gray-600" title="Quick view">
-                               <Eye className="w-5 h-5" />
+                               <Eye className="w-4 h-4" />
                              </button>
                           </Link>
                         </div>
@@ -272,7 +272,7 @@ export default function NotificationDrawer({ isOpen, onClose }: { isOpen: boolea
                       {/* Grey circular navigate button */}
                       <Link href={`/products/${generateProductSlug(product.name, product.id)}`}>
                         <button className="flex items-center justify-center hover:scale-110 transition-transform text-gray-400 hover:text-gray-600" title="Quick view">
-                          <Eye className="w-5 h-5" />
+                          <Eye className="w-4 h-4" />
                         </button>
                       </Link>
 

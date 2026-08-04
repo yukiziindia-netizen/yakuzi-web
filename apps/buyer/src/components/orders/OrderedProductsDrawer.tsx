@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Share2, Plus, ArrowUpRight, ChevronRight, ChevronLeft, Trash2, Star, RefreshCw, Bookmark, Check, Truck, MapPin, Package, Bike, X, CreditCard, XCircle, FileText } from 'lucide-react';
+import { Share2, Plus, Eye, ChevronRight, ChevronLeft, Trash2, Star, RefreshCw, Bookmark, Check, Truck, MapPin, Package, Bike, X, CreditCard, XCircle, FileText } from 'lucide-react';
 import { DeliveryTruckBadge } from '../shared/DeliveryTruckBadge';
 import Image from 'next/image';
 import { useOrders, useOrderTracking } from '@/hooks/useOrders';
@@ -251,7 +251,7 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
                          ) : (
                            <Plus className="w-6 h-6 text-black" strokeWidth={3} />
                          )}
-                         <ArrowUpRight className="w-5 h-5 text-gray-400 mt-0.5" strokeWidth={3} />
+                          <Eye className="w-5 h-5 text-gray-400 mt-0.5" />
                        </div>
                      </div>
  

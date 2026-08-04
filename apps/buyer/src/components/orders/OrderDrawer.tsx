@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Share2, Plus, ArrowUpRight, ChevronRight, ChevronLeft, Filter, X, User, Package, Loader2 } from 'lucide-react';
+import { Share2, Plus, Eye, ChevronRight, ChevronLeft, Filter, X, User, Package, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { OrderFilterDrawer } from './OrderFilterDrawer';
 import { OrderedProductsDrawer } from './OrderedProductsDrawer';
@@ -243,9 +243,9 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
                       </div>
                       <div className="flex justify-between items-center mt-2 border-t border-gray-50 pt-2">
                          <span className="text-xs text-gray-500 font-medium truncate w-20">{name}</span>
-                         <button className="w-5 h-5 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
-                           <ArrowUpRight className="w-3 h-3 text-gray-500" />
-                         </button>
+                          <button className="flex items-center justify-center hover:scale-110 transition-transform" title="Quick view">
+                            <Eye className="w-4 h-4 text-gray-400 hover:text-gray-600" />
+                          </button>
                       </div>
                     </div>
                   );

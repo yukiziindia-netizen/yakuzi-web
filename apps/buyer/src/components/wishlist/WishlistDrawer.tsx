@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Trash2, Loader2, Star, ArrowUpRight, Plus, RefreshCw } from 'lucide-react';
+import { X, Trash2, Loader2, Star, Eye, Plus, RefreshCw } from 'lucide-react';
 import WishlistIcon from '@/components/shared/WishlistIcon';
 import { useWishlist, useRemoveFromWishlist } from '@/hooks/useWishlist';
 import { DeliveryTruckBadge } from '@/components/shared/DeliveryTruckBadge';
@@ -297,10 +297,10 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                                   image: itemImage,
                                 });
                               }}
-                              className="w-5 h-5 sm:w-6 sm:h-6 bg-[#8c8c8c] rounded-full flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform shadow-sm"
+                              className="flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform"
                               title="Quick view"
                             >
-                              <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" strokeWidth={2.5} />
+                              <Eye className="w-5 h-5 text-gray-400 hover:text-gray-600" />
                             </button>
                           </div>
 

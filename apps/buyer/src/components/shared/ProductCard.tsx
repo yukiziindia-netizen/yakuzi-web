@@ -183,7 +183,7 @@ export default function ProductCard({
         onClick={handleBookmarkClick}
         className="absolute right-0 top-[40%] -translate-y-1/2 z-20 cursor-pointer hover:scale-105 transition-transform"
       >
-        <WishlistIcon isFilled={isBookmarked} preserveAspectRatio="none" className="w-[28px] h-[24px] text-[#7B2FBE]" />
+        <WishlistIcon isFilled={isBookmarked} preserveAspectRatio="none" className="w-[32px] h-[32px]" />
       </div>
 
       {/* Product Image - Fixed 190px/200px height matching Samplr */}

@@ -532,9 +532,10 @@ export default function Navbar({
                   : "text-[#562996] sm:text-white sm:hover:text-purple-300"
               }`}
             >
-              <Bookmark 
-                className="w-[18px] h-[18px] xs:w-[24px] xs:h-[24px] sm:w-[26px] sm:h-[26px] md:w-[28px] md:h-[28px] stroke-[2] rotate-90" 
-                fill={isWishlistOpen || wishlistCount > 0 ? "currentColor" : "none"} 
+              <img 
+                src={isWishlistOpen || wishlistCount > 0 ? "/icons/navbar/activesave_trimmed.png" : "/icons/navbar/save_trimmed.png"} 
+                alt="wishlist"
+                className="w-[18px] h-[18px] xs:w-[24px] xs:h-[24px] sm:w-[26px] sm:h-[26px] md:w-[28px] md:h-[28px] object-contain" 
               />
               {wishlistCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 sm:text-[9px] bg-[#f7941d] text-white text-[8px] xs:text-[9px] font-bold rounded-full flex items-center justify-center border border-white sm:border-[#562996]">

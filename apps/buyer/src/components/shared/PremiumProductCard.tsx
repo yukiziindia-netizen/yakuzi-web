@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Minus, ArrowUpRight, Trash2, Share2, RotateCw } from 'lucide-react';
+import { Plus, Minus, Eye, Trash2, Share2, RotateCw } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { ShareButton } from './ShareButton';
 import { StockBasedButton } from './StockBasedButton';
@@ -330,7 +330,7 @@ export default function PremiumProductCard({
         onClick={toggleBookmark}
         className="absolute right-3 top-4 z-20 outline-none w-[32px] h-[32px] bg-white shadow-sm border border-gray-100 rounded-full flex items-center justify-center hover:scale-105 transition-transform"
       >
-        <WishlistIcon isFilled={bookmarked} className="w-[18px] h-[18px] text-[#889096]" />
+        <WishlistIcon isFilled={bookmarked} className="w-[22px] h-[22px]" />
       </button>
 
       {/* Info Section */}
@@ -342,7 +342,8 @@ export default function PremiumProductCard({
           </h3>
           <button
             type="button"
-            className="w-[22px] h-[22px] bg-[#999999] rounded-full flex items-center justify-center ml-2 mr-[-8px] flex-shrink-0 hover:scale-110 transition-transform shadow-sm"
+            className="flex items-center justify-center ml-2 mr-[-8px] flex-shrink-0 hover:scale-110 transition-transform"
+            title="Quick view"
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
@@ -350,7 +351,7 @@ export default function PremiumProductCard({
               onQuickView?.();
             }}
           >
-            <ArrowUpRight className="w-3.5 h-3.5  text-white" strokeWidth={3} />
+            <Eye className="w-5 h-5 text-gray-400 hover:text-gray-600" />
           </button>
         </div>
 

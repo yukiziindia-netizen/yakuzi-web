@@ -20,7 +20,7 @@ import {
   Package,
   Filter,
   Menu,
-  ArrowUpRight,
+  Eye,
   Loader2,
   CheckCircle,
 } from 'lucide-react';
@@ -296,7 +296,7 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
           }}
           className="absolute right-0 top-[40%] -translate-y-1/2 z-20 cursor-pointer hover:scale-105 transition-transform"
         >
-          <WishlistIcon isFilled={isSaved} preserveAspectRatio="none" className={`w-[24px] h-[18px] xs:w-[24px] xs:h-[18px] sm:w-[24px] sm:h-[18px] text-[#7B2FBE] ${isSaved ? 'fill-[#7B2FBE]' : 'fill-none'}`} />
+          <WishlistIcon isFilled={isSaved} preserveAspectRatio="none" className="w-[32px] h-[32px]" />
         </div>
 
         {/* Image Container */}
@@ -313,9 +313,10 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
             </h3>
             <Link
               href={`/products/${generateProductSlug(productName, prod.id || 'prod-' + index)}`}
-              className="w-4 h-4 sm:w-4 sm:h-4 md:w-4 md:h-4 lg:w-4 lg:h-4 xl:w-4 xl:h-4 bg-[#8c8c8c] rounded-full flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform shadow-sm z-20 -mr-2 sm:-mr-2.5 md:-mr-2.5 lg:-mr-3 xl:-mr-2.5"
+              className="flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform z-20 -mr-2 sm:-mr-2.5 md:-mr-2.5 lg:-mr-3 xl:-mr-2.5"
+              title="Quick view"
             >
-              <ArrowUpRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-3.5 md:h-3.5 lg:w-3.5 lg:h-3.5 xl:w-3.5 xl:h-3.5 text-white" strokeWidth={2.5} />
+              <Eye className="w-5 h-5 text-gray-400 hover:text-gray-600" />
             </Link>
           </div>
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Loader2, Share2, Plus, Minus, RotateCw, ArrowUpRight, Star, Truck, Bookmark } from 'lucide-react';
+import { Loader2, Share2, Plus, Minus, RotateCw, Eye, Star, Truck, Bookmark } from 'lucide-react';
 import Link from 'next/link';
 import { getProducts } from '@yukizi/api-client';
 import { generateProductSlug, calculatePricing } from '@yukizi/utils';
@@ -265,8 +265,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
           <WishlistIcon 
             isFilled={isSaved} 
             preserveAspectRatio="none" 
-            fill={isSaved ? '#C5A880' : '#FAF5EB'} 
-            className="w-[28px] h-[24px] text-[#C5A880]" 
+            className="w-[32px] h-[32px]" 
           />
         </div>
 
@@ -284,12 +283,13 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
                        {productName}
                     </h3>
                   </Link>
-                 <button 
-                    onClick={(e) => { e.preventDefault(); onOpenReview(product); }}
-                    className="w-5 h-5 bg-[#8c8c8c] rounded-full flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform shadow-sm shrink-0"
-                 >
-                    <ArrowUpRight className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
-                 </button>
+                  <button 
+                     onClick={(e) => { e.preventDefault(); onOpenReview(product); }}
+                     className="flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform shrink-0"
+                     title="Quick view"
+                  >
+                     <Eye className="w-5 h-5 text-gray-400 hover:text-gray-600" />
+                  </button>
               </div>
            </div>
            

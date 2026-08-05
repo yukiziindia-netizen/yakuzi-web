@@ -129,7 +129,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
             const displayPriceText = finalPrice > 0 ? `₹${Math.round(Number(finalPrice)).toLocaleString('en-IN')}` : 'N/A';
             const displayOriginalPriceText = (finalOriginalPrice > 0 && Number(finalOriginalPrice) > Number(finalPrice)) ? `₹${Math.round(Number(finalOriginalPrice)).toLocaleString('en-IN')}` : '';
             const discount = item.discount;
-            const rating = isCart ? (item.rating || 4.5) : item.rating;
+            const rating = item.rating;
             const quantity = isCart ? (item.quantity ?? 1) : item.quantity;
             const isYukiziChoice = isCart ? (item.isYukiziChoice ?? (idx % 3 === 0)) : item.isYukiziChoice;
             const imageRaw = isCart ? (item.product?.images?.[0] || item.imageUrl || item.image) : item.image;

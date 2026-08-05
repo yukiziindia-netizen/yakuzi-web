@@ -40,7 +40,7 @@ export default function ProductCard({
   stock = 999,
   onClick,
   originalPrice,
-  rating = 4.5,
+  rating,
   discount,
   deliveryTime = '2 days',
   cartQuantity = null,
@@ -72,6 +72,9 @@ export default function ProductCard({
     
   const displayDiscount = discount;
   const showAd = isYukiziChoice || isBestSeller;
+
+  const numRating = Number(rating);
+  const hasRating = rating != null && !isNaN(numRating) && numRating > 0;
 
   const handlePlusClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -217,9 +220,12 @@ export default function ProductCard({
               <span className="text-[11px] sm:text-[12px] text-gray-400 line-through leading-none">{displayOriginalPrice}</span>
             )}
           </div>
+          {/* Only show a rating when the product actually has one. Previously this
+              defaulted to 4.5, so every unrated product advertised a review score
+              nobody had given it. */}
           <div className="flex items-center gap-1">
-            <Star className="w-3.5 h-3.5 text-[#7B2FBE] fill-[#7B2FBE]" />
-            <span className="text-[13px] sm:text-[14px] font-medium text-[#333333] leading-none">{rating}</span>
+            <Star className={`w-3.5 h-3.5 ${hasRating ? 'text-[#7B2FBE] fill-[#7B2FBE]' : 'text-gray-300 fill-gray-300'}`} />
+            <span className={`text-[13px] sm:text-[14px] font-medium leading-none ${hasRating ? 'text-[#333333]' : 'text-gray-400'}`}>{hasRating ? rating : 'NA'}</span>
           </div>
         </div>
 

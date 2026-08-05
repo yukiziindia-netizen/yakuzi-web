@@ -192,6 +192,13 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
     e.stopPropagation();
     e.preventDefault();
     if (isLoadingCart) return;
+    const stock = prod?.stock ?? 9999;
+    const maxLimit = prod?.maximumOrderQuantity ?? stock;
+    const max = Math.min(stock, maxLimit);
+    if (cartQuantity >= max) {
+      toast(`Only ${max} units available`, 'error');
+      return;
+    }
     if (cartItem) {
       updateCartItem({
         itemId: cartItem.id,
@@ -289,7 +296,7 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
                   <span className="text-[10px] font-black tracking-wide min-w-[12px] text-center">
                     {isLoadingCart ? <Loader2 className="w-2.5 h-2.5 animate-spin mx-auto" /> : String(cartQuantity).padStart(2, '0')}
                   </span>
-                  <button onClick={handlePlusClick} className="text-white hover:bg-white/10 w-4.5 h-4.5 flex items-center justify-center rounded transition-colors disabled:opacity-50" disabled={isLoadingCart || cartQuantity >= (prod.stock || 999)}>
+                  <button onClick={handlePlusClick} className="text-white hover:bg-white/10 w-4.5 h-4.5 flex items-center justify-center rounded transition-colors disabled:opacity-50" disabled={isLoadingCart || cartQuantity >= (prod.stock ?? 9999)}>
                     <Plus className="w-2.5 h-2.5" strokeWidth={3} />
                   </button>
                </div>
@@ -554,6 +561,13 @@ function ComparisonOffersList({
         );
 
         const handleQtyChange = (newQty: number) => {
+          const stock = listing.stock ?? 9999;
+          const maxLimit = listing.maximumOrderQuantity ?? stock;
+          const max = Math.min(stock, maxLimit);
+          if (newQty > max) {
+            toast(`Only ${max} units available`, 'error');
+            return;
+          }
           if (cartItem) {
             if (newQty > 0) {
               updateCartItem.mutate({
@@ -711,7 +725,8 @@ function ComparisonOffersList({
                       </button>
                       <span className="font-bold text-[9px] sm:text-sm xl:text-base 2xl:text-lg tracking-wide">{String(itemQty).padStart(2, '0')}</span>
                       <button
-                        className="w-4 sm:w-8 h-full flex items-center justify-center hover:bg-black/10 active:scale-95 transition-all text-white font-bold text-[10px] sm:text-lg xl:text-xl 2xl:text-2xl pb-0.5"
+                        className="w-4 sm:w-8 h-full flex items-center justify-center hover:bg-black/10 active:scale-95 transition-all text-white font-bold text-[10px] sm:text-lg xl:text-xl 2xl:text-2xl pb-0.5 disabled:opacity-50"
+                        disabled={itemQty >= (listing.stock ?? 9999)}
                         onClick={() => handleQtyChange(itemQty + 1)}
                       >
                         +

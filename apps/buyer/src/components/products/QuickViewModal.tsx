@@ -301,7 +301,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
               <div className="flex w-full flex-col gap-3">
                 {comparisonListings.length > 0 ? (
                   comparisonListings.map((listing: any) => {
-                    const inStock = true; // accept even if stock is 0
+                    const inStock = (listing.stock ?? 9999) > 0;
                     const cartItem = cartData?.items?.find(
                       (item: any) => item.productId === listing.id,
                     );
@@ -323,6 +323,17 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                         : 0;
 
                     const handleQtyChange = (newQty: number) => {
+                      const stock = listing.stock ?? 9999;
+                      const maxLimit =
+                        listing.maximumOrderQuantity ||
+                        listing.maxOrderQty ||
+                        config?.max_order_qty ||
+                        100;
+                      const max = Math.min(stock, maxLimit);
+                      if (newQty > max) {
+                        toast(`Only ${max} units available`, 'error');
+                        return;
+                      }
                       if (itemQty === 0) {
                         if (newQty > 0) {
                           handleAddToCart(listing, newQty);
@@ -396,19 +407,10 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                                   {String(itemQty).padStart(2, '0')}
                                 </span>
                                 <button
-                                  className="h-full px-2 sm:px-2.5 text-xs font-extrabold text-white/80 transition-all hover:bg-black/10 hover:text-white active:scale-95"
+                                  className="h-full px-2 sm:px-2.5 text-xs font-extrabold text-white/80 transition-all hover:bg-black/10 hover:text-white active:scale-95 disabled:opacity-50"
+                                  disabled={itemQty >= (listing.stock ?? 9999)}
                                   onClick={() => {
-                                    const nextQty = itemQty + 1;
-                                    const maxQty =
-                                      listing.maximumOrderQuantity ||
-                                      listing.maxOrderQty ||
-                                      config?.max_order_qty ||
-                                      100;
-                                    if (nextQty > maxQty) {
-                                      handleQtyChange(minQty);
-                                    } else {
-                                      handleQtyChange(nextQty);
-                                    }
+                                    handleQtyChange(itemQty + 1);
                                   }}
                                 >
                                   +

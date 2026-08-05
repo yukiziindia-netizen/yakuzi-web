@@ -74,6 +74,13 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
   const handlePlusClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
+    const stock = product?.stock ?? 9999;
+    const maxLimit = product?.maximumOrderQuantity ?? stock;
+    const max = Math.min(stock, maxLimit);
+    if (cartQuantity >= max) {
+      toast(`Only ${max} units available`, 'error');
+      return;
+    }
     if (cartItem) {
       updateCartItem({
         itemId: cartItem.id,
@@ -255,7 +262,8 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
                   </span>
                   <button 
                     onClick={handlePlusClick} 
-                    className="text-white hover:bg-white/10 w-4.5 h-4.5 flex items-center justify-center rounded transition-colors"
+                    className="text-white hover:bg-white/10 w-4.5 h-4.5 flex items-center justify-center rounded transition-colors disabled:opacity-50"
+                    disabled={cartQuantity >= (product?.stock ?? 9999)}
                   >
                     <Plus className="w-2.5 h-2.5" strokeWidth={3} />
                   </button>

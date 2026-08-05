@@ -129,25 +129,35 @@ export default function OrderDetailPage() {
   };
 
   const handleFinalDocsSubmit = async () => {
-    if (!finalDocs.manifest || !finalDocs.packedPicture) {
-      toast.error("Both Manifest and Packed Picture are required");
+    if (!finalDocs.manifest && !mainOrder.manifestUrl) {
+      toast.error("Manifest is required");
+      return;
+    }
+    if (!finalDocs.packedPicture && !mainOrder.packedPictureUrl) {
+      toast.error("Packed Picture is required");
       return;
     }
     setIsUploadingDocs(true);
     try {
-      const manifestFd = new FormData();
-      manifestFd.append("file", finalDocs.manifest);
-      const manifestUrl = await uploadDoc.mutateAsync(manifestFd);
+      let finalManifestUrl = mainOrder.manifestUrl;
+      if (finalDocs.manifest) {
+        const manifestFd = new FormData();
+        manifestFd.append("file", finalDocs.manifest);
+        finalManifestUrl = await uploadDoc.mutateAsync(manifestFd);
+      }
 
-      const packedFd = new FormData();
-      packedFd.append("file", finalDocs.packedPicture);
-      const packedPictureUrl = await uploadDoc.mutateAsync(packedFd);
+      let finalPackedPictureUrl = mainOrder.packedPictureUrl;
+      if (finalDocs.packedPicture) {
+        const packedFd = new FormData();
+        packedFd.append("file", finalDocs.packedPicture);
+        finalPackedPictureUrl = await uploadDoc.mutateAsync(packedFd);
+      }
 
       await updateShipping.mutateAsync({
         orderId: id,
         payload: {
-          manifestUrl,
-          packedPictureUrl
+          manifestUrl: finalManifestUrl,
+          packedPictureUrl: finalPackedPictureUrl
         }
       });
       toast.success("Final shipping documents uploaded successfully");
@@ -480,22 +490,28 @@ export default function OrderDetailPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium text-muted-foreground block">Manifest</label>
-                  {mainOrder.manifestUrl ? (
-                    <a href={mainOrder.manifestUrl} target="_blank" className="text-xs text-primary underline">View Uploaded Manifest</a>
-                  ) : (
-                    <input type="file" accept="application/pdf,image/*" onChange={(e) => setFinalDocs(p => ({...p, manifest: e.target.files?.[0] || null}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
-                  )}
+                  <div className="space-y-2">
+                    {mainOrder.manifestUrl && (
+                      <a href={mainOrder.manifestUrl} target="_blank" className="text-xs text-primary underline block">View Uploaded Manifest</a>
+                    )}
+                    {!mainOrder.isShippingLocked && (
+                      <input type="file" accept="application/pdf,image/*" onChange={(e) => setFinalDocs(p => ({...p, manifest: e.target.files?.[0] || null}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
+                    )}
+                  </div>
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium text-muted-foreground block">Packed Picture</label>
-                  {mainOrder.packedPictureUrl ? (
-                    <a href={mainOrder.packedPictureUrl} target="_blank" className="text-xs text-primary underline">View Uploaded Picture</a>
-                  ) : (
-                    <input type="file" accept="image/*" onChange={(e) => setFinalDocs(p => ({...p, packedPicture: e.target.files?.[0] || null}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
-                  )}
+                  <div className="space-y-2">
+                    {mainOrder.packedPictureUrl && (
+                      <a href={mainOrder.packedPictureUrl} target="_blank" className="text-xs text-primary underline block">View Uploaded Picture</a>
+                    )}
+                    {!mainOrder.isShippingLocked && (
+                      <input type="file" accept="image/*" onChange={(e) => setFinalDocs(p => ({...p, packedPicture: e.target.files?.[0] || null}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
+                    )}
+                  </div>
                 </div>
               </div>
-              {(!mainOrder.manifestUrl || !mainOrder.packedPictureUrl) && (
+              {!mainOrder.isShippingLocked && (
                 <div className="pt-2 flex justify-end">
                   <Button size="sm" variant="outline" onClick={handleFinalDocsSubmit} loading={isUploadingFinalDocs}>
                     Upload Final Documents

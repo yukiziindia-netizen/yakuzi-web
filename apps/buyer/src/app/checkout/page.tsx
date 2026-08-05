@@ -369,22 +369,17 @@ export default function CheckoutPage() {
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <div style={{ width: 18, height: 18, borderRadius: '50%', border: paymentMethod === 'BANK_TRANSFER' ? '6px solid #0066cc' : '2px solid #ccc', flexShrink: 0, transition: 'border 0.15s' }} />
-                    <span style={{ fontSize: 14, fontWeight: 600, color: '#1a1a1a' }}>Cashfree Payments (UPI, Cards, Int&apos;l cards, Wallets)</span>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: '#1a1a1a' }}>Bank transfer / UPI &mdash; pay after placing your order</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                     <div style={{ background: '#fff', border: '1px solid #ddd', borderRadius: 4, padding: '2px 5px', fontSize: 10, fontWeight: 800, color: '#2563eb', letterSpacing: 0.3 }}>UPI</div>
-                    <div style={{ background: '#1a1f71', borderRadius: 4, padding: '2px 5px', fontSize: 10, fontWeight: 700, color: '#fff', letterSpacing: 0.8 }}>VISA</div>
-                    <div style={{ position: 'relative', width: 28, height: 18, flexShrink: 0 }}>
-                      <div style={{ position: 'absolute', left: 0, width: 18, height: 18, borderRadius: '50%', background: '#eb001b' }} />
-                      <div style={{ position: 'absolute', left: 9, width: 18, height: 18, borderRadius: '50%', background: '#f79e1b', opacity: 0.85 }} />
-                    </div>
-                    <span style={{ fontSize: 12, color: '#666', fontWeight: 600 }}>+11</span>
+                    <div style={{ background: '#fff', border: '1px solid #ddd', borderRadius: 4, padding: '2px 5px', fontSize: 10, fontWeight: 800, color: '#555', letterSpacing: 0.3 }}>BANK</div>
                   </div>
                 </div>
                 {paymentMethod === 'BANK_TRANSFER' && (
                   <div style={{ padding: '14px 16px', background: '#fff', borderTop: '1px solid #dce8f5', textAlign: 'center' }}>
                     <p style={{ fontSize: 13, color: '#555', lineHeight: 1.5 }}>
-                      You&apos;ll be redirected to Cashfree Payments (UPI, Cards, Int&apos;l cards, Wallets) to complete your purchase.
+                      No payment is taken online right now. Placing the order reserves your items, and we&apos;ll share payment details so you can pay by bank transfer or UPI. Your order is confirmed once we&apos;ve verified the payment.
                     </p>
                   </div>
                 )}
@@ -440,7 +435,7 @@ export default function CheckoutPage() {
             >
               {createOrder.isPending
                 ? <div style={{ width: 20, height: 20, border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                : `Pay now`}
+                : `Place order`}
             </button>
 
             {/* Footer links */}

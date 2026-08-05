@@ -145,6 +145,18 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                   {items.map((item: any, idx: number) => {
                     const itemName = item.product?.name ?? item.productName ?? item.name ?? 'Product';
                     const quantity = item.quantity ?? 1;
+
+                    // Available stock, summed across in-stock batches by the API.
+                    // Undefined means the API did not report it — treat as unbounded
+                    // and let the server-side validation reject the update instead of
+                    // wrongly blocking a legitimate purchase.
+                    const availableStock = item.stock ?? item.product?.stock ?? Infinity;
+                    const perOrderLimit =
+                      (item.maximumOrderQuantity || item.product?.maximumOrderQuantity) || Infinity;
+                    const minQuantity =
+                      item.moq || item.product?.moq || item.product?.minimumOrderQuantity || 1;
+                    const maxQuantity = Math.max(minQuantity, Math.min(availableStock, perOrderLimit));
+                    const isOutOfStock = availableStock <= 0;
                     const rawPrice = item.product?.price ?? item.price;
                     const rawOriginalPrice = item.product?.originalPrice ?? item.product?.mrp ?? item.originalPrice ?? item.mrp;
                     const itemPrice = rawPrice != null ? rawPrice : 0;
@@ -233,27 +245,23 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                           <div className="flex sm:hidden items-center bg-[#562996] rounded-lg text-white overflow-hidden shadow-sm h-7 px-1.5">
                             <button 
                               onClick={() => {
-                                const moq = item.moq || item.product?.moq || item.product?.minimumOrderQuantity || 1;
-                                updateItem.mutate({ itemId: item.id, quantity: Math.max(moq, quantity - 1) });
+                                updateItem.mutate({ itemId: item.id, quantity: Math.max(minQuantity, quantity - 1) });
                               }}
-                              disabled={updateItem.isPending || syncCart.isPending || quantity <= (item.moq || item.product?.moq || item.product?.minimumOrderQuantity || 1)}
+                              disabled={updateItem.isPending || syncCart.isPending || quantity <= minQuantity}
                               className="px-1.5 h-full hover:bg-black/20 flex items-center justify-center font-bold text-xs transition-colors disabled:opacity-50"
                             >
                               -
                             </button>
                             <span className="text-[11px] font-black px-1 tracking-tighter">{quantity.toString().padStart(2, '0')}</span>
-                            <button 
+                            <button
                               onClick={() => {
-                                const stock = item.stock ?? item.product?.stock ?? 9999;
-                                const maxLimit = (item.maximumOrderQuantity || item.product?.maximumOrderQuantity) || stock;
-                                const max = Math.min(stock, maxLimit);
-                                if (quantity < max) {
+                                if (quantity < maxQuantity) {
                                   updateItem.mutate({ itemId: item.id, quantity: quantity + 1 });
                                 } else {
-                                  toast(`Only ${max} units available`, 'error');
+                                  toast(`Only ${maxQuantity} units available`, 'error');
                                 }
                               }}
-                              disabled={updateItem.isPending || syncCart.isPending}
+                              disabled={updateItem.isPending || syncCart.isPending || quantity >= maxQuantity}
                               className="px-1.5 h-full hover:bg-black/20 flex items-center justify-center font-bold text-xs transition-colors disabled:opacity-50"
                             >
                               +
@@ -293,6 +301,19 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                           </div>
                         </div>
 
+                        {/* Stock notice */}
+                        {isOutOfStock ? (
+                          <div className="w-full pr-1.5 sm:pr-3 mt-0.5">
+                            <span className="text-[11px] font-bold text-red-600 uppercase tracking-wide">Out of stock</span>
+                          </div>
+                        ) : Number.isFinite(maxQuantity) && quantity >= maxQuantity ? (
+                          <div className="w-full pr-1.5 sm:pr-3 mt-0.5">
+                            <span className="text-[11px] font-bold text-amber-600">
+                              Only {maxQuantity} {maxQuantity === 1 ? 'unit' : 'units'} available
+                            </span>
+                          </div>
+                        ) : null}
+
                         {/* Delivery */}
                         <div className="flex justify-end w-full pr-1.5 sm:pr-3 mt-0.5">
                           <DeliveryTruckBadge text="2 days" className="w-[80px] sm:w-[95px] text-[#9a9a9a]" />
@@ -304,27 +325,23 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                           <div className="hidden sm:flex items-center bg-[#562996] rounded-lg text-white overflow-hidden shadow-sm h-7 sm:h-8 px-2 sm:px-2.5">
                             <button 
                               onClick={() => {
-                                const moq = item.moq || item.product?.moq || item.product?.minimumOrderQuantity || 1;
-                                updateItem.mutate({ itemId: item.id, quantity: Math.max(moq, quantity - 1) });
+                                updateItem.mutate({ itemId: item.id, quantity: Math.max(minQuantity, quantity - 1) });
                               }}
-                              disabled={updateItem.isPending || syncCart.isPending || quantity <= (item.moq || item.product?.moq || item.product?.minimumOrderQuantity || 1)}
+                              disabled={updateItem.isPending || syncCart.isPending || quantity <= minQuantity}
                               className="px-2 h-full hover:bg-black/20 flex items-center justify-center font-bold text-xs transition-colors disabled:opacity-50"
                             >
                               -
                             </button>
                             <span className="text-xs sm:text-xs font-black px-1.5 sm:px-2 tracking-tighter">{quantity.toString().padStart(2, '0')}</span>
-                            <button 
+                            <button
                               onClick={() => {
-                                const stock = item.stock ?? item.product?.stock ?? 9999;
-                                const maxLimit = (item.maximumOrderQuantity || item.product?.maximumOrderQuantity) || stock;
-                                const max = Math.min(stock, maxLimit);
-                                if (quantity < max) {
+                                if (quantity < maxQuantity) {
                                   updateItem.mutate({ itemId: item.id, quantity: quantity + 1 });
                                 } else {
-                                  toast(`Only ${max} units available`, 'error');
+                                  toast(`Only ${maxQuantity} units available`, 'error');
                                 }
                               }}
-                              disabled={updateItem.isPending || syncCart.isPending}
+                              disabled={updateItem.isPending || syncCart.isPending || quantity >= maxQuantity}
                               className="px-2 h-full hover:bg-black/20 flex items-center justify-center font-bold text-xs transition-colors disabled:opacity-50"
                             >
                               +

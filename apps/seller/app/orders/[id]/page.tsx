@@ -403,7 +403,7 @@ export default function OrderDetailPage() {
                 <div className="space-y-0.5">
                   <p className="text-xs font-semibold text-amber-700 dark:text-amber-400">Shipping is locked by the admin</p>
                   <p className="text-xs text-amber-700/80 dark:text-amber-400/80">
-                    Dimensions and document uploads are read-only while the lock is on. If you still need to upload your manifest or packed picture, ask the admin to unlock this order.
+                    Package dimensions and their proof images are read-only, so the shipping label stays valid. You can still upload your final manifest and packed picture below.
                   </p>
                 </div>
               </div>
@@ -516,9 +516,9 @@ export default function OrderDetailPage() {
                     ) : (
                       <span className="text-xs text-muted-foreground block">Not uploaded</span>
                     )}
-                    {!mainOrder.isShippingLocked && (
-                      <input type="file" accept="application/pdf,image/*" onChange={(e) => setFinalDocs(p => ({...p, manifest: e.target.files?.[0] || null}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
-                    )}
+                    {/* Deliberately NOT gated on isShippingLocked: the manifest is
+                        produced after the admin locks and issues the label. */}
+                    <input type="file" accept="application/pdf,image/*" onChange={(e) => setFinalDocs(p => ({...p, manifest: e.target.files?.[0] || null}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
                   </div>
                 </div>
                 <div className="space-y-1.5">
@@ -529,19 +529,17 @@ export default function OrderDetailPage() {
                     ) : (
                       <span className="text-xs text-muted-foreground block">Not uploaded</span>
                     )}
-                    {!mainOrder.isShippingLocked && (
-                      <input type="file" accept="image/*" onChange={(e) => setFinalDocs(p => ({...p, packedPicture: e.target.files?.[0] || null}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
-                    )}
+                    {/* Deliberately NOT gated on isShippingLocked: the box is packed
+                        and photographed after the admin locks and issues the label. */}
+                    <input type="file" accept="image/*" onChange={(e) => setFinalDocs(p => ({...p, packedPicture: e.target.files?.[0] || null}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
                   </div>
                 </div>
               </div>
-              {!mainOrder.isShippingLocked && (
-                <div className="pt-2 flex justify-end">
-                  <Button size="sm" variant="outline" onClick={handleFinalDocsSubmit} loading={isUploadingFinalDocs}>
-                    Upload Final Documents
-                  </Button>
-                </div>
-              )}
+              <div className="pt-2 flex justify-end">
+                <Button size="sm" variant="outline" onClick={handleFinalDocsSubmit} loading={isUploadingFinalDocs}>
+                  Upload Final Documents
+                </Button>
+              </div>
             </div>
           </motion.div>
         </div>

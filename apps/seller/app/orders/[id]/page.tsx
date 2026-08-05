@@ -394,6 +394,21 @@ export default function OrderDetailPage() {
               <p className="text-sm text-muted-foreground mt-1">Enter dimensions and upload mandatory images before marking the order as shipped.</p>
             </div>
 
+            {/* The admin lock hides every input in this card. Without this notice the
+                section just renders blank and the seller has no way to tell whether
+                something is missing or whether they are simply not allowed to edit. */}
+            {mainOrder.isShippingLocked && (
+              <div className="flex items-start gap-2.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3.5 py-3">
+                <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
+                <div className="space-y-0.5">
+                  <p className="text-xs font-semibold text-amber-700 dark:text-amber-400">Shipping is locked by the admin</p>
+                  <p className="text-xs text-amber-700/80 dark:text-amber-400/80">
+                    Dimensions and document uploads are read-only while the lock is on. If you still need to upload your manifest or packed picture, ask the admin to unlock this order.
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-muted-foreground">Length (cm)</label>
@@ -425,8 +440,10 @@ export default function OrderDetailPage() {
                   <div key={f.key} className="space-y-1.5">
                     <label className="text-xs font-medium text-muted-foreground block">{f.label}</label>
                     <div className="space-y-2">
-                      {(mainOrder as any)[f.key.replace('Img', 'Image')] && (
+                      {(mainOrder as any)[f.key.replace('Img', 'Image')] ? (
                          <a href={(mainOrder as any)[f.key.replace('Img', 'Image')]} target="_blank" className="text-xs text-primary underline block">View Uploaded</a>
+                      ) : (
+                         <span className="text-xs text-muted-foreground block">Not uploaded</span>
                       )}
                       {!mainOrder.isShippingLocked && (
                         <input type="file" accept="image/*" onChange={(e) => setShippingFiles(p => ({...p, [f.key]: e.target.files?.[0] || null}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20 disabled:opacity-50" />
@@ -491,8 +508,13 @@ export default function OrderDetailPage() {
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium text-muted-foreground block">Manifest</label>
                   <div className="space-y-2">
-                    {mainOrder.manifestUrl && (
-                      <a href={mainOrder.manifestUrl} target="_blank" className="text-xs text-primary underline block">View Uploaded Manifest</a>
+                    {/* NOTE: manifestUrl is a single shared column also written by the
+                        admin document upload, so this link is not necessarily the
+                        seller's own file. Labelled neutrally until the two are split. */}
+                    {mainOrder.manifestUrl ? (
+                      <a href={mainOrder.manifestUrl} target="_blank" className="text-xs text-primary underline block">View current manifest</a>
+                    ) : (
+                      <span className="text-xs text-muted-foreground block">Not uploaded</span>
                     )}
                     {!mainOrder.isShippingLocked && (
                       <input type="file" accept="application/pdf,image/*" onChange={(e) => setFinalDocs(p => ({...p, manifest: e.target.files?.[0] || null}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
@@ -502,8 +524,10 @@ export default function OrderDetailPage() {
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium text-muted-foreground block">Packed Picture</label>
                   <div className="space-y-2">
-                    {mainOrder.packedPictureUrl && (
+                    {mainOrder.packedPictureUrl ? (
                       <a href={mainOrder.packedPictureUrl} target="_blank" className="text-xs text-primary underline block">View Uploaded Picture</a>
+                    ) : (
+                      <span className="text-xs text-muted-foreground block">Not uploaded</span>
                     )}
                     {!mainOrder.isShippingLocked && (
                       <input type="file" accept="image/*" onChange={(e) => setFinalDocs(p => ({...p, packedPicture: e.target.files?.[0] || null}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />

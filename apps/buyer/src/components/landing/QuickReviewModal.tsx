@@ -315,7 +315,7 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                         <div className="flex items-center gap-1 flex-shrink-0">
                           <Star className="h-3 w-3 fill-[#864ac5] text-[#864ac5] sm:h-3.5 sm:w-3.5" />
                           <span className="text-[10px] font-black leading-none text-gray-800 sm:text-[12px]">
-                            {listing.seller?.rating || '4.5'}
+                            {listing.seller?.rating ? listing.seller.rating : 'NA'}
                           </span>
                         </div>
 

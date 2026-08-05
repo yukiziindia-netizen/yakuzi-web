@@ -161,7 +161,10 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
   if (finalOriginalPrice === 0 && discountPercent > 0 && finalPrice > 0) {
     finalOriginalPrice = Math.round(finalPrice / (1 - discountPercent / 100));
   }
-  const rating = product?.rating || 4.5;
+  // No invented rating: unrated products render "NA" rather than a default 4.5.
+  const numRating = Number(product?.rating);
+  const hasRating = product?.rating != null && !isNaN(numRating) && numRating > 0;
+  const rating = hasRating ? product.rating : null;
   const hasNoSellers = product?.sellerCount === 0 || product?.hasSellers === false;
   const isNotAvailable = hasNoSellers && finalPrice <= 0 && mrpVal <= 0;
   const showBellIcon = hasNoSellers || (product?.stock !== undefined && product.stock <= 0);
@@ -338,8 +341,8 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
                  )}
               </div>
               <div className="flex items-center gap-1">
-                 <Star className="w-3.5 h-3.5 text-[#7B2FBE] fill-[#7B2FBE]" />
-                 <span className="text-[13px] sm:text-[14px] font-medium text-[#333333] leading-none">{rating}</span>
+                 <Star className={`w-3.5 h-3.5 ${hasRating ? 'text-[#7B2FBE] fill-[#7B2FBE]' : 'text-gray-300 fill-gray-300'}`} />
+                 <span className={`text-[13px] sm:text-[14px] font-medium leading-none ${hasRating ? 'text-[#333333]' : 'text-gray-400'}`}>{hasRating ? rating : 'NA'}</span>
               </div>
            </div>
 

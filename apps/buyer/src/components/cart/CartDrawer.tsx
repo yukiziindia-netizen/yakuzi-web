@@ -297,7 +297,7 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                           </div>
                           <div className="flex items-center gap-[3px] sm:gap-[4px]">
                             <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-[#6342B4] text-[#6342B4]" />
-                            <span className="text-xs sm:text-[14px] font-bold text-gray-700">{item.rating || 4.5}</span>
+                            <span className="text-xs sm:text-[14px] font-bold text-gray-700">{item.rating ? item.rating : 'NA'}</span>
                           </div>
                         </div>
 

@@ -137,7 +137,10 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
   if (finalOriginalPrice === 0 && discountPercent > 0 && finalPrice > 0) {
     finalOriginalPrice = Math.round(finalPrice / (1 - discountPercent / 100));
   }
-  const rating = prod?.rating || 4.5;
+  // Never invent a rating - unrated products show "NA".
+  const numRating = Number(prod?.rating);
+  const hasRating = prod?.rating != null && !isNaN(numRating) && numRating > 0;
+  const rating = hasRating ? prod.rating : null;
   const hasNoSellers = prod?.sellerCount === 0 || prod?.hasSellers === false;
   const isNotAvailable = hasNoSellers && finalPrice <= 0 && mrpVal <= 0;
   const showBellIcon = hasNoSellers || (prod?.stock !== undefined && prod.stock <= 0);
@@ -363,8 +366,8 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
               <span className="text-[10px] sm:text-[11px] md:text-[12px] lg:text-[13px] xl:text-[11px] text-gray-400 line-through leading-none">{displayOriginalPrice}</span>
             </div>
             <div className="flex items-center gap-0.5 sm:gap-1 -mr-1 sm:-mr-1.5 md:-mr-1.5 lg:-mr-2 xl:-mr-1.5">
-              <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 lg:w-4 lg:h-4 xl:w-3.5 xl:h-3.5 text-[#8b5cf6] fill-[#8b5cf6]" />
-              <span className="text-[12px] sm:text-[13px] md:text-[14px] lg:text-[15px] xl:text-[13px] font-medium text-gray-500 leading-none">{rating}</span>
+              <Star className={`w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 lg:w-4 lg:h-4 xl:w-3.5 xl:h-3.5 ${hasRating ? 'text-[#8b5cf6] fill-[#8b5cf6]' : 'text-gray-300 fill-gray-300'}`} />
+              <span className="text-[12px] sm:text-[13px] md:text-[14px] lg:text-[15px] xl:text-[13px] font-medium text-gray-500 leading-none">{hasRating ? rating : 'NA'}</span>
             </div>
           </div>
 
@@ -679,7 +682,7 @@ function ComparisonOffersList({
             <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
               <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-4.5 md:h-4.5 xl:w-5 xl:h-5 2xl:w-5.5 2xl:h-5.5 fill-[#854cbc] text-[#854cbc] flex-shrink-0" />
               <span className="text-gray-800 font-bold text-[11px] sm:text-[14px] md:text-[16px] xl:text-[18px] 2xl:text-[20px] leading-none">
-                {listing.seller?.rating || '4.5'}
+                {listing.seller?.rating ? listing.seller.rating : 'NA'}
               </span>
             </div>
 
@@ -931,29 +934,6 @@ function ReviewSubmissionForm({
   );
 }
 
-const getMockReviewsForProduct = (productName: string, categoryName?: string, productImage?: string) => {
-  const cleanName = productName || 'product';
-  const cleanCategory = categoryName || 'items';
-
-  return [
-    {
-      id: 'mock-rev-1',
-      userName: 'Amit Sharma',
-      rating: 5,
-      comment: `Extremely satisfied with the ${cleanName}! The quality is superb and it matches the description perfectly. Highly recommended if you are looking for reliable ${cleanCategory}.`,
-      createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      id: 'mock-rev-2',
-      userName: 'Priya Patel',
-      rating: 4,
-      comment: `Good purchase. The ${cleanName} works exactly as expected. Quick delivery and secure packaging. Will definitely buy more from this category.`,
-      createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-      image: productImage || null,
-    }
-  ];
-};
-
 export default function AnimeProductPage({ params }: { params: { productSlug: string } }) {
   const [activeImage, setActiveImage] = useState(0);
   const [selectedVariantName, setSelectedVariantName] = useState<string>('');
@@ -1112,15 +1092,21 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
     displayImages.push(displayImages[0]);
   }
 
+  // Real reviews only. This used to fall back to getMockReviewsForProduct(),
+  // which put two invented reviewers and a 4.5 average on every product that
+  // had never been reviewed.
   const reviewsList = reviewsData?.data && reviewsData.data.length > 0
     ? reviewsData.data
-    : getMockReviewsForProduct(product?.name || 'Product', product?.category?.name || 'Item', images[0]);
+    : [];
 
-  const averageRating = reviewsData?.averageRating || (reviewsData?.data && reviewsData.data.length > 0
-    ? (reviewsData.data.reduce((acc: number, curr: any) => acc + curr.rating, 0) / reviewsData.data.length)
-    : 4.5);
+  const hasReviews = reviewsList.length > 0;
 
-  const totalReviews = reviewsData?.total || (reviewsData?.data && reviewsData.data.length > 0 ? reviewsData.data.length : reviewsList.length);
+  const averageRating = hasReviews
+    ? (reviewsData?.averageRating ||
+        reviewsList.reduce((acc: number, curr: any) => acc + curr.rating, 0) / reviewsList.length)
+    : 0;
+
+  const totalReviews = hasReviews ? (reviewsData?.total || reviewsList.length) : 0;
 
   let bestPricing: any = null;
   if (comparisonListings.length > 0) {
@@ -1399,11 +1385,13 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                     })}
                   </div>
                   <span className="text-[28px] font-black leading-none text-gray-800">
-                    {averageRating.toFixed(1)}
+                    {hasReviews ? averageRating.toFixed(1) : 'NA'}
                   </span>
                 </div>
                 <p className="text-[13px] font-medium text-gray-400">
-                  {averageRating.toFixed(1)} out of 5 stars (based on {totalReviews} review{totalReviews !== 1 ? 's' : ''})
+                  {hasReviews
+                    ? `${averageRating.toFixed(1)} out of 5 stars (based on ${totalReviews} review${totalReviews !== 1 ? 's' : ''})`
+                    : 'No reviews yet'}
                 </p>
               </div>
 
@@ -1417,6 +1405,9 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
 
             {/* Review Cards Carousel */}
             <div className="hide-scrollbar flex flex-col gap-4 overflow-x-auto pb-2 sm:flex-row">
+              {!hasReviews && (
+                <p className="py-4 text-[13px] text-gray-400">No reviews yet. Be the first to review this product.</p>
+              )}
               {reviewsList.map((rev: any) => {
                 const reviewImagesList = (rev.images && rev.images.length > 0)
                   ? rev.images
@@ -1600,9 +1591,9 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                     className="w-[85px] sm:w-[95px] xl:w-[110px] 2xl:w-[125px] h-auto text-gray-500 flex-shrink-0"
                   />
                   <div className="flex items-center gap-1 xl:gap-1.5">
-                    <Star className="w-5.5 h-5.5 xl:w-6.5 xl:h-6.5 2xl:w-7 2xl:h-7 fill-[#7B2FBE] text-[#7B2FBE] flex-shrink-0" />
+                    <Star className={`w-5.5 h-5.5 xl:w-6.5 xl:h-6.5 2xl:w-7 2xl:h-7 flex-shrink-0 ${hasReviews ? 'fill-[#7B2FBE] text-[#7B2FBE]' : 'fill-gray-300 text-gray-300'}`} />
                     <span className="text-[18px] sm:text-[20px] xl:text-[22px] 2xl:text-[24px] font-bold text-gray-800 leading-none">
-                      {averageRating.toFixed(1)}
+                      {hasReviews ? averageRating.toFixed(1) : 'NA'}
                     </span>
                   </div>
                 </div>
@@ -1683,11 +1674,13 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                         })}
                       </div>
                       <span className="text-[28px] font-black leading-none text-gray-800">
-                        {averageRating.toFixed(1)}
+                        {hasReviews ? averageRating.toFixed(1) : 'NA'}
                       </span>
                     </div>
                     <p className="text-[13px] font-medium text-gray-400">
-                      {averageRating.toFixed(1)} out of 5 stars (based on {totalReviews} review{totalReviews !== 1 ? 's' : ''})
+                      {hasReviews
+                    ? `${averageRating.toFixed(1)} out of 5 stars (based on ${totalReviews} review${totalReviews !== 1 ? 's' : ''})`
+                    : 'No reviews yet'}
                     </p>
                   </div>
 
@@ -1701,6 +1694,9 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
 
                 {/* Review Cards Carousel */}
                 <div className="hide-scrollbar flex flex-col gap-4 overflow-x-auto pb-2 sm:flex-row">
+                  {!hasReviews && (
+                    <p className="py-4 text-[13px] text-gray-400">No reviews yet. Be the first to review this product.</p>
+                  )}
                   {reviewsList.map((rev: any) => {
                     const reviewImagesList = (rev.images && rev.images.length > 0)
                       ? rev.images

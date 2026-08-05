@@ -1,5 +1,6 @@
 'use client';
 
+import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -52,6 +53,56 @@ export default function HeroSection({ title = 'YUKiZi' }: HeroSectionProps) {
   ];
 
   const displayBrands = brands.length > 0 ? brands : fallbackBrands;
+
+  const [visibleCount, setVisibleCount] = useState(4);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 480) {
+        setVisibleCount(2);
+      } else if (window.innerWidth < 768) {
+        setVisibleCount(3);
+      } else {
+        setVisibleCount(4);
+      }
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const handlePrev = () => {
+    setCurrentIndex((prev) => {
+      if (prev === 0) {
+        return displayBrands.length - visibleCount;
+      }
+      return prev - 1;
+    });
+  };
+
+  const handleNext = useCallback(() => {
+    setCurrentIndex((prev) => {
+      if (prev >= displayBrands.length - visibleCount) {
+        return 0;
+      }
+      return prev + 1;
+    });
+  }, [displayBrands.length, visibleCount]);
+
+  useEffect(() => {
+    if (displayBrands.length <= visibleCount) return;
+    const interval = setInterval(() => {
+      handleNext();
+    }, 3500);
+    return () => clearInterval(interval);
+  }, [handleNext, displayBrands.length, visibleCount]);
+
+  useEffect(() => {
+    if (currentIndex > displayBrands.length - visibleCount) {
+      setCurrentIndex(Math.max(0, displayBrands.length - visibleCount));
+    }
+  }, [visibleCount, displayBrands.length, currentIndex]);
 
   return (
     <div className="relative z-10 flex w-full flex-col bg-white">
@@ -193,40 +244,71 @@ export default function HeroSection({ title = 'YUKiZi' }: HeroSectionProps) {
       <div className="border-b border-gray-300 bg-[#e2e2e2] px-4 py-1.5 sm:py-2">
         <div className="mx-auto flex max-w-4xl items-center justify-center gap-3 xs:gap-3 md:gap-6">
           {/* Left Arrow */}
-          <button className="flex cursor-pointer items-center justify-center p-1 text-[#8c8c8c] transition-colors hover:text-gray-800">
-            <ChevronLeft className="h-[20px] w-[20px] xs:h-[24px] xs:w-[24px] md:h-[28px] md:w-[28px]" strokeWidth={4.5} />
-          </button>
+          {displayBrands.length > visibleCount && (
+            <button 
+              onClick={handlePrev}
+              className="flex cursor-pointer items-center justify-center p-1 text-[#8c8c8c] transition-colors hover:text-gray-800 focus:outline-none"
+            >
+              <ChevronLeft className="h-[20px] w-[20px] xs:h-[24px] xs:w-[24px] md:h-[28px] md:w-[28px]" strokeWidth={4.5} />
+            </button>
+          )}
 
-          {/* Logos */}
-          <div className="flex flex-nowrap items-center justify-center gap-3 xs:gap-6 md:gap-16">
+          {/* Logos Slider Container */}
+          <div className="relative flex-1 overflow-hidden max-w-3xl">
             {isLoadingBrands ? (
-              <span className="text-sm italic text-gray-400">Loading brands...</span>
+              <div className="flex justify-center">
+                <span className="text-sm italic text-gray-400">Loading brands...</span>
+              </div>
             ) : (
-              displayBrands.map((brand: any) => (
-                <img
-                  key={brand.id}
-                  src={brand.imageUrl}
-                  alt={brand.name}
-                  className="h-[24px] xs:h-[36px] md:h-[54px] cursor-pointer object-contain mix-blend-multiply transition-transform hover:scale-110"
-                />
-              ))
+              <div 
+                className="flex transition-transform duration-500 ease-in-out"
+                style={{
+                  transform: `translateX(-${currentIndex * (100 / visibleCount)}%)`
+                }}
+              >
+                {displayBrands.map((brand: any) => (
+                  <div 
+                    key={brand.id}
+                    className="flex-shrink-0 flex justify-center items-center px-2 xs:px-4"
+                    style={{ width: `${100 / visibleCount}%` }}
+                  >
+                    <img
+                      src={brand.imageUrl}
+                      alt={brand.name}
+                      className="h-[24px] xs:h-[36px] md:h-[54px] cursor-pointer object-contain mix-blend-multiply transition-transform hover:scale-110"
+                    />
+                  </div>
+                ))}
+              </div>
             )}
           </div>
 
           {/* Right Arrow */}
-          <button className="flex cursor-pointer items-center justify-center p-1 text-[#8c8c8c] transition-colors hover:text-gray-800">
-            <ChevronRight className="h-[20px] w-[20px] xs:h-[24px] xs:w-[24px] md:h-[28px] md:w-[28px]" strokeWidth={4.5} />
-          </button>
+          {displayBrands.length > visibleCount && (
+            <button 
+              onClick={handleNext}
+              className="flex cursor-pointer items-center justify-center p-1 text-[#8c8c8c] transition-colors hover:text-gray-800 focus:outline-none"
+            >
+              <ChevronRight className="h-[20px] w-[20px] xs:h-[24px] xs:w-[24px] md:h-[28px] md:w-[28px]" strokeWidth={4.5} />
+            </button>
+          )}
         </div>
       </div>
 
       {/* Dots */}
-      <div className="flex justify-center gap-2 bg-white pt-5 pb-1">
-        <div className="h-2.5 w-2.5 cursor-pointer rounded-full bg-gray-400"></div>
-        <div className="h-2.5 w-2.5 cursor-pointer rounded-full bg-gray-400"></div>
-        <div className="h-2.5 w-2.5 cursor-pointer rounded-full bg-gray-400"></div>
-        <div className="h-2.5 w-2.5 cursor-pointer rounded-full bg-gray-400"></div>
-      </div>
+      {displayBrands.length > visibleCount && (
+        <div className="flex justify-center gap-2 bg-white pt-5 pb-1">
+          {Array.from({ length: displayBrands.length - visibleCount + 1 }).map((_, idx) => (
+            <div 
+              key={idx}
+              onClick={() => setCurrentIndex(idx)}
+              className={`h-2.5 w-2.5 cursor-pointer rounded-full transition-colors duration-300 ${
+                currentIndex === idx ? 'bg-purple-600' : 'bg-gray-400 hover:bg-gray-500'
+              }`}
+            ></div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -13,6 +13,7 @@ import { useScrollLock } from '@/hooks/useScrollLock';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { QuickViewModal } from '@/components/products/QuickViewModal';
+import { calculatePricing } from '@yukizi/utils';
 
 export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const { data: wishlist, isLoading, isError } = useWishlist();
@@ -31,20 +32,23 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
 
   const items = wishlist?.items ?? [];
 
-  const handleAddToCart = (item: any) => {
+  const handleAddToCart = (item: any, finalPrice: number, finalOriginalPrice: number) => {
     if (!isAuthenticated) {
       window.dispatchEvent(new CustomEvent('open-login'));
       return;
     }
     const imgUrl = item.image || item.product?.image || (item.product?.images && (typeof item.product.images[0] === 'string' ? item.product.images[0] : item.product.images[0]?.url));
+    const targetProductId = item.product?.bestListingId || item.productId || item.product?.id || item.id;
     const cartItem = {
-      productId: item.productId || item.product?.id || item.id,
+      productId: targetProductId,
       quantity: 1,
       productName: item.productName || item.product?.name,
-      price: item.price || item.product?.price,
+      price: finalPrice,
+      originalPrice: finalOriginalPrice,
       image: imgUrl,
       imageUrl: imgUrl,
       images: imgUrl ? [imgUrl] : [],
+      ...(item.product || {}),
     };
     addToCart.mutate(cartItem, {
       onSuccess: () => {
@@ -120,25 +124,52 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                 <AnimatePresence initial={false}>
                   {items.map((item: any, idx: number) => {
                     const itemName = item.product?.name ?? item.productName ?? item.name ?? 'Product';
-                    const rawPrice = item.product?.price ?? item.price;
-                    const rawOriginalPrice = item.product?.originalPrice ?? item.product?.mrp ?? item.originalPrice ?? item.mrp;
-                    const itemPrice = rawPrice != null ? rawPrice : 0;
-                    const itemOriginalPrice = rawOriginalPrice != null ? rawOriginalPrice : 0;
-                    const isNotAvailable = item.product?.sellerCount === 0 || item.product?.sellerOffers?.length === 0 || rawPrice == null;
-
-                    const fallbackPrice = item.product?.price || item.product?.mrp || item.product?.originalPrice || item.price || item.mrp || 0;
-                    const fallbackOriginalPrice = (item.product?.price && item.product?.mrp && Number(item.product.mrp) > Number(item.product.price)) ? item.product.mrp : 0;
                     
-                    const hasVariantPrice = !isNotAvailable && itemPrice > 0;
-                    const finalPrice = hasVariantPrice ? itemPrice : fallbackPrice;
-                    const finalOriginalPrice = hasVariantPrice ? itemOriginalPrice : fallbackOriginalPrice;
+                    const productObj = item.product || item;
+                    const rawPrice = productObj?.price ?? productObj?.finalCustomerPayable ?? productObj?.sellingPrice ?? productObj?.sellerOffers?.[0]?.finalCustomerPayable ?? productObj?.sellerOffers?.[0]?.mrp;
+                    const directPrice = (rawPrice != null && !isNaN(Number(rawPrice))) ? Number(rawPrice) : 0;
+                    
+                    const rawMrp = productObj?.mrp ?? productObj?.originalPrice ?? productObj?.sellerOffers?.[0]?.mrp ?? productObj?.lowestPrice ?? productObj?.price;
+                    const mrpVal = (rawMrp != null && !isNaN(Number(rawMrp))) ? Number(rawMrp) : 0;
+
+                    const pricing = mrpVal > 0 ? calculatePricing(
+                      mrpVal,
+                      Number(productObj?.gstPercent || 0),
+                      {
+                        type: productObj?.discountType || (productObj?.discountMeta?.discountPercent ? 'ptr_discount' : 'none'),
+                        discountPercent: productObj?.discountMeta?.discountPercent,
+                        specialPrice: productObj?.discountMeta?.specialPrice,
+                        buy: productObj?.discountMeta?.buy,
+                        get: productObj?.discountMeta?.get,
+                        bonusProductName: productObj?.discountMeta?.bonusProductName,
+                        shippingCharges: productObj?.finalShippingPrice ?? productObj?.shippingCharges ?? 0,
+                        shippingGstPercent: 0,
+                        isTaxIncluded: true,
+                      }
+                    ) : null;
+
+                    const computedPrice = (pricing?.finalCustomerPayable != null && pricing.finalCustomerPayable > 0) 
+                      ? Number(pricing.finalCustomerPayable) 
+                      : 0;
+
+                    const finalPrice = directPrice > 0 ? directPrice : (computedPrice > 0 ? computedPrice : mrpVal);
+                    const discountPercent = Number(productObj?.discountMeta?.discountPercent || 0);
+
+                    let finalOriginalPrice = 0;
+                    if (discountPercent > 0 && finalPrice > 0) {
+                      finalOriginalPrice = Math.round(finalPrice / (1 - discountPercent / 100));
+                    } else if (mrpVal > finalPrice) {
+                      finalOriginalPrice = mrpVal;
+                    }
 
                     const displayPriceText = finalPrice > 0 ? `₹${Math.round(Number(finalPrice)).toLocaleString('en-IN')}` : 'N/A';
-                    const displayOriginalPriceText = (finalOriginalPrice > 0 && Number(finalOriginalPrice) > Number(finalPrice)) ? `₹${Math.round(Number(finalOriginalPrice)).toLocaleString('en-IN')}` : '';
+                    const displayOriginalPriceText = (finalOriginalPrice > 0 && Number(finalOriginalPrice) > Number(finalPrice)) 
+                      ? `₹${Math.round(Number(finalOriginalPrice)).toLocaleString('en-IN')}` 
+                      : '';
 
-                    const discountPercent = (finalOriginalPrice > finalPrice && finalOriginalPrice > 0)
+                    const displayDiscountPercent = (finalOriginalPrice > finalPrice && finalOriginalPrice > 0)
                       ? Math.round(((finalOriginalPrice - finalPrice) / finalOriginalPrice) * 100)
-                      : 0;
+                      : discountPercent;
                     
                     const titleWords = itemName.trim().split(' ').filter(Boolean);
                     const initials = titleWords.length === 1 
@@ -155,9 +186,29 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                     const deliveryTime = item.product?.deliveryTime || item.product?.deliveryText || item.deliveryTime || item.deliveryText || '3 days';
                     const itemRating = item.product?.rating ?? item.product?.averageRating ?? item.rating ?? 'NA';
 
-                    const inCartItem = cartData?.items?.find(
-                      (ci: any) => ci.productId === (item.productId || item.product?.id || item.id)
-                    );
+                    const bestListingId = productObj?.bestListingId;
+                    const catalogProductId = productObj?.id || item.productId;
+                    
+                    const inCartItem = cartData?.items?.find((ci: any) => {
+                      const ciProductIds = [
+                        ci.productId,
+                        ci.product?.id,
+                        ci.id,
+                        ci.bestListingId,
+                        ci.product?.bestListingId
+                      ].filter(Boolean);
+
+                      const itemProductIds = [
+                        item.productId,
+                        item.id,
+                        catalogProductId,
+                        bestListingId,
+                        productObj?.id,
+                        productObj?.bestListingId
+                      ].filter(Boolean);
+
+                      return ciProductIds.some(id1 => itemProductIds.includes(id1));
+                    });
                     const cartQty = inCartItem?.quantity || 0;
 
                     const handleIncrement = (e: React.MouseEvent) => {
@@ -169,7 +220,7 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                           quantity: cartQty + 1,
                         });
                       } else {
-                        handleAddToCart(item);
+                        handleAddToCart(item, finalPrice, finalOriginalPrice);
                       }
                     };
 
@@ -296,7 +347,7 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                                 setSelectedProduct(item.product || {
                                   id: item.productId || item.id,
                                   name: itemName,
-                                  price: itemPrice,
+                                  price: finalPrice,
                                   image: itemImage,
                                 });
                               }}
@@ -310,8 +361,8 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                           {/* Row 3: Discount & Star Rating */}
                           <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2">
                             <div className="text-left">
-                              {discountPercent > 0 && (
-                                <span className="text-xs sm:text-[13px] font-bold text-[#f7941d]">{discountPercent}% off</span>
+                              {displayDiscountPercent > 0 && (
+                                <span className="text-xs sm:text-[13px] font-bold text-black">{displayDiscountPercent}% off</span>
                               )}
                             </div>
                             <div className="flex items-center gap-[3px] sm:gap-[4px]">

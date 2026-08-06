@@ -394,7 +394,7 @@ export default function Navbar({
       >
         <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-6 md:gap-2 pointer-events-auto flex-nowrap justify-center w-full max-w-[1200px] px-1 sm:px-4 relative z-10">
           {/* Left Segment: Logo, Profile, Notifications, Search */}
-          <div className="flex items-center bg-white sm:bg-[#562996] rounded-xl pl-[2px] pr-1 xs:pl-1 xs:pr-1.5 sm:px-4 md:px-6 h-[48px] sm:h-[60px] md:h-[64px] shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl flex-[1.3] sm:flex-1 max-w-[480px] justify-between overflow-hidden min-w-0 border border-gray-100 sm:border-0">
+          <div className="flex items-center bg-white sm:bg-[#562996] rounded-xl pl-[2px] pr-1 xs:pl-1 xs:pr-1.5 sm:px-4 md:px-6 h-[48px] sm:h-[60px] md:h-[64px] shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl flex-1 sm:flex-1 max-w-[480px] justify-between overflow-hidden min-w-0 border border-gray-100 sm:border-0">
             {/* DESKTOP VIEW (sm and up) */}
             <div className="hidden sm:flex items-center w-full justify-between">
                 <div className="flex items-center h-full">
@@ -485,13 +485,13 @@ export default function Navbar({
                 // AFTER LOGIN
                 <div className="flex items-center justify-between w-full h-full py-[6px] gap-2">
                   <Link href="/" className="shrink-0 flex items-center pl-1">
-                    <Image src="/YukiziLogo.png" alt="YUKiZi" width={70} height={24} className="w-[45px] xs:w-[55px] md:w-[65px] object-contain" />
+                    <Image src="/YukiziLogo.png" alt="YUKiZi" width={70} height={24} className="w-[38px] xs:w-[45px] md:w-[65px] object-contain" />
                   </Link>
 
-                  <div className="flex items-center gap-2 xs:gap-3 h-full flex-1 justify-end mr-1.5 xs:mr-2">
+                  <div className="flex items-center gap-1.5 xs:gap-2 h-full flex-1 justify-end mr-0.5 xs:mr-1">
                     <button 
                       onClick={() => setIsNotificationsOpen(true)} 
-                      className={`relative p-1 min-[390px]:mr-2.5 sm:mr-0 mr-0 transition-all duration-200 shrink-0 ${
+                      className={`relative p-1 min-[390px]:mr-1.5 sm:mr-0 mr-0 transition-all duration-200 shrink-0 ${
                         isNotificationsOpen
                           ? "text-[#562996] scale-110 opacity-100"
                           : isAnyDrawerOpen
@@ -499,8 +499,8 @@ export default function Navbar({
                           : "text-[#562996]"
                       }`}
                     >
-                      <Bell className="w-[18px] h-[18px] xs:w-[20px] xs:h-[20px] stroke-[2]" fill={isNotificationsOpen ? "currentColor" : "none"} />
-                      <span className="absolute top-0 right-0 w-1.5 h-1.5 xs:w-2 xs:h-2 bg-[#eb4335] rounded-full shadow-sm" />
+                      <Bell className="w-[15px] h-[15px] xs:w-[17px] xs:h-[17px] stroke-[2.5]" fill={isNotificationsOpen ? "currentColor" : "none"} />
+                      <span className="absolute top-0 right-0 w-1 h-1 xs:w-1.5 xs:h-1.5 bg-[#eb4335] rounded-full shadow-sm" />
                     </button>
 
                     <button
@@ -508,7 +508,7 @@ export default function Navbar({
                         setIsSearchChatOpen(!isSearchChatOpen);
                         setIsChatOpen(false);
                       }}
-                      className={`relative p-1 mr-2.5 transition-all duration-200 shrink-0 ${
+                      className={`relative p-1 mr-1 transition-all duration-200 shrink-0 ${
                         isSearchChatOpen
                           ? "text-[#562996] scale-110 opacity-100"
                           : isAnyDrawerOpen
@@ -516,7 +516,7 @@ export default function Navbar({
                           : "text-[#562996]"
                       }`}
                     >
-                      <Search className="w-[18px] h-[18px] xs:w-[20px] xs:h-[20px] stroke-[2.5]" />
+                      <Search className="w-[15px] h-[15px] xs:w-[17px] xs:h-[17px] stroke-[2.5]" />
                     </button>
                   </div>
                 </div>
@@ -543,7 +543,7 @@ export default function Navbar({
 
 
           {/* Right Segment: Cart, Wishlist, Filter, Menu */}
-          <div className="flex items-center justify-between bg-white sm:bg-[#562996] rounded-xl px-2 xs:px-3 sm:px-8 md:px-12 lg:px-16 h-[48px] sm:h-[60px] md:h-[64px] shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl text-[#562996] sm:text-white sm:shrink-0 flex-[1] sm:flex-1 max-w-[480px] z-10 overflow-hidden min-w-0 border border-gray-100 sm:border-0">
+          <div className="flex items-center justify-between bg-white sm:bg-[#562996] rounded-xl px-2 xs:px-3 sm:px-8 md:px-12 lg:px-16 h-[48px] sm:h-[60px] md:h-[64px] shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl text-[#562996] sm:text-white sm:shrink-0 flex-1 sm:flex-1 max-w-[480px] z-10 overflow-hidden min-w-0 border border-gray-100 sm:border-0">
 
             <button 
               onClick={() => setIsWishlistOpen(true)} 

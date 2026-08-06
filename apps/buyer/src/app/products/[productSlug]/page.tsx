@@ -804,9 +804,9 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
     displayImages = [...variantImages, ...images.filter((img: string) => !variantImages.includes(img))];
   }
 
-  while (displayImages.length < 3 && displayImages.length > 0) {
-    displayImages.push(displayImages[0]);
-  }
+  // A product with one photo used to have it repeated until there were three,
+  // which put the same thumbnail in the rail three times and read as three
+  // different pictures. Show only the photos that exist.
 
   // Real reviews only. This used to fall back to getMockReviewsForProduct(),
   // which put two invented reviewers and a 4.5 average on every product that

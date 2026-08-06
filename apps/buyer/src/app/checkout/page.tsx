@@ -187,6 +187,24 @@ export default function CheckoutPage() {
       return;
     }
 
+    // Email and phone are how the receipt and order updates reach the buyer, so
+    // neither can be left blank. Phone is covered above; email was optional.
+    if (!address.email.trim()) {
+      toast('Please enter your email address so we can send your receipt', 'error');
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address.email.trim())) {
+      toast('Please enter a valid email address', 'error');
+      return;
+    }
+
+    const digitsOnly = address.phone.replace(/\D/g, '');
+    if (digitsOnly.length < 10) {
+      toast('Please enter a valid 10-digit mobile number', 'error');
+      return;
+    }
+
     setSyncError(null);
     // Only send fields the backend DTO accepts — strip firstName, lastName, email
     const orderAddress = {
@@ -374,7 +392,8 @@ export default function CheckoutPage() {
               <input
                 className="co-input"
                 type="email"
-                placeholder="Email or mobile phone number"
+                required
+                placeholder="Email address"
                 value={address.email}
                 onChange={(e) => setAddress({ ...address, email: e.target.value })}
               />
@@ -426,7 +445,7 @@ export default function CheckoutPage() {
               </div>
 
               <div style={{ position: 'relative' }}>
-                <input className="co-input" style={{ paddingRight: 36 }} placeholder="Phone"
+                <input className="co-input" style={{ paddingRight: 36 }} placeholder="Phone" required
                   value={address.phone} onChange={(e) => setAddress({ ...address, phone: e.target.value })} />
                 <HelpCircle size={16} color="#aaa" style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
               </div>

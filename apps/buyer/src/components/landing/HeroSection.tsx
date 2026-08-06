@@ -8,12 +8,57 @@ export default function HeroSection() {
   const { data: brandsData, isLoading: isLoadingBrands } = useBrands();
   const { data: bannersData } = useBanners();
 
-  const banners = Array.isArray(bannersData) ? bannersData.filter((b) => b.isActive !== false) : [];
+  // The API sorts by `order`, but the admin form does not set it, so every
+  // banner currently comes back with the same value and the tie is broken
+  // arbitrarily by Postgres. Sort defensively so the sequence is stable across
+  // requests: by `order`, then oldest first.
+  const banners = React.useMemo(() => {
+    const list = Array.isArray(bannersData)
+      ? bannersData.filter((b) => b.isActive !== false)
+      : [];
+    return [...list].sort((a, b) => {
+      const orderDiff = (a.order ?? 0) - (b.order ?? 0);
+      if (orderDiff !== 0) return orderDiff;
+      return (
+        new Date(a.createdAt ?? 0).getTime() - new Date(b.createdAt ?? 0).getTime()
+      );
+    });
+  }, [bannersData]);
 
-  // The hero shows a single banner. It used to render three side by side, which
-  // made it look as though the admin was meant to supply exactly three; it is an
-  // ordered list, so the hero takes the first active one.
-  const heroBanner = banners[0];
+  // The hero cycles through every active banner the admin has uploaded, in the
+  // order the API returns them (it already sorts by `order` and filters out
+  // inactive ones). With a single banner this renders exactly as before: no
+  // dots, no arrows, no auto-advance.
+  const [bannerIndex, setBannerIndex] = useState(0);
+  const [isBannerPaused, setIsBannerPaused] = useState(false);
+
+  const hasBannerSlideshow = banners.length > 1;
+
+  // Guard against the index dangling past the end when banners are added or
+  // removed while the page is open.
+  useEffect(() => {
+    if (bannerIndex > banners.length - 1) {
+      setBannerIndex(0);
+    }
+  }, [banners.length, bannerIndex]);
+
+  useEffect(() => {
+    if (!hasBannerSlideshow || isBannerPaused) return;
+    const interval = setInterval(() => {
+      setBannerIndex((prev) => (prev + 1) % banners.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [hasBannerSlideshow, isBannerPaused, banners.length]);
+
+  const goToPrevBanner = useCallback(() => {
+    setBannerIndex((prev) => (prev - 1 + banners.length) % banners.length);
+  }, [banners.length]);
+
+  const goToNextBanner = useCallback(() => {
+    setBannerIndex((prev) => (prev + 1) % banners.length);
+  }, [banners.length]);
+
+  const heroBanner = banners[bannerIndex];
   const heroBannerImage =
     heroBanner?.imageUrl || 'https://placehold.co/1600x300/f3f4f6/9ca3af?text=Banner';
 
@@ -46,23 +91,37 @@ export default function HeroSection() {
 
   const displayBrands = brands.length > 0 ? brands : fallbackBrands;
 
-  const [visibleCount, setVisibleCount] = useState(4);
+  const [desiredVisibleCount, setDesiredVisibleCount] = useState(4);
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 480) {
-        setVisibleCount(2);
-      } else if (window.innerWidth < 768) {
-        setVisibleCount(3);
+      const width = window.innerWidth;
+      // The strip spans the full width of the bar, so wider screens show more
+      // logos rather than stretching four of them across the whole page.
+      if (width < 480) {
+        setDesiredVisibleCount(2);
+      } else if (width < 768) {
+        setDesiredVisibleCount(3);
+      } else if (width < 1024) {
+        setDesiredVisibleCount(4);
+      } else if (width < 1440) {
+        setDesiredVisibleCount(5);
       } else {
-        setVisibleCount(4);
+        setDesiredVisibleCount(6);
       }
     };
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Never ask for more slots than there are logos, or the row would occupy only
+  // part of its track and bunch up against the left edge.
+  const visibleCount = Math.max(
+    1,
+    Math.min(desiredVisibleCount, displayBrands.length),
+  );
 
   const handlePrev = () => {
     setCurrentIndex((prev) => {
@@ -98,39 +157,108 @@ export default function HeroSection() {
 
   return (
     <div className="relative z-10 flex w-full flex-col bg-white">
-      {/* Top Main Section: one banner, spanning the full width */}
+      {/* Top Main Section: full-width banner, cycling when there is more than one */}
       <div className="border-b border-gray-200">
-        <div className="relative h-[250px] w-full overflow-hidden bg-white md:h-[300px]">
-          {heroBanner?.link ? (
-            <a
-              href={heroBanner.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block h-full w-full"
-            >
-              <img
-                src={heroBannerImage}
-                alt={heroBanner?.title || 'Featured'}
-                className="h-full w-full object-cover"
-              />
-            </a>
-          ) : (
+        <div
+          className="relative h-[250px] w-full overflow-hidden bg-white md:h-[300px]"
+          onMouseEnter={() => setIsBannerPaused(true)}
+          onMouseLeave={() => setIsBannerPaused(false)}
+          role={hasBannerSlideshow ? 'region' : undefined}
+          aria-label={hasBannerSlideshow ? 'Featured banners' : undefined}
+          aria-roledescription={hasBannerSlideshow ? 'carousel' : undefined}
+        >
+          {banners.length === 0 ? (
             <img
               src={heroBannerImage}
-              alt={heroBanner?.title || 'Featured'}
+              alt="Featured"
               className="h-full w-full object-cover"
             />
+          ) : (
+            banners.map((banner, index) => {
+              const isCurrent = index === bannerIndex;
+              const image = banner?.imageUrl || heroBannerImage;
+              const slide = (
+                <img
+                  src={image}
+                  alt={banner?.title || 'Featured'}
+                  className="h-full w-full object-cover"
+                />
+              );
+
+              return (
+                <div
+                  key={banner?.id ?? index}
+                  className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+                    isCurrent ? 'opacity-100' : 'pointer-events-none opacity-0'
+                  }`}
+                  aria-hidden={!isCurrent}
+                >
+                  {banner?.link ? (
+                    <a
+                      href={banner.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block h-full w-full"
+                      tabIndex={isCurrent ? undefined : -1}
+                    >
+                      {slide}
+                    </a>
+                  ) : (
+                    slide
+                  )}
+                </div>
+              );
+            })
           )}
+
           {(heroBanner as any)?.isAd && (
             <div className="absolute top-3 left-4 z-20 bg-white/80 backdrop-blur-sm text-gray-700 px-1.5 py-0.5 rounded text-[11px] sm:text-[12px] font-medium shadow-sm">
               Ad
             </div>
           )}
+
+          {hasBannerSlideshow && (
+            <>
+              <button
+                type="button"
+                onClick={goToPrevBanner}
+                aria-label="Previous banner"
+                className="absolute left-3 top-1/2 z-20 hidden -translate-y-1/2 items-center justify-center rounded-full bg-white/70 p-2 text-gray-700 shadow-sm backdrop-blur-sm transition hover:bg-white focus:outline-none sm:flex"
+              >
+                <ChevronLeft className="h-5 w-5" strokeWidth={3} />
+              </button>
+              <button
+                type="button"
+                onClick={goToNextBanner}
+                aria-label="Next banner"
+                className="absolute right-3 top-1/2 z-20 hidden -translate-y-1/2 items-center justify-center rounded-full bg-white/70 p-2 text-gray-700 shadow-sm backdrop-blur-sm transition hover:bg-white focus:outline-none sm:flex"
+              >
+                <ChevronRight className="h-5 w-5" strokeWidth={3} />
+              </button>
+
+              <div className="absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2">
+                {banners.map((banner, index) => (
+                  <button
+                    key={banner?.id ?? index}
+                    type="button"
+                    onClick={() => setBannerIndex(index)}
+                    aria-label={`Go to banner ${index + 1}`}
+                    aria-current={index === bannerIndex}
+                    className={`h-2 rounded-full transition-all ${
+                      index === bannerIndex
+                        ? 'w-5 bg-white'
+                        : 'w-2 bg-white/60 hover:bg-white/80'
+                    }`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </div>
       {/* Bottom Slider Section */}
       <div className="border-b border-gray-300 bg-[#e2e2e2] px-4 py-1.5 sm:py-2">
-        <div className="mx-auto flex max-w-4xl items-center justify-center gap-3 xs:gap-3 md:gap-6">
+        <div className="flex w-full items-center gap-3 xs:gap-3 md:gap-6">
           {/* Left Arrow */}
           {displayBrands.length > visibleCount && (
             <button 
@@ -142,7 +270,7 @@ export default function HeroSection() {
           )}
 
           {/* Logos Slider Container */}
-          <div className="relative flex-1 overflow-hidden max-w-3xl">
+          <div className="relative flex-1 overflow-hidden">
             {isLoadingBrands ? (
               <div className="flex justify-center">
                 <span className="text-sm italic text-gray-400">Loading brands...</span>

@@ -36,6 +36,39 @@ export async function createPayment(input: CreatePaymentInput): Promise<Payment>
   return response.data.data ?? response.data;
 }
 
+// ─── Razorpay ───────────────────────────────────────
+
+export interface RazorpayOrder {
+  razorpayOrderId: string;
+  amount: number;
+  currency: string;
+  /** Public key id, returned by the API so it is configured in one place only. */
+  keyId: string;
+  orderId: string;
+}
+
+/**
+ * Starts an online payment. The amount is taken from the order on the server,
+ * never sent from here.
+ */
+export async function createRazorpayOrder(orderId: string): Promise<RazorpayOrder> {
+  const response = await api.post('/payments/razorpay/order', { orderId });
+  return response.data.data ?? response.data;
+}
+
+/**
+ * Hands the signature from Razorpay's checkout back for verification. Until this
+ * succeeds the order is not paid, whatever the browser was shown.
+ */
+export async function verifyRazorpayPayment(input: {
+  razorpayOrderId: string;
+  razorpayPaymentId: string;
+  razorpaySignature: string;
+}): Promise<unknown> {
+  const response = await api.post('/payments/razorpay/verify', input);
+  return response.data.data ?? response.data;
+}
+
 export async function uploadPaymentProof(paymentId: string, proofUrl: string): Promise<Payment> {
   const response = await api.post(`/payments/${paymentId}/proof`, { proofUrl });
   return response.data.data ?? response.data;

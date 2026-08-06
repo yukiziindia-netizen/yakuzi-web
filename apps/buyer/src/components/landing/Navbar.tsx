@@ -162,6 +162,8 @@ export default function Navbar({
   const router = useRouter();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
+  // The bar itself: holds the search panel and the button that opens it.
+  const navPanelRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
@@ -185,11 +187,26 @@ export default function Navbar({
 
     // Handle clicks outside of profile dropdown
     const handleClickOutside = (event: MouseEvent) => {
-      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(target)) {
         setIsProfileDropdownOpen(false);
+      }
+
+      // The search panel had no dismissal of its own, so it stayed open until
+      // the toggle was pressed again. The ref is on the bar that holds both the
+      // panel and the button that opens it, so pressing that button still just
+      // toggles instead of being closed here and reopened by its own handler.
+      if (navPanelRef.current && !navPanelRef.current.contains(target)) {
+        setIsSearchChatOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsSearchChatOpen(false);
+    };
+    document.addEventListener('keydown', handleEscape);
 
     // Load chat sessions on mount
     const savedSessions = localStorage.getItem('yukizi_chat_sessions');
@@ -204,6 +221,7 @@ export default function Navbar({
     return () => {
       if (scrollContainer) scrollContainer.removeEventListener('wheel', handleWheel);
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
     };
   }, []);
 
@@ -392,7 +410,10 @@ export default function Navbar({
         ref={navRef}
         className="fixed bottom-0 left-0 right-0 z-[90] flex justify-center items-end sm:items-center pointer-events-none px-2 pb-4 sm:pb-6 md:pb-4 sm:px-6 w-full will-change-transform"
       >
-        <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-6 md:gap-2 pointer-events-auto flex-nowrap justify-center w-full max-w-[1200px] px-1 sm:px-4 relative z-10">
+        <div
+          ref={navPanelRef}
+          className="flex items-center gap-1.5 xs:gap-2 sm:gap-6 md:gap-2 pointer-events-auto flex-nowrap justify-center w-full max-w-[1200px] px-1 sm:px-4 relative z-10"
+        >
           {/* Left Segment: Logo, Profile, Notifications, Search */}
           <div className="flex items-center bg-white sm:bg-[#562996] rounded-xl pl-[2px] pr-1 xs:pl-1 xs:pr-1.5 sm:px-4 md:px-6 h-[48px] sm:h-[60px] md:h-[64px] shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl flex-1 sm:flex-1 max-w-[480px] justify-between overflow-hidden min-w-0 border border-gray-100 sm:border-0">
             {/* DESKTOP VIEW (sm and up) */}

@@ -44,7 +44,8 @@ export default function CheckoutPage() {
   const { data: platformConfig } = usePlatformConfig();
   const syncCart = useSyncCart();
 
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('BANK_TRANSFER');
+  // Online payment is the only method offered at checkout.
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('RAZORPAY');
   const [syncError, setSyncError] = useState<string | null>(null);
   const [billingOption, setBillingOption] = useState<'same' | 'different'>('same');
   const [saveInfo, setSaveInfo] = useState(false);
@@ -86,11 +87,6 @@ export default function CheckoutPage() {
   const subtotal = Math.round(cart.total ?? 0);
   const total = subtotal;
 
-  // Online payment is offered only when the API has Razorpay keys. The public
-  // key itself comes back from the API when the payment starts, so it is
-  // configured in one place rather than duplicated here.
-  const isOnlinePaymentEnabled =
-    process.env.NEXT_PUBLIC_RAZORPAY_ENABLED === 'true';
 
   const loadRazorpayCheckout = (): Promise<boolean> =>
     new Promise((resolve) => {
@@ -466,31 +462,9 @@ export default function CheckoutPage() {
               <p style={{ fontSize: 13, color: '#777', marginBottom: 14 }}>All transactions are secure and encrypted.</p>
 
               <div style={{ border: '2px solid #0066cc', borderRadius: 8, overflow: 'hidden' }}>
-                <div
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: '#eef4fc', cursor: 'pointer' }}
-                  onClick={() => setPaymentMethod('BANK_TRANSFER')}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 18, height: 18, borderRadius: '50%', border: paymentMethod === 'BANK_TRANSFER' ? '6px solid #0066cc' : '2px solid #ccc', flexShrink: 0, transition: 'border 0.15s' }} />
-                    <span style={{ fontSize: 14, fontWeight: 600, color: '#1a1a1a' }}>Bank transfer / UPI &mdash; pay after placing your order</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                    <div style={{ background: '#fff', border: '1px solid #ddd', borderRadius: 4, padding: '2px 5px', fontSize: 10, fontWeight: 800, color: '#2563eb', letterSpacing: 0.3 }}>UPI</div>
-                    <div style={{ background: '#fff', border: '1px solid #ddd', borderRadius: 4, padding: '2px 5px', fontSize: 10, fontWeight: 800, color: '#555', letterSpacing: 0.3 }}>BANK</div>
-                  </div>
-                </div>
-                {paymentMethod === 'BANK_TRANSFER' && (
-                  <div style={{ padding: '14px 16px', background: '#fff', borderTop: '1px solid #dce8f5', textAlign: 'center' }}>
-                    <p style={{ fontSize: 13, color: '#555', lineHeight: 1.5 }}>
-                      No payment is taken online right now. Placing the order reserves your items, and we&apos;ll share payment details so you can pay by bank transfer or UPI. Your order is confirmed once we&apos;ve verified the payment.
-                    </p>
-                  </div>
-                )}
 
-                {isOnlinePaymentEnabled && (
-                  <>
                     <div
-                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: paymentMethod === 'RAZORPAY' ? '#eef4fc' : '#fff', borderTop: '1px solid #dce8f5', cursor: 'pointer' }}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: paymentMethod === 'RAZORPAY' ? '#eef4fc' : '#fff', cursor: 'pointer' }}
                       onClick={() => setPaymentMethod('RAZORPAY')}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -508,8 +482,6 @@ export default function CheckoutPage() {
                         </p>
                       </div>
                     )}
-                  </>
-                )}
               </div>
             </div>
 

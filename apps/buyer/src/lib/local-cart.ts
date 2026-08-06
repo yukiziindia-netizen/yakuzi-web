@@ -76,11 +76,16 @@ export const localCart = {
         cart.items.splice(existingIndex, 1);
       }
     } else if (itemData.quantity > 0) {
-      cart.items.push({
-        id: `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        ...itemData,
-        quantity: Math.min(itemData.quantity, ceilingFor(itemData)),
-      });
+      // Adding something already out of stock clamps to zero, and a
+      // zero-quantity line would go on to be synced and ordered.
+      const quantity = Math.min(itemData.quantity, ceilingFor(itemData));
+      if (quantity > 0) {
+        cart.items.push({
+          id: `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          ...itemData,
+          quantity,
+        });
+      }
     }
     
     // Recalculate totals
@@ -96,14 +101,15 @@ export const localCart = {
     const existingIndex = cart.items.findIndex(i => i.id === itemId);
     
     if (existingIndex > -1) {
-      if (quantity <= 0) {
+      // The cart drawer's +/- comes through here, so the same ceiling applies.
+      // Clamping can land on zero when an item has sold out since it was added,
+      // and a zero-quantity line left in the cart goes on to be synced and
+      // ordered. Drop it instead.
+      const clamped = Math.min(quantity, ceilingFor(cart.items[existingIndex]));
+      if (clamped <= 0) {
         cart.items.splice(existingIndex, 1);
       } else {
-        // The cart drawer's +/- comes through here, so the same ceiling applies.
-        cart.items[existingIndex].quantity = Math.min(
-          quantity,
-          ceilingFor(cart.items[existingIndex]),
-        );
+        cart.items[existingIndex].quantity = clamped;
       }
       
       cart.subtotal = cart.items.reduce((sum, item) => sum + (item.price || item.product?.price || 0) * item.quantity, 0);

@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, Lock, Eye, EyeOff, Loader2, Phone, KeyRound, X, Undo2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@yukizi/api-client';
 import { useToast } from '@/components/shared/Toast';
 import { useScrollLock } from '@/hooks/useScrollLock';
+import GoogleSignInButton from '@/components/shared/GoogleSignInButton';
 import ForgotPasswordFlow from '@/app/login/ForgotPasswordFlow';
 
 interface LoginModalProps {
@@ -45,7 +46,7 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
   
   const router = useRouter();
   const { toast } = useToast();
-  const { sendOtp, verifyOtp, registerBuyer, loginWithPassword, loginWithGoogle } = useAuth();
+  const { sendOtp, verifyOtp, registerBuyer, loginWithPassword } = useAuth();
 
   const isOpen = isOpenProp !== undefined ? isOpenProp : isOpenState;
   const onClose = onCloseProp !== undefined ? onCloseProp : () => setIsOpenState(false);
@@ -109,94 +110,6 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
   const firstDay = getFirstDayOfMonth(displayYear, displayMonth);
   const daysInPrevMonth = getDaysInMonth(displayYear, displayMonth - 1);
 
-  // ─── Google sign-in ───────────────────────────────
-  // Stays dormant unless NEXT_PUBLIC_GOOGLE_CLIENT_ID is set, so the button
-  // below falls back to the plain icon when Google is not configured rather
-  // than rendering a control that cannot work.
-  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-  const googleButtonRef = useRef<HTMLDivElement>(null);
-
-  const handleGoogleCredential = useCallback(
-    async (credential: string) => {
-      setIsLoading(true);
-      try {
-        await loginWithGoogle(credential);
-        toast('Login successful!', 'success');
-        handleCloseCleanup();
-        router.push('/');
-      } catch (e: any) {
-        toast(
-          e?.response?.data?.message || 'Google sign-in failed. Please try again.',
-          'error',
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [loginWithGoogle, router],
-  );
-
-  useEffect(() => {
-    if (!isOpen || !googleClientId) return;
-
-    let cancelled = false;
-
-    const renderGoogleButton = () => {
-      const google = (window as any).google;
-      if (cancelled || !google?.accounts?.id || !googleButtonRef.current) return;
-
-      google.accounts.id.initialize({
-        client_id: googleClientId,
-        callback: (response: any) => {
-          if (response?.credential) handleGoogleCredential(response.credential);
-        },
-      });
-
-      // Google's own button, rather than a custom control wired to its API.
-      // Their script only hands back an ID token through a button it rendered
-      // itself, and the circular icon variant matches the row it sits in.
-      googleButtonRef.current.innerHTML = '';
-      google.accounts.id.renderButton(googleButtonRef.current, {
-        type: 'icon',
-        shape: 'circle',
-        theme: 'outline',
-        size: 'large',
-      });
-    };
-
-    if ((window as any).google?.accounts?.id) {
-      renderGoogleButton();
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    const existing = document.getElementById(
-      'google-identity-services',
-    ) as HTMLScriptElement | null;
-
-    if (existing) {
-      existing.addEventListener('load', renderGoogleButton);
-      return () => {
-        cancelled = true;
-        existing.removeEventListener('load', renderGoogleButton);
-      };
-    }
-
-    const script = document.createElement('script');
-    script.id = 'google-identity-services';
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.defer = true;
-    script.onload = renderGoogleButton;
-    document.head.appendChild(script);
-
-    return () => {
-      cancelled = true;
-      script.onload = null;
-    };
-  }, [isOpen, googleClientId, handleGoogleCredential]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -736,13 +649,11 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
           <div className="flex justify-center space-x-6 mb-6">
             {/* Google Icon — Google's own button when configured, so the click
                 actually returns an ID token; the static icon otherwise. */}
-            {googleClientId ? (
-              <div
-                ref={googleButtonRef}
-                className="w-11 h-11 flex items-center justify-center [color-scheme:light]"
-                aria-label="Sign in with Google"
-              />
-            ) : (
+            <GoogleSignInButton
+              active={isOpen}
+              onSuccess={handleCloseCleanup}
+              onLoadingChange={setIsLoading}
+              fallback={
             <button type="button" className="w-11 h-11 rounded-full bg-white border border-[#e2e8f0] shadow-[0_1px_4px_rgba(0,0,0,0.05)] flex items-center justify-center hover:scale-110 transition-transform">
               <svg viewBox="0 0 24 24" width="28" height="28" xmlns="http://www.w3.org/2000/svg">
                 <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
@@ -753,7 +664,8 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
                 </g>
               </svg>
             </button>
-            )}
+              }
+            />
 
             {/* Facebook Icon */}
             <button

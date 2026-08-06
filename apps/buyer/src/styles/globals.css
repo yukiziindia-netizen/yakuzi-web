@@ -233,3 +233,31 @@
   mask: url('/icons/navbar/activesave_trimmed.png') no-repeat center / contain;
   -webkit-mask: url('/icons/navbar/activesave_trimmed.png') no-repeat center / contain;
 }
+
+/* ─── Brand strip marquee ───────────────────────────────────────────────
+   The logo track holds two identical halves, so shifting it by -50% lands
+   exactly on the start of the second half and the loop repeats seamlessly. */
+@keyframes brand-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.brand-marquee-track {
+  animation: brand-marquee var(--brand-marquee-duration, 30s) linear infinite;
+  will-change: transform;
+}
+
+/* Hovering stops it, so a logo can be clicked without chasing it. */
+.brand-marquee:hover .brand-marquee-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-marquee-track {
+    animation: none;
+  }
+}

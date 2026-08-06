@@ -91,69 +91,24 @@ export default function HeroSection() {
 
   const displayBrands = brands.length > 0 ? brands : fallbackBrands;
 
-  const [desiredVisibleCount, setDesiredVisibleCount] = useState(4);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  // The strip revolves continuously rather than stepping through pages, so it
+  // needs no index, no timer and no arrows - the animation is entirely in CSS.
+  //
+  // The track is rendered as two identical halves and shifted by -50%, which
+  // lands on the start of the second half and loops without a visible jump.
+  // With only a handful of logos the list is repeated more times so the track
+  // is still wider than a large screen, which it must be or the loop shows a
+  // gap. The count stays even to keep the two halves identical.
+  const marqueeRepeats = displayBrands.length >= 6 ? 2 : 4;
+  const marqueeBrands: any[] = [];
+  for (let i = 0; i < marqueeRepeats; i += 1) {
+    marqueeBrands.push(...displayBrands);
+  }
+  const marqueeHalfLength = marqueeBrands.length / 2;
 
-  useEffect(() => {
-    const handleResize = () => {
-      const width = window.innerWidth;
-      // The strip spans the full width of the bar, so wider screens show more
-      // logos rather than stretching four of them across the whole page.
-      if (width < 480) {
-        setDesiredVisibleCount(2);
-      } else if (width < 768) {
-        setDesiredVisibleCount(3);
-      } else if (width < 1024) {
-        setDesiredVisibleCount(4);
-      } else if (width < 1440) {
-        setDesiredVisibleCount(5);
-      } else {
-        setDesiredVisibleCount(6);
-      }
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Never ask for more slots than there are logos, or the row would occupy only
-  // part of its track and bunch up against the left edge.
-  const visibleCount = Math.max(
-    1,
-    Math.min(desiredVisibleCount, displayBrands.length),
-  );
-
-  const handlePrev = () => {
-    setCurrentIndex((prev) => {
-      if (prev === 0) {
-        return displayBrands.length - visibleCount;
-      }
-      return prev - 1;
-    });
-  };
-
-  const handleNext = useCallback(() => {
-    setCurrentIndex((prev) => {
-      if (prev >= displayBrands.length - visibleCount) {
-        return 0;
-      }
-      return prev + 1;
-    });
-  }, [displayBrands.length, visibleCount]);
-
-  useEffect(() => {
-    if (displayBrands.length <= visibleCount) return;
-    const interval = setInterval(() => {
-      handleNext();
-    }, 3500);
-    return () => clearInterval(interval);
-  }, [handleNext, displayBrands.length, visibleCount]);
-
-  useEffect(() => {
-    if (currentIndex > displayBrands.length - visibleCount) {
-      setCurrentIndex(Math.max(0, displayBrands.length - visibleCount));
-    }
-  }, [visibleCount, displayBrands.length, currentIndex]);
+  // Longer lists take proportionally longer, so the logos travel at the same
+  // speed whatever the brand count.
+  const marqueeDuration = `${Math.max(marqueeHalfLength * 5, 20)}s`;
 
   return (
     <div className="relative z-10 flex w-full flex-col bg-white">
@@ -256,75 +211,39 @@ export default function HeroSection() {
           )}
         </div>
       </div>
-      {/* Bottom Slider Section */}
+      {/* Bottom Strip: brand logos, revolving continuously */}
       <div className="border-b border-gray-300 bg-[#e2e2e2] px-4 py-1.5 sm:py-2">
-        <div className="flex w-full items-center gap-3 xs:gap-3 md:gap-6">
-          {/* Left Arrow */}
-          {displayBrands.length > visibleCount && (
-            <button 
-              onClick={handlePrev}
-              className="flex cursor-pointer items-center justify-center p-1 text-[#8c8c8c] transition-colors hover:text-gray-800 focus:outline-none"
-            >
-              <ChevronLeft className="h-[20px] w-[20px] xs:h-[24px] xs:w-[24px] md:h-[28px] md:w-[28px]" strokeWidth={4.5} />
-            </button>
-          )}
-
-          {/* Logos Slider Container */}
-          <div className="relative flex-1 overflow-hidden">
-            {isLoadingBrands ? (
-              <div className="flex justify-center">
-                <span className="text-sm italic text-gray-400">Loading brands...</span>
-              </div>
-            ) : (
-              <div 
-                className="flex transition-transform duration-500 ease-in-out"
-                style={{
-                  transform: `translateX(-${currentIndex * (100 / visibleCount)}%)`
-                }}
-              >
-                {displayBrands.map((brand: any) => (
-                  <div 
-                    key={brand.id}
-                    className="flex-shrink-0 flex justify-center items-center px-2 xs:px-4"
-                    style={{ width: `${100 / visibleCount}%` }}
-                  >
-                    <img
-                      src={brand.imageUrl}
-                      alt={brand.name}
-                      className="h-[24px] xs:h-[36px] md:h-[54px] cursor-pointer object-contain mix-blend-multiply transition-transform hover:scale-110"
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
+        {isLoadingBrands ? (
+          <div className="flex justify-center">
+            <span className="text-sm italic text-gray-400">Loading brands...</span>
           </div>
-
-          {/* Right Arrow */}
-          {displayBrands.length > visibleCount && (
-            <button 
-              onClick={handleNext}
-              className="flex cursor-pointer items-center justify-center p-1 text-[#8c8c8c] transition-colors hover:text-gray-800 focus:outline-none"
+        ) : (
+          <div className="brand-marquee w-full overflow-hidden">
+            <div
+              className="brand-marquee-track flex w-max items-center"
+              style={
+                { '--brand-marquee-duration': marqueeDuration } as React.CSSProperties
+              }
             >
-              <ChevronRight className="h-[20px] w-[20px] xs:h-[24px] xs:w-[24px] md:h-[28px] md:w-[28px]" strokeWidth={4.5} />
-            </button>
-          )}
-        </div>
+              {marqueeBrands.map((brand: any, index: number) => (
+                <div
+                  key={`${brand.id}-${index}`}
+                  className="flex shrink-0 items-center justify-center px-6 xs:px-8 md:px-12"
+                  // The repeated halves exist only to make the loop seamless;
+                  // a screen reader should hear each brand once.
+                  aria-hidden={index >= marqueeHalfLength}
+                >
+                  <img
+                    src={brand.imageUrl}
+                    alt={brand.name}
+                    className="h-[24px] xs:h-[36px] md:h-[54px] cursor-pointer object-contain mix-blend-multiply transition-transform hover:scale-110"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
-
-      {/* Dots */}
-      {displayBrands.length > visibleCount && (
-        <div className="flex justify-center gap-2 bg-white pt-5 pb-1">
-          {Array.from({ length: displayBrands.length - visibleCount + 1 }).map((_, idx) => (
-            <div 
-              key={idx}
-              onClick={() => setCurrentIndex(idx)}
-              className={`h-2.5 w-2.5 cursor-pointer rounded-full transition-colors duration-300 ${
-                currentIndex === idx ? 'bg-purple-600' : 'bg-gray-400 hover:bg-gray-500'
-              }`}
-            ></div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

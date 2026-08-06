@@ -85,8 +85,11 @@ export {
   uploadPaymentProofByOrder,
   getPaymentByOrderId,
   getPaymentHistory,
+  createRazorpayOrder,
+  verifyRazorpayPayment,
   type Payment,
   type CreatePaymentInput,
+  type RazorpayOrder,
 } from './modules/payments.api';
 
 // Notifications

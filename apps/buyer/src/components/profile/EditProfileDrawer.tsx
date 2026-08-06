@@ -13,7 +13,13 @@ interface EditProfileDrawerProps {
 }
 
 export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawerProps) {
-  const { data: profile } = useBuyerProfile();
+  const {
+    data: profile,
+    isLoading: isProfileLoading,
+    isError: isProfileError,
+    error: profileError,
+    refetch: refetchProfile,
+  } = useBuyerProfile();
   const { user, logout } = useAuth();
   const { mutateAsync: updateProfile, isPending: isUpdating } = useUpdateBuyerProfile();
   const { toast } = useToast();
@@ -35,31 +41,59 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
 
   // Load initial data
   useEffect(() => {
-    if (profile) {
-      const addr = typeof profile.address === 'object' ? profile.address : null;
-      const street = (addr as any)?.street1 ?? (typeof profile.address === 'string' ? profile.address : '');
-      const city = profile.city ?? (addr as any)?.city ?? '';
-      const state = profile.state ?? (addr as any)?.state ?? '';
-      const pincode = profile.pincode ?? (addr as any)?.pincode ?? '';
-      const fullAddress = [street, city, state, pincode].filter(Boolean).join(', ');
+    const addr =
+      profile && typeof profile.address === 'object' ? profile.address : null;
+    const street =
+      (addr as any)?.street1 ??
+      (typeof profile?.address === 'string' ? profile.address : '');
+    const city = profile?.city ?? (addr as any)?.city ?? '';
+    const state = profile?.state ?? (addr as any)?.state ?? '';
+    const pincode = profile?.pincode ?? (addr as any)?.pincode ?? '';
+    const fullAddress = [street, city, state, pincode].filter(Boolean).join(', ');
 
-      setFormData({
-        name: profile.legalName || 'Roopali',
-        username: profile.user?.username || 'Yukizi0346',
-        email: profile.user?.email || user?.email || 'yukizi0346@gmail.com',
-        address: fullAddress || '',
-        phone: profile.user?.phone || '+91 12345 67890',
-      });
-    }
+    // Fall back to the signed-in user, never to invented data. This block used
+    // to be gated on `if (profile)`, so until that query resolved every row
+    // rendered blank — which is what a new buyer sees straight after signup,
+    // even though the session already knows their username, email and phone.
+    setFormData({
+      name: profile?.legalName || '',
+      username: profile?.user?.username || user?.username || '',
+      email: profile?.user?.email || user?.email || '',
+      address: fullAddress,
+      phone: profile?.user?.phone || user?.phone || '',
+    });
 
-    // Load saved avatar from localStorage if exists
-    const savedAvatar = localStorage.getItem('yukizi_avatar');
-    if (savedAvatar) {
-      setPhoto(savedAvatar);
-    } else {
-      setPhoto('https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200');
-    }
+    // Avatar lives in this browser only — the API has no avatar field on the
+    // buyer profile, so there is nothing to load from the server.
+    setPhoto(localStorage.getItem('yukizi_avatar') || '');
   }, [profile, user]);
+
+  // A failed profile load used to be indistinguishable from an empty profile:
+  // both rendered "Add your name" on every row. Say which one it is.
+  const profileStatus = (profileError as any)?.response?.status;
+  const serverMessage = (() => {
+    const m = (profileError as any)?.response?.data?.message;
+    return Array.isArray(m) ? m[0] : m;
+  })();
+  const loadErrorMessage = profileStatus === 403
+    ? 'This account does not have buyer access, so its profile cannot be loaded or edited.'
+    : serverMessage || 'We could not load your profile. Check your connection and try again.';
+
+  // What an empty row should say depends on why it is empty.
+  const emptyLabel = (prompt: string) =>
+    isProfileLoading ? 'Loading…' : isProfileError ? 'Unavailable' : prompt;
+
+  // Shown when no photo has been uploaded. Never invent a stock portrait.
+  const initials =
+    [formData.name, formData.username, formData.email]
+      .find((value) => value && value.trim())
+      ?.trim()
+      .split(/[\s._-]+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((word) => word[0])
+      .join('')
+      .toUpperCase() || '?';
 
   if (!isOpen) return null;
 
@@ -82,6 +116,12 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
   };
 
   const startEditing = (field: keyof typeof formData) => {
+    // Saving goes to the same endpoint that just refused to load, so offering
+    // an editor here would only end in a failed save.
+    if (isProfileError) {
+      toast(loadErrorMessage, 'error');
+      return;
+    }
     setEditingField(field);
     setEditValue(formData[field]);
   };
@@ -157,11 +197,17 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
             onClick={handlePhotoClick}
             className="relative w-28 h-28 rounded-full overflow-hidden border-[3px] border-white shadow-md flex items-center justify-center bg-purple-900 group cursor-pointer hover:scale-105 transition-transform duration-200"
           >
-            <img 
-              src={photo} 
-              alt="Avatar" 
-              className="w-full h-full object-cover group-hover:opacity-75 transition-opacity" 
-            />
+            {photo ? (
+              <img
+                src={photo}
+                alt="Avatar"
+                className="w-full h-full object-cover group-hover:opacity-75 transition-opacity"
+              />
+            ) : (
+              <span className="text-white text-3xl font-bold tracking-wide select-none group-hover:opacity-75 transition-opacity">
+                {initials}
+              </span>
+            )}
             <div className="absolute inset-0 bg-black/35 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
               <Camera className="w-6 h-6 text-white" />
             </div>
@@ -188,6 +234,24 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
 
         {/* Form Body */}
         <div className="flex-1 overflow-y-auto pr-1">
+          {isProfileError && (
+            <div className="mb-5 rounded-2xl border border-red-100 bg-red-50 px-4 py-3">
+              <p className="text-[13px] font-semibold text-red-700">
+                Profile could not be loaded
+              </p>
+              <p className="mt-1 text-[12px] leading-relaxed text-red-600">
+                {loadErrorMessage}
+              </p>
+              <button
+                type="button"
+                onClick={() => refetchProfile()}
+                className="mt-2 text-[12px] font-bold text-red-700 underline underline-offset-2 hover:text-red-800"
+              >
+                Try again
+              </button>
+            </div>
+          )}
+
           {/* About You Section */}
           <span className="text-[11px] font-black text-gray-400 uppercase tracking-widest block mb-4">
             About you
@@ -218,7 +282,11 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
                   onClick={() => startEditing('name')}
                   className="flex items-center gap-1.5 hover:text-purple-600 transition-colors"
                 >
-                  <span className="text-[14px] font-semibold text-gray-800">{formData.name}</span>
+                  {formData.name ? (
+                    <span className="text-[14px] font-semibold text-gray-800">{formData.name}</span>
+                  ) : (
+                    <span className="text-[14px] font-semibold text-gray-400 italic">{emptyLabel('Add your name')}</span>
+                  )}
                   <ChevronRight className="w-4 h-4 text-gray-400" />
                 </button>
               )}
@@ -248,7 +316,11 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
                   onClick={() => startEditing('username')}
                   className="flex items-center gap-1.5 hover:text-purple-600 transition-colors"
                 >
-                  <span className="text-[14px] font-semibold text-gray-800">{formData.username}</span>
+                  {formData.username ? (
+                    <span className="text-[14px] font-semibold text-gray-800">{formData.username}</span>
+                  ) : (
+                    <span className="text-[14px] font-semibold text-gray-400 italic">{emptyLabel('Add a username')}</span>
+                  )}
                   <ChevronRight className="w-4 h-4 text-gray-400" />
                 </button>
               )}
@@ -278,7 +350,11 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
                   onClick={() => startEditing('email')}
                   className="flex items-center gap-1.5 hover:text-purple-600 transition-colors text-right"
                 >
-                  <span className="text-[14px] font-semibold text-gray-800 truncate max-w-[200px] sm:max-w-[240px] block">{formData.email}</span>
+                  {formData.email ? (
+                    <span className="text-[14px] font-semibold text-gray-800 truncate max-w-[200px] sm:max-w-[240px] block">{formData.email}</span>
+                  ) : (
+                    <span className="text-[14px] font-semibold text-gray-400 italic">{emptyLabel('Add your email')}</span>
+                  )}
                   <ChevronRight className="w-4 h-4 text-gray-400" />
                 </button>
               )}
@@ -312,7 +388,7 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
                   {formData.address ? (
                     <span className="text-[14px] font-semibold text-gray-800 truncate block max-w-[220px]">{formData.address}</span>
                   ) : (
-                    <span className="text-[14px] font-semibold text-gray-400 italic">Add your address</span>
+                    <span className="text-[14px] font-semibold text-gray-400 italic">{emptyLabel('Add your address')}</span>
                   )}
                   <ChevronRight className="w-4 h-4 text-gray-400" />
                 </button>
@@ -343,7 +419,11 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
                   onClick={() => startEditing('phone')}
                   className="flex items-center gap-1.5 hover:text-purple-600 transition-colors"
                 >
-                  <span className="text-[14px] font-semibold text-gray-800">{formData.phone}</span>
+                  {formData.phone ? (
+                    <span className="text-[14px] font-semibold text-gray-800">{formData.phone}</span>
+                  ) : (
+                    <span className="text-[14px] font-semibold text-gray-400 italic">{emptyLabel('Add your phone')}</span>
+                  )}
                   <ChevronRight className="w-4 h-4 text-gray-400" />
                 </button>
               )}

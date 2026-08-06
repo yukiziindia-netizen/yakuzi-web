@@ -2,29 +2,21 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { useCategories, useBrands, useBanners } from '@/hooks/useProducts';
+import { useBrands, useBanners } from '@/hooks/useProducts';
 
-interface HeroSectionProps {
-  title?: string;
-}
-
-export default function HeroSection({ title = 'YUKiZi' }: HeroSectionProps) {
-  const { data: categoriesData } = useCategories();
+export default function HeroSection() {
   const { data: brandsData, isLoading: isLoadingBrands } = useBrands();
   const { data: bannersData } = useBanners();
 
   const banners = Array.isArray(bannersData) ? bannersData.filter((b) => b.isActive !== false) : [];
-  const displayHeroBanners = [
-    banners[0]?.imageUrl || 'https://placehold.co/800x600/f3f4f6/9ca3af?text=Banner+1',
-    banners[1]?.imageUrl || 'https://placehold.co/800x600/f3f4f6/9ca3af?text=Banner+2',
-    banners[2]?.imageUrl || 'https://placehold.co/800x600/f3f4f6/9ca3af?text=Banner+3',
-  ];
 
-  const categories = Array.isArray(categoriesData)
-    ? categoriesData
-    : ((categoriesData as any)?.data ?? []);
+  // The hero shows a single banner. It used to render three side by side, which
+  // made it look as though the admin was meant to supply exactly three; it is an
+  // ordered list, so the hero takes the first active one.
+  const heroBanner = banners[0];
+  const heroBannerImage =
+    heroBanner?.imageUrl || 'https://placehold.co/1600x300/f3f4f6/9ca3af?text=Banner';
+
   const brands = Array.isArray(brandsData) ? brandsData.filter((b) => b.isActive !== false) : [];
 
   // Fallback images if no brands exist in the database yet
@@ -106,140 +98,36 @@ export default function HeroSection({ title = 'YUKiZi' }: HeroSectionProps) {
 
   return (
     <div className="relative z-10 flex w-full flex-col bg-white">
-      {/* Top Main Section */}
-      <div className="flex h-auto flex-col border-b border-gray-200 md:h-[300px] md:flex-row">
-        {/* Left Side: Slanted Banners */}
-        <div className="relative h-[250px] w-full overflow-hidden bg-white md:h-full md:w-[60%]">
-          <div className="-ml-[10%] flex h-full w-[120%] gap-1.5 bg-white">
-            {/* Left Image */}
-            <div className="relative flex-1 -skew-x-[15deg] overflow-hidden">
-              <div className="absolute inset-0 z-10 bg-red-600/10 mix-blend-color"></div>
-              {banners[0]?.link ? (
-                <a href={banners[0].link} target="_blank" rel="noopener noreferrer">
-                  <img
-                    src={displayHeroBanners[0]}
-                    alt={banners[0]?.title || "Anime character"}
-                    className="-ml-[40%] h-full w-[180%] origin-center skew-x-[15deg] object-cover scale-[1.1]"
-                  />
-                </a>
-              ) : (
-                <img
-                  src={displayHeroBanners[0]}
-                  alt="Anime character"
-                  className="-ml-[40%] h-full w-[180%] origin-center skew-x-[15deg] object-cover scale-[1.1]"
-                />
-              )}
-              {(banners[0] as any)?.isAd && (
-                <div className="absolute top-3 left-4 z-20 skew-x-[15deg] bg-white/80 backdrop-blur-sm text-gray-700 px-1.5 py-0.5 rounded text-[11px] sm:text-[12px] font-medium shadow-sm">
-                  Ad
-                </div>
-              )}
+      {/* Top Main Section: one banner, spanning the full width */}
+      <div className="border-b border-gray-200">
+        <div className="relative h-[250px] w-full overflow-hidden bg-white md:h-[300px]">
+          {heroBanner?.link ? (
+            <a
+              href={heroBanner.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block h-full w-full"
+            >
+              <img
+                src={heroBannerImage}
+                alt={heroBanner?.title || 'Featured'}
+                className="h-full w-full object-cover"
+              />
+            </a>
+          ) : (
+            <img
+              src={heroBannerImage}
+              alt={heroBanner?.title || 'Featured'}
+              className="h-full w-full object-cover"
+            />
+          )}
+          {(heroBanner as any)?.isAd && (
+            <div className="absolute top-3 left-4 z-20 bg-white/80 backdrop-blur-sm text-gray-700 px-1.5 py-0.5 rounded text-[11px] sm:text-[12px] font-medium shadow-sm">
+              Ad
             </div>
-
-            {/* Middle Image */}
-            <div className="relative z-20 mx-1 flex-[1.3] -skew-x-[15deg] overflow-hidden border-4 border-[#854cbc] bg-white shadow-xl">
-              <div className="absolute inset-0 z-10 bg-yellow-400/10 mix-blend-color"></div>
-              {banners[1]?.link ? (
-                <a href={banners[1].link} target="_blank" rel="noopener noreferrer">
-                  <img
-                    src={displayHeroBanners[1]}
-                    alt={banners[1]?.title || "Group of characters"}
-                    className="-ml-[40%] h-full w-[180%] origin-center skew-x-[15deg] object-cover scale-[1.1]"
-                  />
-                </a>
-              ) : (
-                <img
-                  src={displayHeroBanners[1]}
-                  alt="Group of characters"
-                  className="-ml-[40%] h-full w-[180%] origin-center skew-x-[15deg] object-cover scale-[1.1]"
-                />
-              )}
-              <div className="absolute bottom-4 left-1/2 z-20 -translate-x-1/2 skew-x-[15deg]">
-                {banners[1]?.link ? (
-                  <a
-                    href={banners[1].link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="whitespace-nowrap rounded-full bg-[#854cbc] px-8 py-2 text-sm font-medium text-white shadow-md transition-colors hover:bg-[#723b9e] inline-block"
-                  >
-                    {banners[1]?.title || 'Learn more'}
-                  </a>
-                ) : (
-                  <button className="whitespace-nowrap rounded-full bg-[#854cbc] px-8 py-2 text-sm font-medium text-white shadow-md transition-colors hover:bg-[#723b9e]">
-                    {banners[1]?.title || 'Learn more'}
-                  </button>
-                )}
-              </div>
-              {(banners[1] as any)?.isAd && (
-                <div className="absolute top-3 left-4 z-20 skew-x-[15deg] bg-white/80 backdrop-blur-sm text-gray-700 px-1.5 py-0.5 rounded text-[11px] sm:text-[12px] font-medium shadow-sm">
-                  Ad
-                </div>
-              )}
-            </div>
-
-            {/* Right Image */}
-            <div className="relative z-10 flex-1 -skew-x-[15deg] overflow-hidden">
-              <div className="absolute inset-0 z-10 bg-red-600/10 mix-blend-color"></div>
-              {banners[2]?.link ? (
-                <a href={banners[2].link} target="_blank" rel="noopener noreferrer">
-                  <img
-                    src={displayHeroBanners[2]}
-                    alt={banners[2]?.title || "Character"}
-                    className="-ml-[40%] h-full w-[180%] origin-center skew-x-[15deg] object-cover scale-[1.1]"
-                  />
-                </a>
-              ) : (
-                <img
-                  src={displayHeroBanners[2]}
-                  alt="Character"
-                  className="-ml-[40%] h-full w-[180%] origin-center skew-x-[15deg] object-cover scale-[1.1]"
-                />
-              )}
-              {(banners[2] as any)?.isAd && (
-                <div className="absolute top-3 left-4 z-20 skew-x-[15deg] bg-white/80 backdrop-blur-sm text-gray-700 px-1.5 py-0.5 rounded text-[11px] sm:text-[12px] font-medium shadow-sm">
-                  Ad
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Right Side: Text & Tags */}
-        <div className="hidden md:flex relative z-10 w-full flex-col items-center justify-center border-t border-gray-100 bg-white px-4 py-6 md:w-[40%] md:border-t-0">
-          {/* Image-based Logo */}
-          <Image
-            src="/YukiziLogo.png"
-            alt={title || 'YUKiZi Logo'}
-            width={400}
-            height={120}
-            className="mb-4 h-14 w-auto object-contain drop-shadow-sm md:h-[6rem]"
-            priority
-          />
-
-          <div className="mb-4 flex max-w-[380px] flex-wrap justify-center gap-x-3 gap-y-2 text-center text-[13.5px] font-medium text-gray-500">
-            {categories.map((category: any, index: number) => {
-              const isHighlighted = index % 4 === 2;
-              return (
-                <Link
-                  key={category.id || index}
-                  href={`/category/${category.slug || category.id}`}
-                  className={
-                    isHighlighted
-                      ? 'cursor-pointer rounded-full bg-[#a379cf] px-2.5 py-0.5 text-white shadow-sm transition-colors hover:bg-[#854cbc]'
-                      : 'cursor-pointer transition-colors hover:text-gray-800'
-                  }
-                >
-                  {category.name}
-                </Link>
-              );
-            })}
-            {categories.length === 0 && (
-              <span className="italic text-gray-400">Loading categories...</span>
-            )}
-          </div>
+          )}
         </div>
       </div>
-
       {/* Bottom Slider Section */}
       <div className="border-b border-gray-300 bg-[#e2e2e2] px-4 py-1.5 sm:py-2">
         <div className="mx-auto flex max-w-4xl items-center justify-center gap-3 xs:gap-3 md:gap-6">

@@ -8,6 +8,7 @@ export {
   registerBuyer,
   loginWithPassword,
   loginWithSimplePassword,
+  loginWithGoogle,
   refreshToken,
   logout,
   getProfile,

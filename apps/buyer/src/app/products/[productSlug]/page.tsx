@@ -95,7 +95,7 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
 
   const currentProductId = prod?.id || `prod-${index}`;
   const isSaved = wishlistData?.items?.some(
-    (item: any) => item.productId === currentProductId || item.product?.id === currentProductId || item.id === currentProductId
+    (item: any) => item.productId === currentProductId || item.product?.id === currentProductId || item.id === currentProductId || (prod?.id && (item.productId === prod.id || item.product?.id === prod.id))
   );
 
   const isYukiziChoice = !!prod.isYukiziChoice || !!prod.isNew;
@@ -270,7 +270,7 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
 
       {/* Ad Tag */}
       {isAd && (
-        <div className="absolute -top-4 right-2 text-[10px] sm:text-[11px] text-gray-500 font-medium z-20">
+        <div className="absolute -top-4 right-2 text-[10px] sm:text-[11px] text-gray-400 font-normal z-20">
           Ad
         </div>
       )}

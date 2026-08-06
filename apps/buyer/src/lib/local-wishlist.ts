@@ -27,7 +27,9 @@ export const localWishlist = {
   addItem: (productData: any) => {
     const list = localWishlist.get();
     const prodId = productData.id || productData.productId;
-    const existingIndex = list.items.findIndex((item: any) => item.productId === prodId);
+    const existingIndex = list.items.findIndex(
+      (item: any) => item.productId === prodId || item.id === prodId || item.product?.id === prodId
+    );
     
     if (existingIndex > -1) {
       return list; // already exists
@@ -47,7 +49,9 @@ export const localWishlist = {
 
   removeItem: (productId: string) => {
     const list = localWishlist.get();
-    list.items = list.items.filter((i: any) => i.productId !== productId && i.id !== productId);
+    list.items = list.items.filter(
+      (i: any) => i.productId !== productId && i.id !== productId && i.product?.id !== productId
+    );
     list.total = list.items.length;
     localWishlist.set(list);
     return list;

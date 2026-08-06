@@ -119,7 +119,7 @@ export default function ProductCard({
 
       {/* Ad Tag */}
       {showAd && (
-        <div className="absolute -top-5 right-2 text-[11px] sm:text-[12px] text-gray-500 font-medium z-20">
+        <div className="absolute -top-5 right-2 text-[11px] sm:text-[12px] text-gray-400 font-normal z-20">
           Ad
         </div>
       )}

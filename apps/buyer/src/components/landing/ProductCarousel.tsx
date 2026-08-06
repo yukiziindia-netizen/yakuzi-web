@@ -119,7 +119,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
     }
   };
   const isSaved = wishlistData?.items?.some(
-    (item: any) => item.productId === currentProductId || item.product?.id === currentProductId || item.id === currentProductId
+    (item: any) => item.productId === currentProductId || item.product?.id === currentProductId || item.id === currentProductId || (product?.id && (item.productId === product.id || item.product?.id === product.id))
   );
 
   const isYukiziChoice = product?.isYukiziChoice !== undefined ? !!product.isYukiziChoice : true;
@@ -229,7 +229,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
 
       {/* Ad Tag */}
       {isAd && (
-        <div className="absolute -top-5 right-0 text-[11px] sm:text-[12px] text-gray-500 font-semibold z-20">
+        <div className="absolute -top-5 right-0 text-[11px] sm:text-[12px] text-gray-400 font-normal z-20">
           Ad
         </div>
       )}
@@ -407,7 +407,7 @@ export default function ProductCarousel({ slot = 'HOMEPAGE_CAROUSEL', categoryId
   const slicedProducts = [...products];
 
   return (
-    <div className="w-full max-w-[1600px] 2xl:max-w-none mx-auto px-6 md:px-10 mb-8 sm:mb-12 pt-4">
+    <div className="w-full max-w-[1600px] 2xl:max-w-none mx-auto px-2.5 sm:px-6 md:px-10 mb-8 sm:mb-12 pt-4">
       {/* 
         Responsive Grid Layout with increased columns on large screens:
         - Padding: px-6 md:px-10

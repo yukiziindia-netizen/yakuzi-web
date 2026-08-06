@@ -5,94 +5,89 @@ import { COMPANY } from '@/config/company';
 export const metadata: Metadata = {
   title: 'Shipping Policy | Yukizi',
   description:
-    'Yukizi delivery timelines, shipping charges, tracking, and what to do if a parcel arrives damaged or late.',
+    'Yukizi order processing times, shipping charges, delivery timelines, tracking and coverage.',
 };
 
 export default function ShippingPage() {
   return (
     <PolicyPage
       title="Shipping Policy"
-      intro="How and when your order gets to you, what it costs, and what happens when something goes wrong in transit."
+      intro={`Thank you for shopping with ${COMPANY.legalName}.`}
     >
-      <PolicySection title="Where we deliver">
+      <PolicySection title="Order Processing">
         <p>
-          We deliver across India to any address our courier partners serve. Some PIN
-          codes are not serviceable; where that is the case, checkout will tell you
-          before you pay.
+          Orders are processed within 24&ndash;48 hours after successful payment
+          confirmation.
+        </p>
+        <p>
+          Orders placed on weekends or public holidays will be processed on the next
+          business day.
         </p>
       </PolicySection>
 
-      <PolicySection title="Dispatch and delivery times">
+      <PolicySection title="Shipping Charges">
         <p>
-          Orders are usually dispatched within 1–2 business days of payment being
-          confirmed. Delivery typically takes {COMPANY.deliveryWindow} from dispatch,
-          depending on your location.
-        </p>
-        <p>
-          These are estimates, not guarantees. Festive periods, weather, strikes and
-          courier backlogs can add time, and pre-order or made-to-order items ship on
-          the date shown on the product page rather than immediately.
+          We offer FREE shipping on all eligible orders across India. No additional
+          shipping charges are applied during checkout unless otherwise stated.
         </p>
       </PolicySection>
 
-      <PolicySection title="Shipping charges">
+      <PolicySection title="Delivery Time">
         <p>
-          Shipping charges depend on the item and destination, and are shown on the
-          product page and again at checkout before you confirm your order. What you
-          see at checkout is what you pay — we do not add charges afterwards.
-        </p>
-      </PolicySection>
-
-      <PolicySection title="Tracking your order">
-        <p>
-          Once your order ships we will share a tracking reference, and you can follow
-          its progress from the{' '}
-          <a href="/orders" className="text-[#562996] underline underline-offset-4">
-            orders page
-          </a>{' '}
-          in your account. Tracking can take up to 24 hours to start updating after
+          Estimated delivery time is {COMPANY.deliveryWindow} from the date of
           dispatch.
         </p>
-      </PolicySection>
-
-      <PolicySection title="Delivery attempts and address accuracy">
         <p>
-          Please check your delivery address and phone number before confirming an
-          order — couriers rely on both. If a parcel is returned to us because the
-          address was wrong or nobody was available across the courier&apos;s delivery
-          attempts, we will contact you to arrange redelivery, which may carry a
-          further shipping charge.
+          Delivery timelines may vary depending on your location and courier partner.
         </p>
       </PolicySection>
 
-      <PolicySection title="Damaged, missing or delayed parcels">
+      <PolicySection title="Order Tracking">
         <p>
-          Please inspect your parcel on arrival. If it looks tampered with or crushed,
-          refuse the delivery where you can, and photograph the packaging before
-          opening it where you cannot.
-        </p>
-        <p>
-          Report damage in transit, a missing item or a parcel marked delivered that
-          you did not receive within {COMPANY.returnWindowDays} days of the delivery
-          date, and we will investigate with the courier and put it right. Photographs
-          of the packaging and contents help us resolve these quickly.
+          Once your order has been dispatched, you will receive shipment tracking
+          information through your registered email or phone number.
         </p>
       </PolicySection>
 
-      <PolicySection title="Questions">
+      <PolicySection title="Delivery Delays">
         <p>
-          For anything about a shipment, contact{' '}
+          While we aim to deliver every order on time, delays may occur due to:
+        </p>
+        <ul className="list-disc space-y-1 pl-5">
+          <li>Weather conditions</li>
+          <li>Natural disasters</li>
+          <li>Public holidays</li>
+          <li>Courier partner delays</li>
+          <li>Remote delivery locations</li>
+        </ul>
+        <p>In such situations, we appreciate your patience and understanding.</p>
+      </PolicySection>
+
+      <PolicySection title="Shipping Coverage">
+        <p>
+          Currently, we deliver across India. International shipping may be introduced
+          in the future.
+        </p>
+      </PolicySection>
+
+      <PolicySection title="Contact">
+        <p>For shipping-related questions, contact:</p>
+        <p>
+          Email:{' '}
           <a
             href={`mailto:${COMPANY.supportEmail}`}
             className="text-[#562996] underline underline-offset-4"
           >
             {COMPANY.supportEmail}
-          </a>{' '}
-          with your order number, or raise a ticket from the{' '}
-          <a href="/support" className="text-[#562996] underline underline-offset-4">
-            support page
           </a>
-          .
+          <br />
+          Website:{' '}
+          <a
+            href={COMPANY.websiteUrl}
+            className="text-[#562996] underline underline-offset-4"
+          >
+            {COMPANY.websiteUrl}
+          </a>
         </p>
       </PolicySection>
     </PolicyPage>

@@ -168,6 +168,17 @@ export interface InvoiceParty {
   email: string | null;
 }
 
+export interface InvoiceTaxLine {
+  /** The item's GST rate, e.g. 18. */
+  rate: number;
+  /** Half the rate intra-state (CGST 9% + SGST 9%), the whole rate as IGST otherwise. */
+  componentRate: number;
+  taxableValue: number;
+  cgst: number;
+  sgst: number;
+  igst: number;
+}
+
 export interface OrderInvoice {
   invoiceNumber: string;
   invoiceDate: string;
@@ -177,6 +188,8 @@ export interface OrderInvoice {
   placeOfSupply: string;
   isIntraState: boolean;
   lines: InvoiceLine[];
+  /** Tax stated rate by rate, as a tax invoice requires. */
+  taxBreakdown: InvoiceTaxLine[];
   subtotal: number;
   cgst: number;
   sgst: number;

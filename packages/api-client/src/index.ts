@@ -80,6 +80,7 @@ export {
   type OrderInvoice,
   type InvoiceLine,
   type InvoiceParty,
+  type InvoiceTaxLine,
 } from './modules/orders.api';
 
 // Payments

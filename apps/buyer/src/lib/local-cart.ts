@@ -2,6 +2,23 @@ import { type Cart, type CartItem } from '@yukizi/api-client';
 
 const STORAGE_KEY = 'yukizi_local_cart';
 
+/**
+ * Highest quantity an item may be raised to, given whatever we know about its
+ * availability. Returns Infinity when nothing is known, so callers that never
+ * supplied stock keep working exactly as before.
+ */
+const ceilingFor = (item: any): number => {
+  const stock = item?.stock ?? item?.product?.stock;
+  const perOrderLimit =
+    item?.maximumOrderQuantity ?? item?.product?.maximumOrderQuantity;
+
+  const limits = [stock, perOrderLimit].filter(
+    (n): n is number => typeof n === 'number' && Number.isFinite(n) && n >= 0,
+  );
+
+  return limits.length > 0 ? Math.min(...limits) : Infinity;
+};
+
 export const localCart = {
   get: (): Cart => {
     if (typeof window === 'undefined') return { items: [], subtotal: 0, total: 0 };
@@ -32,12 +49,28 @@ export const localCart = {
     const existingIndex = cart.items.findIndex(item => item.productId === itemData.productId);
     
     if (existingIndex > -1) {
-      if (replace) {
-        cart.items[existingIndex].quantity = itemData.quantity;
-      } else {
-        cart.items[existingIndex].quantity += itemData.quantity;
-      }
-      
+      const existing = cart.items[existingIndex];
+      const nextQuantity = replace
+        ? itemData.quantity
+        : existing.quantity + itemData.quantity;
+
+      // Fold in whatever the caller supplied alongside the quantity, so details
+      // that change over time — stock in particular — are refreshed rather than
+      // frozen at whatever they were when the item first went into the cart.
+      // Keys the caller omitted are left untouched.
+      const { quantity: _ignored, ...refreshed } = itemData;
+      const merged = {
+        ...existing,
+        ...refreshed,
+        id: existing.id,
+        quantity: nextQuantity,
+      };
+
+      // Last line of defence: never let the stored quantity exceed the stock we
+      // know about, whichever screen the item was added from.
+      merged.quantity = Math.min(merged.quantity, ceilingFor(merged));
+      cart.items[existingIndex] = merged;
+
       // Remove item if quantity is 0 or less
       if (cart.items[existingIndex].quantity <= 0) {
         cart.items.splice(existingIndex, 1);
@@ -45,7 +78,8 @@ export const localCart = {
     } else if (itemData.quantity > 0) {
       cart.items.push({
         id: `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        ...itemData
+        ...itemData,
+        quantity: Math.min(itemData.quantity, ceilingFor(itemData)),
       });
     }
     
@@ -65,7 +99,11 @@ export const localCart = {
       if (quantity <= 0) {
         cart.items.splice(existingIndex, 1);
       } else {
-        cart.items[existingIndex].quantity = quantity;
+        // The cart drawer's +/- comes through here, so the same ceiling applies.
+        cart.items[existingIndex].quantity = Math.min(
+          quantity,
+          ceilingFor(cart.items[existingIndex]),
+        );
       }
       
       cart.subtotal = cart.items.reduce((sum, item) => sum + (item.price || item.product?.price || 0) * item.quantity, 0);

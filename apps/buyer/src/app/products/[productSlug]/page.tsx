@@ -601,6 +601,10 @@ function ComparisonOffersList({
                 image: productImage,
                 imageUrl: productImage,
                 images: productImage ? [productImage] : [],
+                // Without these the cart has no idea what the ceiling is and
+                // lets the quantity be raised past the stock that exists.
+                stock: listing.stock,
+                maximumOrderQuantity: listing.maximumOrderQuantity,
               });
             }
           }

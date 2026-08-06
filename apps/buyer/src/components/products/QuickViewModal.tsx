@@ -149,6 +149,10 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
       image: productImages[0],
       imageUrl: productImages[0],
       images: productImages,
+      // Without these the cart has no idea what the ceiling is and lets the
+      // quantity be raised past the stock that exists.
+      stock: listing.stock,
+      maximumOrderQuantity: listing.maximumOrderQuantity,
     });
   };
 

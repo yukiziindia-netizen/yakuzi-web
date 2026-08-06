@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, Printer, Loader2, ShieldCheck, Package, Headphones, Lock } from 'lucide-react';
 import { getOrderInvoices, type OrderInvoice } from '@yukizi/api-client';
@@ -193,13 +193,17 @@ export default function InvoicePage({ params }: { params: { orderId: string } })
 
                 <div className="text-[13px]">
                   <Row label="Subtotal (Taxable Value)" value={money(inv.subtotal)} />
-                  {inv.isIntraState ? (
-                    <>
-                      <Row label="CGST" value={money(inv.cgst)} />
-                      <Row label="SGST" value={money(inv.sgst)} />
-                    </>
-                  ) : (
-                    <Row label="IGST" value={money(inv.igst)} />
+                  {/* Stated rate by rate: an order with a 5% and an 18% item
+                      owes two lines, not one merged figure. */}
+                  {(inv.taxBreakdown ?? []).map((t) =>
+                    inv.isIntraState ? (
+                      <React.Fragment key={t.rate}>
+                        <Row label={`CGST (${t.componentRate}%)`} value={money(t.cgst)} />
+                        <Row label={`SGST (${t.componentRate}%)`} value={money(t.sgst)} />
+                      </React.Fragment>
+                    ) : (
+                      <Row key={t.rate} label={`IGST (${t.componentRate}%)`} value={money(t.igst)} />
+                    ),
                   )}
                   <div className="mt-3 flex items-center justify-between rounded-lg bg-[#f3edfa] px-4 py-3">
                     <span className="font-bold text-[#593696]">TOTAL AMOUNT PAYABLE (₹)</span>

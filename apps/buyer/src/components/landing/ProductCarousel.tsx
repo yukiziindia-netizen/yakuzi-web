@@ -20,33 +20,74 @@ interface ProductCarouselProps {
   initialProducts?: any[];
 }
 
+const OFFER_TEXT = "text-[#333333] text-[10px] sm:text-[15px] font-medium tracking-wide whitespace-nowrap";
+const NO_OFFER_TEXT = "text-gray-400 text-[10px] sm:text-[15px] font-medium tracking-wide whitespace-nowrap";
+
+// A product with nothing on offer used to render nothing at all, leaving an
+// empty gap on the card where every neighbour shows "N% off". It now says so.
+// The other half of this: a discount type with no usable numbers behind it
+// rendered "0% off", "Buy 0 Get 0 Free" or "Special Price: ₹0", which reads
+// as an offer that does not exist. Those collapse to the same label.
+const noOfferLabel = () => <span className={NO_OFFER_TEXT}>No offers</span>;
+
 export const renderBuyerOfferBadge = (p: any) => {
-  const meta = p.discountMeta || {};
-  if (!p?.discountType) {
-    if (meta.discountPercent) {
-      return <span className="text-[#333333] text-[10px] sm:text-[15px] font-medium tracking-wide whitespace-nowrap">{meta.discountPercent}% off</span>;
-    }
-    return null;
+  const meta = p?.discountMeta || {};
+  const percent = Number(meta.discountPercent) || 0;
+  const specialPrice = Number(meta.specialPrice) || 0;
+  const getQty = Number(meta.get) || 0;
+  const buyQty = Number(meta.buy) || 0;
+  const type = typeof p?.discountType === 'string' ? p.discountType.toUpperCase() : '';
+
+  const percentOff = <span className={OFFER_TEXT}>{percent}% off</span>;
+  const sameBonus = <span className={OFFER_TEXT}>Buy {buyQty} Get {getQty} Free</span>;
+  const otherBonus = <span className={OFFER_TEXT}>Buy {buyQty} Get {getQty} {meta.bonusProductName}</span>;
+
+  if (!type || type === 'NONE') {
+    return percent > 0 ? percentOff : noOfferLabel();
   }
-  if (p.discountType === "PTR_DISCOUNT") {
-    return <span className="text-[#333333] text-[10px] sm:text-[15px] font-medium tracking-wide whitespace-nowrap">{meta.discountPercent || 0}% off</span>;
+
+  if (type === 'PTR_DISCOUNT') {
+    return percent > 0 ? percentOff : noOfferLabel();
   }
-  if (p.discountType === "SAME_PRODUCT_BONUS") {
-    return <span className="text-[#333333] text-[10px] sm:text-[15px] font-medium tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} Free</span>;
+
+  if (type === 'SAME_PRODUCT_BONUS') {
+    return getQty > 0 ? sameBonus : noOfferLabel();
   }
-  if (p.discountType === "PTR_PLUS_SAME_PRODUCT_BONUS") {
-    return <div className="flex flex-col gap-0.5"><span className="text-[#333333] text-[10px] sm:text-[15px] font-medium tracking-wide whitespace-nowrap">{meta.discountPercent || 0}% off</span><span className="text-[#333333] text-[10px] sm:text-[15px] font-medium tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} Free</span></div>;
+
+  if (type === 'DIFFERENT_PRODUCT_BONUS') {
+    return getQty > 0 && meta.bonusProductName ? otherBonus : noOfferLabel();
   }
-  if (p.discountType === "DIFFERENT_PRODUCT_BONUS") {
-    return <span className="text-[#333333] text-[10px] sm:text-[15px] font-medium tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} {meta.bonusProductName}</span>;
+
+  if (type === 'PTR_PLUS_SAME_PRODUCT_BONUS') {
+    if (percent <= 0 && getQty <= 0) return noOfferLabel();
+    return (
+      <div className="flex flex-col gap-0.5">
+        {percent > 0 && percentOff}
+        {getQty > 0 && sameBonus}
+      </div>
+    );
   }
-  if (p.discountType === "PTR_PLUS_DIFFERENT_PRODUCT_BONUS") {
-    return <div className="flex flex-col gap-0.5"><span className="text-[#333333] text-[10px] sm:text-[15px] font-medium tracking-wide whitespace-nowrap">{meta.discountPercent || 0}% off</span><span className="text-[#333333] text-[10px] sm:text-[15px] font-medium tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} {meta.bonusProductName}</span></div>;
+
+  if (type === 'PTR_PLUS_DIFFERENT_PRODUCT_BONUS') {
+    const hasBonus = getQty > 0 && meta.bonusProductName;
+    if (percent <= 0 && !hasBonus) return noOfferLabel();
+    return (
+      <div className="flex flex-col gap-0.5">
+        {percent > 0 && percentOff}
+        {hasBonus && otherBonus}
+      </div>
+    );
   }
-  if (p.discountType === "SPECIAL_PRICE") {
-    return <span className="text-emerald-600 text-[10px] sm:text-[15px] font-medium tracking-wide whitespace-nowrap">Special Price: ₹{Math.round(Number(meta.specialPrice) || 0)}</span>;
+
+  if (type === 'SPECIAL_PRICE') {
+    return specialPrice > 0 ? (
+      <span className="text-emerald-600 text-[10px] sm:text-[15px] font-medium tracking-wide whitespace-nowrap">Special Price: ₹{Math.round(specialPrice)}</span>
+    ) : noOfferLabel();
   }
-  return <span className="text-[#333333] text-[10px] sm:text-[15px] font-medium tracking-wide whitespace-nowrap">{p.discountType.replace(/_/g, ' ')}</span>;
+
+  // Unknown type: show the humanised name rather than "No offers", so a new
+  // server-side discount type is never mislabelled as nothing on offer.
+  return <span className={OFFER_TEXT}>{p.discountType.replace(/_/g, ' ')}</span>;
 };
 
 function GridProductCard({ product, index, onOpenReview }: { product: any; index: number; onOpenReview: (p: any) => void }) {

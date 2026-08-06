@@ -448,7 +448,7 @@ export default function ProductCarousel({ slot = 'HOMEPAGE_CAROUSEL', categoryId
   const slicedProducts = [...products];
 
   return (
-    <div className="w-full max-w-[1600px] 2xl:max-w-none mx-auto px-2.5 sm:px-0 mb-8 sm:mb-12 pt-4">
+    <div className="w-full max-w-[1600px] 2xl:max-w-none mx-auto px-4 sm:px-8 mb-8 sm:mb-12 pt-4">
       {/*
         Responsive Grid Layout with increased columns on large screens:
         - Padding: none from sm up, so the row fills the container edge to edge

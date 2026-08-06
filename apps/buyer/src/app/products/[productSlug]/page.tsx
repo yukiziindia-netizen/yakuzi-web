@@ -347,8 +347,8 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
         </div>
 
         {/* Image Container */}
-        <Link href={`/products/${generateProductSlug(productName, prod.id || 'prod-' + index)}`} className="relative w-full h-[130px] sm:h-auto sm:aspect-[4/5] mb-[-8px] sm:mb-[-10px] mt-[-10px] sm:mt-[-12px] overflow-hidden bg-white flex justify-center items-center border-none">
-          <img src={imageUrl} alt={productName} className="max-h-full max-w-full object-contain p-3 sm:p-0.5 transform group-hover:scale-105 transition-transform duration-700 ease-out drop-shadow-md" />
+        <Link href={`/products/${generateProductSlug(productName, prod.id || 'prod-' + index)}`} className="relative w-full h-[130px] sm:h-auto sm:aspect-[4/5] mb-[-8px] sm:mb-[-10px] mt-[-10px] sm:mt-[-12px] overflow-hidden bg-white flex justify-center items-center border-0">
+          <img src={imageUrl} alt={productName} className="max-h-full max-w-full object-contain p-3 sm:p-0.5 transform group-hover:scale-105 transition-transform duration-700 ease-out" />
         </Link>
 
         {/* Details Section */}

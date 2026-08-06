@@ -257,7 +257,7 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                         )}
 
                         {/* Left Image */}
-                        <div className="w-[90px] h-[90px] sm:w-[105px] sm:h-[105px] bg-[#f8f5fd] rounded-xl flex items-center justify-center relative flex-shrink-0 mt-1.5 overflow-hidden">
+                        <div className="w-[90px] sm:w-[105px] bg-[#f8f5fd] rounded-xl flex items-center justify-center relative flex-shrink-0 overflow-hidden self-stretch my-1">
                           <img src={itemImage} alt={itemName} className="w-16 h-16 sm:w-20 sm:h-20 object-contain mix-blend-multiply" />
                           <button 
                             onClick={() => removeFromWishlist.mutate(item.productId || item.product?.id || item.id, {
@@ -272,11 +272,8 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
 
                         {/* Middle Content */}
                         <div className="flex-1 min-w-0 mt-1 flex flex-col gap-1.5 justify-between">
-                          {/* Row 1: Product Name (left) & Actions (right) */}
-                          <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2">
-                            <h3 className="text-[13px] sm:text-[14px] font-medium text-gray-500 leading-snug truncate text-left flex-1">{itemName}</h3>
-                            
-                            {/* Counter/Plus action */}
+                          {/* Row 1: Actions (right-aligned Plus/Quantity Controls) */}
+                          <div className="flex justify-end w-full pr-1.5 sm:pr-3">
                             <div className="flex items-center gap-1.5 flex-shrink-0">
                               {cartQty === 0 ? (
                                 <button
@@ -330,14 +327,9 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                             </div>
                           </div>
 
-                          {/* Row 2: Price & Quickview Button */}
+                          {/* Row 2: Product Name (left) & Quickview/Eye Button (right) */}
                           <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2">
-                            <div className="flex items-baseline gap-2 text-left">
-                              <span className="text-[19px] font-black text-gray-900">{displayPriceText}</span>
-                              {displayOriginalPriceText && (
-                                <span className="text-[14px] font-bold text-gray-400 line-through">{displayOriginalPriceText}</span>
-                              )}
-                            </div>
+                            <h3 className="text-[13px] sm:text-[14px] font-medium text-gray-500 leading-snug truncate text-left flex-1">{itemName}</h3>
                             
                             {/* Quickview Button */}
                             <button
@@ -358,22 +350,32 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                             </button>
                           </div>
 
-                          {/* Row 3: Discount & Star Rating */}
+                          {/* Row 3: Price & Star Rating */}
                           <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2">
-                            <div className="text-left">
-                              {displayDiscountPercent > 0 && (
-                                <span className="text-xs sm:text-[13px] font-bold text-black">{displayDiscountPercent}% off</span>
+                            <div className="flex items-baseline gap-2 text-left">
+                              <span className="text-[19px] font-black text-gray-900">{displayPriceText}</span>
+                              {displayOriginalPriceText && (
+                                <span className="text-[14px] font-bold text-gray-400 line-through">{displayOriginalPriceText}</span>
                               )}
                             </div>
+                            
                             <div className="flex items-center gap-[3px] sm:gap-[4px]">
                               <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-[#6342B4] text-[#6342B4]" />
                               <span className="text-xs sm:text-[14px] font-bold text-gray-700">{itemRating}</span>
                             </div>
                           </div>
 
-                          {/* Row 4: Delivery */}
-                          <div className="flex justify-end w-full pr-1.5 sm:pr-3">
-                            <DeliveryTruckBadge text={deliveryTime} className="w-[80px] sm:w-[95px] text-[#9a9a9a]" />
+                          {/* Row 4: Discount & Delivery */}
+                          <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2">
+                            <div className="text-left">
+                              {displayDiscountPercent > 0 && (
+                                <span className="text-xs sm:text-[13px] font-bold text-black">{displayDiscountPercent}% off</span>
+                              )}
+                            </div>
+                            
+                            <div className="-mr-[6px] sm:-mr-[8px]">
+                              <DeliveryTruckBadge text={deliveryTime} className="w-[52px] sm:w-[75px] h-auto text-[#8c8c8c]" />
+                            </div>
                           </div>
                         </div>
                       </motion.div>

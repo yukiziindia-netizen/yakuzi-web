@@ -267,7 +267,7 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
                   type="text"
                   value={signupUsername}
                   onChange={(e) => setSignupUsername(e.target.value)}
-                  className="bg-transparent text-[#0f172a] text-center text-xl font-medium outline-none w-full max-w-[240px] mb-[100px]"
+                  className="bg-transparent text-[#0f172a] text-center text-xl font-medium outline-none w-full max-w-[240px] mb-[100px] border-b border-[#e2e8f0] focus:border-[#593696] pb-1"
                   autoFocus
                 />
 
@@ -291,7 +291,7 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
                     type="text"
                     value={signupContact}
                     onChange={(e) => setSignupContact(e.target.value)}
-                    className="bg-transparent text-[#0f172a] text-center text-xl font-medium outline-none w-full max-w-[240px]"
+                    className="bg-transparent text-[#0f172a] text-center text-xl font-medium outline-none w-full max-w-[240px] border-b border-[#e2e8f0] focus:border-[#593696] pb-1"
                     autoFocus
                   />
                 </div>
@@ -317,7 +317,7 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
                     type="text"
                     value={signupOtp}
                     onChange={(e) => setSignupOtp(e.target.value)}
-                    className="bg-transparent text-[#0f172a] text-center text-xl font-medium outline-none w-full max-w-[240px]"
+                    className="bg-transparent text-[#0f172a] text-center text-xl font-medium outline-none w-full max-w-[240px] border-b border-[#e2e8f0] focus:border-[#593696] pb-1"
                     autoFocus
                   />
                 </div>
@@ -344,7 +344,7 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
                   type="text"
                   value={signupRealName}
                   onChange={(e) => setSignupRealName(e.target.value)}
-                  className="bg-transparent text-[#0f172a] text-center text-xl font-medium outline-none w-full max-w-[240px] mb-20"
+                  className="bg-transparent text-[#0f172a] text-center text-xl font-medium outline-none w-full max-w-[240px] mb-20 border-b border-[#e2e8f0] focus:border-[#593696] pb-1"
                   autoFocus
                 />
 
@@ -368,7 +368,7 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
                     type="password"
                     value={signupPassword}
                     onChange={(e) => setSignupPassword(e.target.value)}
-                    className="bg-transparent text-[#0f172a] text-center text-xl font-medium outline-none w-full max-w-[240px]"
+                    className="bg-transparent text-[#0f172a] text-center text-xl font-medium outline-none w-full max-w-[240px] border-b border-[#e2e8f0] focus:border-[#593696] pb-1"
                     autoFocus
                   />
                 </div>
@@ -379,7 +379,7 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
                     type="password"
                     value={signupConfirmPassword}
                     onChange={(e) => setSignupConfirmPassword(e.target.value)}
-                    className="bg-transparent text-[#0f172a] text-center text-xl font-medium outline-none w-full max-w-[240px]"
+                    className="bg-transparent text-[#0f172a] text-center text-xl font-medium outline-none w-full max-w-[240px] border-b border-[#e2e8f0] focus:border-[#593696] pb-1"
                   />
                 </div>
 

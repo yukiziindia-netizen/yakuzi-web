@@ -35,31 +35,44 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
 
   // Load initial data
   useEffect(() => {
-    if (profile) {
-      const addr = typeof profile.address === 'object' ? profile.address : null;
-      const street = (addr as any)?.street1 ?? (typeof profile.address === 'string' ? profile.address : '');
-      const city = profile.city ?? (addr as any)?.city ?? '';
-      const state = profile.state ?? (addr as any)?.state ?? '';
-      const pincode = profile.pincode ?? (addr as any)?.pincode ?? '';
-      const fullAddress = [street, city, state, pincode].filter(Boolean).join(', ');
+    const addr =
+      profile && typeof profile.address === 'object' ? profile.address : null;
+    const street =
+      (addr as any)?.street1 ??
+      (typeof profile?.address === 'string' ? profile.address : '');
+    const city = profile?.city ?? (addr as any)?.city ?? '';
+    const state = profile?.state ?? (addr as any)?.state ?? '';
+    const pincode = profile?.pincode ?? (addr as any)?.pincode ?? '';
+    const fullAddress = [street, city, state, pincode].filter(Boolean).join(', ');
 
-      setFormData({
-        name: profile.legalName || 'Roopali',
-        username: profile.user?.username || 'Yukizi0346',
-        email: profile.user?.email || user?.email || 'yukizi0346@gmail.com',
-        address: fullAddress || '',
-        phone: profile.user?.phone || '+91 12345 67890',
-      });
-    }
+    // Fall back to the signed-in user, never to invented data. This block used
+    // to be gated on `if (profile)`, so until that query resolved every row
+    // rendered blank — which is what a new buyer sees straight after signup,
+    // even though the session already knows their username, email and phone.
+    setFormData({
+      name: profile?.legalName || '',
+      username: profile?.user?.username || user?.username || '',
+      email: profile?.user?.email || user?.email || '',
+      address: fullAddress,
+      phone: profile?.user?.phone || user?.phone || '',
+    });
 
-    // Load saved avatar from localStorage if exists
-    const savedAvatar = localStorage.getItem('yukizi_avatar');
-    if (savedAvatar) {
-      setPhoto(savedAvatar);
-    } else {
-      setPhoto('https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200');
-    }
+    // Avatar lives in this browser only — the API has no avatar field on the
+    // buyer profile, so there is nothing to load from the server.
+    setPhoto(localStorage.getItem('yukizi_avatar') || '');
   }, [profile, user]);
+
+  // Shown when no photo has been uploaded. Never invent a stock portrait.
+  const initials =
+    [formData.name, formData.username, formData.email]
+      .find((value) => value && value.trim())
+      ?.trim()
+      .split(/[\s._-]+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((word) => word[0])
+      .join('')
+      .toUpperCase() || '?';
 
   if (!isOpen) return null;
 
@@ -157,11 +170,17 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
             onClick={handlePhotoClick}
             className="relative w-28 h-28 rounded-full overflow-hidden border-[3px] border-white shadow-md flex items-center justify-center bg-purple-900 group cursor-pointer hover:scale-105 transition-transform duration-200"
           >
-            <img 
-              src={photo} 
-              alt="Avatar" 
-              className="w-full h-full object-cover group-hover:opacity-75 transition-opacity" 
-            />
+            {photo ? (
+              <img
+                src={photo}
+                alt="Avatar"
+                className="w-full h-full object-cover group-hover:opacity-75 transition-opacity"
+              />
+            ) : (
+              <span className="text-white text-3xl font-bold tracking-wide select-none group-hover:opacity-75 transition-opacity">
+                {initials}
+              </span>
+            )}
             <div className="absolute inset-0 bg-black/35 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
               <Camera className="w-6 h-6 text-white" />
             </div>
@@ -218,7 +237,11 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
                   onClick={() => startEditing('name')}
                   className="flex items-center gap-1.5 hover:text-purple-600 transition-colors"
                 >
-                  <span className="text-[14px] font-semibold text-gray-800">{formData.name}</span>
+                  {formData.name ? (
+                    <span className="text-[14px] font-semibold text-gray-800">{formData.name}</span>
+                  ) : (
+                    <span className="text-[14px] font-semibold text-gray-400 italic">Add your name</span>
+                  )}
                   <ChevronRight className="w-4 h-4 text-gray-400" />
                 </button>
               )}
@@ -248,7 +271,11 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
                   onClick={() => startEditing('username')}
                   className="flex items-center gap-1.5 hover:text-purple-600 transition-colors"
                 >
-                  <span className="text-[14px] font-semibold text-gray-800">{formData.username}</span>
+                  {formData.username ? (
+                    <span className="text-[14px] font-semibold text-gray-800">{formData.username}</span>
+                  ) : (
+                    <span className="text-[14px] font-semibold text-gray-400 italic">Add a username</span>
+                  )}
                   <ChevronRight className="w-4 h-4 text-gray-400" />
                 </button>
               )}
@@ -278,7 +305,11 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
                   onClick={() => startEditing('email')}
                   className="flex items-center gap-1.5 hover:text-purple-600 transition-colors text-right"
                 >
-                  <span className="text-[14px] font-semibold text-gray-800 truncate max-w-[200px] sm:max-w-[240px] block">{formData.email}</span>
+                  {formData.email ? (
+                    <span className="text-[14px] font-semibold text-gray-800 truncate max-w-[200px] sm:max-w-[240px] block">{formData.email}</span>
+                  ) : (
+                    <span className="text-[14px] font-semibold text-gray-400 italic">Add your email</span>
+                  )}
                   <ChevronRight className="w-4 h-4 text-gray-400" />
                 </button>
               )}
@@ -343,7 +374,11 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
                   onClick={() => startEditing('phone')}
                   className="flex items-center gap-1.5 hover:text-purple-600 transition-colors"
                 >
-                  <span className="text-[14px] font-semibold text-gray-800">{formData.phone}</span>
+                  {formData.phone ? (
+                    <span className="text-[14px] font-semibold text-gray-800">{formData.phone}</span>
+                  ) : (
+                    <span className="text-[14px] font-semibold text-gray-400 italic">Add your phone</span>
+                  )}
                   <ChevronRight className="w-4 h-4 text-gray-400" />
                 </button>
               )}

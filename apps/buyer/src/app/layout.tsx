@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { Open_Sans } from 'next/font/google';
-// @ts-ignore
 import '../styles/globals.css';
 import { Providers } from './providers';
 import SiteFooter from '@/components/shared/SiteFooter';

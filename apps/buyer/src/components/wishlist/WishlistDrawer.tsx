@@ -81,7 +81,7 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
             className="fixed top-0 right-0 h-full w-[95%] sm:w-[580px] md:w-[620px] max-w-full bg-white shadow-2xl z-[110] flex flex-col overflow-hidden rounded-l-3xl"
           >
             {/* Custom Scrollbar Styles */}
-            <style jsx global>{`
+            <style dangerouslySetInnerHTML={{ __html: `
               .custom-scrollbar::-webkit-scrollbar {
                 width: 6px;
               }
@@ -92,7 +92,7 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                 background: #6342B4;
                 border-radius: 10px;
               }
-            `}</style>
+            `}} />
 
             {/* Hidden Close Button (for accessibility / mobile use) */}
             <button onClick={onClose} className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-900 bg-white/80 rounded-full z-10 transition-colors">

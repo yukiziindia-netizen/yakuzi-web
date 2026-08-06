@@ -227,7 +227,7 @@ export default function OrderIdPage({ params }: { params: { orderId: string } })
                 <div className="bg-white/40 backdrop-blur-xl p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl md:rounded-[40px] border border-white/40 shadow-xl">
                   <h2 className="text-xl font-bold text-gray-900 mb-6">Order Items</h2>
                   <div className="space-y-4">
-                    {orderItems.map((item: any) => {
+                    {orderItems.map((item: any, idx: number) => {
                       const itemName = item.product?.name ?? item.productName ?? item.name ?? 'Product';
                       const itemTotal = item.totalPrice ?? item.total ?? (item.price || item.unitPrice || 0) * (item.quantity || 1);
                       
@@ -243,9 +243,9 @@ export default function OrderIdPage({ params }: { params: { orderId: string } })
                         item.product?.image;
                       
                       const itemImage = formatImageUrl(rawImage);
-
                       return (
                           <Link 
+                            key={item.id || item.productId || item.product?.id || idx}
                             href={`/products/${generateProductSlug(itemName, item.productId || item.product?.id)}`}
                             className="flex items-center justify-between py-4 border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors w-full text-left"
                           >

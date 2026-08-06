@@ -26,7 +26,6 @@ export function ShareButton({
   iconClassName = 'w-[18px] h-[18px]',
   onOpenChange,
 }: ShareButtonProps) {
-  return null;
   const [showMenu, setShowMenu] = useState(false);
   const [copied, setCopied] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -48,6 +47,8 @@ export function ShareButton({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showMenu, onOpenChange]);
+
+  return null;
 
   const deepLink = `${typeof window !== 'undefined' ? window.location.origin : ''}/products/${generateProductSlug(productName, productId)}`;
   const shareText = `Check out ${productName} at ?${productPrice}${discount ? ` (${discount}% OFF)` : ''} on Yukizi`;

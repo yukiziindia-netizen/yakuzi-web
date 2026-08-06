@@ -163,7 +163,7 @@ export default function FullscreenSearch({ isOpen, onClose }: { isOpen: boolean;
                           >
                             <div className="w-full h-32 bg-gray-50 rounded-xl flex items-center justify-center mb-3 overflow-hidden">
                               {p.images?.[0] ? (
-                                // eslint-disable-next-line @next/next/no-img-element
+                                // eslint-disable-next-line
                                 <img
                                   src={typeof p.images[0] === 'string' ? p.images[0] : (p.images[0] as any)?.url || '/products/pharma_bottle.png'}
                                   alt={p.name}

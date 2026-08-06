@@ -11,7 +11,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pat
     const contentType = req.headers.get("content-type") || "";
     
     let body;
-    let headers: Record<string, string> = {};
+    const headers: Record<string, string> = {};
     
     if (contentType.includes("multipart/form-data")) {
       body = await req.formData();

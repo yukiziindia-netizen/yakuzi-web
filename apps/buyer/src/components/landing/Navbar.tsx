@@ -208,14 +208,13 @@ export default function Navbar({
     };
     document.addEventListener('keydown', handleEscape);
 
-    // Load chat sessions on mount
     const savedSessions = localStorage.getItem('yukizi_chat_sessions');
     if (savedSessions) {
-      try { setChatSessions(JSON.parse(savedSessions)); } catch (e) { }
+      try { setChatSessions(JSON.parse(savedSessions)); } catch (e) { console.error("Error loading chat sessions:", e); }
     }
     const savedCurrent = localStorage.getItem('yukizi_current_chat');
     if (savedCurrent) {
-      try { setChatMessages(JSON.parse(savedCurrent)); } catch (e) { }
+      try { setChatMessages(JSON.parse(savedCurrent)); } catch (e) { console.error("Error loading current chat:", e); }
     }
 
     return () => {

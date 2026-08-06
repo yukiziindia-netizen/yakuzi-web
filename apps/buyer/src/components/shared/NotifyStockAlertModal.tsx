@@ -101,10 +101,10 @@ export function NotifyStockAlertModal({
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
                 <p className="text-gray-700 font-medium mb-2">
-                  <strong>"{productName}"</strong> is currently out of stock.
+                  <strong>&ldquo;{productName}&rdquo;</strong> is currently out of stock.
                 </p>
                 <p className="text-sm text-gray-600">
-                  We'll send you an email notification as soon as it's available again.
+                  We&apos;ll send you an email notification as soon as it&apos;s available again.
                 </p>
               </div>
 

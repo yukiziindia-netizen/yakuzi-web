@@ -150,7 +150,7 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
             <Package className="w-16 h-16 text-purple-200 mb-4" />
             <h3 className="text-2xl font-bold text-gray-700 mb-2">No Orders Yet</h3>
             <p className="text-sm text-gray-400 max-w-[280px]">
-              You haven't placed any orders yet. Once you place an order, it will appear here.
+              You haven&apos;t placed any orders yet. Once you place an order, it will appear here.
             </p>
           </div>
         ) : (

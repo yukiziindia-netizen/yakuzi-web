@@ -41,8 +41,8 @@ export default function Footer() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
-  // Commented out to hide footer for now
-  if (true) return null;
+  const hideFooter = true;
+  if (hideFooter) return null;
 
   return (
     <footer

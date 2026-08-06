@@ -153,7 +153,8 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                     
                     const isYukiziChoice = item.product?.isYukiziChoice === true || item.isYukiziChoice === true;
                     const deliveryTime = item.product?.deliveryTime || item.product?.deliveryText || item.deliveryTime || item.deliveryText || '3 days';
-                    
+                    const itemRating = item.product?.rating ?? item.product?.averageRating ?? item.rating ?? 'NA';
+
                     const inCartItem = cartData?.items?.find(
                       (ci: any) => ci.productId === (item.productId || item.product?.id || item.id)
                     );
@@ -252,7 +253,7 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                                     title="Reset quantity"
                                     disabled={removeCartItem.isPending}
                                   >
-                                    <RefreshCw className={`w-4 h-4 sm:w-4.5 sm:h-4.5 ${removeCartItem.isPending ? 'animate-spin' : ''}`} />
+                                    <RefreshCw className={`w-4 h-4 sm:w-4.5 sm:h-4.5 text-[#48286b] ${removeCartItem.isPending ? 'animate-spin' : ''}`} />
                                   </button>
 
                                   {/* Purple Quantity Selector Pill */}
@@ -282,7 +283,9 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                           <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2">
                             <div className="flex items-baseline gap-2 text-left">
                               <span className="text-[19px] font-black text-gray-900">{displayPriceText}</span>
-                              <span className="text-[14px] font-bold text-gray-400 line-through">{displayOriginalPriceText}</span>
+                              {displayOriginalPriceText && (
+                                <span className="text-[14px] font-bold text-gray-400 line-through">{displayOriginalPriceText}</span>
+                              )}
                             </div>
                             
                             {/* Quickview Button */}
@@ -313,7 +316,7 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                             </div>
                             <div className="flex items-center gap-[3px] sm:gap-[4px]">
                               <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-[#6342B4] text-[#6342B4]" />
-                              <span className="text-xs sm:text-[14px] font-bold text-gray-700">{item.rating ? item.rating : 'NA'}</span>
+                              <span className="text-xs sm:text-[14px] font-bold text-gray-700">{itemRating}</span>
                             </div>
                           </div>
 

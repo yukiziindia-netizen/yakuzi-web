@@ -133,9 +133,19 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
 
   const finalPrice = directPrice > 0 ? directPrice : (computedPrice > 0 ? computedPrice : mrpVal);
   const discountPercent = Number(prod?.discountMeta?.discountPercent || 0);
-  let finalOriginalPrice = mrpVal > finalPrice ? mrpVal : 0;
-  if (finalOriginalPrice === 0 && discountPercent > 0 && finalPrice > 0) {
+  // The price shown to the buyer is finalCustomerPayable, which is discounted
+  // product PLUS discounted shipping. mrp is the product alone. Striking mrp
+  // through against it compares two different things: a genuine 10% discount
+  // rendered as "₹986.58, was ₹990" - 0.3% off - next to a "10% off" badge.
+  //
+  // Whenever a discount percentage exists, derive the pre-discount figure from
+  // the price actually displayed, so the strike-through and the badge agree.
+  // mrp is only used as the comparison when there is no discount to explain.
+  let finalOriginalPrice = 0;
+  if (discountPercent > 0 && finalPrice > 0) {
     finalOriginalPrice = Math.round(finalPrice / (1 - discountPercent / 100));
+  } else if (mrpVal > finalPrice) {
+    finalOriginalPrice = mrpVal;
   }
   // Never invent a rating - unrated products show "NA".
   const numRating = Number(prod?.rating);

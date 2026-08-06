@@ -12,9 +12,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import AuthGuard from '@/components/shared/AuthGuard';
-import { useAuth } from '@yukizi/api-client';
+import { useAuth, createRazorpayOrder, verifyRazorpayPayment } from '@yukizi/api-client';
 
-type PaymentMethod = 'BANK_TRANSFER' | 'UPI' | 'COD' | 'CREDIT';
+type PaymentMethod = 'BANK_TRANSFER' | 'UPI' | 'COD' | 'CREDIT' | 'RAZORPAY';
 
 const INDIAN_STATES = [
   'Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh','Goa','Gujarat',
@@ -86,6 +86,101 @@ export default function CheckoutPage() {
   const subtotal = Math.round(cart.total ?? 0);
   const total = subtotal;
 
+  // Online payment is offered only when the API has Razorpay keys. The public
+  // key itself comes back from the API when the payment starts, so it is
+  // configured in one place rather than duplicated here.
+  const isOnlinePaymentEnabled =
+    process.env.NEXT_PUBLIC_RAZORPAY_ENABLED === 'true';
+
+  const loadRazorpayCheckout = (): Promise<boolean> =>
+    new Promise((resolve) => {
+      if ((window as any).Razorpay) return resolve(true);
+      const existing = document.getElementById('razorpay-checkout-js');
+      if (existing) {
+        existing.addEventListener('load', () => resolve(true));
+        existing.addEventListener('error', () => resolve(false));
+        return;
+      }
+      const script = document.createElement('script');
+      script.id = 'razorpay-checkout-js';
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+
+  /**
+   * Takes payment for an order that has already been created.
+   *
+   * The order is left untouched if anything here fails: an unpaid order the
+   * buyer can retry is recoverable, whereas clearing the cart on a payment that
+   * never completed is not.
+   */
+  const payOnline = async (orderId: string) => {
+    const ready = await loadRazorpayCheckout();
+    if (!ready) {
+      toast('Could not reach the payment provider. Your order is saved as unpaid.', 'error');
+      window.location.href = `/orders?drawer=${orderId}`;
+      return;
+    }
+
+    let rzpOrder;
+    try {
+      rzpOrder = await createRazorpayOrder(orderId);
+    } catch (e: any) {
+      toast(
+        e?.response?.data?.message || 'Could not start the payment. Your order is saved as unpaid.',
+        'error',
+      );
+      window.location.href = `/orders?drawer=${orderId}`;
+      return;
+    }
+
+    const checkout = new (window as any).Razorpay({
+      key: rzpOrder.keyId,
+      order_id: rzpOrder.razorpayOrderId,
+      amount: rzpOrder.amount,
+      currency: rzpOrder.currency,
+      name: 'Yukizi',
+      description: `Order ${orderId.slice(0, 8)}`,
+      prefill: {
+        name: address.firstName ? `${address.firstName} ${address.lastName}`.trim() : address.name,
+        contact: address.phone,
+        email: address.email || user?.email || '',
+      },
+      handler: async (response: any) => {
+        try {
+          await verifyRazorpayPayment({
+            razorpayOrderId: response.razorpay_order_id,
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpaySignature: response.razorpay_signature,
+          });
+          clearCart.mutate(undefined, {
+            onSuccess: () => { window.location.href = `/orders?drawer=${orderId}&success=true`; },
+            onError: () => { window.location.href = `/orders?drawer=${orderId}&success=true`; },
+          });
+        } catch {
+          // The money may well have left the buyer's account, so this must not
+          // read like a failed order.
+          toast(
+            'Payment received but we could not confirm it automatically. Our team will verify it shortly.',
+            'error',
+          );
+          window.location.href = `/orders?drawer=${orderId}`;
+        }
+      },
+      modal: {
+        ondismiss: () => {
+          toast('Payment cancelled. Your order is saved as unpaid.', 'error');
+          window.location.href = `/orders?drawer=${orderId}`;
+        },
+      },
+      theme: { color: '#562996' },
+    });
+
+    checkout.open();
+  };
+
   const handlePlaceOrder = () => {
     const combinedName = address.firstName && address.lastName
       ? `${address.firstName} ${address.lastName}`
@@ -112,6 +207,14 @@ export default function CheckoutPage() {
         createOrder.mutate(orderAddress, {
           onSuccess: (data: any) => {
             const orderId = data?.data?.id || data?.id;
+
+            if (paymentMethod === 'RAZORPAY') {
+              // The cart is deliberately not cleared yet - it is cleared only
+              // once the payment is verified.
+              payOnline(orderId);
+              return;
+            }
+
             createPaymentMut.mutate(
               { orderId, amount: total, method: paymentMethod },
               {
@@ -382,6 +485,30 @@ export default function CheckoutPage() {
                       No payment is taken online right now. Placing the order reserves your items, and we&apos;ll share payment details so you can pay by bank transfer or UPI. Your order is confirmed once we&apos;ve verified the payment.
                     </p>
                   </div>
+                )}
+
+                {isOnlinePaymentEnabled && (
+                  <>
+                    <div
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: paymentMethod === 'RAZORPAY' ? '#eef4fc' : '#fff', borderTop: '1px solid #dce8f5', cursor: 'pointer' }}
+                      onClick={() => setPaymentMethod('RAZORPAY')}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div style={{ width: 18, height: 18, borderRadius: '50%', border: paymentMethod === 'RAZORPAY' ? '6px solid #0066cc' : '2px solid #ccc', flexShrink: 0, transition: 'border 0.15s' }} />
+                        <span style={{ fontSize: 14, fontWeight: 600, color: '#1a1a1a' }}>Pay now &mdash; UPI, card, netbanking or wallet</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                        <div style={{ background: '#fff', border: '1px solid #ddd', borderRadius: 4, padding: '2px 5px', fontSize: 10, fontWeight: 800, color: '#3395ff', letterSpacing: 0.3 }}>Razorpay</div>
+                      </div>
+                    </div>
+                    {paymentMethod === 'RAZORPAY' && (
+                      <div style={{ padding: '14px 16px', background: '#fff', borderTop: '1px solid #dce8f5', textAlign: 'center' }}>
+                        <p style={{ fontSize: 13, color: '#555', lineHeight: 1.5 }}>
+                          You&apos;ll be taken to Razorpay to complete the payment. Your order is confirmed as soon as the payment succeeds.
+                        </p>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>

@@ -253,7 +253,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
   const imageUrl = product?.images?.[0]?.url || product?.images?.[0] || product?.image || fallbackImage;
 
   return (
-    <div className="relative mt-3 sm:mt-4 group flex flex-col h-auto w-full max-w-[210px] sm:max-w-none mx-auto">
+    <div className="relative mt-3 group flex flex-col h-auto w-full max-w-[210px] sm:max-w-none mx-auto">
       {/* Yukizi Choice & Best Seller Tags */}
       <div className="absolute -top-[12px] left-1.5 sm:left-2 flex items-center gap-1.5 z-30">
         {isYukiziChoice && (
@@ -457,7 +457,7 @@ export default function ProductCarousel({ slot = 'HOMEPAGE_CAROUSEL', categoryId
         - Columns: 2 cols (mobile), 3 cols (sm), 4 cols (md), 5 cols (lg), 6 cols (xl/2xl)
         - Gap: gap-4 (16px)
       */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-7 gap-x-3.5 gap-y-7 sm:gap-x-4 sm:gap-y-9">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-7 gap-x-3.5 gap-y-3 sm:gap-x-4 sm:gap-y-3">
         {slicedProducts.map((product, index) => (
           <GridProductCard
             key={`${product?.id || 'prod'}-${index}`}

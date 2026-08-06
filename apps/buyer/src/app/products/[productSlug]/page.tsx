@@ -34,7 +34,7 @@ import { usePlatformConfig } from '@/hooks/usePlatformConfig';
 import { useWishlist, useAddToWishlist, useRemoveFromWishlist } from '@/hooks/useWishlist';
 import { useProductReviews, useCreateReview } from '@/hooks/useReviews';
 import { useBuyerProfile } from '@/hooks/useBuyerProfile';
-import { uploadReviewImage } from '@yukizi/api-client';
+import { uploadReviewImage, useAuth } from '@yukizi/api-client';
 import Navbar from '@/components/landing/Navbar';
 import { generateProductSlug, parseProductIdFromSlug, calculatePricing } from '@yukizi/utils';
 import { ShareButton } from '@/components/shared/ShareButton';
@@ -88,6 +88,7 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
   const { mutate: addToWishlist } = useAddToWishlist();
   const { mutate: removeFromWishlist } = useRemoveFromWishlist();
   const { data: wishlistData } = useWishlist();
+  const { isAuthenticated } = useAuth();
   const { data: waitlistData } = useWaitlist();
   const { mutate: addToWaitlist } = useAddToWaitlist();
   const { mutate: removeFromWaitlist } = useRemoveFromWaitlist();
@@ -160,6 +161,13 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
   const handleToggleWaitlist = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
+    // Signed-out shoppers used to tap the bell and get nothing at all: the
+    // request went out without a session, failed, and the icon never changed.
+    // Send them to sign in first, the same way the cart and wishlist do.
+    if (!isAuthenticated) {
+      window.dispatchEvent(new CustomEvent('open-login'));
+      return;
+    }
     if (isWaitlisted) {
       removeFromWaitlist(currentProductId, {
         onSuccess: () => toast('Removed from waitlist', 'info')
@@ -277,15 +285,22 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
 
       {/* Container */}
       <div
-        className={`bg-white rounded-[6px] sm:rounded-[6px] p-2.5 sm:p-3 hover:shadow-[0_8px_30px_rgb(133,76,188,0.15)] hover:ring-1 hover:ring-primary/50 transition-all duration-300 group flex flex-col relative border ${isYukiziChoice ? 'border-[#8b5cf6] shadow-[0_0_15px_rgba(139,92,246,0.4)]' : 'border-gray-300 shadow-sm'} w-full h-full overflow-hidden`}
+        className={`bg-white rounded-[6px] sm:rounded-[6px] p-2.5 sm:p-3 hover:shadow-[0_8px_30px_rgb(133,76,188,0.15)] hover:ring-1 hover:ring-primary/50 transition-all duration-300 group flex flex-col relative border ${
+          isWaitlisted
+            ? 'border-gray-900 ring-1 ring-gray-900 shadow-sm'
+            : isYukiziChoice
+              ? 'border-[#8b5cf6] shadow-[0_0_15px_rgba(139,92,246,0.4)]'
+              : 'border-gray-300 shadow-sm'
+        } w-full h-full overflow-hidden`}
       >
            {/* Top action icons */}
         <div className="flex justify-end items-center w-full absolute top-1 sm:top-1.5 left-0 pl-2.5 sm:pl-3 pr-0 sm:pr-0.5 z-20">
           {showBellIcon ? (
-            <button 
+            <button
               onClick={handleToggleWaitlist}
-              className={`transition-colors p-1 rounded-full ${isWaitlisted ? 'text-red-500 bg-red-50' : 'text-black hover:text-black/80 hover:bg-black/5'}`}
+              className={`transition-colors p-1 rounded-full ${isWaitlisted ? 'bg-gray-900 text-white hover:bg-gray-800' : 'text-black hover:text-black/80 hover:bg-black/5'}`}
               title={isWaitlisted ? "Remove from waitlist" : "Notify me when available"}
+              aria-pressed={isWaitlisted}
             >
               <Bell className="w-5 h-5" fill={isWaitlisted ? "currentColor" : "none"} strokeWidth={2.5} />
             </button>

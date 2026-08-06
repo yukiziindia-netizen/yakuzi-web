@@ -157,9 +157,15 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
 
   const finalPrice = directPrice > 0 ? directPrice : (computedPrice > 0 ? computedPrice : mrpVal);
   const discountPercent = Number(product?.discountMeta?.discountPercent || 0);
-  let finalOriginalPrice = mrpVal > finalPrice ? mrpVal : 0;
-  if (finalOriginalPrice === 0 && discountPercent > 0 && finalPrice > 0) {
+  // finalPrice includes discounted shipping; mrp does not. Comparing them makes
+  // a real 10% discount look like 0.6% off. Derive the pre-discount figure from
+  // the displayed price whenever a discount exists, so the strike-through and
+  // the "N% off" badge describe the same number.
+  let finalOriginalPrice = 0;
+  if (discountPercent > 0 && finalPrice > 0) {
     finalOriginalPrice = Math.round(finalPrice / (1 - discountPercent / 100));
+  } else if (mrpVal > finalPrice) {
+    finalOriginalPrice = mrpVal;
   }
   // No invented rating: unrated products render "NA" rather than a default 4.5.
   const numRating = Number(product?.rating);

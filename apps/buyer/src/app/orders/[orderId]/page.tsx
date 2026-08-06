@@ -193,9 +193,18 @@ export default function OrderIdPage({ params }: { params: { orderId: string } })
               <div className="bg-white/40 backdrop-blur-xl p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl md:rounded-[40px] border border-white/40 shadow-xl">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4 mb-6 sm:mb-8">
                   <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">Order #{order.orderNumber ?? (order.id || "").toString().slice(0, 8).toUpperCase()}</h1>
-                  <div className="flex items-center gap-2 text-gray-400">
-                    <Calendar className="w-4 h-4" />
-                    <span className="text-sm font-bold">{orderDate}</span>
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 text-gray-400">
+                      <Calendar className="w-4 h-4" />
+                      <span className="text-sm font-bold">{orderDate}</span>
+                    </div>
+                    <Link
+                      href={`/orders/${order.id}/invoice`}
+                      className="flex items-center gap-1.5 rounded-full border border-[#e2e8f0] bg-white px-4 py-2 text-[13px] font-bold text-[#593696] hover:bg-[#f5f3fa] transition-colors"
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      Tax invoice
+                    </Link>
                   </div>
                 </div>
 

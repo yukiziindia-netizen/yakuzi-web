@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Share2, Plus, Eye, ChevronRight, ChevronLeft, Filter, X, User, Package, Loader2 } from 'lucide-react';
+import { Share2, Plus, Eye, ChevronRight, ChevronLeft, Filter, X, User, Package, Loader2, FileText } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { OrderFilterDrawer } from './OrderFilterDrawer';
 import { OrderedProductsDrawer } from './OrderedProductsDrawer';
 import { useOrderById, useOrders } from '@/hooks/useOrders';
@@ -183,9 +184,23 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
               </div>
             </div>
 
+            {/* The drawer is where a buyer lands after paying, so the invoice
+                is offered here rather than only on the order page. */}
+            {effectiveOrderId && (
+              <div className="px-6 pt-4">
+                <Link
+                  href={`/orders/${effectiveOrderId}/invoice`}
+                  className="flex items-center justify-center gap-2 w-full rounded-full border border-[#e2e8f0] bg-white py-3 text-[14px] font-bold text-[#593696] hover:bg-[#f5f3fa] transition-colors"
+                >
+                  <FileText className="w-4 h-4" />
+                  View tax invoice
+                </Link>
+              </div>
+            )}
+
             {/* Ordered Products Section */}
             <div className="px-6 py-4">
-              <div 
+              <div
                 className="flex justify-between items-center mb-4 cursor-pointer group"
                 onClick={() => setIsOrderedProductsOpen(true)}
               >

@@ -149,6 +149,52 @@ export const getOrderInvoice = async (orderId: string): Promise<{ url: string }>
   return data.data;
 };
 
+export interface InvoiceLine {
+  serial: number;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  taxableValue: number;
+  gstRate: number;
+  gstAmount: number;
+  totalAmount: number;
+}
+
+export interface InvoiceParty {
+  name: string;
+  gstin: string | null;
+  address: string;
+  phone: string | null;
+  email: string | null;
+}
+
+export interface OrderInvoice {
+  invoiceNumber: string;
+  invoiceDate: string;
+  orderReference: string;
+  seller: InvoiceParty;
+  buyer: InvoiceParty;
+  placeOfSupply: string;
+  isIntraState: boolean;
+  lines: InvoiceLine[];
+  subtotal: number;
+  cgst: number;
+  sgst: number;
+  igst: number;
+  totalTax: number;
+  totalAmount: number;
+  amountInWords: string;
+}
+
+/**
+ * One invoice per seller on the order. Distinct from getOrderInvoice above,
+ * which expects a stored document URL.
+ */
+export const getOrderInvoices = async (orderId: string): Promise<OrderInvoice[]> => {
+  const { data } = await api.get(`/orders/${orderId}/invoices`);
+  return data.data ?? data;
+};
+
 // ──────────────────────────────────────────────
 // TRACKING
 // ──────────────────────────────────────────────

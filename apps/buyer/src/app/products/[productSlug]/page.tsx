@@ -34,7 +34,7 @@ import { usePlatformConfig } from '@/hooks/usePlatformConfig';
 import { useWishlist, useAddToWishlist, useRemoveFromWishlist } from '@/hooks/useWishlist';
 import { useProductReviews, useCreateReview } from '@/hooks/useReviews';
 import { useBuyerProfile } from '@/hooks/useBuyerProfile';
-import { uploadReviewImage } from '@yukizi/api-client';
+import { uploadReviewImage, useAuth } from '@yukizi/api-client';
 import Navbar from '@/components/landing/Navbar';
 import { generateProductSlug, parseProductIdFromSlug, calculatePricing } from '@yukizi/utils';
 import { ShareButton } from '@/components/shared/ShareButton';
@@ -88,6 +88,7 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
   const { mutate: addToWishlist } = useAddToWishlist();
   const { mutate: removeFromWishlist } = useRemoveFromWishlist();
   const { data: wishlistData } = useWishlist();
+  const { isAuthenticated } = useAuth();
   const { data: waitlistData } = useWaitlist();
   const { mutate: addToWaitlist } = useAddToWaitlist();
   const { mutate: removeFromWaitlist } = useRemoveFromWaitlist();
@@ -160,6 +161,13 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
   const handleToggleWaitlist = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
+    // Signed-out shoppers used to tap the bell and get nothing at all: the
+    // request went out without a session, failed, and the icon never changed.
+    // Send them to sign in first, the same way the cart and wishlist do.
+    if (!isAuthenticated) {
+      window.dispatchEvent(new CustomEvent('open-login'));
+      return;
+    }
     if (isWaitlisted) {
       removeFromWaitlist(currentProductId, {
         onSuccess: () => toast('Removed from waitlist', 'info')

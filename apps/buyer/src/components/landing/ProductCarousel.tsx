@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Loader2, Share2, Plus, Minus, RotateCw, Eye, Star, Truck, Bookmark, Bell } from 'lucide-react';
 import Link from 'next/link';
-import { getProducts } from '@yukizi/api-client';
+import { getProducts, useAuth } from '@yukizi/api-client';
 import { generateProductSlug, calculatePricing } from '@yukizi/utils';
 import QuickReviewModal from './QuickReviewModal';
 import { useAddToCart, useCart, useUpdateCartItem, useRemoveCartItem } from '@/hooks/useCart';
@@ -98,6 +98,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
   const { mutate: addToWishlist } = useAddToWishlist();
   const { mutate: removeFromWishlist } = useRemoveFromWishlist();
   const { data: wishlistData } = useWishlist();
+  const { isAuthenticated } = useAuth();
   const { data: waitlistData } = useWaitlist();
   const { mutate: addToWaitlist } = useAddToWaitlist();
   const { mutate: removeFromWaitlist } = useRemoveFromWaitlist();
@@ -221,6 +222,13 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
   const handleToggleWaitlist = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
+    // Signed-out shoppers used to tap the bell and get nothing at all: the
+    // request went out without a session, failed, and the icon never changed.
+    // Send them to sign in first, the same way the cart and wishlist do.
+    if (!isAuthenticated) {
+      window.dispatchEvent(new CustomEvent('open-login'));
+      return;
+    }
     if (isWaitlisted) {
       removeFromWaitlist(currentProductId, {
         onSuccess: () => toast('Removed from waitlist', 'info')

@@ -73,7 +73,7 @@ export function StockBasedButton({
           ${status === 'out-of-stock' ? (isWaitlisted ? 'text-red-500 bg-red-50' : 'text-gray-400 hover:text-red-500 hover:bg-red-50') : iconColorMap[status]}
           ${disabled || isLoading ? 'opacity-50 cursor-not-allowed' : ''}
         `}
-        title={status === 'out-of-stock' ? (isWaitlisted ? 'Remove from waitlist' : 'Notify me when available') : 'Add to bag'}
+        title={status === 'out-of-stock' ? (isWaitlisted ? 'Remove from notify me' : 'Notify me when available') : 'Add to bag'}
       >
         {isLoading ? (
           <Loader2 className="w-6 h-6 animate-spin" />

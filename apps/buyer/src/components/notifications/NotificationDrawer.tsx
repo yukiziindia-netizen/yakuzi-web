@@ -63,6 +63,27 @@ import { useWaitlist, useRemoveFromWaitlist } from '@/hooks/useProducts';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { generateProductSlug } from '@yukizi/utils';
+import { renderBuyerOfferBadge } from '@/components/landing/ProductCarousel';
+
+const formatRelativeTime = (dateStr: string) => {
+  try {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    if (isNaN(diffMs)) return '';
+    const diffMins = Math.floor(diffMs / 60000);
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    const diffHrs = Math.floor(diffMins / 60);
+    if (diffHrs < 24) return `${diffHrs}h ago`;
+    const diffDays = Math.floor(diffHrs / 24);
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  } catch (e) {
+    return '';
+  }
+};
 
 export default function NotificationDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   useScrollLock(isOpen);
@@ -208,7 +229,7 @@ export default function NotificationDrawer({ isOpen, onClose }: { isOpen: boolea
                   <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
                 ) : waitlistItems.length === 0 ? (
                   <div className="text-center py-8 text-gray-500 text-sm font-medium">Your waitlist is empty</div>
-                ) : waitlistItems.map((item: any) => {
+                ) : waitlistItems.map((item: any, idx: number) => {
                   const product = item.catalogProduct;
                   if (!product) return null;
                   
@@ -217,77 +238,108 @@ export default function NotificationDrawer({ isOpen, onClose }: { isOpen: boolea
                   const productMrp = product.mrp || product.originalPrice;
                   const hasDiscount = productMrp && productPrice && productMrp > productPrice;
                   const discountPct = hasDiscount ? Math.round(((productMrp - productPrice) / productMrp) * 100) : null;
+                  
+                  const isYukiziChoice = product.isYukiziChoice !== undefined ? product.isYukiziChoice : (item.isYukiziChoice !== undefined ? item.isYukiziChoice : (idx === 0));
+                  const timerText = item.createdAt ? formatRelativeTime(item.createdAt) : (idx === 0 ? '1:10:24' : idx === 1 ? '1:52:10' : '7 Days');
 
                   return (
-                  <div key={`notify-${item.id}`} className="bg-white rounded-2xl shadow-[0_2px_20px_-4px_rgba(0,0,0,0.10)] border border-gray-100/80 p-3 flex gap-3 relative overflow-hidden">
-
-                    {/* Left: Image block */}
-                    <div className="w-[80px] h-[80px] bg-gray-100 rounded-xl flex items-center justify-center relative flex-shrink-0 overflow-hidden">
-                      <img
-                        src={productImage}
-                        alt={product.name}
-                        className="w-[68px] h-[68px] object-contain mix-blend-multiply"
-                      />
-                      {/* Orange trash button at bottom-left of image */}
-                      <button
-                        onClick={() => removeFromWaitlist(product.id)}
-                        className="absolute bottom-0 left-0 bg-[#f7941d] text-white p-1.5 rounded-tr-xl hover:bg-orange-500 active:scale-90 transition-all z-10"
-                      >
-                        <Trash2 className="w-[13px] h-[13px]" />
-                      </button>
-                    </div>
-
-                    {/* Center: Content */}
-                    <div className="flex-1 min-w-0 flex flex-col justify-center gap-0.5">
-
-
-                      {/* Product name */}
-                      <p className="text-[12px] text-gray-400 font-normal leading-snug truncate">{product.name}</p>
-
-                      {/* Price row */}
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-[16px] font-extrabold text-gray-800 leading-none">
-                          {productPrice ? `₹${Math.round(Number(productPrice)).toLocaleString('en-IN')}` : 'N/A'}
-                        </span>
-                        {hasDiscount && (
-                          <span className="text-[11px] text-gray-400 line-through leading-none">
-                            ₹{productMrp}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Discount tag */}
-                      {discountPct && (
-                        <p className="text-[12px] font-bold text-gray-700">{discountPct}% off</p>
+                    <div
+                      key={`notify-${item.id}`}
+                      className={`bg-white rounded-2xl p-3.5 flex gap-4 relative border ${
+                        isYukiziChoice
+                          ? 'border-[#7B2FBE]/40 shadow-[0_2px_12px_rgba(123,47,190,0.12)]'
+                          : 'border-gray-100 shadow-[0_2px_20px_-4px_rgba(0,0,0,0.10)]'
+                      } overflow-visible mt-3`}
+                    >
+                      {/* Yukizi Choice Badge */}
+                      {isYukiziChoice && (
+                        <div className="absolute -top-[9.5px] left-3.5 bg-[#7B2FBE] text-white px-2.5 py-0.5 rounded-full font-bold text-[9px] z-20 shadow-sm uppercase tracking-wider scale-[0.95]">
+                          Yukizi Choice
+                        </div>
                       )}
-                    </div>
 
-                    {/* Right: Actions column */}
-                    <div className="flex flex-col items-center justify-between py-1 flex-shrink-0 gap-1">
-                      {/* Red bell — filled */}
-                      <button className="text-red-500 cursor-default" title="Waitlisted">
-                        <Bell className="w-[22px] h-[22px] fill-red-500" />
-                      </button>
-
-                      {/* Grey circular navigate button */}
-                      <Link href={`/products/${generateProductSlug(product.name, product.id)}`}>
-                        <button className="flex items-center justify-center hover:scale-110 transition-transform text-gray-400 hover:text-gray-600" title="Quick view">
-                          <Eye className="w-4 h-4" />
+                      {/* Left: Image block with Trash can overlay (scaled up) */}
+                      <div className="w-[96px] h-[115px] bg-[#f8f6fc] border border-gray-50 rounded-xl flex items-center justify-center relative flex-shrink-0 overflow-hidden">
+                        <img
+                          src={productImage}
+                          alt={product.name}
+                          className="max-w-[80px] max-h-[90px] object-contain mix-blend-multiply"
+                        />
+                        <button
+                          onClick={() => removeFromWaitlist(product.id)}
+                          className="absolute bottom-0 left-0 bg-[#f7941d] hover:bg-orange-500 text-white p-1.5 rounded-tr-xl active:scale-90 transition-all z-10"
+                          title="Delete waitlist item"
+                        >
+                          <Trash2 className="w-[13px] h-[13px]" />
                         </button>
-                      </Link>
-
-                      {/* Star + rating */}
-                      <div className="flex items-center gap-0.5">
-                        <Star className="w-[13px] h-[13px] fill-[#854cbc] text-[#854cbc]" />
-                        <span className="text-[12px] font-bold text-gray-700">{product.rating || '4.5'}</span>
                       </div>
 
-                      {/* Delivery badge */}
-                      <DeliveryTruckBadge text="3 days" className="w-[60px] text-[#9a9a9a] scale-90" />
-                    </div>
+                      {/* Right: Content details */}
+                      <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5 gap-1.5">
+                        {/* Row 1: Timer Badge & Bell Icon */}
+                        <div className="flex items-center justify-between w-full">
+                          {timerText ? (
+                            <span className="px-2.5 py-0.5 border border-gray-200 text-gray-400 rounded-full text-[9.5px] font-medium leading-none">
+                              {timerText}
+                            </span>
+                          ) : (
+                            <div />
+                          )}
+                          <button
+                            onClick={() => removeFromWaitlist(product.id)}
+                            className="text-[#eb4335] hover:text-red-600 transition-colors shrink-0"
+                            title="Stop notification"
+                          >
+                            <Bell className="w-5 h-5 fill-[#eb4335]" />
+                          </button>
+                        </div>
 
-                  </div>
-                )})}
+                        {/* Row 2: Title & Eye Icon */}
+                        <div className="flex items-start justify-between w-full gap-1.5">
+                          <Link href={`/products/${generateProductSlug(product.name, product.id)}`} className="flex-1 min-w-0 text-left">
+                            <h4 className="text-[12px] font-medium text-gray-500 leading-snug truncate hover:text-[#7B2FBE] transition-colors">
+                              {product.name}
+                            </h4>
+                          </Link>
+                          <Link href={`/products/${generateProductSlug(product.name, product.id)}`} className="text-gray-400 hover:text-gray-600 transition-colors shrink-0">
+                            <Eye className="w-4 h-4" />
+                          </Link>
+                        </div>
+
+                        {/* Row 3: Price & Rating */}
+                        <div className="flex items-baseline justify-between w-full pt-0.5">
+                          <div className="flex items-baseline gap-1.5">
+                            <span className="text-[14px] font-bold text-gray-800 leading-none">
+                              {productPrice ? `₹${Math.round(Number(productPrice))}` : 'N/A'}
+                            </span>
+                            {hasDiscount && (
+                              <span className="text-[10px] text-gray-400 line-through leading-none font-medium">
+                                ₹{Math.round(Number(productMrp))}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <Star className="w-3.5 h-3.5 text-[#7B2FBE] fill-[#7B2FBE]" />
+                            <span className="text-[12px] font-bold text-gray-700 leading-none">
+                              {product.rating || '4.5'}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Row 4: Backend Offers / Discount Tag & Delivery Badge */}
+                        <div className="flex items-center justify-between w-full pt-1.5 border-t border-gray-100/80">
+                          <div className="text-[11px] sm:text-[12px] font-semibold text-gray-500">
+                            {renderBuyerOfferBadge(product)}
+                          </div>
+                          <div className="-mr-[6px]">
+                            <DeliveryTruckBadge text="3 days" className="w-[52px] h-auto text-[#8c8c8c]" />
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
+                  );
+                })}
               </div>
             </div>
 

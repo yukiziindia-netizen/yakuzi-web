@@ -231,11 +231,11 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
     }
     if (isWaitlisted) {
       removeFromWaitlist(currentProductId, {
-        onSuccess: () => toast('Removed from waitlist', 'info')
+        onSuccess: () => toast('Removed from notify me', 'info')
       });
     } else {
       addToWaitlist(currentProductId, {
-        onSuccess: () => toast('Added to waitlist', 'success')
+        onSuccess: () => toast('Added to notify me', 'success')
       });
     }
   };
@@ -298,7 +298,7 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
             <button 
               onClick={handleToggleWaitlist}
               className={`transition-colors p-1 rounded-full ${isWaitlisted ? 'bg-gray-900 text-white hover:bg-gray-800' : 'text-black hover:text-black/80 hover:bg-black/5'}`}
-              title={isWaitlisted ? "Remove from waitlist" : "Notify me when available"}
+              title={isWaitlisted ? "Remove from notify me" : "Notify me when available"}
               aria-pressed={isWaitlisted}
             >
               <Bell className="w-5 h-5" fill={isWaitlisted ? "currentColor" : "none"} strokeWidth={2.5} />

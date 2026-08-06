@@ -3,6 +3,7 @@ import { Open_Sans } from 'next/font/google';
 // @ts-ignore
 import '../styles/globals.css';
 import { Providers } from './providers';
+import SiteFooter from '@/components/shared/SiteFooter';
 
 const openSans = Open_Sans({ subsets: ['latin'] });
 
@@ -23,6 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div style={{ flex: 1 }}>
               {children}
             </div>
+            <SiteFooter />
           </div>
         </Providers>
       </body>

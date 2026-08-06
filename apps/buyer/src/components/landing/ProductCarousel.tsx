@@ -90,7 +90,7 @@ export const renderBuyerOfferBadge = (p: any) => {
   return <span className={OFFER_TEXT}>{p.discountType.replace(/_/g, ' ')}</span>;
 };
 
-function GridProductCard({ product, index, onOpenReview }: { product: any; index: number; onOpenReview: (p: any) => void }) {
+export function GridProductCard({ product, index, onOpenReview }: { product: any; index: number; onOpenReview?: (p: any) => void }) {
   const { data: cartData } = useCart();
   const { mutate: addToCart } = useAddToCart();
   const { mutate: updateCartItem } = useUpdateCartItem();
@@ -367,13 +367,23 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
                        {productName}
                     </h3>
                   </Link>
-                  <button 
-                     onClick={(e) => { e.preventDefault(); onOpenReview(product); }}
-                     className="flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform shrink-0 -mr-[4px] sm:-mr-[6px]"
-                     title="Quick view"
-                  >
-                     <Eye className="w-4 h-4 text-gray-400 hover:text-gray-600" />
-                  </button>
+                  {onOpenReview ? (
+                    <button 
+                       onClick={(e) => { e.preventDefault(); onOpenReview(product); }}
+                       className="flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform shrink-0 -mr-[4px] sm:-mr-[6px]"
+                       title="Quick view"
+                    >
+                       <Eye className="w-4 h-4 text-gray-400 hover:text-gray-600" />
+                    </button>
+                  ) : (
+                    <Link
+                       href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`}
+                       className="flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform shrink-0 -mr-[4px] sm:-mr-[6px]"
+                       title="Quick view"
+                    >
+                       <Eye className="w-4 h-4 text-gray-400 hover:text-gray-600" />
+                    </Link>
+                  )}
               </div>
            </div>
            

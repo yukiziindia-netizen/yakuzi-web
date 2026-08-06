@@ -414,7 +414,9 @@ export default function Navbar({
           className="flex items-center gap-1.5 xs:gap-2 sm:gap-6 md:gap-2 pointer-events-auto flex-nowrap justify-center w-full max-w-[1200px] px-1 sm:px-4 relative z-10"
         >
           {/* Left Segment: Logo, Profile, Notifications, Search */}
-          <div className="flex items-center bg-white sm:bg-[#562996] rounded-xl pl-[2px] pr-1 xs:pl-1 xs:pr-1.5 sm:px-4 md:px-6 h-[48px] sm:h-[60px] md:h-[64px] shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl flex-1 sm:flex-1 max-w-[480px] justify-between overflow-hidden min-w-0 border border-gray-100 sm:border-0">
+          <div className={`flex items-center bg-white sm:bg-[#562996] rounded-xl pl-[2px] pr-1 xs:pl-1 xs:pr-1.5 sm:px-4 md:px-6 h-[48px] sm:h-[60px] md:h-[64px] shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl sm:flex-1 max-w-[480px] justify-between overflow-hidden min-w-0 border border-gray-100 sm:border-0 ${
+            isAuthenticated ? 'flex-1' : 'flex-[1.15]'
+          }`}>
             {/* DESKTOP VIEW (sm and up) */}
             <div className="hidden sm:flex items-center w-full justify-between">
                 <div className="flex items-center h-full">
@@ -492,7 +494,7 @@ export default function Navbar({
                       setIsSearchChatOpen(!isSearchChatOpen);
                       setIsChatOpen(false);
                     }}
-                    className={`relative p-1 mr-2.5 transition-all duration-200 shrink-0 ${
+                    className={`relative p-1 mr-1.5 transition-all duration-200 shrink-0 ${
                       isSearchChatOpen
                         ? "text-[#562996] scale-110 opacity-100"
                         : "text-gray-400 hover:text-gray-600"
@@ -550,7 +552,11 @@ export default function Navbar({
               setIsChatOpen(!isChatOpen);
               setIsSearchChatOpen(false);
             }}
-            className="relative -mt-0.5 sm:-mt-1.5 md:-mt-2 z-20 w-12 h-12 xs:w-14 xs:h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-[#f76409] rounded-xl xs:rounded-[18px] sm:rounded-2xl md:rounded-[1.5rem] flex items-center justify-center shadow-[0_4px_15px_rgba(247,100,9,0.4)] sm:shadow-[0_4px_20px_rgba(247,100,9,0.45)] hover:-translate-y-1 sm:hover:-translate-y-2 transition-transform cursor-pointer shrink-0 mx-1 xs:mx-1.5 sm:mx-2 md:mx-2 border-[4px] xs:border-[5px] sm:border-[6px] md:border-[7px] border-[#ffa168]"
+            className={`relative -mt-0.5 sm:-mt-1.5 md:-mt-2 z-20 w-12 h-12 xs:w-14 xs:h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-[#f76409] rounded-xl xs:rounded-[18px] sm:rounded-2xl md:rounded-[1.5rem] flex items-center justify-center shadow-[0_4px_15px_rgba(247,100,9,0.4)] sm:shadow-[0_4px_20px_rgba(247,100,9,0.45)] hover:-translate-y-1 sm:hover:-translate-y-2 transition-transform cursor-pointer shrink-0 border-[4px] xs:border-[5px] sm:border-[6px] md:border-[7px] border-[#ffa168] ${
+              isAuthenticated
+                ? 'mx-1 xs:mx-1.5 sm:mx-2 md:mx-2'
+                : 'ml-2 xs:ml-2.5 mr-1 xs:mr-1 sm:mx-2 md:mx-2'
+            }`}
           >
             <Image src="/yukizi.jpg" alt="Mascot" width={96} height={96} className="w-full h-full object-cover rounded-[6px] xs:rounded-[10px] sm:rounded-xl md:rounded-[1.1rem]" />
             
@@ -563,7 +569,9 @@ export default function Navbar({
 
 
           {/* Right Segment: Cart, Wishlist, Filter, Menu */}
-          <div className="flex items-center justify-between bg-white sm:bg-[#562996] rounded-xl px-2 xs:px-3 sm:px-8 md:px-12 lg:px-16 h-[48px] sm:h-[60px] md:h-[64px] shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl text-[#562996] sm:text-white sm:shrink-0 flex-1 sm:flex-1 max-w-[480px] z-10 overflow-hidden min-w-0 border border-gray-100 sm:border-0">
+          <div className={`flex items-center justify-between bg-white sm:bg-[#562996] rounded-xl px-2 xs:px-3 sm:px-8 md:px-12 lg:px-16 h-[48px] sm:h-[60px] md:h-[64px] shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl text-[#562996] sm:text-white sm:shrink-0 sm:flex-1 max-w-[480px] z-10 overflow-hidden min-w-0 border border-gray-100 sm:border-0 ${
+            isAuthenticated ? 'flex-1' : 'flex-[0.85]'
+          }`}>
 
             <button 
               onClick={() => setIsWishlistOpen(true)} 
@@ -738,8 +746,8 @@ export default function Navbar({
 
                   {/* Chat Box Footer (Positioned above the navbar) */}
                   <div className="flex items-center justify-between pb-[70px] md:pb-[80px] px-2 md:px-4">
-                    {/* Left Icons */}
-                    <div className="flex items-center gap-5 sm:gap-7 text-white ml-2 md:ml-4">
+                    {/* Action Tool Icons */}
+                    <div className="flex items-center gap-3.5 xs:gap-4 sm:gap-7 text-white ml-1 md:ml-4">
                       <button onClick={handleNewChat} className="hover:text-white/80 transition-colors" title="New Chat">
                         <MessageSquarePlus className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2]" />
                       </button>
@@ -749,19 +757,19 @@ export default function Navbar({
                       <button onClick={handleShare} className="hover:text-white/80 transition-colors" title="Share Chat">
                         <Share2 className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2]" />
                       </button>
-                    </div>
-
-                    {/* Right Icons */}
-                    <div className="flex items-center gap-5 sm:gap-7 text-white mr-2 md:mr-4">
-                      <button onClick={handleRegenerate} disabled={isChatLoading || chatMessages.length < 2} className="hover:text-white/80 transition-colors disabled:opacity-50">
+                      <button onClick={handleRegenerate} disabled={isChatLoading || chatMessages.length < 2} className="hover:text-white/80 transition-colors disabled:opacity-50" title="Regenerate Response">
                         <RotateCw className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.5]" />
                       </button>
-                      <button onClick={() => fileInputRef.current?.click()} className="hover:text-white/80 transition-colors">
+                      <button onClick={() => fileInputRef.current?.click()} className="hover:text-white/80 transition-colors" title="Upload File">
                         <Plus className="w-6 h-6 sm:w-7 sm:h-7 stroke-[3]" />
                       </button>
-                      <button onClick={handleVoiceInput} className={`transition-colors ${isRecording ? 'text-red-400 animate-pulse' : 'hover:text-white/80'}`}>
+                      <button onClick={handleVoiceInput} className={`transition-colors ${isRecording ? 'text-red-400 animate-pulse' : 'hover:text-white/80'}`} title="Voice Input">
                         <AudioLines className="w-6 h-6 sm:w-8 sm:h-8 stroke-[2]" />
                       </button>
+                    </div>
+
+                    {/* Send Button on the right */}
+                    <div className="flex items-center text-white mr-1 md:mr-4">
                       <button
                         onClick={handleChatSubmit}
                         disabled={(!chatInput.trim() && attachments.length === 0) || isChatLoading}
@@ -880,24 +888,24 @@ export default function Navbar({
 
                   {/* Chat Box Footer */}
                   <div className="flex items-center justify-between pb-[70px] md:pb-[80px] px-2 md:px-4 z-10">
-                    {/* Left Icons */}
-                    <div className="flex items-center gap-5 sm:gap-7 text-gray-700">
-                      <button className="hover:text-gray-900 transition-colors">
+                    {/* Action Tool Icons */}
+                    <div className="flex items-center gap-3.5 xs:gap-4 sm:gap-7 text-gray-700 ml-1 md:ml-4">
+                      <button className="hover:text-gray-900 transition-colors" title="Search History">
                         <Clock className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2]" />
+                      </button>
+                      <button className="hover:text-gray-900 transition-colors" title="Reset Search">
+                        <RotateCw className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.5]" />
+                      </button>
+                      <button className="hover:text-gray-900 transition-colors" title="Add Filter">
+                        <Plus className="w-6 h-6 sm:w-7 sm:h-7 stroke-[3]" />
+                      </button>
+                      <button className="hover:text-gray-900 transition-colors" title="Voice Search">
+                        <AudioLines className="w-6 h-6 sm:w-8 sm:h-8 stroke-[2]" />
                       </button>
                     </div>
 
-                    {/* Right Icons */}
-                    <div className="flex items-center gap-5 sm:gap-7 text-gray-700 mr-2 md:mr-4">
-                      <button className="hover:text-gray-900 transition-colors">
-                        <RotateCw className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.5]" />
-                      </button>
-                      <button className="hover:text-gray-900 transition-colors">
-                        <Plus className="w-6 h-6 sm:w-7 sm:h-7 stroke-[3]" />
-                      </button>
-                      <button className="hover:text-gray-900 transition-colors">
-                        <AudioLines className="w-6 h-6 sm:w-8 sm:h-8 stroke-[2]" />
-                      </button>
+                    {/* Send Button on the right */}
+                    <div className="flex items-center text-gray-700 mr-1 md:mr-4">
                       <button
                         onClick={handleSearchSubmit}
                         className="w-12 h-10 sm:w-16 sm:h-12 bg-white rounded-xl flex items-center justify-center hover:bg-gray-50 transition-colors shadow-md border border-gray-100 ml-2"

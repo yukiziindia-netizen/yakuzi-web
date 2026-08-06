@@ -1082,7 +1082,21 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
       )
       : validListings;
 
-  const comparisonListings = filteredListings || [];
+  // Sellers are ordered by their rating, so the best-reviewed one leads the list
+  // and is what the page defaults to. Price only separates sellers whose ratings
+  // are equal. Unrated sellers (rating 0 or absent — the rows showing NA) sort
+  // last rather than being scattered through the list.
+  //
+  // Copied before sorting: the source array is derived from the product query's
+  // cached data, which must not be reordered in place.
+  const comparisonListings = [...(filteredListings || [])].sort((a: any, b: any) => {
+    const ratingOf = (l: any) => Number(l?.seller?.rating) || 0;
+    const priceOf = (l: any) => {
+      const value = Number(l?.price ?? l?.mrp);
+      return Number.isFinite(value) && value > 0 ? value : Infinity;
+    };
+    return ratingOf(b) - ratingOf(a) || priceOf(a) - priceOf(b);
+  });
 
   let displayImages = [...images];
   const rawVariantImages = selectedVariant?.images?.length > 0

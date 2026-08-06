@@ -70,12 +70,16 @@ export {
   getOrderMilestones,
   confirmMilestonePayment,
   getOrderInvoice,
+  getOrderInvoices,
   getOrderTracking,
   type Order,
   type OrderItem,
   type OrderListResponse,
   type CreateOrderInput,
   type Milestone,
+  type OrderInvoice,
+  type InvoiceLine,
+  type InvoiceParty,
 } from './modules/orders.api';
 
 // Payments

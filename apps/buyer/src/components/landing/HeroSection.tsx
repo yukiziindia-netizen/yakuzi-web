@@ -91,23 +91,37 @@ export default function HeroSection() {
 
   const displayBrands = brands.length > 0 ? brands : fallbackBrands;
 
-  const [visibleCount, setVisibleCount] = useState(4);
+  const [desiredVisibleCount, setDesiredVisibleCount] = useState(4);
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 480) {
-        setVisibleCount(2);
-      } else if (window.innerWidth < 768) {
-        setVisibleCount(3);
+      const width = window.innerWidth;
+      // The strip spans the full width of the bar, so wider screens show more
+      // logos rather than stretching four of them across the whole page.
+      if (width < 480) {
+        setDesiredVisibleCount(2);
+      } else if (width < 768) {
+        setDesiredVisibleCount(3);
+      } else if (width < 1024) {
+        setDesiredVisibleCount(4);
+      } else if (width < 1440) {
+        setDesiredVisibleCount(5);
       } else {
-        setVisibleCount(4);
+        setDesiredVisibleCount(6);
       }
     };
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Never ask for more slots than there are logos, or the row would occupy only
+  // part of its track and bunch up against the left edge.
+  const visibleCount = Math.max(
+    1,
+    Math.min(desiredVisibleCount, displayBrands.length),
+  );
 
   const handlePrev = () => {
     setCurrentIndex((prev) => {
@@ -244,7 +258,7 @@ export default function HeroSection() {
       </div>
       {/* Bottom Slider Section */}
       <div className="border-b border-gray-300 bg-[#e2e2e2] px-4 py-1.5 sm:py-2">
-        <div className="mx-auto flex max-w-4xl items-center justify-center gap-3 xs:gap-3 md:gap-6">
+        <div className="flex w-full items-center gap-3 xs:gap-3 md:gap-6">
           {/* Left Arrow */}
           {displayBrands.length > visibleCount && (
             <button 
@@ -256,7 +270,7 @@ export default function HeroSection() {
           )}
 
           {/* Logos Slider Container */}
-          <div className="relative flex-1 overflow-hidden max-w-3xl">
+          <div className="relative flex-1 overflow-hidden">
             {isLoadingBrands ? (
               <div className="flex justify-center">
                 <span className="text-sm italic text-gray-400">Loading brands...</span>

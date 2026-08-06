@@ -195,15 +195,27 @@ export default function InvoicePage({ params }: { params: { orderId: string } })
                   <Row label="Subtotal (Taxable Value)" value={money(inv.subtotal)} />
                   {/* Stated rate by rate: an order with a 5% and an 18% item
                       owes two lines, not one merged figure. */}
-                  {(inv.taxBreakdown ?? []).map((t) =>
-                    inv.isIntraState ? (
-                      <React.Fragment key={t.rate}>
-                        <Row label={`CGST (${t.componentRate}%)`} value={money(t.cgst)} />
-                        <Row label={`SGST (${t.componentRate}%)`} value={money(t.sgst)} />
-                      </React.Fragment>
-                    ) : (
-                      <Row key={t.rate} label={`IGST (${t.componentRate}%)`} value={money(t.igst)} />
-                    ),
+                  {inv.taxBreakdown?.length ? (
+                    inv.taxBreakdown.map((t) =>
+                      inv.isIntraState ? (
+                        <React.Fragment key={t.rate}>
+                          <Row label={`CGST (${t.componentRate}%)`} value={money(t.cgst)} />
+                          <Row label={`SGST (${t.componentRate}%)`} value={money(t.sgst)} />
+                        </React.Fragment>
+                      ) : (
+                        <Row key={t.rate} label={`IGST (${t.componentRate}%)`} value={money(t.igst)} />
+                      ),
+                    )
+                  ) : inv.isIntraState ? (
+                    // Fall back to the unbroken-down totals when the API has
+                    // not shipped taxBreakdown yet. Rendering nothing would
+                    // leave a tax invoice with no tax stated on it at all.
+                    <>
+                      <Row label="CGST" value={money(inv.cgst)} />
+                      <Row label="SGST" value={money(inv.sgst)} />
+                    </>
+                  ) : (
+                    <Row label="IGST" value={money(inv.igst)} />
                   )}
                   <div className="mt-3 flex items-center justify-between rounded-lg bg-[#f3edfa] px-4 py-3">
                     <span className="font-bold text-[#593696]">TOTAL AMOUNT PAYABLE (₹)</span>

@@ -13,7 +13,13 @@ interface EditProfileDrawerProps {
 }
 
 export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawerProps) {
-  const { data: profile } = useBuyerProfile();
+  const {
+    data: profile,
+    isLoading: isProfileLoading,
+    isError: isProfileError,
+    error: profileError,
+    refetch: refetchProfile,
+  } = useBuyerProfile();
   const { user, logout } = useAuth();
   const { mutateAsync: updateProfile, isPending: isUpdating } = useUpdateBuyerProfile();
   const { toast } = useToast();
@@ -62,6 +68,21 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
     setPhoto(localStorage.getItem('yukizi_avatar') || '');
   }, [profile, user]);
 
+  // A failed profile load used to be indistinguishable from an empty profile:
+  // both rendered "Add your name" on every row. Say which one it is.
+  const profileStatus = (profileError as any)?.response?.status;
+  const serverMessage = (() => {
+    const m = (profileError as any)?.response?.data?.message;
+    return Array.isArray(m) ? m[0] : m;
+  })();
+  const loadErrorMessage = profileStatus === 403
+    ? 'This account does not have buyer access, so its profile cannot be loaded or edited.'
+    : serverMessage || 'We could not load your profile. Check your connection and try again.';
+
+  // What an empty row should say depends on why it is empty.
+  const emptyLabel = (prompt: string) =>
+    isProfileLoading ? 'Loading…' : isProfileError ? 'Unavailable' : prompt;
+
   // Shown when no photo has been uploaded. Never invent a stock portrait.
   const initials =
     [formData.name, formData.username, formData.email]
@@ -95,6 +116,12 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
   };
 
   const startEditing = (field: keyof typeof formData) => {
+    // Saving goes to the same endpoint that just refused to load, so offering
+    // an editor here would only end in a failed save.
+    if (isProfileError) {
+      toast(loadErrorMessage, 'error');
+      return;
+    }
     setEditingField(field);
     setEditValue(formData[field]);
   };
@@ -207,6 +234,24 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
 
         {/* Form Body */}
         <div className="flex-1 overflow-y-auto pr-1">
+          {isProfileError && (
+            <div className="mb-5 rounded-2xl border border-red-100 bg-red-50 px-4 py-3">
+              <p className="text-[13px] font-semibold text-red-700">
+                Profile could not be loaded
+              </p>
+              <p className="mt-1 text-[12px] leading-relaxed text-red-600">
+                {loadErrorMessage}
+              </p>
+              <button
+                type="button"
+                onClick={() => refetchProfile()}
+                className="mt-2 text-[12px] font-bold text-red-700 underline underline-offset-2 hover:text-red-800"
+              >
+                Try again
+              </button>
+            </div>
+          )}
+
           {/* About You Section */}
           <span className="text-[11px] font-black text-gray-400 uppercase tracking-widest block mb-4">
             About you
@@ -240,7 +285,7 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
                   {formData.name ? (
                     <span className="text-[14px] font-semibold text-gray-800">{formData.name}</span>
                   ) : (
-                    <span className="text-[14px] font-semibold text-gray-400 italic">Add your name</span>
+                    <span className="text-[14px] font-semibold text-gray-400 italic">{emptyLabel('Add your name')}</span>
                   )}
                   <ChevronRight className="w-4 h-4 text-gray-400" />
                 </button>
@@ -274,7 +319,7 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
                   {formData.username ? (
                     <span className="text-[14px] font-semibold text-gray-800">{formData.username}</span>
                   ) : (
-                    <span className="text-[14px] font-semibold text-gray-400 italic">Add a username</span>
+                    <span className="text-[14px] font-semibold text-gray-400 italic">{emptyLabel('Add a username')}</span>
                   )}
                   <ChevronRight className="w-4 h-4 text-gray-400" />
                 </button>
@@ -308,7 +353,7 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
                   {formData.email ? (
                     <span className="text-[14px] font-semibold text-gray-800 truncate max-w-[200px] sm:max-w-[240px] block">{formData.email}</span>
                   ) : (
-                    <span className="text-[14px] font-semibold text-gray-400 italic">Add your email</span>
+                    <span className="text-[14px] font-semibold text-gray-400 italic">{emptyLabel('Add your email')}</span>
                   )}
                   <ChevronRight className="w-4 h-4 text-gray-400" />
                 </button>
@@ -343,7 +388,7 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
                   {formData.address ? (
                     <span className="text-[14px] font-semibold text-gray-800 truncate block max-w-[220px]">{formData.address}</span>
                   ) : (
-                    <span className="text-[14px] font-semibold text-gray-400 italic">Add your address</span>
+                    <span className="text-[14px] font-semibold text-gray-400 italic">{emptyLabel('Add your address')}</span>
                   )}
                   <ChevronRight className="w-4 h-4 text-gray-400" />
                 </button>
@@ -377,7 +422,7 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
                   {formData.phone ? (
                     <span className="text-[14px] font-semibold text-gray-800">{formData.phone}</span>
                   ) : (
-                    <span className="text-[14px] font-semibold text-gray-400 italic">Add your phone</span>
+                    <span className="text-[14px] font-semibold text-gray-400 italic">{emptyLabel('Add your phone')}</span>
                   )}
                   <ChevronRight className="w-4 h-4 text-gray-400" />
                 </button>

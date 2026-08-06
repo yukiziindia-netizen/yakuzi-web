@@ -8,7 +8,22 @@ export default function HeroSection() {
   const { data: brandsData, isLoading: isLoadingBrands } = useBrands();
   const { data: bannersData } = useBanners();
 
-  const banners = Array.isArray(bannersData) ? bannersData.filter((b) => b.isActive !== false) : [];
+  // The API sorts by `order`, but the admin form does not set it, so every
+  // banner currently comes back with the same value and the tie is broken
+  // arbitrarily by Postgres. Sort defensively so the sequence is stable across
+  // requests: by `order`, then oldest first.
+  const banners = React.useMemo(() => {
+    const list = Array.isArray(bannersData)
+      ? bannersData.filter((b) => b.isActive !== false)
+      : [];
+    return [...list].sort((a, b) => {
+      const orderDiff = (a.order ?? 0) - (b.order ?? 0);
+      if (orderDiff !== 0) return orderDiff;
+      return (
+        new Date(a.createdAt ?? 0).getTime() - new Date(b.createdAt ?? 0).getTime()
+      );
+    });
+  }, [bannersData]);
 
   // The hero cycles through every active banner the admin has uploaded, in the
   // order the API returns them (it already sorts by `order` and filters out

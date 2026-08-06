@@ -121,6 +121,18 @@ export async function verifyOtp(phone: string, otp: string): Promise<VerifyOtpRe
   return parsed;
 }
 
+/**
+ * Exchanges the ID token from Google Identity Services for our own token pair.
+ * The response is the same shape as every other login path.
+ */
+export async function loginWithGoogle(idToken: string): Promise<VerifyOtpResponse> {
+  const { data } = await api.post('/auth/google', { idToken });
+  const raw = data?.data ?? data;
+  const parsed = VerifyOtpResponseSchema.parse(raw);
+  setAccessToken(parsed.accessToken, parsed.refreshToken);
+  return parsed;
+}
+
 export async function resetPassword(params: ResetPasswordRequest): Promise<ResetPasswordResponse> {
   const body = ResetPasswordRequestSchema.parse(params);
   const { data } = await api.post('/auth/reset-password', body);

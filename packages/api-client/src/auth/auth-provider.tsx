@@ -8,7 +8,7 @@ import {
   useEffect,
   type ReactNode,
 } from 'react';
-import { sendOtp, verifyOtp, registerBuyer, loginWithPassword as apiLoginWithPassword, logout as apiLogout, getProfile, type User, type RegisterBuyerRequest } from '../modules/auth.api';
+import { sendOtp, verifyOtp, registerBuyer, loginWithPassword as apiLoginWithPassword, loginWithGoogle as apiLoginWithGoogle, logout as apiLogout, getProfile, type User, type RegisterBuyerRequest } from '../modules/auth.api';
 import { getAccessToken, setAccessToken, setBaseURL } from '../api';
 
 interface AuthContextValue {
@@ -19,6 +19,7 @@ interface AuthContextValue {
   verifyOtp: (phone: string, otp: string) => Promise<void>;
   registerBuyer: (params: RegisterBuyerRequest) => Promise<void>;
   loginWithPassword: (params: { contact: string; password: string }) => Promise<void>;
+  loginWithGoogle: (idToken: string) => Promise<void>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -108,6 +109,11 @@ export function AuthProvider({ children, baseURL }: { children: ReactNode; baseU
     setUser(response.user);
   }, []);
 
+  const handleLoginWithGoogle = useCallback(async (idToken: string) => {
+    const response = await apiLoginWithGoogle(idToken);
+    setUser(response.user);
+  }, []);
+
   const handleLogout = useCallback(async () => {
     try {
       await apiLogout();
@@ -138,6 +144,7 @@ export function AuthProvider({ children, baseURL }: { children: ReactNode; baseU
         verifyOtp: handleVerifyOtp,
         registerBuyer: handleRegisterBuyer,
         loginWithPassword: handleLoginWithPassword,
+        loginWithGoogle: handleLoginWithGoogle,
         logout: handleLogout,
         refresh: handleRefresh,
       }}

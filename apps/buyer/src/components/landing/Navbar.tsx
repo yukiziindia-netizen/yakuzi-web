@@ -405,6 +405,29 @@ export default function Navbar({
 
   return (
     <>
+      {/* Dims and blurs the page while the chat or search panel is open.
+          Rendered outside <nav> deliberately: the bar carries a transform, which
+          makes it the containing block for fixed children, so a backdrop placed
+          inside it is sized to the bar rather than the viewport and dims
+          nothing. It sits below the bar's z-index so the panels stay sharp. */}
+      <AnimatePresence>
+        {(isChatOpen || isSearchChatOpen) && (
+          <motion.div
+            key="panel-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => {
+              setIsChatOpen(false);
+              setIsSearchChatOpen(false);
+            }}
+            className="fixed inset-0 z-[85] bg-black/40 backdrop-blur-sm"
+            aria-hidden="true"
+          />
+        )}
+      </AnimatePresence>
+
       <nav
         ref={navRef}
         className="fixed bottom-0 left-0 right-0 z-[90] flex justify-center items-end sm:items-center pointer-events-none px-2 pb-4 sm:pb-6 md:pb-4 sm:px-6 w-full will-change-transform"
@@ -672,16 +695,6 @@ export default function Navbar({
 
           {/* Chat Box Popup (Mascot) */}
           <AnimatePresence>
-            {isChatOpen && (
-              <motion.div
-                key="chat-backdrop"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-transparent z-[-2] pointer-events-auto"
-                onClick={() => setIsChatOpen(false)}
-              />
-            )}
             {isChatOpen && (
               <motion.div
                 key="chat-popup"

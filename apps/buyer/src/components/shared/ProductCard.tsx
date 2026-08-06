@@ -102,7 +102,7 @@ export default function ProductCard({
   };
 
   return (
-    <div className="relative group flex flex-col h-auto w-full max-w-[210px] sm:max-w-none mx-auto">
+    <div className="relative mt-3 sm:mt-4 group flex flex-col h-auto w-full max-w-[210px] sm:max-w-none mx-auto">
       {/* Yukizi Choice & Best Seller Tags */}
       <div className="absolute -top-[10px] left-4 sm:left-5 flex items-center gap-1.5 z-30">
         {isYukiziChoice && (
@@ -119,7 +119,7 @@ export default function ProductCard({
 
       {/* Ad Tag */}
       {showAd && (
-        <div className="absolute -top-5 right-2 text-[11px] sm:text-[12px] text-gray-500 font-medium z-20">
+        <div className="absolute -top-5 right-2 text-[11px] sm:text-[12px] text-gray-400 font-normal z-20">
           Ad
         </div>
       )}
@@ -192,12 +192,12 @@ export default function ProductCard({
       </div>
 
       {/* Product Image - Fixed 190px/200px height matching Samplr */}
-      <div className="relative w-full h-[190px] sm:h-[200px] bg-[#f8f8f8] overflow-hidden flex justify-center items-center shrink-0">
+      <div className="relative w-full h-[130px] sm:h-[200px] bg-[#f8f8f8] overflow-hidden flex justify-center items-center shrink-0">
         <Image
           src={image}
           alt={name}
           fill
-          className={`object-contain p-2 group-hover:scale-105 transition-transform duration-300 ease-out ${isOutOfStock ? 'grayscale brightness-90 opacity-80' : ''}`}
+          className={`object-contain p-3 sm:p-2 group-hover:scale-105 transition-transform duration-300 ease-out ${isOutOfStock ? 'grayscale brightness-90 opacity-80' : ''}`}
         />
       </div>
 
@@ -205,7 +205,7 @@ export default function ProductCard({
       <div className="flex flex-col gap-1.5 p-[8px] sm:p-[10px] bg-white w-full">
         <div>
           {/* Title */}
-          <h3 className="text-[13px] sm:text-[14px] font-medium text-[#333333] leading-snug line-clamp-2 hover:text-[#7B2FBE] transition-colors">
+          <h3 className="text-[11px] sm:text-[14px] font-medium text-[#333333] leading-snug line-clamp-2 hover:text-[#7B2FBE] transition-colors">
             {name}
           </h3>
         </div>
@@ -213,31 +213,31 @@ export default function ProductCard({
         {/* Price and Rating Row */}
         <div className="flex justify-between items-center w-full pt-0.5">
           <div className="flex items-baseline gap-1">
-            <span className="text-[14px] sm:text-[15px] font-medium text-[#333333] leading-none">
+            <span className="text-[11.5px] sm:text-[15px] font-medium text-[#333333] leading-none">
               {displayPrice}
             </span>
             {displayOriginalPrice && (
-              <span className="text-[11px] sm:text-[12px] text-gray-400 line-through leading-none">{displayOriginalPrice}</span>
+              <span className="text-[9px] sm:text-[12px] text-gray-400 line-through leading-none">{displayOriginalPrice}</span>
             )}
           </div>
           {/* Only show a rating when the product actually has one. Previously this
               defaulted to 4.5, so every unrated product advertised a review score
               nobody had given it. */}
           <div className="flex items-center gap-1">
-            <Star className={`w-3.5 h-3.5 ${hasRating ? 'text-[#7B2FBE] fill-[#7B2FBE]' : 'text-gray-300 fill-gray-300'}`} />
-            <span className={`text-[13px] sm:text-[14px] font-medium leading-none ${hasRating ? 'text-[#333333]' : 'text-gray-400'}`}>{hasRating ? rating : 'NA'}</span>
+            <Star className={`w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 ${hasRating ? 'text-[#7B2FBE] fill-[#7B2FBE]' : 'text-gray-300 fill-gray-300'}`} />
+            <span className={`text-[10px] sm:text-[14px] font-medium leading-none ${hasRating ? 'text-[#333333]' : 'text-gray-400'}`}>{hasRating ? rating : 'NA'}</span>
           </div>
         </div>
 
         {/* Bottom Badges / Delivery Truck Row */}
         <div className="flex items-center justify-between w-full pt-1 border-t border-gray-100/80">
           {displayDiscount ? (
-            <span className="text-[12px] font-medium text-[#7B2FBE] truncate">
+            <span className="text-[10px] sm:text-[12px] font-medium text-[#7B2FBE] truncate">
               {displayDiscount}
             </span>
           ) : <div></div>}
           <div className="-mr-[6px] sm:-mr-[8px]">
-            <DeliveryTruckBadge text={deliveryTime} className="w-[75px] h-auto text-[#8c8c8c]" />
+            <DeliveryTruckBadge text={deliveryTime} className="w-[52px] sm:w-[75px] h-auto text-[#8c8c8c]" />
           </div>
         </div>
       </div>

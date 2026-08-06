@@ -161,10 +161,10 @@ export default function LoginPage() {
     }
   };
 
-  if (authLoading) return <main className="h-screen flex items-center justify-center bg-[#252525]"><Loader2 className="w-8 h-8 animate-spin text-[#8B5CF6]" /></main>;
+  if (authLoading) return <main className="h-screen flex items-center justify-center bg-white"><Loader2 className="w-8 h-8 animate-spin text-[#593696]" /></main>;
 
   return (
-    <main className="min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-b from-[#e4e4e4] via-[#757575] to-[#252525] relative overflow-hidden px-6 py-12 font-sans select-none">
+    <main className="min-h-screen w-full flex flex-col items-center justify-center bg-white relative overflow-hidden px-6 py-12 font-sans select-none">
       <style dangerouslySetInnerHTML={{__html: `
         .custom-scrollbar::-webkit-scrollbar {
           width: 6px;
@@ -173,15 +173,15 @@ export default function LoginPage() {
           background: transparent;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background-color: #4a4a4c;
+          background-color: #b49ce0;
           border-radius: 10px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background-color: #636366;
+          background-color: #8b65d1;
         }
       `}} />
       {/* Noise Overlay */}
-      <div className="absolute inset-0 opacity-20 pointer-events-none mix-blend-overlay" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }}></div>
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(70% 55% at 50% -10%, rgba(161,85,232,0.13) 0%, rgba(89,54,150,0.05) 48%, rgba(255,255,255,0) 78%)' }}></div>
 
       {/* Back Button for Signup */}
       {isSignupMode && (
@@ -194,7 +194,7 @@ export default function LoginPage() {
             else if (signupStep === 2) setSignupStep(1);
             else setIsSignupMode(false);
           }} 
-          className="fixed top-6 left-6 p-2 text-[#8e44ad] hover:text-[#732d91] z-[150] transition-colors font-bold flex items-center space-x-1"
+          className="fixed top-6 left-6 p-2 text-[#593696] hover:text-[#3d236b] z-[150] transition-colors font-bold flex items-center space-x-1"
         >
           <Undo2 size={28} strokeWidth={2.5} />
           <span className="text-sm">Back</span>
@@ -208,7 +208,7 @@ export default function LoginPage() {
           <img 
             src="/YukiziLogo.png" 
             alt="YUKiZi" 
-            className="w-full h-auto object-contain drop-shadow-md" 
+            className="w-full h-auto object-contain" 
           />
         </div>
 
@@ -217,7 +217,7 @@ export default function LoginPage() {
           <div className="w-full flex flex-col items-center">
             {signupStep === 1 ? (
               <>
-                <h2 className="text-white text-[19px] mb-12 tracking-wide drop-shadow-md">
+                <h2 className="text-[#0f172a] text-[19px] mb-12 tracking-wide">
                   How do you want us call you ?
                 </h2>
                 
@@ -226,7 +226,7 @@ export default function LoginPage() {
                   placeholder="Username"
                   value={signupUsername}
                   onChange={(e) => setSignupUsername(e.target.value)}
-                  className="bg-transparent text-white text-center text-xl font-medium outline-none w-full max-w-[240px] mb-[60px] border-b border-white/30 focus:border-white pb-1"
+                  className="bg-transparent text-[#0f172a] text-center text-xl font-medium outline-none w-full max-w-[240px] mb-[60px] border-b border-[#e2e8f0] focus:border-[#593696] pb-1"
                   autoFocus
                 />
 
@@ -236,24 +236,24 @@ export default function LoginPage() {
                     if (!signupUsername) { toast('Please enter a username', 'error'); return; }
                     setSignupStep(2);
                   }}
-                  className="w-full max-w-[280px] py-3.5 rounded-[12px] text-white font-bold text-lg shadow-[0_4px_15px_rgba(142,68,173,0.4)] bg-[#8e44ad] hover:opacity-90 transition-opacity flex justify-center items-center tracking-wide"
+                  className="w-full max-w-[280px] py-3.5 rounded-[12px] text-white font-bold text-lg shadow-[0_4px_14px_rgba(89,54,150,0.3)] bg-[#593696] hover:opacity-90 transition-opacity flex justify-center items-center tracking-wide"
                 >
                   Continue
                 </button>
               </>
             ) : signupStep === 2 ? (
               <>
-                <h2 className="text-white text-[24px] font-bold mb-10 tracking-wide drop-shadow-md">
+                <h2 className="text-[#0f172a] text-[24px] font-bold mb-10 tracking-wide">
                   Hi, {signupUsername || 'User'}
                 </h2>
                 
                 <div className="w-full flex flex-col items-center mb-[60px] space-y-4">
-                  <p className="text-white text-[17px] tracking-wide">Email or Phone ?</p>
+                  <p className="text-[#0f172a] text-[17px] tracking-wide">Email or Phone ?</p>
                   <input
                     type="text"
                     value={signupContact}
                     onChange={(e) => setSignupContact(e.target.value)}
-                    className="bg-transparent text-white text-center text-xl font-medium outline-none w-full max-w-[240px] border-b border-white/30 focus:border-white pb-1"
+                    className="bg-transparent text-[#0f172a] text-center text-xl font-medium outline-none w-full max-w-[240px] border-b border-[#e2e8f0] focus:border-[#593696] pb-1"
                     autoFocus
                   />
                 </div>
@@ -262,24 +262,24 @@ export default function LoginPage() {
                   type="button"
                   onClick={handleSignupSendOtp}
                   disabled={isLoading}
-                  className="w-full max-w-[280px] py-3.5 rounded-[12px] text-white font-bold text-lg shadow-[0_4px_15px_rgba(142,68,173,0.4)] bg-[#8e44ad] hover:opacity-90 transition-opacity flex justify-center items-center tracking-wide disabled:opacity-50"
+                  className="w-full max-w-[280px] py-3.5 rounded-[12px] text-white font-bold text-lg shadow-[0_4px_14px_rgba(89,54,150,0.3)] bg-[#593696] hover:opacity-90 transition-opacity flex justify-center items-center tracking-wide disabled:opacity-50"
                 >
                   {isLoading ? 'Sending...' : 'Continue'}
                 </button>
               </>
             ) : signupStep === 3 ? (
               <>
-                <h2 className="text-white text-[28px] font-bold mb-4 tracking-wide drop-shadow-md">
+                <h2 className="text-[#0f172a] text-[28px] font-bold mb-4 tracking-wide">
                   Verification
                 </h2>
                 
                 <div className="w-full flex flex-col items-center mb-[60px] mt-12 space-y-4">
-                  <p className="text-white text-[17px] tracking-wide text-center">You must have received an OTP</p>
+                  <p className="text-[#0f172a] text-[17px] tracking-wide text-center">You must have received an OTP</p>
                   <input
                     type="text"
                     value={signupOtp}
                     onChange={(e) => setSignupOtp(e.target.value)}
-                    className="bg-transparent text-white text-center text-xl font-medium outline-none w-full max-w-[240px] border-b border-white/30 focus:border-white pb-1"
+                    className="bg-transparent text-[#0f172a] text-center text-xl font-medium outline-none w-full max-w-[240px] border-b border-[#e2e8f0] focus:border-[#593696] pb-1"
                     autoFocus
                   />
                 </div>
@@ -290,18 +290,18 @@ export default function LoginPage() {
                     if (!signupOtp) { toast('Please enter the OTP', 'error'); return; }
                     setSignupStep(4);
                   }}
-                  className="w-full max-w-[280px] py-3.5 rounded-[12px] text-white font-bold text-lg shadow-[0_4px_15px_rgba(142,68,173,0.4)] bg-[#8e44ad] hover:opacity-90 transition-opacity flex justify-center items-center tracking-wide"
+                  className="w-full max-w-[280px] py-3.5 rounded-[12px] text-white font-bold text-lg shadow-[0_4px_14px_rgba(89,54,150,0.3)] bg-[#593696] hover:opacity-90 transition-opacity flex justify-center items-center tracking-wide"
                 >
                   Continue
                 </button>
               </>
             ) : signupStep === 4 ? (
               <>
-                <h2 className="text-white text-[28px] font-bold mb-4 tracking-wide drop-shadow-md">
+                <h2 className="text-[#0f172a] text-[28px] font-bold mb-4 tracking-wide">
                   Almost there !!
                 </h2>
                 
-                <h3 className="text-white text-[20px] font-medium mb-[60px] tracking-wide drop-shadow-sm">
+                <h3 className="text-[#0f172a] text-[20px] font-medium mb-[60px] tracking-wide">
                   What is your name ?
                 </h3>
                 
@@ -309,7 +309,7 @@ export default function LoginPage() {
                   type="text"
                   value={signupRealName}
                   onChange={(e) => setSignupRealName(e.target.value)}
-                  className="bg-transparent text-white text-center text-xl font-medium outline-none w-full max-w-[240px] mb-[60px] border-b border-white/30 focus:border-white pb-1"
+                  className="bg-transparent text-[#0f172a] text-center text-xl font-medium outline-none w-full max-w-[240px] mb-[60px] border-b border-[#e2e8f0] focus:border-[#593696] pb-1"
                   autoFocus
                 />
 
@@ -319,35 +319,35 @@ export default function LoginPage() {
                     if (!signupRealName) { toast('Please enter your name', 'error'); return; }
                     setSignupStep(5);
                   }}
-                  className="w-full max-w-[280px] py-3.5 rounded-[12px] text-white font-bold text-lg shadow-[0_4px_15px_rgba(142,68,173,0.4)] bg-[#8e44ad] hover:opacity-90 transition-opacity flex justify-center items-center tracking-wide"
+                  className="w-full max-w-[280px] py-3.5 rounded-[12px] text-white font-bold text-lg shadow-[0_4px_14px_rgba(89,54,150,0.3)] bg-[#593696] hover:opacity-90 transition-opacity flex justify-center items-center tracking-wide"
                 >
                   Continue
                 </button>
               </>
             ) : signupStep === 5 ? (
               <>
-                <h2 className="text-white text-[28px] font-bold mb-4 tracking-wide drop-shadow-md">
+                <h2 className="text-[#0f172a] text-[28px] font-bold mb-4 tracking-wide">
                   Secure your account
                 </h2>
                 
                 <div className="w-full flex flex-col items-center mb-6 mt-8 space-y-4">
-                  <p className="text-white text-[17px] tracking-wide">Password</p>
+                  <p className="text-[#0f172a] text-[17px] tracking-wide">Password</p>
                   <input
                     type="password"
                     value={signupPassword}
                     onChange={(e) => setSignupPassword(e.target.value)}
-                    className="bg-transparent text-white text-center text-xl font-medium outline-none w-full max-w-[240px] border-b border-white/30 focus:border-white pb-1"
+                    className="bg-transparent text-[#0f172a] text-center text-xl font-medium outline-none w-full max-w-[240px] border-b border-[#e2e8f0] focus:border-[#593696] pb-1"
                     autoFocus
                   />
                 </div>
 
                 <div className="w-full flex flex-col items-center mb-[40px] space-y-4">
-                  <p className="text-white text-[17px] tracking-wide">Confirm Password</p>
+                  <p className="text-[#0f172a] text-[17px] tracking-wide">Confirm Password</p>
                   <input
                     type="password"
                     value={signupConfirmPassword}
                     onChange={(e) => setSignupConfirmPassword(e.target.value)}
-                    className="bg-transparent text-white text-center text-xl font-medium outline-none w-full max-w-[240px] border-b border-white/30 focus:border-white pb-1"
+                    className="bg-transparent text-[#0f172a] text-center text-xl font-medium outline-none w-full max-w-[240px] border-b border-[#e2e8f0] focus:border-[#593696] pb-1"
                   />
                 </div>
 
@@ -358,41 +358,41 @@ export default function LoginPage() {
                     if (signupPassword !== signupConfirmPassword) { toast('Passwords do not match', 'error'); return; }
                     setSignupStep(6);
                   }}
-                  className="w-full max-w-[280px] py-3.5 rounded-[12px] text-white font-bold text-lg shadow-[0_4px_15px_rgba(142,68,173,0.4)] bg-[#8e44ad] hover:opacity-90 transition-opacity flex justify-center items-center tracking-wide"
+                  className="w-full max-w-[280px] py-3.5 rounded-[12px] text-white font-bold text-lg shadow-[0_4px_14px_rgba(89,54,150,0.3)] bg-[#593696] hover:opacity-90 transition-opacity flex justify-center items-center tracking-wide"
                 >
                   Continue
                 </button>
               </>
             ) : (
               <>
-                <h2 className="text-white text-[28px] font-bold mb-2 tracking-wide drop-shadow-md">
+                <h2 className="text-[#0f172a] text-[28px] font-bold mb-2 tracking-wide">
                   One last thing -
                 </h2>
                 
-                <h3 className="text-white text-[19px] font-medium mb-6 tracking-wide drop-shadow-sm">
+                <h3 className="text-[#0f172a] text-[19px] font-medium mb-6 tracking-wide">
                   Your age ?
                 </h3>
                 
                 {/* Calendar UI Mock */}
-                <div className="bg-[#2e2e30] rounded-[16px] p-5 w-[280px] shadow-[0_10px_30px_rgba(0,0,0,0.3)] mb-6 select-none border border-[#3f3f3f]">
+                <div className="bg-white rounded-[16px] p-5 w-[280px] shadow-[0_10px_30px_rgba(89,54,150,0.12)] mb-6 select-none border border-[#e2e8f0]">
                   <div className="flex justify-between items-center mb-5 px-1">
                     <div className="flex space-x-1">
                       <div className="relative">
                         <button 
                           type="button"
                           onClick={() => { setShowMonthSelect(!showMonthSelect); setShowYearSelect(false); }}
-                          className="bg-transparent text-[#8e8e93] font-medium text-[15px] outline-none hover:text-white transition-colors"
+                          className="bg-transparent text-[#64748b] font-medium text-[15px] outline-none hover:text-[#593696] transition-colors"
                         >
                           {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][displayMonth]}
                         </button>
                         {showMonthSelect && (
                           <>
                             <div className="fixed inset-0 z-[1001]" onClick={() => setShowMonthSelect(false)}></div>
-                            <div className="absolute top-full left-0 mt-1 bg-[#2e2e30] border border-[#3f3f3f] rounded-[10px] shadow-2xl z-[1002] max-h-48 overflow-y-auto w-[120px] custom-scrollbar">
+                            <div className="absolute top-full left-0 mt-1 bg-white border border-[#e2e8f0] rounded-[10px] shadow-2xl z-[1002] max-h-48 overflow-y-auto w-[120px] custom-scrollbar">
                               {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map((m, i) => (
                                 <div 
                                   key={m} 
-                                  className={`px-3 py-2 text-[14px] cursor-pointer hover:bg-[#3f3f3f] transition-colors ${displayMonth === i ? 'text-white font-bold bg-[#3f3f3f]' : 'text-[#8e8e93]'}`}
+                                  className={`px-3 py-2 text-[14px] cursor-pointer hover:bg-[#ebe6f5] transition-colors ${displayMonth === i ? 'text-[#593696] font-bold bg-[#ebe6f5]' : 'text-[#64748b]'}`}
                                   onClick={() => { setDisplayMonth(i); setShowMonthSelect(false); }}
                                 >
                                   {m}
@@ -406,18 +406,18 @@ export default function LoginPage() {
                         <button 
                           type="button"
                           onClick={() => { setShowYearSelect(!showYearSelect); setShowMonthSelect(false); }}
-                          className="bg-transparent text-[#8e8e93] font-medium text-[15px] outline-none hover:text-white transition-colors"
+                          className="bg-transparent text-[#64748b] font-medium text-[15px] outline-none hover:text-[#593696] transition-colors"
                         >
                           {displayYear}
                         </button>
                         {showYearSelect && (
                           <>
                             <div className="fixed inset-0 z-[1001]" onClick={() => setShowYearSelect(false)}></div>
-                            <div className="absolute top-full left-0 mt-1 bg-[#2e2e30] border border-[#3f3f3f] rounded-[10px] shadow-2xl z-[1002] max-h-48 overflow-y-auto w-[80px] custom-scrollbar">
+                            <div className="absolute top-full left-0 mt-1 bg-white border border-[#e2e8f0] rounded-[10px] shadow-2xl z-[1002] max-h-48 overflow-y-auto w-[80px] custom-scrollbar">
                               {Array.from({length: 100}, (_, i) => new Date().getFullYear() - i).map(y => (
                                 <div 
                                   key={y} 
-                                  className={`px-3 py-2 text-[14px] cursor-pointer hover:bg-[#3f3f3f] transition-colors ${displayYear === y ? 'text-white font-bold bg-[#3f3f3f]' : 'text-[#8e8e93]'}`}
+                                  className={`px-3 py-2 text-[14px] cursor-pointer hover:bg-[#ebe6f5] transition-colors ${displayYear === y ? 'text-[#593696] font-bold bg-[#ebe6f5]' : 'text-[#64748b]'}`}
                                   onClick={() => { setDisplayYear(y); setShowYearSelect(false); }}
                                 >
                                   {y}
@@ -428,17 +428,17 @@ export default function LoginPage() {
                         )}
                       </div>
                     </div>
-                    <div className="flex space-x-4 text-[#636366] font-bold">
-                      <button type="button" onClick={handlePrevMonth} className="hover:text-white transition-colors">&lt;</button>
-                      <button type="button" onClick={handleNextMonth} className="hover:text-white transition-colors">&gt;</button>
+                    <div className="flex space-x-4 text-[#94a3b8] font-bold">
+                      <button type="button" onClick={handlePrevMonth} className="hover:text-[#593696] transition-colors">&lt;</button>
+                      <button type="button" onClick={handleNextMonth} className="hover:text-[#593696] transition-colors">&gt;</button>
                     </div>
                   </div>
-                  <div className="grid grid-cols-7 gap-1 text-center text-[#636366] text-xs font-medium mb-4">
+                  <div className="grid grid-cols-7 gap-1 text-center text-[#94a3b8] text-xs font-medium mb-4">
                     <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
                   </div>
-                  <div className="grid grid-cols-7 gap-y-3 gap-x-1 text-center text-[#d1d5db] text-[13px] font-medium">
+                  <div className="grid grid-cols-7 gap-y-3 gap-x-1 text-center text-[#334155] text-[13px] font-medium">
                     {Array.from({ length: firstDay }, (_, i) => daysInPrevMonth - firstDay + i + 1).map((day, i) => (
-                      <span key={`prev-${i}`} className="text-[#636366] w-6 h-6 flex items-center justify-center mx-auto cursor-default">
+                      <span key={`prev-${i}`} className="text-[#cbd5e1] w-6 h-6 flex items-center justify-center mx-auto cursor-default">
                         {day}
                       </span>
                     ))}
@@ -448,42 +448,42 @@ export default function LoginPage() {
                         <span 
                           key={`curr-${day}`}
                           onClick={() => { setSignupDate(day); setSignupMonth(displayMonth); setSignupYear(displayYear); }}
-                          className={`cursor-pointer ${isSelected ? 'bg-[#c284b3] text-[#2e2e30] rounded-full w-6 h-6 flex items-center justify-center mx-auto shadow-[0_0_10px_rgba(194,132,179,0.5)]' : 'w-6 h-6 flex items-center justify-center mx-auto hover:text-white transition-colors'}`}
+                          className={`cursor-pointer ${isSelected ? 'bg-[#593696] text-white rounded-full w-6 h-6 flex items-center justify-center mx-auto shadow-[0_0_10px_rgba(89,54,150,0.45)]' : 'w-6 h-6 flex items-center justify-center mx-auto hover:text-[#593696] transition-colors'}`}
                         >
                           {day}
                         </span>
                       );
                     })}
                     {Array.from({ length: 42 - (firstDay + daysInMonth) }, (_, i) => i + 1).map((day, i) => (
-                      <span key={`next-${i}`} className="text-[#636366] w-6 h-6 flex items-center justify-center mx-auto cursor-default">
+                      <span key={`next-${i}`} className="text-[#cbd5e1] w-6 h-6 flex items-center justify-center mx-auto cursor-default">
                         {day}
                       </span>
                     ))}
                   </div>
                 </div>
 
-                <h3 className="text-white text-[19px] font-medium mb-4 tracking-wide drop-shadow-sm">
+                <h3 className="text-[#0f172a] text-[19px] font-medium mb-4 tracking-wide">
                   Gender
                 </h3>
                 
-                <div className="flex space-x-6 mb-8 text-white font-medium text-[17px]">
+                <div className="flex space-x-6 mb-8 text-[#0f172a] font-medium text-[17px]">
                   <label className="flex items-center space-x-2 cursor-pointer">
-                    <div className={`w-5 h-5 rounded-[6px] border-[1.5px] flex items-center justify-center ${signupGender === 'him' ? 'border-[#c284b3] bg-[#c284b3]/10' : 'border-[#d1d5db]'}`}>
-                      {signupGender === 'him' && <div className="w-2.5 h-2.5 rounded-[3px] bg-[#c284b3]"></div>}
+                    <div className={`w-5 h-5 rounded-[6px] border-[1.5px] flex items-center justify-center ${signupGender === 'him' ? 'border-[#593696] bg-[#593696]/10' : 'border-[#cbd5e1]'}`}>
+                      {signupGender === 'him' && <div className="w-2.5 h-2.5 rounded-[3px] bg-[#593696]"></div>}
                     </div>
                     <span>Him</span>
                     <input type="radio" className="hidden" name="gender" value="him" onChange={() => setSignupGender('him')} />
                   </label>
                   <label className="flex items-center space-x-2 cursor-pointer">
-                    <div className={`w-5 h-5 rounded-[6px] border-[1.5px] flex items-center justify-center ${signupGender === 'her' ? 'border-[#c284b3] bg-[#c284b3]/10' : 'border-[#d1d5db]'}`}>
-                      {signupGender === 'her' && <div className="w-2.5 h-2.5 rounded-[3px] bg-[#c284b3]"></div>}
+                    <div className={`w-5 h-5 rounded-[6px] border-[1.5px] flex items-center justify-center ${signupGender === 'her' ? 'border-[#593696] bg-[#593696]/10' : 'border-[#cbd5e1]'}`}>
+                      {signupGender === 'her' && <div className="w-2.5 h-2.5 rounded-[3px] bg-[#593696]"></div>}
                     </div>
                     <span>Her</span>
                     <input type="radio" className="hidden" name="gender" value="her" onChange={() => setSignupGender('her')} />
                   </label>
                   <label className="flex items-center space-x-2 cursor-pointer">
-                    <div className={`w-5 h-5 rounded-[6px] border-[1.5px] flex items-center justify-center ${signupGender === 'others' ? 'border-[#c284b3] bg-[#c284b3]/10' : 'border-[#d1d5db]'}`}>
-                      {signupGender === 'others' && <div className="w-2.5 h-2.5 rounded-[3px] bg-[#c284b3]"></div>}
+                    <div className={`w-5 h-5 rounded-[6px] border-[1.5px] flex items-center justify-center ${signupGender === 'others' ? 'border-[#593696] bg-[#593696]/10' : 'border-[#cbd5e1]'}`}>
+                      {signupGender === 'others' && <div className="w-2.5 h-2.5 rounded-[3px] bg-[#593696]"></div>}
                     </div>
                     <span>Others</span>
                     <input type="radio" className="hidden" name="gender" value="others" onChange={() => setSignupGender('others')} />
@@ -494,7 +494,7 @@ export default function LoginPage() {
                   type="button"
                   onClick={handleRegisterSubmit}
                   disabled={isLoading}
-                  className="w-full max-w-[280px] py-[16px] rounded-[16px] text-white font-bold text-[19px] shadow-[0_0_25px_rgba(232,160,223,0.5)] bg-gradient-to-r from-[#b98df2] to-[#f4aae2] hover:opacity-90 transition-opacity flex justify-center items-center tracking-wide disabled:opacity-50"
+                  className="w-full max-w-[280px] py-[16px] rounded-[16px] text-white font-bold text-[19px] shadow-[0_8px_24px_rgba(89,54,150,0.28)] bg-gradient-to-b from-[#a155e8] via-[#7b41b0] to-[#512384] hover:opacity-90 transition-opacity flex justify-center items-center tracking-wide disabled:opacity-50"
                 >
                   {isLoading ? 'Creating...' : 'Create YUKiZi account'}
                 </button>
@@ -507,41 +507,41 @@ export default function LoginPage() {
               <form onSubmit={handleLogin} className="w-full space-y-4">
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                    <User className="h-[22px] w-[22px] text-gray-400" strokeWidth={2.5} />
+                    <User className="h-[22px] w-[22px] text-[#94a3b8]" strokeWidth={2.5} />
                   </div>
                   <input
                     type="text"
                     placeholder="Username"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="w-full pl-14 pr-4 py-[18px] rounded-full bg-white text-gray-800 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-[#8e44ad] shadow-lg font-bold text-lg"
+                    className="w-full pl-14 pr-4 py-[18px] rounded-full bg-[#f5f3fa] text-[#0f172a] placeholder-[#94a3b8] border border-[#ebe6f5] focus:outline-none focus:ring-2 focus:ring-[#593696] focus:border-transparent shadow-[0_2px_10px_rgba(89,54,150,0.07)] font-bold text-lg"
                   />
                 </div>
 
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                    <Lock className="h-[22px] w-[22px] text-gray-400" strokeWidth={2.5} />
+                    <Lock className="h-[22px] w-[22px] text-[#94a3b8]" strokeWidth={2.5} />
                   </div>
                   <input
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-14 pr-14 py-[18px] rounded-full bg-white text-gray-800 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-[#8e44ad] shadow-lg font-bold text-lg"
+                    className="w-full pl-14 pr-14 py-[18px] rounded-full bg-[#f5f3fa] text-[#0f172a] placeholder-[#94a3b8] border border-[#ebe6f5] focus:outline-none focus:ring-2 focus:ring-[#593696] focus:border-transparent shadow-[0_2px_10px_rgba(89,54,150,0.07)] font-bold text-lg"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-5 flex items-center text-gray-400 hover:text-gray-600"
+                    className="absolute inset-y-0 right-0 pr-5 flex items-center text-[#94a3b8] hover:text-[#593696]"
                   >
                     {showPassword ? <EyeOff className="h-[22px] w-[22px]" /> : <Eye className="h-[22px] w-[22px]" />}
                   </button>
                 </div>
 
-                <div className="flex justify-center items-center text-[13px] md:text-sm mt-5 text-[#d1d5db] font-semibold tracking-wide">
-                  <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowForgotPassword(true); }} className="underline underline-offset-2 hover:text-white transition-colors mr-1">Forgot Password ?</button>
+                <div className="flex justify-center items-center text-[13px] md:text-sm mt-5 text-[#64748b] font-semibold tracking-wide">
+                  <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowForgotPassword(true); }} className="underline underline-offset-2 hover:text-[#593696] transition-colors mr-1">Forgot Password ?</button>
                   <span className="opacity-90">Login through </span>
-                  <button type="button" onClick={() => setIsOtpMode(true)} className="underline underline-offset-2 ml-1 hover:text-white transition-colors">OTP</button>
+                  <button type="button" onClick={() => setIsOtpMode(true)} className="underline underline-offset-2 ml-1 hover:text-[#593696] transition-colors">OTP</button>
                 </div>
                 
                 {/* Action button for Login */}
@@ -549,7 +549,7 @@ export default function LoginPage() {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full py-4 rounded-full text-white font-bold text-lg shadow-[0_0_25px_rgba(232,160,223,0.5)] bg-gradient-to-r from-[#b98df2] to-[#f4aae2] hover:opacity-90 transition-opacity flex justify-center items-center"
+                    className="w-full py-4 rounded-full text-white font-bold text-lg shadow-[0_8px_24px_rgba(89,54,150,0.28)] bg-gradient-to-b from-[#a155e8] via-[#7b41b0] to-[#512384] hover:opacity-90 transition-opacity flex justify-center items-center"
                   >
                     {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Log In'}
                   </button>
@@ -560,20 +560,20 @@ export default function LoginPage() {
                 {step === 'phone' ? (
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                      <Phone className="h-[22px] w-[22px] text-gray-400" strokeWidth={2.5} />
+                      <Phone className="h-[22px] w-[22px] text-[#94a3b8]" strokeWidth={2.5} />
                     </div>
                     <input
                       type="tel"
                       placeholder="Phone Number"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className="w-full pl-14 pr-4 py-[18px] rounded-full bg-white text-gray-800 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-[#8e44ad] shadow-lg font-bold text-lg"
+                      className="w-full pl-14 pr-4 py-[18px] rounded-full bg-[#f5f3fa] text-[#0f172a] placeholder-[#94a3b8] border border-[#ebe6f5] focus:outline-none focus:ring-2 focus:ring-[#593696] focus:border-transparent shadow-[0_2px_10px_rgba(89,54,150,0.07)] font-bold text-lg"
                     />
                   </div>
                 ) : (
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                      <KeyRound className="h-[22px] w-[22px] text-gray-400" strokeWidth={2.5} />
+                      <KeyRound className="h-[22px] w-[22px] text-[#94a3b8]" strokeWidth={2.5} />
                     </div>
                     <input
                       type="text"
@@ -581,17 +581,17 @@ export default function LoginPage() {
                       value={otp}
                       onChange={(e) => setOtp(e.target.value)}
                       maxLength={6}
-                      className="w-full pl-14 pr-4 py-[18px] rounded-full bg-white text-gray-800 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-[#8e44ad] shadow-lg font-bold text-lg tracking-[0.2em]"
+                      className="w-full pl-14 pr-4 py-[18px] rounded-full bg-[#f5f3fa] text-[#0f172a] placeholder-[#94a3b8] border border-[#ebe6f5] focus:outline-none focus:ring-2 focus:ring-[#593696] focus:border-transparent shadow-[0_2px_10px_rgba(89,54,150,0.07)] font-bold text-lg tracking-[0.2em]"
                     />
                   </div>
                 )}
 
-                <div className="flex justify-center items-center text-[13px] md:text-sm mt-5 text-[#d1d5db] font-semibold tracking-wide">
-                  <button type="button" onClick={() => setIsOtpMode(false)} className="underline underline-offset-2 hover:text-white transition-colors mr-1">Use Password ?</button>
+                <div className="flex justify-center items-center text-[13px] md:text-sm mt-5 text-[#64748b] font-semibold tracking-wide">
+                  <button type="button" onClick={() => setIsOtpMode(false)} className="underline underline-offset-2 hover:text-[#593696] transition-colors mr-1">Use Password ?</button>
                   {step === 'otp' && (
                     <>
                       <span className="opacity-90">or </span>
-                      <button type="button" onClick={() => { setStep('phone'); setOtp(''); }} className="underline underline-offset-2 ml-1 hover:text-white transition-colors">Change Number</button>
+                      <button type="button" onClick={() => { setStep('phone'); setOtp(''); }} className="underline underline-offset-2 ml-1 hover:text-[#593696] transition-colors">Change Number</button>
                     </>
                   )}
                 </div>
@@ -601,7 +601,7 @@ export default function LoginPage() {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full py-4 rounded-full text-white font-bold text-lg shadow-[0_0_25px_rgba(232,160,223,0.5)] bg-gradient-to-r from-[#b98df2] to-[#f4aae2] hover:opacity-90 transition-opacity flex justify-center items-center"
+                    className="w-full py-4 rounded-full text-white font-bold text-lg shadow-[0_8px_24px_rgba(89,54,150,0.28)] bg-gradient-to-b from-[#a155e8] via-[#7b41b0] to-[#512384] hover:opacity-90 transition-opacity flex justify-center items-center"
                   >
                     {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : (step === 'phone' ? 'Send OTP' : 'Verify OTP')}
                   </button>
@@ -612,14 +612,14 @@ export default function LoginPage() {
             {/* Separator & Social Login - Always visible */}
             <div className="w-full flex flex-col items-center">
               <div className="flex items-center justify-center space-x-4 mt-8 mb-6 w-full">
-                <div className="h-px w-12 bg-gray-400/60"></div>
-                <span className="text-gray-400 font-medium text-lg">or</span>
-                <div className="h-px w-12 bg-gray-400/60"></div>
+                <div className="h-px w-12 bg-[#e2e8f0]"></div>
+                <span className="text-[#94a3b8] font-medium text-lg">or</span>
+                <div className="h-px w-12 bg-[#e2e8f0]"></div>
               </div>
 
               <div className="flex justify-center space-x-6 mb-12">
                 {/* Google Icon */}
-                <button type="button" className="w-11 h-11 rounded-full bg-transparent flex items-center justify-center hover:scale-110 transition-transform">
+                <button type="button" className="w-11 h-11 rounded-full bg-white border border-[#e2e8f0] shadow-[0_1px_4px_rgba(0,0,0,0.05)] flex items-center justify-center hover:scale-110 transition-transform">
                   <svg viewBox="0 0 24 24" width="28" height="28" xmlns="http://www.w3.org/2000/svg">
                     <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
                       <path fill="#4285F4" d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z"/>
@@ -631,16 +631,16 @@ export default function LoginPage() {
                 </button>
 
                 {/* Facebook Icon */}
-                <button type="button" className="w-11 h-11 rounded-full bg-transparent flex items-center justify-center hover:scale-110 transition-transform">
+                <button type="button" className="w-11 h-11 rounded-full bg-white border border-[#e2e8f0] shadow-[0_1px_4px_rgba(0,0,0,0.05)] flex items-center justify-center hover:scale-110 transition-transform">
                   <svg viewBox="0 0 24 24" width="28" height="28" xmlns="http://www.w3.org/2000/svg">
                     <path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                   </svg>
                 </button>
 
                 {/* Apple Icon */}
-                <button type="button" className="w-11 h-11 rounded-full bg-transparent flex items-center justify-center hover:scale-110 transition-transform">
+                <button type="button" className="w-11 h-11 rounded-full bg-white border border-[#e2e8f0] shadow-[0_1px_4px_rgba(0,0,0,0.05)] flex items-center justify-center hover:scale-110 transition-transform">
                   <svg viewBox="0 0 24 24" width="30" height="30" xmlns="http://www.w3.org/2000/svg">
-                    <path fill="#a3a3a3" d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.19 2.31-.88 3.5-.8 1.55.06 2.85.74 3.65 1.88-3.13 1.82-2.6 5.98.54 7.22-.72 1.76-1.64 3.12-2.77 3.87zm-2.45-13.8c.63-1.64-.17-3.32-1.63-4.15-1.57-.65-3.32.22-3.86 1.95-.57 1.81.4 3.44 1.93 4.04 1.48.59 3.01-.27 3.56-1.84z"/>
+                    <path fill="#0f172a" d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.19 2.31-.88 3.5-.8 1.55.06 2.85.74 3.65 1.88-3.13 1.82-2.6 5.98.54 7.22-.72 1.76-1.64 3.12-2.77 3.87zm-2.45-13.8c.63-1.64-.17-3.32-1.63-4.15-1.57-.65-3.32.22-3.86 1.95-.57 1.81.4 3.44 1.93 4.04 1.48.59 3.01-.27 3.56-1.84z"/>
                   </svg>
                 </button>
               </div>
@@ -650,7 +650,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setIsSignupMode(true)}
-                    className="w-full py-[18px] rounded-full text-white font-bold text-lg shadow-[0_0_30px_rgba(232,160,223,0.4)] bg-gradient-to-r from-[#b98df2] to-[#f4aae2] hover:opacity-90 transition-opacity flex justify-center items-center tracking-wide"
+                    className="w-full py-[18px] rounded-full text-white font-bold text-lg shadow-[0_8px_24px_rgba(89,54,150,0.28)] bg-gradient-to-b from-[#a155e8] via-[#7b41b0] to-[#512384] hover:opacity-90 transition-opacity flex justify-center items-center tracking-wide"
                   >
                     Create YUKiZi account
                   </button>

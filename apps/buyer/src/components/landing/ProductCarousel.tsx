@@ -24,29 +24,29 @@ export const renderBuyerOfferBadge = (p: any) => {
   const meta = p.discountMeta || {};
   if (!p?.discountType) {
     if (meta.discountPercent) {
-      return <span className="text-[#333333] text-[15px] sm:text-[16px] font-medium tracking-wide whitespace-nowrap">{meta.discountPercent}% off</span>;
+      return <span className="text-[#333333] text-[10px] sm:text-[15px] font-medium tracking-wide whitespace-nowrap">{meta.discountPercent}% off</span>;
     }
     return null;
   }
   if (p.discountType === "PTR_DISCOUNT") {
-    return <span className="text-[#333333] text-[15px] sm:text-[16px] font-medium tracking-wide whitespace-nowrap">{meta.discountPercent || 0}% off</span>;
+    return <span className="text-[#333333] text-[10px] sm:text-[15px] font-medium tracking-wide whitespace-nowrap">{meta.discountPercent || 0}% off</span>;
   }
   if (p.discountType === "SAME_PRODUCT_BONUS") {
-    return <span className="text-[#333333] text-[15px] sm:text-[16px] font-medium tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} Free</span>;
+    return <span className="text-[#333333] text-[10px] sm:text-[15px] font-medium tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} Free</span>;
   }
   if (p.discountType === "PTR_PLUS_SAME_PRODUCT_BONUS") {
-    return <div className="flex flex-col gap-0.5"><span className="text-[#333333] text-[15px] sm:text-[16px] font-medium tracking-wide whitespace-nowrap">{meta.discountPercent || 0}% off</span><span className="text-[#333333] text-[15px] sm:text-[16px] font-medium tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} Free</span></div>;
+    return <div className="flex flex-col gap-0.5"><span className="text-[#333333] text-[10px] sm:text-[15px] font-medium tracking-wide whitespace-nowrap">{meta.discountPercent || 0}% off</span><span className="text-[#333333] text-[10px] sm:text-[15px] font-medium tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} Free</span></div>;
   }
   if (p.discountType === "DIFFERENT_PRODUCT_BONUS") {
-    return <span className="text-[#333333] text-[15px] sm:text-[16px] font-medium tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} {meta.bonusProductName}</span>;
+    return <span className="text-[#333333] text-[10px] sm:text-[15px] font-medium tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} {meta.bonusProductName}</span>;
   }
   if (p.discountType === "PTR_PLUS_DIFFERENT_PRODUCT_BONUS") {
-    return <div className="flex flex-col gap-0.5"><span className="text-[#333333] text-[15px] sm:text-[16px] font-medium tracking-wide whitespace-nowrap">{meta.discountPercent || 0}% off</span><span className="text-[#333333] text-[15px] sm:text-[16px] font-medium tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} {meta.bonusProductName}</span></div>;
+    return <div className="flex flex-col gap-0.5"><span className="text-[#333333] text-[10px] sm:text-[15px] font-medium tracking-wide whitespace-nowrap">{meta.discountPercent || 0}% off</span><span className="text-[#333333] text-[10px] sm:text-[15px] font-medium tracking-wide whitespace-nowrap">Buy {meta.buy || 0} Get {meta.get || 0} {meta.bonusProductName}</span></div>;
   }
   if (p.discountType === "SPECIAL_PRICE") {
-    return <span className="text-emerald-600 text-[15px] sm:text-[16px] font-medium tracking-wide whitespace-nowrap">Special Price: ₹{Math.round(Number(meta.specialPrice) || 0)}</span>;
+    return <span className="text-emerald-600 text-[10px] sm:text-[15px] font-medium tracking-wide whitespace-nowrap">Special Price: ₹{Math.round(Number(meta.specialPrice) || 0)}</span>;
   }
-  return <span className="text-[#333333] text-[15px] sm:text-[16px] font-medium tracking-wide whitespace-nowrap">{p.discountType.replace(/_/g, ' ')}</span>;
+  return <span className="text-[#333333] text-[10px] sm:text-[15px] font-medium tracking-wide whitespace-nowrap">{p.discountType.replace(/_/g, ' ')}</span>;
 };
 
 function GridProductCard({ product, index, onOpenReview }: { product: any; index: number; onOpenReview: (p: any) => void }) {
@@ -119,7 +119,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
     }
   };
   const isSaved = wishlistData?.items?.some(
-    (item: any) => item.productId === currentProductId || item.product?.id === currentProductId || item.id === currentProductId
+    (item: any) => item.productId === currentProductId || item.product?.id === currentProductId || item.id === currentProductId || (product?.id && (item.productId === product.id || item.product?.id === product.id))
   );
 
   const isYukiziChoice = product?.isYukiziChoice !== undefined ? !!product.isYukiziChoice : true;
@@ -212,7 +212,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
   const imageUrl = product?.images?.[0]?.url || product?.images?.[0] || product?.image || fallbackImage;
 
   return (
-    <div className="relative group flex flex-col h-auto w-full max-w-[210px] sm:max-w-none mx-auto">
+    <div className="relative mt-3 sm:mt-4 group flex flex-col h-auto w-full max-w-[210px] sm:max-w-none mx-auto">
       {/* Yukizi Choice & Best Seller Tags */}
       <div className="absolute -top-[12px] left-1.5 sm:left-2 flex items-center gap-1.5 z-30">
         {isYukiziChoice && (
@@ -229,7 +229,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
 
       {/* Ad Tag */}
       {isAd && (
-        <div className="absolute -top-5 right-0 text-[11px] sm:text-[12px] text-gray-500 font-semibold z-20">
+        <div className="absolute -top-5 right-0 text-[11px] sm:text-[12px] text-gray-400 font-normal z-20">
           Ad
         </div>
       )}
@@ -313,8 +313,8 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
         </div>
 
         {/* Image Container - Fixed 190px/200px height matching Samplr */}
-        <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`} className="relative w-full h-[190px] sm:h-[200px] bg-white overflow-hidden flex justify-center items-center shrink-0">
-           <img src={imageUrl} alt={productName} className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300 ease-out" />
+        <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`} className="relative w-full h-[130px] sm:h-[200px] bg-white overflow-hidden flex justify-center items-center shrink-0">
+           <img src={imageUrl} alt={productName} className="w-full h-full object-contain p-3 sm:p-2 group-hover:scale-105 transition-transform duration-300 ease-out" />
         </Link>
 
          <div className="flex flex-col gap-1.5 p-[8px] sm:p-[10px] bg-white w-full">
@@ -322,7 +322,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
             <div>
                <div className="flex items-start justify-between w-full gap-1.5">
                   <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`} className="flex-1">
-                    <h3 className="text-[13px] sm:text-[14px] font-medium text-[#333333] leading-snug line-clamp-1 hover:text-[#7B2FBE] transition-colors">
+                    <h3 className="text-[11px] sm:text-[14px] font-medium text-[#333333] leading-snug line-clamp-1 hover:text-[#7B2FBE] transition-colors">
                        {productName}
                     </h3>
                   </Link>
@@ -339,16 +339,16 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
            {/* Price and Rating Row */}
            <div className="flex justify-between items-center w-full pt-0.5">
               <div className="flex items-baseline gap-1">
-                 <span className="text-[14px] sm:text-[15px] font-medium text-[#333333] leading-none">
+                 <span className="text-[11.5px] sm:text-[15px] font-medium text-[#333333] leading-none">
                     {displayPrice}
                  </span>
                  {displayOriginalPrice && (
-                   <span className="text-[11px] sm:text-[12px] text-gray-400 line-through leading-none">{displayOriginalPrice}</span>
+                    <span className="text-[9px] sm:text-[12px] text-gray-400 line-through leading-none">{displayOriginalPrice}</span>
                  )}
               </div>
               <div className="flex items-center gap-1">
-                 <Star className={`w-3.5 h-3.5 ${hasRating ? 'text-[#7B2FBE] fill-[#7B2FBE]' : 'text-gray-300 fill-gray-300'}`} />
-                 <span className={`text-[13px] sm:text-[14px] font-medium leading-none ${hasRating ? 'text-[#333333]' : 'text-gray-400'}`}>{hasRating ? rating : 'NA'}</span>
+                 <Star className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-[#7B2FBE] fill-[#7B2FBE]" />
+                 <span className="text-[10px] sm:text-[14px] font-medium leading-none text-[#333333]">{hasRating ? rating : 'NA'}</span>
               </div>
            </div>
 
@@ -358,7 +358,7 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
                  {renderBuyerOfferBadge(product)}
               </div>
               <div className="-mr-[6px] sm:-mr-[8px]">
-                 <DeliveryTruckBadge text={displayDelivery} className="w-[75px] h-auto text-[#8c8c8c]" />
+                 <DeliveryTruckBadge text={displayDelivery} className="w-[52px] sm:w-[75px] h-auto text-[#8c8c8c]" />
               </div>
            </div>
         </div>
@@ -407,14 +407,16 @@ export default function ProductCarousel({ slot = 'HOMEPAGE_CAROUSEL', categoryId
   const slicedProducts = [...products];
 
   return (
-    <div className="w-full max-w-[1600px] 2xl:max-w-none mx-auto mb-8 sm:mb-12 pt-4">
+    <div className="w-full max-w-[1600px] 2xl:max-w-none mx-auto px-2.5 sm:px-0 mb-8 sm:mb-12 pt-4">
       {/*
         Responsive Grid Layout with increased columns on large screens:
-        - Padding: none, so the row fills the container edge to edge like the banner
+        - Padding: none from sm up, so the row fills the container edge to edge
+          like the banner. A small px-2.5 stays on mobile, where the container is
+          the screen and cards would otherwise touch both edges.
         - Columns: 2 cols (mobile), 3 cols (sm), 4 cols (md), 5 cols (lg), 6 cols (xl/2xl)
         - Gap: gap-4 (16px)
       */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-7 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-7 gap-x-3.5 gap-y-7 sm:gap-x-4 sm:gap-y-9">
         {slicedProducts.map((product, index) => (
           <GridProductCard
             key={`${product?.id || 'prod'}-${index}`}

@@ -34,27 +34,6 @@ export function useWishlist() {
         }
       }
 
-      if (list.items.length > 0) {
-        const ids = list.items.map((i: any) => i.productId).filter(Boolean);
-        try {
-          const res = await api.post('/products/validate-ids', { ids });
-          const activeIds = res.data?.data || [];
-          const activeItems = list.items.filter((item: any) => activeIds.includes(item.productId));
-          if (activeItems.length !== list.items.length) {
-            const newList = {
-              items: activeItems,
-              total: activeItems.length,
-            };
-            if (list === local) {
-              localWishlist.set(newList);
-            }
-            list = newList;
-          }
-        } catch (e) {
-          console.error("Failed to validate wishlist items", e);
-        }
-      }
-
       return list;
     },
     staleTime: 15 * 1000,

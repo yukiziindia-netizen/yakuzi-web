@@ -15,7 +15,9 @@ export default function WishlistIcon({ isFilled, useImage, className, ...props }
       alt="Wishlist"
       className={`${className || ''} inline-block object-contain`}
       style={{
-        filter: 'brightness(0)',
+        filter: isFilled 
+          ? 'brightness(0) invert(24%) sepia(85%) saturate(2375%) hue-rotate(256deg) brightness(88%) contrast(92%)' 
+          : 'brightness(0)',
         ...props.style
       }}
       {...rest}

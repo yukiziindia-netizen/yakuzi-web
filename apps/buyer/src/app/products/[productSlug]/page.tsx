@@ -95,7 +95,7 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
 
   const currentProductId = prod?.id || `prod-${index}`;
   const isSaved = wishlistData?.items?.some(
-    (item: any) => item.productId === currentProductId || item.product?.id === currentProductId || item.id === currentProductId
+    (item: any) => item.productId === currentProductId || item.product?.id === currentProductId || item.id === currentProductId || (prod?.id && (item.productId === prod.id || item.product?.id === prod.id))
   );
 
   const isYukiziChoice = !!prod.isYukiziChoice || !!prod.isNew;
@@ -270,7 +270,7 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
 
       {/* Ad Tag */}
       {isAd && (
-        <div className="absolute -top-4 right-2 text-[10px] sm:text-[11px] text-gray-500 font-medium z-20">
+        <div className="absolute -top-4 right-2 text-[10px] sm:text-[11px] text-gray-400 font-normal z-20">
           Ad
         </div>
       )}
@@ -347,15 +347,15 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
         </div>
 
         {/* Image Container */}
-        <Link href={`/products/${generateProductSlug(productName, prod.id || 'prod-' + index)}`} className="relative w-full aspect-[4/5] mb-[-8px] sm:mb-[-10px] mt-[-10px] sm:mt-[-12px] overflow-hidden bg-white flex justify-center items-center border-none">
-          <img src={imageUrl} alt={productName} className="max-h-full max-w-full object-contain p-0.5 transform group-hover:scale-105 transition-transform duration-700 ease-out drop-shadow-md" />
+        <Link href={`/products/${generateProductSlug(productName, prod.id || 'prod-' + index)}`} className="relative w-full h-[130px] sm:h-auto sm:aspect-[4/5] mb-[-8px] sm:mb-[-10px] mt-[-10px] sm:mt-[-12px] overflow-hidden bg-white flex justify-center items-center border-none">
+          <img src={imageUrl} alt={productName} className="max-h-full max-w-full object-contain p-3 sm:p-0.5 transform group-hover:scale-105 transition-transform duration-700 ease-out drop-shadow-md" />
         </Link>
 
         {/* Details Section */}
         <div className="flex-1 flex flex-col justify-end gap-0.5 sm:gap-0.5 z-10 w-full mt-0 pb-0.5">
           {/* Title Line */}
           <div className="flex items-center justify-between w-full gap-1 sm:gap-1.5">
-            <h3 className="text-[12px] sm:text-[13px] md:text-[14px] lg:text-[15px] xl:text-[13px] font-medium text-gray-500 truncate flex-1 text-left tracking-tight leading-tight">
+            <h3 className="text-[11px] sm:text-[13px] md:text-[14px] lg:text-[15px] xl:text-[13px] font-medium text-gray-500 truncate flex-1 text-left tracking-tight leading-tight">
               {productName}
             </h3>
             <Link
@@ -370,14 +370,14 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
           {/* Price and Rating */}
           <div className="flex justify-between items-center w-full">
             <div className="flex items-baseline gap-1 sm:gap-1.5">
-              <span className="text-[13px] sm:text-[14px] md:text-[15px] lg:text-[16px] xl:text-[14px] font-semibold text-gray-500 tracking-tight leading-none">
+              <span className="text-[11.5px] sm:text-[14px] md:text-[15px] lg:text-[16px] xl:text-[14px] font-semibold text-gray-500 tracking-tight leading-none">
                 {displayPrice}
               </span>
-              <span className="text-[10px] sm:text-[11px] md:text-[12px] lg:text-[13px] xl:text-[11px] text-gray-400 line-through leading-none">{displayOriginalPrice}</span>
+              <span className="text-[9px] sm:text-[11px] md:text-[12px] lg:text-[13px] xl:text-[11px] text-gray-400 line-through leading-none">{displayOriginalPrice}</span>
             </div>
             <div className="flex items-center gap-0.5 sm:gap-1 -mr-1 sm:-mr-1.5 md:-mr-1.5 lg:-mr-2 xl:-mr-1.5">
-              <Star className={`w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 lg:w-4 lg:h-4 xl:w-3.5 xl:h-3.5 ${hasRating ? 'text-[#8b5cf6] fill-[#8b5cf6]' : 'text-gray-300 fill-gray-300'}`} />
-              <span className="text-[12px] sm:text-[13px] md:text-[14px] lg:text-[15px] xl:text-[13px] font-medium text-gray-500 leading-none">{hasRating ? rating : 'NA'}</span>
+              <Star className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 lg:w-4 lg:h-4 xl:w-3.5 xl:h-3.5 text-[#8b5cf6] fill-[#8b5cf6]" />
+              <span className="text-[10px] sm:text-[13px] md:text-[14px] lg:text-[15px] xl:text-[13px] font-medium text-gray-500 leading-none">{hasRating ? rating : 'NA'}</span>
             </div>
           </div>
 
@@ -387,7 +387,7 @@ function RelatedProductCard({ prod, index }: { prod: any; index: number }) {
               {renderBuyerOfferBadge(prod)}
             </div>
             <div className="-mr-[6px] sm:-mr-[8px]">
-              <DeliveryTruckBadge text={displayDelivery} className="w-[55px] sm:w-[60px] md:w-[65px] lg:w-[70px] xl:w-[58px] h-auto text-[#8c8c8c]" />
+              <DeliveryTruckBadge text={displayDelivery} className="w-[52px] sm:w-[60px] md:w-[65px] lg:w-[70px] xl:w-[58px] h-auto text-[#8c8c8c]" />
             </div>
           </div>
         </div>
@@ -601,6 +601,10 @@ function ComparisonOffersList({
                 image: productImage,
                 imageUrl: productImage,
                 images: productImage ? [productImage] : [],
+                // Without these the cart has no idea what the ceiling is and
+                // lets the quantity be raised past the stock that exists.
+                stock: listing.stock,
+                maximumOrderQuantity: listing.maximumOrderQuantity,
               });
             }
           }
@@ -1082,7 +1086,21 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
       )
       : validListings;
 
-  const comparisonListings = filteredListings || [];
+  // Sellers are ordered by their rating, so the best-reviewed one leads the list
+  // and is what the page defaults to. Price only separates sellers whose ratings
+  // are equal. Unrated sellers (rating 0 or absent — the rows showing NA) sort
+  // last rather than being scattered through the list.
+  //
+  // Copied before sorting: the source array is derived from the product query's
+  // cached data, which must not be reordered in place.
+  const comparisonListings = [...(filteredListings || [])].sort((a: any, b: any) => {
+    const ratingOf = (l: any) => Number(l?.seller?.rating) || 0;
+    const priceOf = (l: any) => {
+      const value = Number(l?.price ?? l?.mrp);
+      return Number.isFinite(value) && value > 0 ? value : Infinity;
+    };
+    return ratingOf(b) - ratingOf(a) || priceOf(a) - priceOf(b);
+  });
 
   let displayImages = [...images];
   const rawVariantImages = selectedVariant?.images?.length > 0

@@ -276,15 +276,22 @@ function GridProductCard({ product, index, onOpenReview }: { product: any; index
       )}
 
       <div 
-        className={`bg-white rounded-[6px] hover:shadow-md transition-shadow duration-200 group flex flex-col relative border ${isYukiziChoice ? 'border-[#7B2FBE]/40 shadow-[0_2px_8px_rgba(123,47,190,0.15)]' : 'border-[#ddd] shadow-[0_2px_8px_rgba(0,0,0,0.06)]'} w-full h-auto overflow-hidden`}
+        className={`bg-white rounded-[6px] hover:shadow-md transition-shadow duration-200 group flex flex-col relative border ${
+          isWaitlisted
+            ? 'border-gray-900 ring-1 ring-gray-900 shadow-[0_2px_8px_rgba(0,0,0,0.06)]'
+            : isYukiziChoice
+              ? 'border-[#7B2FBE]/40 shadow-[0_2px_8px_rgba(123,47,190,0.15)]'
+              : 'border-[#ddd] shadow-[0_2px_8px_rgba(0,0,0,0.06)]'
+        } w-full h-auto overflow-hidden`}
       >
            {/* Top Right Plus / Cart Button / Waitlist Bell */}
         <div className="absolute top-1 right-0.5 z-20">
           {showBellIcon ? (
             <button 
               onClick={handleToggleWaitlist}
-              className={`transition-colors p-1 rounded-full ${isWaitlisted ? 'text-red-500 bg-red-50' : 'text-black hover:text-black/80 hover:bg-black/5'}`}
+              className={`transition-colors p-1 rounded-full ${isWaitlisted ? 'bg-gray-900 text-white hover:bg-gray-800' : 'text-black hover:text-black/80 hover:bg-black/5'}`}
               title={isWaitlisted ? "Remove from waitlist" : "Notify me when available"}
+              aria-pressed={isWaitlisted}
             >
               <Bell className="w-5 h-5" fill={isWaitlisted ? "currentColor" : "none"} strokeWidth={2.5} />
             </button>

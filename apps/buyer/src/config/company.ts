@@ -1,23 +1,39 @@
 /**
  * Single source of truth for the company details shown on the public policy pages.
  *
- * ─────────────────────────────────────────────────────────────────────────────
- * ACTION REQUIRED BEFORE THESE PAGES GO PUBLIC
- * ─────────────────────────────────────────────────────────────────────────────
- * Every value marked TO CONFIRM below is a placeholder. They are rendered on
- * customer-facing legal pages, so they must be replaced with the real details
- * (and the policy text reviewed by whoever handles Yukizi's legal/compliance)
- * before this is announced to customers.
+ * The Privacy Policy, Terms of Use, Shipping Policy and Return & Refund Policy
+ * pages now carry the text Yukizi supplied on 6 August 2026. Values below that
+ * are quoted in those documents have been set from them.
  *
- * Fill them in here once and all six pages update.
+ * ─────────────────────────────────────────────────────────────────────────────
+ * STILL OUTSTANDING
+ * ─────────────────────────────────────────────────────────────────────────────
+ * The values still marked TO CONFIRM are placeholders and are rendered on the
+ * customer-facing About and Contact pages, so they need the real details before
+ * this is announced to customers.
+ *
+ * Fill them in here once and every page updates.
  */
 
 export const COMPANY = {
   /** Trading name used throughout the site copy. */
   brandName: 'Yukizi',
 
-  /** TO CONFIRM: full registered legal entity name as on the incorporation certificate. */
-  legalName: 'Yukizi Market Services Private Limited',
+  /**
+   * Legal entity name as written in the supplied policy documents.
+   * NOTE: the AWS account for this project is registered as "Yukizi Market
+   * Services Private Limited" — one of the two is wrong and legal pages must
+   * name the entity exactly as incorporated.
+   */
+  legalName: 'Yukizi Market Private Limited',
+
+  /**
+   * Public website URL quoted in the policy documents.
+   * TO CONFIRM: the documents cite the dev domain. This must become the
+   * production domain before launch — a legal page should not point customers
+   * at dev.yukizi.com.
+   */
+  websiteUrl: 'https://dev.yukizi.com/',
 
   /** TO CONFIRM: full registered office address, including PIN code. */
   registeredAddress: '[Registered office address — to be provided]',
@@ -31,8 +47,13 @@ export const COMPANY = {
   /** TO CONFIRM: the address customers post returns to (often not the registered office). */
   returnsAddress: '[Returns address — to be provided]',
 
-  /** TO CONFIRM: monitored support inbox. */
-  supportEmail: 'support@yukizi.com',
+  /**
+   * Support inbox published in the policy documents.
+   * TO CONFIRM: this is a personal Gmail address, and the site's landing footer
+   * publishes hello@yukizi.in instead. A single monitored inbox on the company
+   * domain would be better on legal pages.
+   */
+  supportEmail: 'Yukizi.india@gmail.com',
 
   /** TO CONFIRM: published support phone number. */
   supportPhone: '[Support phone number — to be provided]',
@@ -55,13 +76,10 @@ export const COMPANY = {
   jurisdictionCity: '[City — to be provided]',
 
   /** Window, in days from delivery, for raising a return or damage claim. */
-  returnWindowDays: 7,
+  returnWindowDays: 3,
 
-  /** Working days to process a refund once a return is approved. */
-  refundProcessingDays: '5–7 business days',
-
-  /** Typical delivery window quoted on the shipping page. */
-  deliveryWindow: '3–7 business days',
+  /** Delivery window quoted in the Shipping Policy, measured from dispatch. */
+  deliveryWindow: '4–7 business days',
 
   /**
    * Last reviewed date shown at the top of each policy page.

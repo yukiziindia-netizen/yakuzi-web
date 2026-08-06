@@ -301,35 +301,54 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
                            <span className={`text-[15px] font-black ${isSelected ? 'text-purple-600' : 'text-gray-500'}`}>{group.dateString}</span>
                            <ChevronRight className="w-5 h-5 text-gray-400" />
                         </div>
-                        <div className="grid grid-cols-2 gap-1.5 h-[160px]">
-                           <div className="flex flex-col gap-1.5 h-full min-h-0">
-                              <div className="bg-gray-50 rounded flex-1 relative flex items-center justify-center overflow-hidden">
-                                 <img src={images[0] || "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=150&auto=format&fit=crop"} className="absolute inset-0 w-full h-full object-contain p-1" alt="" />
+                        <div className="h-[160px] w-full">
+                          {images.length === 1 ? (
+                            <div className="bg-gray-50 rounded w-full h-full relative flex items-center justify-center overflow-hidden">
+                              <img src={images[0]} className="absolute inset-0 w-full h-full object-contain p-1" alt="" />
+                            </div>
+                          ) : images.length === 2 ? (
+                            <div className="grid grid-cols-2 gap-1.5 h-full">
+                              <div className="bg-gray-50 rounded relative flex items-center justify-center overflow-hidden">
+                                <img src={images[0]} className="absolute inset-0 w-full h-full object-contain p-1" alt="" />
                               </div>
-                              <div className="bg-gray-50 rounded flex-1 relative flex items-center justify-center overflow-hidden">
-                                 {images.length > 1 ? (
-                                   <img src={images[1] || "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=150&auto=format&fit=crop"} className="absolute inset-0 w-full h-full object-contain p-1" alt="" />
-                                 ) : (
-                                   <div className="absolute inset-0 bg-gray-100/50"></div>
-                                 )}
+                              <div className="bg-gray-50 rounded relative flex items-center justify-center overflow-hidden">
+                                <img src={images[1]} className="absolute inset-0 w-full h-full object-contain p-1" alt="" />
                               </div>
-                           </div>
-                           <div className="flex flex-col gap-1.5 h-full min-h-0">
-                               <div className="bg-gray-50 rounded flex-[2] relative flex items-center justify-center overflow-hidden">
-                                 {images.length > 2 ? (
-                                   <img src={images[2] || "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=150&auto=format&fit=crop"} className="absolute inset-0 w-full h-full object-contain p-1" alt="" />
-                                 ) : (
-                                   <div className="absolute inset-0 bg-gray-100/50"></div>
-                                 )}
+                            </div>
+                          ) : images.length === 3 ? (
+                            <div className="grid grid-cols-2 gap-1.5 h-full">
+                              <div className="flex flex-col gap-1.5 h-full min-h-0">
+                                <div className="bg-gray-50 rounded flex-1 relative flex items-center justify-center overflow-hidden">
+                                  <img src={images[0]} className="absolute inset-0 w-full h-full object-contain p-1" alt="" />
+                                </div>
+                                <div className="bg-gray-50 rounded flex-1 relative flex items-center justify-center overflow-hidden">
+                                  <img src={images[1]} className="absolute inset-0 w-full h-full object-contain p-1" alt="" />
+                                </div>
                               </div>
-                               <div className="bg-gray-50 rounded flex-1 relative flex items-center justify-center overflow-hidden">
-                                 {images.length > 3 ? (
-                                   <img src={images[3] || "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=150&auto=format&fit=crop"} className="absolute inset-0 w-full h-full object-contain p-1" alt="" />
-                                 ) : (
-                                   <div className="absolute inset-0 bg-gray-100/50"></div>
-                                 )}
+                              <div className="bg-gray-50 rounded relative flex items-center justify-center overflow-hidden">
+                                <img src={images[2]} className="absolute inset-0 w-full h-full object-contain p-1" alt="" />
                               </div>
-                           </div>
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-2 gap-1.5 h-full">
+                              <div className="flex flex-col gap-1.5 h-full min-h-0">
+                                <div className="bg-gray-50 rounded flex-1 relative flex items-center justify-center overflow-hidden">
+                                  <img src={images[0]} className="absolute inset-0 w-full h-full object-contain p-1" alt="" />
+                                </div>
+                                <div className="bg-gray-50 rounded flex-1 relative flex items-center justify-center overflow-hidden">
+                                  <img src={images[1]} className="absolute inset-0 w-full h-full object-contain p-1" alt="" />
+                                </div>
+                              </div>
+                              <div className="flex flex-col gap-1.5 h-full min-h-0">
+                                <div className="bg-gray-50 rounded flex-[2] relative flex items-center justify-center overflow-hidden">
+                                  <img src={images[2]} className="absolute inset-0 w-full h-full object-contain p-1" alt="" />
+                                </div>
+                                <div className="bg-gray-50 rounded flex-1 relative flex items-center justify-center overflow-hidden">
+                                  <img src={images[3]} className="absolute inset-0 w-full h-full object-contain p-1" alt="" />
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     );

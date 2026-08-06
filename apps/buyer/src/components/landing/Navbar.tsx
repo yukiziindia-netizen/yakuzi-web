@@ -670,7 +670,7 @@ export default function Navbar({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/50 backdrop-blur-[1px] z-[-2] pointer-events-auto"
+                className="fixed inset-0 bg-transparent z-[-2] pointer-events-auto"
                 onClick={() => setIsChatOpen(false)}
               />
             )}
@@ -682,7 +682,7 @@ export default function Navbar({
                 exit={{ opacity: 0, y: 50, scale: 0.95 }}
                 className="absolute bottom-[-16px] md:bottom-[-24px] left-0 right-0 z-[-1] pointer-events-auto h-[75vh] max-h-[850px]"
               >
-                <div className="w-full h-full bg-gradient-to-r from-[#8527bf] via-[#ae44eb] to-[#8d2bcd] rounded-2xl md:rounded-3xl shadow-[0_0_80px_rgba(174,68,235,0.75)] p-6 sm:p-8 md:p-10 flex flex-col">
+                <div className="w-full h-full bg-gradient-to-r from-[#8527bf] via-[#ae44eb] to-[#8d2bcd] rounded-2xl md:rounded-3xl shadow-2xl p-6 sm:p-8 md:p-10 flex flex-col">
                   {/* Chat Messages Area */}
                   {chatMessages.length > 0 && (
                     <div ref={chatContainerRef} className="flex-1 overflow-y-auto mb-4 flex flex-col gap-4 scrollbar-hide">

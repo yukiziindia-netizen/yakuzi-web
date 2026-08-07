@@ -206,7 +206,8 @@ export default function CheckoutPage() {
     }
 
     setSyncError(null);
-    // Only send fields the backend DTO accepts — strip firstName, lastName, email
+    // The backend DTO accepts these fields. Email is included: it is how the
+    // receipt and tax invoice reach the buyer, and it is validated above.
     const orderAddress = {
       name: combinedName,
       phone: address.phone.replace(/\D/g, '').slice(-10), // strip non-digits, keep last 10
@@ -214,6 +215,7 @@ export default function CheckoutPage() {
       city: address.city,
       state: address.state,
       pincode: String(address.pincode).replace(/\D/g, '').slice(0, 6), // digits only, max 6
+      email: address.email.trim().toLowerCase(),
     };
 
     syncCart.mutate(undefined, {

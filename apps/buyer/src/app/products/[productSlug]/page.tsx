@@ -1015,9 +1015,12 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
           {/* Breadcrumbs — rendered unconditionally, unlike the tags header below */}
           <ProductBreadcrumbs product={product} className="px-1 text-[13px] -mb-3" />
 
-          {/* Dynamic Tags Header */}
+          {/* Dynamic Tags Header. The badges deliberately straddle the top edge of
+              the image card below: -mb cancels the 20px flex gap, this row's own
+              spacing and the card's mt-4, then overlaps a further ~10px. z-10 keeps
+              the badge painted over the card, which is a later sibling. */}
           {isAd && (
-            <div className="flex items-center justify-between w-full px-1 mb-1">
+            <div className="relative z-10 flex items-center justify-between w-full px-1 -mb-[46px]">
               <div className="flex items-center gap-2">
                 {isYukiziChoice && (
                   <div className="rounded-full bg-[#7B2FBE] px-4 py-1 text-[12px] font-bold tracking-wide text-white shadow-sm">

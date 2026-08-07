@@ -4,8 +4,10 @@ import { notFound } from 'next/navigation';
 import { getProductById } from '@yukizi/api-client';
 import { parseProductIdFromSlug } from '@yukizi/utils';
 import { absoluteUrl, metaTruncate, SITE_NAME } from '@/lib/seo/site';
-import { productSchema, breadcrumbSchema } from '@/lib/seo/schema';
+import { productSchema, breadcrumbSchema, faqPageSchema } from '@/lib/seo/schema';
+import { applySeoOverride, fetchSeoOverride, mergeStructuredData, validFaqs } from '@/lib/seo/overrides';
 import JsonLd from '@/components/seo/JsonLd';
+import SeoFaq from '@/components/seo/SeoFaq';
 import ProductPageClient from './ProductPageClient';
 
 export const dynamic = 'force-dynamic';
@@ -19,6 +21,12 @@ const fetchProduct = cache(async (slugOrId: string) => {
     throw err; // real failure → error boundary/500, NOT a soft-404
   }
 });
+
+// Admin SEO override, deduped between generateMetadata and the page render.
+// fetchSeoOverride is fail-open (null until the API ships /seo/meta).
+const fetchProductOverride = cache(async (productId: string) =>
+  fetchSeoOverride('PRODUCT', productId),
+);
 
 // Adapt the detail payload (formatMasterDetail) to what productSchema() expects.
 // price/stock/sellerName MUST all come from the same listing — mixing the cheapest
@@ -50,7 +58,7 @@ export async function generateMetadata({ params }: { params: { productSlug: stri
   const images: string[] = Array.isArray((p as any).images)
     ? (p as any).images.map((im: any) => (typeof im === 'string' ? im : im?.url)).filter(Boolean)
     : [];
-  return {
+  const derived: Metadata = {
     title,
     description,
     alternates: { canonical: absoluteUrl(canonicalPath) },
@@ -63,6 +71,7 @@ export async function generateMetadata({ params }: { params: { productSlug: stri
     },
     twitter: { card: 'summary_large_image', title, description },
   };
+  return applySeoOverride(derived, await fetchProductOverride(p.id));
 }
 
 export default async function ProductPage({ params }: { params: { productSlug: string } }) {
@@ -75,10 +84,20 @@ export default async function ProductPage({ params }: { params: { productSlug: s
     crumbs.push({ name: p.category.name, ...(p.category.slug ? { path: `/category/${p.category.slug}` } : {}) });
   }
   crumbs.push({ name: p.name ?? 'Product' });
+  const override = await fetchProductOverride(p.id);
+  const faqs = validFaqs(override?.faq);
+  const jsonLd: object[] = [
+    mergeStructuredData(productSchema(buildSchemaInput(p)), override?.structuredDataOverride),
+    breadcrumbSchema(crumbs),
+  ];
+  if (faqs.length) jsonLd.push(faqPageSchema(faqs));
   return (
     <>
-      <JsonLd data={[productSchema(buildSchemaInput(p)), breadcrumbSchema(crumbs)]} />
+      <JsonLd data={jsonLd} />
       <ProductPageClient productSlug={params.productSlug} initialProduct={product} />
+      {/* Visible, server-rendered — outside the client component, so the PDP's
+          mobile/desktop dual JSX trees are not involved. */}
+      <SeoFaq faqs={faqs} />
     </>
   );
 }

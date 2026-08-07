@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronRight, ChevronLeft, Loader2, Inbox } from 'lucide-react';
+import { X, ChevronRight, ChevronLeft, Loader2, Inbox, RefreshCw } from 'lucide-react';
 import { useScrollLock } from '@/hooks/useScrollLock';
 import { Outfit } from 'next/font/google';
 import { useAuth } from '@yukizi/api-client';
@@ -353,17 +353,32 @@ export default function SupportDrawer({ isOpen, onClose }: SupportDrawerProps) {
                       {ticket ? statusLabel(ticket.status) : 'Loading…'}
                     </p>
                   </div>
-                  {ticket && isLive(ticket.status) ? (
+                  <div className="flex items-center gap-3 shrink-0">
+                    {/* Replies land whenever an admin answers, and the query client
+                        runs with refetchOnWindowFocus off, so the thread needs an
+                        explicit way to pull them in. */}
                     <button
-                      onClick={() => activeTicketId && closeTicket.mutate(activeTicketId)}
-                      disabled={closeTicket.isPending}
-                      className="text-red-500 text-xs font-semibold hover:text-red-600 transition-colors disabled:opacity-60 shrink-0"
+                      onClick={() => threadQuery.refetch()}
+                      disabled={threadQuery.isFetching}
+                      title="Check for new replies"
+                      aria-label="Check for new replies"
+                      className="w-8 h-8 rounded-full bg-[#b59fe6]/30 flex items-center justify-center hover:bg-[#b59fe6]/40 transition-colors disabled:opacity-60"
                     >
-                      Close
+                      <RefreshCw
+                        className={`w-4 h-4 text-[#7B2FBE] ${threadQuery.isFetching ? 'animate-spin' : ''}`}
+                        strokeWidth={2.5}
+                      />
                     </button>
-                  ) : (
-                    <span className="w-8 shrink-0" />
-                  )}
+                    {ticket && isLive(ticket.status) && (
+                      <button
+                        onClick={() => activeTicketId && closeTicket.mutate(activeTicketId)}
+                        disabled={closeTicket.isPending}
+                        className="text-red-500 text-xs font-semibold hover:text-red-600 transition-colors disabled:opacity-60"
+                      >
+                        Close
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex-1 px-6 py-4 overflow-y-auto space-y-4 bg-white">
@@ -402,7 +417,7 @@ export default function SupportDrawer({ isOpen, onClose }: SupportDrawerProps) {
                       })}
                       {messages.length > 0 && !messages.some(isFromSupport) && (
                         <p className="text-center text-xs text-gray-400 pt-2">
-                          Sent. Our team will reply here.
+                          Sent. Our team will reply here — tap refresh to check.
                         </p>
                       )}
                       <div ref={messagesEndRef} />

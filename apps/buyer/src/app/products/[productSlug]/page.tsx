@@ -276,7 +276,7 @@ function ComparisonOffersList({
   if (!comparisonListings || comparisonListings.length === 0) {
     return (
       <div className="p-6 rounded-2xl bg-gray-50 border border-dashed border-gray-200 text-center text-xs font-semibold text-gray-400">
-        No active offers available for this product.
+        No active Sellers available for this product.
       </div>
     );
   }

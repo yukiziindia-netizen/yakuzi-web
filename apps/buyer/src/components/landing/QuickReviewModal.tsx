@@ -374,7 +374,7 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                   })
                 ) : (
                   <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 py-6 text-center text-xs font-medium text-gray-400">
-                    No active offers available for this product.
+                    No active Sellers available for this product.
                   </div>
                 )}
               </div>

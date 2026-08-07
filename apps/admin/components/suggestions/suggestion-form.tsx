@@ -49,6 +49,15 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
   const [options, setOptions] = useState<VariantOption[]>([]);
   const [variants, setVariants] = useState<VariantCombination[]>([]);
 
+  // Categories beyond the primary pair. The primary selects above stay the
+  // commission/breadcrumb source of truth; these only widen where the
+  // product appears.
+  const [extraCategoryIds, setExtraCategoryIds] = useState<string[]>([]);
+  const [extraSubCategoryIds, setExtraSubCategoryIds] = useState<string[]>([]);
+  // Whether the product came in with extras — then we must keep sending the
+  // fields so deselecting down to zero actually clears them server-side.
+  const [hadExtras, setHadExtras] = useState(false);
+
   // Prepopulate data when editing
   useEffect(() => {
     if (initialData) {
@@ -75,6 +84,17 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
         subCategoryId: initialData.subCategoryId || "",
         status: initialData.isActive === false ? "draft" : "active"
       });
+
+      // Extra categories / sub-categories
+      const incomingExtraCats = Array.isArray(initialData.extraCategories)
+        ? initialData.extraCategories.map((c: any) => c.id).filter(Boolean)
+        : [];
+      const incomingExtraSubs = Array.isArray(initialData.extraSubCategories)
+        ? initialData.extraSubCategories.map((sc: any) => sc.id).filter(Boolean)
+        : [];
+      setExtraCategoryIds(incomingExtraCats);
+      setExtraSubCategoryIds(incomingExtraSubs);
+      setHadExtras(incomingExtraCats.length > 0 || incomingExtraSubs.length > 0);
 
       // Images
       if (initialData.images && Array.isArray(initialData.images)) {
@@ -168,6 +188,51 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
     (sc: any) => sc.categoryId === form.categoryId
   );
 
+  // Every category the product belongs to (primary + extras); extra
+  // sub-categories may come from any of them.
+  const selectedCategoryIds = [form.categoryId, ...extraCategoryIds].filter(Boolean);
+  const extraCategoryOptions = categories.filter(
+    (c: any) => c.id !== form.categoryId && !extraCategoryIds.includes(c.id)
+  );
+  const extraSubCategoryOptions = subCategories.filter(
+    (sc: any) =>
+      selectedCategoryIds.includes(sc.categoryId) &&
+      sc.id !== form.subCategoryId &&
+      !extraSubCategoryIds.includes(sc.id)
+  );
+  const categoryName = (id: string) => categories.find((c: any) => c.id === id)?.name || id;
+  const subCategoryLabel = (id: string) => {
+    const sc = subCategories.find((s: any) => s.id === id);
+    return sc ? `${sc.name} (${categoryName(sc.categoryId)})` : id;
+  };
+
+  const handlePrimaryCategoryChange = (newCategoryId: string) => {
+    setForm(f => ({ ...f, categoryId: newCategoryId, subCategoryId: "" }));
+    // The new primary cannot also be an extra, and extra sub-categories must
+    // still belong to one of the selected categories.
+    const nextExtraCats = extraCategoryIds.filter(id => id !== newCategoryId);
+    const nextSelected = [newCategoryId, ...nextExtraCats];
+    setExtraCategoryIds(nextExtraCats);
+    setExtraSubCategoryIds(prev =>
+      prev.filter(id => {
+        const sc = subCategories.find((s: any) => s.id === id);
+        return sc && nextSelected.includes(sc.categoryId);
+      })
+    );
+  };
+
+  const removeExtraCategory = (id: string) => {
+    const nextExtraCats = extraCategoryIds.filter(x => x !== id);
+    const nextSelected = [form.categoryId, ...nextExtraCats];
+    setExtraCategoryIds(nextExtraCats);
+    setExtraSubCategoryIds(prev =>
+      prev.filter(sid => {
+        const sc = subCategories.find((s: any) => s.id === sid);
+        return sc && nextSelected.includes(sc.categoryId);
+      })
+    );
+  };
+
   const handleSave = async () => {
     if (!form.title) return toast.error("Title is required");
     if (!form.categoryId) return toast.error("Category is required");
@@ -196,8 +261,8 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
         isActive: form.status === "active",
         images: mediaItems.filter(m => !m.isLoading).map(m => m.url),
         options: options.length > 0 ? options.map(o => ({ name: o.name, values: o.values })) : undefined,
-        variants: variants.length > 0 ? variants.map(v => ({ 
-          name: v.name, 
+        variants: variants.length > 0 ? variants.map(v => ({
+          name: v.name,
           sku: v.sku,
           serialNo: v.serialNo,
           shippingCharges: Number(v.shippingCharges),
@@ -206,6 +271,13 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
           image: v.image,
           images: v.images
         })) : undefined,
+        // Only sent when extras are (or were) in play: the live API rejects
+        // unknown fields (forbidNonWhitelisted), so a build deployed ahead of
+        // the API change must not send them on plain saves. When the product
+        // had extras, keep sending so clearing the last chip really clears.
+        ...(extraCategoryIds.length > 0 || extraSubCategoryIds.length > 0 || hadExtras
+          ? { extraCategoryIds, extraSubCategoryIds }
+          : {}),
       };
 
       if (initialData?.id) {
@@ -317,7 +389,7 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
               <label className="block text-sm font-medium text-foreground">Category</label>
               <select
                 value={form.categoryId}
-                onChange={e => setForm(f => ({ ...f, categoryId: e.target.value, subCategoryId: "" }))}
+                onChange={e => handlePrimaryCategoryChange(e.target.value)}
                 className="w-full rounded-xl border border-input bg-background/50 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/60 transition-all font-medium appearance-none"
               >
                 <option value="" disabled>Select category</option>
@@ -325,6 +397,35 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </select>
+              {extraCategoryIds.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {extraCategoryIds.map(id => (
+                    <span key={id} className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2.5 py-1 text-xs font-medium">
+                      {categoryName(id)}
+                      <button
+                        type="button"
+                        aria-label={`Remove ${categoryName(id)}`}
+                        onClick={() => removeExtraCategory(id)}
+                        className="hover:text-primary/60 transition-colors leading-none"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+              {form.categoryId && extraCategoryOptions.length > 0 && (
+                <select
+                  value=""
+                  onChange={e => { if (e.target.value) setExtraCategoryIds(prev => [...prev, e.target.value]); }}
+                  className="w-full rounded-xl border border-dashed border-input bg-background/30 px-3 py-2 text-xs text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all appearance-none"
+                >
+                  <option value="">+ Add another category</option>
+                  {extraCategoryOptions.map((c: any) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              )}
             </div>
 
             <div className="space-y-1.5">
@@ -340,6 +441,35 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
                   <option key={sc.id} value={sc.id}>{sc.name}</option>
                 ))}
               </select>
+              {extraSubCategoryIds.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {extraSubCategoryIds.map(id => (
+                    <span key={id} className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2.5 py-1 text-xs font-medium">
+                      {subCategoryLabel(id)}
+                      <button
+                        type="button"
+                        aria-label={`Remove ${subCategoryLabel(id)}`}
+                        onClick={() => setExtraSubCategoryIds(prev => prev.filter(x => x !== id))}
+                        className="hover:text-primary/60 transition-colors leading-none"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+              {selectedCategoryIds.length > 0 && extraSubCategoryOptions.length > 0 && (
+                <select
+                  value=""
+                  onChange={e => { if (e.target.value) setExtraSubCategoryIds(prev => [...prev, e.target.value]); }}
+                  className="w-full rounded-xl border border-dashed border-input bg-background/30 px-3 py-2 text-xs text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all appearance-none"
+                >
+                  <option value="">+ Add another sub-category</option>
+                  {extraSubCategoryOptions.map((sc: any) => (
+                    <option key={sc.id} value={sc.id}>{sc.name} ({categoryName(sc.categoryId)})</option>
+                  ))}
+                </select>
+              )}
             </div>
 
               {/* Platform Fees */}

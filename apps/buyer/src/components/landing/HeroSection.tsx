@@ -142,6 +142,11 @@ export default function HeroSection({ initialBanners }: { initialBanners?: any[]
                     src={mobileImage}
                     alt={banner?.title || 'Featured'}
                     className="h-full w-full object-cover"
+                    // The first slide is the LCP element: ask the browser to
+                    // fetch it ahead of the rest of the image flood. Lowercase
+                    // because React 18 only passes the hint through as a plain
+                    // attribute (and @types/react 18.2 has no camelCase prop).
+                    {...(index === 0 ? ({ fetchpriority: 'high' } as any) : {})}
                   />
                 </picture>
               );

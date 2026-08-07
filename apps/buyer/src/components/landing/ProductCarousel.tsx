@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Loader2, Share2, Plus, Minus, RotateCw, Eye, Star, Truck, Bookmark, Bell } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { getProducts, useAuth } from '@yukizi/api-client';
 import { generateProductSlug, calculatePricing } from '@yukizi/utils';
 import QuickReviewModal from './QuickReviewModal';
@@ -257,7 +258,9 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
     if (words.length === 1) return words[0].substring(0, 2).toUpperCase();
     return (words[0][0] + words[words.length - 1][0]).toUpperCase();
   };
-  const fallbackImage = `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent(getInitials(productName))}`;
+  // /png because placehold.co defaults to SVG, which the image optimizer
+  // refuses to process.
+  const fallbackImage = `https://placehold.co/400x400/10b981/ffffff/png?text=${encodeURIComponent(getInitials(productName))}`;
   const imageUrl = product?.images?.[0]?.url || product?.images?.[0] || product?.image || fallbackImage;
 
   return (
@@ -367,7 +370,10 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
 
         {/* Image Container - Fixed 190px/200px height matching Samplr */}
         <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`} className="relative w-full h-[130px] sm:h-[200px] bg-white overflow-hidden flex justify-center items-center shrink-0">
-           <img src={imageUrl} alt={productName} loading="lazy" decoding="async" className="w-full h-full object-contain p-3 sm:p-2 group-hover:scale-105 transition-transform duration-300 ease-out" />
+           {/* next/image so the ~1MB seller uploads are resized/re-encoded to
+               the card's actual rendered width (the grid is 2-7 columns) —
+               measured 65MB of card images on one homepage load without it. */}
+           <Image src={imageUrl} alt={productName} fill sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 15vw" className="object-contain p-3 sm:p-2 group-hover:scale-105 transition-transform duration-300 ease-out" />
         </Link>
 
          <div className="flex flex-col gap-1.5 p-[8px] sm:p-[10px] bg-white w-full">

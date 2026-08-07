@@ -5,6 +5,8 @@ export interface Banner {
   title: string | null;
   link: string | null;
   imageUrl: string;
+  /** Optional narrow-viewport variant; fall back to imageUrl when absent. */
+  mobileImageUrl?: string | null;
   isActive: boolean;
   order: number | null;
   createdAt: string;

@@ -19,12 +19,17 @@ export default function BannersPage() {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [mobileFile, setMobileFile] = useState<File | null>(null);
+  const [mobilePreview, setMobilePreview] = useState<string | null>(null);
+  const [removeMobile, setRemoveMobile] = useState(false);
+  const mobileFileRef = useRef<HTMLInputElement>(null);
 
   const banners: any[] = Array.isArray(bannersData) ? bannersData : (bannersData?.data ?? []);
 
   const openCreate = () => {
     setEditingBanner(null);
     setTitle(""); setLink(""); setFile(null); setPreview(null);
+    setMobileFile(null); setMobilePreview(null); setRemoveMobile(false);
     setShowModal(true);
   };
 
@@ -34,6 +39,9 @@ export default function BannersPage() {
     setLink(banner.link ?? "");
     setFile(null);
     setPreview(banner.imageUrl ?? null);
+    setMobileFile(null);
+    setMobilePreview(banner.mobileImageUrl ?? null);
+    setRemoveMobile(false);
     setShowModal(true);
   };
 
@@ -46,11 +54,31 @@ export default function BannersPage() {
     reader.readAsDataURL(f);
   };
 
+  const handleMobileFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setMobileFile(f);
+    setRemoveMobile(false);
+    const reader = new FileReader();
+    reader.onloadend = () => setMobilePreview(reader.result as string);
+    reader.readAsDataURL(f);
+  };
+
+  const clearMobileImage = () => {
+    setMobileFile(null);
+    setMobilePreview(null);
+    if (mobileFileRef.current) mobileFileRef.current.value = "";
+    // Only meaningful when the stored banner had one to remove
+    if (editingBanner?.mobileImageUrl) setRemoveMobile(true);
+  };
+
   const handleSave = async () => {
     const formData = new FormData();
     if (title) formData.append("title", title);
     if (link) formData.append("link", link);
     if (file) formData.append("image", file);
+    if (mobileFile) formData.append("mobileImage", mobileFile);
+    if (removeMobile && !mobileFile) formData.append("removeMobileImage", "true");
     try {
       if (editingBanner) {
         await updateBanner.mutateAsync({ id: editingBanner.id, payload: formData });
@@ -146,7 +174,7 @@ export default function BannersPage() {
           <Input label="Title (optional)" value={title} onChange={e => setTitle(e.target.value)} placeholder="Banner title" />
           <Input label="Link (optional)" value={link} onChange={e => setLink(e.target.value)} placeholder="https://..." />
           <div>
-            <label className="text-sm font-medium text-foreground mb-2 block">Image</label>
+            <label className="text-sm font-medium text-foreground mb-2 block">Image (desktop)</label>
             <input ref={fileRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
             <button onClick={() => fileRef.current?.click()}
               className="w-full border-2 border-dashed border-border rounded-xl p-6 text-center hover:border-primary/50 transition-colors">
@@ -157,6 +185,25 @@ export default function BannersPage() {
                   <Image className="h-8 w-8 mx-auto text-muted-foreground/40 mb-2" />
                   <p className="text-sm text-muted-foreground">Click to select image</p>
                 </div>
+              )}
+            </button>
+          </div>
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-sm font-medium text-foreground block">Mobile image (optional)</label>
+              {mobilePreview && (
+                <button onClick={clearMobileImage} className="text-xs text-muted-foreground hover:text-destructive transition-colors">
+                  Remove
+                </button>
+              )}
+            </div>
+            <input ref={mobileFileRef} type="file" accept="image/*" onChange={handleMobileFileChange} className="hidden" />
+            <button onClick={() => mobileFileRef.current?.click()}
+              className="w-full border-2 border-dashed border-border rounded-xl p-4 text-center hover:border-primary/50 transition-colors">
+              {mobilePreview ? (
+                <img src={mobilePreview} alt="Mobile preview" className="max-h-24 mx-auto rounded-lg" />
+              ) : (
+                <p className="text-xs text-muted-foreground">Shown on phones instead of the desktop image. Leave empty to reuse it.</p>
               )}
             </button>
           </div>

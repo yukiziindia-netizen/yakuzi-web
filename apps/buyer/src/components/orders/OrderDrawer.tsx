@@ -8,7 +8,6 @@ import { useOrderById, useOrders } from '@/hooks/useOrders';
 import { useAuth } from '@yukizi/api-client';
 import type { OrderFilters } from './OrderFilterDrawer';
 import { useAddToWishlist, useWishlist, useRemoveFromWishlist } from '@/hooks/useWishlist';
-import { useToast } from '@/components/shared/Toast';
 import WishlistIcon from '@/components/shared/WishlistIcon';
 
 
@@ -38,7 +37,6 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
   const { data: wishlistData } = useWishlist();
   const { mutate: addToWishlist } = useAddToWishlist();
   const { mutate: removeFromWishlist } = useRemoveFromWishlist();
-  const { toast } = useToast();
 
 
   useEffect(() => {
@@ -238,14 +236,11 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
                         onClick={(e) => {
                           e.stopPropagation();
                           e.preventDefault();
+                          // No toast: the ribbon icon already fills/empties to show the result.
                           if (isSaved) {
-                            removeFromWishlist(currentProductId, {
-                              onSuccess: () => toast('Removed from wishlist', 'info')
-                            });
+                            removeFromWishlist(currentProductId);
                           } else {
-                            addToWishlist(product, {
-                              onSuccess: () => toast('Added to wishlist', 'success')
-                            });
+                            addToWishlist(product);
                           }
                         }}
                         className="absolute right-0 top-1/2 -translate-y-1/2 z-20 cursor-pointer hover:scale-105 transition-transform"

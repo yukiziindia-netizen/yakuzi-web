@@ -943,10 +943,9 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
   // Wishlist / Bookmark logic
   const isBookmarked = wishlistSet.has(product.id);
   const handleBookmarkToggle = () => {
+    // No toast on either branch: the bookmark icon already flips to show the result.
     if (isBookmarked) {
-      removeFromWishlist.mutate(product.id, {
-        onSuccess: () => toast('Removed from wishlist', 'success'),
-      });
+      removeFromWishlist.mutate(product.id);
     } else {
       addToWishlist.mutate({
         productId: product.id,
@@ -954,8 +953,6 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
         price: displayPrice || 0,
         originalPrice: product.mrp || product.originalPrice || displayPrice,
         image: product.image || images[0],
-      }, {
-        onSuccess: () => toast('Added to wishlist!', 'success'),
       });
     }
   };

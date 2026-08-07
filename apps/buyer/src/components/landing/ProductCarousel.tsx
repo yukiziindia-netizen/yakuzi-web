@@ -349,14 +349,11 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => { 
             e.preventDefault(); 
+            // No toast: the ribbon icon already fills/empties to show the result.
             if (isSaved) {
-              removeFromWishlist(currentProductId, {
-                onSuccess: () => toast('Removed from wishlist', 'info')
-              });
+              removeFromWishlist(currentProductId);
             } else {
-              addToWishlist(product, {
-                onSuccess: () => toast('Added to wishlist', 'success')
-              });
+              addToWishlist(product);
             }
           }}
           className="absolute right-0 top-[40%] -translate-y-1/2 z-20 cursor-pointer hover:scale-105 transition-transform"

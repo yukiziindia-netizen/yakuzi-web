@@ -4,6 +4,25 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useBrands, useBanners } from '@/hooks/useProducts';
 
+// Routes a remote image through /_next/image so the browser downloads a
+// resized AVIF/WebP variant instead of the original upload (banner uploads
+// measure 200-300KB each; the optimized variant is a fraction of that).
+// SVGs and non-absolute URLs are left alone - the optimizer refuses SVG,
+// and the Wikimedia fallback logos are SVG.
+const canOptimize = (url?: string) =>
+  !!url && /^https?:\/\//i.test(url) && !/\.svg([?#]|$)/i.test(url);
+const optimizedUrl = (url: string, w: number) =>
+  `/_next/image?url=${encodeURIComponent(url)}&w=${w}&q=75`;
+// Widths must come from next.config's deviceSizes/imageSizes defaults.
+const bannerSrcSet = (url?: string) =>
+  canOptimize(url)
+    ? [640, 750, 1080, 1920].map((w) => `${optimizedUrl(url!, w)} ${w}w`).join(', ')
+    : undefined;
+const logoSrcSet = (url?: string) =>
+  canOptimize(url)
+    ? `${optimizedUrl(url!, 128)} 1x, ${optimizedUrl(url!, 256)} 2x`
+    : undefined;
+
 export default function HeroSection({ initialBanners }: { initialBanners?: any[] }) {
   const { data: brandsData, isLoading: isLoadingBrands } = useBrands();
   const { data: bannersData } = useBanners(initialBanners);
@@ -137,9 +156,15 @@ export default function HeroSection({ initialBanners }: { initialBanners?: any[]
               const mobileImage = banner?.mobileImageUrl || desktopImage;
               const slide = (
                 <picture className="block h-full w-full">
-                  <source media="(min-width: 1024px)" srcSet={desktopImage} />
+                  <source
+                    media="(min-width: 1024px)"
+                    srcSet={bannerSrcSet(desktopImage) ?? desktopImage}
+                    sizes="100vw"
+                  />
                   <img
                     src={mobileImage}
+                    srcSet={bannerSrcSet(mobileImage)}
+                    sizes={bannerSrcSet(mobileImage) ? '100vw' : undefined}
                     alt={banner?.title || 'Featured'}
                     className="h-full w-full object-cover"
                     // The first slide is the LCP element: ask the browser to
@@ -246,6 +271,7 @@ export default function HeroSection({ initialBanners }: { initialBanners?: any[]
                 >
                   <img
                     src={brand.imageUrl}
+                    srcSet={logoSrcSet(brand.imageUrl)}
                     alt={brand.name}
                     loading="lazy"
                     decoding="async"

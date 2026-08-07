@@ -14,8 +14,12 @@ export default function BlogsPage({ initialPosts }: { initialPosts?: any[] }) {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
 
   // Only seed the very first (unfiltered, page 1) query — page/search changes
-  // must always hit the network, never fall back to the SSR snapshot.
+  // must always hit the network, never fall back to the SSR snapshot. An
+  // empty/failed server fetch must ALSO be left unseeded — seeding an empty
+  // array here would render "no articles" as fresh data and the client would
+  // never refetch, permanently hiding a real API/network hiccup.
   const isDefaultQuery = page === 1 && !searchTerm;
+  const hasSeedData = Array.isArray(initialPosts) && initialPosts.length > 0;
   const { data, isLoading, isError } = useBlogs(
     {
       page,
@@ -23,8 +27,8 @@ export default function BlogsPage({ initialPosts }: { initialPosts?: any[] }) {
       search: searchTerm || undefined,
       status: 'PUBLISHED', // drafts must never surface in the public list
     },
-    isDefaultQuery && initialPosts
-      ? { initialData: { data: initialPosts, total: initialPosts.length } }
+    isDefaultQuery && hasSeedData
+      ? { initialData: { data: initialPosts, total: initialPosts!.length } }
       : {},
   ) as any;
 

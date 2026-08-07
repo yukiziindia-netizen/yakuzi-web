@@ -16,8 +16,11 @@ export default async function BlogsPage() {
   let initialPosts: any[] = [];
   try {
     // The API returns DRAFT posts unless explicitly filtered — the public
-    // list must only ever surface PUBLISHED posts.
-    const res = await getBlogs({ limit: 20, status: 'PUBLISHED' });
+    // list must only ever surface PUBLISHED posts. The controller ignores
+    // page/limit/search entirely and always returns every published post,
+    // so no `limit` is passed here — passing one would fabricate a `total`
+    // that silently breaks the moment API-side pagination lands.
+    const res = await getBlogs({ status: 'PUBLISHED' });
     initialPosts = res.data ?? [];
   } catch {
     /* fail-open: client fetch takes over */

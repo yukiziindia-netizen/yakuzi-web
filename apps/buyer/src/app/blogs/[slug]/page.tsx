@@ -26,18 +26,24 @@ const fetchPost = cache(async (slug: string) => {
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const post = await fetchPost(params.slug);
   if (!post) return { title: 'Article not found', robots: { index: false } };
-  const description = metaTruncate(post.excerpt || post.title);
+  // Prefer the CMS's own SEO fields when the author has set them; fall back
+  // to content-derived defaults otherwise.
+  const title = post.metaTitle || post.title;
+  const description = metaTruncate(post.metaDescription || post.excerpt || post.title);
+  const canonical = post.canonicalUrl || absoluteUrl(`/blogs/${post.slug}`);
+  const ogImg = post.ogImage || post.featuredImage;
   return {
-    title: post.title,
+    title,
     description,
-    alternates: { canonical: absoluteUrl(`/blogs/${post.slug}`) },
+    alternates: { canonical },
     openGraph: {
-      title: post.title,
+      title,
       description,
       type: 'article',
-      url: absoluteUrl(`/blogs/${post.slug}`),
-      ...(post.featuredImage ? { images: [{ url: post.featuredImage }] } : {}),
+      url: canonical,
+      ...(ogImg ? { images: [{ url: ogImg }] } : {}),
     },
+    twitter: { card: 'summary_large_image', title, description },
   };
 }
 

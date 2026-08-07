@@ -440,15 +440,16 @@ function ComparisonOffersList({
                   </div>
                 )
               ) : (
-                <div className="flex items-center gap-1.5 sm:gap-2 xl:gap-3">
-                  <span className="text-[10px] sm:text-[13px] xl:text-[14px] 2xl:text-[16px] font-bold text-red-500 whitespace-nowrap">Out of Stock</span>
-                  <button
-                    onClick={() => setShowStockAlert(true)}
-                    className="w-6 h-6 sm:w-8.5 sm:h-8.5 xl:w-9 xl:h-9 2xl:w-10 2xl:h-10 rounded-full bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center border border-red-100 active:scale-95 transition-all focus:outline-none flex-shrink-0"
-                  >
-                    <Bell className="w-3.5 h-3.5 sm:w-4 sm:h-4 xl:w-4.5 xl:h-4.5 2xl:w-5 2xl:h-5" />
-                  </button>
-                </div>
+                // Out of stock: the bell alone stands in for the label, sized and
+                // coloured like the in-stock Plus so the row never shifts.
+                <button
+                  onClick={() => setShowStockAlert(true)}
+                  title="Out of stock — notify me when it is back"
+                  aria-label="Out of stock — notify me when it is back"
+                  className="text-black hover:text-black/80 focus:outline-none transition-transform active:scale-90 p-0.5"
+                >
+                  <Bell className="w-4.5 h-4.5 sm:w-5.5 sm:h-5.5 md:w-6 md:h-6 xl:w-6.5 xl:h-6.5 2xl:w-7 2xl:h-7" strokeWidth={2.25} />
+                </button>
               )}
             </div>
           </div>

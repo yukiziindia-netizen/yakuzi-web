@@ -20,8 +20,8 @@ interface ProductCarouselProps {
   initialProducts?: any[];
 }
 
-const OFFER_TEXT = "text-[#333333] text-[10px] sm:text-[15px] font-medium tracking-wide whitespace-nowrap";
-const NO_OFFER_TEXT = "text-gray-400 text-[10px] sm:text-[15px] font-medium tracking-wide whitespace-nowrap";
+const OFFER_TEXT = "text-[#333333] text-2xs sm:text-base font-medium tracking-wide whitespace-nowrap";
+const NO_OFFER_TEXT = "text-gray-400 text-2xs sm:text-base font-medium tracking-wide whitespace-nowrap";
 
 // A product with nothing on offer used to render nothing at all, leaving an
 // empty gap on the card where every neighbour shows "N% off". It now says so.
@@ -81,7 +81,7 @@ export const renderBuyerOfferBadge = (p: any) => {
 
   if (type === 'SPECIAL_PRICE') {
     return specialPrice > 0 ? (
-      <span className="text-emerald-600 text-[10px] sm:text-[15px] font-medium tracking-wide whitespace-nowrap">Special Price: ₹{Math.round(specialPrice)}</span>
+      <span className="text-emerald-600 text-2xs sm:text-base font-medium tracking-wide whitespace-nowrap">Special Price: ₹{Math.round(specialPrice)}</span>
     ) : noOfferLabel();
   }
 
@@ -265,12 +265,12 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
       {/* Yukizi Choice & Best Seller Tags */}
       <div className="absolute -top-[12px] left-1.5 sm:left-2 flex items-center gap-1.5 z-30">
         {isYukiziChoice && (
-          <div className="bg-[#7B2FBE] text-white px-3 py-0.5 rounded-full font-semibold text-[10px] sm:text-[11px] shadow-sm tracking-wide flex items-center justify-center">
+          <div className="bg-[#7B2FBE] text-white px-3 py-0.5 rounded-full font-semibold text-2xs sm:text-xs shadow-sm tracking-wide flex items-center justify-center">
             Yukizi Choice
           </div>
         )}
         {isBestSeller && (
-          <div className="bg-[#4a4a4a] text-white px-3 py-0.5 rounded-full font-semibold text-[10px] sm:text-[11px] shadow-sm tracking-wide flex items-center justify-center">
+          <div className="bg-[#4a4a4a] text-white px-3 py-0.5 rounded-full font-semibold text-2xs sm:text-xs shadow-sm tracking-wide flex items-center justify-center">
             Best Seller
           </div>
         )}
@@ -278,7 +278,7 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
 
       {/* Ad Tag */}
       {isAd && (
-        <div className="absolute -top-5 right-0 text-[11px] sm:text-[12px] text-gray-400 font-normal z-20">
+        <div className="absolute -top-5 right-0 text-xs sm:text-xs text-gray-400 font-normal z-20">
           Ad
         </div>
       )}
@@ -322,7 +322,7 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
                   >
                     <Minus className="w-2.5 h-2.5" strokeWidth={3} />
                   </button>
-                  <span className="text-[10px] font-black tracking-wide min-w-[12px] text-center">
+                  <span className="text-2xs font-bold tracking-wide min-w-[12px] text-center">
                     {String(cartQuantity).padStart(2, '0')}
                   </span>
                   <button 
@@ -375,7 +375,7 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
             <div>
                <div className="flex items-start justify-between w-full gap-1.5">
                   <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`} className="flex-1">
-                    <h3 className="text-[11px] sm:text-[14px] font-medium text-[#333333] leading-snug line-clamp-1 hover:text-[#7B2FBE] transition-colors">
+                    <h3 className="text-xs sm:text-sm font-medium text-[#333333] leading-snug line-clamp-1 hover:text-[#7B2FBE] transition-colors">
                        {productName}
                     </h3>
                   </Link>
@@ -402,16 +402,16 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
            {/* Price and Rating Row */}
            <div className="flex justify-between items-center w-full pt-0.5">
               <div className="flex items-baseline gap-1">
-                 <span className="text-[11.5px] sm:text-[15px] font-medium text-[#333333] leading-none">
+                 <span className="text-xs sm:text-base font-medium text-[#333333] leading-none">
                     {displayPrice}
                  </span>
                  {displayOriginalPrice && (
-                    <span className="text-[9px] sm:text-[12px] text-gray-400 line-through leading-none">{displayOriginalPrice}</span>
+                    <span className="text-2xs sm:text-xs text-gray-400 line-through leading-none">{displayOriginalPrice}</span>
                  )}
               </div>
               <div className="flex items-center gap-1">
                  <Star className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-[#7B2FBE] fill-[#7B2FBE]" />
-                 <span className="text-[10px] sm:text-[14px] font-medium leading-none text-[#333333]">{hasRating ? rating : 'NA'}</span>
+                 <span className="text-2xs sm:text-sm font-medium leading-none text-[#333333]">{hasRating ? rating : 'NA'}</span>
               </div>
            </div>
 

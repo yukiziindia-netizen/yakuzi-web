@@ -65,7 +65,7 @@ export default function PremiumCategoriesMegaMenu({ isOpen, onMouseEnter, onMous
                     {group.map((category) => (
                       <div key={category.id} className="group/item">
                         <Link href={`/?category=${category.id}`}>
-                           <h4 className="text-[14px] font-black text-gray-900 mb-6 flex items-center justify-between group-hover/item:text-black transition-colors uppercase tracking-widest cursor-pointer">
+                           <h4 className="text-sm font-bold text-gray-900 mb-6 flex items-center justify-between group-hover/item:text-black transition-colors uppercase tracking-widest cursor-pointer">
                             {category.name}
                             <ArrowRight className="w-3.5 h-3.5 text-gray-300 group-hover/item:translate-x-1 group-hover/item:text-gray-950 transition-all" />
                           </h4>
@@ -75,7 +75,7 @@ export default function PremiumCategoriesMegaMenu({ isOpen, onMouseEnter, onMous
                             <li key={sub.id}>
                               <Link 
                                 href={`/?category=${category.id}&subcategory=${sub.id}`}
-                                className="text-[13px] font-bold text-gray-400 hover:text-gray-950 transition-all duration-300 flex items-center gap-3"
+                                className="text-sm font-bold text-gray-400 hover:text-gray-950 transition-all duration-300 flex items-center gap-3"
                               >
                                 <div className="w-1 h-1 rounded-full bg-gray-200 group-hover/item:bg-lime-400 transition-colors" />
                                 {sub.name}
@@ -97,12 +97,12 @@ export default function PremiumCategoriesMegaMenu({ isOpen, onMouseEnter, onMous
                        <div className="w-10 h-10 bg-gray-950 rounded-2xl flex items-center justify-center text-white shadow-xl">
                           <section.icon className="w-5 h-5" />
                        </div>
-                       <h3 className="text-[13px] font-black text-gray-900 uppercase tracking-widest">{section.title}</h3>
+                       <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest">{section.title}</h3>
                     </div>
                     <ul className="space-y-4">
                       {section.links.map((link, lIdx) => (
                         <li key={lIdx}>
-                          <Link href={link.href} className="text-[13px] font-black text-gray-400 hover:text-gray-950 flex items-center group/link">
+                          <Link href={link.href} className="text-sm font-bold text-gray-400 hover:text-gray-950 flex items-center group/link">
                             {link.label}
                             <ArrowRight className="w-3 h-3 ml-2 opacity-0 -translate-x-2 group-hover/link:opacity-100 group-hover/link:translate-x-0 transition-all" />
                           </Link>
@@ -115,9 +115,9 @@ export default function PremiumCategoriesMegaMenu({ isOpen, onMouseEnter, onMous
             </div>
             
             <div className="bg-gray-950 p-6 flex items-center justify-center gap-8">
-               <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.4em]">Browse through {categories.length} Categories</p>
+               <p className="text-2xs font-bold text-white/40 uppercase tracking-[0.4em]">Browse through {categories.length} Categories</p>
                <div className="h-1 w-1 rounded-full bg-white/20" />
-               <p className="text-[10px] font-black text-lime-400 uppercase tracking-[0.4em]">PREMIUM PHARMA NETWORK</p>
+               <p className="text-2xs font-bold text-lime-400 uppercase tracking-[0.4em]">PREMIUM PHARMA NETWORK</p>
             </div>
           </div>
         </motion.div>

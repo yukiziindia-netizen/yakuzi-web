@@ -24,8 +24,8 @@ export default function Timeline({ steps }: { steps: TimelineStep[] }) {
       {/* Progress Bar */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Progress</span>
-          <span className="text-[10px] font-bold text-lime-600">{Math.round(progressPercent)}%</span>
+          <span className="text-2xs font-bold text-gray-400 uppercase tracking-widest">Progress</span>
+          <span className="text-2xs font-bold text-lime-600">{Math.round(progressPercent)}%</span>
         </div>
         <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
           <motion.div
@@ -103,14 +103,14 @@ export default function Timeline({ steps }: { steps: TimelineStep[] }) {
                   </span>
                 </div>
                 {step.description && (
-                  <span className={`text-[11px] mt-0.5 font-medium ${step.isError ? 'text-red-400' : 'text-gray-400'}`}>{step.description}</span>
+                  <span className={`text-xs mt-0.5 font-medium ${step.isError ? 'text-red-400' : 'text-gray-400'}`}>{step.description}</span>
                 )}
                 {step.isActive && (
                   <div className="flex items-center gap-3 mt-1">
                     <motion.span
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="text-[10px] font-bold text-lime-600"
+                      className="text-2xs font-bold text-lime-600"
                     >
                       In Progress
                     </motion.span>

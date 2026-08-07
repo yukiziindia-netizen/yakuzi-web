@@ -176,19 +176,19 @@ export default function SupportDrawer({ isOpen, onClose }: SupportDrawerProps) {
             {!isAuthenticated && (
               <div className="flex-1 flex flex-col h-full bg-white">
                 <div className="flex justify-between items-center px-6 pt-6 pb-2">
-                  <h2 className="text-[22px] font-bold text-gray-900">Customer Support</h2>
+                  <h2 className="text-2xl font-bold text-gray-900">Customer Support</h2>
                   <button onClick={handleClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
                     <X className="w-5 h-5 text-gray-500" />
                   </button>
                 </div>
                 <div className="flex-1 flex flex-col items-center justify-center px-8 text-center gap-4">
-                  <p className="text-[15px] font-medium text-gray-800">Sign in to contact support</p>
-                  <p className="text-[13px] text-gray-400 max-w-[280px]">
+                  <p className="text-base font-medium text-gray-800">Sign in to contact support</p>
+                  <p className="text-sm text-gray-400 max-w-[280px]">
                     Your tickets are tied to your account so our team can reply to you.
                   </p>
                   <button
                     onClick={handleSignIn}
-                    className="mt-2 px-6 py-3 bg-[#8C52FF] hover:bg-[#7b46e0] text-white text-[14px] font-bold rounded-xl shadow-md transition-all active:scale-[0.98]"
+                    className="mt-2 px-6 py-3 bg-[#8C52FF] hover:bg-[#7b46e0] text-white text-sm font-bold rounded-xl shadow-md transition-all active:scale-[0.98]"
                   >
                     Sign in
                   </button>
@@ -200,7 +200,7 @@ export default function SupportDrawer({ isOpen, onClose }: SupportDrawerProps) {
             {isAuthenticated && screen === 'list' && (
               <div className="flex-1 flex flex-col h-full bg-white relative">
                 <div className="flex justify-between items-center px-6 pt-6 pb-2">
-                  <h2 className="text-[22px] font-bold text-gray-900">Customer Support</h2>
+                  <h2 className="text-2xl font-bold text-gray-900">Customer Support</h2>
                   <button onClick={handleClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
                     <X className="w-5 h-5 text-gray-500" />
                   </button>
@@ -213,10 +213,10 @@ export default function SupportDrawer({ isOpen, onClose }: SupportDrawerProps) {
                     </div>
                   ) : ticketsQuery.isError ? (
                     <div className="h-full flex flex-col items-center justify-center gap-3 text-center">
-                      <p className="text-[14px] font-medium text-gray-700">Could not load your tickets</p>
+                      <p className="text-sm font-medium text-gray-700">Could not load your tickets</p>
                       <button
                         onClick={() => ticketsQuery.refetch()}
-                        className="text-[13px] font-bold text-[#7B2FBE] hover:underline"
+                        className="text-sm font-bold text-[#7B2FBE] hover:underline"
                       >
                         Try again
                       </button>
@@ -224,8 +224,8 @@ export default function SupportDrawer({ isOpen, onClose }: SupportDrawerProps) {
                   ) : tickets.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center gap-3 text-center">
                       <Inbox className="w-10 h-10 text-gray-200" />
-                      <p className="text-[14px] font-medium text-gray-700">No tickets yet</p>
-                      <p className="text-[13px] text-gray-400 max-w-[260px]">
+                      <p className="text-sm font-medium text-gray-700">No tickets yet</p>
+                      <p className="text-sm text-gray-400 max-w-[260px]">
                         Start a ticket and our team will reply here.
                       </p>
                     </div>
@@ -238,11 +238,11 @@ export default function SupportDrawer({ isOpen, onClose }: SupportDrawerProps) {
                           className="flex justify-between items-center py-4 border-b border-gray-100 group transition-all cursor-pointer hover:bg-gray-50/50 px-2 -mx-2 rounded-xl"
                         >
                           <div className="min-w-0 pr-3">
-                            <span className="block text-[15px] font-medium text-gray-800 truncate">
+                            <span className="block text-base font-medium text-gray-800 truncate">
                               {t.subject}
                             </span>
                             {t.description && (
-                              <span className="block text-[12px] text-gray-400 truncate mt-0.5">
+                              <span className="block text-xs text-gray-400 truncate mt-0.5">
                                 {t.description}
                               </span>
                             )}
@@ -270,7 +270,7 @@ export default function SupportDrawer({ isOpen, onClose }: SupportDrawerProps) {
                       setFormError('');
                       setScreen('new');
                     }}
-                    className="px-6 py-3 bg-[#8C52FF] hover:bg-[#7b46e0] text-white text-[14px] font-bold rounded-xl shadow-md transition-all active:scale-[0.98] w-[80%] max-w-[280px]"
+                    className="px-6 py-3 bg-[#8C52FF] hover:bg-[#7b46e0] text-white text-sm font-bold rounded-xl shadow-md transition-all active:scale-[0.98] w-[80%] max-w-[280px]"
                   >
                     New Support Ticket
                   </button>
@@ -290,14 +290,14 @@ export default function SupportDrawer({ isOpen, onClose }: SupportDrawerProps) {
                   </button>
                   <div className="text-center flex-1">
                     <h3 className="text-sm font-bold text-gray-900">New Support Ticket</h3>
-                    <p className="text-[10px] text-gray-400">Our team will reply here</p>
+                    <p className="text-2xs text-gray-400">Our team will reply here</p>
                   </div>
                   <span className="w-8" />
                 </div>
 
                 <div className="flex-1 px-6 py-5 overflow-y-auto space-y-5">
                   <div>
-                    <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest block mb-2">
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-2">
                       Subject
                     </label>
                     <input
@@ -308,7 +308,7 @@ export default function SupportDrawer({ isOpen, onClose }: SupportDrawerProps) {
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest block mb-2">
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-2">
                       Message
                     </label>
                     <textarea
@@ -319,14 +319,14 @@ export default function SupportDrawer({ isOpen, onClose }: SupportDrawerProps) {
                       className="w-full px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 text-sm text-gray-800 font-medium focus:outline-none focus:ring-2 focus:ring-[#8C52FF]/40 resize-none"
                     />
                   </div>
-                  {formError && <p className="text-[12px] font-medium text-red-500">{formError}</p>}
+                  {formError && <p className="text-xs font-medium text-red-500">{formError}</p>}
                 </div>
 
                 <div className="pb-16 pt-4 flex justify-center bg-white shrink-0">
                   <button
                     onClick={handleCreateTicket}
                     disabled={createTicket.isPending}
-                    className="px-6 py-3 bg-[#8C52FF] hover:bg-[#7b46e0] disabled:opacity-60 text-white text-[14px] font-bold rounded-xl shadow-md transition-all active:scale-[0.98] w-[80%] max-w-[280px] flex items-center justify-center gap-2"
+                    className="px-6 py-3 bg-[#8C52FF] hover:bg-[#7b46e0] disabled:opacity-60 text-white text-sm font-bold rounded-xl shadow-md transition-all active:scale-[0.98] w-[80%] max-w-[280px] flex items-center justify-center gap-2"
                   >
                     {createTicket.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
                     {createTicket.isPending ? 'Sending…' : 'Send to support'}
@@ -349,7 +349,7 @@ export default function SupportDrawer({ isOpen, onClose }: SupportDrawerProps) {
                     <h3 className="text-sm font-bold text-gray-900 truncate">
                       {ticket?.subject || 'Support'}
                     </h3>
-                    <p className="text-[10px] text-gray-400">
+                    <p className="text-2xs text-gray-400">
                       {ticket ? statusLabel(ticket.status) : 'Loading…'}
                     </p>
                   </div>
@@ -392,7 +392,7 @@ export default function SupportDrawer({ isOpen, onClose }: SupportDrawerProps) {
                                 {msg.message}
                               </div>
                               <span
-                                className={`text-[9px] text-gray-400 ${fromSupport ? 'text-left' : 'text-right'}`}
+                                className={`text-2xs text-gray-400 ${fromSupport ? 'text-left' : 'text-right'}`}
                               >
                                 {formatTime(msg.createdAt)}
                               </span>
@@ -401,7 +401,7 @@ export default function SupportDrawer({ isOpen, onClose }: SupportDrawerProps) {
                         );
                       })}
                       {messages.length > 0 && !messages.some(isFromSupport) && (
-                        <p className="text-center text-[11px] text-gray-400 pt-2">
+                        <p className="text-center text-xs text-gray-400 pt-2">
                           Sent. Our team will reply here.
                         </p>
                       )}

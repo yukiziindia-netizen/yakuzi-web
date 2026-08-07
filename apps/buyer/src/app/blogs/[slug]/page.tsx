@@ -89,7 +89,7 @@ export default function BlogDetailPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight mb-4">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight mb-4">
               {blog.title}
             </h1>
 

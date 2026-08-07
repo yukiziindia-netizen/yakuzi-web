@@ -101,7 +101,7 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
 
             {/* Header */}
             <div className="pt-8 px-4 sm:px-6 pb-2">
-              <h2 className="text-[34px] font-extrabold text-gray-800">Saved</h2>
+              <h2 className="text-4xl font-bold text-gray-800">Saved</h2>
             </div>
 
             {/* Items */}
@@ -251,7 +251,7 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                         }`}
                       >
                         {isYukiziChoice && (
-                          <span className="absolute -top-[12px] left-3 bg-[#7B2FBE] text-white px-3 py-0.5 rounded-full font-semibold text-[10px] sm:text-[11px] shadow-sm tracking-wide flex items-center justify-center z-20">
+                          <span className="absolute -top-[12px] left-3 bg-[#7B2FBE] text-white px-3 py-0.5 rounded-full font-semibold text-2xs sm:text-xs shadow-sm tracking-wide flex items-center justify-center z-20">
                             Yukizi Choice
                           </span>
                         )}
@@ -312,7 +312,7 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                                     >
                                       -
                                     </button>
-                                    <span className="text-xs sm:text-xs font-black px-0.5 sm:px-1 tracking-tighter min-w-[14px] sm:min-w-[16px] text-center">
+                                    <span className="text-xs sm:text-xs font-bold px-0.5 sm:px-1 tracking-tighter min-w-[14px] sm:min-w-[16px] text-center">
                                       {cartQty.toString().padStart(2, '0')}
                                     </span>
                                     <button 
@@ -329,7 +329,7 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
 
                           {/* Row 2: Product Name (left) & Quickview/Eye Button (right) */}
                           <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2">
-                            <h3 className="text-[13px] sm:text-[14px] font-medium text-gray-500 leading-snug truncate text-left flex-1">{itemName}</h3>
+                            <h3 className="text-sm sm:text-sm font-medium text-gray-500 leading-snug truncate text-left flex-1">{itemName}</h3>
                             
                             {/* Quickview Button */}
                             <button
@@ -353,15 +353,15 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                           {/* Row 3: Price & Star Rating */}
                           <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2">
                             <div className="flex items-baseline gap-2 text-left">
-                              <span className="text-[19px] font-black text-gray-900">{displayPriceText}</span>
+                              <span className="text-xl font-bold text-gray-900">{displayPriceText}</span>
                               {displayOriginalPriceText && (
-                                <span className="text-[14px] font-bold text-gray-400 line-through">{displayOriginalPriceText}</span>
+                                <span className="text-sm font-bold text-gray-400 line-through">{displayOriginalPriceText}</span>
                               )}
                             </div>
                             
                             <div className="flex items-center gap-[3px] sm:gap-[4px]">
                               <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-[#6342B4] text-[#6342B4]" />
-                              <span className="text-xs sm:text-[14px] font-bold text-gray-700">{itemRating}</span>
+                              <span className="text-xs sm:text-sm font-bold text-gray-700">{itemRating}</span>
                             </div>
                           </div>
 
@@ -369,7 +369,7 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                           <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2">
                             <div className="text-left">
                               {displayDiscountPercent > 0 && (
-                                <span className="text-xs sm:text-[13px] font-bold text-black">{displayDiscountPercent}% off</span>
+                                <span className="text-xs sm:text-sm font-bold text-black">{displayDiscountPercent}% off</span>
                               )}
                             </div>
                             

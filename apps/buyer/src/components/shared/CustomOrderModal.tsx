@@ -79,7 +79,7 @@ export function CustomOrderModal({ isOpen, onClose, productName, productId }: Cu
                   <X className="h-5 w-5 text-gray-400" />
                 </button>
               </div>
-              <h2 className="text-2xl font-black text-gray-900 tracking-tight leading-none">Custom Order Request</h2>
+              <h2 className="text-2xl font-bold text-gray-900 tracking-tight leading-none">Custom Order Request</h2>
               <p className="text-sm text-gray-500 font-medium mt-2">
                 {productName ? `Inquiring about ${productName}` : 'Tell us what you are looking for'}
               </p>
@@ -101,7 +101,7 @@ export function CustomOrderModal({ isOpen, onClose, productName, productId }: Cu
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-emerald-600 ml-1">Your Requirements</label>
+                    <label className="text-2xs font-bold uppercase tracking-widest text-emerald-600 ml-1">Your Requirements</label>
                     <textarea
                       required
                       value={message}
@@ -115,7 +115,7 @@ export function CustomOrderModal({ isOpen, onClose, productName, productId }: Cu
                   <button
                     type="submit"
                     disabled={isLoading || !message.trim()}
-                    className="w-full h-14 bg-gray-900 text-white rounded-[20px] font-black text-lg flex items-center justify-center gap-2 hover:bg-black transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 shadow-xl shadow-black/10"
+                    className="w-full h-14 bg-gray-900 text-white rounded-[20px] font-bold text-lg flex items-center justify-center gap-2 hover:bg-black transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 shadow-xl shadow-black/10"
                   >
                     {isLoading ? (
                       <Loader2 className="h-6 w-6 animate-spin" />
@@ -127,7 +127,7 @@ export function CustomOrderModal({ isOpen, onClose, productName, productId }: Cu
                     )}
                   </button>
                   
-                  <p className="text-[11px] text-center text-gray-400 font-bold uppercase tracking-tighter">
+                  <p className="text-xs text-center text-gray-400 font-bold uppercase tracking-tighter">
                     Typically responds within 24 hours
                   </p>
                 </form>

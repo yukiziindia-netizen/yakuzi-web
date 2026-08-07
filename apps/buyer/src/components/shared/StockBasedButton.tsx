@@ -89,7 +89,7 @@ export function StockBasedButton({
 
       {/* Stock Status Badge */}
       {badgeMap[status] && (
-        <div className={`text-[8px] font-bold text-center truncate px-1 ${status === 'selling-fast' ? 'text-yellow-700' :
+        <div className={`text-2xs font-bold text-center truncate px-1 ${status === 'selling-fast' ? 'text-yellow-700' :
           status === 'low' ? 'text-red-600' :
             'text-gray-500'
           }`}>

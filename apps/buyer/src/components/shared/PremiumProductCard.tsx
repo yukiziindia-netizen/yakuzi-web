@@ -172,7 +172,7 @@ export default function PremiumProductCard({
       {/* Discount Tag - overlapping the top-left corner */}
       {discountTag && (
         <div
-          className={`absolute -top-[16px] left-[4px] sm:left-[8px] bg-white border border-gray-400 font-normal text-gray-900 rounded-full z-20 whitespace-nowrap shadow-none w-fit px-2 h-[20px] sm:h-[22px] flex items-center justify-center ${discountTag.length > 12 ? 'text-[8px] xs:text-[9px] sm:text-[9.5px]' : 'text-[9px] xs:text-[10px] sm:text-[11.5px]'
+          className={`absolute -top-[16px] left-[4px] sm:left-[8px] bg-white border border-gray-400 font-normal text-gray-900 rounded-full z-20 whitespace-nowrap shadow-none w-fit px-2 h-[20px] sm:h-[22px] flex items-center justify-center ${discountTag.length > 12 ? 'text-2xs xs:text-2xs sm:text-2xs' : 'text-2xs xs:text-2xs sm:text-xs'
             }`}
         >
           {discountTag}
@@ -253,7 +253,7 @@ export default function PremiumProductCard({
                         (e.target as any).blur();
                       }
                     }}
-                    className="w-10 min-w-10 bg-white/10 text-white text-[13px] font-bold text-center tabular-nums outline-none border-b border-white/40 rounded px-1 appearance-none"
+                    className="w-10 min-w-10 bg-white/10 text-white text-sm font-bold text-center tabular-nums outline-none border-b border-white/40 rounded px-1 appearance-none"
                     autoFocus
                   />
                 ) : (
@@ -267,7 +267,7 @@ export default function PremiumProductCard({
                       setIsEditingQty(true);
                       setTimeout(() => inputRef.current?.select(), 0);
                     }}
-                    className="text-white text-[11px] sm:text-[13px] font-bold min-w-[24px] sm:min-w-[32px] px-1 text-center tabular-nums select-none cursor-text hover:bg-white/10 rounded transition-all"
+                    className="text-white text-xs sm:text-sm font-bold min-w-[24px] sm:min-w-[32px] px-1 text-center tabular-nums select-none cursor-text hover:bg-white/10 rounded transition-all"
                   >
                     {String(count).padStart(2, '0')}
                   </button>
@@ -317,7 +317,7 @@ export default function PremiumProductCard({
             />
           ) : (
             <div className="w-[80px] h-[80px] sm:w-[96px] sm:h-[96px] bg-[#dcf3e8] rounded-full flex items-center justify-center shadow-inner border border-teal-200/40">
-              <span className="text-2xl sm:text-3xl font-black text-[#1bd1d4] tracking-widest drop-shadow-sm select-none">{initials}</span>
+              <span className="text-2xl sm:text-3xl font-bold text-[#1bd1d4] tracking-widest drop-shadow-sm select-none">{initials}</span>
             </div>
           )}
         </div>
@@ -337,7 +337,7 @@ export default function PremiumProductCard({
       <div className="mt-auto flex flex-col z-10 w-full pb-1">
         {/* Product Name & Arrow Button */}
         <div className="flex items-center justify-between mb-2 pl-1 pr-0">
-          <h3 className="font-medium text-gray-900 text-[14px] xs:text-[15px] sm:text-[17px] leading-snug line-clamp-1 truncate tracking-tight flex-1">
+          <h3 className="font-medium text-gray-900 text-sm xs:text-base sm:text-lg leading-snug line-clamp-1 truncate tracking-tight flex-1">
             {name}
           </h3>
           <button
@@ -363,28 +363,28 @@ export default function PremiumProductCard({
 
           {/* Top Header Row */}
           <div className="flex justify-between items-center w-full min-w-0 mb-0.5 gap-1">
-            <span className="text-[9px] xs:text-[10px] sm:text-[12px] font-medium text-gray-600 uppercase tracking-wide flex-1 text-left">
+            <span className="text-2xs xs:text-2xs sm:text-xs font-medium text-gray-600 uppercase tracking-wide flex-1 text-left">
               {(product as any)?.sellerCount > 1 ? 'MIN MRP' : 'MRP'}
             </span>
-            <span className="text-[9px] xs:text-[10px] sm:text-[12px] font-medium text-gray-600 uppercase tracking-wide text-center flex-1">MOQ</span>
-            <span className="text-[9px] xs:text-[10px] sm:text-[12px] font-medium text-gray-600 uppercase tracking-wide flex-1 text-right whitespace-nowrap">
+            <span className="text-2xs xs:text-2xs sm:text-xs font-medium text-gray-600 uppercase tracking-wide text-center flex-1">MOQ</span>
+            <span className="text-2xs xs:text-2xs sm:text-xs font-medium text-gray-600 uppercase tracking-wide flex-1 text-right whitespace-nowrap">
               {(product as any)?.sellerCount > 1 ? 'MIN RATE' : rateLabel}
             </span>
           </div>
 
           {/* Values Row */}
           <div className="flex justify-between items-center w-full min-w-0 gap-1">
-            <span className="text-[11px] xs:text-[12px] sm:text-[14px] font-medium text-gray-800 truncate flex-1 text-left">
+            <span className="text-xs xs:text-xs sm:text-sm font-medium text-gray-800 truncate flex-1 text-left">
               {product?.sellerCount === 0 ? (
-                <span className="text-[9px] text-gray-400 font-bold">N/A</span>
+                <span className="text-2xs text-gray-400 font-bold">N/A</span>
               ) : (
                 <>₹{Math.round(Number(mrp || price))}</>
               )}
             </span>
-            <span className="text-[11px] xs:text-[12px] sm:text-[14px] font-[900] text-gray-800 text-center flex-1">{moq}</span>
-            <span className="text-[11px] xs:text-[12px] sm:text-[14px] font-[900] text-gray-900 truncate flex-1 text-right">
+            <span className="text-xs xs:text-xs sm:text-sm font-[900] text-gray-800 text-center flex-1">{moq}</span>
+            <span className="text-xs xs:text-xs sm:text-sm font-[900] text-gray-900 truncate flex-1 text-right">
               {product?.sellerCount === 0 ? (
-                <span className="text-[9px] text-gray-400 font-bold">NOT AVAILABLE</span>
+                <span className="text-2xs text-gray-400 font-bold">NOT AVAILABLE</span>
               ) : (
                 <>₹{Math.round(Number(price))}</>
               )}

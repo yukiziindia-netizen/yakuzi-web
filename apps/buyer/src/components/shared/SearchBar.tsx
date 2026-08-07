@@ -110,7 +110,7 @@ export default function SearchBar({ isOpen = false, onClose }: SearchBarProps) {
               {/* Recent Searches (Show when no query) */}
               {query.length < 2 && recentSearches.length > 0 && (
                 <div className="py-2">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Recent</p>
+                  <p className="text-2xs font-bold text-gray-400 uppercase tracking-widest mb-2">Recent</p>
                   {recentSearches.map((search) => (
                     <button
                       key={search}
@@ -146,7 +146,7 @@ export default function SearchBar({ isOpen = false, onClose }: SearchBarProps) {
                     </div>
                   ) : (
                     <>
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Products</p>
+                      <p className="text-2xs font-bold text-gray-400 uppercase tracking-widest mb-2">Products</p>
                       {products.map((product: any) => (
                         <button
                           key={product.id}

@@ -40,7 +40,7 @@ export function PriceSection({
             </span>
           )}
         </div>
-        <div className="text-base font-black text-gray-900">
+        <div className="text-base font-bold text-gray-900">
           ₹{Math.round(Number(finalPrice)).toLocaleString('en-IN')}
         </div>
         {showPTR && ptr && (

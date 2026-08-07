@@ -88,10 +88,10 @@ export default async function CategoryPage({
         <section className="flex-1 flex flex-col w-full">
           {/* Mobile Header (Category Name & Breadcrumb) */}
           <div className="flex flex-col px-4 sm:hidden pt-4 pb-2">
-            <h1 className="text-[28px] xs:text-[32px] font-bold text-gray-500 tracking-tight leading-none mb-1.5">
+            <h1 className="text-3xl xs:text-3xl font-bold text-gray-500 tracking-tight leading-none mb-1.5">
               {displayCategoryName}
             </h1>
-            <p className="text-[13px] xs:text-[14px] text-gray-400 font-medium flex flex-wrap gap-1 items-center">
+            <p className="text-sm xs:text-sm text-gray-400 font-medium flex flex-wrap gap-1 items-center">
               {breadcrumbs.length > 0 
                 ? breadcrumbs.map((crumb, idx) => (
                     <span key={idx} className="flex items-center gap-1">

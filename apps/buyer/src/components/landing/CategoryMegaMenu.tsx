@@ -40,14 +40,14 @@ export default function CategoryMegaMenu({ category, isOpen, onMouseEnter, onMou
             <div className="flex p-8 gap-10 min-h-0">
               {/* Categories Column */}
               <div className="flex-1">
-                <h3 className="text-[13px] font-bold uppercase tracking-[0.1em] mb-6 flex items-center gap-2 text-[#800080]">
+                <h3 className="text-sm font-bold uppercase tracking-widest mb-6 flex items-center gap-2 text-[#800080]">
                   Explore {category.name}
-                  <span className="text-lg font-light">›</span>
+                  <span className="text-lg font-normal">›</span>
                 </h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
                   <div className="md:col-span-2 space-y-6">
-                    <h4 className="text-[15px] font-bold text-[#800080] mb-4 flex items-center justify-between group cursor-pointer hover:text-sky-600 transition-colors border-b border-gray-100 pb-2">
+                    <h4 className="text-base font-bold text-[#800080] mb-4 flex items-center justify-between group cursor-pointer hover:text-sky-600 transition-colors border-b border-gray-100 pb-2">
                       Sub Categories
                       <span className="text-gray-400 group-hover:text-sky-600 transition-colors">›</span>
                     </h4>
@@ -56,36 +56,36 @@ export default function CategoryMegaMenu({ category, isOpen, onMouseEnter, onMou
                         <li key={sub.id}>
                           <Link 
                             href={`/category/${category.slug || category.id}?subCategoryId=${sub.id}`}
-                            className="text-[14px] text-gray-500 hover:text-sky-600 transition-colors duration-200"
+                            className="text-sm text-gray-500 hover:text-sky-600 transition-colors duration-200"
                           >
                             {sub.name}
                           </Link>
                         </li>
                       ))}
                       {subCategories.length === 0 && (
-                        <li className="text-[14px] text-gray-400 italic">No subcategories available</li>
+                        <li className="text-sm text-gray-400 italic">No subcategories available</li>
                       )}
                     </ul>
                   </div>
 
                   <div className="space-y-10">
                     <div>
-                      <h4 className="text-[15px] font-bold text-[#800080] mb-4 border-b border-gray-100 pb-2">Popular in {category.name}</h4>
+                      <h4 className="text-base font-bold text-[#800080] mb-4 border-b border-gray-100 pb-2">Popular in {category.name}</h4>
                       <ul className="space-y-3">
-                        <li><a href="#" className="text-[14px] text-gray-500 hover:text-sky-600 transition-colors">Best Sellers</a></li>
-                        <li><a href="#" className="text-[14px] text-gray-500 hover:text-sky-600 transition-colors">New Arrivals</a></li>
-                        <li><a href="#" className="text-[14px] text-gray-500 hover:text-sky-600 transition-colors">Top Brands</a></li>
+                        <li><a href="#" className="text-sm text-gray-500 hover:text-sky-600 transition-colors">Best Sellers</a></li>
+                        <li><a href="#" className="text-sm text-gray-500 hover:text-sky-600 transition-colors">New Arrivals</a></li>
+                        <li><a href="#" className="text-sm text-gray-500 hover:text-sky-600 transition-colors">Top Brands</a></li>
                       </ul>
                     </div>
                   </div>
 
                   <div className="space-y-10">
                     <div>
-                      <h4 className="text-[15px] font-bold text-[#800080] mb-4 border-b border-gray-100 pb-2">Resources</h4>
+                      <h4 className="text-base font-bold text-[#800080] mb-4 border-b border-gray-100 pb-2">Resources</h4>
                       <ul className="space-y-3">
-                        <li><a href="#" className="text-[14px] text-gray-500 hover:text-sky-600 transition-colors">Usage Guide</a></li>
-                        <li><a href="#" className="text-[14px] text-gray-500 hover:text-sky-600 transition-colors">Health Tips</a></li>
-                        <li><a href="#" className="text-[14px] text-gray-500 hover:text-sky-600 transition-colors">Safety Info</a></li>
+                        <li><a href="#" className="text-sm text-gray-500 hover:text-sky-600 transition-colors">Usage Guide</a></li>
+                        <li><a href="#" className="text-sm text-gray-500 hover:text-sky-600 transition-colors">Health Tips</a></li>
+                        <li><a href="#" className="text-sm text-gray-500 hover:text-sky-600 transition-colors">Safety Info</a></li>
                       </ul>
                     </div>
                   </div>
@@ -95,8 +95,8 @@ export default function CategoryMegaMenu({ category, isOpen, onMouseEnter, onMou
               {/* Right Side: Featured (Matches Brands layout) */}
               <div className="w-[400px] flex flex-col gap-8">
                 <div className="flex justify-between items-center">
-                  <h3 className="text-[15px] font-bold text-[#800080]">Featured Products</h3>
-                  <Link href={`/category/${category.slug || category.id}`} className="text-[12px] font-bold text-sky-600 hover:text-sky-700 flex items-center gap-1">
+                  <h3 className="text-base font-bold text-[#800080]">Featured Products</h3>
+                  <Link href={`/category/${category.slug || category.id}`} className="text-xs font-bold text-sky-600 hover:text-sky-700 flex items-center gap-1">
                     View All <ArrowRight className="w-3 h-3" />
                   </Link>
                 </div>
@@ -112,8 +112,8 @@ export default function CategoryMegaMenu({ category, isOpen, onMouseEnter, onMou
                           className="object-contain p-2 transform group-hover:scale-110 transition-transform duration-700 ease-out"
                         />
                       </div>
-                      <p className="text-[15px] font-bold text-gray-800 mb-1">{product.name}</p>
-                      <p className="text-[14px] font-semibold text-gray-500">{product.price}</p>
+                      <p className="text-base font-bold text-gray-800 mb-1">{product.name}</p>
+                      <p className="text-sm font-semibold text-gray-500">{product.price}</p>
                     </div>
                   ))}
                 </div>

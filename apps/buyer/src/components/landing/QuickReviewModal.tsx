@@ -159,7 +159,7 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
               {/* Header section with Title & Share */}
               <div className="relative flex w-full flex-col pt-3">
                 <div className="flex w-full items-start justify-between">
-                  <h2 className="max-w-[85%] text-[20px] font-black leading-tight tracking-tight text-gray-500">
+                  <h2 className="max-w-[85%] text-xl font-bold leading-tight tracking-tight text-gray-500">
                     {displayProduct.name}
                   </h2>
                   <button
@@ -281,7 +281,7 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                       >
                         {/* 1. Offer Badge */}
                         <div className="flex-shrink-0 select-none">
-                          <div className="rounded bg-[#864ac5] px-2 py-1 text-center text-[10px] font-black uppercase leading-none tracking-wider text-white sm:px-2.5 sm:py-1.5 sm:text-[11px]">
+                          <div className="rounded bg-[#864ac5] px-2 py-1 text-center text-2xs font-bold uppercase leading-none tracking-wider text-white sm:px-2.5 sm:py-1.5 sm:text-xs">
                             {discountPercent > 0 
                               ? `${discountPercent}% off` 
                               : (listing.discountType === "SAME_PRODUCT_BONUS" 
@@ -297,11 +297,11 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
 
                         {/* 2. Price */}
                         <div className="flex flex-col min-w-0">
-                          <span className="truncate text-xs font-black leading-none text-gray-800 sm:text-[14px]">
+                          <span className="truncate text-xs font-bold leading-none text-gray-800 sm:text-sm">
                             ₹{Math.round(listing.price || 0)}
                           </span>
                           {listing.moq > 1 && (
-                            <span className="mt-1 truncate text-[8px] font-bold leading-none text-gray-400 sm:mt-1.5 sm:text-[9px]">
+                            <span className="mt-1 truncate text-2xs font-bold leading-none text-gray-400 sm:mt-1.5 sm:text-2xs">
                               {listing.moq * 10}% off on purchase of {listing.moq}
                             </span>
                           )}
@@ -310,7 +310,7 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                         {/* 3. Star Rating */}
                         <div className="flex items-center gap-1 flex-shrink-0">
                           <Star className="h-3 w-3 fill-[#864ac5] text-[#864ac5] sm:h-3.5 sm:w-3.5" />
-                          <span className="text-[10px] font-black leading-none text-gray-800 sm:text-[12px]">
+                          <span className="text-2xs font-bold leading-none text-gray-800 sm:text-xs">
                             {listing.seller?.rating ? listing.seller.rating : 'NA'}
                           </span>
                         </div>
@@ -327,9 +327,9 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                         <div className="flex flex-shrink-0 items-center justify-end min-w-[32px]">
                           {inStock ? (
                             itemQty > 0 ? (
-                              <div className="flex h-7 w-20 select-none items-center justify-between overflow-hidden rounded-[8px] bg-[#48286b] text-[10px] font-black text-white shadow-sm sm:h-8">
+                              <div className="flex h-7 w-20 select-none items-center justify-between overflow-hidden rounded-[8px] bg-[#48286b] text-2xs font-bold text-white shadow-sm sm:h-8">
                                 <button
-                                  className="h-full px-2 sm:px-2.5 text-xs font-extrabold text-white/80 transition-all hover:bg-black/10 hover:text-white active:scale-95"
+                                  className="h-full px-2 sm:px-2.5 text-xs font-bold text-white/80 transition-all hover:bg-black/10 hover:text-white active:scale-95"
                                   onClick={() => handleQtyChange(itemQty - 1)}
                                 >
                                   -
@@ -338,7 +338,7 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                                   {String(itemQty).padStart(2, '0')}
                                 </span>
                                 <button
-                                  className="h-full px-2 sm:px-2.5 text-xs font-extrabold text-white/80 transition-all hover:bg-black/10 hover:text-white active:scale-95"
+                                  className="h-full px-2 sm:px-2.5 text-xs font-bold text-white/80 transition-all hover:bg-black/10 hover:text-white active:scale-95"
                                   onClick={() => {
                                     const nextQty = itemQty + 1;
                                     const maxQty = listing.maximumOrderQuantity || listing.maxOrderQty || config?.max_order_qty || 100;

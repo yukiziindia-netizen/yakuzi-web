@@ -55,7 +55,7 @@ function Accordion({
     <div className="border-b border-gray-100 py-3">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between text-left text-xs sm:text-[13px] xl:text-[14px] 2xl:text-[15px] font-normal uppercase tracking-wider text-gray-500 focus:outline-none"
+        className="flex w-full items-center justify-between text-left text-xs sm:text-sm xl:text-sm 2xl:text-base font-normal uppercase tracking-wider text-gray-500 focus:outline-none"
       >
         {title}
         {isOpen ? (
@@ -72,7 +72,7 @@ function Accordion({
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden"
           >
-            <div className="purple-scroll relative max-h-[70px] overflow-y-auto pr-4 pt-2 text-xs sm:text-[13px] xl:text-[14px] 2xl:text-[15px] font-normal leading-relaxed text-gray-500">
+            <div className="purple-scroll relative max-h-[70px] overflow-y-auto pr-4 pt-2 text-xs sm:text-sm xl:text-sm 2xl:text-base font-normal leading-relaxed text-gray-500">
               {content}
             </div>
           </motion.div>
@@ -402,8 +402,8 @@ function ComparisonOffersList({
                       key={pIdx}
                       className={
                         pIdx === 0
-                          ? "text-[10px] sm:text-[13.5px] xl:text-[14.5px] 2xl:text-[16.5px] font-bold"
-                          : "text-[7.5px] sm:text-[10.5px] xl:text-[11.5px] 2xl:text-[12.5px] font-medium opacity-90"
+                          ? "text-2xs sm:text-sm xl:text-sm 2xl:text-base font-bold"
+                          : "text-2xs sm:text-2xs xl:text-xs 2xl:text-xs font-medium opacity-90"
                       }
                     >
                       {part}
@@ -417,11 +417,11 @@ function ComparisonOffersList({
 
             {/* 2. Price & Subtext */}
             <div className="flex flex-col items-start justify-center min-w-0 text-left">
-              <span className="text-[11px] sm:text-[15px] md:text-[17px] xl:text-[19px] 2xl:text-[21px] font-medium text-gray-800 leading-none tracking-tight">
+              <span className="text-xs sm:text-base md:text-lg xl:text-xl 2xl:text-xl font-medium text-gray-800 leading-none tracking-tight">
                 ₹{Math.round(pricing.finalCustomerPayable).toLocaleString('en-IN')}
               </span>
               {subText && (
-                <span className="text-[8px] sm:text-[11px] xl:text-[13px] 2xl:text-[14px] text-gray-500 font-medium mt-1 leading-none whitespace-nowrap overflow-hidden text-ellipsis max-w-full">
+                <span className="text-2xs sm:text-xs xl:text-sm 2xl:text-sm text-gray-500 font-medium mt-1 leading-none whitespace-nowrap overflow-hidden text-ellipsis max-w-full">
                   {subText}
                 </span>
               )}
@@ -430,7 +430,7 @@ function ComparisonOffersList({
             {/* 3. Star Rating */}
             <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
               <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-4.5 md:h-4.5 xl:w-5 xl:h-5 2xl:w-5.5 2xl:h-5.5 fill-[#854cbc] text-[#854cbc] flex-shrink-0" />
-              <span className="text-gray-800 font-bold text-[11px] sm:text-[14px] md:text-[16px] xl:text-[18px] 2xl:text-[20px] leading-none">
+              <span className="text-gray-800 font-bold text-xs sm:text-sm md:text-base xl:text-lg 2xl:text-xl leading-none">
                 {listing.seller?.rating ? listing.seller.rating : 'NA'}
               </span>
             </div>
@@ -470,14 +470,14 @@ function ComparisonOffersList({
                     {/* Quantity Control Pill */}
                     <div className="flex items-center bg-[#48286b] rounded-[8px] overflow-hidden h-6 w-[60px] sm:h-7.5 sm:w-24 md:h-8 md:w-26 xl:h-8.5 xl:w-30 2xl:h-9 2xl:w-34 text-white shadow-sm select-none justify-between px-1 sm:px-2 xl:px-3">
                       <button
-                        className="w-4 sm:w-8 h-full flex items-center justify-center hover:bg-black/10 active:scale-95 transition-all text-white font-bold text-[10px] sm:text-lg xl:text-xl 2xl:text-2xl pb-0.5"
+                        className="w-4 sm:w-8 h-full flex items-center justify-center hover:bg-black/10 active:scale-95 transition-all text-white font-bold text-2xs sm:text-lg xl:text-xl 2xl:text-2xl pb-0.5"
                         onClick={() => handleQtyChange(itemQty - 1)}
                       >
                         -
                       </button>
-                      <span className="font-bold text-[9px] sm:text-sm xl:text-base 2xl:text-lg tracking-wide">{String(itemQty).padStart(2, '0')}</span>
+                      <span className="font-bold text-2xs sm:text-sm xl:text-base 2xl:text-lg tracking-wide">{String(itemQty).padStart(2, '0')}</span>
                       <button
-                        className="w-4 sm:w-8 h-full flex items-center justify-center hover:bg-black/10 active:scale-95 transition-all text-white font-bold text-[10px] sm:text-lg xl:text-xl 2xl:text-2xl pb-0.5 disabled:opacity-50"
+                        className="w-4 sm:w-8 h-full flex items-center justify-center hover:bg-black/10 active:scale-95 transition-all text-white font-bold text-2xs sm:text-lg xl:text-xl 2xl:text-2xl pb-0.5 disabled:opacity-50"
                         disabled={itemQty >= (listing.stock ?? 9999)}
                         onClick={() => handleQtyChange(itemQty + 1)}
                       >
@@ -583,7 +583,7 @@ function ReviewSubmissionForm({
 
       {/* Review Title */}
       <div className="flex flex-col gap-1.5">
-        <label className="text-[11px] font-bold text-gray-500 uppercase">Title of your review</label>
+        <label className="text-xs font-bold text-gray-500 uppercase">Title of your review</label>
         <input
           type="text"
           value={reviewTitle}
@@ -595,7 +595,7 @@ function ReviewSubmissionForm({
 
       {/* Review Comment */}
       <div className="flex flex-col gap-1.5">
-        <label className="text-[11px] font-bold text-gray-500 uppercase">Your review</label>
+        <label className="text-xs font-bold text-gray-500 uppercase">Your review</label>
         <textarea
           rows={3}
           value={reviewComment}
@@ -607,7 +607,7 @@ function ReviewSubmissionForm({
 
       {/* Dropzone Photo Uploader */}
       <div className="flex flex-col gap-1.5">
-        <label className="text-[11px] font-bold text-gray-500 uppercase">Do you have photos to share?</label>
+        <label className="text-xs font-bold text-gray-500 uppercase">Do you have photos to share?</label>
         
         <input
           type="file"
@@ -640,7 +640,7 @@ function ReviewSubmissionForm({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           )}
-          <span className="text-[10px] text-gray-400 font-bold text-center">
+          <span className="text-2xs text-gray-400 font-bold text-center">
             {isUploadingImage ? (
               <span className="text-[#854cbc]">Uploading photo...</span>
             ) : (
@@ -1013,7 +1013,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
         {/* MOBILE VIEW LAYOUT */}
         <div className="block lg:hidden flex flex-col gap-5 w-full">
           {/* Breadcrumbs — rendered unconditionally, unlike the tags header below */}
-          <ProductBreadcrumbs product={product} className="px-1 text-[13px] -mb-3" />
+          <ProductBreadcrumbs product={product} className="px-1 text-sm -mb-3" />
 
           {/* Dynamic Tags Header. The badges deliberately straddle the top edge of
               the image card below: -mb cancels the 20px flex gap, this row's own
@@ -1023,18 +1023,18 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
             <div className="relative z-10 flex items-center justify-between w-full px-1 -mb-[46px]">
               <div className="flex items-center gap-2">
                 {isYukiziChoice && (
-                  <div className="rounded-full bg-[#7B2FBE] px-4 py-1 text-[12px] font-bold tracking-wide text-white shadow-sm">
+                  <div className="rounded-full bg-[#7B2FBE] px-4 py-1 text-xs font-bold tracking-wide text-white shadow-sm">
                     Yukizi Choice
                   </div>
                 )}
                 {isBestSeller && (
-                  <div className="rounded-full bg-[#4a4a4a] px-4 py-1 text-[12px] font-bold tracking-wide text-white shadow-sm">
+                  <div className="rounded-full bg-[#4a4a4a] px-4 py-1 text-xs font-bold tracking-wide text-white shadow-sm">
                     Best Seller
                   </div>
                 )}
               </div>
               {isAd && (
-                <span className="text-[11px] text-gray-400 font-semibold select-none">Ad</span>
+                <span className="text-xs text-gray-400 font-semibold select-none">Ad</span>
               )}
             </div>
           )}
@@ -1121,7 +1121,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
 
           {/* Related Products */}
           <div className="mt-4 border-t border-gray-100 pt-6">
-            <h2 className="mb-4 text-[16px] sm:text-[18px] font-bold text-gray-500">Related Products</h2>
+            <h2 className="mb-4 text-base sm:text-lg font-bold text-gray-500">Related Products</h2>
             <div className="grid grid-cols-2 gap-x-3.5 gap-y-[28px] pb-4">
               {relatedProducts.slice(0, 4).map((prod: any, idx: number) => (
                 <GridProductCard key={prod.id} product={prod} index={idx} />
@@ -1155,11 +1155,11 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                       );
                     })}
                   </div>
-                  <span className="text-[28px] font-black leading-none text-gray-800">
+                  <span className="text-3xl font-bold leading-none text-gray-800">
                     {hasReviews ? averageRating.toFixed(1) : 'NA'}
                   </span>
                 </div>
-                <p className="text-[13px] font-medium text-gray-400">
+                <p className="text-sm font-medium text-gray-400">
                   {hasReviews
                     ? `${averageRating.toFixed(1)} out of 5 stars (based on ${totalReviews} review${totalReviews !== 1 ? 's' : ''})`
                     : 'No reviews yet'}
@@ -1168,7 +1168,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
 
               <button
                 type="button"
-                className="bg-[#854cbc] hover:bg-[#723eab] text-white rounded-[6px] px-6 py-2 text-[12px] sm:text-[13px] font-medium transition-colors whitespace-nowrap"
+                className="bg-[#854cbc] hover:bg-[#723eab] text-white rounded-[6px] px-6 py-2 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap"
               >
                 See all reviews
               </button>
@@ -1177,7 +1177,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
             {/* Review Cards Carousel */}
             <div className="hide-scrollbar flex flex-col gap-4 overflow-x-auto pb-2 sm:flex-row">
               {!hasReviews && (
-                <p className="py-4 text-[13px] text-gray-400">No reviews yet. Be the first to review this product.</p>
+                <p className="py-4 text-sm text-gray-400">No reviews yet. Be the first to review this product.</p>
               )}
               {reviewsList.map((rev: any) => {
                 const reviewImagesList = (rev.images && rev.images.length > 0)
@@ -1186,7 +1186,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                 return (
                   <div key={rev.id} className="flex min-w-[280px] flex-1 flex-row justify-between gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
                     <div className="flex flex-col justify-between flex-1">
-                      <p className="mb-4 text-[11px] font-medium leading-relaxed text-gray-500">
+                      <p className="mb-4 text-xs font-medium leading-relaxed text-gray-500">
                         {rev.comment}
                       </p>
                       <div>
@@ -1195,7 +1195,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                             <Star key={i} size={14} fill={i <= rev.rating ? "currentColor" : "none"} className={i <= rev.rating ? "text-[#b165f1]" : "text-gray-200"} />
                           ))}
                         </div>
-                        <p className="text-[10px] font-semibold text-gray-400">
+                        <p className="text-2xs font-semibold text-gray-400">
                           - {rev.userName || 'Anonymous'}, {new Date(rev.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                         </p>
                       </div>
@@ -1239,21 +1239,21 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
               <div className="flex items-center justify-between w-full gap-4 min-h-6">
                 <ProductBreadcrumbs
                   product={product}
-                  className="text-[13px] sm:text-[14px] xl:text-[15px] 2xl:text-[16px]"
+                  className="text-sm sm:text-sm xl:text-base 2xl:text-base"
                 />
                 {isAd && (
-                  <span className="shrink-0 text-[11px] text-gray-400 font-semibold select-none">Ad</span>
+                  <span className="shrink-0 text-xs text-gray-400 font-semibold select-none">Ad</span>
                 )}
               </div>
               {isAd && (isYukiziChoice || isBestSeller) && (
                 <div className="flex items-center gap-2 w-full h-6">
                   {isYukiziChoice && (
-                    <div className="rounded-full bg-[#7B2FBE] px-4 py-1 text-[12px] font-bold tracking-wide text-white shadow-sm">
+                    <div className="rounded-full bg-[#7B2FBE] px-4 py-1 text-xs font-bold tracking-wide text-white shadow-sm">
                       Yukizi Choice
                     </div>
                   )}
                   {isBestSeller && (
-                    <div className="rounded-full bg-[#4a4a4a] px-4 py-1 text-[12px] font-bold tracking-wide text-white shadow-sm">
+                    <div className="rounded-full bg-[#4a4a4a] px-4 py-1 text-xs font-bold tracking-wide text-white shadow-sm">
                       Best Seller
                     </div>
                   )}
@@ -1286,7 +1286,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
 
               {/* Related Products - moved inside left column to avoid XL height gaps */}
               <div className="flex flex-col gap-4 border-t border-gray-100 pt-8 mt-6">
-                <h2 className="text-[20px] sm:text-[22px] xl:text-[24px] 2xl:text-[26px] font-bold text-gray-500">Related Products</h2>
+                <h2 className="text-xl sm:text-2xl xl:text-2xl 2xl:text-2xl font-bold text-gray-500">Related Products</h2>
                 <div className="grid grid-cols-3 gap-5 pb-4">
                   {relatedProducts.map((prod: any, idx: number) => (
                     <GridProductCard key={prod.id} product={prod} index={idx} />
@@ -1299,7 +1299,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
             <div className="flex flex-col">
               {/* Title Block */}
               <div className="flex items-start justify-between w-full mb-4">
-                <h1 className="text-[22px] sm:text-[26px] xl:text-[30px] 2xl:text-[34px] font-medium text-gray-500 tracking-tight leading-tight max-w-[95%]">
+                <h1 className="text-2xl sm:text-2xl xl:text-3xl 2xl:text-4xl font-medium text-gray-500 tracking-tight leading-tight max-w-[95%]">
                   {product.name}
                 </h1>
               </div>
@@ -1309,19 +1309,19 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                 {/* Left: Price & Discount */}
                 <div className="flex flex-col items-start justify-end">
                   <div className="flex items-baseline gap-2.5">
-                    <span className="text-[24px] sm:text-[28px] xl:text-[30px] 2xl:text-[32px] font-medium text-[#333333] leading-none">
+                    <span className="text-2xl sm:text-3xl xl:text-3xl 2xl:text-3xl font-medium text-[#333333] leading-none">
                       {displayPrice > 0 
                         ? `₹${Number(displayPrice).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` 
                         : 'N/A'}
                     </span>
                     {displayMrp && displayMrp > displayPrice ? (
-                      <span className="text-[12px] sm:text-[14px] xl:text-[15px] 2xl:text-[16px] font-bold text-gray-400 line-through leading-none">
+                      <span className="text-xs sm:text-sm xl:text-base 2xl:text-base font-bold text-gray-400 line-through leading-none">
                         ₹{displayMrp ? Number(displayMrp).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
                       </span>
                     ) : null}
                   </div>
                   {activeDiscountPercent && activeDiscountPercent > 0 ? (
-                    <span className="text-[14px] sm:text-[16px] xl:text-[18px] 2xl:text-[20px] font-bold text-gray-800 mt-2 leading-none">
+                    <span className="text-sm sm:text-base xl:text-lg 2xl:text-xl font-bold text-gray-800 mt-2 leading-none">
                       {activeDiscountPercent}% off
                     </span>
                   ) : null}
@@ -1335,7 +1335,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                   />
                   <div className="flex items-center gap-1 xl:gap-1.5">
                     <Star className={`w-5.5 h-5.5 xl:w-6.5 xl:h-6.5 2xl:w-7 2xl:h-7 flex-shrink-0 ${hasReviews ? 'fill-[#7B2FBE] text-[#7B2FBE]' : 'fill-gray-300 text-gray-300'}`} />
-                    <span className="text-[18px] sm:text-[20px] xl:text-[22px] 2xl:text-[24px] font-bold text-gray-800 leading-none">
+                    <span className="text-lg sm:text-xl xl:text-2xl 2xl:text-2xl font-bold text-gray-800 leading-none">
                       {hasReviews ? averageRating.toFixed(1) : 'NA'}
                     </span>
                   </div>
@@ -1391,7 +1391,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
 
               {/* Reviews - moved inside right column to avoid XL height gaps */}
               <div className="flex flex-col border-t border-gray-100 pt-8 mt-6">
-                <h2 className="text-[20px] sm:text-[22px] xl:text-[24px] 2xl:text-[26px] font-bold text-gray-500 mb-4">Reviews</h2>
+                <h2 className="text-xl sm:text-2xl xl:text-2xl 2xl:text-2xl font-bold text-gray-500 mb-4">Reviews</h2>
 
                 <div className="mb-6 flex items-center justify-between w-full">
                   <div>
@@ -1416,11 +1416,11 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                           );
                         })}
                       </div>
-                      <span className="text-[28px] font-black leading-none text-gray-800">
+                      <span className="text-3xl font-bold leading-none text-gray-800">
                         {hasReviews ? averageRating.toFixed(1) : 'NA'}
                       </span>
                     </div>
-                    <p className="text-[13px] font-medium text-gray-400">
+                    <p className="text-sm font-medium text-gray-400">
                       {hasReviews
                     ? `${averageRating.toFixed(1)} out of 5 stars (based on ${totalReviews} review${totalReviews !== 1 ? 's' : ''})`
                     : 'No reviews yet'}
@@ -1429,7 +1429,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
 
                   <button
                     type="button"
-                    className="bg-[#854cbc] hover:bg-[#723eab] text-white rounded-[6px] px-6 py-2 text-[12px] sm:text-[13px] font-medium transition-colors whitespace-nowrap"
+                    className="bg-[#854cbc] hover:bg-[#723eab] text-white rounded-[6px] px-6 py-2 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap"
                   >
                     See all reviews
                   </button>
@@ -1438,7 +1438,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                 {/* Review Cards Carousel */}
                 <div className="hide-scrollbar flex flex-col gap-4 overflow-x-auto pb-2 sm:flex-row">
                   {!hasReviews && (
-                    <p className="py-4 text-[13px] text-gray-400">No reviews yet. Be the first to review this product.</p>
+                    <p className="py-4 text-sm text-gray-400">No reviews yet. Be the first to review this product.</p>
                   )}
                   {reviewsList.map((rev: any) => {
                     const reviewImagesList = (rev.images && rev.images.length > 0)
@@ -1447,7 +1447,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                     return (
                       <div key={rev.id} className="flex min-w-[280px] flex-1 flex-row justify-between gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
                         <div className="flex flex-col justify-between flex-1">
-                          <p className="mb-4 text-[11px] font-medium leading-relaxed text-gray-500">
+                          <p className="mb-4 text-xs font-medium leading-relaxed text-gray-500">
                             {rev.comment}
                           </p>
                           <div>
@@ -1456,7 +1456,7 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                                 <Star key={i} size={14} fill={i <= rev.rating ? "currentColor" : "none"} className={i <= rev.rating ? "text-[#b165f1]" : "text-gray-200"} />
                               ))}
                             </div>
-                            <p className="text-[10px] font-semibold text-gray-400">
+                            <p className="text-2xs font-semibold text-gray-400">
                               - {rev.userName || 'Anonymous'}, {new Date(rev.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                             </p>
                           </div>

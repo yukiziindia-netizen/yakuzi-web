@@ -22,7 +22,7 @@ export default function CategoryBanner({ title, imageUrl }: CategoryBannerProps)
 
         {/* Centered Text */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <h1 className="text-white text-6xl md:text-8xl lg:text-[10rem] font-extrabold tracking-tight drop-shadow-md text-center px-4" style={{ textShadow: '0 4px 24px rgba(0,0,0,0.3)' }}>
+          <h1 className="text-white text-6xl md:text-8xl lg:text-[10rem] font-bold tracking-tight drop-shadow-md text-center px-4" style={{ textShadow: '0 4px 24px rgba(0,0,0,0.3)' }}>
             {title}
           </h1>
         </div>

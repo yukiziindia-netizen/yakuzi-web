@@ -6,6 +6,8 @@ import {
   createReview,
   updateReview,
   deleteReview,
+  getReviewEligibility,
+  useAuth,
   type CreateReviewInput,
 } from '@yukizi/api-client';
 
@@ -14,6 +16,19 @@ export function useProductReviews(productId: string, params?: { page?: number; l
     queryKey: ['reviews', productId, params],
     queryFn: () => getProductReviews(productId, params),
     enabled: !!productId,
+  });
+}
+
+// Only meaningful once logged in — a signed-out shopper always hits the
+// existing "please log in" message on submit, so there's nothing to check
+// here until they're authenticated.
+export function useReviewEligibility(productId: string) {
+  const { isAuthenticated } = useAuth();
+  return useQuery({
+    queryKey: ['review-eligibility', productId],
+    queryFn: () => getReviewEligibility(productId),
+    enabled: !!productId && isAuthenticated,
+    staleTime: 60 * 1000,
   });
 }
 

@@ -29,11 +29,17 @@ export const CreateReviewSchema = z.object({
   images: z.array(z.string()).optional(),
 });
 
+export const ReviewEligibilitySchema = z.object({
+  canReview: z.boolean(),
+  reason: z.enum(['NOT_PURCHASED', 'ALREADY_REVIEWED']).nullable(),
+});
+
 // ─── Types ──────────────────────────────────────────
 
 export type Review = z.infer<typeof ReviewSchema>;
 export type ReviewListResponse = z.infer<typeof ReviewListResponseSchema>;
 export type CreateReviewInput = z.infer<typeof CreateReviewSchema>;
+export type ReviewEligibility = z.infer<typeof ReviewEligibilitySchema>;
 
 // ─── API Functions ──────────────────────────────────
 
@@ -49,6 +55,11 @@ export async function createReview(input: CreateReviewInput): Promise<Review> {
   const body = CreateReviewSchema.parse(input);
   const { data } = await api.post('/reviews', body);
   return ReviewSchema.parse(data);
+}
+
+export async function getReviewEligibility(productId: string): Promise<ReviewEligibility> {
+  const { data } = await api.get(`/reviews/eligibility/${productId}`);
+  return ReviewEligibilitySchema.parse(data);
 }
 
 export async function getAdminReviews(params?: { page?: number; limit?: number }) {

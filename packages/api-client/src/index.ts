@@ -71,6 +71,7 @@ export {
   confirmMilestonePayment,
   getOrderInvoice,
   getOrderInvoices,
+  emailOrderInvoices,
   getOrderTracking,
   type Order,
   type OrderItem,

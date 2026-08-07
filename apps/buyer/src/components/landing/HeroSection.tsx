@@ -242,6 +242,8 @@ export default function HeroSection() {
                   <img
                     src={brand.imageUrl}
                     alt={brand.name}
+                    loading="lazy"
+                    decoding="async"
                     className="h-[24px] xs:h-[36px] md:h-[54px] cursor-pointer object-contain mix-blend-multiply transition-transform hover:scale-110"
                   />
                 </div>

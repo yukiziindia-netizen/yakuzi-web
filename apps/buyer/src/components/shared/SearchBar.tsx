@@ -155,10 +155,12 @@ export default function SearchBar({ isOpen = false, onClose }: SearchBarProps) {
                         >
                           <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center flex-shrink-0">
                             {product.images?.[0] ? (
-                              <img 
-                                src={typeof product.images[0] === 'string' ? product.images[0] : (product.images[0] as any)?.url || '/products/pharma_bottle.png'} 
-                                alt="" 
-                                className="w-full h-full object-contain rounded-xl" 
+                              <img
+                                src={typeof product.images[0] === 'string' ? product.images[0] : (product.images[0] as any)?.url || '/products/pharma_bottle.png'}
+                                alt={product.name ?? 'Product'}
+                                loading="lazy"
+                                decoding="async"
+                                className="w-full h-full object-contain rounded-xl"
                               />
                             ) : (
                               <Package className="w-4 h-4 text-gray-300" />

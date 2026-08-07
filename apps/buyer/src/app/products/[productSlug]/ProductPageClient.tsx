@@ -1168,7 +1168,7 @@ export default function ProductPageClient({ productSlug, initialProduct }: { pro
                       }`}
                   >
                     {v.image && (
-                      <img src={v.image} alt={v.name} className="w-5 h-5 rounded-full object-cover" />
+                      <img src={v.image} alt={v.name} loading="lazy" decoding="async" className="w-5 h-5 rounded-full object-cover" />
                     )}
                     <span>{v.name}</span>
                   </button>
@@ -1295,7 +1295,7 @@ export default function ProductPageClient({ productSlug, initialProduct }: { pro
                       <div className="flex gap-1.5 flex-wrap flex-shrink-0 self-center">
                         {reviewImagesList.map((imgUrl: string, idx: number) => (
                           <div key={idx} className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border border-gray-100 bg-white">
-                            <img src={imgUrl} alt={`Review photo ${idx + 1}`} className="w-full h-full object-cover" />
+                            <img src={imgUrl} alt={`Review photo ${idx + 1}`} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                           </div>
                         ))}
                       </div>
@@ -1455,7 +1455,7 @@ export default function ProductPageClient({ productSlug, initialProduct }: { pro
                           }`}
                       >
                         {v.image && (
-                          <img src={v.image} alt={v.name} className="w-6 h-6 rounded-full object-cover" />
+                          <img src={v.image} alt={v.name} loading="lazy" decoding="async" className="w-6 h-6 rounded-full object-cover" />
                         )}
                         <span>{v.name}</span>
                       </button>
@@ -1559,7 +1559,7 @@ export default function ProductPageClient({ productSlug, initialProduct }: { pro
                           <div className="flex gap-1.5 flex-wrap flex-shrink-0 self-center">
                             {reviewImagesList.map((imgUrl: string, idx: number) => (
                               <div key={idx} className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border border-gray-100 bg-white">
-                                <img src={imgUrl} alt={`Review photo ${idx + 1}`} className="w-full h-full object-cover" />
+                                <img src={imgUrl} alt={`Review photo ${idx + 1}`} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                               </div>
                             ))}
                           </div>

@@ -198,7 +198,7 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                           : 'border-white/30 hover:border-white/60'
                       }`}
                     >
-                      <img src={img} alt="" className="h-full w-full object-cover" />
+                      <img src={img} alt={displayProduct.name ?? 'Product image'} loading="lazy" decoding="async" className="h-full w-full object-cover" />
                     </button>
                   ))}
                 </div>
@@ -209,6 +209,8 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
                     <img
                       src={activeImage}
                       alt={displayProduct.name}
+                      loading="lazy"
+                      decoding="async"
                       className="max-h-full max-w-full object-contain transition-transform duration-500 hover:scale-105"
                     />
                   </div>

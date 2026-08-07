@@ -235,7 +235,7 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
 
                       {/* Left Image */}
                       <div className="w-[90px] h-[90px] sm:w-[105px] sm:h-[105px] bg-[#f8f5fd] rounded-xl flex items-center justify-center relative flex-shrink-0 mt-1.5 overflow-hidden">
-                        <img src={itemImage} alt={itemName} className="w-16 h-16 sm:w-20 sm:h-20 object-contain mix-blend-multiply" />
+                        <img src={itemImage} alt={itemName} loading="lazy" decoding="async" className="w-16 h-16 sm:w-20 sm:h-20 object-contain mix-blend-multiply" />
                         <button 
                           onClick={(e) => {
                             e.preventDefault();

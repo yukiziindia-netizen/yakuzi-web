@@ -135,6 +135,8 @@ export default function BlogDetailPage({
                 <img
                   src={blog.coverImage}
                   alt={blog.title}
+                  loading="lazy"
+                  decoding="async"
                   className="absolute inset-0 w-full h-full object-cover"
                 />
               </div>

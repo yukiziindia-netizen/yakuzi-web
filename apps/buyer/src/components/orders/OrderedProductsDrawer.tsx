@@ -210,10 +210,12 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
  
                    {/* Left: Image */}
                    <div className="relative w-[100px] h-[115px] sm:w-[110px] sm:h-[125px] shrink-0 bg-gray-50 rounded-lg overflow-hidden border border-gray-100 flex items-center justify-center">
-                     <img 
-                       src={imageUrl} 
-                       className="w-full h-full object-cover" 
-                       alt={name} 
+                     <img
+                       src={imageUrl}
+                       className="w-full h-full object-cover"
+                       alt={name}
+                       loading="lazy"
+                       decoding="async"
                      />
                      <button className="absolute bottom-1 left-1 bg-[#f9884e] text-white p-2 rounded-md">
                         <Trash2 className="w-[18px] h-[18px]" />

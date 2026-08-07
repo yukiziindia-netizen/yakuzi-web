@@ -151,7 +151,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
               
               {/* Left Image & Trash */}
               <div className="w-[85px] h-[85px] bg-[#f2f2f2] rounded-lg overflow-hidden relative flex-shrink-0 mt-1">
-                <img src={image} alt="Product" className="w-full h-full object-cover mix-blend-multiply" />
+                <img src={image} alt={title ?? 'Product'} loading="lazy" decoding="async" className="w-full h-full object-cover mix-blend-multiply" />
                 {isCart && (
                   <button 
                     onClick={() => {
@@ -191,12 +191,12 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                 <div className="flex flex-col items-end gap-1.5 mt-1">
                    {/* In Cart, we don't have the save icon image, we have quantity at top */}
                    {!isCart && (
-                     <img src="/save icon.jpg" alt="save" className="w-[18px] h-[18px] object-contain mix-blend-multiply cursor-pointer" />
+                     <img src="/save icon.jpg" alt="save" loading="lazy" decoding="async" className="w-[18px] h-[18px] object-contain mix-blend-multiply cursor-pointer" />
                    )}
                    
                    <div className="flex items-center gap-1.5">
                      {/* Share/Network abstract icon */}
-                     <img src="/whislist icon.jpg" alt="network" className="w-[18px] h-[18px] object-contain cursor-pointer opacity-80" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                     <img src="/whislist icon.jpg" alt="network" loading="lazy" decoding="async" className="w-[18px] h-[18px] object-contain cursor-pointer opacity-80" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                      
                      {/* Quantity pill */}
                      {quantity !== null && (

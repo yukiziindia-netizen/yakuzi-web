@@ -1,8 +1,26 @@
 // Central SEO constants. NEXT_PUBLIC_SITE_URL must be set per environment
-// (dev: https://dev.yukizi.com, prod: the production domain) — falls back to dev.
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://dev.yukizi.com').replace(/\/$/, '');
+// (dev: https://dev.yukizi.com, prod: the production domain, INCLUDING the scheme) — falls back to dev.
+const DEV_SITE_URL = 'https://dev.yukizi.com';
+const rawSiteUrl = (process.env.NEXT_PUBLIC_SITE_URL || DEV_SITE_URL).replace(/\/$/, '');
+
+function isValidAbsoluteUrl(candidate: string): boolean {
+  try {
+    // eslint-disable-next-line no-new
+    new URL(candidate);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// `metadataBase: new URL(SITE_URL)` runs at module load in the root layout — a malformed
+// env value (e.g. missing "https://") must never throw and crash every render.
+export const SITE_URL = isValidAbsoluteUrl(rawSiteUrl) ? rawSiteUrl : DEV_SITE_URL;
+
 if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_SITE_URL) {
   console.warn('[seo] NEXT_PUBLIC_SITE_URL is not set — canonicals and JSON-LD will point at the dev domain');
+} else if (process.env.NEXT_PUBLIC_SITE_URL && SITE_URL !== rawSiteUrl) {
+  console.warn(`[seo] NEXT_PUBLIC_SITE_URL="${process.env.NEXT_PUBLIC_SITE_URL}" is not a valid absolute URL (needs a scheme, e.g. https://) — falling back to ${DEV_SITE_URL}`);
 }
 export const SITE_NAME = 'Yukizi';
 export const SITE_TAGLINE = 'Anime, Manga & Collectibles Marketplace';

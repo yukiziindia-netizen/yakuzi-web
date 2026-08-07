@@ -45,10 +45,13 @@ export default function AdminCollectionsPage() {
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const [addType, setAddType] = useState<"categories" | "subcategories">("categories");
   const [editId, setEditId] = useState("");
-  const [formData, setFormData] = useState({ name: "", categoryId: "", image: "" });
+  const [formData, setFormData] = useState({ name: "", categoryId: "", image: "", mobileImage: "" });
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [mobileFile, setMobileFile] = useState<File | null>(null);
+  const [mobilePreview, setMobilePreview] = useState<string | null>(null);
+  const mobileFileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
   const categories = Array.isArray(categoriesData) ? categoriesData : (categoriesData?.categories ?? []);
@@ -62,9 +65,12 @@ export default function AdminCollectionsPage() {
       name: "",
       categoryId: categories.length > 0 ? categories[0].id : "",
       image: "",
+      mobileImage: "",
     });
     setFile(null);
     setPreview(null);
+    setMobileFile(null);
+    setMobilePreview(null);
     setAddPickerOpen(false);
     setModalOpen(true);
   };
@@ -79,17 +85,22 @@ export default function AdminCollectionsPage() {
       name: item.name || "",
       categoryId: item.categoryId || (categories.length > 0 ? categories[0].id : ""),
       image: item.image || "",
+      mobileImage: item.mobileImage || "",
     });
     setFile(null);
     setPreview(item.image || null);
+    setMobileFile(null);
+    setMobilePreview(item.mobileImage || null);
     setModalOpen(true);
   };
 
   const closeModal = () => {
     setModalOpen(false);
-    setFormData({ name: "", categoryId: "", image: "" });
+    setFormData({ name: "", categoryId: "", image: "", mobileImage: "" });
     setFile(null);
     setPreview(null);
+    setMobileFile(null);
+    setMobilePreview(null);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,22 +112,46 @@ export default function AdminCollectionsPage() {
     reader.readAsDataURL(f);
   };
 
+  const handleMobileFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setMobileFile(f);
+    const reader = new FileReader();
+    reader.onloadend = () => setMobilePreview(reader.result as string);
+    reader.readAsDataURL(f);
+  };
+
+  // Clearing sends "" so the API nulls the column and the storefront falls
+  // back to the desktop image, rather than leaving the old phone banner.
+  const clearMobileImage = () => {
+    setMobileFile(null);
+    setMobilePreview(null);
+    setFormData((prev) => ({ ...prev, mobileImage: "" }));
+    if (mobileFileRef.current) mobileFileRef.current.value = "";
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       let finalImage = formData.image;
-      if (file) {
+      let finalMobileImage = formData.mobileImage;
+      if (file || mobileFile) {
         setUploading(true);
-        finalImage = await uploadImage(file);
-        setUploading(false);
+        try {
+          if (file) finalImage = await uploadImage(file);
+          if (mobileFile) finalMobileImage = await uploadImage(mobileFile);
+        } finally {
+          // Without this an upload failure leaves the button spinning forever.
+          setUploading(false);
+        }
       }
 
       if (addType === "categories") {
         if (modalMode === "create") {
-          await createCat.mutateAsync({ name: formData.name, image: finalImage });
+          await createCat.mutateAsync({ name: formData.name, image: finalImage, mobileImage: finalMobileImage });
           toast.success("Collection created");
         } else {
-          await updateCat.mutateAsync({ id: editId, payload: { name: formData.name, image: finalImage } });
+          await updateCat.mutateAsync({ id: editId, payload: { name: formData.name, image: finalImage, mobileImage: finalMobileImage } });
           toast.success("Collection updated");
         }
       } else {
@@ -297,7 +332,7 @@ export default function AdminCollectionsPage() {
                   
                   {addType === "categories" && (
                     <div>
-                      <label className="block text-sm font-medium text-foreground mb-1.5">Collection Image</label>
+                      <label className="block text-sm font-medium text-foreground mb-1.5">Collection Image <span className="text-muted-foreground font-normal">(desktop)</span></label>
                       <input ref={fileRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
                       {preview ? (
                         <div className="relative aspect-[16/9] w-full rounded-xl overflow-hidden group">
@@ -318,6 +353,46 @@ export default function AdminCollectionsPage() {
                           <div className="text-xs text-muted-foreground">Recommend 1200x400px</div>
                         </button>
                       )}
+
+                      {/* Optional phone banner. Left empty, the desktop image is
+                          used on every screen, which is how every existing
+                          collection behaves. */}
+                      <div className="mt-5">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="block text-sm font-medium text-foreground">
+                            Mobile Image <span className="text-muted-foreground font-normal">(optional)</span>
+                          </label>
+                          {mobilePreview && (
+                            <button type="button" onClick={clearMobileImage}
+                              className="text-xs font-medium text-muted-foreground hover:text-destructive transition-colors">
+                              Remove
+                            </button>
+                          )}
+                        </div>
+                        <input ref={mobileFileRef} type="file" accept="image/*" onChange={handleMobileFileChange} className="hidden" />
+                        {mobilePreview ? (
+                          <div className="relative aspect-[4/3] w-40 rounded-xl overflow-hidden group">
+                            <img src={mobilePreview} alt="Mobile preview" className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button type="button" variant="ghost" className="text-white hover:bg-white/20" onClick={() => mobileFileRef.current?.click()}>
+                                Change
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button type="button" onClick={() => mobileFileRef.current?.click()}
+                            className="w-40 aspect-[4/3] border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center gap-1.5 hover:bg-muted/50 hover:border-primary/50 transition-colors">
+                            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                              <Plus className="h-4 w-4" />
+                            </div>
+                            <div className="text-xs font-medium text-foreground">Upload</div>
+                            <div className="text-[11px] text-muted-foreground px-2 text-center">Recommend 800x600px</div>
+                          </button>
+                        )}
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Shown on phones. Leave empty to use the desktop image everywhere.
+                        </p>
+                      </div>
                     </div>
                   )}
 

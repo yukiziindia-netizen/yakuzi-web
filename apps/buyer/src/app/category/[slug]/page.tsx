@@ -20,6 +20,7 @@ export default async function CategoryPage({
   let categoryName = slug;
   let categoryId = slug;
   let categoryImage: string | undefined = undefined;
+  let categoryMobileImage: string | undefined = undefined;
   let categoryData: any = null;
   let allCategories: any[] = [];
   
@@ -31,11 +32,11 @@ export default async function CategoryPage({
       categoryData = category;
       categoryName = category.name;
       categoryId = category.id;
-      categoryImage = category.image || undefined;
-      if (categoryImage && categoryImage.startsWith('/')) {
-        const base = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000").replace(/\/api$/, "");
-        categoryImage = `${base}${categoryImage}`;
-      }
+      const base = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000").replace(/\/api$/, "");
+      const absolute = (url?: string) =>
+        url && url.startsWith('/') ? `${base}${url}` : url;
+      categoryImage = absolute(category.image || undefined);
+      categoryMobileImage = absolute(category.mobileImage || undefined);
     }
   } catch (error) {
     console.error("Failed to fetch categories on server", error);
@@ -86,6 +87,17 @@ export default async function CategoryPage({
       
       <div className="w-full max-w-[1600px] 2xl:max-w-none mx-auto bg-white overflow-hidden flex flex-col relative min-h-screen">
         <section className="flex-1 flex flex-col w-full">
+          {/* Banner. One responsive component rather than a desktop-only block:
+              it picks the phone artwork itself and falls back to the desktop
+              image when a collection has no separate mobile upload. */}
+          <div className="w-full flex-shrink-0 flex flex-col">
+            <CategoryBanner
+              title={categoryName}
+              imageUrl={categoryImage}
+              mobileImageUrl={categoryMobileImage}
+            />
+          </div>
+
           {/* Mobile Header (Category Name & Breadcrumb) */}
           <div className="flex flex-col px-4 sm:hidden pt-4 pb-2">
             <h1 className="text-3xl xs:text-3xl font-bold text-gray-500 tracking-tight leading-none mb-1.5">
@@ -103,10 +115,6 @@ export default async function CategoryPage({
             </p>
           </div>
 
-          {/* Desktop Banner */}
-          <div className="hidden sm:flex w-full flex-shrink-0 flex-col">
-            <CategoryBanner title={categoryName} imageUrl={categoryImage} />
-          </div>
           <div className="flex-1 min-h-[300px] overflow-hidden bg-transparent mt-4 sm:mt-6">
             <ProductCarousel categoryId={categoryId} initialProducts={initialProducts} />
           </div>

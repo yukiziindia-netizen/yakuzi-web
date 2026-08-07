@@ -191,12 +191,13 @@ export async function getCategories() {
   return data.data;
 }
 
-export async function createCategory(payload: { name: string; image?: string }) {
+export async function createCategory(payload: { name: string; image?: string; mobileImage?: string }) {
   const { data } = await apiClient.post<{ data: any }>("/admin/categories", payload);
   return data.data;
 }
 
-export async function updateCategory(id: string, payload: { name?: string; image?: string }) {
+// mobileImage: omit to leave it untouched, send "" to clear it back to the desktop image.
+export async function updateCategory(id: string, payload: { name?: string; image?: string; mobileImage?: string }) {
   const { data } = await apiClient.patch<{ data: any }>(`/admin/categories/${id}`, payload);
   return data.data;
 }

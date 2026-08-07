@@ -37,6 +37,8 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
     email: '',
     address: '',
     phone: '',
+    gender: '',
+    dob: '',
   });
 
   // Load initial data
@@ -61,6 +63,9 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
       email: profile?.user?.email || user?.email || '',
       address: fullAddress,
       phone: profile?.user?.phone || user?.phone || '',
+      gender: (profile?.user as any)?.gender || '',
+      // The date input wants yyyy-mm-dd; the API returns a full ISO timestamp.
+      dob: ((profile?.user as any)?.dob || '').slice(0, 10),
     });
 
     // Avatar lives in this browser only — the API has no avatar field on the
@@ -115,7 +120,11 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
     }
   };
 
-  const startEditing = (field: keyof typeof formData) => {
+  // The number the buyer reached checkout with, when their account has no
+  // saved phone (checkout cannot claim a number another account owns).
+  const contactPhone = !formData.phone ? ((profile as any)?.contactPhone || '') : '';
+
+  const startEditing = (field: keyof typeof formData, prefill?: string) => {
     // Saving goes to the same endpoint that just refused to load, so offering
     // an editor here would only end in a failed save.
     if (isProfileError) {
@@ -123,7 +132,27 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
       return;
     }
     setEditingField(field);
-    setEditValue(formData[field]);
+    setEditValue(formData[field] || prefill || '');
+  };
+
+  const GENDER_OPTIONS = [
+    { value: 'MALE', label: 'Male' },
+    { value: 'FEMALE', label: 'Female' },
+    { value: 'OTHER', label: 'Other' },
+    { value: 'PREFER_NOT_TO_SAY', label: 'Prefer not to say' },
+  ];
+  const genderLabel = (value: string) =>
+    GENDER_OPTIONS.find((o) => o.value === value)?.label ||
+    (value ? value.charAt(0) + value.slice(1).toLowerCase() : '');
+
+  const ageFromDob = (iso: string): number | null => {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return null;
+    const now = new Date();
+    let age = now.getFullYear() - d.getFullYear();
+    const m = now.getMonth() - d.getMonth();
+    if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
+    return age >= 0 && age < 130 ? age : null;
   };
 
   const saveField = async (field: keyof typeof formData) => {
@@ -143,6 +172,10 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
           ? { ...(profile.address as any), street1: editValue }
           : { street1: editValue, city: '', state: '', pincode: '' };
         updatePayload.address = addressObj;
+      } else if (field === 'gender') {
+        updatePayload.gender = editValue;
+      } else if (field === 'dob') {
+        updatePayload.dob = editValue;
       }
 
       await updateProfile(updatePayload);
@@ -150,7 +183,8 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
       // Update local state ONLY on success!
       setFormData((prev) => ({ ...prev, [field]: editValue }));
       setEditingField(null);
-      toast(`${field.charAt(0).toUpperCase() + field.slice(1)} updated successfully!`, 'success');
+      const fieldLabel = field === 'dob' ? 'Age' : field.charAt(0).toUpperCase() + field.slice(1);
+      toast(`${fieldLabel} updated successfully!`, 'success');
     } catch (err: any) {
       const errorMsg = err.response?.data?.message || err.message || 'Failed to save profile changes.';
       toast(errorMsg, 'error');
@@ -415,14 +449,98 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
                   </button>
                 </div>
               ) : (
-                <button 
-                  onClick={() => startEditing('phone')}
+                <button
+                  onClick={() => startEditing('phone', contactPhone)}
                   className="flex items-center gap-1.5 hover:text-purple-600 transition-colors"
                 >
                   {formData.phone ? (
                     <span className="text-sm font-semibold text-gray-800">{formData.phone}</span>
+                  ) : contactPhone ? (
+                    // The number from their latest order - shown so the field is
+                    // never blank after a purchase, saved to the account only
+                    // when they confirm it (it may belong to another account).
+                    <span className="text-right">
+                      <span className="text-sm font-semibold text-gray-800 block">{contactPhone}</span>
+                      <span className="text-[11px] text-gray-400 block">from your last order — tap to save</span>
+                    </span>
                   ) : (
                     <span className="text-sm font-semibold text-gray-400 italic">{emptyLabel('Add your phone')}</span>
+                  )}
+                  <ChevronRight className="w-4 h-4 text-gray-400" />
+                </button>
+              )}
+            </div>
+
+            {/* Field Row: Gender */}
+            <div className="min-h-[52px] py-3.5 border-b border-gray-50 flex items-center justify-between group">
+              <span className="text-sm font-semibold text-gray-800">Gender</span>
+              {editingField === 'gender' ? (
+                <div className="flex items-center gap-2">
+                  <select
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    className="border border-purple-300 rounded-lg px-2.5 py-1 text-sm outline-none focus:ring-2 focus:ring-purple-400 text-gray-800 bg-white"
+                    autoFocus
+                  >
+                    <option value="">Select…</option>
+                    {GENDER_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                  </select>
+                  <button onClick={() => saveField('gender')} className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg">
+                    <Check className="w-4 h-4 stroke-[3]" />
+                  </button>
+                  <button onClick={() => setEditingField(null)} className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => startEditing('gender')}
+                  className="flex items-center gap-1.5 hover:text-purple-600 transition-colors"
+                >
+                  {formData.gender ? (
+                    <span className="text-sm font-semibold text-gray-800">{genderLabel(formData.gender)}</span>
+                  ) : (
+                    <span className="text-sm font-semibold text-gray-400 italic">{emptyLabel('Add your gender')}</span>
+                  )}
+                  <ChevronRight className="w-4 h-4 text-gray-400" />
+                </button>
+              )}
+            </div>
+
+            {/* Field Row: Age (stored as date of birth) */}
+            <div className="min-h-[52px] py-3.5 border-b border-gray-50 flex items-center justify-between group">
+              <span className="text-sm font-semibold text-gray-800">Age</span>
+              {editingField === 'dob' ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="date"
+                    value={editValue}
+                    max={new Date().toISOString().slice(0, 10)}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    className="border border-purple-300 rounded-lg px-2.5 py-1 text-sm outline-none focus:ring-2 focus:ring-purple-400 text-gray-800 bg-white"
+                    autoFocus
+                  />
+                  <button onClick={() => saveField('dob')} className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg">
+                    <Check className="w-4 h-4 stroke-[3]" />
+                  </button>
+                  <button onClick={() => setEditingField(null)} className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => startEditing('dob')}
+                  className="flex items-center gap-1.5 hover:text-purple-600 transition-colors"
+                >
+                  {formData.dob && ageFromDob(formData.dob) !== null ? (
+                    <span className="text-right">
+                      <span className="text-sm font-semibold text-gray-800 block">{ageFromDob(formData.dob)} years</span>
+                      <span className="text-[11px] text-gray-400 block">born {formData.dob}</span>
+                    </span>
+                  ) : (
+                    <span className="text-sm font-semibold text-gray-400 italic">{emptyLabel('Add your age')}</span>
                   )}
                   <ChevronRight className="w-4 h-4 text-gray-400" />
                 </button>

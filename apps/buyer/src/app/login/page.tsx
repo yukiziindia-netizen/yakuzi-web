@@ -23,6 +23,8 @@ export default function LoginPage() {
   const [signupRealName, setSignupRealName] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
   const [signupConfirmPassword, setSignupConfirmPassword] = useState('');
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [showSignupConfirmPassword, setShowSignupConfirmPassword] = useState(false);
   const [signupGender, setSignupGender] = useState('');
   const [signupDate, setSignupDate] = useState<number | null>(6);
   const [signupMonth, setSignupMonth] = useState<number>(9);
@@ -333,23 +335,43 @@ export default function LoginPage() {
                 
                 <div className="w-full flex flex-col items-center mb-6 mt-8 space-y-4">
                   <p className="text-[#0f172a] text-lg tracking-wide">Password</p>
-                  <input
-                    type="password"
-                    value={signupPassword}
-                    onChange={(e) => setSignupPassword(e.target.value)}
-                    className="bg-transparent text-[#0f172a] text-center text-xl font-medium outline-none w-full max-w-[240px] border-b border-[#e2e8f0] focus:border-[#593696] pb-1"
-                    autoFocus
-                  />
+                  <div className="relative w-full max-w-[240px]">
+                    <input
+                      type={showSignupPassword ? 'text' : 'password'}
+                      value={signupPassword}
+                      onChange={(e) => setSignupPassword(e.target.value)}
+                      className="bg-transparent text-[#0f172a] text-center text-xl font-medium outline-none w-full border-b border-[#e2e8f0] focus:border-[#593696] pb-1 px-7"
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowSignupPassword((s) => !s)}
+                      aria-label={showSignupPassword ? 'Hide password' : 'Show password'}
+                      className="absolute right-0 bottom-1 text-[#94a3b8] hover:text-[#593696]"
+                    >
+                      {showSignupPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                  </div>
                 </div>
 
                 <div className="w-full flex flex-col items-center mb-[40px] space-y-4">
                   <p className="text-[#0f172a] text-lg tracking-wide">Confirm Password</p>
-                  <input
-                    type="password"
-                    value={signupConfirmPassword}
-                    onChange={(e) => setSignupConfirmPassword(e.target.value)}
-                    className="bg-transparent text-[#0f172a] text-center text-xl font-medium outline-none w-full max-w-[240px] border-b border-[#e2e8f0] focus:border-[#593696] pb-1"
-                  />
+                  <div className="relative w-full max-w-[240px]">
+                    <input
+                      type={showSignupConfirmPassword ? 'text' : 'password'}
+                      value={signupConfirmPassword}
+                      onChange={(e) => setSignupConfirmPassword(e.target.value)}
+                      className="bg-transparent text-[#0f172a] text-center text-xl font-medium outline-none w-full border-b border-[#e2e8f0] focus:border-[#593696] pb-1 px-7"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowSignupConfirmPassword((s) => !s)}
+                      aria-label={showSignupConfirmPassword ? 'Hide password' : 'Show password'}
+                      className="absolute right-0 bottom-1 text-[#94a3b8] hover:text-[#593696]"
+                    >
+                      {showSignupConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                  </div>
                 </div>
 
                 <button

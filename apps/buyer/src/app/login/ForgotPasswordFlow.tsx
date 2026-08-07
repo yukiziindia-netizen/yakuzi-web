@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, Loader2, Mail, User } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Loader2, Mail, User } from 'lucide-react';
 import { sendOtp, resetPassword } from '@yukizi/api-client';
 import { useToast } from '@/components/shared/Toast';
 
@@ -200,38 +200,57 @@ const TextInput = ({
   value: string;
   onChange: (v: string) => void;
   icon?: React.ReactNode;
-}) => (
-  <div style={{ position: 'relative' }}>
-    {icon && (
-      <div style={{
-        position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)',
-        color: '#9ca3af', pointerEvents: 'none', display: 'flex', alignItems: 'center',
-      }}>
-        {icon}
-      </div>
-    )}
-    <input
-      type={type}
-      placeholder={placeholder}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      style={{
-        width: '100%',
-        padding: icon ? '12px 14px 12px 36px' : '12px 14px',
-        borderRadius: 12,
-        border: '1.5px solid #e2e2e2',
-        background: '#fff',
-        color: '#374151',
-        fontSize: 14,
-        outline: 'none',
-        boxSizing: 'border-box',
-        boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-      }}
-      onFocus={(e) => { e.target.style.borderColor = '#8e44ad'; e.target.style.boxShadow = '0 0 0 3px rgba(142,68,173,0.15)'; }}
-      onBlur={(e) => { e.target.style.borderColor = '#e2e2e2'; e.target.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)'; }}
-    />
-  </div>
-);
+}) => {
+  // Password fields get an eye toggle so what was typed can be checked.
+  const [showPassword, setShowPassword] = useState(false);
+  const isPassword = type === 'password';
+  return (
+    <div style={{ position: 'relative' }}>
+      {icon && (
+        <div style={{
+          position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)',
+          color: '#9ca3af', pointerEvents: 'none', display: 'flex', alignItems: 'center',
+        }}>
+          {icon}
+        </div>
+      )}
+      <input
+        type={isPassword && showPassword ? 'text' : type}
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        style={{
+          width: '100%',
+          padding: `12px ${isPassword ? '40px' : '14px'} 12px ${icon ? '36px' : '14px'}`,
+          borderRadius: 12,
+          border: '1.5px solid #e2e2e2',
+          background: '#fff',
+          color: '#374151',
+          fontSize: 14,
+          outline: 'none',
+          boxSizing: 'border-box',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+        }}
+        onFocus={(e) => { e.target.style.borderColor = '#8e44ad'; e.target.style.boxShadow = '0 0 0 3px rgba(142,68,173,0.15)'; }}
+        onBlur={(e) => { e.target.style.borderColor = '#e2e2e2'; e.target.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)'; }}
+      />
+      {isPassword && (
+        <button
+          type="button"
+          onClick={() => setShowPassword((s) => !s)}
+          aria-label={showPassword ? 'Hide password' : 'Show password'}
+          style={{
+            position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
+            background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+            color: '#9ca3af', display: 'flex', alignItems: 'center',
+          }}
+        >
+          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+        </button>
+      )}
+    </div>
+  );
+};
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function ForgotPasswordFlow({ onClose }: ForgotPasswordFlowProps) {

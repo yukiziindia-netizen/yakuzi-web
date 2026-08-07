@@ -131,13 +131,19 @@ export default function HeroSection() {
           ) : (
             banners.map((banner, index) => {
               const isCurrent = index === bannerIndex;
-              const image = banner?.imageUrl || heroBannerImage;
+              const desktopImage = banner?.imageUrl || heroBannerImage;
+              // Admins can upload a separate narrow-viewport crop; without
+              // one, phones simply get the desktop art as before.
+              const mobileImage = banner?.mobileImageUrl || desktopImage;
               const slide = (
-                <img
-                  src={image}
-                  alt={banner?.title || 'Featured'}
-                  className="h-full w-full object-cover"
-                />
+                <picture className="block h-full w-full">
+                  <source media="(min-width: 1024px)" srcSet={desktopImage} />
+                  <img
+                    src={mobileImage}
+                    alt={banner?.title || 'Featured'}
+                    className="h-full w-full object-cover"
+                  />
+                </picture>
               );
 
               return (

@@ -211,6 +211,21 @@ export const getOrderInvoices = async (orderId: string): Promise<OrderInvoice[]>
   return data.data ?? data;
 };
 
+/**
+ * Emails the order's invoice(s) to the buyer as a PDF attachment.
+ *
+ * Rejects with the API's own status when it cannot send: 422 when the account
+ * has no email address on it, 503 when mail is unavailable, 404 when there is
+ * nothing to invoice. Those messages are written for the buyer, so callers
+ * should surface `error.response.data.message` rather than inventing one.
+ */
+export const emailOrderInvoices = async (
+  orderId: string,
+): Promise<{ sent: boolean }> => {
+  const { data } = await api.post(`/orders/${orderId}/invoice/email`);
+  return data.data ?? data;
+};
+
 // ──────────────────────────────────────────────
 // TRACKING
 // ──────────────────────────────────────────────

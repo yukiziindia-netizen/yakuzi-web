@@ -2,9 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ChevronLeft, Printer, Loader2, ShieldCheck, Package, Headphones, Lock } from 'lucide-react';
-import { getOrderInvoices, type OrderInvoice } from '@yukizi/api-client';
+import { ChevronLeft, Printer, Loader2, Mail, ShieldCheck, Package, Headphones, Lock } from 'lucide-react';
+import { getOrderInvoices, emailOrderInvoices, type OrderInvoice } from '@yukizi/api-client';
 import AuthGuard from '@/components/shared/AuthGuard';
+import { useToast } from '@/components/shared/Toast';
 
 /**
  * Printable tax invoice, laid out to the agreed design.
@@ -24,6 +25,30 @@ const money = (n: number) =>
 export default function InvoicePage({ params }: { params: { orderId: string } }) {
   const [invoices, setInvoices] = useState<OrderInvoice[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
+  const { toast } = useToast();
+
+  const emailInvoice = async () => {
+    if (sending) return;
+    setSending(true);
+    try {
+      await emailOrderInvoices(params.orderId);
+      toast('Invoice emailed to you', 'success');
+    } catch (e: any) {
+      // The API says WHY it could not send — 422 when the account has no email
+      // address, 503 when mail is unavailable, 404 when there is nothing to
+      // invoice — and those messages are written for the buyer. Show the real
+      // one rather than a generic failure, which would leave them with no idea
+      // what to do about it.
+      toast(
+        e?.response?.data?.message ||
+          'We could not email the invoice just now. Please try again shortly.',
+        'error',
+      );
+    } finally {
+      setSending(false);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -81,13 +106,28 @@ export default function InvoicePage({ params }: { params: { orderId: string } })
           >
             <ChevronLeft className="w-4 h-4" /> Back to order
           </Link>
-          <button
-            type="button"
-            onClick={() => window.print()}
-            className="flex items-center gap-2 rounded-full bg-gradient-to-b from-[#a155e8] via-[#7b41b0] to-[#512384] px-5 py-2.5 text-white text-sm font-bold shadow-[0_8px_24px_rgba(89,54,150,0.28)] hover:opacity-90 transition-opacity"
-          >
-            <Printer className="w-4 h-4" /> Download / Print
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={emailInvoice}
+              disabled={sending}
+              className="flex items-center gap-2 rounded-full border border-[#593696] px-5 py-2.5 text-[#593696] text-sm font-bold hover:bg-[#f7f4fc] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {sending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Mail className="w-4 h-4" />
+              )}
+              {sending ? 'Sending…' : 'Email me this invoice'}
+            </button>
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="flex items-center gap-2 rounded-full bg-gradient-to-b from-[#a155e8] via-[#7b41b0] to-[#512384] px-5 py-2.5 text-white text-sm font-bold shadow-[0_8px_24px_rgba(89,54,150,0.28)] hover:opacity-90 transition-opacity"
+            >
+              <Printer className="w-4 h-4" /> Download / Print
+            </button>
+          </div>
         </div>
 
         {invoices.length === 0 && (

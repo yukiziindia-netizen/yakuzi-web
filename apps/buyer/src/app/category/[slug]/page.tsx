@@ -6,6 +6,7 @@ import CategoryBanner from '@/components/landing/CategoryBanner';
 import ProductCarousel from '@/components/landing/ProductCarousel';
 import { getCategories, getProducts } from '@yukizi/api-client';
 import { absoluteUrl, metaTruncate, SITE_NAME } from '@/lib/seo/site';
+import { applySeoOverride, fetchSeoOverride } from '@/lib/seo/overrides';
 import { breadcrumbSchema, itemListSchema } from '@/lib/seo/schema';
 import JsonLd from '@/components/seo/JsonLd';
 
@@ -46,12 +47,13 @@ export async function generateMetadata({
   const description = metaTruncate(
     cat.description || `Shop ${cat.name} on ${SITE_NAME}: authentic products from verified sellers with fast shipping across India.`,
   );
-  return {
+  const derived: Metadata = {
     title,
     description,
     alternates: { canonical: absoluteUrl(`/category/${slug}`) }, // ?sub= does not filter → always canonicalize to base
     openGraph: { title, description, url: absoluteUrl(`/category/${slug}`) },
   };
+  return applySeoOverride(derived, await fetchSeoOverride('CATEGORY', cat.id));
 }
 
 // Streams in after the shell: the banner, name and breadcrumb paint without

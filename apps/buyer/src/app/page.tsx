@@ -7,12 +7,20 @@ import ComingSoon from '@/components/landing/ComingSoon';
 import dynamicComponent from 'next/dynamic';
 const Footer = dynamicComponent(() => import('@/components/landing/Footer'), { ssr: false });
 import { getProducts, getComingSoonStatus, getBanners } from '@yukizi/api-client';
+import type { Metadata } from 'next';
 import JsonLd from '@/components/seo/JsonLd';
 import { organizationSchema, webSiteSchema } from '@/lib/seo/schema';
 import { absoluteUrl } from '@/lib/seo/site';
+import { applySeoOverride, fetchSeoOverride } from '@/lib/seo/overrides';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { alternates: { canonical: absoluteUrl('/') } };
+
+// Was a static `metadata` export; generateMetadata lets the admin SEO
+// override for the homepage (entity "/") merge over the same defaults.
+export async function generateMetadata(): Promise<Metadata> {
+  const derived: Metadata = { alternates: { canonical: absoluteUrl('/') } };
+  return applySeoOverride(derived, await fetchSeoOverride('HOMEPAGE', '/'));
+}
 
 // The product grid streams in after the shell: the (slow) products query no
 // longer holds back TTFB, the hero, or the navbar. The grid is still fully

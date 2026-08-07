@@ -47,6 +47,7 @@ export function productSchema(p: {
   stock?: number; hasSellers?: boolean;
   category?: { name?: string } | null;
   reviewSummary?: { average?: number; count?: number } | null;
+  listings?: unknown[] | null; sellerCount?: number; sellerName?: string;
 }) {
   const images: string[] = [];
   if (p.image) images.push(p.image);
@@ -56,17 +57,18 @@ export function productSchema(p: {
   }
   const price = p.price ?? p.mrp;
   const url = absoluteUrl(`/products/${p.slug ?? p.id}`);
+  const hasSellers = p.hasSellers ?? ((p.listings?.length ?? 0) > 0 || (p.sellerCount ?? 0) > 0);
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
     '@id': `${url}#product`,
-    name: p.name,
+    ...(p.name ? { name: p.name } : {}),
     url,
     ...(images.length ? { image: images } : {}),
     ...(p.description ? { description: p.description } : {}),
     ...(p.manufacturer ? { brand: { '@type': 'Brand', name: p.manufacturer } } : {}),
     ...(p.category?.name ? { category: p.category.name } : {}),
-    ...(price != null && p.hasSellers
+    ...(price != null && hasSellers
       ? {
           offers: {
             '@type': 'Offer',
@@ -77,7 +79,7 @@ export function productSchema(p: {
               (p.stock ?? 0) > 0
                 ? 'https://schema.org/InStock'
                 : 'https://schema.org/OutOfStock',
-            seller: { '@id': `${SITE_URL}/#organization` },
+            ...(p.sellerName ? { seller: { '@type': 'Organization', name: p.sellerName } } : {}),
           },
         }
       : {}),
@@ -106,7 +108,7 @@ export function articleSchema(post: {
     headline: post.title,
     url,
     ...(post.excerpt ? { description: post.excerpt } : {}),
-    ...(post.featuredImage ? { image: [post.featuredImage] } : {}),
+    ...(post.featuredImage ? { image: [absoluteUrl(post.featuredImage)] } : {}),
     ...(post.publishedAt || post.createdAt ? { datePublished: post.publishedAt || post.createdAt } : {}),
     ...(post.updatedAt ? { dateModified: post.updatedAt } : {}),
     ...(post.author?.name ? { author: { '@type': 'Person', name: post.author.name } } : {}),

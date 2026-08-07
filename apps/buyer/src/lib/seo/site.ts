@@ -1,6 +1,9 @@
 // Central SEO constants. NEXT_PUBLIC_SITE_URL must be set per environment
 // (dev: https://dev.yukizi.com, prod: the production domain) — falls back to dev.
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://dev.yukizi.com').replace(/\/$/, '');
+if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_SITE_URL) {
+  console.warn('[seo] NEXT_PUBLIC_SITE_URL is not set — canonicals and JSON-LD will point at the dev domain');
+}
 export const SITE_NAME = 'Yukizi';
 export const SITE_TAGLINE = 'Anime, Manga & Collectibles Marketplace';
 export const SITE_DESCRIPTION =
@@ -10,6 +13,7 @@ export const SUPPORT_EMAIL = 'support@yukizi.com';
 export const DEFAULT_OG_IMAGE = '/YukiziLogo.png';
 
 export function absoluteUrl(path: string): string {
+  if (path.startsWith('//')) return `https:${path}`;
   if (/^https?:\/\//.test(path)) return path;
   return `${SITE_URL}${path.startsWith('/') ? path : `/${path}`}`;
 }

@@ -27,13 +27,8 @@ export const COMPANY = {
    */
   legalName: 'Yukizi Market Private Limited',
 
-  /**
-   * Public website URL quoted in the policy documents.
-   * TO CONFIRM: the documents cite the dev domain. This must become the
-   * production domain before launch — a legal page should not point customers
-   * at dev.yukizi.com.
-   */
-  websiteUrl: 'https://dev.yukizi.com/',
+  /** Public website URL quoted in the policy documents. */
+  websiteUrl: 'https://yukizi.com/',
 
   /** TO CONFIRM: full registered office address, including PIN code. */
   registeredAddress: '[Registered office address — to be provided]',

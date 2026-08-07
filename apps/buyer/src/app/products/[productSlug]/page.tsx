@@ -1235,22 +1235,27 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
           <div className="grid grid-cols-[1fr_1.25fr] gap-10 items-start mt-6">
             {/* Left Column */}
             <div className="flex flex-col gap-6">
-              {isAd && (
-                <div className="flex items-center justify-between w-full h-6">
-                  <div className="flex items-center gap-2">
-                    {isYukiziChoice && (
-                      <div className="rounded-full bg-[#7B2FBE] px-4 py-1 text-[12px] font-bold tracking-wide text-white shadow-sm">
-                        Yukizi Choice
-                      </div>
-                    )}
-                    {isBestSeller && (
-                      <div className="rounded-full bg-[#4a4a4a] px-4 py-1 text-[12px] font-bold tracking-wide text-white shadow-sm">
-                        Best Seller
-                      </div>
-                    )}
-                  </div>
-                  {isAd && (
-                    <span className="text-[11px] text-gray-400 font-semibold select-none">Ad</span>
+              {/* Breadcrumbs, with the Ad marker sharing the row */}
+              <div className="flex items-center justify-between w-full gap-4 min-h-6">
+                <ProductBreadcrumbs
+                  product={product}
+                  className="text-[13px] sm:text-[14px] xl:text-[15px] 2xl:text-[16px]"
+                />
+                {isAd && (
+                  <span className="shrink-0 text-[11px] text-gray-400 font-semibold select-none">Ad</span>
+                )}
+              </div>
+              {isAd && (isYukiziChoice || isBestSeller) && (
+                <div className="flex items-center gap-2 w-full h-6">
+                  {isYukiziChoice && (
+                    <div className="rounded-full bg-[#7B2FBE] px-4 py-1 text-[12px] font-bold tracking-wide text-white shadow-sm">
+                      Yukizi Choice
+                    </div>
+                  )}
+                  {isBestSeller && (
+                    <div className="rounded-full bg-[#4a4a4a] px-4 py-1 text-[12px] font-bold tracking-wide text-white shadow-sm">
+                      Best Seller
+                    </div>
                   )}
                 </div>
               )}
@@ -1292,12 +1297,6 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
 
             {/* Right Column */}
             <div className="flex flex-col">
-              {/* Right Header - Breadcrumbs */}
-              <ProductBreadcrumbs
-                product={product}
-                className="text-[13px] sm:text-[14px] xl:text-[15px] 2xl:text-[16px] mb-4 min-h-6"
-              />
-
               {/* Title Block */}
               <div className="flex items-start justify-between w-full mb-4">
                 <h1 className="text-[22px] sm:text-[26px] xl:text-[30px] 2xl:text-[34px] font-medium text-gray-500 tracking-tight leading-tight max-w-[95%]">

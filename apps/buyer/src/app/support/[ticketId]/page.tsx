@@ -104,7 +104,7 @@ export default function TicketDetailPage() {
           </Link>
 
           <div className="flex items-center gap-3">
-            <span className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest ${
+            <span className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest ${
               ticket?.status === 'open' ? 'bg-lime-100 text-lime-700' : 'bg-gray-100 text-gray-500'
             }`}>
               {ticket?.status}
@@ -124,7 +124,7 @@ export default function TicketDetailPage() {
                 <Clock className="w-3 h-3" />
                 <span>Ticket #{ticketId.slice(-6).toUpperCase()}</span>
               </p>
-              <h1 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight leading-tight">
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight leading-tight">
                 {ticket?.subject}
               </h1>
               <p className="text-gray-500 font-medium mt-2">{ticket?.category}</p>
@@ -173,7 +173,7 @@ export default function TicketDetailPage() {
                         }`}>
                           <p className="text-base font-medium leading-relaxed">{msg.message}</p>
                         </div>
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1">
+                        <span className="text-2xs font-bold text-gray-400 uppercase tracking-widest px-1">
                           {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>

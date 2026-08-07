@@ -100,15 +100,15 @@ export default function PaymentIdPage({ params }: { params: { orderId: string } 
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8 mb-6 sm:mb-8 md:mb-12">
                 <div className="bg-white/40 p-6 rounded-3xl border border-white h-fit">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Payment Summary</p>
+                  <p className="text-2xs font-bold text-gray-400 uppercase tracking-widest mb-4">Payment Summary</p>
                   <div className="space-y-4">
                     <div>
                       <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Total Bill Amount</p>
-                      <p className="text-3xl font-black text-gray-900 tracking-tight">₹{Math.round(Number(amount)).toLocaleString('en-IN')}</p>
+                      <p className="text-3xl font-bold text-gray-900 tracking-tight">₹{Math.round(Number(amount)).toLocaleString('en-IN')}</p>
                     </div>
                     <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status</span>
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${['CONFIRMED', 'COMPLETED', 'VERIFIED'].includes(status) ? 'bg-green-100 text-green-700' : status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}`}>
+                      <span className="text-2xs font-bold text-gray-400 uppercase tracking-widest">Status</span>
+                      <span className={`px-3 py-1 rounded-full text-2xs font-bold uppercase tracking-wider ${['CONFIRMED', 'COMPLETED', 'VERIFIED'].includes(status) ? 'bg-green-100 text-green-700' : status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}`}>
                         {status}
                       </span>
                     </div>
@@ -116,32 +116,32 @@ export default function PaymentIdPage({ params }: { params: { orderId: string } 
                 </div>
 
                 <div className="bg-white/40 p-6 md:p-8 rounded-[32px] sm:rounded-[40px] border border-white shadow-sm relative overflow-hidden group">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-6 border-b border-gray-100 pb-4">Bank Details for Payment</p>
+                  <p className="text-2xs font-bold text-gray-400 uppercase tracking-widest mb-6 border-b border-gray-100 pb-4">Bank Details for Payment</p>
                   
                   <div className="grid grid-cols-1 gap-y-5">
                     <div className="flex items-center justify-between group/item">
-                       <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Account Name</span>
-                       <span className="text-xs font-black text-gray-900 text-right">The Era Of Marketing</span>
+                       <span className="text-2xs font-bold text-gray-400 uppercase tracking-widest">Account Name</span>
+                       <span className="text-xs font-bold text-gray-900 text-right">The Era Of Marketing</span>
                     </div>
                     <div className="flex items-center justify-between group/item">
-                       <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Account Number</span>
-                       <span className="text-xs font-black text-gray-900 tracking-wider font-mono">10126079826</span>
+                       <span className="text-2xs font-bold text-gray-400 uppercase tracking-widest">Account Number</span>
+                       <span className="text-xs font-bold text-gray-900 tracking-wider font-mono">10126079826</span>
                     </div>
                     <div className="flex items-center justify-between group/item">
-                       <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Bank Name</span>
-                       <span className="text-xs font-black text-gray-900 text-right">IDFC FIRST Bank LTD</span>
+                       <span className="text-2xs font-bold text-gray-400 uppercase tracking-widest">Bank Name</span>
+                       <span className="text-xs font-bold text-gray-900 text-right">IDFC FIRST Bank LTD</span>
                     </div>
                     <div className="flex items-center justify-between group/item">
-                       <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">IFSC Code</span>
-                       <span className="text-xs font-black text-gray-900 tracking-wider font-mono">IDFB0060102</span>
+                       <span className="text-2xs font-bold text-gray-400 uppercase tracking-widest">IFSC Code</span>
+                       <span className="text-xs font-bold text-gray-900 tracking-wider font-mono">IDFB0060102</span>
                     </div>
                     <div className="flex items-center justify-between group/item">
-                       <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Swift / BIC</span>
-                       <span className="text-xs font-black text-gray-900 tracking-wider font-mono uppercase">IDFBINBBMUM</span>
+                       <span className="text-2xs font-bold text-gray-400 uppercase tracking-widest">Swift / BIC</span>
+                       <span className="text-xs font-bold text-gray-900 tracking-wider font-mono uppercase">IDFBINBBMUM</span>
                     </div>
                     <div className="pt-4 border-t border-gray-100 mt-2">
-                       <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">Bank Address</span>
-                       <p className="text-[10px] font-bold text-gray-500 leading-relaxed italic">
+                       <span className="text-2xs font-bold text-gray-400 uppercase tracking-widest mb-2 block">Bank Address</span>
+                       <p className="text-2xs font-bold text-gray-500 leading-relaxed italic">
                         Salt Lake, Sector 1, Kolkata, West Bengal, India, Pincode: 700064.
                        </p>
                     </div>

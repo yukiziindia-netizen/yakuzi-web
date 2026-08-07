@@ -178,7 +178,7 @@ export function ExpiryPicker({ value, onChange, label, error, className, require
                 </button>
               </div>
             </div>
-            <p className="text-[10px] text-gray-400 text-center mt-3 uppercase tracking-widest font-bold">Scroll over cards to change</p>
+            <p className="text-2xs text-gray-400 text-center mt-3 uppercase tracking-widest font-bold">Scroll over cards to change</p>
           </motion.div>
         )}
       </AnimatePresence>

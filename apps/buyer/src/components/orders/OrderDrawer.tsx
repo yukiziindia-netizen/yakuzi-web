@@ -163,15 +163,15 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
 
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex flex-wrap items-center gap-3">
-                  <h2 className="text-[34px] font-extrabold text-gray-800 mr-2">Orders</h2>
-                  {filters.paymentStatus !== 'All' && <span className="bg-purple-600 text-white text-[14px] px-4 py-2 rounded shadow-sm font-bold uppercase">{filters.paymentStatus}</span>}
-                  {filters.orderStatus !== 'All orders' && <span className="bg-purple-600 text-white text-[14px] px-4 py-2 rounded shadow-sm font-bold capitalize">Status : {filters.orderStatus.toLowerCase()}</span>}
-                  {filters.month !== 'All' && <span className="bg-purple-600 text-white text-[14px] px-4 py-2 rounded shadow-sm font-bold uppercase">{filters.month}</span>}
-                  {filters.year !== 'All' && <span className="bg-purple-600 text-white text-[14px] px-4 py-2 rounded shadow-sm font-bold">{filters.year}</span>}
+                  <h2 className="text-4xl font-bold text-gray-800 mr-2">Orders</h2>
+                  {filters.paymentStatus !== 'All' && <span className="bg-purple-600 text-white text-sm px-4 py-2 rounded shadow-sm font-bold uppercase">{filters.paymentStatus}</span>}
+                  {filters.orderStatus !== 'All orders' && <span className="bg-purple-600 text-white text-sm px-4 py-2 rounded shadow-sm font-bold capitalize">Status : {filters.orderStatus.toLowerCase()}</span>}
+                  {filters.month !== 'All' && <span className="bg-purple-600 text-white text-sm px-4 py-2 rounded shadow-sm font-bold uppercase">{filters.month}</span>}
+                  {filters.year !== 'All' && <span className="bg-purple-600 text-white text-sm px-4 py-2 rounded shadow-sm font-bold">{filters.year}</span>}
                 </div>
                 
                 <div className="flex items-center gap-3.5 mr-12">
-                  <span className="bg-purple-600 text-white text-[14px] px-4 py-2 rounded shadow-sm font-bold">All orders</span>
+                  <span className="bg-purple-600 text-white text-sm px-4 py-2 rounded shadow-sm font-bold">All orders</span>
                   <button 
                     onClick={() => setIsFilterOpen(true)}
                     className="text-gray-400 hover:text-purple-600 transition-colors p-2"
@@ -188,7 +188,7 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
               <div className="px-6 pt-4">
                 <Link
                   href={`/orders/${effectiveOrderId}/invoice`}
-                  className="flex items-center justify-center gap-2 w-full rounded-full border border-[#e2e8f0] bg-white py-3 text-[14px] font-bold text-[#593696] hover:bg-[#f5f3fa] transition-colors"
+                  className="flex items-center justify-center gap-2 w-full rounded-full border border-[#e2e8f0] bg-white py-3 text-sm font-bold text-[#593696] hover:bg-[#f5f3fa] transition-colors"
                 >
                   <FileText className="w-4 h-4" />
                   View tax invoice
@@ -202,7 +202,7 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
                 className="flex justify-between items-center mb-4 cursor-pointer group"
                 onClick={() => setIsOrderedProductsOpen(true)}
               >
-                <h3 className="text-[24px] font-extrabold text-gray-700">Ordered Products</h3>
+                <h3 className="text-2xl font-bold text-gray-700">Ordered Products</h3>
                 <ChevronRight className="w-7 h-7 text-gray-400 group-hover:text-gray-600 transition-colors" />
               </div>
               <div className="flex gap-4 overflow-x-auto pb-4 hide-scrollbar -mx-2 px-2 snap-x">
@@ -266,7 +266,7 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
             {/* My Orders Section (Grouped) */}
             <div className="px-6 py-2 pb-8">
               <div className="flex justify-between items-center mb-4 cursor-pointer group">
-                <h3 className="text-[24px] font-extrabold text-gray-700">My Orders</h3>
+                <h3 className="text-2xl font-bold text-gray-700">My Orders</h3>
                 <ChevronRight className="w-7 h-7 text-gray-400 group-hover:text-gray-600 transition-colors" />
               </div>
               
@@ -308,7 +308,7 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
                     return (
                       <div key={group.dateString + idx} onClick={() => setSelectedOrderId(group.orderIds[0])} className={`min-w-[220px] max-w-[220px] border ${isSelected ? 'border-purple-600 ring-2 ring-purple-600 shadow-md' : 'border-gray-200'} rounded-xl p-3 shadow-sm bg-white snap-center cursor-pointer hover:shadow-md transition-all`}>
                         <div className="flex justify-between items-center mb-3">
-                           <span className={`text-[15px] font-black ${isSelected ? 'text-purple-600' : 'text-gray-500'}`}>{group.dateString}</span>
+                           <span className={`text-base font-bold ${isSelected ? 'text-purple-600' : 'text-gray-500'}`}>{group.dateString}</span>
                            <ChevronRight className="w-5 h-5 text-gray-400" />
                         </div>
                         <div className="h-[160px] w-full">

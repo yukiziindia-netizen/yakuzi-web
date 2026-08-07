@@ -118,19 +118,19 @@ export default function ProfilePage() {
                 
                 <div className="space-y-6">
                   <div>
-                    <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Legal Name</label>
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-1">Legal Name</label>
                     <p className="text-lg font-bold text-gray-800">{profile.legalName || '—'}</p>
                   </div>
                   <div>
-                    <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest block mb-1">GST Number</label>
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-1">GST Number</label>
                     <p className="text-lg font-bold text-gray-800">{profile.gstNumber || '—'}</p>
                   </div>
                   <div>
-                    <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest block mb-1">PAN Number</label>
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-1">PAN Number</label>
                     <p className="text-lg font-bold text-gray-800">{profile.panNumber || '—'}</p>
                   </div>
                   <div>
-                    <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Drug License</label>
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-1">Drug License</label>
                     <p className="text-lg font-bold text-gray-800">{profile.drugLicenseNumber || '—'}</p>
                   </div>
                 </div>

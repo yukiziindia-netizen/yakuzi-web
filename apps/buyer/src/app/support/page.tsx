@@ -93,7 +93,7 @@ export default function SupportPage() {
                 </div>
                 <div className="grid grid-cols-1 gap-6">
                   <div>
-                    <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest block mb-2">Subject</label>
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-2">Subject</label>
                     <input
                       value={form.subject}
                       onChange={(e) => setForm((f) => ({ ...f, subject: e.target.value }))}
@@ -102,7 +102,7 @@ export default function SupportPage() {
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest block mb-2">Message</label>
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-2">Message</label>
                     <textarea
                       value={form.message}
                       onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
@@ -175,12 +175,12 @@ export default function SupportPage() {
                    >
                      <div className="flex flex-col">
                        <div className="flex items-center gap-3 mb-2">
-                         <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{String(tkt.id || tkt._id || tkt.ticketId || tkt.ticket_id).slice(-8)}</span>
-                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${statusColor(tkt.status)}`}>
+                         <span className="text-2xs font-bold text-gray-400 uppercase tracking-widest">{String(tkt.id || tkt._id || tkt.ticketId || tkt.ticket_id).slice(-8)}</span>
+                         <span className={`text-2xs font-bold px-2 py-0.5 rounded-full uppercase ${statusColor(tkt.status)}`}>
                             {tkt.status}
                          </span>
                          {tkt.priority && (
-                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${tkt.priority === 'high' ? 'bg-red-100 text-red-600' : tkt.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-500'}`}>
+                           <span className={`text-2xs font-bold px-2 py-0.5 rounded-full ${tkt.priority === 'high' ? 'bg-red-100 text-red-600' : tkt.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-500'}`}>
                              {tkt.priority}
                            </span>
                          )}

@@ -451,7 +451,7 @@ export default function Navbar({
                     {!isAuthenticated ? (
                       <button 
                         onClick={onLoginClick || (() => window.dispatchEvent(new CustomEvent('open-login')))} 
-                        className="text-white font-bold text-[12px] md:text-[13px] bg-white/20 hover:bg-white/30 px-2.5 md:px-3 py-1 md:py-1.5 rounded-lg transition-colors border border-white/20"
+                        className="text-white font-bold text-xs md:text-sm bg-white/20 hover:bg-white/30 px-2.5 md:px-3 py-1 md:py-1.5 rounded-lg transition-colors border border-white/20"
                       >
                         Start
                       </button>
@@ -491,7 +491,7 @@ export default function Navbar({
                     setIsSearchChatOpen(!isSearchChatOpen);
                     setIsChatOpen(false);
                   }}
-                  className="w-full h-[28px] md:h-[30px] bg-white rounded-md text-gray-800 text-[11px] md:text-[12px] pl-2 md:pl-3 pr-7 md:pr-9 focus:outline-none cursor-pointer placeholder-gray-400 shadow-sm font-medium"
+                  className="w-full h-[28px] md:h-[30px] bg-white rounded-md text-gray-800 text-xs md:text-xs pl-2 md:pl-3 pr-7 md:pr-9 focus:outline-none cursor-pointer placeholder-gray-400 shadow-sm font-medium"
                 />
                 <Search className="w-3.5 h-3.5 text-gray-400 absolute right-2.5 md:right-3.5 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2]" />
               </div>
@@ -508,7 +508,7 @@ export default function Navbar({
                     </Link>
                     <div className="w-[1px] h-3.5 bg-[#e0e0e0]/30 mx-1 xs:mx-1.5" />
                     <Link href="/login" className="h-full flex items-center cursor-pointer">
-                      <span className="text-[10px] xs:text-[11px] font-normal whitespace-nowrap">Start Now</span>
+                      <span className="text-2xs xs:text-xs font-normal whitespace-nowrap">Start Now</span>
                     </Link>
                   </div>
 
@@ -612,7 +612,7 @@ export default function Navbar({
                 }`}
               />
               {wishlistCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 sm:text-[9px] bg-[#f7941d] text-white text-[8px] xs:text-[9px] font-bold rounded-full flex items-center justify-center border border-white sm:border-[#562996]">
+                <span className="absolute -top-1 -right-1 w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 sm:text-2xs bg-[#f7941d] text-white text-2xs xs:text-2xs font-bold rounded-full flex items-center justify-center border border-white sm:border-[#562996]">
                   {wishlistCount}
                 </span>
               )}
@@ -633,7 +633,7 @@ export default function Navbar({
                 fill={isCartOpen ? "currentColor" : "none"}
               />
               {cartData?.items && cartData.items.length > 0 && (
-                <span className="absolute -top-1 -right-1 w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 sm:text-[9px] bg-[#f7941d] text-white text-[8px] xs:text-[9px] font-bold rounded-full flex items-center justify-center border border-white sm:border-[#562996]">
+                <span className="absolute -top-1 -right-1 w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 sm:text-2xs bg-[#f7941d] text-white text-2xs xs:text-2xs font-bold rounded-full flex items-center justify-center border border-white sm:border-[#562996]">
                   {cartData.items.length}
                 </span>
               )}
@@ -727,7 +727,7 @@ export default function Navbar({
                             {att.type.startsWith('image/') ? (
                               <img src={att.data} alt="preview" className="w-full h-full object-cover rounded" />
                             ) : (
-                              <span className="text-[10px] text-white font-bold uppercase truncate px-1">
+                              <span className="text-2xs text-white font-bold uppercase truncate px-1">
                                 {att.name.split('.').pop()}
                               </span>
                             )}
@@ -963,7 +963,7 @@ export default function Navbar({
             </button>
             {/* Header */}
             <div className="flex justify-between items-center mb-10 pt-4">
-              <h2 className="text-[22px] font-bold text-[#2d2d2d] tracking-tight">Menu</h2>
+              <h2 className="text-2xl font-bold text-[#2d2d2d] tracking-tight">Menu</h2>
               <div className="flex items-center gap-2.5">
                 <button
                   onClick={() => {
@@ -996,7 +996,7 @@ export default function Navbar({
                       handleLogout();
                       setIsMobileMenuOpen(false);
                     }}
-                    className="text-[#484848] text-[15px] font-medium hover:text-black transition-colors"
+                    className="text-[#484848] text-base font-medium hover:text-black transition-colors"
                   >
                     Sign out
                   </button>
@@ -1006,7 +1006,7 @@ export default function Navbar({
                       setIsMobileMenuOpen(false);
                       onLoginClick?.();
                     }}
-                    className="text-[#484848] text-[15px] font-medium hover:text-black transition-colors"
+                    className="text-[#484848] text-base font-medium hover:text-black transition-colors"
                   >
                     Sign in
                   </button>
@@ -1026,7 +1026,7 @@ export default function Navbar({
                       <Link
                         href={`/category/${category.slug || category.id}`}
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className="flex-1 text-[16px] font-medium tracking-wide text-gray-700 hover:text-black transition-colors"
+                        className="flex-1 text-base font-medium tracking-wide text-gray-700 hover:text-black transition-colors"
                       >
                         {category.name}
                       </Link>
@@ -1067,7 +1067,7 @@ export default function Navbar({
                                 key={sub.id}
                                 href={`/category/${category.slug || category.id}?sub=${sub.slug || sub.id}`}
                                 onClick={() => setIsMobileMenuOpen(false)}
-                                className="text-[15px] text-gray-600 hover:text-black transition-colors block"
+                                className="text-base text-gray-600 hover:text-black transition-colors block"
                               >
                                 {sub.name}
                               </Link>

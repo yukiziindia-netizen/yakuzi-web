@@ -106,8 +106,8 @@ export default function InvoicePage({ params }: { params: { orderId: string } })
               <div className="flex items-start justify-between gap-8">
                 <img src="/YukiziLogo.png" alt="Yukizi" className="h-10 w-auto object-contain" />
                 <div className="text-right">
-                  <h1 className="text-[26px] font-black tracking-tight text-[#593696]">TAX INVOICE</h1>
-                  <table className="mt-3 ml-auto text-[13px]">
+                  <h1 className="text-2xl font-bold tracking-tight text-[#593696]">TAX INVOICE</h1>
+                  <table className="mt-3 ml-auto text-sm">
                     <tbody>
                       <tr>
                         <td className="pr-6 text-[#64748b] text-left">Invoice No.</td>
@@ -136,8 +136,8 @@ export default function InvoicePage({ params }: { params: { orderId: string } })
               <div className="mt-6 flex gap-3 rounded-lg border border-[#e9dff5] bg-[#f7f4fc] p-4">
                 <ShieldCheck className="w-5 h-5 text-[#593696] flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-[13px] font-bold text-[#593696]">Generated via Yukizi Marketplace</p>
-                  <p className="text-[12px] text-[#475569] mt-0.5">
+                  <p className="text-sm font-bold text-[#593696]">Generated via Yukizi Marketplace</p>
+                  <p className="text-xs text-[#475569] mt-0.5">
                     This invoice is generated on behalf of the seller for the supply of goods to the customer.
                   </p>
                 </div>
@@ -152,7 +152,7 @@ export default function InvoicePage({ params }: { params: { orderId: string } })
               </div>
 
               {/* Lines */}
-              <table className="w-full mt-8 text-[12px] border-collapse">
+              <table className="w-full mt-8 text-xs border-collapse">
                 <thead>
                   <tr className="bg-[#593696] text-white text-left">
                     <th className="py-3 px-3 font-bold">#</th>
@@ -184,14 +184,14 @@ export default function InvoicePage({ params }: { params: { orderId: string } })
               {/* Note + totals */}
               <div className="mt-7 grid grid-cols-2 gap-8 items-start">
                 <div className="rounded-lg border border-[#e2e8f0] bg-[#f8fafc] p-4">
-                  <p className="text-[13px] font-bold text-[#593696] mb-1.5">Note to Customer</p>
-                  <p className="text-[12px] text-[#475569] leading-relaxed">
+                  <p className="text-sm font-bold text-[#593696] mb-1.5">Note to Customer</p>
+                  <p className="text-xs text-[#475569] leading-relaxed">
                     This is a tax invoice for the supply of goods. The products have been sold by the
                     seller (Supplier) and this invoice is generated on their behalf by Yukizi Marketplace.
                   </p>
                 </div>
 
-                <div className="text-[13px]">
+                <div className="text-sm">
                   <Row label="Subtotal (Taxable Value)" value={money(inv.subtotal)} />
                   {/* Stated rate by rate: an order with a 5% and an 18% item
                       owes two lines, not one merged figure. */}
@@ -219,12 +219,12 @@ export default function InvoicePage({ params }: { params: { orderId: string } })
                   )}
                   <div className="mt-3 flex items-center justify-between rounded-lg bg-[#f3edfa] px-4 py-3">
                     <span className="font-bold text-[#593696]">TOTAL AMOUNT PAYABLE (₹)</span>
-                    <span className="text-[20px] font-black text-[#593696]">{money(inv.totalAmount)}</span>
+                    <span className="text-xl font-bold text-[#593696]">{money(inv.totalAmount)}</span>
                   </div>
-                  <p className="mt-3 text-[11px] text-[#94a3b8]">Amount in Words:</p>
-                  <p className="text-[12px] text-[#0f172a]">{inv.amountInWords}</p>
+                  <p className="mt-3 text-xs text-[#94a3b8]">Amount in Words:</p>
+                  <p className="text-xs text-[#0f172a]">{inv.amountInWords}</p>
                   {inv.placeOfSupply && (
-                    <p className="mt-2 text-[11px] text-[#94a3b8]">
+                    <p className="mt-2 text-xs text-[#94a3b8]">
                       Place of supply: <span className="text-[#475569]">{inv.placeOfSupply}</span>
                     </p>
                   )}
@@ -244,14 +244,14 @@ export default function InvoicePage({ params }: { params: { orderId: string } })
                 known; legal name, GSTIN, CIN and registered address are left
                 blank rather than filled with placeholders on a tax document. */}
             <div className="bg-[#593696] px-8 py-6 text-white">
-              <p className="text-[13px] font-bold">&nbsp;</p>
-              <p className="text-[12px] opacity-90 mt-1">GSTIN:&nbsp;</p>
-              <p className="text-[12px] opacity-90">Address:&nbsp;</p>
-              <p className="text-[12px] opacity-90">CIN:&nbsp;</p>
-              <p className="text-[12px] opacity-90">
+              <p className="text-sm font-bold">&nbsp;</p>
+              <p className="text-xs opacity-90 mt-1">GSTIN:&nbsp;</p>
+              <p className="text-xs opacity-90">Address:&nbsp;</p>
+              <p className="text-xs opacity-90">CIN:&nbsp;</p>
+              <p className="text-xs opacity-90">
                 Email: <a href="mailto:support@yukizi.com" className="underline">support@yukizi.com</a> | Website:&nbsp;
               </p>
-              <p className="text-[11px] opacity-75 text-center mt-4">
+              <p className="text-xs opacity-75 text-center mt-4">
                 This is a system generated invoice and does not require signature.
               </p>
             </div>
@@ -265,14 +265,14 @@ export default function InvoicePage({ params }: { params: { orderId: string } })
 function Party({ title, subtitle, party }: { title: string; subtitle: string; party: any }) {
   return (
     <div>
-      <p className="text-[15px] font-black text-[#593696]">
-        {title} <span className="text-[12px] font-semibold text-[#64748b]">{subtitle}</span>
+      <p className="text-base font-bold text-[#593696]">
+        {title} <span className="text-xs font-semibold text-[#64748b]">{subtitle}</span>
       </p>
-      <p className="mt-2 text-[14px] font-bold text-[#0f172a]">{party.name || '—'}</p>
-      <p className="text-[12px] text-[#475569] mt-1">GSTIN: {party.gstin || '—'}</p>
-      <p className="text-[12px] text-[#475569] mt-1 leading-relaxed">{party.address || '—'}</p>
-      {party.phone && <p className="text-[12px] text-[#475569] mt-1">Phone: {party.phone}</p>}
-      {party.email && <p className="text-[12px] text-[#475569] mt-1">Email: {party.email}</p>}
+      <p className="mt-2 text-sm font-bold text-[#0f172a]">{party.name || '—'}</p>
+      <p className="text-xs text-[#475569] mt-1">GSTIN: {party.gstin || '—'}</p>
+      <p className="text-xs text-[#475569] mt-1 leading-relaxed">{party.address || '—'}</p>
+      {party.phone && <p className="text-xs text-[#475569] mt-1">Phone: {party.phone}</p>}
+      {party.email && <p className="text-xs text-[#475569] mt-1">Email: {party.email}</p>}
     </div>
   );
 }
@@ -291,9 +291,9 @@ function Assurance({ icon, title, body }: { icon: React.ReactNode; title: string
     <div>
       <div className="flex items-center gap-1.5 text-[#593696]">
         {icon}
-        <p className="text-[11px] font-bold">{title}</p>
+        <p className="text-xs font-bold">{title}</p>
       </div>
-      <p className="text-[10px] text-[#64748b] mt-1 leading-relaxed">{body}</p>
+      <p className="text-2xs text-[#64748b] mt-1 leading-relaxed">{body}</p>
     </div>
   );
 }

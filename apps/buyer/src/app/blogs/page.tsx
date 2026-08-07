@@ -41,7 +41,7 @@ export default function BlogsPage() {
               <BookOpen className="w-3.5 h-3.5" />
               Yukizi Insights
             </div>
-            <h1 className="text-3xl sm:text-4xl font-black text-gray-900 tracking-tight mb-3">
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight mb-3">
               Our Blog
             </h1>
             <p className="text-gray-500 max-w-xl mx-auto text-sm sm:text-base">

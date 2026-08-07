@@ -167,7 +167,7 @@ export default function HeroSection() {
           )}
 
           {(heroBanner as any)?.isAd && (
-            <div className="absolute top-3 left-4 z-20 bg-white/80 backdrop-blur-sm text-gray-700 px-1.5 py-0.5 rounded text-[11px] sm:text-[12px] font-medium shadow-sm">
+            <div className="absolute top-3 left-4 z-20 bg-white/80 backdrop-blur-sm text-gray-700 px-1.5 py-0.5 rounded text-xs sm:text-xs font-medium shadow-sm">
               Ad
             </div>
           )}

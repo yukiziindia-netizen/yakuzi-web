@@ -55,7 +55,7 @@ export default function Testimonials() {
               </div>
 
               {/* Quote */}
-              <p className="text-base sm:text-lg font-light text-gray-600 text-center mb-4 sm:mb-6 md:mb-8 leading-relaxed tracking-wide">
+              <p className="text-base sm:text-lg font-normal text-gray-600 text-center mb-4 sm:mb-6 md:mb-8 leading-relaxed tracking-wide">
                 {testimonial.quote}
               </p>
 

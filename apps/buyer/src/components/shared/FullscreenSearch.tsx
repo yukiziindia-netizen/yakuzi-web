@@ -94,7 +94,7 @@ export default function FullscreenSearch({ isOpen, onClose }: { isOpen: boolean;
                       if (e.key === 'Escape') onClose();
                     }}
                     placeholder="Start typing ..."
-                    className="w-full text-4xl sm:text-5xl md:text-6xl font-light text-primary placeholder:text-primary/50 focus:outline-none bg-transparent"
+                    className="w-full text-4xl sm:text-5xl md:text-6xl font-normal text-primary placeholder:text-primary/50 focus:outline-none bg-transparent"
                   />
                 </div>
 

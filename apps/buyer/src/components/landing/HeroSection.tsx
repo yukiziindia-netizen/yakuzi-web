@@ -4,9 +4,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useBrands, useBanners } from '@/hooks/useProducts';
 
-export default function HeroSection() {
+export default function HeroSection({ initialBanners }: { initialBanners?: any[] }) {
   const { data: brandsData, isLoading: isLoadingBrands } = useBrands();
-  const { data: bannersData } = useBanners();
+  const { data: bannersData } = useBanners(initialBanners);
 
   // The API sorts by `order`, but the admin form does not set it, so every
   // banner currently comes back with the same value and the tie is broken

@@ -11,11 +11,14 @@ export function useBrands() {
   });
 }
 
-export function useBanners() {
+// The homepage passes the banners it already fetched during SSR so the hero
+// image is in the initial HTML instead of waiting for hydration + an XHR.
+export function useBanners(initialData?: Awaited<ReturnType<typeof getBanners>>) {
   return useQuery({
     queryKey: ['banners'],
     queryFn: getBanners,
     staleTime: 60 * 60 * 1000,
+    ...(initialData !== undefined ? { initialData } : {}),
   });
 }
 

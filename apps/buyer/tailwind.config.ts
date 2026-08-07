@@ -80,7 +80,15 @@ const config: Config = {
         sm: 'calc(var(--radius) - 4px)',
       },
       fontFamily: {
-        sans: ['"Google Sans"', 'Open Sans', 'Inter', 'system-ui', 'sans-serif'],
+        sans: ['"Google Sans"', 'var(--font-open-sans)', '"Open Sans"', 'system-ui', 'sans-serif'],
+      },
+      fontSize: {
+        '2xs': ['0.625rem', { lineHeight: '0.875rem', letterSpacing: '0.01em' }],
+        'lg': ['1.125rem', { lineHeight: '1.625rem', letterSpacing: '-0.005em' }],
+        'xl': ['1.25rem', { lineHeight: '1.75rem', letterSpacing: '-0.01em' }],
+        '2xl': ['1.5rem', { lineHeight: '2rem', letterSpacing: '-0.01em' }],
+        '3xl': ['1.75rem', { lineHeight: '2.125rem', letterSpacing: '-0.015em' }],
+        '4xl': ['2.125rem', { lineHeight: '2.5rem', letterSpacing: '-0.02em' }],
       },
       keyframes: {
         "accordion-down": {

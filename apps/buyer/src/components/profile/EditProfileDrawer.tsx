@@ -235,6 +235,8 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
               <img
                 src={photo}
                 alt="Avatar"
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover group-hover:opacity-75 transition-opacity"
               />
             ) : (

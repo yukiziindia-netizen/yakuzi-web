@@ -50,7 +50,7 @@ export default function OrderCard({ orderId, date, status, total, itemCount, pro
         <div className="flex items-start sm:items-center gap-3 sm:gap-4 md:gap-6 flex-1 min-w-0">
           <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 bg-gradient-to-br from-gray-50 to-white border border-gray-100 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500 flex-shrink-0 overflow-hidden">
             {productImage ? (
-              <img src={productImage} alt={productName || 'Product'} className="w-full h-full object-cover" />
+              <img src={productImage} alt={productName || 'Product'} loading="lazy" decoding="async" className="w-full h-full object-cover" />
             ) : (
               <Package className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-gray-900 stroke-[1.5px]" />
             )}

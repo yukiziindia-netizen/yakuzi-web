@@ -261,7 +261,7 @@ export default function OrderIdPage({ params }: { params: { orderId: string } })
                             <div className="flex items-center gap-4">
                               <div className="w-14 h-14 bg-gray-50 rounded-2xl flex-shrink-0 overflow-hidden flex items-center justify-center border border-gray-100">
                                 {itemImage ? (
-                                  <img src={itemImage} alt={itemName} className="w-full h-full object-cover" />
+                                  <img src={itemImage} alt={itemName} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                                 ) : (
                                   <div className="p-3 bg-lime-50 rounded-xl">
                                     <Package className="w-6 h-6 text-lime-600" />

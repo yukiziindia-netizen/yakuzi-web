@@ -367,7 +367,7 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
 
         {/* Image Container - Fixed 190px/200px height matching Samplr */}
         <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`} className="relative w-full h-[130px] sm:h-[200px] bg-white overflow-hidden flex justify-center items-center shrink-0">
-           <img src={imageUrl} alt={productName} className="w-full h-full object-contain p-3 sm:p-2 group-hover:scale-105 transition-transform duration-300 ease-out" />
+           <img src={imageUrl} alt={productName} loading="lazy" decoding="async" className="w-full h-full object-contain p-3 sm:p-2 group-hover:scale-105 transition-transform duration-300 ease-out" />
         </Link>
 
          <div className="flex flex-col gap-1.5 p-[8px] sm:p-[10px] bg-white w-full">

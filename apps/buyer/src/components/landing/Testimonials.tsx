@@ -50,6 +50,8 @@ export default function Testimonials() {
                 <img
                   src={testimonial.avatar}
                   alt={testimonial.name}
+                  loading="lazy"
+                  decoding="async"
                   className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full grayscale hover:grayscale-0 transition-all duration-500"
                 />
               </div>

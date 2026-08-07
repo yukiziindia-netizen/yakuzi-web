@@ -184,7 +184,7 @@ export default function NotificationDrawer({ isOpen, onClose }: { isOpen: boolea
                     <div key={`notif-${item.id}`} className="bg-white rounded-[14px] shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border border-gray-100 p-3 flex gap-3 relative group">
                       {/* Left Image */}
                       <div className="w-[72px] h-[72px] bg-[#f8f5fd] rounded-xl flex items-center justify-center relative flex-shrink-0 overflow-hidden">
-                        <img src={product.image || (product.images && product.images[0])} alt="Product" className="w-12 h-12 object-contain mix-blend-multiply" />
+                        <img src={product.image || (product.images && product.images[0])} alt={product.name ?? 'Product'} loading="lazy" decoding="async" className="w-12 h-12 object-contain mix-blend-multiply" />
                         <button 
                           onClick={() => deleteNotification(item.id)}
                           className="absolute bottom-0 left-0 bg-[#f7941d] text-white p-1 rounded-tr-lg hover:bg-orange-500 transition-colors"
@@ -263,6 +263,8 @@ export default function NotificationDrawer({ isOpen, onClose }: { isOpen: boolea
                         <img
                           src={productImage}
                           alt={product.name}
+                          loading="lazy"
+                          decoding="async"
                           className="max-w-[80px] max-h-[90px] object-contain mix-blend-multiply"
                         />
                         <button

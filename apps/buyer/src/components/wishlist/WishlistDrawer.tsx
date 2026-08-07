@@ -258,7 +258,7 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
 
                         {/* Left Image */}
                         <div className="w-[90px] sm:w-[105px] bg-[#f8f5fd] rounded-xl flex items-center justify-center relative flex-shrink-0 overflow-hidden self-stretch my-1">
-                          <img src={itemImage} alt={itemName} className="w-16 h-16 sm:w-20 sm:h-20 object-contain mix-blend-multiply" />
+                          <img src={itemImage} alt={itemName} loading="lazy" decoding="async" className="w-16 h-16 sm:w-20 sm:h-20 object-contain mix-blend-multiply" />
                           <button 
                             onClick={() => removeFromWishlist.mutate(item.productId || item.product?.id || item.id, {
                               onSuccess: () => toast('Removed from saved items', 'info'),

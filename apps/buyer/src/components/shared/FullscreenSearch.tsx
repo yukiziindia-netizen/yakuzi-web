@@ -167,6 +167,8 @@ export default function FullscreenSearch({ isOpen, onClose }: { isOpen: boolean;
                                 <img
                                   src={typeof p.images[0] === 'string' ? p.images[0] : (p.images[0] as any)?.url || '/products/pharma_bottle.png'}
                                   alt={p.name}
+                                  loading="lazy"
+                                  decoding="async"
                                   className="w-full h-full object-contain"
                                 />
                               ) : (

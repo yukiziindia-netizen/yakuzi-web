@@ -57,9 +57,11 @@ export default function Footer() {
           {/* Brand/Logo Section */}
           <div className="flex flex-col gap-4 lg:col-span-1">
             <div className="flex items-center gap-2">
-              <img 
-                src="/YukiziLogo.png" 
-                alt="YUKiZi" 
+              <img
+                src="/YukiziLogo.png"
+                alt="YUKiZi"
+                loading="lazy"
+                decoding="async"
                 className="h-[32px] w-auto object-contain"
               />
             </div>

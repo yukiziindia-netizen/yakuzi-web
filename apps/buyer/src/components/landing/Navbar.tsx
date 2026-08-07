@@ -752,7 +752,7 @@ export default function Navbar({
                         {attachments.map((att, i) => (
                           <div key={i} className="relative w-12 h-12 rounded bg-white/10 flex-shrink-0 flex items-center justify-center border border-white/20">
                             {att.type.startsWith('image/') ? (
-                              <img src={att.data} alt="preview" className="w-full h-full object-cover rounded" />
+                              <img src={att.data} alt="preview" loading="lazy" decoding="async" className="w-full h-full object-cover rounded" />
                             ) : (
                               <span className="text-2xs text-white font-bold uppercase truncate px-1">
                                 {att.name.split('.').pop()}

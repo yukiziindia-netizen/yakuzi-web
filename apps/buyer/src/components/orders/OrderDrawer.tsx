@@ -225,10 +225,12 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
                         </button>
                       </div>
                       <div className="h-28 flex items-center justify-center mb-2 overflow-hidden">
-                         <img 
-                            src={imageUrl} 
-                            className="h-full object-contain" 
-                            alt={name} 
+                         <img
+                            src={imageUrl}
+                            className="h-full object-contain"
+                            alt={name}
+                            loading="lazy"
+                            decoding="async"
                          />
                       </div>
                       <div
@@ -314,47 +316,47 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
                         <div className="h-[160px] w-full">
                           {images.length === 1 ? (
                             <div className="bg-gray-50 rounded w-full h-full relative flex items-center justify-center overflow-hidden">
-                              <img src={images[0]} className="absolute inset-0 w-full h-full object-contain p-1" alt="" />
+                              <img src={images[0]} className="absolute inset-0 w-full h-full object-contain p-1" alt="" aria-hidden="true" loading="lazy" decoding="async" />
                             </div>
                           ) : images.length === 2 ? (
                             <div className="grid grid-cols-2 gap-1.5 h-full">
                               <div className="bg-gray-50 rounded relative flex items-center justify-center overflow-hidden">
-                                <img src={images[0]} className="absolute inset-0 w-full h-full object-contain p-1" alt="" />
+                                <img src={images[0]} className="absolute inset-0 w-full h-full object-contain p-1" alt="" aria-hidden="true" loading="lazy" decoding="async" />
                               </div>
                               <div className="bg-gray-50 rounded relative flex items-center justify-center overflow-hidden">
-                                <img src={images[1]} className="absolute inset-0 w-full h-full object-contain p-1" alt="" />
+                                <img src={images[1]} className="absolute inset-0 w-full h-full object-contain p-1" alt="" aria-hidden="true" loading="lazy" decoding="async" />
                               </div>
                             </div>
                           ) : images.length === 3 ? (
                             <div className="grid grid-cols-2 gap-1.5 h-full">
                               <div className="flex flex-col gap-1.5 h-full min-h-0">
                                 <div className="bg-gray-50 rounded flex-1 relative flex items-center justify-center overflow-hidden">
-                                  <img src={images[0]} className="absolute inset-0 w-full h-full object-contain p-1" alt="" />
+                                  <img src={images[0]} className="absolute inset-0 w-full h-full object-contain p-1" alt="" aria-hidden="true" loading="lazy" decoding="async" />
                                 </div>
                                 <div className="bg-gray-50 rounded flex-1 relative flex items-center justify-center overflow-hidden">
-                                  <img src={images[1]} className="absolute inset-0 w-full h-full object-contain p-1" alt="" />
+                                  <img src={images[1]} className="absolute inset-0 w-full h-full object-contain p-1" alt="" aria-hidden="true" loading="lazy" decoding="async" />
                                 </div>
                               </div>
                               <div className="bg-gray-50 rounded relative flex items-center justify-center overflow-hidden">
-                                <img src={images[2]} className="absolute inset-0 w-full h-full object-contain p-1" alt="" />
+                                <img src={images[2]} className="absolute inset-0 w-full h-full object-contain p-1" alt="" aria-hidden="true" loading="lazy" decoding="async" />
                               </div>
                             </div>
                           ) : (
                             <div className="grid grid-cols-2 gap-1.5 h-full">
                               <div className="flex flex-col gap-1.5 h-full min-h-0">
                                 <div className="bg-gray-50 rounded flex-1 relative flex items-center justify-center overflow-hidden">
-                                  <img src={images[0]} className="absolute inset-0 w-full h-full object-contain p-1" alt="" />
+                                  <img src={images[0]} className="absolute inset-0 w-full h-full object-contain p-1" alt="" aria-hidden="true" loading="lazy" decoding="async" />
                                 </div>
                                 <div className="bg-gray-50 rounded flex-1 relative flex items-center justify-center overflow-hidden">
-                                  <img src={images[1]} className="absolute inset-0 w-full h-full object-contain p-1" alt="" />
+                                  <img src={images[1]} className="absolute inset-0 w-full h-full object-contain p-1" alt="" aria-hidden="true" loading="lazy" decoding="async" />
                                 </div>
                               </div>
                               <div className="flex flex-col gap-1.5 h-full min-h-0">
                                 <div className="bg-gray-50 rounded flex-[2] relative flex items-center justify-center overflow-hidden">
-                                  <img src={images[2]} className="absolute inset-0 w-full h-full object-contain p-1" alt="" />
+                                  <img src={images[2]} className="absolute inset-0 w-full h-full object-contain p-1" alt="" aria-hidden="true" loading="lazy" decoding="async" />
                                 </div>
                                 <div className="bg-gray-50 rounded flex-1 relative flex items-center justify-center overflow-hidden">
-                                  <img src={images[3]} className="absolute inset-0 w-full h-full object-contain p-1" alt="" />
+                                  <img src={images[3]} className="absolute inset-0 w-full h-full object-contain p-1" alt="" aria-hidden="true" loading="lazy" decoding="async" />
                                 </div>
                               </div>
                             </div>

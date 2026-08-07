@@ -51,18 +51,29 @@ export function useCart() {
   });
 }
 
+// The cart query's fetcher hits /products/validate-ids over the network, so
+// invalidating alone leaves the UI (e.g. the +/- stepper) waiting on a round
+// trip to show a change that already landed in localStorage synchronously.
+// Writing the mutation's own return value into the cache updates the UI
+// immediately; invalidate still runs after so the network validation catches
+// up in the background.
+function applyCartUpdate(queryClient: ReturnType<typeof useQueryClient>, cart: any) {
+  queryClient.setQueriesData({ queryKey: ['cart'] }, cart);
+  queryClient.invalidateQueries({ queryKey: ['cart'] });
+}
+
 export function useAddToCart() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ productId, quantity, replace = false, ...extra }: { productId: string; quantity?: number; replace?: boolean; [key: string]: any }) => {
-      return localCart.addItem({ 
-        productId, 
+      return localCart.addItem({
+        productId,
         quantity: quantity !== undefined ? quantity : 1,
-        ...extra 
+        ...extra
       } as any, replace);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['cart'] });
+    onSuccess: (cart) => {
+      applyCartUpdate(queryClient, cart);
     },
   });
 }
@@ -73,8 +84,8 @@ export function useUpdateCartItem() {
     mutationFn: async ({ itemId, quantity }: { itemId: string; quantity: number }) => {
       return localCart.updateItem(itemId, quantity);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['cart'] });
+    onSuccess: (cart) => {
+      applyCartUpdate(queryClient, cart);
     },
   });
 }
@@ -85,8 +96,8 @@ export function useRemoveCartItem() {
     mutationFn: async (itemId: string) => {
       return localCart.removeItem(itemId);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['cart'] });
+    onSuccess: (cart) => {
+      applyCartUpdate(queryClient, cart);
     },
   });
 }

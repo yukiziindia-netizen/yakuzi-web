@@ -54,7 +54,7 @@ import SearchBar from "@/components/shared/SearchBar";
 import { SidebarSheet, type SidebarView } from "@/components/landing/SidebarSheet";
 import WishlistIcon from "@/components/shared/WishlistIcon";
 
-import { useAuth, type Category, sendChatMessage, type ChatMessage } from "@yukizi/api-client";
+import { useAuth, type Category, sendChatMessage, type ChatMessage, getProducts } from "@yukizi/api-client";
 import { useCart } from "@/hooks/useCart";
 import { localCart } from "@/lib/local-cart";
 import { useQueryClient } from "@tanstack/react-query";
@@ -157,6 +157,33 @@ export default function Navbar({
   const [chatInput, setChatInput] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [searchInput, setSearchInput] = useState("");
+  // Live results shown inside the search panel while typing.
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearchLoading, setIsSearchLoading] = useState(false);
+
+  useEffect(() => {
+    const q = searchInput.trim();
+    if (!isSearchChatOpen || q.length < 2) {
+      setSearchResults([]);
+      setIsSearchLoading(false);
+      return;
+    }
+    setIsSearchLoading(true);
+    let stale = false;
+    // Debounced so a fast typist fires one request, not one per keystroke.
+    const timer = setTimeout(async () => {
+      const res = await getProducts({ search: q, limit: 6 });
+      if (!stale) {
+        setSearchResults(res.data);
+        setIsSearchLoading(false);
+      }
+    }, 300);
+    return () => {
+      stale = true;
+      clearTimeout(timer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchInput, isSearchChatOpen]);
   const [isRecording, setIsRecording] = useState(false);
   const [attachments, setAttachments] = useState<{ name: string; data: string; type: string }[]>([]);
   const router = useRouter();
@@ -884,7 +911,7 @@ export default function Navbar({
                   <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[300px] h-[150px] bg-pink-500/10 blur-[50px] pointer-events-none rounded-full" />
 
                   {/* Chat Box Header / Input Area */}
-                  <div className="flex-1 pb-4 z-10">
+                  <div className="pb-2 z-10">
                     <textarea
                       value={searchInput}
                       onChange={(e) => setSearchInput(e.target.value)}
@@ -894,9 +921,57 @@ export default function Navbar({
                           handleSearchSubmit();
                         }
                       }}
+                      rows={1}
                       placeholder="Start typing ..."
-                      className="w-full h-full bg-transparent text-[#562996] text-base sm:text-xl md:text-2xl placeholder-[#a66ee8] outline-none resize-none font-medium"
+                      className="w-full bg-transparent text-[#562996] text-base sm:text-xl md:text-2xl placeholder-[#a66ee8] outline-none resize-none font-medium"
                     />
+                  </div>
+
+                  {/* Live results while typing, like every search box the team
+                      is used to - image, name, price. Enter still opens the
+                      full results page. */}
+                  <div className="flex-1 overflow-y-auto z-10 -mx-2 px-2">
+                    {searchInput.trim().length >= 2 && (
+                      isSearchLoading ? (
+                        <p className="text-sm text-gray-400 px-2 py-3">Searching…</p>
+                      ) : searchResults.length === 0 ? (
+                        <p className="text-sm text-gray-400 px-2 py-3">
+                          Nothing matches “{searchInput.trim()}” yet.
+                        </p>
+                      ) : (
+                        <ul className="divide-y divide-gray-50">
+                          {searchResults.map((p: any) => (
+                            <li key={p.id}>
+                              <button
+                                onClick={() => {
+                                  router.push(`/products/${p.slug}`);
+                                  setIsSearchChatOpen(false);
+                                  setSearchInput('');
+                                }}
+                                className="w-full flex items-center gap-3 py-2.5 px-2 rounded-xl hover:bg-purple-50/60 transition-colors text-left"
+                              >
+                                <img
+                                  src={p.image || 'https://placehold.co/96x96/f3f4f6/9ca3af?text=%20'}
+                                  alt=""
+                                  className="w-12 h-12 rounded-lg object-cover bg-gray-100 shrink-0"
+                                />
+                                <span className="flex-1 min-w-0">
+                                  <span className="block text-sm font-semibold text-gray-800 truncate">{p.name}</span>
+                                  {p.manufacturer && (
+                                    <span className="block text-xs text-gray-400 truncate">{p.manufacturer}</span>
+                                  )}
+                                </span>
+                                {(p.price ?? p.mrp) != null && (
+                                  <span className="text-sm font-bold text-gray-800 shrink-0">
+                                    ₹{Number(p.price ?? p.mrp).toLocaleString('en-IN')}
+                                  </span>
+                                )}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )
+                    )}
                   </div>
 
                   {/* Search Box Footer */}

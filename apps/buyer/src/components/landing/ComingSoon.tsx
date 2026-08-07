@@ -8,7 +8,7 @@ export default function ComingSoon() {
       {/* Desktop View (md and above) */}
       <div className="hidden md:flex w-full h-full items-center justify-center relative p-0 m-0">
         <img
-          src="/Desktop - Coming soon.png"
+          src="/Desktop - Coming soon.webp"
           alt="Yukizi - Coming Soon"
           className="w-full h-full object-contain max-w-full max-h-full block"
         />
@@ -17,7 +17,7 @@ export default function ComingSoon() {
       {/* Mobile View (sm and below) */}
       <div className="flex md:hidden w-full h-full items-center justify-center relative p-0 m-0">
         <img
-          src="/Mobile - Coming soon.png"
+          src="/Mobile - Coming soon.webp"
           alt="Yukizi - Coming Soon"
           className="w-full h-full object-contain max-w-full max-h-full block"
         />

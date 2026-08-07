@@ -23,6 +23,7 @@ import {
   Eye,
   Loader2,
   CheckCircle,
+  X,
 } from 'lucide-react';
 import Image from 'next/image';
 import { DeliveryTruckBadge } from '@/components/shared/DeliveryTruckBadge';
@@ -39,6 +40,7 @@ import Navbar from '@/components/landing/Navbar';
 import { generateProductSlug, parseProductIdFromSlug, calculatePricing } from '@yukizi/utils';
 import { ShareButton } from '@/components/shared/ShareButton';
 import WishlistIcon from '@/components/shared/WishlistIcon';
+import { useScrollLock } from '@/hooks/useScrollLock';
 import { renderBuyerOfferBadge, GridProductCard } from '@/components/landing/ProductCarousel';
 
 function Accordion({
@@ -154,6 +156,18 @@ function ProductBannerCard({
 }) {
   const activeImage = images[activeImageIndex % images.length];
   const isDesktop = variant === 'desktop';
+  const [isZoomed, setIsZoomed] = useState(false);
+
+  useScrollLock(isZoomed);
+
+  useEffect(() => {
+    if (!isZoomed) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsZoomed(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isZoomed]);
 
   return (
     <div className="relative w-full aspect-[4/3] rounded-[24px] bg-transparent flex items-center justify-center p-0 mt-4 lg:mt-0 border border-gray-200/80 shadow-md">
@@ -189,10 +203,16 @@ function ProductBannerCard({
         ))}
       </div>
 
-      {/* Main Image */}
+      {/* Main Image. Sits under the thumbnails/share/ribbon, which carry their own
+          z-index, so clicking those never opens the zoom. */}
       <div className="absolute inset-0 w-full h-full rounded-[24px] overflow-hidden p-4 sm:p-6 bg-white">
         {activeImage && (
-          <div className="relative w-full h-full">
+          <button
+            type="button"
+            onClick={() => setIsZoomed(true)}
+            aria-label="Zoom in on the product image"
+            className="relative w-full h-full block cursor-zoom-in focus:outline-none"
+          >
             <Image
               src={activeImage}
               alt={productName}
@@ -200,7 +220,7 @@ function ProductBannerCard({
               className="object-contain hover:scale-105 transition-transform duration-500"
               priority
             />
-          </div>
+          </button>
         )}
       </div>
 
@@ -227,6 +247,77 @@ function ProductBannerCard({
           />
         </svg>
       </button>
+
+      {/* Zoomed view. Rendered from inside the card so the mobile and desktop
+          layouts both get it without a second copy. */}
+      <AnimatePresence>
+        {isZoomed && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsZoomed(false)}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${productName} enlarged`}
+            className="fixed inset-0 z-[200] bg-black/90 flex flex-col items-center justify-center gap-4 p-4 sm:p-8 cursor-zoom-out"
+          >
+            <button
+              type="button"
+              onClick={() => setIsZoomed(false)}
+              aria-label="Close the enlarged image"
+              className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors focus:outline-none"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            <motion.div
+              initial={{ scale: 0.94 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.94 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-4xl flex-1 max-h-[75vh] cursor-default"
+            >
+              <Image
+                src={activeImage}
+                alt={productName}
+                fill
+                className="object-contain"
+                sizes="100vw"
+              />
+            </motion.div>
+
+            {images.length > 1 && (
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="flex items-center gap-2 shrink-0"
+              >
+                {images.slice(0, 6).map((img: string, idx: number) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setActiveImageIndex(idx)}
+                    aria-label={`Show image ${idx + 1}`}
+                    className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden border-2 transition-all focus:outline-none ${
+                      activeImageIndex % images.length === idx
+                        ? 'border-white scale-105'
+                        : 'border-white/30 hover:border-white/60'
+                    }`}
+                  >
+                    <Image
+                      src={img}
+                      alt=""
+                      width={56}
+                      height={56}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -1245,8 +1336,11 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
                   <span className="shrink-0 text-[11px] text-gray-400 font-semibold select-none">Ad</span>
                 )}
               </div>
+              {/* Straddles the top edge of the image card below, matching mobile.
+                  -mb cancels the column's 24px gap and overlaps a further ~10px;
+                  z-10 keeps the badge over the card, which is a later sibling. */}
               {isAd && (isYukiziChoice || isBestSeller) && (
-                <div className="flex items-center gap-2 w-full h-6">
+                <div className="relative z-10 flex items-center gap-2 w-full h-6 -mb-[34px]">
                   {isYukiziChoice && (
                     <div className="rounded-full bg-[#7B2FBE] px-4 py-1 text-[12px] font-bold tracking-wide text-white shadow-sm">
                       Yukizi Choice

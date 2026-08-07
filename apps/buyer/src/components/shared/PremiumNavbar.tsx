@@ -116,7 +116,7 @@ export default function PremiumNavbar({ onLoginClick }: PremiumNavbarProps) {
             <span
               style={{
                 fontFamily: "'Outfit', 'Inter', sans-serif",
-                fontWeight: 900,
+                fontWeight: 700,
                 fontSize: 28,
                 color: '#fff',
                 letterSpacing: '-1px',
@@ -299,7 +299,7 @@ export default function PremiumNavbar({ onLoginClick }: PremiumNavbarProps) {
               className="fixed top-0 right-0 bottom-0 w-[92%] sm:w-[500px] md:w-[520px] max-w-full bg-white z-50 shadow-2xl lg:hidden overflow-y-auto"
             >
               <div className="flex items-center justify-between p-4 border-b border-gray-100" style={{ background: '#7B2FBE' }}>
-                <span style={{ fontWeight: 900, fontSize: 22, color: '#fff', fontStyle: 'italic', letterSpacing: '-0.5px', textTransform: 'uppercase' }}>
+                <span style={{ fontWeight: 700, fontSize: 24, color: '#fff', fontStyle: 'italic', letterSpacing: '-0.5px', textTransform: 'uppercase' }}>
                   YUK<span style={{ color: '#FFD700' }}>i</span>Zi
                 </span>
                 <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 rounded-full" style={{ background: 'rgba(255,255,255,0.15)' }}>

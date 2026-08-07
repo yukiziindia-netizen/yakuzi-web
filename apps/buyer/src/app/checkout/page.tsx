@@ -358,13 +358,13 @@ export default function CheckoutPage() {
         {/* ── Top bar ────────────────────────────────────────────────────── */}
         <div style={{ background: '#fff', borderBottom: '1px solid #e8e8e8' }}>
           <div className="co-topbar-inner" style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', height: 56, gap: 6 }}>
-            <Link href="/" style={{ fontSize: 17, fontWeight: 700, color: '#1a1a1a', textDecoration: 'none' }}>Yukizi</Link>
+            <Link href="/" style={{ fontSize: 18, fontWeight: 700, color: '#1a1a1a', textDecoration: 'none' }}>Yukizi</Link>
             <span style={{ color: '#ccc', fontSize: 18 }}>/</span>
-            <span style={{ fontSize: 13, color: '#555', fontWeight: 500 }}>Information</span>
+            <span style={{ fontSize: 14, color: '#555', fontWeight: 500 }}>Information</span>
             <span style={{ color: '#ccc' }}>&#8250;</span>
-            <span style={{ fontSize: 13, color: '#bbb' }}>Shipping</span>
+            <span style={{ fontSize: 14, color: '#bbb' }}>Shipping</span>
             <span style={{ color: '#ccc' }}>&#8250;</span>
-            <span style={{ fontSize: 13, color: '#bbb' }}>Payment</span>
+            <span style={{ fontSize: 14, color: '#bbb' }}>Payment</span>
           </div>
         </div>
 
@@ -400,7 +400,7 @@ export default function CheckoutPage() {
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, cursor: 'pointer' }}>
                 <input type="checkbox" checked={emailMe} onChange={(e) => setEmailMe(e.target.checked)}
                   style={{ width: 14, height: 14, accentColor: '#0066cc', cursor: 'pointer' }} />
-                <span style={{ fontSize: 13, color: '#555' }}>Email me with news and offers</span>
+                <span style={{ fontSize: 14, color: '#555' }}>Email me with news and offers</span>
               </label>
             </div>
 
@@ -411,7 +411,7 @@ export default function CheckoutPage() {
               <p className="co-section-title" style={{ marginBottom: 14 }}>Delivery</p>
 
               <div style={{ marginBottom: 10 }}>
-                <label style={{ fontSize: 11, color: '#888', display: 'block', marginBottom: 4 }}>Country/Region</label>
+                <label style={{ fontSize: 12, color: '#888', display: 'block', marginBottom: 4 }}>Country/Region</label>
                 <select className="co-select" defaultValue="India">
                   <option>India</option>
                 </select>
@@ -435,7 +435,7 @@ export default function CheckoutPage() {
                   onChange={(e) => setAddress({ ...address, city: e.target.value })} />
                 <div style={{ position: 'relative' }}>
                   <label style={{ position: 'absolute', top: 5, left: 12, fontSize: 10, color: '#888', pointerEvents: 'none', zIndex: 1 }}>State</label>
-                  <select className="co-select" style={{ paddingTop: 16, height: 42, fontSize: 13 }}
+                  <select className="co-select" style={{ paddingTop: 16, height: 42, fontSize: 14 }}
                     value={address.state} onChange={(e) => setAddress({ ...address, state: e.target.value })}>
                     {INDIAN_STATES.map((s) => <option key={s}>{s}</option>)}
                   </select>
@@ -453,7 +453,7 @@ export default function CheckoutPage() {
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, cursor: 'pointer' }}>
                 <input type="checkbox" checked={saveInfo} onChange={(e) => setSaveInfo(e.target.checked)}
                   style={{ width: 14, height: 14, accentColor: '#0066cc', cursor: 'pointer' }} />
-                <span style={{ fontSize: 13, color: '#555' }}>Save this information for next time</span>
+                <span style={{ fontSize: 14, color: '#555' }}>Save this information for next time</span>
               </label>
             </div>
 
@@ -478,7 +478,7 @@ export default function CheckoutPage() {
             {/* PAYMENT */}
             <div className="co-section">
               <p className="co-section-title" style={{ marginBottom: 4 }}>Payment</p>
-              <p style={{ fontSize: 13, color: '#777', marginBottom: 14 }}>All transactions are secure and encrypted.</p>
+              <p style={{ fontSize: 14, color: '#777', marginBottom: 14 }}>All transactions are secure and encrypted.</p>
 
               <div style={{ border: '2px solid #0066cc', borderRadius: 8, overflow: 'hidden' }}>
 
@@ -491,12 +491,12 @@ export default function CheckoutPage() {
                         <span style={{ fontSize: 14, fontWeight: 600, color: '#1a1a1a' }}>Pay now &mdash; UPI, card, netbanking or wallet</span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                        <div style={{ background: '#fff', border: '1px solid #ddd', borderRadius: 4, padding: '2px 5px', fontSize: 10, fontWeight: 800, color: '#3395ff', letterSpacing: 0.3 }}>Razorpay</div>
+                        <div style={{ background: '#fff', border: '1px solid #ddd', borderRadius: 4, padding: '2px 5px', fontSize: 10, fontWeight: 700, color: '#3395ff', letterSpacing: 0.3 }}>Razorpay</div>
                       </div>
                     </div>
                     {paymentMethod === 'RAZORPAY' && (
                       <div style={{ padding: '14px 16px', background: '#fff', borderTop: '1px solid #dce8f5', textAlign: 'center' }}>
-                        <p style={{ fontSize: 13, color: '#555', lineHeight: 1.5 }}>
+                        <p style={{ fontSize: 14, color: '#555', lineHeight: 1.5 }}>
                           You&apos;ll be taken to Razorpay to complete the payment. Your order is confirmed as soon as the payment succeeds.
                         </p>
                       </div>
@@ -532,7 +532,7 @@ export default function CheckoutPage() {
               <div style={{ background: '#fff5f5', border: '1px solid #fca5a5', borderRadius: 8, padding: 14, marginBottom: 20, display: 'flex', gap: 10 }}>
                 <AlertCircle size={18} color="#dc2626" style={{ flexShrink: 0, marginTop: 1 }} />
                 <div>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: '#7f1d1d', marginBottom: 4 }}>Cannot place order</p>
+                  <p style={{ fontSize: 14, fontWeight: 600, color: '#7f1d1d', marginBottom: 4 }}>Cannot place order</p>
                   <p style={{ fontSize: 12, color: '#ef4444' }}>{syncError}</p>
                 </div>
               </div>
@@ -592,7 +592,7 @@ export default function CheckoutPage() {
                         </div>
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontSize: 13, fontWeight: 500, color: '#1a1a1a', lineHeight: 1.4, marginBottom: 2, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as any }}>{name}</p>
+                        <p style={{ fontSize: 14, fontWeight: 500, color: '#1a1a1a', lineHeight: 1.4, marginBottom: 2, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as any }}>{name}</p>
                         {item.variantName && <p style={{ fontSize: 12, color: '#888' }}>{item.variantName}</p>}
                       </div>
                       <span style={{ flexShrink: 0, fontSize: 14, fontWeight: 600, color: '#1a1a1a' }}>
@@ -630,7 +630,7 @@ export default function CheckoutPage() {
                 <span style={{ fontSize: 18, fontWeight: 700, color: '#1a1a1a' }}>Total Payable</span>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
                   <span style={{ fontSize: 12, color: '#888' }}>INR</span>
-                  <span style={{ fontSize: 22, fontWeight: 700, color: '#1a1a1a' }}>₹{Math.round(Number(total)).toLocaleString('en-IN')}</span>
+                  <span style={{ fontSize: 24, fontWeight: 700, color: '#1a1a1a' }}>₹{Math.round(Number(total)).toLocaleString('en-IN')}</span>
                 </div>
               </div>
               <p style={{ fontSize: 12, color: '#888', marginTop: 4, textAlign: 'right' }}>

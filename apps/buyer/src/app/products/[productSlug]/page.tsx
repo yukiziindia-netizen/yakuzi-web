@@ -83,6 +83,53 @@ function Accordion({
 }
 
 
+// Shared by the mobile and desktop layouts so the two trails can't drift apart.
+function ProductBreadcrumbs({
+  product,
+  className = '',
+}: {
+  product: any;
+  className?: string;
+}) {
+  const categoryHref = product?.category
+    ? `/category/${product.category.slug || product.category.id}`
+    : null;
+
+  return (
+    <nav
+      aria-label="Breadcrumb"
+      className={`hide-scrollbar flex items-center gap-1 overflow-x-auto whitespace-nowrap font-normal text-gray-600 ${className}`}
+    >
+      <Link href="/" className="transition-colors hover:text-[#854cbc] text-gray-600">
+        Home
+      </Link>
+      {categoryHref && (
+        <>
+          <span className="text-gray-400 mx-1">&gt;</span>
+          <Link
+            href={categoryHref}
+            className="transition-colors hover:text-[#854cbc] text-gray-600"
+          >
+            {product.category.name || 'Category'}
+          </Link>
+        </>
+      )}
+      {product?.subCategory?.name && (
+        <>
+          <span className="text-gray-400 mx-1">&gt;</span>
+          <span className="text-gray-600">{product.subCategory.name}</span>
+        </>
+      )}
+      {product?.name && (
+        <>
+          <span className="text-gray-400 mx-1">&gt;</span>
+          <span className="max-w-[200px] truncate text-gray-700">{product.name}</span>
+        </>
+      )}
+    </nav>
+  );
+}
+
 
 function ProductBannerCard({
   images,
@@ -958,6 +1005,8 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
         .purple-scroll::-webkit-scrollbar { width: 5px; }
         .purple-scroll::-webkit-scrollbar-track { background: transparent; }
         .purple-scroll::-webkit-scrollbar-thumb { background: #854cbc; border-radius: 5px; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `,
         }}
       />
@@ -966,6 +1015,9 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
 
         {/* MOBILE VIEW LAYOUT */}
         <div className="block lg:hidden flex flex-col gap-5 w-full">
+          {/* Breadcrumbs — rendered unconditionally, unlike the tags header below */}
+          <ProductBreadcrumbs product={product} className="px-1 text-[13px] -mb-3" />
+
           {/* Dynamic Tags Header */}
           {isAd && (
             <div className="flex items-center justify-between w-full px-1 mb-1">
@@ -1241,34 +1293,10 @@ export default function AnimeProductPage({ params }: { params: { productSlug: st
             {/* Right Column */}
             <div className="flex flex-col">
               {/* Right Header - Breadcrumbs */}
-              <div className="hide-scrollbar flex items-center gap-1 text-[13px] sm:text-[14px] xl:text-[15px] 2xl:text-[16px] font-normal text-gray-600 mb-4 h-6">
-                <Link href="/" className="transition-colors hover:text-[#854cbc] text-gray-600">
-                  Home
-                </Link>
-                <span className="text-gray-400 mx-1">&gt;</span>
-                {product.category && (
-                  <>
-                    <Link
-                      href={`/category/${product.category.slug || product.category.id}`}
-                      className="transition-colors hover:text-[#854cbc] text-gray-600"
-                    >
-                      {product.category.name || 'Category'}
-                    </Link>
-                    <span className="text-gray-400 mx-1">&gt;</span>
-                  </>
-                )}
-                {product.subCategory && (
-                  <>
-                    <span className="cursor-pointer transition-colors hover:text-[#854cbc] text-gray-600">
-                      {product.subCategory.name}
-                    </span>
-                    <span className="text-gray-400 mx-1">&gt;</span>
-                  </>
-                )}
-                <span className="max-w-[200px] truncate text-gray-700">
-                  {product.name}
-                </span>
-              </div>
+              <ProductBreadcrumbs
+                product={product}
+                className="text-[13px] sm:text-[14px] xl:text-[15px] 2xl:text-[16px] mb-4 min-h-6"
+              />
 
               {/* Title Block */}
               <div className="flex items-start justify-between w-full mb-4">

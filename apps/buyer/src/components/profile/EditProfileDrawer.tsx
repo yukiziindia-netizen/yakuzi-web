@@ -430,9 +430,11 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
             </div>
           </div>
 
-          <div className="h-px bg-gray-100 my-6" />
-
-          {/* Password Updates Area */}
+          {/* Security Section — headed like About you, so the transition reads
+              as structure instead of an empty row between Phone and Password */}
+          <span className="text-xs font-bold text-gray-400 uppercase tracking-widest block mt-8 mb-4">
+            Security
+          </span>
           <div className="flex flex-col gap-4">
             <div className="flex justify-between items-center py-2.5">
               <span className="text-sm font-semibold text-gray-800">Password</span>
@@ -447,7 +449,11 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
             
             <div className="flex justify-end items-center py-1">
               <button 
-                onClick={() => toast('Reset password link sent to email.', 'success')}
+                onClick={() =>
+                  // No reset API is wired here yet - never claim a link was
+                  // sent when nothing happened. Point at the flow that works.
+                  toast('Sign out and tap "Forgot Password ?" on the login screen to reset it.', 'info')
+                }
                 className="flex items-center gap-1.5 text-gray-400 hover:text-purple-600 transition-colors text-right"
               >
                 <span className="text-sm font-medium text-gray-400">Forgot Password</span>

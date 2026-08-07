@@ -899,23 +899,13 @@ export default function Navbar({
                     />
                   </div>
 
-                  {/* Chat Box Footer */}
-                  <div className="flex items-center justify-between pb-[70px] md:pb-[80px] px-2 md:px-4 z-10">
-                    {/* Action Tool Icons */}
-                    <div className="flex items-center gap-3.5 xs:gap-4 sm:gap-7 text-gray-700 ml-1 md:ml-4">
-                      <button className="hover:text-gray-900 transition-colors" title="Search History">
-                        <Clock className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2]" />
-                      </button>
-                      <button className="hover:text-gray-900 transition-colors" title="Reset Search">
-                        <RotateCw className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.5]" />
-                      </button>
-                      <button className="hover:text-gray-900 transition-colors" title="Add Filter">
-                        <Plus className="w-6 h-6 sm:w-7 sm:h-7 stroke-[3]" />
-                      </button>
-                      <button className="hover:text-gray-900 transition-colors" title="Voice Search">
-                        <AudioLines className="w-6 h-6 sm:w-8 sm:h-8 stroke-[2]" />
-                      </button>
-                    </div>
+                  {/* Search Box Footer */}
+                  {/* Four tool icons used to sit on the left here — Search
+                      History, Reset Search, Add Filter, Voice Search. None of
+                      them had an onClick, so every one was decorative and did
+                      nothing when pressed. Removed rather than wired up,
+                      because none of those features exist to wire them to. */}
+                  <div className="flex items-center justify-end pb-[70px] md:pb-[80px] px-2 md:px-4 z-10">
 
                     {/* Send Button on the right */}
                     <div className="flex items-center text-gray-700 mr-1 md:mr-4">

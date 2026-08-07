@@ -1,4 +1,5 @@
-import { cache } from 'react';
+import { cache, Suspense } from 'react';
+import { Loader2 } from 'lucide-react';
 import type { Metadata } from 'next';
 import HomeNavbar from '@/components/landing/HomeNavbar';
 import CategoryBanner from '@/components/landing/CategoryBanner';
@@ -53,6 +54,28 @@ export async function generateMetadata({
   };
 }
 
+// Streams in after the shell: the banner, name and breadcrumb paint without
+// waiting for the (slow) products query. The grid is still fully
+// server-rendered into the streamed HTML, itemList JSON-LD included, so
+// crawlers see the same markup as before.
+async function CategoryProducts({ categoryId, categoryName }: { categoryId: string; categoryName: string }) {
+  let initialProducts: any[] = [];
+  try {
+    const res = await getProducts({ categoryId, limit: 100 });
+    if (res && res.data && Array.isArray(res.data)) {
+      initialProducts = res.data;
+    }
+  } catch (error) {
+    console.error("Failed to load category products:", error);
+  }
+  return (
+    <>
+      <JsonLd data={[itemListSchema(categoryName, initialProducts.slice(0, 24))]} />
+      <ProductCarousel categoryId={categoryId} initialProducts={initialProducts} />
+    </>
+  );
+}
+
 export default async function CategoryPage({
   params,
   searchParams,
@@ -83,16 +106,6 @@ export default async function CategoryPage({
       url && url.startsWith('/') ? `${base}${url}` : url;
     categoryImage = absolute(categoryData.image || undefined);
     categoryMobileImage = absolute(categoryData.mobileImage || undefined);
-  }
-
-  let initialProducts: any[] = [];
-  try {
-    const res = await getProducts({ categoryId, limit: 100 });
-    if (res && res.data && Array.isArray(res.data)) {
-      initialProducts = res.data;
-    }
-  } catch (error) {
-    console.error("Failed to load category products:", error);
   }
 
   let breadcrumbs: string[] = [];
@@ -129,7 +142,6 @@ export default async function CategoryPage({
       <JsonLd
         data={[
           breadcrumbSchema([{ name: 'Home', path: '/' }, { name: categoryName }]),
-          itemListSchema(categoryName, initialProducts.slice(0, 24)),
         ]}
       />
       <HomeNavbar />
@@ -165,7 +177,15 @@ export default async function CategoryPage({
           </div>
 
           <div className="flex-1 min-h-[300px] overflow-hidden bg-transparent mt-4 sm:mt-6">
-            <ProductCarousel categoryId={categoryId} initialProducts={initialProducts} />
+            <Suspense
+              fallback={
+                <div className="h-40 flex items-center justify-center">
+                  <Loader2 className="w-6 h-6 animate-spin text-[#854cbc]" />
+                </div>
+              }
+            >
+              <CategoryProducts categoryId={categoryId} categoryName={categoryName} />
+            </Suspense>
           </div>
         </section>
       </div>

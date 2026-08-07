@@ -77,6 +77,9 @@ export const CreateOrderSchema = z.object({
   city: z.string().min(1),
   state: z.string().min(1),
   pincode: z.string().min(1),
+  // Optional: the companion API PR accepts this field as optional, so this
+  // widening is safe regardless of merge order.
+  email: z.string().optional(),
 });
 
 // ─── Types ──────────────────────────────────────────

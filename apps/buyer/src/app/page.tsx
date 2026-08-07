@@ -5,8 +5,12 @@ import ComingSoon from '@/components/landing/ComingSoon';
 import dynamicComponent from 'next/dynamic';
 const Footer = dynamicComponent(() => import('@/components/landing/Footer'), { ssr: false });
 import { getProducts, getComingSoonStatus } from '@yukizi/api-client';
+import JsonLd from '@/components/seo/JsonLd';
+import { organizationSchema, webSiteSchema } from '@/lib/seo/schema';
+import { absoluteUrl } from '@/lib/seo/site';
 
 export const dynamic = 'force-dynamic';
+export const metadata = { alternates: { canonical: absoluteUrl('/') } };
 
 export default async function HomePage({
   searchParams,
@@ -47,6 +51,7 @@ export default async function HomePage({
 
   return (
     <main className="w-full bg-white min-h-screen relative pb-24 sm:pb-32">
+      <JsonLd data={[organizationSchema(), webSiteSchema()]} />
       <HomeNavbar />
       
       <div className="w-full max-w-[1600px] 2xl:max-w-none mx-auto bg-white overflow-hidden flex flex-col relative min-h-screen">

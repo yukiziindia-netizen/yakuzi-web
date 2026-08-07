@@ -29,26 +29,11 @@ export default function CategoryBanner({ title, imageUrl, mobileImageUrl }: Cate
           style={{ backgroundImage: `url(${desktopImage})` }}
         />
 
-        {/* Dark overlay for text readability */}
-        <div className="absolute inset-0 bg-black/20" />
-
-        {/* Centered Text */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <h1
-            className="text-white text-5xl sm:text-6xl md:text-8xl lg:text-[10rem] font-bold tracking-tight drop-shadow-md text-center px-4"
-            style={{ textShadow: '0 4px 24px rgba(0,0,0,0.3)' }}
-          >
-            {title}
-          </h1>
-        </div>
-
-        {/* Bottom Pagination Dots */}
-        <div className="absolute bottom-4 md:bottom-8 left-0 right-0 flex justify-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-white cursor-pointer shadow-sm"></div>
-          <div className="w-2.5 h-2.5 rounded-full bg-white/40 cursor-pointer hover:bg-white/80 transition-colors shadow-sm"></div>
-          <div className="w-2.5 h-2.5 rounded-full bg-white/40 cursor-pointer hover:bg-white/80 transition-colors shadow-sm"></div>
-          <div className="w-2.5 h-2.5 rounded-full bg-white/40 cursor-pointer hover:bg-white/80 transition-colors shadow-sm"></div>
-        </div>
+        {/* The banner artwork carries its own text, so the category name is
+            not painted over it - stamping "Collectables" across a banner that
+            already says "Shop Manga, Comics & Collectables" read as a glitch.
+            The h1 stays for screen readers and search engines. */}
+        <h1 className="sr-only">{title}</h1>
       </div>
     </div>
   );

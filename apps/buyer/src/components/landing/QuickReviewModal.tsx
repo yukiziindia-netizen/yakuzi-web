@@ -18,7 +18,6 @@ import { DeliveryTruckBadge } from '@/components/shared/DeliveryTruckBadge';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { useToast } from '@/components/shared/Toast';
 import { ShareButton } from '@/components/shared/ShareButton';
 import { NotifyStockAlertModal } from '@/components/shared/NotifyStockAlertModal';
 import { CustomOrderModal } from '@/components/shared/CustomOrderModal';
@@ -51,7 +50,6 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
   const fullProduct = fullProductRaw as any;
   const displayProduct = fullProduct || (product as any);
   const listings = displayProduct?.listings || [];
-  const { toast } = useToast();
   const addToCart = useAddToCart();
   const { data: cartData } = useCart();
   const { data: config } = usePlatformConfig();
@@ -92,23 +90,17 @@ export default function QuickReviewModal({ product, isOpen, onClose }: QuickRevi
   const isBookmarked = wishlistSet.has(displayProduct.id);
 
   const handleBookmarkToggle = () => {
+    // No toast on either branch: the bookmark icon already flips to show the result.
     if (isBookmarked) {
-      removeFromWishlist.mutate(displayProduct.id, {
-        onSuccess: () => toast('Removed from wishlist', 'success'),
-      });
+      removeFromWishlist.mutate(displayProduct.id);
     } else {
-      addToWishlist.mutate(
-        {
-          productId: displayProduct.id,
-          productName: displayProduct.name,
-          price: displayPrice || 0,
-          originalPrice: displayProduct.mrp || displayProduct.originalPrice || displayPrice,
-          image: displayProduct.image || productImages[0],
-        },
-        {
-          onSuccess: () => toast('Added to wishlist!', 'success'),
-        },
-      );
+      addToWishlist.mutate({
+        productId: displayProduct.id,
+        productName: displayProduct.name,
+        price: displayPrice || 0,
+        originalPrice: displayProduct.mrp || displayProduct.originalPrice || displayPrice,
+        image: displayProduct.image || productImages[0],
+      });
     }
   };
 

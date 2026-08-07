@@ -113,23 +113,17 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
   const isBookmarked = wishlistSet.has(displayProduct.id);
 
   const handleBookmarkToggle = () => {
+    // No toast on either branch: the bookmark icon already flips to show the result.
     if (isBookmarked) {
-      removeFromWishlist.mutate(displayProduct.id, {
-        onSuccess: () => toast('Removed from wishlist', 'success'),
-      });
+      removeFromWishlist.mutate(displayProduct.id);
     } else {
-      addToWishlist.mutate(
-        {
-          productId: displayProduct.id,
-          productName: displayProduct.name,
-          price: displayPrice || 0,
-          originalPrice: displayProduct.mrp || displayProduct.originalPrice || displayPrice,
-          image: displayProduct.image || productImages[0],
-        },
-        {
-          onSuccess: () => toast('Added to wishlist!', 'success'),
-        },
-      );
+      addToWishlist.mutate({
+        productId: displayProduct.id,
+        productName: displayProduct.name,
+        price: displayPrice || 0,
+        originalPrice: displayProduct.mrp || displayProduct.originalPrice || displayPrice,
+        image: displayProduct.image || productImages[0],
+      });
     }
   };
 

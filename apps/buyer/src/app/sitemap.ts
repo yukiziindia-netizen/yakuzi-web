@@ -45,8 +45,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   try {
-    const blogs = await getBlogs({ limit: 100 });
+    const blogs = await getBlogs({ limit: 100, status: 'PUBLISHED' });
     for (const b of blogs.data) {
+      if ((b as any).status && (b as any).status !== 'PUBLISHED') continue;
       if (b?.slug) entries.push({
         url: absoluteUrl(`/blogs/${b.slug}`),
         lastModified: b.publishedAt ? new Date(b.publishedAt) : b.createdAt ? new Date(b.createdAt) : undefined,

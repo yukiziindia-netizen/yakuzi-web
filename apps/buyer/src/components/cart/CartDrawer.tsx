@@ -45,14 +45,49 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
         }
         
         const profile = (profileData as any)?.data || profileData;
+        const saved =
+          profile?.address && typeof profile.address === 'object'
+            ? profile.address
+            : {};
+
         const address = {
-          name: profile?.legalName || profile?.name || user?.name || 'Customer',
-          phone: profile?.phone || user?.phone || user?.mobile || '0000000000',
-          address: profile?.address?.street1 || (typeof profile?.address === 'string' ? profile.address : 'Default Address'),
-          city: profile?.address?.city || profile?.city || 'Default City',
-          state: profile?.address?.state || profile?.state || 'Default State',
-          pincode: profile?.address?.pincode || profile?.pincode || '000000',
+          name: profile?.legalName || profile?.name || user?.name || '',
+          phone: String(profile?.phone || user?.phone || user?.mobile || '')
+            .replace(/\D/g, '')
+            .slice(-10),
+          address:
+            saved.street1 ||
+            (typeof profile?.address === 'string' ? profile.address : ''),
+          city: saved.city || profile?.city || '',
+          state: saved.state || profile?.state || '',
+          pincode: String(saved.pincode || profile?.pincode || '')
+            .replace(/\D/g, '')
+            .slice(0, 6),
+          email: String(user?.email || profile?.email || '')
+            .trim()
+            .toLowerCase(),
         };
+
+        // This used to paper over every gap with invented values — 'Default
+        // Address', 'Default City', pincode '000000' — and place a REAL order
+        // against them, which is unfulfillable. Anything incomplete now goes to
+        // the checkout form, which collects and validates the real details.
+        // The same check keeps this path working once the API makes email
+        // mandatory, since an order is only placed here when one is present.
+        const isComplete =
+          Boolean(address.name) &&
+          /^[6-9]\d{9}$/.test(address.phone) &&
+          Boolean(address.address) &&
+          Boolean(address.city) &&
+          Boolean(address.state) &&
+          /^\d{6}$/.test(address.pincode) &&
+          /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address.email);
+
+        if (!isComplete) {
+          onClose();
+          router.push('/checkout');
+          return;
+        }
 
         createOrder.mutate(address, {
           onSuccess: (data: any) => {

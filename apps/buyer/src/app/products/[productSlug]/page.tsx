@@ -20,15 +20,22 @@ const fetchProduct = cache(async (slugOrId: string) => {
   }
 });
 
-// Adapt the detail payload (formatMasterDetail) to what productSchema() expects:
-// listings already carry a flattened `sellerName` (see products.service.ts formatMasterDetail),
-// so pick the seller of the best in-stock listing (falling back to the first) for honest Offer attribution.
+// Adapt the detail payload (formatMasterDetail) to what productSchema() expects.
+// price/stock/sellerName MUST all come from the same listing — mixing the cheapest
+// listing's price with a different (in-stock) listing's seller would misattribute
+// the Offer. Choose the cheapest in-stock listing; if none is in stock, fall back
+// to the top-level (cheapest overall) price/stock and report OutOfStock, no seller.
 function buildSchemaInput(p: any) {
   const listings: any[] = Array.isArray(p.listings) ? p.listings : [];
-  const withStock = listings.find((l) => (l?.stock ?? 0) > 0) ?? listings[0];
+  const inStock = listings.filter((l) => (l?.stock ?? 0) > 0);
+  const chosen = inStock.length
+    ? inStock.reduce((a, b) => ((a.price ?? Infinity) <= (b.price ?? Infinity) ? a : b))
+    : undefined;
   return {
     ...p,
-    sellerName: withStock?.sellerName || undefined,
+    ...(chosen
+      ? { price: chosen.price ?? p.price, stock: chosen.stock, sellerName: chosen.sellerName || undefined }
+      : { stock: 0, sellerName: undefined }),
   };
 }
 

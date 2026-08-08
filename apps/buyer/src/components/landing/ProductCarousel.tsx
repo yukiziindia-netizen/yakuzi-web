@@ -130,9 +130,10 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
         quantity: cartQuantity + 1,
       });
     } else {
+      // No toast: the button turning into the quantity stepper is already
+      // the confirmation, and the toast used to cover the top-left cards.
       addToCart(
-        { productId: targetProductId, quantity: 1, price: finalPrice, originalPrice: finalOriginalPrice || mrpVal, ...product },
-        { onSuccess: () => toast('Added to cart', 'success') }
+        { productId: targetProductId, quantity: 1, price: finalPrice, originalPrice: finalOriginalPrice || mrpVal, ...product }
       );
     }
   };

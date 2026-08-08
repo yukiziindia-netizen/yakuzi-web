@@ -508,7 +508,7 @@ export default function Navbar({
             the page underneath stays clickable through it. */}
         <div
           aria-hidden="true"
-          className="absolute inset-x-0 bottom-0 -top-[60px] sm:-top-[70px] pointer-events-none bg-[linear-gradient(to_top,#fff_45%,rgba(255,255,255,0.85)_70%,rgba(255,255,255,0)_100%)]"
+          className="absolute inset-x-0 bottom-0 -top-[60px] sm:-top-[70px] pointer-events-none bg-[linear-gradient(to_top,#fff_45%,rgba(255,255,255,0.85)_70%,rgba(255,255,255,0)_100%)] sm:[-webkit-mask-image:linear-gradient(to_right,#000,transparent_16%,transparent_84%,#000)] sm:[mask-image:linear-gradient(to_right,#000,transparent_16%,transparent_84%,#000)]"
         />
         <div
           ref={navPanelRef}

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Bot, Save, UploadCloud, RefreshCw, Send, AlertCircle, X, Edit, Trash2, Eraser } from "lucide-react";
+import { Bot, Save, UploadCloud, RefreshCw, Send, AlertCircle, X, Edit, Trash2, Eraser, Brain } from "lucide-react";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { apiClient } from "@/lib/apiClient";
@@ -97,7 +97,7 @@ export default function ChatbotAdminPage() {
   };
   
   const [chatInput, setChatInput] = useState("");
-  const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
+  const [messages, setMessages] = useState<{ role: string; content: string; thoughts?: string; thinkingTimeMs?: number }[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
@@ -243,7 +243,12 @@ export default function ChatbotAdminPage() {
       
       const data = await res.json();
       if (res.ok) {
-        setMessages(prev => [...prev, { role: "assistant", content: data.response }]);
+        setMessages(prev => [...prev, {
+          role: "assistant",
+          content: data.response,
+          thoughts: data.thoughts,
+          thinkingTimeMs: data.thinkingTimeMs || data.thinking_time_ms
+        }]);
       } else {
         setMessages(prev => [...prev, { role: "assistant", content: "Error: Could not connect to chatbot." }]);
       }
@@ -252,6 +257,43 @@ export default function ChatbotAdminPage() {
     } finally {
       setIsTyping(false);
     }
+  };
+
+  const formatFormattedMessage = (content: string) => {
+    if (!content) return null;
+    const lines = content.split('\n');
+    return lines.map((line, lineIdx) => {
+      const parts = line.split(/(\*\*.*?\*\*)/g);
+      const lineElements = parts.map((part, pIdx) => {
+        if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+          return <strong key={pIdx} className="font-bold">{part.slice(2, -2)}</strong>;
+        }
+        return part;
+      });
+
+      const trimmed = line.trim();
+      if (trimmed.startsWith('* ') || trimmed.startsWith('- ')) {
+        const rest = line.substring(line.indexOf(trimmed.startsWith('* ') ? '*' : '-') + 1);
+        const bulletParts = rest.split(/(\*\*.*?\*\*)/g).map((part, pIdx) => {
+          if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+            return <strong key={pIdx} className="font-bold">{part.slice(2, -2)}</strong>;
+          }
+          return part;
+        });
+        return (
+          <div key={lineIdx} className="flex items-start gap-2 my-1 pl-1">
+            <span className="text-primary font-bold">•</span>
+            <div className="flex-1">{bulletParts}</div>
+          </div>
+        );
+      }
+
+      return (
+        <div key={lineIdx} className={trimmed === '' ? 'h-2' : ''}>
+          {lineElements}
+        </div>
+      );
+    });
   };
 
   return (
@@ -331,11 +373,22 @@ export default function ChatbotAdminPage() {
             )}
             
             {messages.map((msg, i) => (
-              <div key={i} className={cn("flex max-w-[80%]", msg.role === "user" ? "ml-auto" : "mr-auto")}>
+              <div key={i} className={cn("flex max-w-[85%]", msg.role === "user" ? "ml-auto" : "mr-auto")}>
                 <div className={cn("p-3 rounded-2xl text-sm", 
                   msg.role === "user" ? "bg-primary text-primary-foreground rounded-br-sm" : "bg-accent rounded-bl-sm"
                 )}>
-                  {msg.content}
+                  {msg.role === "assistant" && msg.thoughts && (
+                    <details className="mb-2 text-xs bg-background/50 rounded-xl p-2 border border-border">
+                      <summary className="cursor-pointer font-semibold flex items-center gap-1.5 select-none hover:text-primary transition-colors">
+                        <Brain className="w-3.5 h-3.5 text-primary" />
+                        Thinking Process {msg.thinkingTimeMs ? `(${(msg.thinkingTimeMs / 1000).toFixed(1)}s)` : ''}
+                      </summary>
+                      <div className="mt-2 text-2xs leading-relaxed whitespace-pre-wrap font-mono opacity-80 border-t border-border/50 pt-2">
+                        {msg.thoughts}
+                      </div>
+                    </details>
+                  )}
+                  <div className="whitespace-pre-wrap leading-relaxed">{formatFormattedMessage(msg.content)}</div>
                 </div>
               </div>
             ))}

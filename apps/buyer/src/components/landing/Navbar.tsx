@@ -38,7 +38,8 @@ import {
   LifeBuoy,
   ChevronDown,
   ChevronUp,
-  LayoutGrid
+  LayoutGrid,
+  Brain
 } from "lucide-react";
 
 
@@ -54,7 +55,7 @@ import SearchBar from "@/components/shared/SearchBar";
 import { SidebarSheet, type SidebarView } from "@/components/landing/SidebarSheet";
 import WishlistIcon from "@/components/shared/WishlistIcon";
 
-import { useAuth, type Category, sendChatMessage, type ChatMessage, getProducts } from "@yukizi/api-client";
+import { useAuth, type Category, sendChatMessage, sendChatMessageFull, type ChatMessage, getProducts } from "@yukizi/api-client";
 import { useCart } from "@/hooks/useCart";
 import { localCart } from "@/lib/local-cart";
 import { useQueryClient } from "@tanstack/react-query";
@@ -267,6 +268,43 @@ export default function Navbar({
     }
   }, [chatMessages, isMounted]);
 
+  const formatFormattedMessage = (content: string) => {
+    if (!content) return null;
+    const lines = content.split('\n');
+    return lines.map((line, lineIdx) => {
+      const parts = line.split(/(\*\*.*?\*\*)/g);
+      const lineElements = parts.map((part, pIdx) => {
+        if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+          return <strong key={pIdx} className="font-bold">{part.slice(2, -2)}</strong>;
+        }
+        return part;
+      });
+
+      const trimmed = line.trim();
+      if (trimmed.startsWith('* ') || trimmed.startsWith('- ')) {
+        const rest = line.substring(line.indexOf(trimmed.startsWith('* ') ? '*' : '-') + 1);
+        const bulletParts = rest.split(/(\*\*.*?\*\*)/g).map((part, pIdx) => {
+          if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+            return <strong key={pIdx} className="font-bold">{part.slice(2, -2)}</strong>;
+          }
+          return part;
+        });
+        return (
+          <div key={lineIdx} className="flex items-start gap-2 my-1 pl-1">
+            <span className="text-purple-200 font-bold">•</span>
+            <div className="flex-1">{bulletParts}</div>
+          </div>
+        );
+      }
+
+      return (
+        <div key={lineIdx} className={trimmed === '' ? 'h-2' : ''}>
+          {lineElements}
+        </div>
+      );
+    });
+  };
+
   const performChatRequest = async (userMsgText: string, currentHistory: ChatMessage[], currentAttachments: typeof attachments) => {
     const userMessage: ChatMessage = { role: 'user', content: userMsgText, attachments: currentAttachments };
     setChatMessages((prev) => [...prev, userMessage]);
@@ -275,8 +313,13 @@ export default function Navbar({
     setIsChatLoading(true);
 
     try {
-      const response = await sendChatMessage(userMessage.content, currentHistory, userMessage.attachments);
-      setChatMessages((prev) => [...prev, { role: 'assistant', content: response }]);
+      const response = await sendChatMessageFull(userMessage.content, currentHistory, userMessage.attachments);
+      setChatMessages((prev) => [...prev, {
+        role: 'assistant',
+        content: response.response,
+        thoughts: response.thoughts,
+        thinkingTimeMs: response.thinkingTimeMs
+      }]);
     } catch (error) {
       console.error('Chat error:', error);
       setChatMessages((prev) => [...prev, { role: 'assistant', content: 'Sorry, I encountered an error processing your request.' }]);
@@ -729,8 +772,19 @@ export default function Navbar({
                     <div ref={chatContainerRef} className="flex-1 overflow-y-auto mb-4 flex flex-col gap-4 scrollbar-hide">
                       {chatMessages.map((msg, idx) => (
                         <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                          <div className={`max-w-[80%] rounded-2xl px-4 py-2 ${msg.role === 'user' ? 'bg-white text-[#7f26d9]' : 'bg-[#562996] text-white border border-white/20'}`}>
-                            {msg.content}
+                          <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${msg.role === 'user' ? 'bg-white text-[#7f26d9]' : 'bg-[#562996] text-white border border-white/20'}`}>
+                            {msg.role === 'assistant' && msg.thoughts && (
+                              <details className="mb-2 text-xs bg-white/10 rounded-xl p-2.5 border border-white/15 text-white/90">
+                                <summary className="cursor-pointer font-semibold flex items-center gap-1.5 select-none hover:text-white transition-colors">
+                                  <Brain className="w-3.5 h-3.5 text-purple-200" />
+                                  Thinking Process {msg.thinkingTimeMs ? `(${(msg.thinkingTimeMs / 1000).toFixed(1)}s)` : ''}
+                                </summary>
+                                <div className="mt-2 text-2xs leading-relaxed whitespace-pre-wrap font-mono opacity-90 border-t border-white/10 pt-2">
+                                  {msg.thoughts}
+                                </div>
+                              </details>
+                            )}
+                            <div className="whitespace-pre-wrap leading-relaxed">{formatFormattedMessage(msg.content)}</div>
                           </div>
                         </div>
                       ))}

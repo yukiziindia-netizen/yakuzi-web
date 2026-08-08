@@ -200,6 +200,7 @@ export {
 // Chatbot
 export {
   sendChatMessage,
+  sendChatMessageFull,
   type ChatMessage,
   type ChatRequest,
   type ChatResponse,

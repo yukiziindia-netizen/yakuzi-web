@@ -33,7 +33,7 @@ import { useAddToCart, useCart, useUpdateCartItem, useRemoveCartItem } from '@/h
 import { useToast } from '@/components/shared/Toast';
 import { usePlatformConfig } from '@/hooks/usePlatformConfig';
 import { useWishlist, useAddToWishlist, useRemoveFromWishlist } from '@/hooks/useWishlist';
-import { useProductReviews, useCreateReview } from '@/hooks/useReviews';
+import { useProductReviews, useCreateReview, useReviewEligibility } from '@/hooks/useReviews';
 import { useBuyerProfile } from '@/hooks/useBuyerProfile';
 import { uploadReviewImage, useAuth } from '@yukizi/api-client';
 import Navbar from '@/components/landing/Navbar';
@@ -597,6 +597,11 @@ function ComparisonOffersList({
   );
 }
 
+const REVIEW_BLOCK_MESSAGE: Record<'NOT_PURCHASED' | 'ALREADY_REVIEWED', string> = {
+  NOT_PURCHASED: 'You can only review a product you have purchased.',
+  ALREADY_REVIEWED: "You've already reviewed this product.",
+};
+
 function ReviewSubmissionForm({
   rating,
   setRating,
@@ -607,6 +612,7 @@ function ReviewSubmissionForm({
   reviewImages,
   setReviewImages,
   onSubmit,
+  blockedReason,
 }: {
   rating: number;
   setRating: (r: number) => void;
@@ -617,11 +623,23 @@ function ReviewSubmissionForm({
   reviewImages: string[];
   setReviewImages: React.Dispatch<React.SetStateAction<string[]>>;
   onSubmit: (e: React.FormEvent) => void;
+  blockedReason?: 'NOT_PURCHASED' | 'ALREADY_REVIEWED' | null;
 }) {
   const { toast } = useToast();
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const blockedMessage = blockedReason ? REVIEW_BLOCK_MESSAGE[blockedReason] : null;
+
+  const handleStarClick = (starVal: number) => {
+    // Tell them up front, at the point they start rating, rather than only
+    // after they've written a whole review and hit submit.
+    if (blockedMessage) {
+      toast(blockedMessage, 'error');
+      return;
+    }
+    setRating(starVal);
+  };
 
   const handleFileUpload = async (files: FileList | File[]) => {
     if (!files || files.length === 0) return;
@@ -655,13 +673,19 @@ function ReviewSubmissionForm({
     <form onSubmit={onSubmit} className="flex flex-col gap-4 border border-gray-200 rounded-2xl bg-white p-5 shadow-sm mt-6">
       <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wide">Your overall rating</h3>
 
+      {blockedMessage && (
+        <p className="text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+          {blockedMessage}
+        </p>
+      )}
+
       {/* Stars selector */}
       <div className="flex gap-1.5 text-gray-300">
         {[1, 2, 3, 4, 5].map((starVal) => (
           <button
             type="button"
             key={starVal}
-            onClick={() => setRating(starVal)}
+            onClick={() => handleStarClick(starVal)}
             className="focus:outline-none transition-transform active:scale-90"
           >
             <Star
@@ -767,7 +791,14 @@ function ReviewSubmissionForm({
       {/* Submit Button */}
       <button
         type="submit"
-        className="w-full bg-[#854cbc] hover:bg-purple-800 text-white rounded-xl py-3 text-xs font-bold uppercase tracking-wider shadow-sm transition-colors mt-2"
+        disabled={!!blockedMessage}
+        onClick={(e) => {
+          if (blockedMessage) {
+            e.preventDefault();
+            toast(blockedMessage, 'error');
+          }
+        }}
+        className="w-full bg-[#854cbc] hover:bg-purple-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl py-3 text-xs font-bold uppercase tracking-wider shadow-sm transition-colors mt-2"
       >
         Submit Review
       </button>
@@ -800,6 +831,7 @@ export default function ProductPageClient({ productSlug, initialProduct }: { pro
   const { data: userProfile } = useBuyerProfile();
   const { data: reviewsData } = useProductReviews(product?.id || '');
   const { mutate: submitReview } = useCreateReview();
+  const { data: reviewEligibility } = useReviewEligibility(product?.id || '');
 
   // Review state
   const [rating, setRating] = useState(0);
@@ -1053,6 +1085,10 @@ export default function ProductPageClient({ productSlug, initialProduct }: { pro
     if (!userProfile) {
       toast('Please log in to submit a review', 'error');
       // setIsLoginOpen(true); // Uncomment if login modal exists
+      return;
+    }
+    if (reviewEligibility?.canReview === false) {
+      toast(REVIEW_BLOCK_MESSAGE[reviewEligibility.reason ?? 'NOT_PURCHASED'], 'error');
       return;
     }
     if (rating === 0) {
@@ -1316,6 +1352,7 @@ export default function ProductPageClient({ productSlug, initialProduct }: { pro
               reviewImages={reviewImages}
               setReviewImages={setReviewImages}
               onSubmit={handleReviewSubmit}
+              blockedReason={reviewEligibility?.canReview === false ? reviewEligibility.reason : null}
             />
           </div>
         </div>
@@ -1580,6 +1617,7 @@ export default function ProductPageClient({ productSlug, initialProduct }: { pro
                   reviewImages={reviewImages}
                   setReviewImages={setReviewImages}
                   onSubmit={handleReviewSubmit}
+                  blockedReason={reviewEligibility?.canReview === false ? reviewEligibility.reason : null}
                 />
               </div>
             </div>

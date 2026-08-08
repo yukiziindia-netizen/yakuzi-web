@@ -116,9 +116,11 @@ export {
   updateReview,
   deleteReview,
   deleteAdminReview,
+  getReviewEligibility,
   type Review,
   type ReviewListResponse,
   type CreateReviewInput,
+  type ReviewEligibility,
 } from './modules/reviews.api';
 
 // Tickets

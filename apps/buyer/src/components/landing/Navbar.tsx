@@ -502,6 +502,14 @@ export default function Navbar({
         ref={navRef}
         className="fixed bottom-0 left-0 right-0 z-[90] flex justify-center items-end sm:items-center pointer-events-none px-2 pb-4 sm:pb-6 md:pb-4 sm:px-6 w-full will-change-transform"
       >
+        {/* Soft white glow behind the floating bar. Absolutely positioned so it
+            never affects layout, and painted before the z-10 panel so the bar
+            always sits on top of it. The whole <nav> is pointer-events-none, so
+            the page underneath stays clickable through it. */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 bottom-0 -top-[120px] sm:-top-[140px] pointer-events-none bg-[linear-gradient(to_top,#fff_45%,rgba(255,255,255,0.85)_70%,rgba(255,255,255,0)_100%)]"
+        />
         <div
           ref={navPanelRef}
           className="flex items-center gap-1.5 xs:gap-2 sm:gap-6 md:gap-2 pointer-events-auto flex-nowrap justify-center w-full max-w-[1200px] px-1 sm:px-4 relative z-10"

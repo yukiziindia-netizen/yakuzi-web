@@ -4,9 +4,28 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useBrands, useBanners } from '@/hooks/useProducts';
 
-export default function HeroSection() {
+// Routes a remote image through /_next/image so the browser downloads a
+// resized AVIF/WebP variant instead of the original upload (banner uploads
+// measure 200-300KB each; the optimized variant is a fraction of that).
+// SVGs and non-absolute URLs are left alone - the optimizer refuses SVG,
+// and the Wikimedia fallback logos are SVG.
+const canOptimize = (url?: string) =>
+  !!url && /^https?:\/\//i.test(url) && !/\.svg([?#]|$)/i.test(url);
+const optimizedUrl = (url: string, w: number) =>
+  `/_next/image?url=${encodeURIComponent(url)}&w=${w}&q=75`;
+// Widths must come from next.config's deviceSizes/imageSizes defaults.
+const bannerSrcSet = (url?: string) =>
+  canOptimize(url)
+    ? [640, 750, 1080, 1920].map((w) => `${optimizedUrl(url!, w)} ${w}w`).join(', ')
+    : undefined;
+const logoSrcSet = (url?: string) =>
+  canOptimize(url)
+    ? `${optimizedUrl(url!, 128)} 1x, ${optimizedUrl(url!, 256)} 2x`
+    : undefined;
+
+export default function HeroSection({ initialBanners }: { initialBanners?: any[] }) {
   const { data: brandsData, isLoading: isLoadingBrands } = useBrands();
-  const { data: bannersData } = useBanners();
+  const { data: bannersData } = useBanners(initialBanners);
 
   // The API sorts by `order`, but the admin form does not set it, so every
   // banner currently comes back with the same value and the tie is broken
@@ -131,13 +150,30 @@ export default function HeroSection() {
           ) : (
             banners.map((banner, index) => {
               const isCurrent = index === bannerIndex;
-              const image = banner?.imageUrl || heroBannerImage;
+              const desktopImage = banner?.imageUrl || heroBannerImage;
+              // Admins can upload a separate narrow-viewport crop; without
+              // one, phones simply get the desktop art as before.
+              const mobileImage = banner?.mobileImageUrl || desktopImage;
               const slide = (
-                <img
-                  src={image}
-                  alt={banner?.title || 'Featured'}
-                  className="h-full w-full object-cover"
-                />
+                <picture className="block h-full w-full">
+                  <source
+                    media="(min-width: 1024px)"
+                    srcSet={bannerSrcSet(desktopImage) ?? desktopImage}
+                    sizes="100vw"
+                  />
+                  <img
+                    src={mobileImage}
+                    srcSet={bannerSrcSet(mobileImage)}
+                    sizes={bannerSrcSet(mobileImage) ? '100vw' : undefined}
+                    alt={banner?.title || 'Featured'}
+                    className="h-full w-full object-cover"
+                    // The first slide is the LCP element: ask the browser to
+                    // fetch it ahead of the rest of the image flood. Lowercase
+                    // because React 18 only passes the hint through as a plain
+                    // attribute (and @types/react 18.2 has no camelCase prop).
+                    {...(index === 0 ? ({ fetchpriority: 'high' } as any) : {})}
+                  />
+                </picture>
               );
 
               return (
@@ -167,7 +203,7 @@ export default function HeroSection() {
           )}
 
           {(heroBanner as any)?.isAd && (
-            <div className="absolute top-3 left-4 z-20 bg-white/80 backdrop-blur-sm text-gray-700 px-1.5 py-0.5 rounded text-[11px] sm:text-[12px] font-medium shadow-sm">
+            <div className="absolute top-3 left-4 z-20 bg-white/80 backdrop-blur-sm text-gray-700 px-1.5 py-0.5 rounded text-xs sm:text-xs font-medium shadow-sm">
               Ad
             </div>
           )}
@@ -235,7 +271,10 @@ export default function HeroSection() {
                 >
                   <img
                     src={brand.imageUrl}
+                    srcSet={logoSrcSet(brand.imageUrl)}
                     alt={brand.name}
+                    loading="lazy"
+                    decoding="async"
                     className="h-[24px] xs:h-[36px] md:h-[54px] cursor-pointer object-contain mix-blend-multiply transition-transform hover:scale-110"
                   />
                 </div>

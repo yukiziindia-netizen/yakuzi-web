@@ -92,21 +92,21 @@ export default function BrandsMegaMenu({ isOpen, onMouseEnter, onMouseLeave }: B
                 {brandGroups.map((group, idx) => (
                   <div key={idx} className="space-y-10">
                     <div>
-                      <h3 className={`text-[13px] font-bold uppercase tracking-[0.1em] mb-8 flex items-center gap-2 ${group.titleColor}`}>
+                      <h3 className={`text-sm font-bold uppercase tracking-widest mb-8 flex items-center gap-2 ${group.titleColor}`}>
                         {group.title}
-                        {idx === 0 && <span className="text-lg font-light">›</span>}
+                        {idx === 0 && <span className="text-lg font-normal">›</span>}
                       </h3>
                       <div className="space-y-10">
                         {group.subgroups.map((sub, sIdx) => (
                           <div key={sIdx}>
-                            <h4 className="text-[15px] font-bold text-[#800080] mb-4 flex items-center justify-between group cursor-pointer hover:text-sky-600 transition-colors">
+                            <h4 className="text-base font-bold text-[#800080] mb-4 flex items-center justify-between group cursor-pointer hover:text-sky-600 transition-colors">
                               {sub.name}
                               <span className="text-gray-400 group-hover:text-sky-600 transition-colors">›</span>
                             </h4>
                             <ul className="space-y-2.5">
                               {sub.links.map((link, lIdx) => (
                                 <li key={lIdx}>
-                                  <a href="#" className="text-[14px] text-gray-500 hover:text-sky-600 transition-colors duration-200">
+                                  <a href="#" className="text-sm text-gray-500 hover:text-sky-600 transition-colors duration-200">
                                     {link}
                                   </a>
                                 </li>
@@ -126,11 +126,11 @@ export default function BrandsMegaMenu({ isOpen, onMouseEnter, onMouseLeave }: B
                 <div className="w-[160px] space-y-10">
                   {featuredLinks.map((section, idx) => (
                     <div key={idx}>
-                      <h3 className="text-[15px] font-bold text-[#800080] mb-5">{section.title}</h3>
+                      <h3 className="text-base font-bold text-[#800080] mb-5">{section.title}</h3>
                       <ul className="space-y-3.5">
                         {section.links.map((link, lIdx) => (
                           <li key={lIdx}>
-                            <a href="#" className="text-[14px] text-gray-500 hover:text-sky-600 transition-colors duration-200">
+                            <a href="#" className="text-sm text-gray-500 hover:text-sky-600 transition-colors duration-200">
                               {link}
                             </a>
                           </li>
@@ -152,8 +152,8 @@ export default function BrandsMegaMenu({ isOpen, onMouseEnter, onMouseLeave }: B
                           className="object-contain p-2 transform group-hover:scale-110 transition-transform duration-700 ease-out"
                         />
                       </div>
-                      <p className="text-[15px] font-bold text-gray-800 mb-1">{product.name}</p>
-                      <p className="text-[14px] font-semibold text-gray-500">{product.price}</p>
+                      <p className="text-base font-bold text-gray-800 mb-1">{product.name}</p>
+                      <p className="text-sm font-semibold text-gray-500">{product.price}</p>
                     </div>
                   ))}
                 </div>

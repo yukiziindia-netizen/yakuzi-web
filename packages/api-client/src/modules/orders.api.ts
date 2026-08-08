@@ -77,6 +77,9 @@ export const CreateOrderSchema = z.object({
   city: z.string().min(1),
   state: z.string().min(1),
   pincode: z.string().min(1),
+  // Optional: the companion API PR accepts this field as optional, so this
+  // widening is safe regardless of merge order.
+  email: z.string().optional(),
 });
 
 // ─── Types ──────────────────────────────────────────
@@ -168,6 +171,17 @@ export interface InvoiceParty {
   email: string | null;
 }
 
+export interface InvoiceTaxLine {
+  /** The item's GST rate, e.g. 18. */
+  rate: number;
+  /** Half the rate intra-state (CGST 9% + SGST 9%), the whole rate as IGST otherwise. */
+  componentRate: number;
+  taxableValue: number;
+  cgst: number;
+  sgst: number;
+  igst: number;
+}
+
 export interface OrderInvoice {
   invoiceNumber: string;
   invoiceDate: string;
@@ -177,6 +191,8 @@ export interface OrderInvoice {
   placeOfSupply: string;
   isIntraState: boolean;
   lines: InvoiceLine[];
+  /** Tax stated rate by rate, as a tax invoice requires. */
+  taxBreakdown: InvoiceTaxLine[];
   subtotal: number;
   cgst: number;
   sgst: number;
@@ -192,6 +208,21 @@ export interface OrderInvoice {
  */
 export const getOrderInvoices = async (orderId: string): Promise<OrderInvoice[]> => {
   const { data } = await api.get(`/orders/${orderId}/invoices`);
+  return data.data ?? data;
+};
+
+/**
+ * Emails the order's invoice(s) to the buyer as a PDF attachment.
+ *
+ * Rejects with the API's own status when it cannot send: 422 when the account
+ * has no email address on it, 503 when mail is unavailable, 404 when there is
+ * nothing to invoice. Those messages are written for the buyer, so callers
+ * should surface `error.response.data.message` rather than inventing one.
+ */
+export const emailOrderInvoices = async (
+  orderId: string,
+): Promise<{ sent: boolean }> => {
+  const { data } = await api.post(`/orders/${orderId}/invoice/email`);
   return data.data ?? data;
 };
 

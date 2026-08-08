@@ -88,7 +88,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
     if (isCart && displayItems.length === 0) {
       return (
         <div className="flex flex-col h-full bg-white p-6 pt-10">
-          <h2 className="text-[22px] font-bold text-gray-800 mb-20">My Cart</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-20">My Cart</h2>
           <div className="flex flex-col items-center justify-center flex-1 opacity-50 pb-20">
             <ShoppingBag className="w-16 h-16 text-gray-300 mb-4" />
             <p className="text-sm font-medium text-gray-400">Your cart is empty</p>
@@ -101,7 +101,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
       <div className="flex flex-col h-full bg-white">
         {/* Header */}
         <div className="p-6 pt-10 pb-4">
-          <h2 className="text-[22px] font-bold text-gray-800">
+          <h2 className="text-2xl font-bold text-gray-800">
             {isCart ? "My Cart" : "Saved"}
           </h2>
         </div>
@@ -144,14 +144,14 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
             return (
             <div key={`${item.id}-${idx}`} className="bg-white rounded-[12px] border border-[#e2cbf5] p-2 flex gap-3 shadow-sm hover:shadow-md transition-shadow relative">
               {isYukiziChoice && (
-                <div className="absolute top-0 left-2 px-2 py-[2px] rounded-b-md text-[8px] font-bold bg-[#854cbc] text-white z-20 pointer-events-none">
+                <div className="absolute top-0 left-2 px-2 py-[2px] rounded-b-md text-2xs font-bold bg-[#854cbc] text-white z-20 pointer-events-none">
                   Yukizi Choice
                 </div>
               )}
               
               {/* Left Image & Trash */}
               <div className="w-[85px] h-[85px] bg-[#f2f2f2] rounded-lg overflow-hidden relative flex-shrink-0 mt-1">
-                <img src={image} alt="Product" className="w-full h-full object-cover mix-blend-multiply" />
+                <img src={image} alt={title ?? 'Product'} loading="lazy" decoding="async" className="w-full h-full object-cover mix-blend-multiply" />
                 {isCart && (
                   <button 
                     onClick={() => {
@@ -170,18 +170,18 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
               {/* Middle Info */}
               <div className="flex-1 flex flex-col justify-center min-w-0 pr-10">
                 {isCart && (
-                  <button className="flex items-center gap-1 bg-[#562996] text-white px-2 py-0.5 rounded text-[9px] font-bold w-fit mb-1 shadow-sm mt-1">
+                  <button className="flex items-center gap-1 bg-[#562996] text-white px-2 py-0.5 rounded text-2xs font-bold w-fit mb-1 shadow-sm mt-1">
                     Wishlist <WishlistIcon className="w-2.5 h-2.5 text-white" />
                   </button>
                 )}
-                <h3 className="text-[11px] font-medium text-gray-600 truncate mb-0.5 mt-1">
+                <h3 className="text-xs font-medium text-gray-600 truncate mb-0.5 mt-1">
                   {title}
                 </h3>
                 <div className="flex items-end gap-1.5 leading-none mb-1">
-                  <span className="text-[15px] font-medium text-gray-800">{displayPriceText}</span>
-                  <span className="text-[9px] text-gray-400 line-through pb-0.5">{displayOriginalPriceText}</span>
+                  <span className="text-base font-medium text-gray-800">{displayPriceText}</span>
+                  <span className="text-2xs text-gray-400 line-through pb-0.5">{displayOriginalPriceText}</span>
                 </div>
-                <span className="text-[9px] font-bold text-gray-800">
+                <span className="text-2xs font-bold text-gray-800">
                   {discount}
                 </span>
               </div>
@@ -191,12 +191,12 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                 <div className="flex flex-col items-end gap-1.5 mt-1">
                    {/* In Cart, we don't have the save icon image, we have quantity at top */}
                    {!isCart && (
-                     <img src="/save icon.jpg" alt="save" className="w-[18px] h-[18px] object-contain mix-blend-multiply cursor-pointer" />
+                     <img src="/save icon.jpg" alt="save" loading="lazy" decoding="async" className="w-[18px] h-[18px] object-contain mix-blend-multiply cursor-pointer" />
                    )}
                    
                    <div className="flex items-center gap-1.5">
                      {/* Share/Network abstract icon */}
-                     <img src="/whislist icon.jpg" alt="network" className="w-[18px] h-[18px] object-contain cursor-pointer opacity-80" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                     <img src="/whislist icon.jpg" alt="network" loading="lazy" decoding="async" className="w-[18px] h-[18px] object-contain cursor-pointer opacity-80" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                      
                      {/* Quantity pill */}
                      {quantity !== null && (
@@ -208,15 +208,15 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                               }
                             }}
                             disabled={updateItem.isPending}
-                            className="px-1.5 h-full flex items-center justify-center hover:bg-white/20 transition-colors text-[10px]"
+                            className="px-1.5 h-full flex items-center justify-center hover:bg-white/20 transition-colors text-2xs"
                           >-</button>
-                          <span className="text-[10px] font-bold px-0.5 tracking-tighter">{String(quantity).padStart(2, '0')}</span>
+                          <span className="text-2xs font-bold px-0.5 tracking-tighter">{String(quantity).padStart(2, '0')}</span>
                           <button 
                             onClick={() => {
                               updateItem.mutate({ itemId: item.id, quantity: quantity + 1 });
                             }}
                             disabled={updateItem.isPending}
-                            className="px-1.5 h-full flex items-center justify-center hover:bg-white/20 transition-colors text-[10px]"
+                            className="px-1.5 h-full flex items-center justify-center hover:bg-white/20 transition-colors text-2xs"
                           >+</button>
                        </div>
                      )}
@@ -226,7 +226,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                 <div className="flex flex-col items-end gap-0.5">
                   <div className="flex items-center gap-0.5">
                     <Star className="w-3 h-3 fill-[#854cbc] text-[#854cbc]" />
-                    <span className="text-[11px] font-bold text-gray-700">{rating}</span>
+                    <span className="text-xs font-bold text-gray-700">{rating}</span>
                   </div>
                   <div className="flex items-center mt-1">
                     <DeliveryTruckBadge text="3 days" className="w-[75px] text-[#9a9a9a]" />
@@ -253,7 +253,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
           <div className="space-y-4 mb-6">
             <button 
               onClick={() => toggleSection("price")}
-              className="flex items-center justify-between w-full font-bold text-gray-800 text-[16px]"
+              className="flex items-center justify-between w-full font-bold text-gray-800 text-base"
             >
               Price
               {openSections.price ? <ChevronUp className="w-4 h-4 text-gray-500" strokeWidth={3} /> : <ChevronDown className="w-4 h-4 text-gray-500" strokeWidth={3} />}
@@ -292,7 +292,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                           className="absolute w-full appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-[#854cbc] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:pointer-events-auto z-10"
                         />
                       </div>
-                      <div className="flex justify-between mt-2 text-[14px] text-gray-500 font-medium">
+                      <div className="flex justify-between mt-2 text-sm text-gray-500 font-medium">
                         <span>₹{filters.minPrice}</span>
                         <span>₹{filters.maxPrice}</span>
                       </div>
@@ -310,13 +310,13 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
               <div className={`w-[18px] h-[18px] rounded-[4px] border flex items-center justify-center transition-colors ${filters.newItems ? "bg-[#854cbc] border-[#854cbc] text-white" : "border-gray-300 bg-white"}`}>
                 {filters.newItems && <Check className="w-3 h-3" strokeWidth={3} />}
               </div>
-              <span className="text-gray-700 text-[15px] font-medium">New Items</span>
+              <span className="text-gray-700 text-base font-medium">New Items</span>
             </label>
             <label className="flex items-center gap-3 cursor-pointer group" onClick={() => handleFilterChange('bestSelling', !filters.bestSelling)}>
               <div className={`w-[18px] h-[18px] rounded-[4px] border flex items-center justify-center transition-colors ${filters.bestSelling ? "bg-[#854cbc] border-[#854cbc] text-white" : "border-gray-300 bg-white"}`}>
                 {filters.bestSelling && <Check className="w-3 h-3" strokeWidth={3} />}
               </div>
-              <span className="text-gray-700 text-[15px] font-medium">Best Selling</span>
+              <span className="text-gray-700 text-base font-medium">Best Selling</span>
             </label>
           </div>
 
@@ -326,7 +326,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
           <div className="space-y-4 mb-6">
             <button 
               onClick={() => toggleSection("discount")}
-              className="flex items-center justify-between w-full font-bold text-gray-800 text-[16px]"
+              className="flex items-center justify-between w-full font-bold text-gray-800 text-base"
             >
               Discount
               {openSections.discount ? <ChevronUp className="w-4 h-4 text-gray-500" strokeWidth={3} /> : <ChevronDown className="w-4 h-4 text-gray-500" strokeWidth={3} />}
@@ -348,7 +348,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                         <div className={`w-[18px] h-[18px] rounded-full border-2 flex items-center justify-center transition-colors ${filters.discount === opt ? "border-[#854cbc]" : "border-gray-200 group-hover:border-[#854cbc]/50"}`}>
                            {filters.discount === opt && <div className="w-2 h-2 rounded-full bg-[#854cbc]" />}
                         </div>
-                        <span className="text-[15px] text-gray-700 font-medium">{opt}</span>
+                        <span className="text-base text-gray-700 font-medium">{opt}</span>
                       </label>
                     ))}
                   </div>
@@ -363,7 +363,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
           <div className="space-y-4 mb-6">
             <button 
               onClick={() => toggleSection("location")}
-              className="flex items-center justify-between w-full font-bold text-gray-800 text-[16px]"
+              className="flex items-center justify-between w-full font-bold text-gray-800 text-base"
             >
               Location
               {openSections.location ? <ChevronUp className="w-4 h-4 text-gray-500" strokeWidth={3} /> : <ChevronDown className="w-4 h-4 text-gray-500" strokeWidth={3} />}
@@ -385,7 +385,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                         <div className={`w-[18px] h-[18px] rounded-full border-2 flex items-center justify-center transition-colors ${filters.location === opt ? "border-[#854cbc]" : "border-gray-200 group-hover:border-[#854cbc]/50"}`}>
                            {filters.location === opt && <div className="w-2 h-2 rounded-full bg-[#854cbc]" />}
                         </div>
-                        <span className="text-[15px] text-gray-700 font-medium">{opt}</span>
+                        <span className="text-base text-gray-700 font-medium">{opt}</span>
                       </label>
                     ))}
                   </div>

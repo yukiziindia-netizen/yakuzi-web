@@ -8,16 +8,16 @@ const BrandsStrip = () => {
     {
       id: 2, content: (
         <div className="flex flex-col items-start leading-[0.7] pt-1">
-          <span className="font-serif font-black text-lg sm:text-xl tracking-tight">Gamar</span>
-          <span className="font-serif font-black text-[10px] sm:text-[11px] tracking-[0.1em] ml-3">ance</span>
+          <span className="font-serif font-bold text-lg sm:text-xl tracking-tight">Gamar</span>
+          <span className="font-serif font-bold text-2xs sm:text-xs tracking-widest ml-3">ance</span>
         </div>
       )
     },
-    { id: 3, content: <span className="font-sans font-semibold text-sm sm:text-base tracking-tight">Gasparyan<sup className="text-[8px] font-normal">®</sup></span> },
+    { id: 3, content: <span className="font-sans font-semibold text-sm sm:text-base tracking-tight">Gasparyan<sup className="text-2xs font-normal">®</sup></span> },
     { id: 4, content: <span className="font-serif text-xl sm:text-2xl font-normal tracking-wide">Ocean</span> },
     { id: 5, content: <span className="font-serif text-base sm:text-lg tracking-[0.15em] font-medium">Eembreeque</span> },
-    { id: 6, content: <span className="font-sans font-black text-lg sm:text-xl tracking-tighter">Helveior</span> },
-    { id: 7, content: <span className="font-serif text-base sm:text-lg font-light tracking-[0.2em]">RODOND</span> },
+    { id: 6, content: <span className="font-sans font-bold text-lg sm:text-xl tracking-tighter">Helveior</span> },
+    { id: 7, content: <span className="font-serif text-base sm:text-lg font-normal tracking-[0.2em]">RODOND</span> },
   ];
 
   return (

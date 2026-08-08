@@ -36,12 +36,12 @@ export default function PremiumFooter() {
                 />
               </div>
               <div>
-                <h3 className="text-4xl font-black text-gray-950 tracking-tighter mb-1 uppercase">
+                <h3 className="text-4xl font-bold text-gray-950 tracking-tighter mb-1 uppercase">
                   Yukizi
                 </h3>
                 <div className="flex items-center gap-3">
                    <div className="w-2 h-2 rounded-full bg-lime-500 animate-pulse" />
-                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Operational Supremacy</p>
+                   <p className="text-2xs font-bold text-gray-400 uppercase tracking-[0.3em]">Operational Supremacy</p>
                 </div>
               </div>
             </div>
@@ -63,7 +63,7 @@ export default function PremiumFooter() {
                ].map((cert) => (
                  <div key={cert.label} className="flex items-center gap-3 px-5 py-3 bg-gray-50 rounded-2xl border border-gray-100">
                     <cert.icon className="w-4 h-4 text-gray-400" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">{cert.label}</span>
+                    <span className="text-2xs font-bold uppercase tracking-widest text-gray-500">{cert.label}</span>
                  </div>
                ))}
             </div>
@@ -77,7 +77,7 @@ export default function PremiumFooter() {
                 href={link.href}
                 className="group flex flex-col gap-1 transition-all"
               >
-                <span className="text-sm font-black text-gray-900 group-hover:text-lime-600 transition-colors uppercase tracking-widest">
+                <span className="text-sm font-bold text-gray-900 group-hover:text-lime-600 transition-colors uppercase tracking-widest">
                   {link.label}
                 </span>
                 <div className="h-0.5 w-0 bg-lime-400 group-hover:w-full transition-all duration-300" />
@@ -87,13 +87,13 @@ export default function PremiumFooter() {
         </div>
 
         <div className="mt-24 pt-12 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-8">
-           <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em]">
+           <p className="text-2xs font-bold text-gray-400 uppercase tracking-[0.4em]">
              &copy; {new Date().getFullYear()} YUKIZI INTELLIGENCE SYSTEMS. ALL PROTOCOLS RESERVED.
            </p>
            <div className="flex items-center gap-10">
-              <p className="text-[9px] font-black text-gray-300 uppercase tracking-widest leading-none">ISO 27001:2022</p>
-              <p className="text-[9px] font-black text-gray-300 uppercase tracking-widest leading-none">GDPR COMPLIANT</p>
-              <p className="text-[9px] font-black text-gray-300 uppercase tracking-widest leading-none">SOC 2 TYPE II</p>
+              <p className="text-2xs font-bold text-gray-300 uppercase tracking-widest leading-none">ISO 27001:2022</p>
+              <p className="text-2xs font-bold text-gray-300 uppercase tracking-widest leading-none">GDPR COMPLIANT</p>
+              <p className="text-2xs font-bold text-gray-300 uppercase tracking-widest leading-none">SOC 2 TYPE II</p>
            </div>
         </div>
       </div>

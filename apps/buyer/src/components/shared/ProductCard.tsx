@@ -106,12 +106,12 @@ export default function ProductCard({
       {/* Yukizi Choice & Best Seller Tags */}
       <div className="absolute -top-[10px] left-4 sm:left-5 flex items-center gap-1.5 z-30">
         {isYukiziChoice && (
-          <div className="bg-[#8b5cf6] text-white px-2 sm:px-2.5 py-0.5 rounded-full font-semibold text-[10px] sm:text-[11px] shadow-sm tracking-wide flex items-center justify-center">
+          <div className="bg-[#8b5cf6] text-white px-2 sm:px-2.5 py-0.5 rounded-full font-semibold text-2xs sm:text-xs shadow-sm tracking-wide flex items-center justify-center">
             Yukizi Choice
           </div>
         )}
         {isBestSeller && (
-          <div className="bg-[#4a4a4a] text-white px-2 sm:px-2.5 py-0.5 rounded-full font-semibold text-[10px] sm:text-[11px] shadow-sm tracking-wide flex items-center justify-center">
+          <div className="bg-[#4a4a4a] text-white px-2 sm:px-2.5 py-0.5 rounded-full font-semibold text-2xs sm:text-xs shadow-sm tracking-wide flex items-center justify-center">
             Best Seller
           </div>
         )}
@@ -119,7 +119,7 @@ export default function ProductCard({
 
       {/* Ad Tag */}
       {showAd && (
-        <div className="absolute -top-5 right-2 text-[11px] sm:text-[12px] text-gray-400 font-normal z-20">
+        <div className="absolute -top-5 right-2 text-xs sm:text-xs text-gray-400 font-normal z-20">
           Ad
         </div>
       )}
@@ -149,7 +149,7 @@ export default function ProductCard({
                 <button onClick={handleMinusClick} className="text-white hover:bg-white/10 w-4.5 h-4.5 flex items-center justify-center rounded transition-colors" disabled={isLoadingCart}>
                   <Minus className="w-2.5 h-2.5" strokeWidth={3} />
                 </button>
-                <span className="text-[10px] font-black tracking-wide min-w-[12px] text-center">
+                <span className="text-2xs font-bold tracking-wide min-w-[12px] text-center">
                   {isLoadingCart ? <Loader2 className="w-2.5 h-2.5 animate-spin mx-auto" /> : String(cartQuantity).padStart(2, '0')}
                 </span>
                 <button onClick={handlePlusClick} className="text-white hover:bg-white/10 w-4.5 h-4.5 flex items-center justify-center rounded transition-colors" disabled={isLoadingCart || cartQuantity >= stock}>
@@ -205,7 +205,7 @@ export default function ProductCard({
       <div className="flex flex-col gap-1.5 p-[8px] sm:p-[10px] bg-white w-full">
         <div>
           {/* Title */}
-          <h3 className="text-[11px] sm:text-[14px] font-medium text-[#333333] leading-snug line-clamp-2 hover:text-[#7B2FBE] transition-colors">
+          <h3 className="text-xs sm:text-sm font-medium text-[#333333] leading-snug line-clamp-2 hover:text-[#7B2FBE] transition-colors">
             {name}
           </h3>
         </div>
@@ -213,11 +213,11 @@ export default function ProductCard({
         {/* Price and Rating Row */}
         <div className="flex justify-between items-center w-full pt-0.5">
           <div className="flex items-baseline gap-1">
-            <span className="text-[11.5px] sm:text-[15px] font-medium text-[#333333] leading-none">
+            <span className="text-xs sm:text-base font-medium text-[#333333] leading-none">
               {displayPrice}
             </span>
             {displayOriginalPrice && (
-              <span className="text-[9px] sm:text-[12px] text-gray-400 line-through leading-none">{displayOriginalPrice}</span>
+              <span className="text-2xs sm:text-xs text-gray-400 line-through leading-none">{displayOriginalPrice}</span>
             )}
           </div>
           {/* Only show a rating when the product actually has one. Previously this
@@ -225,14 +225,14 @@ export default function ProductCard({
               nobody had given it. */}
           <div className="flex items-center gap-1">
             <Star className={`w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 ${hasRating ? 'text-[#7B2FBE] fill-[#7B2FBE]' : 'text-gray-300 fill-gray-300'}`} />
-            <span className={`text-[10px] sm:text-[14px] font-medium leading-none ${hasRating ? 'text-[#333333]' : 'text-gray-400'}`}>{hasRating ? rating : 'NA'}</span>
+            <span className={`text-2xs sm:text-sm font-medium leading-none ${hasRating ? 'text-[#333333]' : 'text-gray-400'}`}>{hasRating ? rating : 'NA'}</span>
           </div>
         </div>
 
         {/* Bottom Badges / Delivery Truck Row */}
         <div className="flex items-center justify-between w-full pt-1 border-t border-gray-100/80">
           {displayDiscount ? (
-            <span className="text-[10px] sm:text-[12px] font-medium text-[#7B2FBE] truncate">
+            <span className="text-2xs sm:text-xs font-medium text-[#7B2FBE] truncate">
               {displayDiscount}
             </span>
           ) : <div></div>}

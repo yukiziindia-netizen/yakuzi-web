@@ -45,14 +45,49 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
         }
         
         const profile = (profileData as any)?.data || profileData;
+        const saved =
+          profile?.address && typeof profile.address === 'object'
+            ? profile.address
+            : {};
+
         const address = {
-          name: profile?.legalName || profile?.name || user?.name || 'Customer',
-          phone: profile?.phone || user?.phone || user?.mobile || '0000000000',
-          address: profile?.address?.street1 || (typeof profile?.address === 'string' ? profile.address : 'Default Address'),
-          city: profile?.address?.city || profile?.city || 'Default City',
-          state: profile?.address?.state || profile?.state || 'Default State',
-          pincode: profile?.address?.pincode || profile?.pincode || '000000',
+          name: profile?.legalName || profile?.name || user?.name || '',
+          phone: String(profile?.phone || user?.phone || user?.mobile || '')
+            .replace(/\D/g, '')
+            .slice(-10),
+          address:
+            saved.street1 ||
+            (typeof profile?.address === 'string' ? profile.address : ''),
+          city: saved.city || profile?.city || '',
+          state: saved.state || profile?.state || '',
+          pincode: String(saved.pincode || profile?.pincode || '')
+            .replace(/\D/g, '')
+            .slice(0, 6),
+          email: String(user?.email || profile?.email || '')
+            .trim()
+            .toLowerCase(),
         };
+
+        // This used to paper over every gap with invented values — 'Default
+        // Address', 'Default City', pincode '000000' — and place a REAL order
+        // against them, which is unfulfillable. Anything incomplete now goes to
+        // the checkout form, which collects and validates the real details.
+        // The same check keeps this path working once the API makes email
+        // mandatory, since an order is only placed here when one is present.
+        const isComplete =
+          Boolean(address.name) &&
+          /^[6-9]\d{9}$/.test(address.phone) &&
+          Boolean(address.address) &&
+          Boolean(address.city) &&
+          Boolean(address.state) &&
+          /^\d{6}$/.test(address.pincode) &&
+          /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address.email);
+
+        if (!isComplete) {
+          onClose();
+          router.push('/checkout');
+          return;
+        }
 
         createOrder.mutate(address, {
           onSuccess: (data: any) => {
@@ -121,7 +156,7 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
 
             {/* Header */}
             <div className="pt-8 px-4 sm:px-6 pb-2">
-              <h2 className="text-[34px] font-extrabold text-gray-800">My Cart</h2>
+              <h2 className="text-4xl font-bold text-gray-800">My Cart</h2>
             </div>
 
             {/* Items */}
@@ -170,17 +205,8 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                     const finalPrice = hasVariantPrice ? itemPrice : fallbackPrice;
                     const finalOriginalPrice = hasVariantPrice ? itemOriginalPrice : fallbackOriginalPrice;
 
-                    const calculatedDiscountPercent = (finalOriginalPrice > finalPrice && finalOriginalPrice > 0)
-                      ? Math.round(((finalOriginalPrice - finalPrice) / finalOriginalPrice) * 100)
-                      : 0;
-                    const discountText = item.discount || (calculatedDiscountPercent > 0 ? `${calculatedDiscountPercent}% off` : '');
-
-                    const displayPriceText = finalPrice > 0 
-                      ? `₹${Number(finalPrice * quantity).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` 
-                      : 'N/A';
-                    const displayOriginalPriceText = (finalOriginalPrice > 0 && Number(finalOriginalPrice) > Number(finalPrice)) 
-                      ? `₹${Number(finalOriginalPrice * quantity).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` 
-                      : '';
+                    const displayPriceText = finalPrice > 0 ? `₹${Math.round(Number(finalPrice * quantity)).toLocaleString('en-IN')}` : 'N/A';
+                    const displayOriginalPriceText = (finalOriginalPrice > 0 && Number(finalOriginalPrice) > Number(finalPrice)) ? `₹${Math.round(Number(finalOriginalPrice * quantity)).toLocaleString('en-IN')}` : '';
                     const itemImageRaw = item.product?.images?.[0] || item.imageUrl || item.image;
                     const titleWords = itemName.trim().split(' ').filter(Boolean);
                     const initials = titleWords.length === 1 
@@ -199,17 +225,17 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, x: -50 }}
-                      className="bg-white rounded-[14px] shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border border-[#854cbc] p-2 sm:p-3 flex gap-2 sm:gap-3 relative group overflow-visible"
+                      className="bg-white rounded-[14px] shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border border-gray-100 p-2 sm:p-3 flex gap-2 sm:gap-3 relative overflow-hidden group"
                     >
                       {isYukiziChoice && (
-                        <span className="absolute -top-[10px] left-4 px-2.5 py-0.5 text-[9.5px] font-bold text-white bg-[#854cbc] rounded-full z-10 shadow-sm whitespace-nowrap">
-                          Yukizi Choice
+                        <span className="absolute top-0 left-0 text-2xs font-bold text-white bg-[#6342B4] px-2 py-1 rounded-br-lg z-10 uppercase tracking-wider">
+                          YUKIZI CHOICE
                         </span>
                       )}
 
                       {/* Left Image */}
-                      <div className="w-[90px] h-[110px] sm:w-[105px] sm:h-[125px] bg-[#f8f5fd] rounded-xl flex items-center justify-center relative flex-shrink-0 mt-2 overflow-hidden">
-                        <img src={itemImage} alt={itemName} className="w-full h-full object-contain mix-blend-multiply" />
+                      <div className="w-[90px] h-[90px] sm:w-[105px] sm:h-[105px] bg-[#f8f5fd] rounded-xl flex items-center justify-center relative flex-shrink-0 mt-1.5 overflow-hidden">
+                        <img src={itemImage} alt={itemName} loading="lazy" decoding="async" className="w-16 h-16 sm:w-20 sm:h-20 object-contain mix-blend-multiply" />
                         <button 
                           onClick={(e) => {
                             e.preventDefault();
@@ -245,7 +271,7 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                               }}
                               className="flex items-center gap-1 bg-[#562996] text-white px-2.5 sm:px-3.5 py-1.5 rounded-lg hover:bg-[#432075] transition-colors shadow-sm"
                             >
-                              <span className="text-[10px] sm:text-xs font-bold tracking-wider">Wishlist</span>
+                              <span className="text-2xs sm:text-xs font-bold tracking-wider">Wishlist</span>
                               <Bookmark className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white" />
                             </button>
                           </div>
@@ -261,7 +287,7 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                             >
                               -
                             </button>
-                            <span className="text-[11px] font-black px-1 tracking-tighter">{quantity.toString().padStart(2, '0')}</span>
+                            <span className="text-xs font-bold px-1 tracking-tighter">{quantity.toString().padStart(2, '0')}</span>
                             <button
                               onClick={() => {
                                 if (quantity < maxQuantity) {
@@ -279,8 +305,8 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                         </div>
 
                         {/* Product Name & Arrow Button */}
-                        <div className="flex items-center justify-between w-full pr-0.5 sm:pr-1 gap-2 mt-3.5">
-                          <h3 className="text-[15px] font-medium text-gray-500 leading-snug truncate flex-1">{itemName}</h3>
+                        <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2">
+                          <h3 className="text-base font-bold text-gray-800 leading-snug truncate flex-1">{itemName}</h3>
                           <button
                             onClick={(e) => {
                               e.preventDefault();
@@ -299,34 +325,33 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                           </button>
                         </div>
                         {/* Price & Rating */}
-                        <div className="flex items-center justify-between w-full pr-0.5 sm:pr-1 gap-2 mt-2">
+                        <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2">
                           <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className="text-[18px] font-semibold text-gray-800">{displayPriceText}</span>
-                            <span className="text-[13px] font-normal text-gray-400 line-through">{displayOriginalPriceText}</span>
+                            <span className="text-xl font-bold text-gray-900">{displayPriceText}</span>
+                            <span className="text-sm font-bold text-gray-400 line-through">{displayOriginalPriceText}</span>
                           </div>
                           <div className="flex items-center gap-[3px] sm:gap-[4px]">
                             <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-[#6342B4] text-[#6342B4]" />
-                            <span className="text-xs sm:text-[14px] font-bold text-gray-700">{item.rating ? item.rating : 'NA'}</span>
+                            <span className="text-xs sm:text-sm font-bold text-gray-700">{item.rating ? item.rating : 'NA'}</span>
                           </div>
                         </div>
 
-                        {/* Discount & Delivery Row */}
-                        <div className="flex items-center justify-between w-full pr-0.5 sm:pr-1 mt-1.5">
-                          <div>
-                            {discountText ? (
-                              <span className="text-[13px] font-bold text-gray-800">
-                                {discountText}
-                              </span>
-                            ) : isOutOfStock ? (
-                              <span className="text-[11px] font-bold text-red-600 uppercase tracking-wide">Out of stock</span>
-                            ) : null}
+                        {/* Stock notice */}
+                        {isOutOfStock ? (
+                          <div className="w-full pr-1.5 sm:pr-3 mt-0.5">
+                            <span className="text-xs font-bold text-red-600 uppercase tracking-wide">Out of stock</span>
                           </div>
-                          <div className="flex items-center -mr-1 sm:-mr-2">
-                            <DeliveryTruckBadge 
-                              text={item.product?.deliveryTime || item.product?.deliveryText || '3 days'} 
-                              className="w-[65px] sm:w-[70px] text-[#9a9a9a]" 
-                            />
+                        ) : Number.isFinite(maxQuantity) && quantity >= maxQuantity ? (
+                          <div className="w-full pr-1.5 sm:pr-3 mt-0.5">
+                            <span className="text-xs font-bold text-amber-600">
+                              Only {maxQuantity} {maxQuantity === 1 ? 'unit' : 'units'} available
+                            </span>
                           </div>
+                        ) : null}
+
+                        {/* Delivery */}
+                        <div className="flex justify-end w-full pr-1.5 sm:pr-3 mt-0.5">
+                          <DeliveryTruckBadge text="2 days" className="w-[80px] sm:w-[95px] text-[#9a9a9a]" />
                         </div>
 
                         {/* Top Right Actions */}
@@ -342,7 +367,7 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                             >
                               -
                             </button>
-                            <span className="text-xs sm:text-xs font-black px-1.5 sm:px-2 tracking-tighter">{quantity.toString().padStart(2, '0')}</span>
+                            <span className="text-xs sm:text-xs font-bold px-1.5 sm:px-2 tracking-tighter">{quantity.toString().padStart(2, '0')}</span>
                             <button
                               onClick={() => {
                                 if (quantity < maxQuantity) {
@@ -370,11 +395,11 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
             <div className="px-5 pb-6 pt-3 border-t border-gray-100">
               {/* Subtotal row */}
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[17px] font-semibold text-gray-400 uppercase tracking-widest">Subtotal</span>
-                <span className="text-[28px] font-black text-gray-900">₹{Math.round(Number(cart?.total ?? 0)).toLocaleString('en-IN')}</span>
+                <span className="text-lg font-semibold text-gray-400 uppercase tracking-widest">Subtotal</span>
+                <span className="text-3xl font-bold text-gray-900">₹{Math.round(Number(cart?.total ?? 0)).toLocaleString('en-IN')}</span>
               </div>
               {items.length > 0 && (
-                <p className="text-[15px] text-gray-400 mb-4">
+                <p className="text-base text-gray-400 mb-4">
                   {items.length} item{items.length > 1 ? 's' : ''} · Shipping calculated at checkout
                 </p>
               )}
@@ -390,7 +415,7 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                   router.push('/checkout');
                 }}
                 disabled={items.length === 0}
-                className="w-full bg-[#854cbc] hover:bg-[#6f3ea5] active:scale-[0.98] text-white rounded-2xl py-5 text-[19px] font-bold shadow-lg transition-all flex justify-center items-center gap-3 disabled:opacity-40 disabled:cursor-not-allowed mb-2"
+                className="w-full bg-[#854cbc] hover:bg-[#6f3ea5] active:scale-[0.98] text-white rounded-2xl py-5 text-xl font-bold shadow-lg transition-all flex justify-center items-center gap-3 disabled:opacity-40 disabled:cursor-not-allowed mb-2"
               >
                 <ShoppingCart className="w-6 h-6" />
                 Order Now

@@ -109,8 +109,8 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
             {/* Title Row */}
             <div className="flex justify-between items-start gap-4">
               <div>
-                <h2 className="text-[24px] sm:text-[28px] font-extrabold text-gray-850 leading-none">My Orders</h2>
-                <p className="text-[12px] text-gray-400 font-bold mt-1.5">Order Id #{orderNumber}</p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-850 leading-none">My Orders</h2>
+                <p className="text-xs text-gray-400 font-bold mt-1.5">Order Id #{orderNumber}</p>
               </div>
               <div className="flex flex-col items-end gap-2 mr-10">
                 <p className="text-xs sm:text-sm font-bold text-gray-500 whitespace-nowrap">Date: {orderDateShort}</p>
@@ -143,9 +143,9 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
 
             {/* Ship to Section */}
             <div>
-              <h3 className="text-sm sm:text-base font-black text-[#1e1e1e] mb-1">Ship to</h3>
-              <div className="text-[12px] font-bold text-gray-500 leading-relaxed space-y-0.5">
-                <p className="text-gray-855 font-black">{(headerOrder as any).user?.name || headerOrder?.address?.name || shipHeader.name || 'Name Surname'}</p>
+              <h3 className="text-sm sm:text-base font-bold text-[#1e1e1e] mb-1">Ship to</h3>
+              <div className="text-xs font-bold text-gray-500 leading-relaxed space-y-0.5">
+                <p className="text-gray-855 font-bold">{(headerOrder as any).user?.name || headerOrder?.address?.name || shipHeader.name || 'Name Surname'}</p>
                 {headerShippingAddress ? (
                   headerShippingAddress.split(', ').map((addrPart: string, sIdx: number) => (
                     <p key={sIdx}>{addrPart}</p>
@@ -203,17 +203,19 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
                    <div className="flex gap-3">
                    
                    {isYukiziChoice && (
-                     <div className="absolute -top-2.5 left-4 bg-[#8b3dcc] text-white text-[9px] font-bold px-2.5 py-0.5 rounded-full z-10">
+                     <div className="absolute -top-2.5 left-4 bg-[#8b3dcc] text-white text-2xs font-bold px-2.5 py-0.5 rounded-full z-10">
                        Yukizi Choice
                      </div>
                    )}
  
                    {/* Left: Image */}
                    <div className="relative w-[100px] h-[115px] sm:w-[110px] sm:h-[125px] shrink-0 bg-gray-50 rounded-lg overflow-hidden border border-gray-100 flex items-center justify-center">
-                     <img 
-                       src={imageUrl} 
-                       className="w-full h-full object-cover" 
-                       alt={name} 
+                     <img
+                       src={imageUrl}
+                       className="w-full h-full object-cover"
+                       alt={name}
+                       loading="lazy"
+                       decoding="async"
                      />
                      <button className="absolute bottom-1 left-1 bg-[#f9884e] text-white p-2 rounded-md">
                         <Trash2 className="w-[18px] h-[18px]" />
@@ -236,8 +238,8 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
                              <RefreshCw className="w-4 h-4" />
                            </div>
                          )}
-                         <span className="bg-[#c0c0c0] text-white text-[13px] font-bold px-3 py-1.5 rounded-[8px] shadow-sm whitespace-nowrap">Return / Replace</span>
-                         <span className="bg-[#c0c0c0] text-white text-[13px] font-bold px-3 py-1.5 rounded-[8px] shadow-sm whitespace-nowrap">Canceled</span>
+                         <span className="bg-[#c0c0c0] text-white text-sm font-bold px-3 py-1.5 rounded-[8px] shadow-sm whitespace-nowrap">Return / Replace</span>
+                         <span className="bg-[#c0c0c0] text-white text-sm font-bold px-3 py-1.5 rounded-[8px] shadow-sm whitespace-nowrap">Canceled</span>
                        </div>
  
                        <div className="flex flex-col items-end gap-1.5">
@@ -256,7 +258,7 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
                      </div>
  
                      {/* Title */}
-                     <h3 className="text-[16px] text-gray-600 font-bold leading-tight mb-1.5 line-clamp-2">
+                     <h3 className="text-base text-gray-600 font-bold leading-tight mb-1.5 line-clamp-2">
                        {name}
                      </h3>
  
@@ -264,8 +266,8 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
                      <div className="flex justify-between items-end">
                        <div>
                          <div className="flex items-baseline gap-2">
-                           <span className="text-[21px] font-black text-gray-800">₹{Math.round(Number(price)).toLocaleString('en-IN')}</span>
-                           {discount > 0 && <span className="text-[14px] text-gray-400 line-through">₹{Math.round(Number(mrp)).toLocaleString('en-IN')}</span>}
+                           <span className="text-xl font-bold text-gray-800">₹{Math.round(Number(price)).toLocaleString('en-IN')}</span>
+                           {discount > 0 && <span className="text-sm text-gray-400 line-through">₹{Math.round(Number(mrp)).toLocaleString('en-IN')}</span>}
                          </div>
                          {discount > 0 && <span className="text-sm text-gray-500 font-semibold">{discount}% off</span>}
                        </div>
@@ -281,7 +283,7 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
                                 e.stopPropagation();
                                 setExpandedItem(expandedItem === item.id ? null : item.id);
                               }}
-                              className="text-[13px] font-bold text-gray-600 underline whitespace-nowrap hover:text-[#8b3dcc]"
+                              className="text-sm font-bold text-gray-600 underline whitespace-nowrap hover:text-[#8b3dcc]"
                             >
                               Order details
                             </button>
@@ -310,8 +312,8 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
                                  {step.isCompleted ? <Check className="w-4 h-4" strokeWidth={3} /> : step.icon}
                                </div>
                                <div className="text-center w-[70px]">
-                                 <p className={`text-[9px] font-bold leading-tight ${step.isCompleted ? 'text-gray-700' : 'text-gray-500'}`}>{step.label}</p>
-                                 <p className="text-[8px] text-gray-400 font-medium">{step.date}</p>
+                                 <p className={`text-2xs font-bold leading-tight ${step.isCompleted ? 'text-gray-700' : 'text-gray-500'}`}>{step.label}</p>
+                                 <p className="text-2xs text-gray-400 font-medium">{step.date}</p>
                                </div>
                              </div>
                            ))}

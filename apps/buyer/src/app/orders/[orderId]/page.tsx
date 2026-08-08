@@ -73,7 +73,7 @@ function buildTimelineSteps(status: string | undefined, order?: any) {
     action: label === 'Paid' && idx === activeIdx + 1 && !order?.payments?.some((p: any) => p.proofUrl) ? (
       <Link 
         href={`/payments/${order.id}`} 
-        className="px-4 py-1.5 bg-lime-400 hover:bg-lime-500 text-gray-900 rounded-full text-[11px] font-black uppercase tracking-wider transition-all shadow-lg shadow-lime-200/50 flex items-center gap-1.5"
+        className="px-4 py-1.5 bg-lime-400 hover:bg-lime-500 text-gray-900 rounded-full text-xs font-bold uppercase tracking-wider transition-all shadow-lg shadow-lime-200/50 flex items-center gap-1.5"
       >
         <CreditCard className="w-3.5 h-3.5" />
         Pay Now
@@ -193,9 +193,18 @@ export default function OrderIdPage({ params }: { params: { orderId: string } })
               <div className="bg-white/40 backdrop-blur-xl p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl md:rounded-[40px] border border-white/40 shadow-xl">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4 mb-6 sm:mb-8">
                   <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">Order #{order.orderNumber ?? (order.id || "").toString().slice(0, 8).toUpperCase()}</h1>
-                  <div className="flex items-center gap-2 text-gray-400">
-                    <Calendar className="w-4 h-4" />
-                    <span className="text-sm font-bold">{orderDate}</span>
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 text-gray-400">
+                      <Calendar className="w-4 h-4" />
+                      <span className="text-sm font-bold">{orderDate}</span>
+                    </div>
+                    <Link
+                      href={`/orders/${order.id}/invoice`}
+                      className="flex items-center gap-1.5 rounded-full border border-[#e2e8f0] bg-white px-4 py-2 text-sm font-bold text-[#593696] hover:bg-[#f5f3fa] transition-colors"
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      Tax invoice
+                    </Link>
                   </div>
                 </div>
 
@@ -215,8 +224,8 @@ export default function OrderIdPage({ params }: { params: { orderId: string } })
 
                   {shippingAddress && (
                     <div className="p-6 bg-white/40 rounded-3xl border border-white shadow-sm">
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Ship to</p>
-                      {(order.address as any)?.name && <p className="text-sm font-black text-gray-800 mb-1">{(order.address as any).name}</p>}
+                      <p className="text-2xs font-bold text-gray-400 uppercase tracking-widest mb-3">Ship to</p>
+                      {(order.address as any)?.name && <p className="text-sm font-bold text-gray-800 mb-1">{(order.address as any).name}</p>}
                       <p className="text-sm font-bold text-gray-800 leading-relaxed">{shippingAddress}</p>
                     </div>
                   )}
@@ -252,7 +261,7 @@ export default function OrderIdPage({ params }: { params: { orderId: string } })
                             <div className="flex items-center gap-4">
                               <div className="w-14 h-14 bg-gray-50 rounded-2xl flex-shrink-0 overflow-hidden flex items-center justify-center border border-gray-100">
                                 {itemImage ? (
-                                  <img src={itemImage} alt={itemName} className="w-full h-full object-cover" />
+                                  <img src={itemImage} alt={itemName} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                                 ) : (
                                   <div className="p-3 bg-lime-50 rounded-xl">
                                     <Package className="w-6 h-6 text-lime-600" />
@@ -263,7 +272,7 @@ export default function OrderIdPage({ params }: { params: { orderId: string } })
                                 <p className="font-bold text-gray-900 line-clamp-1">{itemName}</p>
                                 <div className="flex items-center gap-2 mt-0.5">
                                   <span className="text-xs text-gray-400 font-bold">Qty: {item.quantity || 1}</span>
-                                  <span className="text-[10px] text-gray-300">•</span>
+                                  <span className="text-2xs text-gray-300">•</span>
                                   <span className="text-xs text-gray-400 font-bold">₹{(item.price || item.unitPrice || (itemTotal / (item.quantity || 1))).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/unit</span>
                                 </div>
                               </div>
@@ -304,6 +313,18 @@ export default function OrderIdPage({ params }: { params: { orderId: string } })
                   <h2 className="text-xl font-bold text-gray-900 tracking-tight">Live Tracking</h2>
                 </div>
                 <Timeline steps={steps} />
+
+                {tracking?.track_url && (
+                  <a
+                    href={tracking.track_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-4 w-full py-3 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-2xl font-semibold text-sm transition-all border border-gray-200 flex items-center justify-center gap-2"
+                  >
+                    <Truck className="w-4 h-4" />
+                    Track on courier site
+                  </a>
+                )}
 
                 {['PLACED', 'ACCEPTED'].includes(normalizeStatus(status)) && (
                   <div className="mt-8">

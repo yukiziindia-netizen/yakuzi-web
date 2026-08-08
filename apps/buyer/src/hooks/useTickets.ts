@@ -10,10 +10,16 @@ import {
   type CreateTicketInput,
 } from '@yukizi/api-client';
 
-export function useTickets(params?: { page?: number; limit?: number; status?: string }) {
+export function useTickets(
+  params?: { page?: number; limit?: number; status?: string },
+  // The list is behind auth, so callers that render before sign-in (the support
+  // drawer) need a way to hold the request back instead of firing a 401.
+  options?: { enabled?: boolean },
+) {
   return useQuery({
     queryKey: ['tickets', params],
     queryFn: () => getTickets(params),
+    enabled: options?.enabled ?? true,
   });
 }
 

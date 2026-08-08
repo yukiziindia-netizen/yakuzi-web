@@ -14,6 +14,10 @@ export interface BlogPost {
   status: 'DRAFT' | 'PUBLISHED';
   publishedAt?: string;
   createdAt: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  canonicalUrl?: string;
+  ogImage?: string;
   author?: {
     name: string;
     avatar?: string;

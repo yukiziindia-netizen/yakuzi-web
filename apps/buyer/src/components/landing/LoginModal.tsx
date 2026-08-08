@@ -29,6 +29,8 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
   const [signupRealName, setSignupRealName] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
   const [signupConfirmPassword, setSignupConfirmPassword] = useState('');
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [showSignupConfirmPassword, setShowSignupConfirmPassword] = useState(false);
   const [signupGender, setSignupGender] = useState('');
   const [signupDate, setSignupDate] = useState<number | null>(6);
   const [signupMonth, setSignupMonth] = useState<number>(9);
@@ -249,10 +251,12 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
         
         {/* Logo */}
         <div className="mb-6 md:mb-8 flex justify-center w-full max-w-[180px] xs:max-w-[220px] sm:max-w-[240px] md:max-w-[280px] transition-all duration-300">
-          <img 
-            src="/YukiziLogo.png" 
-            alt="YUKiZi" 
-            className="w-full h-auto object-contain" 
+          <img
+            src="/YukiziLogo.png"
+            alt="YUKiZi"
+            loading="lazy"
+            decoding="async"
+            className="w-full h-auto object-contain"
           />
         </div>
 
@@ -261,7 +265,7 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
           <div className="w-full flex flex-col items-center">
             {signupStep === 1 ? (
               <>
-                <h2 className="text-[#0f172a] text-[19px] mb-20 tracking-wide">
+                <h2 className="text-[#0f172a] text-xl mb-20 tracking-wide">
                   How do you want us call you ?
                 </h2>
                 
@@ -283,12 +287,12 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
               </>
             ) : signupStep === 2 ? (
               <>
-                <h2 className="text-[#0f172a] text-[24px] font-bold mb-10 tracking-wide">
+                <h2 className="text-[#0f172a] text-2xl font-bold mb-10 tracking-wide">
                   Hi, {signupUsername || 'User'}
                 </h2>
                 
                 <div className="w-full flex flex-col items-center mb-[100px] space-y-4">
-                  <p className="text-[#0f172a] text-[17px] tracking-wide">Email or Phone ?</p>
+                  <p className="text-[#0f172a] text-lg tracking-wide">Email or Phone ?</p>
                   <input
                     type="text"
                     value={signupContact}
@@ -309,12 +313,12 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
               </>
             ) : signupStep === 3 ? (
               <>
-                <h2 className="text-[#0f172a] text-[28px] font-bold mb-4 tracking-wide">
+                <h2 className="text-[#0f172a] text-3xl font-bold mb-4 tracking-wide">
                   Verification
                 </h2>
                 
                 <div className="w-full flex flex-col items-center mb-[100px] mt-12 space-y-4">
-                  <p className="text-[#0f172a] text-[17px] tracking-wide text-center">You must have received an OTP</p>
+                  <p className="text-[#0f172a] text-lg tracking-wide text-center">You must have received an OTP</p>
                   <input
                     type="text"
                     value={signupOtp}
@@ -334,11 +338,11 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
               </>
             ) : signupStep === 4 ? (
               <>
-                <h2 className="text-[#0f172a] text-[28px] font-bold mb-4 tracking-wide">
+                <h2 className="text-[#0f172a] text-3xl font-bold mb-4 tracking-wide">
                   Almost there !!
                 </h2>
                 
-                <h3 className="text-[#0f172a] text-[20px] font-medium mb-[120px] tracking-wide">
+                <h3 className="text-[#0f172a] text-xl font-medium mb-[120px] tracking-wide">
                   What is you name ?
                 </h3>
                 
@@ -360,29 +364,49 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
               </>
             ) : signupStep === 5 ? (
               <>
-                <h2 className="text-[#0f172a] text-[28px] font-bold mb-4 tracking-wide">
+                <h2 className="text-[#0f172a] text-3xl font-bold mb-4 tracking-wide">
                   Secure your account
                 </h2>
                 
                 <div className="w-full flex flex-col items-center mb-6 mt-12 space-y-4">
-                  <p className="text-[#0f172a] text-[17px] tracking-wide">Password</p>
-                  <input
-                    type="password"
-                    value={signupPassword}
-                    onChange={(e) => setSignupPassword(e.target.value)}
-                    className="bg-transparent text-[#0f172a] text-center text-xl font-medium outline-none w-full max-w-[240px] border-b border-[#e2e8f0] focus:border-[#593696] pb-1"
-                    autoFocus
-                  />
+                  <p className="text-[#0f172a] text-lg tracking-wide">Password</p>
+                  <div className="relative w-full max-w-[240px]">
+                    <input
+                      type={showSignupPassword ? 'text' : 'password'}
+                      value={signupPassword}
+                      onChange={(e) => setSignupPassword(e.target.value)}
+                      className="bg-transparent text-[#0f172a] text-center text-xl font-medium outline-none w-full border-b border-[#e2e8f0] focus:border-[#593696] pb-1 px-7"
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowSignupPassword((s) => !s)}
+                      aria-label={showSignupPassword ? 'Hide password' : 'Show password'}
+                      className="absolute right-0 bottom-1 text-[#94a3b8] hover:text-[#593696]"
+                    >
+                      {showSignupPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                  </div>
                 </div>
 
                 <div className="w-full flex flex-col items-center mb-[70px] space-y-4">
-                  <p className="text-[#0f172a] text-[17px] tracking-wide">Confirm Password</p>
-                  <input
-                    type="password"
-                    value={signupConfirmPassword}
-                    onChange={(e) => setSignupConfirmPassword(e.target.value)}
-                    className="bg-transparent text-[#0f172a] text-center text-xl font-medium outline-none w-full max-w-[240px] border-b border-[#e2e8f0] focus:border-[#593696] pb-1"
-                  />
+                  <p className="text-[#0f172a] text-lg tracking-wide">Confirm Password</p>
+                  <div className="relative w-full max-w-[240px]">
+                    <input
+                      type={showSignupConfirmPassword ? 'text' : 'password'}
+                      value={signupConfirmPassword}
+                      onChange={(e) => setSignupConfirmPassword(e.target.value)}
+                      className="bg-transparent text-[#0f172a] text-center text-xl font-medium outline-none w-full border-b border-[#e2e8f0] focus:border-[#593696] pb-1 px-7"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowSignupConfirmPassword((s) => !s)}
+                      aria-label={showSignupConfirmPassword ? 'Hide password' : 'Show password'}
+                      className="absolute right-0 bottom-1 text-[#94a3b8] hover:text-[#593696]"
+                    >
+                      {showSignupConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                  </div>
                 </div>
 
                 <button
@@ -395,11 +419,11 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
               </>
             ) : (
               <>
-                <h2 className="text-[#0f172a] text-[28px] font-bold mb-2 tracking-wide">
+                <h2 className="text-[#0f172a] text-3xl font-bold mb-2 tracking-wide">
                   One last thing -
                 </h2>
                 
-                <h3 className="text-[#0f172a] text-[19px] font-medium mb-10 tracking-wide">
+                <h3 className="text-[#0f172a] text-xl font-medium mb-10 tracking-wide">
                   Your age ?
                 </h3>
                 
@@ -411,7 +435,7 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
                         <button 
                           type="button"
                           onClick={() => { setShowMonthSelect(!showMonthSelect); setShowYearSelect(false); }}
-                          className="bg-transparent text-[#64748b] font-medium text-[15px] outline-none hover:text-[#593696] transition-colors"
+                          className="bg-transparent text-[#64748b] font-medium text-base outline-none hover:text-[#593696] transition-colors"
                         >
                           {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][displayMonth]}
                         </button>
@@ -422,7 +446,7 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
                               {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map((m, i) => (
                                 <div 
                                   key={m} 
-                                  className={`px-3 py-2 text-[14px] cursor-pointer hover:bg-[#ebe6f5] transition-colors ${displayMonth === i ? 'text-[#593696] font-bold bg-[#ebe6f5]' : 'text-[#64748b]'}`}
+                                  className={`px-3 py-2 text-sm cursor-pointer hover:bg-[#ebe6f5] transition-colors ${displayMonth === i ? 'text-[#593696] font-bold bg-[#ebe6f5]' : 'text-[#64748b]'}`}
                                   onClick={() => { setDisplayMonth(i); setShowMonthSelect(false); }}
                                 >
                                   {m}
@@ -436,7 +460,7 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
                         <button 
                           type="button"
                           onClick={() => { setShowYearSelect(!showYearSelect); setShowMonthSelect(false); }}
-                          className="bg-transparent text-[#64748b] font-medium text-[15px] outline-none hover:text-[#593696] transition-colors"
+                          className="bg-transparent text-[#64748b] font-medium text-base outline-none hover:text-[#593696] transition-colors"
                         >
                           {displayYear}
                         </button>
@@ -447,7 +471,7 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
                               {Array.from({length: 100}, (_, i) => new Date().getFullYear() - i).map(y => (
                                 <div 
                                   key={y} 
-                                  className={`px-3 py-2 text-[14px] cursor-pointer hover:bg-[#ebe6f5] transition-colors ${displayYear === y ? 'text-[#593696] font-bold bg-[#ebe6f5]' : 'text-[#64748b]'}`}
+                                  className={`px-3 py-2 text-sm cursor-pointer hover:bg-[#ebe6f5] transition-colors ${displayYear === y ? 'text-[#593696] font-bold bg-[#ebe6f5]' : 'text-[#64748b]'}`}
                                   onClick={() => { setDisplayYear(y); setShowYearSelect(false); }}
                                 >
                                   {y}
@@ -466,7 +490,7 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
                   <div className="grid grid-cols-7 gap-1 text-center text-[#94a3b8] text-xs font-medium mb-4">
                     <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
                   </div>
-                  <div className="grid grid-cols-7 gap-y-3 gap-x-1 text-center text-[#334155] text-[13px] font-medium">
+                  <div className="grid grid-cols-7 gap-y-3 gap-x-1 text-center text-[#334155] text-sm font-medium">
                     {Array.from({ length: firstDay }, (_, i) => daysInPrevMonth - firstDay + i + 1).map((day, i) => (
                       <span key={`prev-${i}`} className="text-[#cbd5e1] w-6 h-6 flex items-center justify-center mx-auto cursor-default">
                         {day}
@@ -492,11 +516,11 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
                   </div>
                 </div>
 
-                <h3 className="text-[#0f172a] text-[19px] font-medium mb-6 tracking-wide">
+                <h3 className="text-[#0f172a] text-xl font-medium mb-6 tracking-wide">
                   Gender
                 </h3>
                 
-                <div className="flex space-x-6 mb-12 text-[#0f172a] font-medium text-[17px]">
+                <div className="flex space-x-6 mb-12 text-[#0f172a] font-medium text-lg">
                   <label className="flex items-center space-x-2 cursor-pointer">
                     <div className={`w-5 h-5 rounded-[6px] border-[1.5px] flex items-center justify-center ${signupGender === 'him' ? 'border-[#593696] bg-[#593696]/10' : 'border-[#cbd5e1]'}`}>
                       {signupGender === 'him' && <div className="w-2.5 h-2.5 rounded-[3px] bg-[#593696]"></div>}
@@ -524,7 +548,7 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
                   type="button"
                   onClick={handleRegisterSubmit}
                   disabled={isLoading}
-                  className="w-full max-w-[280px] py-[16px] rounded-[16px] text-white font-bold text-[19px] shadow-[0_8px_24px_rgba(89,54,150,0.28)] bg-gradient-to-b from-[#a155e8] via-[#7b41b0] to-[#512384] hover:opacity-90 transition-opacity flex justify-center items-center tracking-wide disabled:opacity-50"
+                  className="w-full max-w-[280px] py-[16px] rounded-[16px] text-white font-bold text-xl shadow-[0_8px_24px_rgba(89,54,150,0.28)] bg-gradient-to-b from-[#a155e8] via-[#7b41b0] to-[#512384] hover:opacity-90 transition-opacity flex justify-center items-center tracking-wide disabled:opacity-50"
                 >
                   {isLoading ? 'Creating...' : 'Create YUKiZi account'}
                 </button>
@@ -568,7 +592,7 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
               </button>
             </div>
 
-            <div className="flex justify-center items-center text-[13px] md:text-sm mt-5 text-[#64748b] font-semibold tracking-wide">
+            <div className="flex justify-center items-center text-sm md:text-sm mt-5 text-[#64748b] font-semibold tracking-wide">
               <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowForgotPassword(true); }} className="underline underline-offset-2 hover:text-[#593696] transition-colors mr-1">Forgot Password ?</button>
               <span className="opacity-90">Login through </span>
               <button type="button" onClick={() => setIsOtpMode(true)} className="underline underline-offset-2 ml-1 hover:text-[#593696] transition-colors">OTP</button>
@@ -615,7 +639,7 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
               </div>
             )}
 
-            <div className="flex justify-center items-center text-[13px] md:text-sm mt-5 text-[#64748b] font-semibold tracking-wide">
+            <div className="flex justify-center items-center text-sm md:text-sm mt-5 text-[#64748b] font-semibold tracking-wide">
               <button type="button" onClick={() => setIsOtpMode(false)} className="underline underline-offset-2 hover:text-[#593696] transition-colors mr-1">Use Password ?</button>
               {step === 'otp' && (
                 <>
@@ -642,7 +666,7 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
         <div className="w-full flex flex-col items-center">
           <div className="flex items-center justify-center space-x-4 mt-6 mb-4 w-full">
             <div className="h-px w-12 bg-[#e2e8f0]"></div>
-            <span className="text-[#94a3b8] font-medium text-[15px]">or</span>
+            <span className="text-[#94a3b8] font-medium text-base">or</span>
             <div className="h-px w-12 bg-[#e2e8f0]"></div>
           </div>
 

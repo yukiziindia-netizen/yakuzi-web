@@ -83,6 +83,8 @@ export const CategorySchema = z.object({
   label: z.string().optional(),
   slug: z.string().optional(),
   image: z.string().optional().nullable(),
+  /** Phone banner. Absent or null means "use image on every screen". */
+  mobileImage: z.string().optional().nullable(),
   description: z.string().optional(),
   productCount: z.number().optional(),
   subCategories: z.array(SubCategorySchema).optional(),

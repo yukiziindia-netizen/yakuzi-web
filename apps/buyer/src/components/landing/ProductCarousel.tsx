@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Loader2, Share2, Plus, Minus, RotateCw, Eye, Star, Truck, Bookmark, Bell } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { getProducts, useAuth } from '@yukizi/api-client';
 import { generateProductSlug, calculatePricing } from '@yukizi/utils';
 import QuickReviewModal from './QuickReviewModal';
@@ -20,8 +21,8 @@ interface ProductCarouselProps {
   initialProducts?: any[];
 }
 
-const OFFER_TEXT = "text-[#333333] text-[10px] sm:text-[15px] font-medium tracking-wide whitespace-nowrap";
-const NO_OFFER_TEXT = "text-gray-400 text-[10px] sm:text-[15px] font-medium tracking-wide whitespace-nowrap";
+const OFFER_TEXT = "text-[#333333] text-2xs sm:text-base font-medium tracking-wide whitespace-nowrap";
+const NO_OFFER_TEXT = "text-gray-400 text-2xs sm:text-base font-medium tracking-wide whitespace-nowrap";
 
 // A product with nothing on offer used to render nothing at all, leaving an
 // empty gap on the card where every neighbour shows "N% off". It now says so.
@@ -81,7 +82,7 @@ export const renderBuyerOfferBadge = (p: any) => {
 
   if (type === 'SPECIAL_PRICE') {
     return specialPrice > 0 ? (
-      <span className="text-emerald-600 text-[10px] sm:text-[15px] font-medium tracking-wide whitespace-nowrap">Special Price: ₹{Math.round(specialPrice)}</span>
+      <span className="text-emerald-600 text-2xs sm:text-base font-medium tracking-wide whitespace-nowrap">Special Price: ₹{Math.round(specialPrice)}</span>
     ) : noOfferLabel();
   }
 
@@ -129,9 +130,10 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
         quantity: cartQuantity + 1,
       });
     } else {
+      // No toast: the button turning into the quantity stepper is already
+      // the confirmation, and the toast used to cover the top-left cards.
       addToCart(
-        { productId: targetProductId, quantity: 1, price: finalPrice, originalPrice: finalOriginalPrice || mrpVal, ...product },
-        { onSuccess: () => toast('Added to cart', 'success') }
+        { productId: targetProductId, quantity: 1, price: finalPrice, originalPrice: finalOriginalPrice || mrpVal, ...product }
       );
     }
   };
@@ -257,7 +259,9 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
     if (words.length === 1) return words[0].substring(0, 2).toUpperCase();
     return (words[0][0] + words[words.length - 1][0]).toUpperCase();
   };
-  const fallbackImage = `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent(getInitials(productName))}`;
+  // /png because placehold.co defaults to SVG, which the image optimizer
+  // refuses to process.
+  const fallbackImage = `https://placehold.co/400x400/10b981/ffffff/png?text=${encodeURIComponent(getInitials(productName))}`;
   const imageUrl = product?.images?.[0]?.url || product?.images?.[0] || product?.image || fallbackImage;
 
   return (
@@ -265,12 +269,12 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
       {/* Yukizi Choice & Best Seller Tags */}
       <div className="absolute -top-[12px] left-1.5 sm:left-2 flex items-center gap-1.5 z-30">
         {isYukiziChoice && (
-          <div className="bg-[#7B2FBE] text-white px-3 py-0.5 rounded-full font-semibold text-[10px] sm:text-[11px] shadow-sm tracking-wide flex items-center justify-center">
+          <div className="bg-[#7B2FBE] text-white px-3 py-0.5 rounded-full font-semibold text-2xs sm:text-xs shadow-sm tracking-wide flex items-center justify-center">
             Yukizi Choice
           </div>
         )}
         {isBestSeller && (
-          <div className="bg-[#4a4a4a] text-white px-3 py-0.5 rounded-full font-semibold text-[10px] sm:text-[11px] shadow-sm tracking-wide flex items-center justify-center">
+          <div className="bg-[#4a4a4a] text-white px-3 py-0.5 rounded-full font-semibold text-2xs sm:text-xs shadow-sm tracking-wide flex items-center justify-center">
             Best Seller
           </div>
         )}
@@ -278,7 +282,7 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
 
       {/* Ad Tag */}
       {isAd && (
-        <div className="absolute -top-5 right-0 text-[11px] sm:text-[12px] text-gray-400 font-normal z-20">
+        <div className="absolute -top-5 right-0 text-xs sm:text-xs text-gray-400 font-normal z-20">
           Ad
         </div>
       )}
@@ -322,7 +326,7 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
                   >
                     <Minus className="w-2.5 h-2.5" strokeWidth={3} />
                   </button>
-                  <span className="text-[10px] font-black tracking-wide min-w-[12px] text-center">
+                  <span className="text-2xs font-bold tracking-wide min-w-[12px] text-center">
                     {String(cartQuantity).padStart(2, '0')}
                   </span>
                   <button 
@@ -349,14 +353,11 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => { 
             e.preventDefault(); 
+            // No toast: the ribbon icon already fills/empties to show the result.
             if (isSaved) {
-              removeFromWishlist(currentProductId, {
-                onSuccess: () => toast('Removed from wishlist', 'info')
-              });
+              removeFromWishlist(currentProductId);
             } else {
-              addToWishlist(product, {
-                onSuccess: () => toast('Added to wishlist', 'success')
-              });
+              addToWishlist(product);
             }
           }}
           className="absolute right-0 top-[40%] -translate-y-1/2 z-20 cursor-pointer hover:scale-105 transition-transform"
@@ -370,7 +371,10 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
 
         {/* Image Container - Fixed 190px/200px height matching Samplr */}
         <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`} className="relative w-full h-[130px] sm:h-[200px] bg-white overflow-hidden flex justify-center items-center shrink-0">
-           <img src={imageUrl} alt={productName} className="w-full h-full object-contain p-3 sm:p-2 group-hover:scale-105 transition-transform duration-300 ease-out" />
+           {/* next/image so the ~1MB seller uploads are resized/re-encoded to
+               the card's actual rendered width (the grid is 2-7 columns) —
+               measured 65MB of card images on one homepage load without it. */}
+           <Image src={imageUrl} alt={productName} fill sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 15vw" className="object-contain p-3 sm:p-2 group-hover:scale-105 transition-transform duration-300 ease-out" />
         </Link>
 
          <div className="flex flex-col gap-1.5 p-[8px] sm:p-[10px] bg-white w-full">
@@ -378,7 +382,7 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
             <div>
                <div className="flex items-start justify-between w-full gap-1.5">
                   <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`} className="flex-1">
-                    <h3 className="text-[11px] sm:text-[14px] font-medium text-[#333333] leading-snug line-clamp-1 hover:text-[#7B2FBE] transition-colors">
+                    <h3 className="text-xs sm:text-sm font-medium text-[#333333] leading-snug line-clamp-1 hover:text-[#7B2FBE] transition-colors">
                        {productName}
                     </h3>
                   </Link>
@@ -405,16 +409,16 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
            {/* Price and Rating Row */}
            <div className="flex justify-between items-center w-full pt-0.5">
               <div className="flex items-baseline gap-1">
-                 <span className="text-[11.5px] sm:text-[15px] font-medium text-[#333333] leading-none">
+                 <span className="text-xs sm:text-base font-medium text-[#333333] leading-none">
                     {displayPrice}
                  </span>
                  {displayOriginalPrice && (
-                    <span className="text-[9px] sm:text-[12px] text-gray-400 line-through leading-none">{displayOriginalPrice}</span>
+                    <span className="text-2xs sm:text-xs text-gray-400 line-through leading-none">{displayOriginalPrice}</span>
                  )}
               </div>
               <div className="flex items-center gap-1">
                  <Star className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-[#7B2FBE] fill-[#7B2FBE]" />
-                 <span className="text-[10px] sm:text-[14px] font-medium leading-none text-[#333333]">{hasRating ? rating : 'NA'}</span>
+                 <span className="text-2xs sm:text-sm font-medium leading-none text-[#333333]">{hasRating ? rating : 'NA'}</span>
               </div>
            </div>
 

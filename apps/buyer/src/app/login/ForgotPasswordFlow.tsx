@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, Loader2, Mail, User } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Loader2, Mail, User } from 'lucide-react';
 import { sendOtp, resetPassword } from '@yukizi/api-client';
 import { useToast } from '@/components/shared/Toast';
 
@@ -102,7 +102,7 @@ function PasswordBoxIcon() {
           paddingRight: 16,
         }}
       >
-        <span style={{ color: '#9ca3af', fontWeight: 700, fontSize: 22, letterSpacing: 4 }}>**</span>
+        <span style={{ color: '#9ca3af', fontWeight: 700, fontSize: 24, letterSpacing: 4 }}>**</span>
       </div>
       {/* Small orange lock badge — overlaps bottom-right corner */}
       <div style={{ position: 'absolute', bottom: -10, right: -14 }}>
@@ -169,8 +169,8 @@ const PurpleButton = ({
         ? 'linear-gradient(135deg,#a97ec4,#9b6db5)'
         : 'linear-gradient(135deg,#7b3fa3,#6a2d91)',
       color: '#fff',
-      fontWeight: 800,
-      fontSize: 13,
+      fontWeight: 700,
+      fontSize: 14,
       letterSpacing: '0.12em',
       border: 'none',
       cursor: disabled || isLoading ? 'not-allowed' : 'pointer',
@@ -200,38 +200,57 @@ const TextInput = ({
   value: string;
   onChange: (v: string) => void;
   icon?: React.ReactNode;
-}) => (
-  <div style={{ position: 'relative' }}>
-    {icon && (
-      <div style={{
-        position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)',
-        color: '#9ca3af', pointerEvents: 'none', display: 'flex', alignItems: 'center',
-      }}>
-        {icon}
-      </div>
-    )}
-    <input
-      type={type}
-      placeholder={placeholder}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      style={{
-        width: '100%',
-        padding: icon ? '12px 14px 12px 36px' : '12px 14px',
-        borderRadius: 12,
-        border: '1.5px solid #e2e2e2',
-        background: '#fff',
-        color: '#374151',
-        fontSize: 14,
-        outline: 'none',
-        boxSizing: 'border-box',
-        boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-      }}
-      onFocus={(e) => { e.target.style.borderColor = '#8e44ad'; e.target.style.boxShadow = '0 0 0 3px rgba(142,68,173,0.15)'; }}
-      onBlur={(e) => { e.target.style.borderColor = '#e2e2e2'; e.target.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)'; }}
-    />
-  </div>
-);
+}) => {
+  // Password fields get an eye toggle so what was typed can be checked.
+  const [showPassword, setShowPassword] = useState(false);
+  const isPassword = type === 'password';
+  return (
+    <div style={{ position: 'relative' }}>
+      {icon && (
+        <div style={{
+          position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)',
+          color: '#9ca3af', pointerEvents: 'none', display: 'flex', alignItems: 'center',
+        }}>
+          {icon}
+        </div>
+      )}
+      <input
+        type={isPassword && showPassword ? 'text' : type}
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        style={{
+          width: '100%',
+          padding: `12px ${isPassword ? '40px' : '14px'} 12px ${icon ? '36px' : '14px'}`,
+          borderRadius: 12,
+          border: '1.5px solid #e2e2e2',
+          background: '#fff',
+          color: '#374151',
+          fontSize: 14,
+          outline: 'none',
+          boxSizing: 'border-box',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+        }}
+        onFocus={(e) => { e.target.style.borderColor = '#8e44ad'; e.target.style.boxShadow = '0 0 0 3px rgba(142,68,173,0.15)'; }}
+        onBlur={(e) => { e.target.style.borderColor = '#e2e2e2'; e.target.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)'; }}
+      />
+      {isPassword && (
+        <button
+          type="button"
+          onClick={() => setShowPassword((s) => !s)}
+          aria-label={showPassword ? 'Hide password' : 'Show password'}
+          style={{
+            position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
+            background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+            color: '#9ca3af', display: 'flex', alignItems: 'center',
+          }}
+        >
+          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+        </button>
+      )}
+    </div>
+  );
+};
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function ForgotPasswordFlow({ onClose }: ForgotPasswordFlowProps) {
@@ -337,7 +356,7 @@ export default function ForgotPasswordFlow({ onClose }: ForgotPasswordFlowProps)
   const renderRestoreEmail = () => (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <OrangeLockWithRefresh />
-      <h2 style={{ fontSize: 17, fontWeight: 700, color: '#4b4b4b', marginBottom: 4, marginTop: 2 }}>
+      <h2 style={{ fontSize: 18, fontWeight: 700, color: '#4b4b4b', marginBottom: 4, marginTop: 2 }}>
         Restore Password
       </h2>
       <p style={{ fontSize: 12, color: '#9ca3af', marginBottom: 18 }}>Confirm your email</p>
@@ -354,7 +373,7 @@ export default function ForgotPasswordFlow({ onClose }: ForgotPasswordFlowProps)
           <button
             type="button"
             onClick={() => setStep('INITIAL')}
-            style={{ fontSize: 11, color: '#9ca3af', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
+            style={{ fontSize: 12, color: '#9ca3af', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
           >
             Try another way
           </button>
@@ -370,7 +389,7 @@ export default function ForgotPasswordFlow({ onClose }: ForgotPasswordFlowProps)
   const renderRestoreOtp = () => (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <OrangeLockWithRefresh />
-      <h2 style={{ fontSize: 17, fontWeight: 700, color: '#4b4b4b', marginBottom: 22, marginTop: 2 }}>
+      <h2 style={{ fontSize: 18, fontWeight: 700, color: '#4b4b4b', marginBottom: 22, marginTop: 2 }}>
         Restore Password
       </h2>
       <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -432,7 +451,7 @@ export default function ForgotPasswordFlow({ onClose }: ForgotPasswordFlowProps)
   const renderRestoreNewPwd = () => (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <OrangeLockWithRefresh />
-      <h2 style={{ fontSize: 17, fontWeight: 700, color: '#4b4b4b', marginBottom: 18, marginTop: 2 }}>
+      <h2 style={{ fontSize: 18, fontWeight: 700, color: '#4b4b4b', marginBottom: 18, marginTop: 2 }}>
         Restore Password
       </h2>
       <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -465,7 +484,7 @@ export default function ForgotPasswordFlow({ onClose }: ForgotPasswordFlowProps)
   const renderRecoverInputs = () => (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <OrangeLockWithRefresh />
-      <h2 style={{ fontSize: 17, fontWeight: 700, color: '#4b4b4b', marginBottom: 18, marginTop: 2 }}>
+      <h2 style={{ fontSize: 18, fontWeight: 700, color: '#4b4b4b', marginBottom: 18, marginTop: 2 }}>
         Recover Password
       </h2>
       <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -492,7 +511,7 @@ export default function ForgotPasswordFlow({ onClose }: ForgotPasswordFlowProps)
           <button
             type="button"
             onClick={() => setStep('INITIAL')}
-            style={{ fontSize: 11, color: '#9ca3af', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
+            style={{ fontSize: 12, color: '#9ca3af', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
           >
             Try another way
           </button>
@@ -504,7 +523,7 @@ export default function ForgotPasswordFlow({ onClose }: ForgotPasswordFlowProps)
   const renderRecoverPwd = () => (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <OrangeLockWithRefresh />
-      <h2 style={{ fontSize: 17, fontWeight: 700, color: '#4b4b4b', marginBottom: 18, marginTop: 2 }}>
+      <h2 style={{ fontSize: 18, fontWeight: 700, color: '#4b4b4b', marginBottom: 18, marginTop: 2 }}>
         Recover Password
       </h2>
       <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -537,7 +556,7 @@ export default function ForgotPasswordFlow({ onClose }: ForgotPasswordFlowProps)
           <polyline points="20 6 9 17 4 12" />
         </svg>
       </div>
-      <h2 style={{ fontSize: 20, fontWeight: 800, color: '#4b4b4b', marginBottom: 12 }}>
+      <h2 style={{ fontSize: 20, fontWeight: 700, color: '#4b4b4b', marginBottom: 12 }}>
         Password Updated!
       </h2>
       <p style={{ fontSize: 14, color: '#6b7280', marginBottom: 28, textAlign: 'center', lineHeight: 1.5 }}>

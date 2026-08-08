@@ -37,6 +37,8 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
     email: '',
     address: '',
     phone: '',
+    gender: '',
+    dob: '',
   });
 
   // Load initial data
@@ -61,6 +63,9 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
       email: profile?.user?.email || user?.email || '',
       address: fullAddress,
       phone: profile?.user?.phone || user?.phone || '',
+      gender: (profile?.user as any)?.gender || '',
+      // The date input wants yyyy-mm-dd; the API returns a full ISO timestamp.
+      dob: ((profile?.user as any)?.dob || '').slice(0, 10),
     });
 
     // Avatar lives in this browser only — the API has no avatar field on the
@@ -115,7 +120,11 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
     }
   };
 
-  const startEditing = (field: keyof typeof formData) => {
+  // The number the buyer reached checkout with, when their account has no
+  // saved phone (checkout cannot claim a number another account owns).
+  const contactPhone = !formData.phone ? ((profile as any)?.contactPhone || '') : '';
+
+  const startEditing = (field: keyof typeof formData, prefill?: string) => {
     // Saving goes to the same endpoint that just refused to load, so offering
     // an editor here would only end in a failed save.
     if (isProfileError) {
@@ -123,7 +132,27 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
       return;
     }
     setEditingField(field);
-    setEditValue(formData[field]);
+    setEditValue(formData[field] || prefill || '');
+  };
+
+  const GENDER_OPTIONS = [
+    { value: 'MALE', label: 'Male' },
+    { value: 'FEMALE', label: 'Female' },
+    { value: 'OTHER', label: 'Other' },
+    { value: 'PREFER_NOT_TO_SAY', label: 'Prefer not to say' },
+  ];
+  const genderLabel = (value: string) =>
+    GENDER_OPTIONS.find((o) => o.value === value)?.label ||
+    (value ? value.charAt(0) + value.slice(1).toLowerCase() : '');
+
+  const ageFromDob = (iso: string): number | null => {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return null;
+    const now = new Date();
+    let age = now.getFullYear() - d.getFullYear();
+    const m = now.getMonth() - d.getMonth();
+    if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
+    return age >= 0 && age < 130 ? age : null;
   };
 
   const saveField = async (field: keyof typeof formData) => {
@@ -143,6 +172,10 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
           ? { ...(profile.address as any), street1: editValue }
           : { street1: editValue, city: '', state: '', pincode: '' };
         updatePayload.address = addressObj;
+      } else if (field === 'gender') {
+        updatePayload.gender = editValue;
+      } else if (field === 'dob') {
+        updatePayload.dob = editValue;
       }
 
       await updateProfile(updatePayload);
@@ -150,7 +183,8 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
       // Update local state ONLY on success!
       setFormData((prev) => ({ ...prev, [field]: editValue }));
       setEditingField(null);
-      toast(`${field.charAt(0).toUpperCase() + field.slice(1)} updated successfully!`, 'success');
+      const fieldLabel = field === 'dob' ? 'Age' : field.charAt(0).toUpperCase() + field.slice(1);
+      toast(`${fieldLabel} updated successfully!`, 'success');
     } catch (err: any) {
       const errorMsg = err.response?.data?.message || err.message || 'Failed to save profile changes.';
       toast(errorMsg, 'error');
@@ -201,6 +235,8 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
               <img
                 src={photo}
                 alt="Avatar"
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover group-hover:opacity-75 transition-opacity"
               />
             ) : (
@@ -219,7 +255,7 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
           </div>
           <button 
             onClick={handlePhotoClick}
-            className="text-[13px] font-semibold text-gray-500 hover:text-purple-600 transition-colors"
+            className="text-sm font-semibold text-gray-500 hover:text-purple-600 transition-colors"
           >
             Change photo
           </button>
@@ -236,16 +272,16 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
         <div className="flex-1 overflow-y-auto pr-1">
           {isProfileError && (
             <div className="mb-5 rounded-2xl border border-red-100 bg-red-50 px-4 py-3">
-              <p className="text-[13px] font-semibold text-red-700">
+              <p className="text-sm font-semibold text-red-700">
                 Profile could not be loaded
               </p>
-              <p className="mt-1 text-[12px] leading-relaxed text-red-600">
+              <p className="mt-1 text-xs leading-relaxed text-red-600">
                 {loadErrorMessage}
               </p>
               <button
                 type="button"
                 onClick={() => refetchProfile()}
-                className="mt-2 text-[12px] font-bold text-red-700 underline underline-offset-2 hover:text-red-800"
+                className="mt-2 text-xs font-bold text-red-700 underline underline-offset-2 hover:text-red-800"
               >
                 Try again
               </button>
@@ -253,14 +289,14 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
           )}
 
           {/* About You Section */}
-          <span className="text-[11px] font-black text-gray-400 uppercase tracking-widest block mb-4">
+          <span className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-4">
             About you
           </span>
 
           <div className="flex flex-col">
             {/* Field Row: Name */}
             <div className="min-h-[52px] py-3.5 border-b border-gray-50 flex items-center justify-between group">
-              <span className="text-[14px] font-semibold text-gray-800">Name</span>
+              <span className="text-sm font-semibold text-gray-800">Name</span>
               {editingField === 'name' ? (
                 <div className="flex items-center gap-2">
                   <input
@@ -283,9 +319,9 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
                   className="flex items-center gap-1.5 hover:text-purple-600 transition-colors"
                 >
                   {formData.name ? (
-                    <span className="text-[14px] font-semibold text-gray-800">{formData.name}</span>
+                    <span className="text-sm font-semibold text-gray-800">{formData.name}</span>
                   ) : (
-                    <span className="text-[14px] font-semibold text-gray-400 italic">{emptyLabel('Add your name')}</span>
+                    <span className="text-sm font-semibold text-gray-400 italic">{emptyLabel('Add your name')}</span>
                   )}
                   <ChevronRight className="w-4 h-4 text-gray-400" />
                 </button>
@@ -294,7 +330,7 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
 
             {/* Field Row: Username */}
             <div className="min-h-[52px] py-3.5 border-b border-gray-50 flex items-center justify-between group">
-              <span className="text-[14px] font-semibold text-gray-800">Username</span>
+              <span className="text-sm font-semibold text-gray-800">Username</span>
               {editingField === 'username' ? (
                 <div className="flex items-center gap-2">
                   <input
@@ -317,9 +353,9 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
                   className="flex items-center gap-1.5 hover:text-purple-600 transition-colors"
                 >
                   {formData.username ? (
-                    <span className="text-[14px] font-semibold text-gray-800">{formData.username}</span>
+                    <span className="text-sm font-semibold text-gray-800">{formData.username}</span>
                   ) : (
-                    <span className="text-[14px] font-semibold text-gray-400 italic">{emptyLabel('Add a username')}</span>
+                    <span className="text-sm font-semibold text-gray-400 italic">{emptyLabel('Add a username')}</span>
                   )}
                   <ChevronRight className="w-4 h-4 text-gray-400" />
                 </button>
@@ -328,7 +364,7 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
 
             {/* Field Row: Email */}
             <div className="min-h-[52px] py-3.5 border-b border-gray-50 flex items-center justify-between group">
-              <span className="text-[14px] font-semibold text-gray-800">Email</span>
+              <span className="text-sm font-semibold text-gray-800">Email</span>
               {editingField === 'email' ? (
                 <div className="flex items-center gap-2">
                   <input
@@ -351,9 +387,9 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
                   className="flex items-center gap-1.5 hover:text-purple-600 transition-colors text-right"
                 >
                   {formData.email ? (
-                    <span className="text-[14px] font-semibold text-gray-800 truncate max-w-[200px] sm:max-w-[240px] block">{formData.email}</span>
+                    <span className="text-sm font-semibold text-gray-800 truncate max-w-[200px] sm:max-w-[240px] block">{formData.email}</span>
                   ) : (
-                    <span className="text-[14px] font-semibold text-gray-400 italic">{emptyLabel('Add your email')}</span>
+                    <span className="text-sm font-semibold text-gray-400 italic">{emptyLabel('Add your email')}</span>
                   )}
                   <ChevronRight className="w-4 h-4 text-gray-400" />
                 </button>
@@ -362,7 +398,7 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
 
             {/* Field Row: Address */}
             <div className="min-h-[52px] py-3.5 border-b border-gray-50 flex items-center justify-between group">
-              <span className="text-[14px] font-semibold text-gray-800">Address</span>
+              <span className="text-sm font-semibold text-gray-800">Address</span>
               {editingField === 'address' ? (
                 <div className="flex items-center gap-2">
                   <input
@@ -386,9 +422,9 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
                   className="flex items-center gap-1.5 hover:text-purple-600 transition-colors max-w-[260px] text-right"
                 >
                   {formData.address ? (
-                    <span className="text-[14px] font-semibold text-gray-800 truncate block max-w-[220px]">{formData.address}</span>
+                    <span className="text-sm font-semibold text-gray-800 truncate block max-w-[220px]">{formData.address}</span>
                   ) : (
-                    <span className="text-[14px] font-semibold text-gray-400 italic">{emptyLabel('Add your address')}</span>
+                    <span className="text-sm font-semibold text-gray-400 italic">{emptyLabel('Add your address')}</span>
                   )}
                   <ChevronRight className="w-4 h-4 text-gray-400" />
                 </button>
@@ -397,7 +433,7 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
 
             {/* Field Row: Phone */}
             <div className="min-h-[52px] py-3.5 border-b border-gray-50 flex items-center justify-between group">
-              <span className="text-[14px] font-semibold text-gray-800">Phone</span>
+              <span className="text-sm font-semibold text-gray-800">Phone</span>
               {editingField === 'phone' ? (
                 <div className="flex items-center gap-2">
                   <input
@@ -415,14 +451,98 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
                   </button>
                 </div>
               ) : (
-                <button 
-                  onClick={() => startEditing('phone')}
+                <button
+                  onClick={() => startEditing('phone', contactPhone)}
                   className="flex items-center gap-1.5 hover:text-purple-600 transition-colors"
                 >
                   {formData.phone ? (
-                    <span className="text-[14px] font-semibold text-gray-800">{formData.phone}</span>
+                    <span className="text-sm font-semibold text-gray-800">{formData.phone}</span>
+                  ) : contactPhone ? (
+                    // The number from their latest order - shown so the field is
+                    // never blank after a purchase, saved to the account only
+                    // when they confirm it (it may belong to another account).
+                    <span className="text-right">
+                      <span className="text-sm font-semibold text-gray-800 block">{contactPhone}</span>
+                      <span className="text-[11px] text-gray-400 block">from your last order — tap to save</span>
+                    </span>
                   ) : (
-                    <span className="text-[14px] font-semibold text-gray-400 italic">{emptyLabel('Add your phone')}</span>
+                    <span className="text-sm font-semibold text-gray-400 italic">{emptyLabel('Add your phone')}</span>
+                  )}
+                  <ChevronRight className="w-4 h-4 text-gray-400" />
+                </button>
+              )}
+            </div>
+
+            {/* Field Row: Gender */}
+            <div className="min-h-[52px] py-3.5 border-b border-gray-50 flex items-center justify-between group">
+              <span className="text-sm font-semibold text-gray-800">Gender</span>
+              {editingField === 'gender' ? (
+                <div className="flex items-center gap-2">
+                  <select
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    className="border border-purple-300 rounded-lg px-2.5 py-1 text-sm outline-none focus:ring-2 focus:ring-purple-400 text-gray-800 bg-white"
+                    autoFocus
+                  >
+                    <option value="">Select…</option>
+                    {GENDER_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                  </select>
+                  <button onClick={() => saveField('gender')} className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg">
+                    <Check className="w-4 h-4 stroke-[3]" />
+                  </button>
+                  <button onClick={() => setEditingField(null)} className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => startEditing('gender')}
+                  className="flex items-center gap-1.5 hover:text-purple-600 transition-colors"
+                >
+                  {formData.gender ? (
+                    <span className="text-sm font-semibold text-gray-800">{genderLabel(formData.gender)}</span>
+                  ) : (
+                    <span className="text-sm font-semibold text-gray-400 italic">{emptyLabel('Add your gender')}</span>
+                  )}
+                  <ChevronRight className="w-4 h-4 text-gray-400" />
+                </button>
+              )}
+            </div>
+
+            {/* Field Row: Age (stored as date of birth) */}
+            <div className="min-h-[52px] py-3.5 border-b border-gray-50 flex items-center justify-between group">
+              <span className="text-sm font-semibold text-gray-800">Age</span>
+              {editingField === 'dob' ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="date"
+                    value={editValue}
+                    max={new Date().toISOString().slice(0, 10)}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    className="border border-purple-300 rounded-lg px-2.5 py-1 text-sm outline-none focus:ring-2 focus:ring-purple-400 text-gray-800 bg-white"
+                    autoFocus
+                  />
+                  <button onClick={() => saveField('dob')} className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg">
+                    <Check className="w-4 h-4 stroke-[3]" />
+                  </button>
+                  <button onClick={() => setEditingField(null)} className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => startEditing('dob')}
+                  className="flex items-center gap-1.5 hover:text-purple-600 transition-colors"
+                >
+                  {formData.dob && ageFromDob(formData.dob) !== null ? (
+                    <span className="text-right">
+                      <span className="text-sm font-semibold text-gray-800 block">{ageFromDob(formData.dob)} years</span>
+                      <span className="text-[11px] text-gray-400 block">born {formData.dob}</span>
+                    </span>
+                  ) : (
+                    <span className="text-sm font-semibold text-gray-400 italic">{emptyLabel('Add your age')}</span>
                   )}
                   <ChevronRight className="w-4 h-4 text-gray-400" />
                 </button>
@@ -430,27 +550,33 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
             </div>
           </div>
 
-          <div className="h-px bg-gray-100 my-6" />
-
-          {/* Password Updates Area */}
+          {/* Security Section — headed like About you, so the transition reads
+              as structure instead of an empty row between Phone and Password */}
+          <span className="text-xs font-bold text-gray-400 uppercase tracking-widest block mt-8 mb-4">
+            Security
+          </span>
           <div className="flex flex-col gap-4">
             <div className="flex justify-between items-center py-2.5">
-              <span className="text-[14px] font-semibold text-gray-800">Password</span>
+              <span className="text-sm font-semibold text-gray-800">Password</span>
               <button 
                 onClick={() => toast('Password change feature coming soon!', 'info')}
                 className="flex items-center gap-1.5 text-gray-400 hover:text-purple-600 transition-colors text-right"
               >
-                <span className="text-[14px] font-medium text-gray-400">Change your password</span>
+                <span className="text-sm font-medium text-gray-400">Change your password</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
             
             <div className="flex justify-end items-center py-1">
               <button 
-                onClick={() => toast('Reset password link sent to email.', 'success')}
+                onClick={() =>
+                  // No reset API is wired here yet - never claim a link was
+                  // sent when nothing happened. Point at the flow that works.
+                  toast('Sign out and tap "Forgot Password ?" on the login screen to reset it.', 'info')
+                }
                 className="flex items-center gap-1.5 text-gray-400 hover:text-purple-600 transition-colors text-right"
               >
-                <span className="text-[14px] font-medium text-gray-400">Forgot Password</span>
+                <span className="text-sm font-medium text-gray-400">Forgot Password</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -464,7 +590,7 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
                   onClose();
                   toast('Logged out successfully', 'success');
                 }}
-                className="w-full py-3.5 rounded-2xl border border-red-200 text-red-500 hover:bg-red-50 font-bold text-[15px] tracking-wide transition-all duration-200 flex justify-center items-center shadow-sm"
+                className="w-full py-3.5 rounded-2xl border border-red-200 text-red-500 hover:bg-red-50 font-bold text-base tracking-wide transition-all duration-200 flex justify-center items-center shadow-sm"
               >
                 Sign Out
               </button>

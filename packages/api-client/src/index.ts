@@ -71,6 +71,7 @@ export {
   confirmMilestonePayment,
   getOrderInvoice,
   getOrderInvoices,
+  emailOrderInvoices,
   getOrderTracking,
   type Order,
   type OrderItem,
@@ -80,6 +81,7 @@ export {
   type OrderInvoice,
   type InvoiceLine,
   type InvoiceParty,
+  type InvoiceTaxLine,
 } from './modules/orders.api';
 
 // Payments
@@ -114,9 +116,11 @@ export {
   updateReview,
   deleteReview,
   deleteAdminReview,
+  getReviewEligibility,
   type Review,
   type ReviewListResponse,
   type CreateReviewInput,
+  type ReviewEligibility,
 } from './modules/reviews.api';
 
 // Tickets
@@ -196,6 +200,7 @@ export {
 // Chatbot
 export {
   sendChatMessage,
+  sendChatMessageFull,
   type ChatMessage,
   type ChatRequest,
   type ChatResponse,

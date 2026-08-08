@@ -327,7 +327,7 @@ export default function OnboardingPage() {
               <div className="mx-auto w-16 h-16 bg-yellow-100 rounded-2xl flex items-center justify-center mb-6">
                 <Shield className="w-8 h-8 text-yellow-600" />
               </div>
-              <h1 className="text-2xl font-black text-gray-900 mb-4">Application Under Review</h1>
+              <h1 className="text-2xl font-bold text-gray-900 mb-4">Application Under Review</h1>
               <p className="text-gray-600 font-medium mb-6">
                 Your business profile has been submitted and is currently being reviewed by our team. You will receive a notification once your account is verified.
               </p>
@@ -635,7 +635,7 @@ export default function OnboardingPage() {
                     </div>
 
                     <div className="pt-4">
-                      <label className="block text-sm font-black uppercase tracking-wider text-gray-400 mb-2 ml-1">Referral Code (Optional)</label>
+                      <label className="block text-sm font-bold uppercase tracking-wider text-gray-400 mb-2 ml-1">Referral Code (Optional)</label>
                       <div className="relative group">
                         <Gift className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-300 group-focus-within:text-emerald-500 transition-colors" />
                         <input
@@ -646,7 +646,7 @@ export default function OnboardingPage() {
                           className="w-full pl-12 pr-4 py-4 rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50/30 focus:border-emerald-400 focus:bg-white focus:border-solid outline-none transition-all font-mono font-bold text-gray-700"
                         />
                       </div>
-                      <p className="text-[10px] text-gray-400 mt-2 ml-1 font-medium">Were you referred? Enter the code here to link your account.</p>
+                      <p className="text-2xs text-gray-400 mt-2 ml-1 font-medium">Were you referred? Enter the code here to link your account.</p>
                     </div>
                   </div>
                 </motion.div>

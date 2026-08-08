@@ -110,7 +110,7 @@ export default function SearchBar({ isOpen = false, onClose }: SearchBarProps) {
               {/* Recent Searches (Show when no query) */}
               {query.length < 2 && recentSearches.length > 0 && (
                 <div className="py-2">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Recent</p>
+                  <p className="text-2xs font-bold text-gray-400 uppercase tracking-widest mb-2">Recent</p>
                   {recentSearches.map((search) => (
                     <button
                       key={search}
@@ -146,7 +146,7 @@ export default function SearchBar({ isOpen = false, onClose }: SearchBarProps) {
                     </div>
                   ) : (
                     <>
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Products</p>
+                      <p className="text-2xs font-bold text-gray-400 uppercase tracking-widest mb-2">Products</p>
                       {products.map((product: any) => (
                         <button
                           key={product.id}
@@ -155,10 +155,12 @@ export default function SearchBar({ isOpen = false, onClose }: SearchBarProps) {
                         >
                           <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center flex-shrink-0">
                             {product.images?.[0] ? (
-                              <img 
-                                src={typeof product.images[0] === 'string' ? product.images[0] : (product.images[0] as any)?.url || '/products/pharma_bottle.png'} 
-                                alt="" 
-                                className="w-full h-full object-contain rounded-xl" 
+                              <img
+                                src={typeof product.images[0] === 'string' ? product.images[0] : (product.images[0] as any)?.url || '/products/pharma_bottle.png'}
+                                alt={product.name ?? 'Product'}
+                                loading="lazy"
+                                decoding="async"
+                                className="w-full h-full object-contain rounded-xl"
                               />
                             ) : (
                               <Package className="w-4 h-4 text-gray-300" />

@@ -25,8 +25,9 @@ export default function WishlistPage() {
   const items = wishlist?.items ?? [];
 
   const handleRemove = (productId: string) => {
+    // No success toast: the row disappears from the list, which says it already.
+    // The failure toast stays -- nothing else would tell the shopper it did not work.
     removeFromWishlist.mutate(productId, {
-      onSuccess: () => toast('Removed from wishlist', 'success'),
       onError: () => toast('Failed to remove item', 'error'),
     });
   };

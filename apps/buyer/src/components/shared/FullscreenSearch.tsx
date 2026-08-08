@@ -94,7 +94,7 @@ export default function FullscreenSearch({ isOpen, onClose }: { isOpen: boolean;
                       if (e.key === 'Escape') onClose();
                     }}
                     placeholder="Start typing ..."
-                    className="w-full text-4xl sm:text-5xl md:text-6xl font-light text-primary placeholder:text-primary/50 focus:outline-none bg-transparent"
+                    className="w-full text-4xl sm:text-5xl md:text-6xl font-normal text-primary placeholder:text-primary/50 focus:outline-none bg-transparent"
                   />
                 </div>
 
@@ -167,6 +167,8 @@ export default function FullscreenSearch({ isOpen, onClose }: { isOpen: boolean;
                                 <img
                                   src={typeof p.images[0] === 'string' ? p.images[0] : (p.images[0] as any)?.url || '/products/pharma_bottle.png'}
                                   alt={p.name}
+                                  loading="lazy"
+                                  decoding="async"
                                   className="w-full h-full object-contain"
                                 />
                               ) : (

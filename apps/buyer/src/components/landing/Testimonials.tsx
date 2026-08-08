@@ -50,12 +50,14 @@ export default function Testimonials() {
                 <img
                   src={testimonial.avatar}
                   alt={testimonial.name}
+                  loading="lazy"
+                  decoding="async"
                   className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full grayscale hover:grayscale-0 transition-all duration-500"
                 />
               </div>
 
               {/* Quote */}
-              <p className="text-base sm:text-lg font-light text-gray-600 text-center mb-4 sm:mb-6 md:mb-8 leading-relaxed tracking-wide">
+              <p className="text-base sm:text-lg font-normal text-gray-600 text-center mb-4 sm:mb-6 md:mb-8 leading-relaxed tracking-wide">
                 {testimonial.quote}
               </p>
 

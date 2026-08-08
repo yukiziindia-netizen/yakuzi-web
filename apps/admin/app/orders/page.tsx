@@ -65,7 +65,12 @@ export default function AdminOrdersPage() {
     const nextMap: Record<string, string> = {
       PLACED: "ACCEPTED",
       ACCEPTED: "PAYMENT_RECEIVED",
-      PAYMENT_RECEIVED: "DISPATCHED_FROM_SELLER",
+      // READY_TO_SHIP must stay in this sequence — it's the transition that
+      // pushes the order to Shiprocket (see OrdersService.pushOrderToShiprocketIfNeeded).
+      // Skipping straight to DISPATCHED_FROM_SELLER here silently never creates
+      // the Shiprocket shipment.
+      PAYMENT_RECEIVED: "READY_TO_SHIP",
+      READY_TO_SHIP: "DISPATCHED_FROM_SELLER",
       DISPATCHED_FROM_SELLER: "RECEIVED_AT_WAREHOUSE",
       RECEIVED_AT_WAREHOUSE: "SHIPPED",
       SHIPPED: "OUT_FOR_DELIVERY",
@@ -191,10 +196,10 @@ export default function AdminOrdersPage() {
                       </div>
                     </td>
                     <td className="px-5 py-4">
-                      {["PLACED", "ACCEPTED", "PAYMENT_RECEIVED", "DISPATCHED_FROM_SELLER", "RECEIVED_AT_WAREHOUSE", "SHIPPED", "OUT_FOR_DELIVERY"].includes(o.orderStatus) && (
+                      {["PLACED", "ACCEPTED", "PAYMENT_RECEIVED", "READY_TO_SHIP", "DISPATCHED_FROM_SELLER", "RECEIVED_AT_WAREHOUSE", "SHIPPED", "OUT_FOR_DELIVERY"].includes(o.orderStatus) && (
                         <div className="flex flex-col items-start gap-1">
                           <button onClick={(e) => void handleOverride(e, o.id, o.orderStatus)} className="text-xs text-primary underline hover:text-primary/80">
-                            → {o.orderStatus === "PLACED" ? "Accept" : o.orderStatus === "ACCEPTED" ? "Mark Paid" : o.orderStatus === "PAYMENT_RECEIVED" ? "Dispatch" : o.orderStatus === "DISPATCHED_FROM_SELLER" ? "Recv at Wh" : o.orderStatus === "RECEIVED_AT_WAREHOUSE" ? "Ship" : o.orderStatus === "SHIPPED" ? "Out for Delivery" : "Deliver"}
+                            → {o.orderStatus === "PLACED" ? "Accept" : o.orderStatus === "ACCEPTED" ? "Mark Paid" : o.orderStatus === "PAYMENT_RECEIVED" ? "Ready to Ship" : o.orderStatus === "READY_TO_SHIP" ? "Dispatch" : o.orderStatus === "DISPATCHED_FROM_SELLER" ? "Recv at Wh" : o.orderStatus === "RECEIVED_AT_WAREHOUSE" ? "Ship" : o.orderStatus === "SHIPPED" ? "Out for Delivery" : "Deliver"}
                           </button>
                         </div>
                       )}

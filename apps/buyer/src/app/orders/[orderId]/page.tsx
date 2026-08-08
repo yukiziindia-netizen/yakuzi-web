@@ -314,6 +314,18 @@ export default function OrderIdPage({ params }: { params: { orderId: string } })
                 </div>
                 <Timeline steps={steps} />
 
+                {tracking?.track_url && (
+                  <a
+                    href={tracking.track_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-4 w-full py-3 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-2xl font-semibold text-sm transition-all border border-gray-200 flex items-center justify-center gap-2"
+                  >
+                    <Truck className="w-4 h-4" />
+                    Track on courier site
+                  </a>
+                )}
+
                 {['PLACED', 'ACCEPTED'].includes(normalizeStatus(status)) && (
                   <div className="mt-8">
                     {!order.payments?.some((p: any) => p.proofUrl) ? (

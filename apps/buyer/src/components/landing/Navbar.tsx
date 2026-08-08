@@ -468,8 +468,6 @@ export default function Navbar({
                           className={`relative transition-all duration-200 flex items-center ${
                             isNotificationsOpen
                               ? "text-white scale-110 opacity-100"
-                              : isAnyDrawerOpen
-                              ? "text-white/40 opacity-50"
                               : "text-white hover:text-purple-300"
                           }`}
                         >
@@ -539,8 +537,6 @@ export default function Navbar({
                       className={`relative p-1 min-[390px]:mr-1.5 sm:mr-0 mr-0 transition-all duration-200 shrink-0 ${
                         isNotificationsOpen
                           ? "text-[#562996] scale-110 opacity-100"
-                          : isAnyDrawerOpen
-                          ? "text-[#562996]/40 opacity-50"
                           : "text-[#562996]"
                       }`}
                     >
@@ -556,8 +552,6 @@ export default function Navbar({
                       className={`relative p-1 mr-1 transition-all duration-200 shrink-0 ${
                         isSearchChatOpen
                           ? "text-[#562996] scale-110 opacity-100"
-                          : isAnyDrawerOpen
-                          ? "text-[#562996]/40 opacity-50"
                           : "text-[#562996]"
                       }`}
                     >
@@ -601,8 +595,6 @@ export default function Navbar({
               className={`relative transition-all duration-200 hover:scale-110 flex items-center justify-center ${
                 isWishlistOpen
                   ? "text-[#562996] sm:text-white scale-110 opacity-100"
-                  : isAnyDrawerOpen
-                  ? "text-[#562996]/40 sm:text-white/40 opacity-50"
                   : "text-[#562996] sm:text-white sm:hover:text-purple-300"
               }`}
             >
@@ -623,8 +615,6 @@ export default function Navbar({
               className={`relative transition-all duration-200 hover:scale-110 ${
                 isCartOpen
                   ? "text-[#562996] sm:text-white scale-110 opacity-100"
-                  : isAnyDrawerOpen
-                  ? "text-[#562996]/40 sm:text-white/40 opacity-50"
                   : "text-[#562996] sm:text-white sm:hover:text-purple-300"
               }`}
             >
@@ -644,8 +634,6 @@ export default function Navbar({
               className={`hidden sm:block relative transition-all duration-200 hover:scale-110 ${
                 isOrderDrawerOpen
                   ? "text-[#562996] sm:text-white scale-110 opacity-100"
-                  : isAnyDrawerOpen
-                  ? "text-[#562996]/40 sm:text-white/40 opacity-50"
                   : "text-[#562996] sm:text-white sm:hover:text-purple-300"
               }`}
             >
@@ -664,8 +652,6 @@ export default function Navbar({
               className={`transition-all duration-200 hover:scale-110 ${
                 sidebarView === "filters"
                   ? "text-[#562996] sm:text-white scale-110 opacity-100"
-                  : isAnyDrawerOpen
-                  ? "text-[#562996]/40 sm:text-white/40 opacity-50"
                   : "text-[#562996] sm:text-white sm:hover:text-purple-300"
               }`}
             >
@@ -680,8 +666,6 @@ export default function Navbar({
               className={`mr-2 sm:mr-0 transition-all duration-200 hover:scale-110 ${
                 isMobileMenuOpen
                   ? "text-[#562996] sm:text-white scale-110 opacity-100"
-                  : isAnyDrawerOpen
-                  ? "text-[#562996]/40 sm:text-white/40 opacity-50"
                   : "text-[#562996] sm:text-white sm:hover:text-purple-300"
               }`}
             >
@@ -973,21 +957,11 @@ export default function Navbar({
                   className="text-[#484848] hover:text-black transition-colors"
                   title="Customer Support"
                 >
-                  <svg
-                    width="23"
-                    height="23"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M3 14c0-4.97 4.03-9 9-9s9 4.03 9 9" />
-                    <rect x="2" y="13" width="3" height="5" rx="1.5" />
-                    <rect x="19" y="13" width="3" height="5" rx="1.5" />
-                    <path d="M5 17c2 3 12 3 14 0" />
-                  </svg>
+                  <img
+                    src="/headphone.png"
+                    alt="Customer Support"
+                    className="w-[48px] h-[48px] object-contain mix-blend-multiply"
+                  />
                 </button>
                 <div style={{ width: '1px', height: '18px', backgroundColor: '#cccccc' }} className="mx-1" />
                 {isAuthenticated ? (

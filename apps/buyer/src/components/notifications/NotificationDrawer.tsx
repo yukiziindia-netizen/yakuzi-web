@@ -158,11 +158,11 @@ export default function NotificationDrawer({ isOpen, onClose }: { isOpen: boolea
 
                       return (
                         <div key={`notif-${item.id}`} className="bg-white rounded-2xl shadow-[0_2px_20px_-4px_rgba(0,0,0,0.10)] border border-gray-100/80 px-5 py-4 relative pr-10">
-                          <p className="text-[13.5px] text-gray-400 font-normal leading-snug mb-0.5">
+                          <p className="text-[13.5px] text-gray-500 font-normal leading-snug mb-0.5">
                             {firstLine}
                           </p>
                           {secondLine && (
-                            <p className="text-[14px] font-bold text-gray-600 leading-snug">
+                            <p className="text-[14px] font-bold text-gray-700 leading-snug">
                               {secondLine}
                             </p>
                           )}
@@ -245,10 +245,10 @@ export default function NotificationDrawer({ isOpen, onClose }: { isOpen: boolea
                   return (
                     <div
                       key={`notify-${item.id}`}
-                      className={`bg-white rounded-2xl p-3.5 flex gap-4 relative border ${
+                      className={`bg-white rounded-2xl p-3.5 flex gap-4 relative border-2 border-[#7B2FBE] ${
                         isYukiziChoice
-                          ? 'border-[#7B2FBE]/40 shadow-[0_2px_12px_rgba(123,47,190,0.12)]'
-                          : 'border-gray-100 shadow-[0_2px_20px_-4px_rgba(0,0,0,0.10)]'
+                          ? 'shadow-[0_2px_12px_rgba(123,47,190,0.12)]'
+                          : 'shadow-[0_2px_20px_-4px_rgba(0,0,0,0.10)]'
                       } overflow-visible mt-3`}
                     >
                       {/* Yukizi Choice Badge */}

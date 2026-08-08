@@ -146,13 +146,13 @@ export default function ProductCard({
 
              {/* Quantity Control Pill */}
              <div className="flex items-center bg-[#48286b] rounded-[6px] overflow-hidden h-6 text-white shadow-sm select-none justify-between px-1 gap-1">
-                <button onClick={handleMinusClick} className="text-white hover:bg-white/10 w-4.5 h-4.5 flex items-center justify-center rounded transition-colors disabled:opacity-50" disabled={isLoadingCart}>
+                <button onClick={handleMinusClick} className="text-white hover:bg-white/10 w-4.5 h-4.5 flex items-center justify-center rounded transition-colors" disabled={isLoadingCart}>
                   <Minus className="w-2.5 h-2.5" strokeWidth={3} />
                 </button>
                 <span className="text-[10px] font-black tracking-wide min-w-[12px] text-center">
                   {isLoadingCart ? <Loader2 className="w-2.5 h-2.5 animate-spin mx-auto" /> : String(cartQuantity).padStart(2, '0')}
                 </span>
-                <button onClick={handlePlusClick} className="text-white hover:bg-white/10 w-4.5 h-4.5 flex items-center justify-center rounded transition-colors disabled:opacity-50" disabled={isLoadingCart || cartQuantity >= stock}>
+                <button onClick={handlePlusClick} className="text-white hover:bg-white/10 w-4.5 h-4.5 flex items-center justify-center rounded transition-colors" disabled={isLoadingCart || cartQuantity >= stock}>
                   <Plus className="w-2.5 h-2.5" strokeWidth={3} />
                 </button>
              </div>

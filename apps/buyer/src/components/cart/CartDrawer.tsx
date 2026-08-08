@@ -170,8 +170,17 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                     const finalPrice = hasVariantPrice ? itemPrice : fallbackPrice;
                     const finalOriginalPrice = hasVariantPrice ? itemOriginalPrice : fallbackOriginalPrice;
 
-                    const displayPriceText = finalPrice > 0 ? `₹${Math.round(Number(finalPrice * quantity)).toLocaleString('en-IN')}` : 'N/A';
-                    const displayOriginalPriceText = (finalOriginalPrice > 0 && Number(finalOriginalPrice) > Number(finalPrice)) ? `₹${Math.round(Number(finalOriginalPrice * quantity)).toLocaleString('en-IN')}` : '';
+                    const calculatedDiscountPercent = (finalOriginalPrice > finalPrice && finalOriginalPrice > 0)
+                      ? Math.round(((finalOriginalPrice - finalPrice) / finalOriginalPrice) * 100)
+                      : 0;
+                    const discountText = item.discount || (calculatedDiscountPercent > 0 ? `${calculatedDiscountPercent}% off` : '');
+
+                    const displayPriceText = finalPrice > 0 
+                      ? `₹${Number(finalPrice * quantity).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` 
+                      : 'N/A';
+                    const displayOriginalPriceText = (finalOriginalPrice > 0 && Number(finalOriginalPrice) > Number(finalPrice)) 
+                      ? `₹${Number(finalOriginalPrice * quantity).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` 
+                      : '';
                     const itemImageRaw = item.product?.images?.[0] || item.imageUrl || item.image;
                     const titleWords = itemName.trim().split(' ').filter(Boolean);
                     const initials = titleWords.length === 1 
@@ -190,17 +199,17 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, x: -50 }}
-                      className="bg-white rounded-[14px] shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border border-gray-100 p-2 sm:p-3 flex gap-2 sm:gap-3 relative overflow-hidden group"
+                      className="bg-white rounded-[14px] shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border border-[#854cbc] p-2 sm:p-3 flex gap-2 sm:gap-3 relative group overflow-visible"
                     >
                       {isYukiziChoice && (
-                        <span className="absolute top-0 left-0 text-[9px] font-bold text-white bg-[#6342B4] px-2 py-1 rounded-br-lg z-10 uppercase tracking-wider">
-                          YUKIZI CHOICE
+                        <span className="absolute -top-[10px] left-4 px-2.5 py-0.5 text-[9.5px] font-bold text-white bg-[#854cbc] rounded-full z-10 shadow-sm whitespace-nowrap">
+                          Yukizi Choice
                         </span>
                       )}
 
                       {/* Left Image */}
-                      <div className="w-[90px] h-[90px] sm:w-[105px] sm:h-[105px] bg-[#f8f5fd] rounded-xl flex items-center justify-center relative flex-shrink-0 mt-1.5 overflow-hidden">
-                        <img src={itemImage} alt={itemName} className="w-16 h-16 sm:w-20 sm:h-20 object-contain mix-blend-multiply" />
+                      <div className="w-[90px] h-[110px] sm:w-[105px] sm:h-[125px] bg-[#f8f5fd] rounded-xl flex items-center justify-center relative flex-shrink-0 mt-2 overflow-hidden">
+                        <img src={itemImage} alt={itemName} className="w-full h-full object-contain mix-blend-multiply" />
                         <button 
                           onClick={(e) => {
                             e.preventDefault();
@@ -270,8 +279,8 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                         </div>
 
                         {/* Product Name & Arrow Button */}
-                        <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2">
-                          <h3 className="text-[16px] font-bold text-gray-800 leading-snug truncate flex-1">{itemName}</h3>
+                        <div className="flex items-center justify-between w-full pr-0.5 sm:pr-1 gap-2 mt-3.5">
+                          <h3 className="text-[15px] font-medium text-gray-500 leading-snug truncate flex-1">{itemName}</h3>
                           <button
                             onClick={(e) => {
                               e.preventDefault();
@@ -290,10 +299,10 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                           </button>
                         </div>
                         {/* Price & Rating */}
-                        <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2">
+                        <div className="flex items-center justify-between w-full pr-0.5 sm:pr-1 gap-2 mt-2">
                           <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className="text-[19px] font-black text-gray-900">{displayPriceText}</span>
-                            <span className="text-[14px] font-bold text-gray-400 line-through">{displayOriginalPriceText}</span>
+                            <span className="text-[18px] font-semibold text-gray-800">{displayPriceText}</span>
+                            <span className="text-[13px] font-normal text-gray-400 line-through">{displayOriginalPriceText}</span>
                           </div>
                           <div className="flex items-center gap-[3px] sm:gap-[4px]">
                             <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-[#6342B4] text-[#6342B4]" />
@@ -301,22 +310,23 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                           </div>
                         </div>
 
-                        {/* Stock notice */}
-                        {isOutOfStock ? (
-                          <div className="w-full pr-1.5 sm:pr-3 mt-0.5">
-                            <span className="text-[11px] font-bold text-red-600 uppercase tracking-wide">Out of stock</span>
+                        {/* Discount & Delivery Row */}
+                        <div className="flex items-center justify-between w-full pr-0.5 sm:pr-1 mt-1.5">
+                          <div>
+                            {discountText ? (
+                              <span className="text-[13px] font-bold text-gray-800">
+                                {discountText}
+                              </span>
+                            ) : isOutOfStock ? (
+                              <span className="text-[11px] font-bold text-red-600 uppercase tracking-wide">Out of stock</span>
+                            ) : null}
                           </div>
-                        ) : Number.isFinite(maxQuantity) && quantity >= maxQuantity ? (
-                          <div className="w-full pr-1.5 sm:pr-3 mt-0.5">
-                            <span className="text-[11px] font-bold text-amber-600">
-                              Only {maxQuantity} {maxQuantity === 1 ? 'unit' : 'units'} available
-                            </span>
+                          <div className="flex items-center -mr-1 sm:-mr-2">
+                            <DeliveryTruckBadge 
+                              text={item.product?.deliveryTime || item.product?.deliveryText || '3 days'} 
+                              className="w-[65px] sm:w-[70px] text-[#9a9a9a]" 
+                            />
                           </div>
-                        ) : null}
-
-                        {/* Delivery */}
-                        <div className="flex justify-end w-full pr-1.5 sm:pr-3 mt-0.5">
-                          <DeliveryTruckBadge text="2 days" className="w-[80px] sm:w-[95px] text-[#9a9a9a]" />
                         </div>
 
                         {/* Top Right Actions */}

@@ -162,9 +162,11 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                       finalOriginalPrice = mrpVal;
                     }
 
-                    const displayPriceText = finalPrice > 0 ? `₹${Math.round(Number(finalPrice)).toLocaleString('en-IN')}` : 'N/A';
+                    const displayPriceText = finalPrice > 0 
+                      ? `₹${Number(finalPrice).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` 
+                      : 'N/A';
                     const displayOriginalPriceText = (finalOriginalPrice > 0 && Number(finalOriginalPrice) > Number(finalPrice)) 
-                      ? `₹${Math.round(Number(finalOriginalPrice)).toLocaleString('en-IN')}` 
+                      ? `₹${Number(finalOriginalPrice).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` 
                       : '';
 
                     const displayDiscountPercent = (finalOriginalPrice > finalPrice && finalOriginalPrice > 0)
@@ -246,12 +248,10 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, x: -50 }}
-                        className={`bg-white rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border p-2 sm:p-3 flex gap-2 sm:gap-3.5 relative overflow-visible mt-3 group transition-all ${
-                          isYukiziChoice ? 'border-[#7B2FBE] border-[1.5px]' : 'border-gray-100'
-                        }`}
+                        className="bg-white rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border border-[#854cbc] p-2 sm:p-3 flex gap-2 sm:gap-3.5 relative overflow-visible mt-3 group transition-all"
                       >
                         {isYukiziChoice && (
-                          <span className="absolute -top-[12px] left-3 bg-[#7B2FBE] text-white px-3 py-0.5 rounded-full font-semibold text-[10px] sm:text-[11px] shadow-sm tracking-wide flex items-center justify-center z-20">
+                          <span className="absolute -top-[12px] left-3 bg-[#854cbc] text-white px-3 py-0.5 rounded-full font-semibold text-[10px] sm:text-[11px] shadow-sm tracking-wide flex items-center justify-center z-20">
                             Yukizi Choice
                           </span>
                         )}
@@ -271,7 +271,7 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                         </div>
 
                         {/* Middle Content */}
-                        <div className="flex-1 min-w-0 mt-1 flex flex-col gap-1.5 justify-between">
+                        <div className="flex-1 min-w-0 mt-1 relative">
                           {/* Row 1: Actions (right-aligned Plus/Quantity Controls) */}
                           <div className="flex justify-end w-full pr-1.5 sm:pr-3">
                             <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -328,8 +328,8 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                           </div>
 
                           {/* Row 2: Product Name (left) & Quickview/Eye Button (right) */}
-                          <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2">
-                            <h3 className="text-[13px] sm:text-[14px] font-medium text-gray-500 leading-snug truncate text-left flex-1">{itemName}</h3>
+                          <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2 mt-3.5">
+                            <h3 className="text-[15px] font-medium text-gray-500 leading-snug truncate text-left flex-1">{itemName}</h3>
                             
                             {/* Quickview Button */}
                             <button
@@ -351,11 +351,11 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                           </div>
 
                           {/* Row 3: Price & Star Rating */}
-                          <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2">
+                          <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2 mt-2">
                             <div className="flex items-baseline gap-2 text-left">
-                              <span className="text-[19px] font-black text-gray-900">{displayPriceText}</span>
+                              <span className="text-[18px] font-semibold text-gray-800">{displayPriceText}</span>
                               {displayOriginalPriceText && (
-                                <span className="text-[14px] font-bold text-gray-400 line-through">{displayOriginalPriceText}</span>
+                                <span className="text-[13px] font-normal text-gray-400 line-through">{displayOriginalPriceText}</span>
                               )}
                             </div>
                             
@@ -366,10 +366,10 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                           </div>
 
                           {/* Row 4: Discount & Delivery */}
-                          <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2">
+                          <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 mt-1.5">
                             <div className="text-left">
                               {displayDiscountPercent > 0 && (
-                                <span className="text-xs sm:text-[13px] font-bold text-black">{displayDiscountPercent}% off</span>
+                                <span className="text-[13px] font-bold text-gray-800">{displayDiscountPercent}% off</span>
                               )}
                             </div>
                             

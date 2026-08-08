@@ -327,7 +327,7 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
                   </span>
                   <button 
                     onClick={handlePlusClick} 
-                    className="text-white hover:bg-white/10 w-4.5 h-4.5 flex items-center justify-center rounded transition-colors disabled:opacity-50"
+                    className="text-white hover:bg-white/10 w-4.5 h-4.5 flex items-center justify-center rounded transition-colors"
                     disabled={cartQuantity >= (product?.stock ?? 9999)}
                   >
                     <Plus className="w-2.5 h-2.5" strokeWidth={3} />

@@ -500,7 +500,7 @@ export default function Navbar({
 
       <nav
         ref={navRef}
-        className="fixed bottom-0 left-0 right-0 z-[90] flex justify-center items-end sm:items-center pointer-events-none px-2 pb-4 sm:pb-6 md:pb-4 sm:px-6 w-full will-change-transform"
+        className="fixed bottom-0 left-0 right-0 z-[90] flex justify-center items-end sm:items-center pointer-events-none px-2 pb-2 sm:pb-6 md:pb-4 sm:px-6 w-full will-change-transform"
       >
         {/* Soft white glow behind the floating bar. Absolutely positioned so it
             never affects layout, and painted before the z-10 panel so the bar

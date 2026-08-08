@@ -140,7 +140,7 @@ export default function NotificationDrawer({ isOpen, onClose }: { isOpen: boolea
 
             {/* Section 1: Notification */}
             <div className="flex-1 flex flex-col min-h-0 pt-8 px-6">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">Notification</h2>
+              <h2 className="text-[22px] font-bold text-gray-800 mb-4">Notification</h2>
               
               <div className="flex-1 overflow-y-auto custom-scrollbar pr-3 space-y-3 pb-4">
                 {isNotificationsLoading ? (
@@ -158,11 +158,11 @@ export default function NotificationDrawer({ isOpen, onClose }: { isOpen: boolea
 
                       return (
                         <div key={`notif-${item.id}`} className="bg-white rounded-2xl shadow-[0_2px_20px_-4px_rgba(0,0,0,0.10)] border border-gray-100/80 px-5 py-4 relative pr-10">
-                          <p className="text-[13.5px] text-gray-500 font-normal leading-snug mb-0.5">
+                          <p className="text-[13.5px] text-gray-400 font-normal leading-snug mb-0.5">
                             {firstLine}
                           </p>
                           {secondLine && (
-                            <p className="text-[14px] font-bold text-gray-700 leading-snug">
+                            <p className="text-[14px] font-bold text-gray-600 leading-snug">
                               {secondLine}
                             </p>
                           )}
@@ -184,7 +184,7 @@ export default function NotificationDrawer({ isOpen, onClose }: { isOpen: boolea
                     <div key={`notif-${item.id}`} className="bg-white rounded-[14px] shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border border-gray-100 p-3 flex gap-3 relative group">
                       {/* Left Image */}
                       <div className="w-[72px] h-[72px] bg-[#f8f5fd] rounded-xl flex items-center justify-center relative flex-shrink-0 overflow-hidden">
-                        <img src={product.image || (product.images && product.images[0])} alt={product.name ?? 'Product'} loading="lazy" decoding="async" className="w-12 h-12 object-contain mix-blend-multiply" />
+                        <img src={product.image || (product.images && product.images[0])} alt="Product" className="w-12 h-12 object-contain mix-blend-multiply" />
                         <button 
                           onClick={() => deleteNotification(item.id)}
                           className="absolute bottom-0 left-0 bg-[#f7941d] text-white p-1 rounded-tr-lg hover:bg-orange-500 transition-colors"
@@ -195,11 +195,11 @@ export default function NotificationDrawer({ isOpen, onClose }: { isOpen: boolea
 
                       {/* Right Content */}
                       <div className="flex-1 min-w-0 pr-8">
-                        <h3 className="text-xs font-bold text-gray-800 leading-snug truncate mb-1.5">{item.message}</h3>
+                        <h3 className="text-[11px] font-bold text-gray-800 leading-snug truncate mb-1.5">{item.message}</h3>
                         <div className="flex items-center gap-1.5 mb-1.5">
-                          <span className="text-sm font-bold text-gray-900">₹{product.price || product.mrp}</span>
+                          <span className="text-[13px] font-black text-gray-900">₹{product.price || product.mrp}</span>
                         </div>
-                        <span className="text-2xs font-bold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
+                        <span className="text-[9px] font-bold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
                           Back in Stock!
                         </span>
                         
@@ -222,7 +222,7 @@ export default function NotificationDrawer({ isOpen, onClose }: { isOpen: boolea
 
             {/* Section 2: Notify me */}
             <div className="flex-1 flex flex-col min-h-0 px-6 pb-6 pt-2">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">Notify me</h2>
+              <h2 className="text-[22px] font-bold text-gray-800 mb-4">Notify me</h2>
               
               <div className="flex-1 overflow-y-auto custom-scrollbar pr-3 space-y-3">
                 {isWaitlistLoading ? (
@@ -245,15 +245,15 @@ export default function NotificationDrawer({ isOpen, onClose }: { isOpen: boolea
                   return (
                     <div
                       key={`notify-${item.id}`}
-                      className={`bg-white rounded-2xl p-3.5 flex gap-4 relative border-2 border-[#7B2FBE] ${
+                      className={`bg-white rounded-2xl p-3.5 flex gap-4 relative border ${
                         isYukiziChoice
-                          ? 'shadow-[0_2px_12px_rgba(123,47,190,0.12)]'
-                          : 'shadow-[0_2px_20px_-4px_rgba(0,0,0,0.10)]'
+                          ? 'border-[#7B2FBE]/40 shadow-[0_2px_12px_rgba(123,47,190,0.12)]'
+                          : 'border-gray-100 shadow-[0_2px_20px_-4px_rgba(0,0,0,0.10)]'
                       } overflow-visible mt-3`}
                     >
                       {/* Yukizi Choice Badge */}
                       {isYukiziChoice && (
-                        <div className="absolute -top-[9.5px] left-3.5 bg-[#7B2FBE] text-white px-2.5 py-0.5 rounded-full font-bold text-2xs z-20 shadow-sm uppercase tracking-wider scale-[0.95]">
+                        <div className="absolute -top-[9.5px] left-3.5 bg-[#7B2FBE] text-white px-2.5 py-0.5 rounded-full font-bold text-[9px] z-20 shadow-sm uppercase tracking-wider scale-[0.95]">
                           Yukizi Choice
                         </div>
                       )}
@@ -263,8 +263,6 @@ export default function NotificationDrawer({ isOpen, onClose }: { isOpen: boolea
                         <img
                           src={productImage}
                           alt={product.name}
-                          loading="lazy"
-                          decoding="async"
                           className="max-w-[80px] max-h-[90px] object-contain mix-blend-multiply"
                         />
                         <button
@@ -281,7 +279,7 @@ export default function NotificationDrawer({ isOpen, onClose }: { isOpen: boolea
                         {/* Row 1: Timer Badge & Bell Icon */}
                         <div className="flex items-center justify-between w-full">
                           {timerText ? (
-                            <span className="px-2.5 py-0.5 border border-gray-200 text-gray-400 rounded-full text-2xs font-medium leading-none">
+                            <span className="px-2.5 py-0.5 border border-gray-200 text-gray-400 rounded-full text-[9.5px] font-medium leading-none">
                               {timerText}
                             </span>
                           ) : (
@@ -299,7 +297,7 @@ export default function NotificationDrawer({ isOpen, onClose }: { isOpen: boolea
                         {/* Row 2: Title & Eye Icon */}
                         <div className="flex items-start justify-between w-full gap-1.5">
                           <Link href={`/products/${generateProductSlug(product.name, product.id)}`} className="flex-1 min-w-0 text-left">
-                            <h4 className="text-xs font-medium text-gray-500 leading-snug truncate hover:text-[#7B2FBE] transition-colors">
+                            <h4 className="text-[12px] font-medium text-gray-500 leading-snug truncate hover:text-[#7B2FBE] transition-colors">
                               {product.name}
                             </h4>
                           </Link>
@@ -311,18 +309,18 @@ export default function NotificationDrawer({ isOpen, onClose }: { isOpen: boolea
                         {/* Row 3: Price & Rating */}
                         <div className="flex items-baseline justify-between w-full pt-0.5">
                           <div className="flex items-baseline gap-1.5">
-                            <span className="text-sm font-bold text-gray-800 leading-none">
+                            <span className="text-[14px] font-bold text-gray-800 leading-none">
                               {productPrice ? `₹${Math.round(Number(productPrice))}` : 'N/A'}
                             </span>
                             {hasDiscount && (
-                              <span className="text-2xs text-gray-400 line-through leading-none font-medium">
+                              <span className="text-[10px] text-gray-400 line-through leading-none font-medium">
                                 ₹{Math.round(Number(productMrp))}
                               </span>
                             )}
                           </div>
                           <div className="flex items-center gap-1 shrink-0">
                             <Star className="w-3.5 h-3.5 text-[#7B2FBE] fill-[#7B2FBE]" />
-                            <span className="text-xs font-bold text-gray-700 leading-none">
+                            <span className="text-[12px] font-bold text-gray-700 leading-none">
                               {product.rating || '4.5'}
                             </span>
                           </div>
@@ -330,7 +328,7 @@ export default function NotificationDrawer({ isOpen, onClose }: { isOpen: boolea
 
                         {/* Row 4: Backend Offers / Discount Tag & Delivery Badge */}
                         <div className="flex items-center justify-between w-full pt-1.5 border-t border-gray-100/80">
-                          <div className="text-xs sm:text-xs font-semibold text-gray-500">
+                          <div className="text-[11px] sm:text-[12px] font-semibold text-gray-500">
                             {renderBuyerOfferBadge(product)}
                           </div>
                           <div className="-mr-[6px]">

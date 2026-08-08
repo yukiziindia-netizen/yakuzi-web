@@ -246,9 +246,7 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, x: -50 }}
-                        className={`bg-white rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border p-2 sm:p-3 flex gap-2 sm:gap-3.5 relative overflow-visible mt-3 group transition-all ${
-                          isYukiziChoice ? 'border-[#7B2FBE] border-[1.5px]' : 'border-gray-100'
-                        }`}
+                        className="bg-white rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border-2 border-[#7B2FBE] p-2 sm:p-3 flex gap-2 sm:gap-3.5 relative overflow-visible mt-3 group transition-all"
                       >
                         {isYukiziChoice && (
                           <span className="absolute -top-[12px] left-3 bg-[#7B2FBE] text-white px-3 py-0.5 rounded-full font-semibold text-2xs sm:text-xs shadow-sm tracking-wide flex items-center justify-center z-20">

@@ -216,175 +216,181 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                     const itemImage = (!resolvedImage || resolvedImage === '/products/pharma_bottle.png')
                       ? `https://placehold.co/400x400/10b981/ffffff?text=${encodeURIComponent(initials)}`
                       : resolvedImage;
-                    const isYukiziChoice = item.isYukiziChoice ?? (idx % 3 === 0);
+                     const isYukiziChoice = item.isYukiziChoice ?? (idx % 3 === 0);
+                     const deliveryTime = item.product?.deliveryTime || item.product?.deliveryText || item.deliveryTime || item.deliveryText || '2 days';
+                     const discountPercent = Number(item.product?.discountMeta?.discountPercent || item.discountPercent || item.product?.discountPercent || 0);
+                     const displayDiscountPercent = (finalOriginalPrice > finalPrice && finalOriginalPrice > 0)
+                       ? Math.round(((finalOriginalPrice - finalPrice) / finalOriginalPrice) * 100)
+                       : discountPercent;
 
-                  return (
-                    <motion.div
-                      key={item.id || idx}
-                      layout
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, x: -50 }}
-                      className="bg-white rounded-[14px] shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border border-gray-100 p-2 sm:p-3 flex gap-2 sm:gap-3 relative overflow-hidden group"
-                    >
-                      {isYukiziChoice && (
-                        <span className="absolute top-0 left-0 text-2xs font-bold text-white bg-[#6342B4] px-2 py-1 rounded-br-lg z-10 uppercase tracking-wider">
-                          YUKIZI CHOICE
-                        </span>
-                      )}
+                   return (
+                     <motion.div
+                       key={item.id || idx}
+                       layout
+                       initial={{ opacity: 0, y: 10 }}
+                       animate={{ opacity: 1, y: 0 }}
+                       exit={{ opacity: 0, x: -50 }}
+                       className="bg-white rounded-[14px] shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border-2 border-[#7B2FBE] p-2 sm:p-3 flex gap-2 sm:gap-3 relative overflow-visible mt-3 group transition-all"
+                     >
+                       {isYukiziChoice && (
+                         <span className="absolute -top-[12px] left-3 bg-[#7B2FBE] text-white px-3 py-0.5 rounded-full font-semibold text-2xs sm:text-xs shadow-sm tracking-wide flex items-center justify-center z-20">
+                           Yukizi Choice
+                         </span>
+                       )}
 
-                      {/* Left Image */}
-                      <div className="w-[90px] h-[90px] sm:w-[105px] sm:h-[105px] bg-[#f8f5fd] rounded-xl flex items-center justify-center relative flex-shrink-0 mt-1.5 overflow-hidden">
-                        <img src={itemImage} alt={itemName} loading="lazy" decoding="async" className="w-16 h-16 sm:w-20 sm:h-20 object-contain mix-blend-multiply" />
-                        <button 
-                          onClick={(e) => {
-                            e.preventDefault();
-                            removeItem.mutate(item.id, {
-                              onSuccess: () => toast('Item removed from bag', 'info'),
-                            });
-                          }}
-                          disabled={removeItem.isPending || syncCart.isPending}
-                          className="absolute bottom-0 left-0 bg-[#f7941d] text-white p-1.5 sm:p-2 rounded-tr-2xl hover:bg-orange-500 transition-colors z-10 disabled:opacity-50"
-                        >
-                          <Trash2 className="w-4 h-4 sm:w-[22px] sm:h-[22px]" />
-                        </button>
-                      </div>
+                       {/* Left Image */}
+                       <div className="w-[100px] h-[110px] sm:w-[120px] sm:h-[130px] bg-[#f8f5fd] rounded-xl flex items-center justify-center relative flex-shrink-0 mt-1.5 overflow-hidden">
+                         <img src={itemImage} alt={itemName} loading="lazy" decoding="async" className="w-20 h-20 sm:w-24 sm:h-24 object-contain mix-blend-multiply" />
+                         <button 
+                           onClick={(e) => {
+                             e.preventDefault();
+                             removeItem.mutate(item.id, {
+                               onSuccess: () => toast('Item removed from bag', 'info'),
+                             });
+                           }}
+                           disabled={removeItem.isPending || syncCart.isPending}
+                           className="absolute bottom-0 left-0 bg-[#f7941d] text-white p-1.5 sm:p-2 rounded-tr-2xl hover:bg-orange-500 transition-colors z-10 disabled:opacity-50"
+                         >
+                           <Trash2 className="w-4 h-4 sm:w-[22px] sm:h-[22px]" />
+                         </button>
+                       </div>
 
-                      {/* Right Content */}
-                      <div className="flex-1 min-w-0 pr-1 mt-1 relative">
-                        {/* Top Row: Wishlist Badge & Quantity Pill (on mobile) */}
-                        <div className="flex items-center justify-between w-full mb-1.5 pr-1">
-                          {/* Wishlist Button Badge */}
-                          <div className="inline-block">
-                            <button 
-                              onClick={async (e) => {
-                                e.preventDefault();
-                                await addToWishlist.mutateAsync({
-                                  ...item,
-                                  id: item.product?.id || item.productId || item.id,
-                                  name: itemName,
-                                  price: itemPrice,
-                                  originalPrice: itemOriginalPrice,
-                                  image: itemImage,
-                                });
-                                toast('Added to wishlist', 'success');
-                              }}
-                              className="flex items-center gap-1 bg-[#562996] text-white px-2.5 sm:px-3.5 py-1.5 rounded-lg hover:bg-[#432075] transition-colors shadow-sm"
-                            >
-                              <span className="text-2xs sm:text-xs font-bold tracking-wider">Wishlist</span>
-                              <Bookmark className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white" />
-                            </button>
-                          </div>
+                       {/* Right Content */}
+                       <div className="flex-1 min-w-0 pr-1 mt-1 relative">
+                         {/* Top Row: Wishlist Badge & Quantity Pill (on mobile) */}
+                         <div className="flex items-center justify-between w-full mb-1.5 pr-1">
+                           {/* Wishlist Button Badge */}
+                           <div className="inline-block">
+                             <button 
+                               onClick={async (e) => {
+                                 e.preventDefault();
+                                 await addToWishlist.mutateAsync({
+                                   ...item,
+                                   id: item.product?.id || item.productId || item.id,
+                                   name: itemName,
+                                   price: itemPrice,
+                                   originalPrice: itemOriginalPrice,
+                                   image: itemImage,
+                                 });
+                                 toast('Added to wishlist', 'success');
+                               }}
+                               className="flex items-center gap-1 bg-[#562996] text-white px-2.5 sm:px-3.5 py-1.5 rounded-lg hover:bg-[#432075] transition-colors shadow-sm"
+                             >
+                               <span className="text-2xs sm:text-xs font-bold tracking-wider">Wishlist</span>
+                               <Bookmark className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white" />
+                             </button>
+                           </div>
 
-                          {/* Quantity Pill (Mobile only) */}
-                          <div className="flex sm:hidden items-center bg-[#562996] rounded-lg text-white overflow-hidden shadow-sm h-7 px-1.5">
-                            <button 
-                              onClick={() => {
-                                updateItem.mutate({ itemId: item.id, quantity: Math.max(minQuantity, quantity - 1) });
-                              }}
-                              disabled={updateItem.isPending || syncCart.isPending || quantity <= minQuantity}
-                              className="px-1.5 h-full hover:bg-black/20 flex items-center justify-center font-bold text-xs transition-colors disabled:opacity-50"
-                            >
-                              -
-                            </button>
-                            <span className="text-xs font-bold px-1 tracking-tighter">{quantity.toString().padStart(2, '0')}</span>
-                            <button
-                              onClick={() => {
-                                if (quantity < maxQuantity) {
-                                  updateItem.mutate({ itemId: item.id, quantity: quantity + 1 });
-                                } else {
-                                  toast(`Only ${maxQuantity} units available`, 'error');
-                                }
-                              }}
-                              disabled={updateItem.isPending || syncCart.isPending || quantity >= maxQuantity}
-                              className="px-1.5 h-full hover:bg-black/20 flex items-center justify-center font-bold text-xs transition-colors disabled:opacity-50"
-                            >
-                              +
-                            </button>
-                          </div>
-                        </div>
+                           {/* Quantity Pill (Mobile only) */}
+                           <div className="flex sm:hidden items-center bg-[#562996] rounded-lg text-white overflow-hidden shadow-sm h-7 px-1.5">
+                             <button 
+                               onClick={() => {
+                                 updateItem.mutate({ itemId: item.id, quantity: Math.max(minQuantity, quantity - 1) });
+                               }}
+                               disabled={updateItem.isPending || syncCart.isPending || quantity <= minQuantity}
+                               className="px-1.5 h-full hover:bg-black/20 flex items-center justify-center font-bold text-xs transition-colors disabled:opacity-50"
+                             >
+                               -
+                             </button>
+                             <span className="text-xs font-bold px-1 tracking-tighter">{quantity.toString().padStart(2, '0')}</span>
+                             <button
+                               onClick={() => {
+                                 if (quantity < maxQuantity) {
+                                   updateItem.mutate({ itemId: item.id, quantity: quantity + 1 });
+                                 } else {
+                                   toast(`Only ${maxQuantity} units available`, 'error');
+                                 }
+                               }}
+                               disabled={updateItem.isPending || syncCart.isPending || quantity >= maxQuantity}
+                               className="px-1.5 h-full hover:bg-black/20 flex items-center justify-center font-bold text-xs transition-colors disabled:opacity-50"
+                             >
+                               +
+                             </button>
+                           </div>
+                         </div>
 
-                        {/* Product Name & Arrow Button */}
-                        <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2">
-                          <h3 className="text-base font-bold text-gray-800 leading-snug truncate flex-1">{itemName}</h3>
-                          <button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              setSelectedProduct(item.product || {
-                                id: item.productId || item.id,
-                                name: itemName,
-                                price: itemPrice,
-                                image: itemImage,
-                              });
-                            }}
-                            className="flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform"
-                            title="Quick view"
-                          >
-                            <Eye className="w-4 h-4 text-gray-400 hover:text-gray-600" />
-                          </button>
-                        </div>
-                        {/* Price & Rating */}
-                        <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2">
-                          <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className="text-xl font-bold text-gray-900">{displayPriceText}</span>
-                            <span className="text-sm font-bold text-gray-400 line-through">{displayOriginalPriceText}</span>
-                          </div>
-                          <div className="flex items-center gap-[3px] sm:gap-[4px]">
-                            <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-[#6342B4] text-[#6342B4]" />
-                            <span className="text-xs sm:text-sm font-bold text-gray-700">{item.rating ? item.rating : 'NA'}</span>
-                          </div>
-                        </div>
+                         {/* Product Name & Arrow Button */}
+                         <div className="flex items-center justify-between w-full pr-0.5 sm:pr-1 gap-2">
+                           <h3 className="text-base font-bold text-gray-800 leading-snug truncate flex-1">{itemName}</h3>
+                           <button
+                             onClick={(e) => {
+                               e.preventDefault();
+                               e.stopPropagation();
+                               setSelectedProduct(item.product || {
+                                 id: item.productId || item.id,
+                                 name: itemName,
+                                 price: itemPrice,
+                                 image: itemImage,
+                               });
+                             }}
+                             className="flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform"
+                             title="Quick view"
+                           >
+                             <Eye className="w-4 h-4 text-gray-400 hover:text-gray-600" />
+                           </button>
+                         </div>
+                         {/* Price & Rating */}
+                         <div className="flex items-center justify-between w-full pr-0.5 sm:pr-1 gap-2">
+                           <div className="flex items-center gap-1.5 mt-0.5">
+                             <span className="text-xl font-bold text-gray-900">{displayPriceText}</span>
+                             <span className="text-sm font-bold text-gray-400 line-through">{displayOriginalPriceText}</span>
+                           </div>
+                           <div className="flex items-center gap-[3px] sm:gap-[4px]">
+                             <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-[#6342B4] text-[#6342B4]" />
+                             <span className="text-xs sm:text-sm font-bold text-gray-700">{item.rating ? item.rating : 'NA'}</span>
+                           </div>
+                         </div>
 
-                        {/* Stock notice */}
-                        {isOutOfStock ? (
-                          <div className="w-full pr-1.5 sm:pr-3 mt-0.5">
-                            <span className="text-xs font-bold text-red-600 uppercase tracking-wide">Out of stock</span>
-                          </div>
-                        ) : Number.isFinite(maxQuantity) && quantity >= maxQuantity ? (
-                          <div className="w-full pr-1.5 sm:pr-3 mt-0.5">
-                            <span className="text-xs font-bold text-amber-600">
-                              Only {maxQuantity} {maxQuantity === 1 ? 'unit' : 'units'} available
-                            </span>
-                          </div>
-                        ) : null}
+                         {/* Stock notice (only shown if out of stock) */}
+                         {isOutOfStock && (
+                           <div className="w-full pr-0.5 sm:pr-1 mt-0.5 text-left">
+                             <span className="text-xs font-bold text-red-600 uppercase tracking-wide">Out of stock</span>
+                           </div>
+                         )}
 
-                        {/* Delivery */}
-                        <div className="flex justify-end w-full pr-1.5 sm:pr-3 mt-0.5">
-                          <DeliveryTruckBadge text="2 days" className="w-[80px] sm:w-[95px] text-[#9a9a9a]" />
-                        </div>
+                         {/* Row 4: Discount & Delivery */}
+                         <div className="flex items-center justify-between w-full pr-0.5 sm:pr-1 gap-2 mt-1.5">
+                           <div className="text-left">
+                             {displayDiscountPercent > 0 && (
+                               <span className="text-xs sm:text-sm font-bold text-black">{displayDiscountPercent}% off</span>
+                             )}
+                           </div>
+                           <div className="-mr-1.5 sm:-mr-2.5">
+                             <DeliveryTruckBadge text={deliveryTime} className="w-[68px] sm:w-[85px] h-auto text-[#8c8c8c]" />
+                           </div>
+                         </div>
 
-                        {/* Top Right Actions */}
-                        <div className="absolute top-0 right-0 flex flex-col items-end gap-2">
-                          {/* Quantity Pill (Desktop/Tablet only) */}
-                          <div className="hidden sm:flex items-center bg-[#562996] rounded-lg text-white overflow-hidden shadow-sm h-7 sm:h-8 px-2 sm:px-2.5">
-                            <button 
-                              onClick={() => {
-                                updateItem.mutate({ itemId: item.id, quantity: Math.max(minQuantity, quantity - 1) });
-                              }}
-                              disabled={updateItem.isPending || syncCart.isPending || quantity <= minQuantity}
-                              className="px-2 h-full hover:bg-black/20 flex items-center justify-center font-bold text-xs transition-colors disabled:opacity-50"
-                            >
-                              -
-                            </button>
-                            <span className="text-xs sm:text-xs font-bold px-1.5 sm:px-2 tracking-tighter">{quantity.toString().padStart(2, '0')}</span>
-                            <button
-                              onClick={() => {
-                                if (quantity < maxQuantity) {
-                                  updateItem.mutate({ itemId: item.id, quantity: quantity + 1 });
-                                } else {
-                                  toast(`Only ${maxQuantity} units available`, 'error');
-                                }
-                              }}
-                              disabled={updateItem.isPending || syncCart.isPending || quantity >= maxQuantity}
-                              className="px-2 h-full hover:bg-black/20 flex items-center justify-center font-bold text-xs transition-colors disabled:opacity-50"
-                            >
-                              +
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
+                         {/* Top Right Actions */}
+                         <div className="absolute top-0 right-0 flex flex-col items-end gap-2">
+                           {/* Quantity Pill (Desktop/Tablet only) */}
+                           <div className="hidden sm:flex items-center bg-[#562996] rounded-lg text-white overflow-hidden shadow-sm h-7 sm:h-8 px-2 sm:px-2.5">
+                             <button 
+                               onClick={() => {
+                                 updateItem.mutate({ itemId: item.id, quantity: Math.max(minQuantity, quantity - 1) });
+                               }}
+                               disabled={updateItem.isPending || syncCart.isPending || quantity <= minQuantity}
+                               className="px-2 h-full hover:bg-black/20 flex items-center justify-center font-bold text-xs transition-colors disabled:opacity-50"
+                             >
+                               -
+                             </button>
+                             <span className="text-xs sm:text-xs font-bold px-1.5 sm:px-2 tracking-tighter">{quantity.toString().padStart(2, '0')}</span>
+                             <button
+                               onClick={() => {
+                                 if (quantity < maxQuantity) {
+                                   updateItem.mutate({ itemId: item.id, quantity: quantity + 1 });
+                                 } else {
+                                   toast(`Only ${maxQuantity} units available`, 'error');
+                                 }
+                               }}
+                               disabled={updateItem.isPending || syncCart.isPending || quantity >= maxQuantity}
+                               className="px-2 h-full hover:bg-black/20 flex items-center justify-center font-bold text-xs transition-colors disabled:opacity-50"
+                             >
+                               +
+                             </button>
+                           </div>
+                         </div>
+                       </div>
+                     </motion.div>
                   );
                 })}
                 </AnimatePresence>

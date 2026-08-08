@@ -464,9 +464,7 @@ export default function Navbar({
           className="flex items-center gap-1.5 xs:gap-2 sm:gap-6 md:gap-2 pointer-events-auto flex-nowrap justify-center w-full max-w-[1200px] px-1 sm:px-4 relative z-10"
         >
           {/* Left Segment: Logo, Profile, Notifications, Search */}
-          <div className={`flex items-center bg-white sm:bg-[#562996] rounded-xl pl-[2px] pr-1 xs:pl-1 xs:pr-1.5 sm:px-4 md:px-6 h-[48px] sm:h-[60px] md:h-[64px] shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl sm:flex-1 max-w-[480px] justify-between overflow-hidden min-w-0 border border-gray-100 sm:border-0 ${
-            isAuthenticated ? 'flex-1' : 'flex-[1.15]'
-          }`}>
+          <div className="flex items-center bg-white sm:bg-[#562996] rounded-full sm:rounded-xl pl-2.5 pr-1.5 xs:pl-3 xs:pr-2 sm:px-4 md:px-6 h-9 sm:h-[60px] md:h-[64px] shadow-[0_6px_20px_rgba(0,0,0,0.08)] sm:shadow-2xl flex-[1.08] sm:flex-1 max-w-[480px] justify-between overflow-hidden min-w-0">
             {/* DESKTOP VIEW (sm and up) */}
             <div className="hidden sm:flex items-center w-full justify-between">
                 <div className="flex items-center h-full">
@@ -525,32 +523,33 @@ export default function Navbar({
             </div>
 
             {/* MOBILE VIEW (below sm) */}
-            <div className="flex sm:hidden items-center w-full justify-between h-full px-1">
+            <div className="flex sm:hidden items-center w-full justify-between h-full">
               {!isAuthenticated ? (
                 // BEFORE LOGIN
-                <div className="flex items-center justify-between w-full h-full py-[6px] gap-0.5">
-                  <div className="h-[36px] flex items-center justify-center bg-gradient-to-b from-[#a155e8] via-[#7b41b0] to-[#512384] px-2 xs:px-2.5 rounded-[12px] text-[#e0e0e0] shrink-0 shadow-sm border border-[#a155e8]/20">
-                    <Link href="/" className="h-full flex items-center">
-                      <Image src="/YukiziLogo.png" alt="YUKiZi" width={70} height={24} className="w-[36px] xs:w-[44px] object-contain [filter:brightness(0)_invert(0.88)_drop-shadow(0.25px_0_0_#e0e0e0)_drop-shadow(-0.25px_0_0_#e0e0e0)_drop-shadow(0_0.25px_0_#e0e0e0)] cursor-pointer" />
-                    </Link>
-                    <div className="w-[1px] h-3.5 bg-[#e0e0e0]/30 mx-1 xs:mx-1.5" />
-                    <Link href="/login" className="h-full flex items-center cursor-pointer">
-                      <span className="text-2xs xs:text-xs font-normal whitespace-nowrap">Start Now</span>
-                    </Link>
-                  </div>
+                <div className="flex items-center justify-between w-full h-full gap-1">
+                  <Link href="/" className="shrink-0 flex items-center cursor-pointer">
+                    <Image src="/YukiziLogo.png" alt="YUKiZi" width={70} height={24} className="w-[38px] xs:w-[44px] object-contain" />
+                  </Link>
+
+                  <Link
+                    href="/login"
+                    className="h-[26px] flex items-center justify-center bg-[#854cbc] px-2 xs:px-2.5 rounded-[10px] shrink-0 cursor-pointer"
+                  >
+                    <span className="text-2xs font-medium text-white whitespace-nowrap">Start Now</span>
+                  </Link>
 
                   <button
                     onClick={() => {
                       setIsSearchChatOpen(!isSearchChatOpen);
                       setIsChatOpen(false);
                     }}
-                    className={`relative p-1 mr-1.5 transition-all duration-200 shrink-0 ${
+                    className={`relative p-1 transition-all duration-200 shrink-0 ${
                       isSearchChatOpen
                         ? "text-[#562996] scale-110 opacity-100"
-                        : "text-gray-400 hover:text-gray-600"
+                        : "text-[#442f58] hover:text-black"
                     }`}
                   >
-                    <Search className="w-[18px] h-[18px] xs:w-[20px] xs:h-[20px] stroke-[2.5]" />
+                    <Search className="w-[17px] h-[17px] xs:w-[18px] xs:h-[18px] stroke-[2.5]" />
                   </button>
                 </div>
               ) : (
@@ -602,26 +601,20 @@ export default function Navbar({
               setIsChatOpen(!isChatOpen);
               setIsSearchChatOpen(false);
             }}
-            className={`relative -mt-0.5 sm:-mt-1.5 md:-mt-2 z-20 w-12 h-12 xs:w-14 xs:h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-[#f76409] rounded-xl xs:rounded-[18px] sm:rounded-2xl md:rounded-[1.5rem] flex items-center justify-center shadow-[0_4px_15px_rgba(247,100,9,0.4)] sm:shadow-[0_4px_20px_rgba(247,100,9,0.45)] hover:-translate-y-1 sm:hover:-translate-y-2 transition-transform cursor-pointer shrink-0 border-[4px] xs:border-[5px] sm:border-[6px] md:border-[7px] border-[#ffa168] ${
-              isAuthenticated
-                ? 'mx-1 xs:mx-1.5 sm:mx-2 md:mx-2'
-                : 'ml-2 xs:ml-2.5 mr-1 xs:mr-1 sm:mx-2 md:mx-2'
-            }`}
+            className="relative -mt-2 sm:-mt-1.5 md:-mt-2 z-20 w-11 h-[54px] xs:w-12 xs:h-[59px] sm:w-20 sm:h-20 md:w-24 md:h-24 bg-[#f76409] rounded-xl xs:rounded-[14px] sm:rounded-2xl md:rounded-[1.5rem] flex items-center justify-center shadow-[0_6px_16px_rgba(247,100,9,0.3)] sm:shadow-[0_4px_20px_rgba(247,100,9,0.45)] hover:-translate-y-1 sm:hover:-translate-y-2 transition-transform cursor-pointer shrink-0 border-0 sm:border-[6px] md:border-[7px] border-[#ffa168] mx-0.5 xs:mx-1 sm:mx-2 md:mx-2"
           >
-            <Image src="/yukizi.jpg" alt="Mascot" width={96} height={96} className="w-full h-full object-cover rounded-[6px] xs:rounded-[10px] sm:rounded-xl md:rounded-[1.1rem]" />
-            
-            {/* Top dots (Desktop only) */}
-            <div className="hidden sm:block absolute -top-[14px] left-[32%] w-[6px] h-[6px] bg-[#ffa168] rounded-[1px] shadow-[0_0_4px_rgba(255,161,104,0.6)]" />
-            <div className="hidden sm:block absolute -top-[26px] left-[48%] w-[8px] h-[8px] bg-[#ffa168] rounded-[1.5px] shadow-[0_0_5px_rgba(255,161,104,0.6)]" />
-            <div className="hidden sm:block absolute -top-[38px] left-[40%] w-[4px] h-[4px] bg-[#ffa168] rounded-[0.5px] shadow-[0_0_3px_rgba(255,161,104,0.6)]" />
+            <Image src="/yukizi.jpg" alt="Mascot" width={96} height={96} className="w-full h-full object-cover rounded-xl xs:rounded-[14px] sm:rounded-xl md:rounded-[1.1rem]" />
+
+            {/* Top dots */}
+            <div className="absolute -top-[8px] left-[32%] w-[4px] h-[4px] sm:-top-[14px] sm:left-[32%] sm:w-[6px] sm:h-[6px] bg-[#ffa168] rounded-[1px] shadow-[0_0_4px_rgba(255,161,104,0.6)]" />
+            <div className="absolute -top-[15px] left-[48%] w-[5px] h-[5px] sm:-top-[26px] sm:left-[48%] sm:w-[8px] sm:h-[8px] bg-[#ffa168] rounded-[1.5px] shadow-[0_0_5px_rgba(255,161,104,0.6)]" />
+            <div className="absolute -top-[21px] left-[40%] w-[3px] h-[3px] sm:-top-[38px] sm:left-[40%] sm:w-[4px] sm:h-[4px] bg-[#ffa168] rounded-[0.5px] shadow-[0_0_3px_rgba(255,161,104,0.6)]" />
           </div>
 
 
 
           {/* Right Segment: Cart, Wishlist, Filter, Menu */}
-          <div className={`flex items-center justify-between bg-white sm:bg-[#562996] rounded-xl px-2 xs:px-3 sm:px-8 md:px-12 lg:px-16 h-[48px] sm:h-[60px] md:h-[64px] shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl text-[#562996] sm:text-white sm:shrink-0 sm:flex-1 max-w-[480px] z-10 overflow-hidden min-w-0 border border-gray-100 sm:border-0 ${
-            isAuthenticated ? 'flex-1' : 'flex-[0.85]'
-          }`}>
+          <div className="flex items-center justify-between bg-white sm:bg-[#562996] rounded-full sm:rounded-xl px-3.5 xs:px-4 sm:px-8 md:px-12 lg:px-16 h-9 sm:h-[60px] md:h-[64px] shadow-[0_6px_20px_rgba(0,0,0,0.08)] sm:shadow-2xl text-[#562996] sm:text-white sm:shrink-0 flex-[0.92] sm:flex-1 max-w-[480px] z-10 overflow-hidden min-w-0">
 
             <button 
               onClick={() => setIsWishlistOpen(true)} 
@@ -703,8 +696,8 @@ export default function Navbar({
             </button>
 
             <button 
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
-              className={`mr-2 sm:mr-0 transition-all duration-200 hover:scale-110 ${
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className={`transition-all duration-200 hover:scale-110 ${
                 isMobileMenuOpen
                   ? "text-[#562996] sm:text-white scale-110 opacity-100"
                   : isAnyDrawerOpen

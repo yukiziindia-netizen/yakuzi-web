@@ -38,7 +38,8 @@ import {
   LifeBuoy,
   ChevronDown,
   ChevronUp,
-  LayoutGrid
+  LayoutGrid,
+  Brain
 } from "lucide-react";
 
 
@@ -54,7 +55,7 @@ import SearchBar from "@/components/shared/SearchBar";
 import { SidebarSheet, type SidebarView } from "@/components/landing/SidebarSheet";
 import WishlistIcon from "@/components/shared/WishlistIcon";
 
-import { useAuth, type Category, sendChatMessage, type ChatMessage } from "@yukizi/api-client";
+import { useAuth, type Category, sendChatMessage, sendChatMessageFull, type ChatMessage, getProducts } from "@yukizi/api-client";
 import { useCart } from "@/hooks/useCart";
 import { localCart } from "@/lib/local-cart";
 import { useQueryClient } from "@tanstack/react-query";
@@ -157,6 +158,33 @@ export default function Navbar({
   const [chatInput, setChatInput] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [searchInput, setSearchInput] = useState("");
+  // Live results shown inside the search panel while typing.
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearchLoading, setIsSearchLoading] = useState(false);
+
+  useEffect(() => {
+    const q = searchInput.trim();
+    if (!isSearchChatOpen || q.length < 2) {
+      setSearchResults([]);
+      setIsSearchLoading(false);
+      return;
+    }
+    setIsSearchLoading(true);
+    let stale = false;
+    // Debounced so a fast typist fires one request, not one per keystroke.
+    const timer = setTimeout(async () => {
+      const res = await getProducts({ search: q, limit: 6 });
+      if (!stale) {
+        setSearchResults(res.data);
+        setIsSearchLoading(false);
+      }
+    }, 300);
+    return () => {
+      stale = true;
+      clearTimeout(timer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchInput, isSearchChatOpen]);
   const [isRecording, setIsRecording] = useState(false);
   const [attachments, setAttachments] = useState<{ name: string; data: string; type: string }[]>([]);
   const router = useRouter();
@@ -240,6 +268,43 @@ export default function Navbar({
     }
   }, [chatMessages, isMounted]);
 
+  const formatFormattedMessage = (content: string) => {
+    if (!content) return null;
+    const lines = content.split('\n');
+    return lines.map((line, lineIdx) => {
+      const parts = line.split(/(\*\*.*?\*\*)/g);
+      const lineElements = parts.map((part, pIdx) => {
+        if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+          return <strong key={pIdx} className="font-bold">{part.slice(2, -2)}</strong>;
+        }
+        return part;
+      });
+
+      const trimmed = line.trim();
+      if (trimmed.startsWith('* ') || trimmed.startsWith('- ')) {
+        const rest = line.substring(line.indexOf(trimmed.startsWith('* ') ? '*' : '-') + 1);
+        const bulletParts = rest.split(/(\*\*.*?\*\*)/g).map((part, pIdx) => {
+          if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+            return <strong key={pIdx} className="font-bold">{part.slice(2, -2)}</strong>;
+          }
+          return part;
+        });
+        return (
+          <div key={lineIdx} className="flex items-start gap-2 my-1 pl-1">
+            <span className="text-purple-200 font-bold">•</span>
+            <div className="flex-1">{bulletParts}</div>
+          </div>
+        );
+      }
+
+      return (
+        <div key={lineIdx} className={trimmed === '' ? 'h-2' : ''}>
+          {lineElements}
+        </div>
+      );
+    });
+  };
+
   const performChatRequest = async (userMsgText: string, currentHistory: ChatMessage[], currentAttachments: typeof attachments) => {
     const userMessage: ChatMessage = { role: 'user', content: userMsgText, attachments: currentAttachments };
     setChatMessages((prev) => [...prev, userMessage]);
@@ -248,8 +313,13 @@ export default function Navbar({
     setIsChatLoading(true);
 
     try {
-      const response = await sendChatMessage(userMessage.content, currentHistory, userMessage.attachments);
-      setChatMessages((prev) => [...prev, { role: 'assistant', content: response }]);
+      const response = await sendChatMessageFull(userMessage.content, currentHistory, userMessage.attachments);
+      setChatMessages((prev) => [...prev, {
+        role: 'assistant',
+        content: response.response,
+        thoughts: response.thoughts,
+        thinkingTimeMs: response.thinkingTimeMs
+      }]);
     } catch (error) {
       console.error('Chat error:', error);
       setChatMessages((prev) => [...prev, { role: 'assistant', content: 'Sorry, I encountered an error processing your request.' }]);
@@ -430,16 +500,22 @@ export default function Navbar({
 
       <nav
         ref={navRef}
-        className="fixed bottom-0 left-0 right-0 z-[90] flex justify-center items-end sm:items-center pointer-events-none px-2 pb-4 sm:pb-6 md:pb-4 sm:px-6 w-full will-change-transform"
+        className="fixed bottom-0 left-0 right-0 z-[90] flex justify-center items-end sm:items-center pointer-events-none px-2 pb-2 sm:pb-6 md:pb-4 sm:px-6 w-full will-change-transform"
       >
+        {/* Soft white glow behind the floating bar. Absolutely positioned so it
+            never affects layout, and painted before the z-10 panel so the bar
+            always sits on top of it. The whole <nav> is pointer-events-none, so
+            the page underneath stays clickable through it. */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 bottom-0 -top-[60px] sm:-top-[70px] pointer-events-none bg-[linear-gradient(to_top,#fff_45%,rgba(255,255,255,0.85)_70%,rgba(255,255,255,0)_100%)] sm:[-webkit-mask-image:linear-gradient(to_right,#000,transparent_16%,transparent_84%,#000)] sm:[mask-image:linear-gradient(to_right,#000,transparent_16%,transparent_84%,#000)]"
+        />
         <div
           ref={navPanelRef}
           className="flex items-center gap-1.5 xs:gap-2 sm:gap-6 md:gap-2 pointer-events-auto flex-nowrap justify-center w-full max-w-[1200px] px-1 sm:px-4 relative z-10"
         >
           {/* Left Segment: Logo, Profile, Notifications, Search */}
-          <div className={`flex items-center bg-white sm:bg-[#562996] rounded-xl pl-[2px] pr-1 xs:pl-1 xs:pr-1.5 sm:px-4 md:px-6 h-[48px] sm:h-[60px] md:h-[64px] shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl sm:flex-1 max-w-[480px] justify-between overflow-hidden min-w-0 border border-gray-100 sm:border-0 ${
-            isAuthenticated ? 'flex-1' : 'flex-[1.15]'
-          }`}>
+          <div className="flex items-center bg-white sm:bg-[#562996] rounded-full sm:rounded-xl pl-2.5 pr-1.5 xs:pl-3 xs:pr-2 sm:px-4 md:px-6 h-9 sm:h-[60px] md:h-[64px] shadow-[0_6px_20px_rgba(0,0,0,0.08)] sm:shadow-2xl flex-[1.08] sm:flex-1 max-w-[480px] justify-between overflow-hidden min-w-0">
             {/* DESKTOP VIEW (sm and up) */}
             <div className="hidden sm:flex items-center w-full justify-between">
                 <div className="flex items-center h-full">
@@ -498,32 +574,33 @@ export default function Navbar({
             </div>
 
             {/* MOBILE VIEW (below sm) */}
-            <div className="flex sm:hidden items-center w-full justify-between h-full px-1">
+            <div className="flex sm:hidden items-center w-full justify-between h-full">
               {!isAuthenticated ? (
                 // BEFORE LOGIN
-                <div className="flex items-center justify-between w-full h-full py-[6px] gap-0.5">
-                  <div className="h-[36px] flex items-center justify-center bg-gradient-to-b from-[#a155e8] via-[#7b41b0] to-[#512384] px-2 xs:px-2.5 rounded-[12px] text-[#e0e0e0] shrink-0 shadow-sm border border-[#a155e8]/20">
-                    <Link href="/" className="h-full flex items-center">
-                      <Image src="/YukiziLogo.png" alt="YUKiZi" width={70} height={24} className="w-[36px] xs:w-[44px] object-contain [filter:brightness(0)_invert(0.88)_drop-shadow(0.25px_0_0_#e0e0e0)_drop-shadow(-0.25px_0_0_#e0e0e0)_drop-shadow(0_0.25px_0_#e0e0e0)] cursor-pointer" />
-                    </Link>
-                    <div className="w-[1px] h-3.5 bg-[#e0e0e0]/30 mx-1 xs:mx-1.5" />
-                    <Link href="/login" className="h-full flex items-center cursor-pointer">
-                      <span className="text-[10px] xs:text-[11px] font-normal whitespace-nowrap">Start Now</span>
-                    </Link>
-                  </div>
+                <div className="flex items-center justify-between w-full h-full gap-1">
+                  <Link href="/" className="shrink-0 flex items-center cursor-pointer">
+                    <Image src="/YukiziLogo.png" alt="YUKiZi" width={70} height={24} className="w-[38px] xs:w-[44px] object-contain" />
+                  </Link>
+
+                  <Link
+                    href="/login"
+                    className="h-[26px] flex items-center justify-center bg-[#854cbc] px-2 xs:px-2.5 rounded-[10px] shrink-0 cursor-pointer"
+                  >
+                    <span className="text-[10px] font-medium text-white whitespace-nowrap">Start Now</span>
+                  </Link>
 
                   <button
                     onClick={() => {
                       setIsSearchChatOpen(!isSearchChatOpen);
                       setIsChatOpen(false);
                     }}
-                    className={`relative p-1 mr-1.5 transition-all duration-200 shrink-0 ${
+                    className={`relative p-1 transition-all duration-200 shrink-0 ${
                       isSearchChatOpen
                         ? "text-[#562996] scale-110 opacity-100"
-                        : "text-gray-400 hover:text-gray-600"
+                        : "text-[#442f58] hover:text-black"
                     }`}
                   >
-                    <Search className="w-[18px] h-[18px] xs:w-[20px] xs:h-[20px] stroke-[2.5]" />
+                    <Search className="w-[17px] h-[17px] xs:w-[18px] xs:h-[18px] stroke-[2.5]" />
                   </button>
                 </div>
               ) : (
@@ -534,8 +611,21 @@ export default function Navbar({
                   </Link>
 
                   <div className="flex items-center gap-1.5 xs:gap-2 h-full flex-1 justify-end mr-0.5 xs:mr-1">
-                    <button 
-                      onClick={() => setIsNotificationsOpen(true)} 
+                    <button
+                      onClick={() => setIsProfileOpen(true)}
+                      className={`relative p-1 transition-all duration-200 shrink-0 ${
+                        isProfileOpen
+                          ? "text-[#562996] scale-110 opacity-100"
+                          : isAnyDrawerOpen
+                          ? "text-[#562996]/40 opacity-50"
+                          : "text-[#562996]"
+                      }`}
+                    >
+                      <User className="w-[15px] h-[15px] xs:w-[17px] xs:h-[17px] stroke-[2.5]" fill={isProfileOpen ? "currentColor" : "none"} />
+                    </button>
+
+                    <button
+                      onClick={() => setIsNotificationsOpen(true)}
                       className={`relative p-1 min-[390px]:mr-1.5 sm:mr-0 mr-0 transition-all duration-200 shrink-0 ${
                         isNotificationsOpen
                           ? "text-[#562996] scale-110 opacity-100"
@@ -575,26 +665,20 @@ export default function Navbar({
               setIsChatOpen(!isChatOpen);
               setIsSearchChatOpen(false);
             }}
-            className={`relative -mt-0.5 sm:-mt-1.5 md:-mt-2 z-20 w-12 h-12 xs:w-14 xs:h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-[#f76409] rounded-xl xs:rounded-[18px] sm:rounded-2xl md:rounded-[1.5rem] flex items-center justify-center shadow-[0_4px_15px_rgba(247,100,9,0.4)] sm:shadow-[0_4px_20px_rgba(247,100,9,0.45)] hover:-translate-y-1 sm:hover:-translate-y-2 transition-transform cursor-pointer shrink-0 border-[4px] xs:border-[5px] sm:border-[6px] md:border-[7px] border-[#ffa168] ${
-              isAuthenticated
-                ? 'mx-1 xs:mx-1.5 sm:mx-2 md:mx-2'
-                : 'ml-2 xs:ml-2.5 mr-1 xs:mr-1 sm:mx-2 md:mx-2'
-            }`}
+            className="relative -mt-2 sm:-mt-1.5 md:-mt-2 z-20 w-11 h-[54px] xs:w-12 xs:h-[59px] sm:w-20 sm:h-20 md:w-24 md:h-24 bg-[#f76409] rounded-xl xs:rounded-[14px] sm:rounded-2xl md:rounded-[1.5rem] flex items-center justify-center shadow-[0_6px_16px_rgba(247,100,9,0.3)] sm:shadow-[0_4px_20px_rgba(247,100,9,0.45)] hover:-translate-y-1 sm:hover:-translate-y-2 transition-transform cursor-pointer shrink-0 border-0 sm:border-[6px] md:border-[7px] border-[#ffa168] mx-0.5 xs:mx-1 sm:mx-2 md:mx-2"
           >
-            <Image src="/yukizi.jpg" alt="Mascot" width={96} height={96} className="w-full h-full object-cover rounded-[6px] xs:rounded-[10px] sm:rounded-xl md:rounded-[1.1rem]" />
-            
-            {/* Top dots (Desktop only) */}
-            <div className="hidden sm:block absolute -top-[14px] left-[32%] w-[6px] h-[6px] bg-[#ffa168] rounded-[1px] shadow-[0_0_4px_rgba(255,161,104,0.6)]" />
-            <div className="hidden sm:block absolute -top-[26px] left-[48%] w-[8px] h-[8px] bg-[#ffa168] rounded-[1.5px] shadow-[0_0_5px_rgba(255,161,104,0.6)]" />
-            <div className="hidden sm:block absolute -top-[38px] left-[40%] w-[4px] h-[4px] bg-[#ffa168] rounded-[0.5px] shadow-[0_0_3px_rgba(255,161,104,0.6)]" />
+            <Image src="/yukizi.jpg" alt="Mascot" width={96} height={96} className="w-full h-full object-cover rounded-xl xs:rounded-[14px] sm:rounded-xl md:rounded-[1.1rem]" />
+
+            {/* Top dots */}
+            <div className="absolute -top-[8px] left-[32%] w-[4px] h-[4px] sm:-top-[14px] sm:left-[32%] sm:w-[6px] sm:h-[6px] bg-[#ffa168] rounded-[1px] shadow-[0_0_4px_rgba(255,161,104,0.6)]" />
+            <div className="absolute -top-[15px] left-[48%] w-[5px] h-[5px] sm:-top-[26px] sm:left-[48%] sm:w-[8px] sm:h-[8px] bg-[#ffa168] rounded-[1.5px] shadow-[0_0_5px_rgba(255,161,104,0.6)]" />
+            <div className="absolute -top-[21px] left-[40%] w-[3px] h-[3px] sm:-top-[38px] sm:left-[40%] sm:w-[4px] sm:h-[4px] bg-[#ffa168] rounded-[0.5px] shadow-[0_0_3px_rgba(255,161,104,0.6)]" />
           </div>
 
 
 
           {/* Right Segment: Cart, Wishlist, Filter, Menu */}
-          <div className={`flex items-center justify-between bg-white sm:bg-[#562996] rounded-xl px-2 xs:px-3 sm:px-8 md:px-12 lg:px-16 h-[48px] sm:h-[60px] md:h-[64px] shadow-[0_4px_15px_rgba(0,0,0,0.08)] sm:shadow-2xl text-[#562996] sm:text-white sm:shrink-0 sm:flex-1 max-w-[480px] z-10 overflow-hidden min-w-0 border border-gray-100 sm:border-0 ${
-            isAuthenticated ? 'flex-1' : 'flex-[0.85]'
-          }`}>
+          <div className="flex items-center justify-between bg-white sm:bg-[#562996] rounded-full sm:rounded-xl px-3.5 xs:px-4 sm:px-8 md:px-12 lg:px-16 h-9 sm:h-[60px] md:h-[64px] shadow-[0_6px_20px_rgba(0,0,0,0.08)] sm:shadow-2xl text-[#562996] sm:text-white sm:shrink-0 flex-[0.92] sm:flex-1 max-w-[480px] z-10 overflow-hidden min-w-0">
 
             <button 
               onClick={() => setIsWishlistOpen(true)} 
@@ -676,8 +760,8 @@ export default function Navbar({
             </button>
 
             <button 
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
-              className={`mr-2 sm:mr-0 transition-all duration-200 hover:scale-110 ${
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className={`transition-all duration-200 hover:scale-110 ${
                 isMobileMenuOpen
                   ? "text-[#562996] sm:text-white scale-110 opacity-100"
                   : isAnyDrawerOpen
@@ -709,8 +793,19 @@ export default function Navbar({
                     <div ref={chatContainerRef} className="flex-1 overflow-y-auto mb-4 flex flex-col gap-4 scrollbar-hide">
                       {chatMessages.map((msg, idx) => (
                         <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                          <div className={`max-w-[80%] rounded-2xl px-4 py-2 ${msg.role === 'user' ? 'bg-white text-[#7f26d9]' : 'bg-[#562996] text-white border border-white/20'}`}>
-                            {msg.content}
+                          <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${msg.role === 'user' ? 'bg-white text-[#7f26d9]' : 'bg-[#562996] text-white border border-white/20'}`}>
+                            {msg.role === 'assistant' && msg.thoughts && (
+                              <details className="mb-2 text-xs bg-white/10 rounded-xl p-2.5 border border-white/15 text-white/90">
+                                <summary className="cursor-pointer font-semibold flex items-center gap-1.5 select-none hover:text-white transition-colors">
+                                  <Brain className="w-3.5 h-3.5 text-purple-200" />
+                                  Thinking Process {msg.thinkingTimeMs ? `(${(msg.thinkingTimeMs / 1000).toFixed(1)}s)` : ''}
+                                </summary>
+                                <div className="mt-2 text-2xs leading-relaxed whitespace-pre-wrap font-mono opacity-90 border-t border-white/10 pt-2">
+                                  {msg.thoughts}
+                                </div>
+                              </details>
+                            )}
+                            <div className="whitespace-pre-wrap leading-relaxed">{formatFormattedMessage(msg.content)}</div>
                           </div>
                         </div>
                       ))}
@@ -725,7 +820,7 @@ export default function Navbar({
                         {attachments.map((att, i) => (
                           <div key={i} className="relative w-12 h-12 rounded bg-white/10 flex-shrink-0 flex items-center justify-center border border-white/20">
                             {att.type.startsWith('image/') ? (
-                              <img src={att.data} alt="preview" className="w-full h-full object-cover rounded" />
+                              <img src={att.data} alt="preview" loading="lazy" decoding="async" className="w-full h-full object-cover rounded" />
                             ) : (
                               <span className="text-[10px] text-white font-bold uppercase truncate px-1">
                                 {att.name.split('.').pop()}
@@ -884,7 +979,7 @@ export default function Navbar({
                   <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[300px] h-[150px] bg-pink-500/10 blur-[50px] pointer-events-none rounded-full" />
 
                   {/* Chat Box Header / Input Area */}
-                  <div className="flex-1 pb-4 z-10">
+                  <div className="pb-2 z-10">
                     <textarea
                       value={searchInput}
                       onChange={(e) => setSearchInput(e.target.value)}
@@ -894,28 +989,66 @@ export default function Navbar({
                           handleSearchSubmit();
                         }
                       }}
+                      rows={1}
                       placeholder="Start typing ..."
-                      className="w-full h-full bg-transparent text-[#562996] text-base sm:text-xl md:text-2xl placeholder-[#a66ee8] outline-none resize-none font-medium"
+                      className="w-full bg-transparent text-[#562996] text-base sm:text-xl md:text-2xl placeholder-[#a66ee8] outline-none resize-none font-medium"
                     />
                   </div>
 
-                  {/* Chat Box Footer */}
-                  <div className="flex items-center justify-between pb-[70px] md:pb-[80px] px-2 md:px-4 z-10">
-                    {/* Action Tool Icons */}
-                    <div className="flex items-center gap-3.5 xs:gap-4 sm:gap-7 text-gray-700 ml-1 md:ml-4">
-                      <button className="hover:text-gray-900 transition-colors" title="Search History">
-                        <Clock className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2]" />
-                      </button>
-                      <button className="hover:text-gray-900 transition-colors" title="Reset Search">
-                        <RotateCw className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.5]" />
-                      </button>
-                      <button className="hover:text-gray-900 transition-colors" title="Add Filter">
-                        <Plus className="w-6 h-6 sm:w-7 sm:h-7 stroke-[3]" />
-                      </button>
-                      <button className="hover:text-gray-900 transition-colors" title="Voice Search">
-                        <AudioLines className="w-6 h-6 sm:w-8 sm:h-8 stroke-[2]" />
-                      </button>
-                    </div>
+                  {/* Live results while typing, like every search box the team
+                      is used to - image, name, price. Enter still opens the
+                      full results page. */}
+                  <div className="flex-1 overflow-y-auto z-10 -mx-2 px-2">
+                    {searchInput.trim().length >= 2 && (
+                      isSearchLoading ? (
+                        <p className="text-sm text-gray-400 px-2 py-3">Searching…</p>
+                      ) : searchResults.length === 0 ? (
+                        <p className="text-sm text-gray-400 px-2 py-3">
+                          Nothing matches “{searchInput.trim()}” yet.
+                        </p>
+                      ) : (
+                        <ul className="divide-y divide-gray-50">
+                          {searchResults.map((p: any) => (
+                            <li key={p.id}>
+                              <button
+                                onClick={() => {
+                                  router.push(`/products/${p.slug}`);
+                                  setIsSearchChatOpen(false);
+                                  setSearchInput('');
+                                }}
+                                className="w-full flex items-center gap-3 py-2.5 px-2 rounded-xl hover:bg-purple-50/60 transition-colors text-left"
+                              >
+                                <img
+                                  src={p.image || 'https://placehold.co/96x96/f3f4f6/9ca3af?text=%20'}
+                                  alt=""
+                                  className="w-12 h-12 rounded-lg object-cover bg-gray-100 shrink-0"
+                                />
+                                <span className="flex-1 min-w-0">
+                                  <span className="block text-sm font-semibold text-gray-800 truncate">{p.name}</span>
+                                  {p.manufacturer && (
+                                    <span className="block text-xs text-gray-400 truncate">{p.manufacturer}</span>
+                                  )}
+                                </span>
+                                {(p.price ?? p.mrp) != null && (
+                                  <span className="text-sm font-bold text-gray-800 shrink-0">
+                                    ₹{Number(p.price ?? p.mrp).toLocaleString('en-IN')}
+                                  </span>
+                                )}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )
+                    )}
+                  </div>
+
+                  {/* Search Box Footer */}
+                  {/* Four tool icons used to sit on the left here — Search
+                      History, Reset Search, Add Filter, Voice Search. None of
+                      them had an onClick, so every one was decorative and did
+                      nothing when pressed. Removed rather than wired up,
+                      because none of those features exist to wire them to. */}
+                  <div className="flex items-center justify-end pb-[70px] md:pb-[80px] px-2 md:px-4 z-10">
 
                     {/* Send Button on the right */}
                     <div className="flex items-center text-gray-700 mr-1 md:mr-4">

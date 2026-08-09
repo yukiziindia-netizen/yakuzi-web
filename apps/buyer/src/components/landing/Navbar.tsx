@@ -49,7 +49,6 @@ import EditProfileDrawer from "@/components/profile/EditProfileDrawer";
 import CartDrawer from "@/components/cart/CartDrawer";
 import WishlistDrawer from "@/components/wishlist/WishlistDrawer";
 import SupportDrawer from "@/components/shared/SupportDrawer";
-import { OrderDrawer } from "@/components/orders/OrderDrawer";
 import NotificationDrawer from "@/components/notifications/NotificationDrawer";
 import SearchBar from "@/components/shared/SearchBar";
 import { SidebarSheet, type SidebarView } from "@/components/landing/SidebarSheet";
@@ -88,7 +87,6 @@ export default function Navbar({
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isWishlistOpen, setIsWishlistOpen] =
     useState(false);
-  const [isOrderDrawerOpen, setIsOrderDrawerOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] =
     useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -458,7 +456,6 @@ export default function Navbar({
     isMobileMenuOpen ||
     isCartOpen ||
     isWishlistOpen ||
-    isOrderDrawerOpen ||
     isNotificationsOpen ||
     isProfileOpen ||
     sidebarView !== null;
@@ -723,12 +720,10 @@ export default function Navbar({
               )}
             </button>
 
-            <button 
-              onClick={() => setIsOrderDrawerOpen(true)} 
+            <button
+              onClick={() => router.push('/orders')}
               className={`hidden sm:block relative transition-all duration-200 hover:scale-110 ${
-                isOrderDrawerOpen
-                  ? "text-[#562996] sm:text-white scale-110 opacity-100"
-                  : isAnyDrawerOpen
+                isAnyDrawerOpen
                   ? "text-[#562996]/40 sm:text-white/40 opacity-50"
                   : "text-[#562996] sm:text-white sm:hover:text-purple-300"
               }`}
@@ -1210,7 +1205,7 @@ export default function Navbar({
                 <button
                   onClick={() => {
                     setIsMobileMenuOpen(false);
-                    setIsOrderDrawerOpen(true);
+                    router.push('/orders');
                   }}
                   className="w-10 h-10 rounded-full bg-[#f3ebfa] flex items-center justify-center text-[#8e44ad] hover:bg-[#ebdcf7] transition-all duration-200 shadow-sm border border-purple-100"
                 >
@@ -1260,12 +1255,6 @@ export default function Navbar({
         onClose={() =>
           setIsNotificationsOpen(false)
         }
-      />
-
-      <OrderDrawer
-        isOpen={isOrderDrawerOpen}
-        onClose={() => setIsOrderDrawerOpen(false)}
-        onLoginClick={onLoginClick}
       />
 
       <SupportDrawer

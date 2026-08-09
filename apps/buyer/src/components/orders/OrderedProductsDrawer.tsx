@@ -278,7 +278,7 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
                            4.5
                          </div>
                          <div className="flex items-center gap-2 mt-1">
-                            <button 
+                            <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setExpandedItem(expandedItem === item.id ? null : item.id);
@@ -289,6 +289,18 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
                             </button>
                             <DeliveryTruckBadge text="3 days" className="w-[85px] text-[#9a9a9a]" />
                          </div>
+                         {/* Each card can belong to a different order, so the
+                             invoice link lives on the card, not the header. */}
+                         {itemOrder.id && (
+                           <Link
+                             href={`/orders/${itemOrder.id}/invoice`}
+                             onClick={(e) => e.stopPropagation()}
+                             className="flex items-center gap-1 text-sm font-bold text-gray-600 underline whitespace-nowrap hover:text-[#8b3dcc]"
+                           >
+                             <FileText className="w-4 h-4" />
+                             View tax invoice
+                           </Link>
+                         )}
                        </div>
                      </div>
  

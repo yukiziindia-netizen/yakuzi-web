@@ -58,7 +58,7 @@ export default function BlogsPage({ initialPosts }: { initialPosts?: any[] }) {
               Our Blog
             </h1>
             <p className="text-gray-500 max-w-xl mx-auto text-sm sm:text-base">
-              Stay updated with the latest insights, trends, and news from the pharmaceutical industry.
+              Stay updated with the latest insights, trends, and news from Yukizi.
             </p>
           </motion.div>
 

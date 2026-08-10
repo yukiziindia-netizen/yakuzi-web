@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import { DeliveryTruckBadge } from '@/components/shared/DeliveryTruckBadge';
+import { trackProductView } from '@/lib/analytics/tracker';
 import Link from 'next/link';
 import { useProductById, useProducts, useWaitlist, useAddToWaitlist, useRemoveFromWaitlist } from '@/hooks/useProducts';
 import { useAddToCart, useCart, useUpdateCartItem, useRemoveCartItem } from '@/hooks/useCart';
@@ -827,6 +828,12 @@ export default function ProductPageClient({ productSlug, initialProduct }: { pro
   const removeFromWishlist = useRemoveFromWishlist();
 
   const product = (productData as any)?.data || productData;
+
+  // Analytics: one product_view per product landed on (id, not slug — the
+  // admin product reports join on the catalog id).
+  useEffect(() => {
+    if (product?.id) trackProductView(product.id);
+  }, [product?.id]);
 
   const { data: userProfile } = useBuyerProfile();
   const { data: reviewsData } = useProductReviews(product?.id || '');

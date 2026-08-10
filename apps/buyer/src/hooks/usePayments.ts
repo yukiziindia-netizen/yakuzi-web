@@ -9,6 +9,7 @@ import {
   uploadPaymentProofByOrder,
   type CreatePaymentInput,
 } from '@yukizi/api-client';
+import { track } from '@/lib/analytics/tracker';
 
 export function usePaymentHistory(params?: { page?: number; limit?: number }) {
   return useQuery({
@@ -28,7 +29,10 @@ export function usePaymentByOrderId(orderId: string) {
 export function useCreatePayment() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: CreatePaymentInput) => createPayment(input),
+    mutationFn: (input: CreatePaymentInput) => {
+      track('payment_started', { method: (input as { method?: string }).method });
+      return createPayment(input);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payments'] });
     },

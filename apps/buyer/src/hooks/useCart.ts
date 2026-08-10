@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getCart, addToCart, updateCartItem, removeCartItem, clearCart, useAuth, api } from '@yukizi/api-client';
 import { localCart } from '@/lib/local-cart';
+import { track } from '@/lib/analytics/tracker';
 import { useEffect, useState } from 'react';
 
 export function useCart() {
@@ -72,8 +73,9 @@ export function useAddToCart() {
         ...extra
       } as any, replace);
     },
-    onSuccess: (cart) => {
+    onSuccess: (cart, variables) => {
       applyCartUpdate(queryClient, cart);
+      track('add_to_cart', { quantity: variables.quantity ?? 1 }, variables.productId);
     },
   });
 }
@@ -98,6 +100,7 @@ export function useRemoveCartItem() {
     },
     onSuccess: (cart) => {
       applyCartUpdate(queryClient, cart);
+      track('remove_from_cart');
     },
   });
 }

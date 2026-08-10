@@ -5,6 +5,7 @@ import { AuthProvider } from '@yukizi/api-client';
 import { ToastProvider } from '@/components/shared/Toast';
 import { useApiEventHandler } from '@/hooks/useApiEventHandler';
 import LoginModal from '@/components/landing/LoginModal';
+import { AnalyticsProvider } from '@/components/analytics/AnalyticsProvider';
 
 function ApiEventBridge({ children }: { children: React.ReactNode }) {
   useApiEventHandler();
@@ -18,6 +19,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <ToastProvider>
           <ApiEventBridge>{children}</ApiEventBridge>
           <LoginModal />
+          <AnalyticsProvider />
         </ToastProvider>
       </AuthProvider>
     </ReactQueryProvider>

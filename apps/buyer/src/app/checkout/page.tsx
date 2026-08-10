@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import AuthGuard from '@/components/shared/AuthGuard';
 import { useAuth, createRazorpayOrder, verifyRazorpayPayment } from '@yukizi/api-client';
+import { track } from '@/lib/analytics/tracker';
 
 type PaymentMethod = 'BANK_TRANSFER' | 'UPI' | 'COD' | 'CREDIT' | 'RAZORPAY';
 
@@ -25,6 +26,10 @@ const INDIAN_STATES = [
 ];
 
 export default function CheckoutPage() {
+  useEffect(() => {
+    track('checkout_started');
+  }, []);
+
   const { user } = useAuth();
   const router = useRouter();
   const bp = user?.buyerProfile as any;

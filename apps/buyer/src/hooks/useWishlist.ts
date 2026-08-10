@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getWishlist, addToWishlist as backendAddToWishlist, removeFromWishlist as backendRemoveFromWishlist, useAuth, api } from '@yukizi/api-client';
 import { localWishlist } from '@/lib/local-wishlist';
+import { track } from '@/lib/analytics/tracker';
 import { useEffect } from 'react';
 
 export function useWishlist() {
@@ -47,8 +48,9 @@ export function useAddToWishlist() {
     mutationFn: async (productData: any) => {
       return localWishlist.addItem(productData);
     },
-    onSuccess: () => {
+    onSuccess: (_data, productData) => {
       queryClient.invalidateQueries({ queryKey: ['wishlist'] });
+      track('wishlist_add', undefined, productData?.productId ?? productData?.id);
     },
   });
 }
@@ -59,8 +61,9 @@ export function useRemoveFromWishlist() {
     mutationFn: async (productId: string) => {
       return localWishlist.removeItem(productId);
     },
-    onSuccess: () => {
+    onSuccess: (_data, productId) => {
       queryClient.invalidateQueries({ queryKey: ['wishlist'] });
+      track('wishlist_remove', undefined, productId);
     },
   });
 }

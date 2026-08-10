@@ -7,6 +7,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { getProducts } from '@yukizi/api-client';
+import { track, trackSearch } from '@/lib/analytics/tracker';
 
 const RECENT_SEARCHES_KEY = 'yukizi_recent_searches';
 const MAX_RECENT = 5;
@@ -47,6 +48,15 @@ export default function SearchBar({ isOpen = false, onClose }: SearchBarProps) {
   const products = results?.data ?? [];
   const recentSearches = getRecentSearches();
 
+  // One analytics search event per settled (debounced) query, with the
+  // result count so zero-result searches surface in the admin report.
+  useEffect(() => {
+    if (debouncedQuery.length >= 2 && results !== undefined) {
+      trackSearch(debouncedQuery, products.length);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedQuery, results]);
+
   useEffect(() => {
     if (isOpen && inputRef.current) {
       setTimeout(() => inputRef.current?.focus(), 100);
@@ -54,6 +64,7 @@ export default function SearchBar({ isOpen = false, onClose }: SearchBarProps) {
   }, [isOpen]);
 
   const handleSelect = (product: any) => {
+    track('product_click', { from: 'search' }, product.id);
     if (query.trim()) saveRecentSearch(query.trim());
     setQuery('');
     onClose?.();

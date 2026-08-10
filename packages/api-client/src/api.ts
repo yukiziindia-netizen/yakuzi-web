@@ -118,6 +118,16 @@ function processQueue(error: unknown, token: string | null = null) {
 // Request interceptor: inject Authorization header
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    // Analytics: lets the API link server-side events (signup/login/purchase)
+    // to the anonymous visitor. Absent outside the buyer app — harmless.
+    try {
+      if (typeof window !== 'undefined' && config.headers) {
+        const visitorId = window.localStorage.getItem('yz_vid');
+        if (visitorId) config.headers['X-Visitor-Id'] = visitorId;
+      }
+    } catch {
+      /* storage blocked — skip */
+    }
     const token = getAccessToken();
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;

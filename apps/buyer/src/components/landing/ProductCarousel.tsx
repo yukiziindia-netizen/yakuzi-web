@@ -370,7 +370,7 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
         </div>
 
         {/* Image Container - Fixed 190px/200px height matching Samplr */}
-        <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`} className="relative w-full h-[130px] sm:h-[200px] bg-white overflow-hidden flex justify-center items-center shrink-0">
+        <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index, product?.slug)}`} className="relative w-full h-[130px] sm:h-[200px] bg-white overflow-hidden flex justify-center items-center shrink-0">
            {/* next/image so the ~1MB seller uploads are resized/re-encoded to
                the card's actual rendered width (the grid is 2-7 columns) —
                measured 65MB of card images on one homepage load without it. */}
@@ -381,7 +381,7 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
             {/* Brand Subtitle & Title Line */}
             <div>
                <div className="flex items-start justify-between w-full gap-1.5">
-                  <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`} className="flex-1">
+                  <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index, product?.slug)}`} className="flex-1">
                     <h3 className="text-xs sm:text-sm font-medium text-[#333333] leading-snug line-clamp-1 hover:text-[#7B2FBE] transition-colors">
                        {productName}
                     </h3>
@@ -396,7 +396,7 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
                     </button>
                   ) : (
                     <Link
-                       href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index)}`}
+                       href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index, product?.slug)}`}
                        className="flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform shrink-0 -mr-[4px] sm:-mr-[6px]"
                        title="Quick view"
                     >

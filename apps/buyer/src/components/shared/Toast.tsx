@@ -39,7 +39,13 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
   const addToast = useCallback((message: string, type: ToastType = 'success') => {
     const id = crypto.randomUUID();
-    setToasts((prev) => [...prev, { id, message, type }]);
+    setToasts((prev) => {
+      // A burst of parallel requests failing together (e.g. several PDP
+      // queries hitting one connectivity blip) used to stack one identical
+      // toast per request instead of surfacing the problem once.
+      if (prev.some((t) => t.message === message && t.type === type)) return prev;
+      return [...prev, { id, message, type }];
+    });
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
     }, 4000);

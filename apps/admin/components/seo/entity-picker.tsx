@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Search, Check } from "lucide-react";
 import { Input, Select, Skeleton } from "@/components/ui";
 import { cn } from "@/lib/utils";
-import { getAdminProductsFiltered, getCategories, getSubCategories, getAdminBrands } from "@/api/admin.api";
+import { getSuggestions, getCategories, getSubCategories, getAdminBrands } from "@/api/admin.api";
 import { getBlogPostsForPicker, SEO_ENTITY_TYPES, type SeoEntityType } from "@/api/seo.api";
 
 export const ENTITY_TYPE_LABELS: Record<SeoEntityType, string> = {
@@ -35,8 +35,12 @@ function useEntityOptions(type: SeoEntityType, search: string) {
     queryFn: async (): Promise<Array<{ id: string; label: string; hint?: string }>> => {
       switch (type) {
         case "PRODUCT": {
-          const raw = await getAdminProductsFiltered({ search: search || undefined, limit: 20 });
-          return asArray(raw).map((p: any) => ({ id: p.id, label: p.name ?? p.title ?? p.id, hint: p.masterProduct?.name }));
+          // Catalog products (suggestions), NOT seller offers: SEO records are
+          // keyed by the stable catalog id — the same id the buyer PDP and the
+          // product form use. Offer ids fragment per listing.
+          const raw = await getSuggestions({ search: search || undefined, limit: 20 });
+          const rows = asArray(raw?.data ?? raw?.suggestions ?? raw);
+          return rows.map((p: any) => ({ id: p.id, label: p.name ?? p.id, hint: p.manufacturer }));
         }
         case "CATEGORY": {
           const raw = await getCategories();

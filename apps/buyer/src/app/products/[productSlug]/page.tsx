@@ -28,6 +28,14 @@ const fetchProductOverride = cache(async (productId: string) =>
   fetchSeoOverride('PRODUCT', productId),
 );
 
+// SEO records are keyed by the STABLE catalog id, never the listing id: the
+// payload's `id` is the seller offer when a listing exists (formatMasterDetail)
+// and would change whenever listings do. masterProductId is always the catalog
+// product; `id` is only a fallback for very old cached payloads.
+function overrideKey(p: { id: string; masterProductId?: string }): string {
+  return p.masterProductId || p.id;
+}
+
 // Adapt the detail payload (formatMasterDetail) to what productSchema() expects.
 // price/stock/sellerName MUST all come from the same listing — mixing the cheapest
 // listing's price with a different (in-stock) listing's seller would misattribute
@@ -71,7 +79,7 @@ export async function generateMetadata({ params }: { params: { productSlug: stri
     },
     twitter: { card: 'summary_large_image', title, description },
   };
-  return applySeoOverride(derived, await fetchProductOverride(p.id));
+  return applySeoOverride(derived, await fetchProductOverride(overrideKey(p)));
 }
 
 export default async function ProductPage({ params }: { params: { productSlug: string } }) {
@@ -84,7 +92,7 @@ export default async function ProductPage({ params }: { params: { productSlug: s
     crumbs.push({ name: p.category.name, ...(p.category.slug ? { path: `/category/${p.category.slug}` } : {}) });
   }
   crumbs.push({ name: p.name ?? 'Product' });
-  const override = await fetchProductOverride(p.id);
+  const override = await fetchProductOverride(overrideKey(p));
   const faqs = validFaqs(override?.faq);
   const jsonLd: object[] = [
     mergeStructuredData(productSchema(buildSchemaInput(p)), override?.structuredDataOverride),

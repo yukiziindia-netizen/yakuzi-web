@@ -279,6 +279,11 @@ export async function updateGstPanStatus(
   return response.data;
 }
 
+export async function updateSellerProfile(userId: string, data: Record<string, unknown>) {
+  const { data: response } = await apiClient.patch<{ data: any }>(`/admin/users/${userId}/seller-profile`, data);
+  return response.data;
+}
+
 // ─── Products (Extended) ─────────────────────────────
 export async function getAdminProductsFiltered(params: { page?: number; limit?: number; status?: string; search?: string; categoryId?: string; sellerId?: string } = {}) {
   const qs = new URLSearchParams();

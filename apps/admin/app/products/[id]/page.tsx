@@ -26,6 +26,7 @@ export default function ProductDetailPage() {
   const startEdit = () => {
     setForm({
       name: product?.name ?? "",
+      slug: product?.variant?.catalogProduct?.slug ?? "",
       manufacturer: product?.manufacturer ?? "",
       chemicalComposition: product?.chemicalComposition ?? "",
       mrp: product?.mrp ?? "",
@@ -45,11 +46,24 @@ export default function ProductDetailPage() {
 
   const handleSave = async () => {
     try {
-      await updateProduct.mutateAsync({ productId: id, payload: form });
-      toast.success("Product updated");
+      // Only send meaningful values: empty numeric strings would otherwise
+      // coerce to 0 server-side, and an empty slug must not wipe the URL.
+      const payload: Record<string, any> = {};
+      for (const [k, v] of Object.entries(form)) {
+        if (v === "" || v === undefined || v === null) continue;
+        payload[k] = v;
+      }
+      const changingSlug =
+        payload.slug && payload.slug !== (product?.variant?.catalogProduct?.slug ?? "");
+      await updateProduct.mutateAsync({ productId: id, payload });
+      toast.success(
+        changingSlug
+          ? "Product updated — old URL now 301-redirects to the new one"
+          : "Product updated"
+      );
       setEditing(false);
-    } catch {
-      toast.error("Failed to update product");
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message ?? "Failed to update product");
     }
   };
 
@@ -130,6 +144,30 @@ export default function ProductDetailPage() {
             {editing ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Input label="Product Name" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-sm font-medium text-foreground">URL slug</label>
+                    <button
+                      type="button"
+                      className="text-xs text-primary hover:underline"
+                      onClick={() => setForm(f => ({
+                        ...f,
+                        slug: String(f.name ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, ""),
+                      }))}
+                    >
+                      Generate from name
+                    </button>
+                  </div>
+                  <Input
+                    value={form.slug}
+                    placeholder="e.g. dragon-ball-goku-figurine"
+                    onChange={e => setForm(f => ({ ...f, slug: e.target.value }))}
+                  />
+                  <p className="text-[11px] text-muted-foreground">
+                    yukizi.com/products/<span className="text-foreground">{form.slug || "…"}</span> — changing this
+                    auto-creates a 301 redirect from the old URL, so existing links keep working.
+                  </p>
+                </div>
                 <Input label="Manufacturer" value={form.manufacturer} onChange={e => setForm(f => ({ ...f, manufacturer: e.target.value }))} />
                 <Input label="Chemical Composition" value={form.chemicalComposition} onChange={e => setForm(f => ({ ...f, chemicalComposition: e.target.value }))} />
                 <Input label="MRP (₹)" type="number" value={form.mrp} onChange={e => setForm(f => ({ ...f, mrp: e.target.value }))} />

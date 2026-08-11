@@ -9,6 +9,7 @@ export const WishlistItemSchema = z.object({
   product: z.object({
     id: z.string(),
     name: z.string(),
+    slug: z.string().optional(),
     price: z.number(),
     mrp: z.number().optional(),
     images: z.array(z.string()).optional(),
@@ -45,6 +46,7 @@ function mapBackendWishlist(responseData: any): Wishlist {
       product: {
         id: product.id || raw.productId || raw.id,
         name: product.name || raw.name,
+        slug: product.slug || raw.slug,
         price: product.price ?? raw.price ?? 0,
         mrp: product.mrp ?? raw.mrp,
         images: Array.isArray(product.images) ? product.images : (raw.image ? [raw.image] : []),

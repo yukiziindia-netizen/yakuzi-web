@@ -255,7 +255,7 @@ export default function OrderIdPage({ params }: { params: { orderId: string } })
                       return (
                           <Link 
                             key={item.id || item.productId || item.product?.id || idx}
-                            href={`/products/${generateProductSlug(itemName, item.productId || item.product?.id)}`}
+                            href={`/products/${generateProductSlug(itemName, item.productId || item.product?.id, item.product?.slug)}`}
                             className="flex items-center justify-between py-4 border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors w-full text-left"
                           >
                             <div className="flex items-center gap-4">

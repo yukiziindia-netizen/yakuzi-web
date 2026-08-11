@@ -205,7 +205,7 @@ export default function NotificationDrawer({ isOpen, onClose }: { isOpen: boolea
                         
                         {/* Top Right Action */}
                         <div className="absolute top-2 right-2 flex flex-col items-center gap-1">
-                          <Link href={`/products/${generateProductSlug(product.name, product.id)}`}>
+                          <Link href={`/products/${generateProductSlug(product.name, product.id, product.slug)}`}>
                              <button className="text-gray-400 hover:text-gray-600" title="Quick view">
                                <Eye className="w-4 h-4" />
                              </button>
@@ -296,12 +296,12 @@ export default function NotificationDrawer({ isOpen, onClose }: { isOpen: boolea
 
                         {/* Row 2: Title & Eye Icon */}
                         <div className="flex items-start justify-between w-full gap-1.5">
-                          <Link href={`/products/${generateProductSlug(product.name, product.id)}`} className="flex-1 min-w-0 text-left">
+                          <Link href={`/products/${generateProductSlug(product.name, product.id, product.slug)}`} className="flex-1 min-w-0 text-left">
                             <h4 className="text-[12px] font-medium text-gray-500 leading-snug truncate hover:text-[#7B2FBE] transition-colors">
                               {product.name}
                             </h4>
                           </Link>
-                          <Link href={`/products/${generateProductSlug(product.name, product.id)}`} className="text-gray-400 hover:text-gray-600 transition-colors shrink-0">
+                          <Link href={`/products/${generateProductSlug(product.name, product.id, product.slug)}`} className="text-gray-400 hover:text-gray-600 transition-colors shrink-0">
                             <Eye className="w-4 h-4" />
                           </Link>
                         </div>

@@ -1,7 +1,14 @@
 /**
- * Generates a URL-friendly slug from a product name and ID
+ * Generates a URL-friendly slug from a product name and ID.
+ *
+ * Products backfilled with a real, unique `slug` (see CatalogProduct.slug)
+ * already resolve on the backend via `{ id } OR { slug }`, so pass it
+ * through as-is for a clean URL (e.g. /products/testing) instead of
+ * appending the raw UUID. Falls back to the old name-id form for products
+ * that don't have one yet.
  */
-export function generateProductSlug(name: string, id: string): string {
+export function generateProductSlug(name: string, id: string, slug?: string | null): string {
+  if (slug) return slug;
   if (!name) return id;
   const slugifiedName = name
     .toLowerCase()

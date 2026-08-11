@@ -196,22 +196,34 @@ export default function SellerOnboardingPage() {
     }));
   };
 
+  // Everything is mandatory except GST and Further Documents (Rishi, 11 Aug).
   const validate = () => {
     const e: Record<string, string> = {};
     if (!formData.companyName.trim()) e.companyName = "Business name is required";
-    
+
     if (!formData.panNumber.trim()) e.panNumber = "PAN number is required";
-    
+    else if (!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(formData.panNumber.trim().toUpperCase())) {
+      e.panNumber = "Invalid PAN (format: ABCDE1234F)";
+    }
+
+    // GST stays optional — but when provided it must at least look like one.
+    if (formData.gstNumber?.trim() && !/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][0-9A-Z]Z[0-9A-Z]$/.test(formData.gstNumber.trim().toUpperCase())) {
+      e.gstNumber = "Invalid GST number (15 characters, e.g. 27AABCU9603R1ZM)";
+    }
+
     if (!formData.address.trim()) e.address = "Address is required";
     if (!formData.city.trim()) e.city = "City is required";
     if (!formData.state) e.state = "State is required";
     if (!formData.pincode.trim()) e.pincode = "Pincode is required";
     else if (!/^\d{6}$/.test(formData.pincode.trim())) e.pincode = "Invalid pincode";
-    
+
     if (!formData.bankAccountNumber.trim()) e.bankAccountNumber = "Account number is required";
+    else if (!/^\d{9,18}$/.test(formData.bankAccountNumber.trim())) e.bankAccountNumber = "Account number must be 9–18 digits";
     if (!formData.bankName.trim()) e.bankName = "Bank name is required";
     if (!formData.bankIfsc.trim()) e.bankIfsc = "IFSC code is required";
+    else if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(formData.bankIfsc.trim().toUpperCase())) e.bankIfsc = "Invalid IFSC (format: HDFC0001234)";
     if (!formData.bankAccountHolder.trim()) e.bankAccountHolder = "Account holder name is required";
+    if (!formData.cancelCheck) e.cancelCheck = "Cancelled cheque upload is required";
     if (!formData.email.trim()) e.email = "Email is required";
     else if (!/^\S+@\S+\.\S+$/.test(formData.email)) e.email = "Invalid email format";
 
@@ -364,9 +376,9 @@ export default function SellerOnboardingPage() {
                    <div className="p-2 bg-indigo-50 rounded-lg"><MapPin className="w-5 h-5 text-indigo-600" /></div>
                    <h2 className="text-xl font-bold text-slate-900">Registered Address</h2>
                 </div>
-                <Input label="Street Address" value={formData.address} onChange={(e) => updateField("address", e.target.value)} placeholder="Building No, Street, Landmark" className="h-14 rounded-2xl" error={errors.address} />
+                <Input label="Street Address" value={formData.address} onChange={(e) => updateField("address", e.target.value)} placeholder="Building No, Street, Landmark" required className="h-14 rounded-2xl" error={errors.address} />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Input label="City" value={formData.city} onChange={(e) => updateField("city", e.target.value)} placeholder="City" className="h-14 rounded-2xl" error={errors.city} />
+                  <Input label="City" value={formData.city} onChange={(e) => updateField("city", e.target.value)} placeholder="City" required className="h-14 rounded-2xl" error={errors.city} />
                   <div className="space-y-2">
                     <label className="text-sm font-bold text-slate-700">State</label>
                     <select value={formData.state} onChange={(e) => updateField("state", e.target.value)} className="w-full h-14 rounded-2xl border border-slate-100 bg-slate-50 px-4 text-sm font-medium focus:border-primary outline-none transition-all">
@@ -376,7 +388,7 @@ export default function SellerOnboardingPage() {
                     {errors.state && <p className="text-xs text-red-500">{errors.state}</p>}
                   </div>
                 </div>
-                <Input label="Pincode" value={formData.pincode} onChange={(e) => updateField("pincode", e.target.value.replace(/\D/g, "").slice(0,6))} placeholder="400001" maxLength={6} className="h-14 rounded-2xl" error={errors.pincode} />
+                <Input label="Pincode" value={formData.pincode} onChange={(e) => updateField("pincode", e.target.value.replace(/\D/g, "").slice(0,6))} placeholder="400001" maxLength={6} required className="h-14 rounded-2xl" error={errors.pincode} />
               </div>
 
               <div className="space-y-4 pt-4 border-t border-slate-50">
@@ -384,15 +396,15 @@ export default function SellerOnboardingPage() {
                    <div className="p-2 bg-indigo-50 rounded-lg"><CreditCard className="w-5 h-5 text-indigo-600" /></div>
                    <h2 className="text-xl font-bold text-slate-900">Bank Details</h2>
                 </div>
-                <Input label="Account Holder Name" value={formData.bankAccountHolder} onChange={(e) => updateField("bankAccountHolder", e.target.value)} placeholder="As per bank records" className="h-14 rounded-2xl" error={errors.bankAccountHolder} />
+                <Input label="Account Holder Name" value={formData.bankAccountHolder} onChange={(e) => updateField("bankAccountHolder", e.target.value)} placeholder="As per bank records" required className="h-14 rounded-2xl" error={errors.bankAccountHolder} />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Input label="Account Number" value={formData.bankAccountNumber} onChange={(e) => updateField("bankAccountNumber", e.target.value)} placeholder="000000000000" className="h-14 rounded-2xl" error={errors.bankAccountNumber} />
-                  <Input label="IFSC Code" value={formData.bankIfsc} onChange={(e) => updateField("bankIfsc", e.target.value.toUpperCase())} placeholder="HDFC0001234" className="h-14 rounded-2xl uppercase" error={errors.bankIfsc} />
+                  <Input label="Account Number" value={formData.bankAccountNumber} onChange={(e) => updateField("bankAccountNumber", e.target.value)} placeholder="000000000000" required className="h-14 rounded-2xl" error={errors.bankAccountNumber} />
+                  <Input label="IFSC Code" value={formData.bankIfsc} onChange={(e) => updateField("bankIfsc", e.target.value.toUpperCase())} placeholder="HDFC0001234" required className="h-14 rounded-2xl uppercase" error={errors.bankIfsc} />
                 </div>
-                <Input label="Bank Name" value={formData.bankName} onChange={(e) => updateField("bankName", e.target.value)} placeholder="e.g. HDFC Bank" className="h-14 rounded-2xl" error={errors.bankName} />
+                <Input label="Bank Name" value={formData.bankName} onChange={(e) => updateField("bankName", e.target.value)} placeholder="e.g. HDFC Bank" required className="h-14 rounded-2xl" error={errors.bankName} />
                 
                 <div className="mt-4">
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Upload Cancelled Cheque</label>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">Upload Cancelled Cheque <span className="text-red-500">*</span></label>
                   <input ref={checkInputRef} type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={handleCheckUpload} className="hidden" />
                   <button type="button" onClick={() => checkInputRef.current?.click()} disabled={uploadingCheck} className={`w-full flex flex-col items-center justify-center p-6 border-2 border-dashed ${errors.cancelCheck ? 'border-red-400 bg-red-50' : 'border-slate-200'} rounded-[24px] hover:border-primary/50 hover:bg-slate-50 transition-all text-slate-500 group`}>
                     {uploadingCheck ? (

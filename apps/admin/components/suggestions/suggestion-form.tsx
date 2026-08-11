@@ -7,6 +7,14 @@ import toast from "react-hot-toast";
 import { useCategories, useSubCategories, useCreateSuggestion, useUpdateSuggestion } from "@/hooks/useAdmin";
 import { MediaUploader, MediaItem } from "@/components/ui/media-uploader";
 import { VariantBuilder, VariantOption, VariantCombination } from "@/components/ui/variant-builder";
+import {
+  ProductSeoFields,
+  emptyProductSeoForm,
+  productSeoFormFromRecord,
+  productSeoFormHasContent,
+  productSeoFormToPayload,
+} from "@/components/seo/product-seo-fields";
+import { useSeoMetaOne, useUpsertSeoMeta } from "@/hooks/useSeo";
 
 export interface SuggestionFormProps {
   initialData?: any;
@@ -18,6 +26,20 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
   const { data: subCatsData } = useSubCategories();
   const createSuggestion = useCreateSuggestion();
   const updateSuggestion = useUpdateSuggestion();
+  const upsertSeo = useUpsertSeoMeta();
+
+  // SEO lives in the same SeoMeta record the SEO tab edits (PRODUCT + catalog
+  // id). Editing an existing entry loads that record; creating one writes it
+  // right after the product exists.
+  const [seoForm, setSeoForm] = useState(emptyProductSeoForm());
+  const [seoSeeded, setSeoSeeded] = useState(!initialData?.id);
+  const { data: seoRecord, isLoading: seoLoading } = useSeoMetaOne("PRODUCT", initialData?.id);
+  useEffect(() => {
+    if (initialData?.id && !seoLoading && !seoSeeded) {
+      setSeoForm(productSeoFormFromRecord(seoRecord));
+      setSeoSeeded(true);
+    }
+  }, [initialData?.id, seoLoading, seoRecord, seoSeeded]);
 
   const categories = Array.isArray(categoriesData) ? categoriesData : (categoriesData?.categories ?? []);
   const subCategories = Array.isArray(subCatsData) ? subCatsData : (subCatsData?.subCategories ?? []);
@@ -280,13 +302,30 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
           : {}),
       };
 
+      // Validate SEO JSON before touching the product, so a typo can't leave
+      // a product saved with its SEO silently dropped.
+      const wantsSeo = productSeoFormHasContent(seoForm) || !!seoRecord;
+      if (wantsSeo && productSeoFormToPayload(seoForm, "precheck") === null) return;
+
+      let catalogId: string | undefined = initialData?.id;
       if (initialData?.id) {
         await updateSuggestion.mutateAsync({ id: initialData.id, payload });
-        toast.success("Catalog entry updated successfully");
       } else {
-        await createSuggestion.mutateAsync(payload);
-        toast.success("Catalog entry created successfully");
+        const created = await createSuggestion.mutateAsync(payload);
+        catalogId = created?.id;
       }
+
+      let seoNote = "";
+      if (wantsSeo && catalogId) {
+        try {
+          const seoPayload = productSeoFormToPayload(seoForm, catalogId);
+          if (seoPayload) await upsertSeo.mutateAsync(seoPayload);
+          seoNote = " with SEO (also editable under the SEO tab)";
+        } catch {
+          toast.error("Product saved, but its SEO failed — finish it from the SEO tab.");
+        }
+      }
+      toast.success(initialData?.id ? `Catalog entry updated${seoNote}` : `Catalog entry created${seoNote}`);
       onClose();
     } catch (err: any) {
       toast.error(err?.response?.data?.message || (initialData?.id ? "Failed to update" : "Failed to create"));
@@ -350,14 +389,30 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
 
           {/* Variants */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-            <VariantBuilder 
-              options={options} 
-              onChangeOptions={setOptions} 
+            <VariantBuilder
+              options={options}
+              onChangeOptions={setOptions}
               variants={variants}
               onChangeVariants={setVariants}
               productMedia={mediaItems}
               onAddProductMedia={(items) => setMediaItems(prev => [...prev, ...items])}
             />
+          </motion.div>
+
+          {/* Search engine optimization — same record as the SEO tab */}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
+            className="glass-card rounded-2xl p-6 border border-border/50 space-y-4">
+            <div>
+              <h3 className="text-base font-semibold text-foreground">Search engine optimization</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Optional — saves with the product and stays editable under the SEO tab. Blank fields fall back to generated defaults.
+              </p>
+            </div>
+            {!seoSeeded ? (
+              <p className="text-sm text-muted-foreground">Loading SEO…</p>
+            ) : (
+              <ProductSeoFields value={seoForm} onChange={setSeoForm} productName={form.title} />
+            )}
           </motion.div>
 
         </div>

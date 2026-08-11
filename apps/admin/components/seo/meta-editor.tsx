@@ -208,7 +208,14 @@ export function MetaEditor({ open, onClose, record, presetType, presetId }: {
               <Textarea maxLength={160} rows={3} placeholder="Leave blank to keep the generated description" value={form.description} onChange={(e) => set("description", e.target.value)} />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Input label="Canonical URL" placeholder="https://yukizi.com/…" value={form.canonicalUrl} onChange={(e) => set("canonicalUrl", e.target.value)} />
+              <div className="space-y-1.5">
+                <Input label="Canonical URL" placeholder="https://yukizi.com/…" value={form.canonicalUrl} onChange={(e) => set("canonicalUrl", e.target.value)} />
+                {entityType === "PRODUCT" && (
+                  <p className="text-xs text-muted-foreground">
+                    This only sets the SEO canonical tag — it does not change the page's actual URL. Edit the URL slug from Products → the product → Edit instead.
+                  </p>
+                )}
+              </div>
               <Select label="Robots" value={form.robots} onChange={(e) => set("robots", e.target.value)}>
                 {ROBOTS_PRESETS.map((r) => <option key={r} value={r}>{r === "" ? "Default (index,follow)" : r}</option>)}
               </Select>

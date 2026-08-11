@@ -160,6 +160,14 @@ export default function Navbar({
       return () => clearTimeout(t);
     }
   }, [isSearchChatOpen]);
+
+  // Same for the chatbot panel: open it, type immediately.
+  useEffect(() => {
+    if (isChatOpen) {
+      const t = setTimeout(() => chatTextareaRef.current?.focus(), 120);
+      return () => clearTimeout(t);
+    }
+  }, [isChatOpen]);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatSessions, setChatSessions] = useState<{ id: string, date: number, messages: ChatMessage[] }[]>([]);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
@@ -203,6 +211,7 @@ export default function Navbar({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const searchTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const chatTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   const { data: categoriesData } = useCategories();
   const categories = Array.isArray(categoriesData) ? categoriesData : (categoriesData as any)?.data ?? [];
@@ -844,6 +853,7 @@ export default function Navbar({
                       </div>
                     )}
                     <textarea
+                      ref={chatTextareaRef}
                       value={chatInput}
                       onChange={(e) => setChatInput(e.target.value)}
                       onKeyDown={(e) => {

@@ -9,6 +9,7 @@ import { useState } from "react";
 
 const NAV = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
+  { icon: BarChart3, label: "Analytics", href: "/analytics" },
   { icon: Bot, label: "AI Chatbot", href: "/chatbot" },
   { icon: Users, label: "Users", href: "/users" },
   { icon: Package, label: "Products", href: "/products" },

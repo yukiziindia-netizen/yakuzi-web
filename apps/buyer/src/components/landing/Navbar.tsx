@@ -150,6 +150,16 @@ export default function Navbar({
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isSearchChatOpen, setIsSearchChatOpen] = useState(false);
+
+  // Type-immediately: focus the search box as soon as the panel opens. The
+  // panel mounts inside AnimatePresence, so wait a beat for it to exist
+  // (same idiom as SearchBar's open-focus).
+  useEffect(() => {
+    if (isSearchChatOpen) {
+      const t = setTimeout(() => searchTextareaRef.current?.focus(), 120);
+      return () => clearTimeout(t);
+    }
+  }, [isSearchChatOpen]);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatSessions, setChatSessions] = useState<{ id: string, date: number, messages: ChatMessage[] }[]>([]);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
@@ -192,6 +202,7 @@ export default function Navbar({
   const navPanelRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const searchTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   const { data: categoriesData } = useCategories();
   const categories = Array.isArray(categoriesData) ? categoriesData : (categoriesData as any)?.data ?? [];
@@ -976,6 +987,7 @@ export default function Navbar({
                   {/* Chat Box Header / Input Area */}
                   <div className="pb-2 z-10">
                     <textarea
+                      ref={searchTextareaRef}
                       value={searchInput}
                       onChange={(e) => setSearchInput(e.target.value)}
                       onKeyDown={(e) => {

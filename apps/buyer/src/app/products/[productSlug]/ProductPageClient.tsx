@@ -1458,19 +1458,20 @@ export default function ProductPageClient({ productSlug, initialProduct }: { pro
                       </span>
                     ) : null}
                   </div>
-                  {activeDiscountPercent && activeDiscountPercent > 0 ? (
-                    <span className="text-sm sm:text-base xl:text-lg 2xl:text-xl font-bold text-gray-800 mt-2 leading-none">
-                      {activeDiscountPercent}% off
-                    </span>
-                  ) : null}
                 </div>
 
-                {/* Right: Truck & Rating */}
+                {/* Right: Truck, Offer & Rating — the offer sits after the
+                    truck icon (Rishi, 11 Aug), not under the price. */}
                 <div className="flex items-center gap-4 sm:gap-5 xl:gap-6 pb-0.5">
                   <DeliveryTruckBadge
                     text={product.deliveryText || "3 days"}
                     className="w-[85px] sm:w-[95px] xl:w-[110px] 2xl:w-[125px] h-auto text-gray-500 flex-shrink-0"
                   />
+                  {activeDiscountPercent && activeDiscountPercent > 0 ? (
+                    <span className="text-sm sm:text-base xl:text-lg 2xl:text-xl font-bold text-gray-800 leading-none whitespace-nowrap">
+                      {activeDiscountPercent}% off
+                    </span>
+                  ) : null}
                   <div className="flex items-center gap-1 xl:gap-1.5">
                     <Star className={`w-5.5 h-5.5 xl:w-6.5 xl:h-6.5 2xl:w-7 2xl:h-7 flex-shrink-0 ${hasReviews ? 'fill-[#7B2FBE] text-[#7B2FBE]' : 'fill-gray-300 text-gray-300'}`} />
                     <span className="text-lg sm:text-xl xl:text-2xl 2xl:text-2xl font-bold text-gray-800 leading-none">

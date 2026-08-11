@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { sendOtp, verifyOtp, getCurrentUser } from "@/api/auth.api";
 import {
   getAdminDashboard, getAdminUsers, getUserById, approveUser, rejectUser, blockUser, unblockUser,
-  getBuyers, getSellers, updateUser, deleteUser, updateUserStatus, updateGstPanStatus,
+  getBuyers, getSellers, updateUser, deleteUser, updateUserStatus, updateGstPanStatus, updateSellerProfile,
   getAdminProducts, getAdminProductsFiltered, getProductById, disableProduct, enableProduct, deleteProduct, createProduct, updateProduct, approveProduct, rejectProduct,
   getAdminOrders, getAdminOrdersFiltered, getOrderById, updateAdminOrderStatus, updateAdminShippingDocs, uploadAdminOrderDocument, cancelOrder, getOrderInvoice,
   getPayments, confirmPayment, rejectPayment,
@@ -287,10 +287,23 @@ export function useUpdateGstPanStatus() {
   return useMutation({
     mutationFn: ({ userId, role, data }: { userId: string; role: 'BUYER' | 'SELLER'; data: { verified: boolean; creditTier?: 'PREPAID' | 'EMI' | 'FULLCREDIT' } }) => 
       updateGstPanStatus(userId, role, data),
-    onSuccess: () => { 
-      void qc.invalidateQueries({ queryKey: ["admin", "users"] }); 
-      void qc.invalidateQueries({ queryKey: ["admin", "buyers"] }); 
-      void qc.invalidateQueries({ queryKey: ["admin", "sellers"] }); 
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["admin", "users"] });
+      void qc.invalidateQueries({ queryKey: ["admin", "buyers"] });
+      void qc.invalidateQueries({ queryKey: ["admin", "sellers"] });
+    },
+  });
+}
+
+export function useUpdateSellerProfile() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, data }: { userId: string; data: Record<string, unknown> }) =>
+      updateSellerProfile(userId, data),
+    onSuccess: (_result, { userId }) => {
+      void qc.invalidateQueries({ queryKey: ["admin", "user", userId] });
+      void qc.invalidateQueries({ queryKey: ["admin", "users"] });
+      void qc.invalidateQueries({ queryKey: ["admin", "sellers"] });
     },
   });
 }

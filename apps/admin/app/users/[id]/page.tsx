@@ -2,11 +2,11 @@
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft, Phone, Mail, Building2, FileText, MapPin, Calendar, Trash2, Ban, Unlock, UserCheck, UserX, ExternalLink } from "lucide-react";
+import { ArrowLeft, Phone, Mail, Building2, FileText, MapPin, Calendar, Trash2, Ban, Unlock, UserCheck, UserX, ExternalLink, Pencil } from "lucide-react";
 import { AdminLayout } from "@/components/layout/admin-layout";
-import { Button, Badge, Modal, Skeleton } from "@/components/ui";
+import { Button, Badge, Modal, Skeleton, Input } from "@/components/ui";
 import { cn } from "@/lib/utils";
-import { useUserById, useAffirmUserStatus, useDeleteUser, usePresignedUrl } from "@/hooks/useAdmin";
+import { useUserById, useAffirmUserStatus, useDeleteUser, usePresignedUrl, useUpdateSellerProfile } from "@/hooks/useAdmin";
 import toast from "react-hot-toast";
 
 const getFullUrl = (url: string) => {
@@ -56,6 +56,91 @@ function SecureDocViewer({ url, label, number, expiry }: { url: string; label: s
   );
 }
 
+function SellerEditModal({ open, onClose, userId, sp }: { open: boolean; onClose: () => void; userId: string; sp: any }) {
+  const updateSellerProfile = useUpdateSellerProfile();
+  const bank = sp?.bankAccount ?? {};
+  const [form, setForm] = useState({
+    companyName: sp?.companyName ?? "",
+    email: sp?.email ?? "",
+    gstNumber: sp?.gstNumber ?? "",
+    panNumber: sp?.panNumber ?? "",
+    aadhaarNumber: sp?.aadhaarNumber ?? "",
+    address: sp?.address ?? "",
+    city: sp?.city ?? "",
+    state: sp?.state ?? "",
+    pincode: sp?.pincode ?? "",
+    bankName: bank.bankName ?? "",
+    accountNumber: bank.accountNumber ?? "",
+    accountHolder: bank.accountHolder ?? "",
+    ifsc: bank.ifsc ?? "",
+  });
+
+  const set = (field: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    setForm((prev) => ({ ...prev, [field]: e.target.value }));
+
+  const handleSave = async () => {
+    try {
+      await updateSellerProfile.mutateAsync({
+        userId,
+        data: {
+          companyName: form.companyName,
+          email: form.email,
+          gstNumber: form.gstNumber,
+          panNumber: form.panNumber,
+          aadhaarNumber: form.aadhaarNumber,
+          address: form.address,
+          city: form.city,
+          state: form.state,
+          pincode: form.pincode,
+          bankAccount: {
+            bankName: form.bankName,
+            accountNumber: form.accountNumber,
+            accountHolder: form.accountHolder,
+            ifsc: form.ifsc,
+          },
+        },
+      });
+      toast.success("Seller details updated");
+      onClose();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to update seller details");
+    }
+  };
+
+  return (
+    <Modal open={open} onClose={onClose} title="Edit Seller Details" maxWidth="max-w-2xl">
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Input label="Company" value={form.companyName} onChange={set("companyName")} />
+          <Input label="Business Email" value={form.email} onChange={set("email")} />
+          <Input label="GST Number" value={form.gstNumber} onChange={set("gstNumber")} />
+          <Input label="PAN Number" value={form.panNumber} onChange={set("panNumber")} />
+          <Input label="Aadhaar Number" value={form.aadhaarNumber} onChange={set("aadhaarNumber")} />
+          <Input label="Pincode" value={form.pincode} onChange={set("pincode")} />
+        </div>
+        <Input label="Address" value={form.address} onChange={set("address")} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Input label="City" value={form.city} onChange={set("city")} />
+          <Input label="State" value={form.state} onChange={set("state")} />
+        </div>
+        <div className="pt-4 border-t border-border">
+          <p className="text-sm font-semibold text-foreground mb-3">Bank Details</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input label="Bank Name" value={form.bankName} onChange={set("bankName")} />
+            <Input label="Account Number" value={form.accountNumber} onChange={set("accountNumber")} />
+            <Input label="Account Holder" value={form.accountHolder} onChange={set("accountHolder")} />
+            <Input label="IFSC Code" value={form.ifsc} onChange={set("ifsc")} />
+          </div>
+        </div>
+        <div className="flex justify-end gap-3 pt-2">
+          <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button variant="primary" onClick={handleSave} loading={updateSellerProfile.isPending}>Save Changes</Button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
 export default function UserDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
@@ -63,6 +148,7 @@ export default function UserDetailPage() {
   const updateStatus = useAffirmUserStatus();
   const deleteUserMutation = useDeleteUser();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   const handleAction = async (action: "approve" | "reject" | "block" | "unblock") => {
     try {
@@ -148,6 +234,9 @@ export default function UserDetailPage() {
             )}
             {user.status === "BLOCKED" && (
               <Button size="sm" variant="outline" onClick={() => handleAction("unblock")} leftIcon={<Unlock className="h-4 w-4" />}>Unblock</Button>
+            )}
+            {isSeller && (
+              <Button size="sm" variant="outline" onClick={() => setShowEditModal(true)} leftIcon={<Pencil className="h-4 w-4" />}>Edit</Button>
             )}
             <Button size="sm" variant="danger" onClick={() => setShowDeleteModal(true)} leftIcon={<Trash2 className="h-4 w-4" />}>Delete</Button>
           </div>
@@ -266,6 +355,10 @@ export default function UserDetailPage() {
           <Button variant="danger" onClick={handleDelete} loading={deleteUserMutation.isPending}>Delete User</Button>
         </div>
       </Modal>
+
+      {isSeller && (
+        <SellerEditModal key={`${sp?.id ?? "new"}-${sp?.updatedAt ?? ""}`} open={showEditModal} onClose={() => setShowEditModal(false)} userId={id} sp={sp} />
+      )}
     </AdminLayout>
   );
 }

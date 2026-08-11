@@ -9,6 +9,7 @@ import { formatCurrency } from "@yukizi/utils";
 import { cn } from "@/lib/utils";
 import { useProductById, useUpdateProduct, useDeleteProduct, useCategories } from "@/hooks/useAdmin";
 import toast from "react-hot-toast";
+import { ProductSeoSection } from "@/components/seo/product-seo-fields";
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -311,6 +312,15 @@ export default function ProductDetailPage() {
             )}
           </div>
         </div>
+
+        {/* SEO — same record as the SEO tab */}
+        {product?.variant?.catalogProduct?.id && (
+          <ProductSeoSection
+            catalogProductId={product.variant.catalogProduct.id}
+            productName={product?.name}
+            slug={product?.variant?.catalogProduct?.slug}
+          />
+        )}
 
         {/* Batches */}
         {batches.length > 0 && (

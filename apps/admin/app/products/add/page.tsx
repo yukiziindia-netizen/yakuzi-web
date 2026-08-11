@@ -11,6 +11,13 @@ import { useCategories, useSubCategories } from "@/hooks/useAdmin";
 import { apiClient } from "@/lib/apiClient";
 import { MediaUploader, MediaItem } from "@/components/ui/media-uploader";
 import { VariantBuilder, VariantOption, VariantCombination } from "@/components/ui/variant-builder";
+import {
+  ProductSeoFields,
+  emptyProductSeoForm,
+  productSeoFormHasContent,
+  productSeoFormToPayload,
+} from "@/components/seo/product-seo-fields";
+import { upsertSeoMeta } from "@/api/seo.api";
 
 export default function AddProductPage() {
   const router = useRouter();
@@ -47,6 +54,7 @@ export default function AddProductPage() {
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [options, setOptions] = useState<VariantOption[]>([]);
   const [variants, setVariants] = useState<VariantCombination[]>([]);
+  const [seoForm, setSeoForm] = useState(emptyProductSeoForm());
   const [loading, setLoading] = useState(false);
 
   // Filter subcategories based on selected category
@@ -91,8 +99,29 @@ export default function AddProductPage() {
         })) : undefined,
       };
 
-      await apiClient.post("/admin/suggestions", payload);
-      toast.success("Product created successfully");
+      // Validate SEO JSON fields BEFORE creating, so a bad value can't leave
+      // a product created but its SEO silently dropped.
+      const wantsSeo = productSeoFormHasContent(seoForm);
+      if (wantsSeo && productSeoFormToPayload(seoForm, "precheck") === null) {
+        setLoading(false);
+        return;
+      }
+
+      const res = await apiClient.post<{ data: any }>("/admin/suggestions", payload);
+      const created = res.data?.data;
+
+      // Same record the SEO tab edits: PRODUCT + the new catalog id.
+      if (wantsSeo && created?.id) {
+        try {
+          const seoPayload = productSeoFormToPayload(seoForm, created.id);
+          if (seoPayload) await upsertSeoMeta(seoPayload);
+          toast.success("Product created with SEO — also editable under the SEO tab");
+        } catch {
+          toast.error("Product created, but saving its SEO failed — add it from the SEO tab.");
+        }
+      } else {
+        toast.success("Product created successfully");
+      }
       router.push("/products");
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "Failed to create product");
@@ -219,14 +248,26 @@ export default function AddProductPage() {
 
             {/* Variants */}
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-              <VariantBuilder 
-                options={options} 
-                onChangeOptions={setOptions} 
+              <VariantBuilder
+                options={options}
+                onChangeOptions={setOptions}
                 variants={variants}
                 onChangeVariants={setVariants}
                 productMedia={mediaItems}
                 onAddProductMedia={(items) => setMediaItems(prev => [...prev, ...items])}
               />
+            </motion.div>
+
+            {/* Search engine optimization — saves to the same record as the SEO tab */}
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
+              className="glass-card rounded-2xl p-6 border border-border/50 space-y-4">
+              <div>
+                <h3 className="text-base font-semibold text-foreground">Search engine optimization</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Optional — everything here saves with the product and stays editable under the SEO tab. Blank fields fall back to sensible generated defaults.
+                </p>
+              </div>
+              <ProductSeoFields value={seoForm} onChange={setSeoForm} productName={form.title} />
             </motion.div>
 
           </div>

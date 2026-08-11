@@ -177,6 +177,10 @@ export default function AdminProductsPage() {
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-1">
+                        <button onClick={() => router.push(`/products/${p.id}`)} aria-label="Edit product" title="Edit product"
+                          className="h-7 w-7 rounded-lg flex items-center justify-center text-primary hover:bg-primary/10 transition-colors">
+                          <Eye className="h-3.5 w-3.5" />
+                        </button>
                         <button onClick={() => void toggleStatus(p.id, p.name, p.isActive)} aria-label={p.isActive ? "Disable" : "Enable"} title={p.isActive ? "Disable" : "Enable"}
                           className={cn("h-7 w-7 rounded-lg flex items-center justify-center transition-colors", p.isActive ? "text-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20" : "text-green-500 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20")}>
                           {p.isActive ? <XCircle className="h-3.5 w-3.5" /> : <CheckCircle className="h-3.5 w-3.5" />}

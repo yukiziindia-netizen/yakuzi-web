@@ -128,7 +128,7 @@ export default function AdminOrdersPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="font-semibold text-2xl text-foreground">Order Monitoring</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">{allOrders.length} total orders · {allOrders.filter((o: any) => o.orderStatus === "PLACED").length} pending</p>
+          <p className="text-sm text-muted-foreground mt-0.5">{totalOrders} total orders · {allOrders.filter((o: any) => o.orderStatus === "PLACED").length} pending (this page)</p>
         </div>
         <DateRangePicker value={dateRange} onChange={setDateRange} align="end" />
       </div>

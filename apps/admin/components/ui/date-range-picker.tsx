@@ -50,7 +50,11 @@ export function DateRangePicker({
     setOpen(false);
   };
 
-  const quickRanges = [
+  // getValue returning undefined clears the range - the pages using this
+  // picker treat an undefined dateFrom/dateTo as "no filter", so "All Dates"
+  // just needs to hand back nothing rather than a huge synthetic range.
+  const quickRanges: { label: string; getValue: () => DateRange | undefined }[] = [
+    { label: "All Dates", getValue: () => undefined },
     { label: "Today", getValue: () => ({ from: startOfDay(new Date()), to: endOfDay(new Date()) }) },
     { label: "Yesterday", getValue: () => ({ from: startOfYesterday(), to: endOfYesterday() }) },
     { label: "Last 7 Days", getValue: () => ({ from: startOfDay(subDays(new Date(), 6)), to: endOfDay(new Date()) }) },
@@ -137,16 +141,22 @@ export function DateRangePicker({
                   numberOfMonths={2}
                   className="p-0 border-none m-0"
                   classNames={{
-                    months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                    months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0 relative",
                     month: "space-y-4",
                     month_caption: "flex justify-center pt-1 relative items-center",
                     caption_label: "text-sm font-bold text-gray-900",
-                    nav: "space-x-1 flex items-center",
+                    // react-day-picker v9 renders Nav ONCE, as the first child of
+                    // "months" (not nested inside month_caption like v8) - it needs
+                    // to be the positioned element itself (pinned to the top,
+                    // spanning both months) rather than relying on the buttons'
+                    // own "absolute left/right" with no positioned ancestor closer
+                    // than .rdp-root, which let them drift into the day grid.
+                    nav: "absolute inset-x-0 top-1 flex items-center justify-between px-1 z-10 pointer-events-none",
                     button_previous: cn(
-                      "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 transition-opacity rounded-md border border-gray-200 flex items-center justify-center absolute left-1 z-10"
+                      "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 transition-opacity rounded-md border border-gray-200 flex items-center justify-center pointer-events-auto"
                     ),
                     button_next: cn(
-                      "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 transition-opacity rounded-md border border-gray-200 flex items-center justify-center absolute right-1 z-10"
+                      "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 transition-opacity rounded-md border border-gray-200 flex items-center justify-center pointer-events-auto"
                     ),
                     month_grid: "w-full border-collapse space-y-1",
                     weekdays: "flex",

@@ -74,11 +74,11 @@ export default async function HomePage({
   }
 
   return (
-    <main className="w-full bg-white min-h-screen relative pb-24 sm:pb-32">
+    <main className="w-full bg-gray-50 min-h-screen relative pb-24 sm:pb-32">
       <JsonLd data={[organizationSchema(), webSiteSchema()]} />
       <HomeNavbar />
 
-      <div className="w-full max-w-[1600px] 2xl:max-w-none mx-auto bg-white overflow-hidden flex flex-col relative min-h-screen">
+      <div className="w-full max-w-[1600px] 2xl:max-w-none mx-auto bg-gray-50 overflow-hidden flex flex-col relative min-h-screen">
         <section className="flex-1 flex flex-col w-full">
           <div className="w-full flex-shrink-0 flex flex-col">
             <HeroSection initialBanners={initialBanners} />

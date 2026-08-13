@@ -293,7 +293,7 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
             ? 'border-gray-900 ring-1 ring-gray-900 shadow-[0_2px_8px_rgba(0,0,0,0.06)]'
             : isYukiziChoice
               ? 'border-[#7B2FBE]/40 shadow-[0_2px_8px_rgba(123,47,190,0.15)]'
-              : 'border-[#ddd] shadow-[0_2px_8px_rgba(0,0,0,0.06)]'
+              : 'border-gray-300 shadow-[0_2px_8px_rgba(0,0,0,0.06)]'
         } w-full h-auto overflow-hidden`}
       >
            {/* Top Right Plus / Cart Button / Waitlist Bell */}

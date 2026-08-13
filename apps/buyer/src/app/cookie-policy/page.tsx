@@ -155,6 +155,8 @@ export default function CookiePolicyPage() {
             {COMPANY.supportEmail}
           </a>
           <br />
+          Phone: {COMPANY.supportPhone}
+          <br />
           Grievance Officer: {COMPANY.grievanceOfficer.name} —{' '}
           <a
             href={`mailto:${COMPANY.grievanceOfficer.email}`}

@@ -50,8 +50,8 @@ export const COMPANY = {
    */
   supportEmail: 'Yukizi.india@gmail.com',
 
-  /** TO CONFIRM: published support phone number. */
-  supportPhone: '[Support phone number — to be provided]',
+  /** Published support phone number, confirmed by Rishi 2026-08-13. */
+  supportPhone: '+91 82912 80021',
 
   /** Published support hours. */
   supportHours: 'Monday to Saturday, 10:00 – 18:00 IST',

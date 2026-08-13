@@ -297,7 +297,7 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
 
       {/* Ad Tag */}
       {isAd && (
-        <div className="absolute -top-2 right-0 text-2xs sm:text-2xs text-gray-400 font-normal z-20">
+        <div className="absolute -top-4 right-0 text-2xs sm:text-2xs text-gray-400 font-normal z-20">
           Ad
         </div>
       )}

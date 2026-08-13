@@ -1250,7 +1250,6 @@ export default function ProductPageClient({ productSlug, initialProduct }: { pro
               defaultOpen={true}
             />
             <Accordion title="SHIPPING & RETURN INFO" />
-            <Accordion title="ADDITIONAL INFO" />
           </div>
 
           {/* Related Products */}
@@ -1419,7 +1418,6 @@ export default function ProductPageClient({ productSlug, initialProduct }: { pro
                 />
                 <Accordion title="PRODUCT SPECIFICATIONS" />
                 <Accordion title="SHIPPING & RETURN INFO" />
-                <Accordion title="ADDITIONAL INFO" />
               </div>
 
               {/* Related Products - moved inside left column to avoid XL height gaps */}

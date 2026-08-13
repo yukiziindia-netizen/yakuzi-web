@@ -166,16 +166,19 @@ export default function Footer() {
             </div>
             <ul className="flex flex-col gap-2 text-sm font-semibold">
               <li>
-                <Link href="#" className="hover:text-white transition-colors">Privacy Policy</Link>
+                <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
               </li>
               <li>
-                <Link href="#" className="hover:text-white transition-colors">Terms of Use</Link>
+                <Link href="/terms" className="hover:text-white transition-colors">Terms of Use</Link>
               </li>
               <li>
-                <Link href="#" className="hover:text-white transition-colors">Shipping Policy</Link>
+                <Link href="/shipping" className="hover:text-white transition-colors">Shipping Policy</Link>
               </li>
               <li>
-                <Link href="#" className="hover:text-white transition-colors">Cancellation & Returns</Link>
+                <Link href="/returns" className="hover:text-white transition-colors">Cancellation & Returns</Link>
+              </li>
+              <li>
+                <Link href="/cookie-policy" className="hover:text-white transition-colors">Cookie Policy</Link>
               </li>
             </ul>
           </div>

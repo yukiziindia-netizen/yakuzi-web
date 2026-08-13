@@ -376,12 +376,12 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
               addToWishlist(product);
             }
           }}
-          className="absolute right-0 top-[40%] -translate-y-1/2 z-20 cursor-pointer hover:scale-105 transition-transform"
+          className="absolute right-0 top-[44%] -translate-y-1/2 z-20 cursor-pointer hover:scale-105 transition-transform"
         >
-          <WishlistIcon 
-            isFilled={isSaved} 
-            preserveAspectRatio="none" 
-            className="w-[24px] h-[24px]" 
+          <WishlistIcon
+            isFilled={isSaved}
+            preserveAspectRatio="none"
+            className="w-[21px] h-[21px]"
           />
         </div>
 

@@ -307,7 +307,9 @@ export async function getAdminOrdersFiltered(params: { page?: number; limit?: nu
   const qs = new URLSearchParams();
   Object.entries(params).forEach(([k, v]) => { if (v) qs.set(k, String(v)); });
   const { data } = await apiClient.get<any>(`/admin/orders?${qs}`);
-  return data?.data?.data ?? data?.data ?? data ?? [];
+  // Backend responds { message, data: { data: Order[], total, page, limit, totalPages } } —
+  // unwrap only the outer envelope so callers still get `total` for pagination.
+  return data?.data ?? { data: [], total: 0 };
 }
 
 export async function cancelOrder(orderId: string, reason?: string) {

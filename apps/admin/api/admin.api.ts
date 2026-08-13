@@ -159,6 +159,21 @@ export async function getSettlements(params: {
   return data.data;
 }
 
+// True totals across every matching settlement (not just the current page) -
+// use for stat cards, not the paginated getSettlements() list.
+export async function getSettlementsSummary(params: {
+  dateFrom?: string;
+  dateTo?: string;
+  sellerId?: string;
+  status?: string;
+  [key: string]: any;
+} = {}) {
+  const qs = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => { if (v) qs.set(k, String(v)); });
+  const { data } = await apiClient.get<any>(`/admin/settlements/summary?${qs}`);
+  return data.data as { gross: number; pending: number; totalSettled: number };
+}
+
 export async function markSettlementPaid(settlementId: string, payoutReference: string, paymentProofUrl?: string) {
   const { data } = await apiClient.patch<{ data: any }>(`/admin/settlements/${settlementId}/mark-paid`, { payoutReference, paymentProofUrl });
   return data.data;

@@ -32,7 +32,12 @@ const noOfferLabel = () => null;
 // the reference layout's green "34% off"), so only the plain-percent case
 // gets the green treatment there. Other callers (PDP, drawers, modals) keep
 // the original neutral color by leaving this false.
-export const renderBuyerOfferBadge = (p: any, accentGreen = false) => {
+// compact: the PTR_PLUS_* combo types normally stack percent+bonus on two
+// lines, which made cards with a combo offer taller than every other card
+// in the grid. The homepage grid opts into a single joined line instead so
+// every card's price row is exactly one line tall, regardless of discount
+// type. Other callers keep the richer two-line stack by leaving this false.
+export const renderBuyerOfferBadge = (p: any, accentGreen = false, compact = false) => {
   const meta = p?.discountMeta || {};
   const percent = Number(meta.discountPercent) || 0;
   const specialPrice = Number(meta.specialPrice) || 0;
@@ -43,6 +48,9 @@ export const renderBuyerOfferBadge = (p: any, accentGreen = false) => {
   const percentOff = <span className={accentGreen ? PERCENT_OFF_TEXT_GREEN : OFFER_TEXT}>{percent}% off</span>;
   const sameBonus = <span className={OFFER_TEXT}>Buy {buyQty} Get {getQty} Free</span>;
   const otherBonus = <span className={OFFER_TEXT}>Buy {buyQty} Get {getQty} {meta.bonusProductName}</span>;
+  const percentText = `${percent}% off`;
+  const sameBonusText = `Buy ${buyQty} Get ${getQty} Free`;
+  const otherBonusText = `Buy ${buyQty} Get ${getQty} ${meta.bonusProductName}`;
 
   if (!type || type === 'NONE') {
     return percent > 0 ? percentOff : noOfferLabel();
@@ -62,6 +70,10 @@ export const renderBuyerOfferBadge = (p: any, accentGreen = false) => {
 
   if (type === 'PTR_PLUS_SAME_PRODUCT_BONUS') {
     if (percent <= 0 && getQty <= 0) return noOfferLabel();
+    if (compact) {
+      const parts = [percent > 0 && percentText, getQty > 0 && sameBonusText].filter(Boolean);
+      return <span className={accentGreen ? PERCENT_OFF_TEXT_GREEN : OFFER_TEXT}>{parts.join(' + ')}</span>;
+    }
     return (
       <div className="flex flex-col gap-0.5">
         {percent > 0 && percentOff}
@@ -73,6 +85,10 @@ export const renderBuyerOfferBadge = (p: any, accentGreen = false) => {
   if (type === 'PTR_PLUS_DIFFERENT_PRODUCT_BONUS') {
     const hasBonus = getQty > 0 && meta.bonusProductName;
     if (percent <= 0 && !hasBonus) return noOfferLabel();
+    if (compact) {
+      const parts = [percent > 0 && percentText, hasBonus && otherBonusText].filter(Boolean);
+      return <span className={accentGreen ? PERCENT_OFF_TEXT_GREEN : OFFER_TEXT}>{parts.join(' + ')}</span>;
+    }
     return (
       <div className="flex flex-col gap-0.5">
         {percent > 0 && percentOff}
@@ -377,7 +393,7 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
            <Image src={imageUrl} alt={productName} fill sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 15vw" className="object-contain p-3 sm:p-2 group-hover:scale-105 transition-transform duration-300 ease-out" />
         </Link>
 
-         <div className="flex flex-col gap-1.5 p-[8px] sm:p-[10px] bg-white w-full">
+         <div className="flex flex-col gap-1 p-[8px] sm:p-[10px] bg-white w-full">
             {/* Brand Subtitle & Title Line */}
             <div>
                <div className="flex items-start justify-between w-full gap-1.5">
@@ -407,7 +423,7 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
            </div>
            
            {/* Price, Offer and Rating Row */}
-           <div className="flex justify-between items-center w-full pt-0.5 gap-1">
+           <div className="flex justify-between items-center w-full gap-1">
               <div className="flex items-baseline gap-1 min-w-0 overflow-hidden">
                  <span className="text-xs sm:text-base font-medium text-[#333333] leading-none shrink-0">
                     {displayPrice}
@@ -415,7 +431,7 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
                  {displayOriginalPrice && (
                     <span className="text-2xs sm:text-xs text-gray-400 line-through leading-none shrink-0">{displayOriginalPrice}</span>
                  )}
-                 <span className="truncate">{renderBuyerOfferBadge(product, true)}</span>
+                 <span className="truncate">{renderBuyerOfferBadge(product, true, true)}</span>
               </div>
               <div className="flex items-center gap-1 shrink-0">
                  <Star className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-[#7B2FBE] fill-[#7B2FBE]" />

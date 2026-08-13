@@ -22,14 +22,11 @@ interface ProductCarouselProps {
 
 const OFFER_TEXT = "text-[#333333] text-2xs sm:text-base font-medium tracking-wide whitespace-nowrap";
 const PERCENT_OFF_TEXT_GREEN = "text-green-600 text-2xs sm:text-base font-semibold tracking-wide whitespace-nowrap";
-const NO_OFFER_TEXT = "text-gray-400 text-2xs sm:text-base font-medium tracking-wide whitespace-nowrap";
 
-// A product with nothing on offer used to render nothing at all, leaving an
-// empty gap on the card where every neighbour shows "N% off". It now says so.
-// The other half of this: a discount type with no usable numbers behind it
-// rendered "0% off", "Buy 0 Get 0 Free" or "Special Price: ₹0", which reads
-// as an offer that does not exist. Those collapse to the same label.
-const noOfferLabel = () => <span className={NO_OFFER_TEXT}>No offers</span>;
+// Rishi: a product with nothing on offer should render nothing at all, not
+// a "No offers" label. Covers both no discount configured and a discount
+// type with no usable numbers behind it (e.g. "0% off", "Buy 0 Get 0 Free").
+const noOfferLabel = () => null;
 
 // accentGreen: the homepage grid card inlines this next to the price (like
 // the reference layout's green "34% off"), so only the plain-percent case

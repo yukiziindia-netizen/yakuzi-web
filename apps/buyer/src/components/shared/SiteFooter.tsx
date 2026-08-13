@@ -8,6 +8,7 @@ const footerLinks = [
   { label: 'Returns & Refunds', href: '/returns' },
   { label: 'Privacy Policy', href: '/privacy' },
   { label: 'Terms of Use', href: '/terms' },
+  { label: 'Cookie Policy', href: '/cookie-policy' },
   { label: 'Blog', href: '/blogs' },
 ];
 

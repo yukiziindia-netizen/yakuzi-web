@@ -4,7 +4,7 @@ import { absoluteUrl } from '@/lib/seo/site';
 
 export const revalidate = 3600; // rebuild at most hourly
 
-const STATIC_PATHS = ['/', '/blogs', '/about', '/contact', '/privacy', '/terms', '/returns', '/shipping'];
+const STATIC_PATHS = ['/', '/blogs', '/about', '/contact', '/privacy', '/terms', '/returns', '/shipping', '/cookie-policy'];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = STATIC_PATHS.map((p) => ({

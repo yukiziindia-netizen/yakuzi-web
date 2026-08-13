@@ -1254,7 +1254,6 @@ export default function ProductPageClient({ productSlug, initialProduct }: { pro
               content={product.specifications || 'No specifications available for this product.'}
             />
             <Accordion title="SHIPPING & RETURN INFO" />
-            <Accordion title="ADDITIONAL INFO" />
           </div>
 
           {/* Related Products */}
@@ -1426,7 +1425,6 @@ export default function ProductPageClient({ productSlug, initialProduct }: { pro
                   content={product.specifications || 'No specifications available for this product.'}
                 />
                 <Accordion title="SHIPPING & RETURN INFO" />
-                <Accordion title="ADDITIONAL INFO" />
               </div>
 
               {/* Related Products - moved inside left column to avoid XL height gaps */}

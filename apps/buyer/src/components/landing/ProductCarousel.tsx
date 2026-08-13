@@ -20,8 +20,14 @@ interface ProductCarouselProps {
   initialProducts?: any[];
 }
 
-const OFFER_TEXT = "text-[#333333] text-2xs sm:text-base font-medium tracking-wide whitespace-nowrap";
-const PERCENT_OFF_TEXT_GREEN = "text-green-600 text-2xs sm:text-base font-semibold tracking-wide whitespace-nowrap";
+// overflow-hidden + text-ellipsis (instead of wrapping callers in their own
+// "truncate" span) so the truncation lives on the element that actually has
+// the right font-size/line-height. A wrapping span with no size classes of
+// its own inherits the ambient 16px/24px line box as an invisible "strut",
+// which made offer badges taller than the rest of the price row and threw
+// off row-height matching between grid cards.
+const OFFER_TEXT = "text-[#333333] text-2xs sm:text-base font-medium tracking-wide whitespace-nowrap overflow-hidden text-ellipsis";
+const PERCENT_OFF_TEXT_GREEN = "text-green-600 text-2xs sm:text-base font-semibold tracking-wide whitespace-nowrap overflow-hidden text-ellipsis";
 
 // Rishi: a product with nothing on offer should render nothing at all, not
 // a "No offers" label. Covers both no discount configured and a discount
@@ -98,7 +104,7 @@ export const renderBuyerOfferBadge = (p: any, accentGreen = false, compact = fal
 
   if (type === 'SPECIAL_PRICE') {
     return specialPrice > 0 ? (
-      <span className="text-emerald-600 text-2xs sm:text-base font-medium tracking-wide whitespace-nowrap">Special Price: ₹{Math.round(specialPrice)}</span>
+      <span className="text-emerald-600 text-2xs sm:text-base font-medium tracking-wide whitespace-nowrap overflow-hidden text-ellipsis">Special Price: ₹{Math.round(specialPrice)}</span>
     ) : noOfferLabel();
   }
 
@@ -430,7 +436,7 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
                  {displayOriginalPrice && (
                     <span className="text-2xs sm:text-xs text-gray-400 line-through leading-none shrink-0">{displayOriginalPrice}</span>
                  )}
-                 <span className="truncate">{renderBuyerOfferBadge(product, false, true)}</span>
+                 {renderBuyerOfferBadge(product, false, true)}
               </div>
               <div className="flex items-center gap-1 shrink-0">
                  <Star className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-[#7B2FBE] fill-[#7B2FBE]" />

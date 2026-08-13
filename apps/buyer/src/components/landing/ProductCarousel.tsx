@@ -28,10 +28,9 @@ const PERCENT_OFF_TEXT_GREEN = "text-green-600 text-2xs sm:text-base font-semibo
 // type with no usable numbers behind it (e.g. "0% off", "Buy 0 Get 0 Free").
 const noOfferLabel = () => null;
 
-// accentGreen: the homepage grid card inlines this next to the price (like
-// the reference layout's green "34% off"), so only the plain-percent case
-// gets the green treatment there. Other callers (PDP, drawers, modals) keep
-// the original neutral color by leaving this false.
+// accentGreen: was used to color the homepage grid card's offer text green;
+// Rishi asked for it back to the neutral color, so no caller currently
+// passes true. Left in place in case a future card wants the accent again.
 // compact: the PTR_PLUS_* combo types normally stack percent+bonus on two
 // lines, which made cards with a combo offer taller than every other card
 // in the grid. The homepage grid opts into a single joined line instead so
@@ -431,7 +430,7 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
                  {displayOriginalPrice && (
                     <span className="text-2xs sm:text-xs text-gray-400 line-through leading-none shrink-0">{displayOriginalPrice}</span>
                  )}
-                 <span className="truncate">{renderBuyerOfferBadge(product, true, true)}</span>
+                 <span className="truncate">{renderBuyerOfferBadge(product, false, true)}</span>
               </div>
               <div className="flex items-center gap-1 shrink-0">
                  <Star className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-[#7B2FBE] fill-[#7B2FBE]" />

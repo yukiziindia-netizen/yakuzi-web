@@ -7,7 +7,7 @@ import {
   getAdminProducts, getAdminProductsFiltered, getProductById, disableProduct, enableProduct, deleteProduct, createProduct, updateProduct, approveProduct, rejectProduct,
   getAdminOrders, getAdminOrdersFiltered, getOrderById, updateAdminOrderStatus, updateAdminShippingDocs, uploadAdminOrderDocument, cancelOrder, getOrderInvoice,
   getPayments, confirmPayment, rejectPayment,
-  getSettlements, markSettlementPaid, getSellerSettlements, createSettlement, syncSettlements,
+  getSettlements, getSettlementsSummary, markSettlementPaid, getSellerSettlements, createSettlement, syncSettlements,
   getTickets, getTicketById, replyToTicket, updateTicketStatus,
   getCategories, createCategory, updateCategory, deleteCategory,
   getSubCategories, createSubCategory, updateSubCategory, deleteSubCategory as deleteSubCategoryApi,
@@ -174,6 +174,8 @@ export function useRejectPayment() {
 // ─── Settlements ─────────────────────────────────────
 
 export function useSettlements(params: { page?: number; limit?: number; dateFrom?: string; dateTo?: string } = {}) { return useQuery({ queryKey: ["admin", "settlements", params], queryFn: () => getSettlements(params), staleTime: 60_000, retry: 1 }); }
+// True gross/pending/settled totals across every matching settlement, not just the current page - drives the Settlements stat cards.
+export function useSettlementsSummary(params: { dateFrom?: string; dateTo?: string } = {}) { return useQuery({ queryKey: ["admin", "settlements-summary", params], queryFn: () => getSettlementsSummary(params), staleTime: 60_000, retry: 1 }); }
 
 export function useMarkSettlementPaid() {
   const qc = useQueryClient();

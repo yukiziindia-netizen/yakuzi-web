@@ -8,7 +8,7 @@ import { Button, Input, Badge, Pagination, StatCard } from "@/components/ui";
 import { formatCurrency, formatDate } from "@yukizi/utils";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
-import { useSettlements, useMarkSettlementPaid, useSyncSettlements, useAdminOrdersFiltered, useUploadSettlementProof } from "@/hooks/useAdmin";
+import { useSettlements, useSettlementsSummary, useMarkSettlementPaid, useSyncSettlements, useAdminOrdersFiltered, useUploadSettlementProof } from "@/hooks/useAdmin";
 
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { DateRange } from "react-day-picker";
@@ -28,6 +28,12 @@ export default function AdminSettlementsPage() {
   const { data: settlementsData, isLoading: isLoadingSettlements } = useSettlements({
     page,
     limit,
+    dateFrom: dateRange?.from?.toISOString(),
+    dateTo: dateRange?.to?.toISOString(),
+  });
+  // Stat cards need true totals across every matching settlement, not just
+  // the current page - getAllSettlements only returns one page of records.
+  const { data: summary } = useSettlementsSummary({
     dateFrom: dateRange?.from?.toISOString(),
     dateTo: dateRange?.to?.toISOString(),
   });
@@ -167,8 +173,6 @@ export default function AdminSettlementsPage() {
     );
   }
 
-  const pendingAmount = displayItems.filter((s: any) => s.payoutStatus !== "PAID").reduce((sum: number, s: any) => sum + (Number(s.amount) || 0), 0);
-
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -189,9 +193,9 @@ export default function AdminSettlementsPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard title="Total Transactions" value={String(totalSettlements)} icon={CreditCard} iconClass="bg-blue-50 text-blue-600 dark:bg-blue-900/20" delay={0} />
-          <StatCard title="Gross Settlement Volume" value={formatCurrency(displayItems.reduce((sum: number, s: any) => sum + (Number(s.amount) || 0), 0))} icon={TrendingUp} iconClass="bg-purple-50 text-purple-600 dark:bg-purple-900/20" delay={0.05} />
-          <StatCard title="Pending Payouts" value={formatCurrency(pendingAmount)} icon={Clock} iconClass="bg-yellow-50 text-yellow-600 dark:bg-yellow-900/20" delay={0.1} />
-          <StatCard title="Total Settled" value={formatCurrency(displayItems.filter((s: any) => s.payoutStatus === "PAID").reduce((sum: number, s: any) => sum + (Number(s.amount) || 0), 0))} icon={CheckCircle2} iconClass="bg-green-50 text-green-600 dark:bg-green-900/20" delay={0.15} />
+          <StatCard title="Gross Settlement Volume" value={formatCurrency(summary?.gross ?? 0)} icon={TrendingUp} iconClass="bg-purple-50 text-purple-600 dark:bg-purple-900/20" delay={0.05} />
+          <StatCard title="Pending Payouts" value={formatCurrency(summary?.pending ?? 0)} icon={Clock} iconClass="bg-yellow-50 text-yellow-600 dark:bg-yellow-900/20" delay={0.1} />
+          <StatCard title="Total Settled" value={formatCurrency(summary?.totalSettled ?? 0)} icon={CheckCircle2} iconClass="bg-green-50 text-green-600 dark:bg-green-900/20" delay={0.15} />
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-border/40">

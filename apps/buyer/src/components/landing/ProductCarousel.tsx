@@ -12,7 +12,6 @@ import { useAddToWishlist, useWishlist, useRemoveFromWishlist } from '@/hooks/us
 import { useWaitlist, useAddToWaitlist, useRemoveFromWaitlist } from '@/hooks/useProducts';
 import { useToast } from '@/components/shared/Toast';
 import WishlistIcon from '@/components/shared/WishlistIcon';
-import { DeliveryTruckBadge } from '@/components/shared/DeliveryTruckBadge';
 
 interface ProductCarouselProps {
   reverse?: boolean;
@@ -22,6 +21,7 @@ interface ProductCarouselProps {
 }
 
 const OFFER_TEXT = "text-[#333333] text-2xs sm:text-base font-medium tracking-wide whitespace-nowrap";
+const PERCENT_OFF_TEXT_GREEN = "text-green-600 text-2xs sm:text-base font-semibold tracking-wide whitespace-nowrap";
 const NO_OFFER_TEXT = "text-gray-400 text-2xs sm:text-base font-medium tracking-wide whitespace-nowrap";
 
 // A product with nothing on offer used to render nothing at all, leaving an
@@ -31,7 +31,11 @@ const NO_OFFER_TEXT = "text-gray-400 text-2xs sm:text-base font-medium tracking-
 // as an offer that does not exist. Those collapse to the same label.
 const noOfferLabel = () => <span className={NO_OFFER_TEXT}>No offers</span>;
 
-export const renderBuyerOfferBadge = (p: any) => {
+// accentGreen: the homepage grid card inlines this next to the price (like
+// the reference layout's green "34% off"), so only the plain-percent case
+// gets the green treatment there. Other callers (PDP, drawers, modals) keep
+// the original neutral color by leaving this false.
+export const renderBuyerOfferBadge = (p: any, accentGreen = false) => {
   const meta = p?.discountMeta || {};
   const percent = Number(meta.discountPercent) || 0;
   const specialPrice = Number(meta.specialPrice) || 0;
@@ -39,7 +43,7 @@ export const renderBuyerOfferBadge = (p: any) => {
   const buyQty = Number(meta.buy) || 0;
   const type = typeof p?.discountType === 'string' ? p.discountType.toUpperCase() : '';
 
-  const percentOff = <span className={OFFER_TEXT}>{percent}% off</span>;
+  const percentOff = <span className={accentGreen ? PERCENT_OFF_TEXT_GREEN : OFFER_TEXT}>{percent}% off</span>;
   const sameBonus = <span className={OFFER_TEXT}>Buy {buyQty} Get {getQty} Free</span>;
   const otherBonus = <span className={OFFER_TEXT}>Buy {buyQty} Get {getQty} {meta.bonusProductName}</span>;
 
@@ -250,7 +254,6 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
     ? `₹${Math.round(finalOriginalPrice)}`
     : '';
 
-  const displayDelivery = product?.deliveryText || product?.deliveryTime || '3 days';
   const productName = product?.name || 'Product';
 
   const getInitials = (name: string) => {
@@ -293,7 +296,7 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
             ? 'border-gray-900 ring-1 ring-gray-900 shadow-[0_2px_8px_rgba(0,0,0,0.06)]'
             : isYukiziChoice
               ? 'border-[#7B2FBE]/40 shadow-[0_2px_8px_rgba(123,47,190,0.15)]'
-              : 'border-[#ddd] shadow-[0_2px_8px_rgba(0,0,0,0.06)]'
+              : 'border-gray-300 shadow-[0_2px_8px_rgba(0,0,0,0.06)]'
         } w-full h-auto overflow-hidden`}
       >
            {/* Top Right Plus / Cart Button / Waitlist Bell */}
@@ -406,29 +409,20 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
               </div>
            </div>
            
-           {/* Price and Rating Row */}
-           <div className="flex justify-between items-center w-full pt-0.5">
-              <div className="flex items-baseline gap-1">
-                 <span className="text-xs sm:text-base font-medium text-[#333333] leading-none">
+           {/* Price, Offer and Rating Row */}
+           <div className="flex justify-between items-center w-full pt-0.5 gap-1">
+              <div className="flex items-baseline gap-1 min-w-0 overflow-hidden">
+                 <span className="text-xs sm:text-base font-medium text-[#333333] leading-none shrink-0">
                     {displayPrice}
                  </span>
                  {displayOriginalPrice && (
-                    <span className="text-2xs sm:text-xs text-gray-400 line-through leading-none">{displayOriginalPrice}</span>
+                    <span className="text-2xs sm:text-xs text-gray-400 line-through leading-none shrink-0">{displayOriginalPrice}</span>
                  )}
+                 <span className="truncate">{renderBuyerOfferBadge(product, true)}</span>
               </div>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 shrink-0">
                  <Star className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-[#7B2FBE] fill-[#7B2FBE]" />
                  <span className="text-2xs sm:text-sm font-medium leading-none text-[#333333]">{hasRating ? rating : 'NA'}</span>
-              </div>
-           </div>
-
-           {/* Bottom Badges / Delivery Truck Row */}
-           <div className="flex justify-between items-center w-full pt-1 border-t border-gray-100/80">
-              <div className="flex items-center gap-1">
-                 {renderBuyerOfferBadge(product)}
-              </div>
-              <div className="-mr-[6px] sm:-mr-[8px]">
-                 <DeliveryTruckBadge text={displayDelivery} className="w-[52px] sm:w-[75px] h-auto text-[#8c8c8c]" />
               </div>
            </div>
         </div>

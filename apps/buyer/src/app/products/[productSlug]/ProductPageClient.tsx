@@ -1249,6 +1249,10 @@ export default function ProductPageClient({ productSlug, initialProduct }: { pro
               content={product.description || 'No description available.'}
               defaultOpen={true}
             />
+            <Accordion
+              title="PRODUCT SPECIFICATIONS"
+              content={product.specifications || 'No specifications available for this product.'}
+            />
             <Accordion title="SHIPPING & RETURN INFO" />
             <Accordion title="ADDITIONAL INFO" />
           </div>
@@ -1417,7 +1421,10 @@ export default function ProductPageClient({ productSlug, initialProduct }: { pro
                   content={product.description || 'No description available.'}
                   defaultOpen={true}
                 />
-                <Accordion title="PRODUCT SPECIFICATIONS" />
+                <Accordion
+                  title="PRODUCT SPECIFICATIONS"
+                  content={product.specifications || 'No specifications available for this product.'}
+                />
                 <Accordion title="SHIPPING & RETURN INFO" />
                 <Accordion title="ADDITIONAL INFO" />
               </div>

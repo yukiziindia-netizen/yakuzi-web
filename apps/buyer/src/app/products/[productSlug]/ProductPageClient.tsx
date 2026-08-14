@@ -1373,7 +1373,7 @@ export default function ProductPageClient({ productSlug, initialProduct }: { pro
         {/* DESKTOP VIEW LAYOUT */}
         <div className="hidden lg:flex flex-col gap-6 w-full">
           {/* 2-Column Grid */}
-          <div className="grid grid-cols-[1fr_1.25fr] gap-10 items-start mt-6">
+          <div className="grid grid-cols-[1fr_1.25fr] gap-10 items-start">
             {/* Left Column */}
             <div className="flex flex-col gap-6">
               {/* Breadcrumbs, with the Ad marker sharing the row */}

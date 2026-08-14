@@ -110,6 +110,7 @@ export async function getProducts(params?: {
   isNew?: boolean;
   isDiscounted?: boolean;
   isBestSelling?: boolean;
+  isYukiziChoice?: boolean;
   discountRange?: string;
   location?: string;
   discountType?: string;
@@ -213,11 +214,11 @@ export async function getNearbyProducts(params: {
   };
 }
 
-export async function getCities(): Promise<{ id: string; name: string; state: string }[]> {
+export async function getCities(): Promise<string[]> {
   try {
     const { data } = await api.get('/locations/cities');
     const payload = data?.data ?? data;
-    return Array.isArray(payload) ? payload : (Array.isArray(payload?.cities) ? payload.categories : []);
+    return Array.isArray(payload) ? payload : [];
   } catch (err) {
     console.warn('[Cities] Failed to fetch cities:', (err as any)?.response?.status, (err as any)?.message);
     return [];

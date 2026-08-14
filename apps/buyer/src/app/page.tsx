@@ -32,12 +32,16 @@ async function CarouselSection({ searchParams }: { searchParams: any }) {
     const res = await getProducts({
       limit: 100,
       search,
+      sortBy: searchParams?.sortBy || undefined,
+      sortOrder: searchParams?.sortOrder === 'asc' || searchParams?.sortOrder === 'desc' ? searchParams.sortOrder : undefined,
       minPrice: searchParams?.minPrice ? Number(searchParams.minPrice) : undefined,
       maxPrice: searchParams?.maxPrice ? Number(searchParams.maxPrice) : undefined,
       isNew: searchParams?.isNew === 'true' ? true : undefined,
+      isYukiziChoice: searchParams?.isYukiziChoice === 'true' ? true : undefined,
       isBestSelling: searchParams?.isBestSelling === 'true' ? true : undefined,
       discountRange: searchParams?.discountRange && searchParams.discountRange !== 'All' ? searchParams.discountRange : undefined,
       location: searchParams?.location && searchParams.location !== 'All' ? searchParams.location : undefined,
+      manufacturer: searchParams?.manufacturer && searchParams.manufacturer !== 'All' ? searchParams.manufacturer : undefined,
     });
     if (res && res.data && Array.isArray(res.data)) {
       initialProducts = res.data;

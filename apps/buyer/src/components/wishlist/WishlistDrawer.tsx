@@ -2,7 +2,6 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trash2, Loader2, Star, Eye, Plus, RefreshCw } from 'lucide-react';
-import WishlistIcon from '@/components/shared/WishlistIcon';
 import { useWishlist, useRemoveFromWishlist } from '@/hooks/useWishlist';
 import { DeliveryTruckBadge } from '@/components/shared/DeliveryTruckBadge';
 import { useToast } from '@/components/shared/Toast';
@@ -117,7 +116,6 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                 </div>
               ) : items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full gap-4 opacity-50 mt-10">
-                  <WishlistIcon className="w-20 h-20 text-gray-300" />
                   <p className="text-base font-medium text-gray-400">Your saved items list is empty</p>
                 </div>
               ) : (

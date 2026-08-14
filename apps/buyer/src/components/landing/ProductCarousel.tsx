@@ -179,9 +179,10 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
     e.stopPropagation();
     e.preventDefault();
     if (cartItem) {
-      removeCartItem(cartItem.id, {
-        onSuccess: () => toast('Removed from cart', 'info')
-      });
+      // No toast: the stepper collapsing back to the cart icon is already
+      // the confirmation, and the toast covered the top-left cards (same
+      // reasoning as dropping the "Added to cart" toast above).
+      removeCartItem(cartItem.id);
     }
   };
   const isSaved = wishlistData?.items?.some(

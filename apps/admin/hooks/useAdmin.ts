@@ -5,7 +5,7 @@ import {
   getAdminDashboard, getAdminUsers, getUserById, approveUser, rejectUser, blockUser, unblockUser,
   getBuyers, getSellers, updateUser, deleteUser, updateUserStatus, updateGstPanStatus, updateSellerProfile,
   getAdminProducts, getAdminProductsFiltered, getProductById, disableProduct, enableProduct, deleteProduct, createProduct, updateProduct, approveProduct, rejectProduct,
-  getAdminOrders, getAdminOrdersFiltered, getOrderById, updateAdminOrderStatus, updateAdminShippingDocs, uploadAdminOrderDocument, cancelOrder, getOrderInvoice,
+  getAdminOrders, getAdminOrdersFiltered, getOrderById, updateAdminOrderStatus, updateAdminShippingDocs, uploadAdminOrderDocument, cancelOrder, getOrderInvoice, getOrderTracking,
   getPayments, confirmPayment, rejectPayment,
   getSettlements, getSettlementsSummary, markSettlementPaid, getSellerSettlements, createSettlement, syncSettlements,
   getTickets, getTicketById, replyToTicket, updateTicketStatus,
@@ -372,6 +372,16 @@ export function useCancelOrder() {
 
 export function useOrderInvoice(orderId: string) {
   return useQuery({ queryKey: ["admin", "order", orderId, "invoice"], queryFn: () => getOrderInvoice(orderId), enabled: !!orderId });
+}
+
+export function useOrderTracking(orderId: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ["admin", "order", orderId, "tracking"],
+    queryFn: () => getOrderTracking(orderId),
+    enabled: !!orderId && enabled,
+    staleTime: 60_000,
+    retry: 1,
+  });
 }
 
 // ─── Settlements Extended ────────────────────────────

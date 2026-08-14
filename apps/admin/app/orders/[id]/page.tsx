@@ -2,14 +2,14 @@
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft, Package, Truck, CheckCircle, XCircle, Clock, CreditCard, FileText, User, MapPin, Phone, Building2, Mail, ExternalLink, Navigation, Calculator } from "lucide-react";
+import { ArrowLeft, Package, Truck, CheckCircle, XCircle, Clock, CreditCard, FileText, User, MapPin, Phone, Building2, Mail, ExternalLink, Navigation, Calculator, RefreshCw, Loader2 } from "lucide-react";
 
 
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { Button, Badge, Modal, Input, Skeleton } from "@/components/ui";
 import { formatCurrency, calculatePricing } from "@yukizi/utils";
 import { cn } from "@/lib/utils";
-import { useOrderById, useUpdateAdminOrderStatus, useCancelOrder, useUpdateAdminShippingDocs, useUploadAdminOrderDocument } from "@/hooks/useAdmin";
+import { useOrderById, useUpdateAdminOrderStatus, useCancelOrder, useUpdateAdminShippingDocs, useUploadAdminOrderDocument, useOrderTracking } from "@/hooks/useAdmin";
 import toast from "react-hot-toast";
 
 const ORDER_STATUSES = [
@@ -28,6 +28,7 @@ export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { data: order, isLoading } = useOrderById(id);
+  const { data: tracking, isLoading: isTrackingLoading, isFetching: isTrackingFetching, isError: isTrackingError, refetch: refetchTracking } = useOrderTracking(id, !!order?.shiprocketOrderId);
   const updateStatus = useUpdateAdminOrderStatus();
   const cancelOrder = useCancelOrder();
   
@@ -651,25 +652,89 @@ export default function OrderDetailPage() {
             {/* Tracking Info */}
             {order.shiprocketOrderId && (
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }} className="glass-card rounded-2xl p-6">
-                <h2 className="font-semibold text-foreground mb-4">Shiprocket Tracking</h2>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="font-semibold text-foreground flex items-center gap-2">
+                    <Navigation className="h-4 w-4 text-primary" /> Shiprocket Tracking
+                  </h2>
+                  <div className="flex items-center gap-2">
+                    {tracking?.current_status && (
+                      <Badge variant="info" className="capitalize">{String(tracking.current_status).toLowerCase().replace(/_/g, " ")}</Badge>
+                    )}
+                    <button
+                      onClick={() => refetchTracking()}
+                      disabled={isTrackingFetching}
+                      title="Refresh live status"
+                      className="p-1.5 rounded-lg hover:bg-accent/10 text-muted-foreground disabled:opacity-50"
+                    >
+                      <RefreshCw className={cn("h-3.5 w-3.5", isTrackingFetching && "animate-spin")} />
+                    </button>
+                  </div>
+                </div>
+
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Order ID</span>
                     <span className="text-sm font-semibold text-foreground">{order.shiprocketOrderId}</span>
                   </div>
-                  {order.awbCode && (
+                  {(tracking?.awb_code || order.awbCode) && (
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground">AWB</span>
-                      <span className="text-sm font-semibold text-primary">{order.awbCode}</span>
+                      <span className="text-sm font-semibold text-primary">{tracking?.awb_code || order.awbCode}</span>
                     </div>
                   )}
-                  {order.courierName && (
+                  {(tracking?.courier || order.courierName) && (
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground">Courier</span>
-                      <span className="text-sm font-semibold text-foreground">{order.courierName}</span>
+                      <span className="text-sm font-semibold text-foreground">{tracking?.courier || order.courierName}</span>
                     </div>
                   )}
+                  {tracking?.estimated_delivery && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Estimated Delivery</span>
+                      <span className="text-sm font-semibold text-foreground">{tracking.estimated_delivery}</span>
+                    </div>
+                  )}
+                  {tracking?.delivered_date && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Delivered</span>
+                      <span className="text-sm font-semibold text-green-600">{tracking.delivered_date}</span>
+                    </div>
+                  )}
+                  {tracking?.track_url && (
+                    <a href={tracking.track_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
+                      View on Shiprocket <ExternalLink className="h-3 w-3" />
+                    </a>
+                  )}
                 </div>
+
+                {isTrackingLoading && (
+                  <div className="flex items-center gap-2 mt-4 text-xs text-muted-foreground">
+                    <Loader2 className="h-3 w-3 animate-spin" /> Fetching live status from Shiprocket…
+                  </div>
+                )}
+
+                {isTrackingError && (
+                  <p className="mt-4 text-xs text-muted-foreground">Live tracking is temporarily unavailable — showing last known details above.</p>
+                )}
+
+                {!!tracking?.activities?.length && (
+                  <div className="mt-5 pt-4 border-t border-border/30">
+                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-3">Activity Timeline</p>
+                    <div className="space-y-3">
+                      {tracking.activities.map((activity: any, idx: number) => (
+                        <div key={idx} className="flex items-start gap-3">
+                          <div className={cn("h-2 w-2 rounded-full mt-1.5 shrink-0", idx === 0 ? "bg-primary" : "bg-muted-foreground/30")} />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-foreground">{activity.activity || activity.status || activity["sr-status-label"]}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {[activity.location, activity.date].filter(Boolean).join(" · ")}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </motion.div>
             )}
 

@@ -489,7 +489,35 @@ function ComparisonOffersList({
             key={listing.id}
             className="transition-colors w-full bg-[#eaeaea] border border-gray-200/60 hover:border-purple-200 shadow-sm flex items-center justify-between py-1 px-2.5 sm:py-1.5 sm:px-4 xl:py-2 xl:px-6 rounded-[6px]"
           >
-            {/* 1. Discount Badge */}
+            {/* 1. Price & Subtext */}
+            <div className="flex flex-col items-start justify-center min-w-[40px] sm:min-w-[56px] md:min-w-[64px] xl:min-w-[72px] 2xl:min-w-[80px] text-left">
+              <span className="text-xs sm:text-base md:text-lg xl:text-xl 2xl:text-xl font-medium text-gray-800 leading-none tracking-tight">
+                ₹{Math.round(pricing.finalCustomerPayable).toLocaleString('en-IN')}
+              </span>
+              {subText && (
+                <span className="text-2xs sm:text-xs xl:text-sm 2xl:text-sm text-gray-500 font-medium mt-1 leading-none whitespace-nowrap overflow-hidden text-ellipsis max-w-full">
+                  {subText}
+                </span>
+              )}
+            </div>
+
+            {/* 2. Star Rating */}
+            <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
+              <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-4.5 md:h-4.5 xl:w-5 xl:h-5 2xl:w-5.5 2xl:h-5.5 fill-[#854cbc] text-[#854cbc] flex-shrink-0" />
+              <span className="text-gray-800 font-bold text-xs sm:text-sm md:text-base xl:text-lg 2xl:text-xl leading-none">
+                {listing.seller?.rating ? listing.seller.rating : 'NA'}
+              </span>
+            </div>
+
+            {/* 3. Delivery badge */}
+            <div className="flex items-center flex-shrink-0">
+              <DeliveryTruckBadge
+                text={listing.deliveryText || '3 days'}
+                className="w-[48px] sm:w-[62px] md:w-[70px] xl:w-[78px] 2xl:w-[88px] h-auto text-gray-500 flex-shrink-0"
+              />
+            </div>
+
+            {/* 4. Discount Badge */}
             <div className="flex-shrink-0 min-w-0">
               {discountText ? (
                 <div className="bg-[#854cbc] text-white px-1.5 py-0.5 sm:px-2.5 sm:py-0.5 xl:px-3 xl:py-1 2xl:px-3.5 2xl:py-1 rounded font-bold tracking-wide whitespace-nowrap flex items-center justify-center gap-0.5 sm:gap-1 shadow-sm">
@@ -509,34 +537,6 @@ function ComparisonOffersList({
               ) : (
                 <div className="w-[10px]" />
               )}
-            </div>
-
-            {/* 2. Price & Subtext */}
-            <div className="flex flex-col items-start justify-center min-w-0 text-left">
-              <span className="text-xs sm:text-base md:text-lg xl:text-xl 2xl:text-xl font-medium text-gray-800 leading-none tracking-tight">
-                ₹{Math.round(pricing.finalCustomerPayable).toLocaleString('en-IN')}
-              </span>
-              {subText && (
-                <span className="text-2xs sm:text-xs xl:text-sm 2xl:text-sm text-gray-500 font-medium mt-1 leading-none whitespace-nowrap overflow-hidden text-ellipsis max-w-full">
-                  {subText}
-                </span>
-              )}
-            </div>
-
-            {/* 3. Star Rating */}
-            <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
-              <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-4.5 md:h-4.5 xl:w-5 xl:h-5 2xl:w-5.5 2xl:h-5.5 fill-[#854cbc] text-[#854cbc] flex-shrink-0" />
-              <span className="text-gray-800 font-bold text-xs sm:text-sm md:text-base xl:text-lg 2xl:text-xl leading-none">
-                {listing.seller?.rating ? listing.seller.rating : 'NA'}
-              </span>
-            </div>
-
-            {/* 4. Delivery badge */}
-            <div className="flex items-center flex-shrink-0">
-              <DeliveryTruckBadge
-                text={listing.deliveryText || '3 days'}
-                className="w-[48px] sm:w-[62px] md:w-[70px] xl:w-[78px] 2xl:w-[88px] h-auto text-gray-500 flex-shrink-0"
-              />
             </div>
 
             {/* 5. Actions (Plus / Incremental / Reset) */}
@@ -1247,10 +1247,6 @@ export default function ProductPageClient({ productSlug, initialProduct }: { pro
 
           {/* Accordions */}
           <div className="mt-2">
-            <Accordion
-              title="OFFERS"
-              content={product.offers || 'No offers available at this moment.'}
-            />
             <Accordion
               title="DESCRIPTION"
               content={product.description || 'No description available.'}

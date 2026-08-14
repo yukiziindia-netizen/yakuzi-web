@@ -896,7 +896,7 @@ export default function ProductPageClient({ productSlug, initialProduct }: { pro
 
   if (isLoading) {
     return (
-      <main className="flex min-h-screen flex-col bg-white pb-32">
+      <main className="flex min-h-screen flex-col bg-gray-50 pb-32">
         <Navbar />
         <div className="flex flex-1 items-center justify-center">
           <Loader2 className="h-10 w-10 animate-spin text-[#854cbc]" />
@@ -907,7 +907,7 @@ export default function ProductPageClient({ productSlug, initialProduct }: { pro
 
   if (isError || !product) {
     return (
-      <main className="flex min-h-screen flex-col bg-white pb-32">
+      <main className="flex min-h-screen flex-col bg-gray-50 pb-32">
         <Navbar />
         <div className="flex flex-1 items-center justify-center">
           <div className="text-center text-xl font-bold text-gray-500">Product not found</div>
@@ -1124,7 +1124,7 @@ export default function ProductPageClient({ productSlug, initialProduct }: { pro
   };
 
   return (
-    <main className="min-h-screen bg-white pb-32">
+    <main className="min-h-screen bg-gray-50 pb-32">
       <style
         dangerouslySetInnerHTML={{
           __html: `

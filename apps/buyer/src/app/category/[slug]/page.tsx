@@ -60,10 +60,35 @@ export async function generateMetadata({
 // waiting for the (slow) products query. The grid is still fully
 // server-rendered into the streamed HTML, itemList JSON-LD included, so
 // crawlers see the same markup as before.
-async function CategoryProducts({ categoryId, categoryName }: { categoryId: string; categoryName: string }) {
+async function CategoryProducts({
+  categoryId,
+  categoryName,
+  searchParams,
+}: {
+  categoryId: string;
+  categoryName: string;
+  searchParams?: { [key: string]: string | string[] | undefined };
+}) {
   let initialProducts: any[] = [];
+  // Same filter params the Filters panel writes to the URL on the homepage —
+  // previously never read here, so opening Filters while browsing a category
+  // silently did nothing.
+  const str = (v: string | string[] | undefined) => (typeof v === 'string' ? v : undefined);
   try {
-    const res = await getProducts({ categoryId, limit: 100 });
+    const res = await getProducts({
+      categoryId,
+      limit: 100,
+      sortBy: str(searchParams?.sortBy),
+      sortOrder: str(searchParams?.sortOrder) === 'asc' || str(searchParams?.sortOrder) === 'desc' ? (searchParams?.sortOrder as 'asc' | 'desc') : undefined,
+      minPrice: str(searchParams?.minPrice) ? Number(searchParams?.minPrice) : undefined,
+      maxPrice: str(searchParams?.maxPrice) ? Number(searchParams?.maxPrice) : undefined,
+      isNew: str(searchParams?.isNew) === 'true' ? true : undefined,
+      isYukiziChoice: str(searchParams?.isYukiziChoice) === 'true' ? true : undefined,
+      isBestSelling: str(searchParams?.isBestSelling) === 'true' ? true : undefined,
+      discountRange: str(searchParams?.discountRange) && searchParams?.discountRange !== 'All' ? str(searchParams?.discountRange) : undefined,
+      location: str(searchParams?.location) && searchParams?.location !== 'All' ? str(searchParams?.location) : undefined,
+      manufacturer: str(searchParams?.manufacturer) && searchParams?.manufacturer !== 'All' ? str(searchParams?.manufacturer) : undefined,
+    });
     if (res && res.data && Array.isArray(res.data)) {
       initialProducts = res.data;
     }
@@ -186,7 +211,7 @@ export default async function CategoryPage({
                 </div>
               }
             >
-              <CategoryProducts categoryId={categoryId} categoryName={categoryName} />
+              <CategoryProducts categoryId={categoryId} categoryName={categoryName} searchParams={resolvedSearchParams} />
             </Suspense>
           </div>
         </section>

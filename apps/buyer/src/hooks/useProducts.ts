@@ -37,6 +37,7 @@ export function useProducts(params?: {
   isNew?: boolean;
   isDiscounted?: boolean;
   isBestSelling?: boolean;
+  isYukiziChoice?: boolean;
 }) {
   return useQuery({
     queryKey: ['products', params],

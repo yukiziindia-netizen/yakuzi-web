@@ -12,8 +12,18 @@ import {
 } from "lucide-react";
 import WishlistIcon from "@/components/shared/WishlistIcon";
 import { useCart, useUpdateCartItem, useRemoveCartItem } from "@/hooks/useCart";
+import { useCities, useManufacturers } from "@/hooks/useProducts";
 import { useToast } from "@/components/shared/Toast";
 import { useRouter, useSearchParams } from "next/navigation";
+
+type SortOption = "Relevance" | "Price: Low to High" | "Price: High to Low" | "Newest First";
+
+function sortOptionFromParams(sortBy: string | null, sortOrder: string | null): SortOption {
+  if (sortBy === 'price' && sortOrder === 'asc') return "Price: Low to High";
+  if (sortBy === 'price' && sortOrder === 'desc') return "Price: High to Low";
+  if (sortBy === 'newest') return "Newest First";
+  return "Relevance";
+}
 
 export type SidebarView = "cart" | "wishlist" | "filters" | null;
 
@@ -33,23 +43,35 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
 
   // Filter States
   const [filters, setFilters] = useState({
+    sort: sortOptionFromParams(searchParams.get('sortBy'), searchParams.get('sortOrder')) as SortOption,
     newItems: searchParams.get('isNew') === 'true',
+    yukiziChoice: searchParams.get('isYukiziChoice') === 'true',
     bestSelling: searchParams.get('isBestSelling') === 'true',
     discount: searchParams.get('discountRange') || "All",
     location: searchParams.get('location') || "All",
+    manufacturer: searchParams.get('manufacturer') || "All",
     minPrice: Number(searchParams.get('minPrice') || 0),
     maxPrice: Number(searchParams.get('maxPrice') || 10000),
   });
 
+  const { data: cities } = useCities();
+  const { data: manufacturers } = useManufacturers();
+
   const handleFilterChange = (key: keyof typeof filters, value: any) => {
     const updated = { ...filters, [key]: value };
     setFilters(updated);
-    
+
     const params = new URLSearchParams(searchParams.toString());
+    if (updated.sort === 'Price: Low to High') { params.set('sortBy', 'price'); params.set('sortOrder', 'asc'); }
+    else if (updated.sort === 'Price: High to Low') { params.set('sortBy', 'price'); params.set('sortOrder', 'desc'); }
+    else if (updated.sort === 'Newest First') { params.set('sortBy', 'newest'); params.set('sortOrder', 'desc'); }
+    else { params.delete('sortBy'); params.delete('sortOrder'); }
     if (updated.newItems) params.set('isNew', 'true'); else params.delete('isNew');
+    if (updated.yukiziChoice) params.set('isYukiziChoice', 'true'); else params.delete('isYukiziChoice');
     if (updated.bestSelling) params.set('isBestSelling', 'true'); else params.delete('isBestSelling');
     if (updated.discount && updated.discount !== 'All') params.set('discountRange', updated.discount); else params.delete('discountRange');
     if (updated.location && updated.location !== 'All') params.set('location', updated.location); else params.delete('location');
+    if (updated.manufacturer && updated.manufacturer !== 'All') params.set('manufacturer', updated.manufacturer); else params.delete('manufacturer');
     params.set('minPrice', String(updated.minPrice));
     params.set('maxPrice', String(updated.maxPrice));
     router.push(`?${params.toString()}`, { scroll: false });
@@ -57,9 +79,11 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
 
   // Accordion States
   const [openSections, setOpenSections] = useState({
+    sort: true,
     price: true,
     discount: true,
     location: true,
+    manufacturer: true,
   });
 
   const toggleSection = (section: keyof typeof openSections) => {
@@ -249,9 +273,46 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
         </div>
 
         <div className="flex-1 overflow-y-auto scrollbar-hide pb-24 pr-4">
+          {/* Sort By */}
+          <div className="space-y-4 mb-6">
+            <button
+              onClick={() => toggleSection("sort")}
+              className="flex items-center justify-between w-full font-bold text-gray-800 text-base"
+            >
+              Sort By
+              {openSections.sort ? <ChevronUp className="w-4 h-4 text-gray-500" strokeWidth={3} /> : <ChevronDown className="w-4 h-4 text-gray-500" strokeWidth={3} />}
+            </button>
+            <AnimatePresence>
+              {openSections.sort && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="space-y-3 pt-1">
+                    {(["Relevance", "Price: Low to High", "Price: High to Low", "Newest First"] as SortOption[]).map(opt => (
+                      <label key={opt} className="flex items-center gap-3 cursor-pointer group" onClick={(e) => {
+                        e.preventDefault();
+                        handleFilterChange('sort', opt);
+                      }}>
+                        <div className={`w-[18px] h-[18px] rounded-full border-2 flex items-center justify-center transition-colors ${filters.sort === opt ? "border-[#854cbc]" : "border-gray-200 group-hover:border-[#854cbc]/50"}`}>
+                           {filters.sort === opt && <div className="w-2 h-2 rounded-full bg-[#854cbc]" />}
+                        </div>
+                        <span className="text-base text-gray-700 font-medium">{opt}</span>
+                      </label>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          <div className="border-t border-gray-200 mb-4" />
+
           {/* Price Range */}
           <div className="space-y-4 mb-6">
-            <button 
+            <button
               onClick={() => toggleSection("price")}
               className="flex items-center justify-between w-full font-bold text-gray-800 text-base"
             >
@@ -311,6 +372,12 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                 {filters.newItems && <Check className="w-3 h-3" strokeWidth={3} />}
               </div>
               <span className="text-gray-700 text-base font-medium">New Items</span>
+            </label>
+            <label className="flex items-center gap-3 cursor-pointer group" onClick={() => handleFilterChange('yukiziChoice', !filters.yukiziChoice)}>
+              <div className={`w-[18px] h-[18px] rounded-[4px] border flex items-center justify-center transition-colors ${filters.yukiziChoice ? "bg-[#854cbc] border-[#854cbc] text-white" : "border-gray-300 bg-white"}`}>
+                {filters.yukiziChoice && <Check className="w-3 h-3" strokeWidth={3} />}
+              </div>
+              <span className="text-gray-700 text-base font-medium">Yukizi Choice</span>
             </label>
             <label className="flex items-center gap-3 cursor-pointer group" onClick={() => handleFilterChange('bestSelling', !filters.bestSelling)}>
               <div className={`w-[18px] h-[18px] rounded-[4px] border flex items-center justify-center transition-colors ${filters.bestSelling ? "bg-[#854cbc] border-[#854cbc] text-white" : "border-gray-300 bg-white"}`}>
@@ -377,7 +444,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                   className="overflow-hidden"
                 >
                   <div className="space-y-3 pt-1">
-                    {["All", "Monteria", "Marana", "Pownhon"].map(opt => (
+                    {["All", ...(cities ?? [])].map(opt => (
                       <label key={opt} className="flex items-center gap-3 cursor-pointer group" onClick={(e) => {
                         e.preventDefault();
                         handleFilterChange('location', filters.location === opt && opt !== "All" ? "All" : opt);
@@ -395,6 +462,47 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
           </div>
 
           <div className="border-t border-gray-200 mb-4" />
+
+          {/* Manufacturer / Publisher Accordion */}
+          {manufacturers && manufacturers.length > 0 && (
+            <>
+              <div className="space-y-4 mb-6">
+                <button
+                  onClick={() => toggleSection("manufacturer")}
+                  className="flex items-center justify-between w-full font-bold text-gray-800 text-base"
+                >
+                  Manufacturer/Publisher
+                  {openSections.manufacturer ? <ChevronUp className="w-4 h-4 text-gray-500" strokeWidth={3} /> : <ChevronDown className="w-4 h-4 text-gray-500" strokeWidth={3} />}
+                </button>
+                <AnimatePresence>
+                  {openSections.manufacturer && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="space-y-3 pt-1">
+                        {["All", ...manufacturers.map(m => m.name)].map(opt => (
+                          <label key={opt} className="flex items-center gap-3 cursor-pointer group" onClick={(e) => {
+                            e.preventDefault();
+                            handleFilterChange('manufacturer', filters.manufacturer === opt && opt !== "All" ? "All" : opt);
+                          }}>
+                            <div className={`w-[18px] h-[18px] rounded-full border-2 flex items-center justify-center transition-colors ${filters.manufacturer === opt ? "border-[#854cbc]" : "border-gray-200 group-hover:border-[#854cbc]/50"}`}>
+                               {filters.manufacturer === opt && <div className="w-2 h-2 rounded-full bg-[#854cbc]" />}
+                            </div>
+                            <span className="text-base text-gray-700 font-medium">{opt}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              <div className="border-t border-gray-200 mb-4" />
+            </>
+          )}
 
         </div>
       </div>

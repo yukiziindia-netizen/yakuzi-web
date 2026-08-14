@@ -201,7 +201,7 @@ function ProductBannerCard({
               alt=""
               width={72}
               height={72}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
           </button>
         ))}
@@ -313,7 +313,7 @@ function ProductBannerCard({
                       alt=""
                       width={56}
                       height={56}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                     />
                   </button>
                 ))}

@@ -979,7 +979,10 @@ export default function ProductPageClient({ productSlug, initialProduct }: { pro
 
   const variantImages = (rawVariantImages || []).map(unwrapImage).filter(Boolean);
   if (variantImages.length > 0) {
-    displayImages = [...variantImages, ...images.filter((img: string) => !variantImages.includes(img))];
+    // A selected variant shows only ITS OWN photos, not the full product
+    // gallery — mixing in every other variant's images made the thumbnail
+    // rail show pictures that didn't match what was actually selected.
+    displayImages = variantImages;
   }
 
   // A product with one photo used to have it repeated until there were three,

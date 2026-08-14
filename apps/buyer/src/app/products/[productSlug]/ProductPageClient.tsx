@@ -26,7 +26,6 @@ import {
   X,
 } from 'lucide-react';
 import Image from 'next/image';
-import { DeliveryTruckBadge } from '@/components/shared/DeliveryTruckBadge';
 import { trackProductView } from '@/lib/analytics/tracker';
 import Link from 'next/link';
 import { useProductById, useProducts, useWaitlist, useAddToWaitlist, useRemoveFromWaitlist } from '@/hooks/useProducts';
@@ -509,15 +508,7 @@ function ComparisonOffersList({
               </span>
             </div>
 
-            {/* 3. Delivery badge */}
-            <div className="flex items-center flex-shrink-0">
-              <DeliveryTruckBadge
-                text={listing.deliveryText || '3 days'}
-                className="w-[48px] sm:w-[62px] md:w-[70px] xl:w-[78px] 2xl:w-[88px] h-auto text-gray-500 flex-shrink-0"
-              />
-            </div>
-
-            {/* 4. Discount Badge */}
+            {/* 3. Discount Badge */}
             <div className="flex-shrink-0 min-w-0">
               {discountText ? (
                 <div className="bg-[#854cbc] text-white px-1.5 py-0.5 sm:px-2.5 sm:py-0.5 xl:px-3 xl:py-1 2xl:px-3.5 2xl:py-1 rounded font-bold tracking-wide whitespace-nowrap flex items-center justify-center gap-0.5 sm:gap-1 shadow-sm">
@@ -539,7 +530,7 @@ function ComparisonOffersList({
               )}
             </div>
 
-            {/* 5. Actions (Plus / Incremental / Reset) */}
+            {/* 4. Actions (Plus / Incremental / Reset) */}
             <div className="flex items-center justify-end flex-shrink-0">
               {inStock ? (
                 itemQty === 0 ? (
@@ -1468,13 +1459,8 @@ export default function ProductPageClient({ productSlug, initialProduct }: { pro
                   </div>
                 </div>
 
-                {/* Right: Truck, Offer & Rating — the offer sits after the
-                    truck icon (Rishi, 11 Aug), not under the price. */}
+                {/* Right: Offer & Rating */}
                 <div className="flex items-center gap-4 sm:gap-5 xl:gap-6 pb-0.5">
-                  <DeliveryTruckBadge
-                    text={product.deliveryText || "3 days"}
-                    className="w-[85px] sm:w-[95px] xl:w-[110px] 2xl:w-[125px] h-auto text-gray-500 flex-shrink-0"
-                  />
                   {activeDiscountPercent && activeDiscountPercent > 0 ? (
                     <span className="text-sm sm:text-base xl:text-lg 2xl:text-xl font-bold text-gray-800 leading-none whitespace-nowrap">
                       {activeDiscountPercent}% off

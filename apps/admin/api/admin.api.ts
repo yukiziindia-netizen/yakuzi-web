@@ -115,8 +115,8 @@ export async function updateAdminOrderStatus(orderId: string, status: string) {
   return data.data;
 }
 
-export async function updateAdminShippingDocs(orderId: string, payload: { 
-  adminShippingLabelUrl?: string; 
+export async function updateAdminShippingDocs(orderId: string, payload: {
+  adminShippingLabelUrl?: string;
   adminInvoiceUrl?: string;
   manifestUrl?: string;
   invoiceUrl?: string;
@@ -124,6 +124,11 @@ export async function updateAdminShippingDocs(orderId: string, payload: {
   sellerId?: string;
 }) {
   const { data } = await apiClient.patch<{ data: any }>(`/orders/${orderId}/admin-shipping-docs`, payload);
+  return data.data;
+}
+
+export async function getOrderTracking(orderId: string) {
+  const { data } = await apiClient.get<{ data: any }>(`/orders/${orderId}/tracking`);
   return data.data;
 }
 

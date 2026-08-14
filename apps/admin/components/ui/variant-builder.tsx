@@ -255,9 +255,17 @@ const ImageSelectionModal = ({
           >
             Cancel
           </button>
-          <button 
+          <button
             onClick={() => {
-              onSelect(selectedUrls);
+              // selectedUrls accumulates in click order, which is unrelated to how
+              // the images are arranged in the product's Media grid. Re-sort to
+              // that grid order so the variant's image order (and its derived
+              // cover image, urls[0]) always matches what's shown there and on
+              // the buyer PDP, regardless of the order the admin clicked in.
+              const orderedUrls = productMedia
+                .map(m => m.url)
+                .filter(url => selectedUrls.includes(url));
+              onSelect(orderedUrls);
               onClose();
             }}
             disabled={selectedUrls.length === 0}

@@ -44,6 +44,10 @@ import WishlistIcon from '@/components/shared/WishlistIcon';
 import { useScrollLock } from '@/hooks/useScrollLock';
 import { renderBuyerOfferBadge, GridProductCard } from '@/components/landing/ProductCarousel';
 
+const SHIPPING_RETURN_INFO =
+  'Shipping: Orders are shipped within 3–7 business days.\n\n' +
+  'Returns/Refunds: Returns or refunds are accepted only if the product delivered is wrong or damaged. A ticket must be raised within 48 hours of delivery, along with a clear unboxing video as proof.';
+
 function Accordion({
   title,
   content,
@@ -75,7 +79,7 @@ function Accordion({
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden"
           >
-            <div className="purple-scroll relative max-h-[70px] overflow-y-auto pr-4 pt-2 text-xs sm:text-sm xl:text-sm 2xl:text-base font-normal leading-relaxed text-gray-500">
+            <div className="purple-scroll relative max-h-[70px] overflow-y-auto whitespace-pre-line pr-4 pt-2 text-xs sm:text-sm xl:text-sm 2xl:text-base font-normal leading-relaxed text-gray-500">
               {content}
             </div>
           </motion.div>
@@ -1253,7 +1257,7 @@ export default function ProductPageClient({ productSlug, initialProduct }: { pro
               title="PRODUCT SPECIFICATIONS"
               content={product.specifications || 'No specifications available for this product.'}
             />
-            <Accordion title="SHIPPING & RETURN INFO" />
+            <Accordion title="SHIPPING & RETURN INFO" content={SHIPPING_RETURN_INFO} />
           </div>
 
           {/* Related Products */}
@@ -1424,7 +1428,7 @@ export default function ProductPageClient({ productSlug, initialProduct }: { pro
                   title="PRODUCT SPECIFICATIONS"
                   content={product.specifications || 'No specifications available for this product.'}
                 />
-                <Accordion title="SHIPPING & RETURN INFO" />
+                <Accordion title="SHIPPING & RETURN INFO" content={SHIPPING_RETURN_INFO} />
               </div>
 
               {/* Related Products - moved inside left column to avoid XL height gaps */}

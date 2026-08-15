@@ -513,22 +513,27 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
     <AnimatePresence>
       {isOpen && (
         <>
+          {/* Sits below the floating nav bar's z-[90] so the bar stays
+              visible/usable over the full-screen sheet, same trick the
+              search panel already uses. */}
           <motion.div
             key="sidebar-backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/50 z-[100]"
+            className="fixed inset-0 bg-black/50 z-[85]"
           />
-          
+
+          {/* Full-screen sheet, opens bottom-up (matches the search panel's
+              interaction model, not the old right-side drawer). */}
           <motion.div
             key="sidebar-panel"
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed top-0 right-0 bottom-0 w-[92%] sm:w-[500px] md:w-[520px] max-w-full bg-white z-[110] shadow-2xl rounded-l-3xl flex flex-col overflow-hidden"
+            className="fixed inset-0 bg-white z-[86] shadow-2xl flex flex-col overflow-hidden"
           >
             {/* Hidden Close Button */}
             <button onClick={onClose} className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-900 bg-white/80 rounded-full z-[80] transition-colors">

@@ -482,6 +482,50 @@ export default function Navbar({
 
   useScrollLock(isAnyDrawerOpen);
 
+  // Cart/Wishlist/Filters/Menu are now exclusive full-screen-or-near-full-screen
+  // panels sharing the same screen real estate, so opening one closes the
+  // others — and clicking an already-open one's icon closes it, matching how
+  // the search panel already behaves.
+  const toggleWishlist = () => {
+    const next = !isWishlistOpen;
+    setIsWishlistOpen(next);
+    if (next) {
+      setIsCartOpen(false);
+      setSidebarView(null);
+      setIsMobileMenuOpen(false);
+    }
+  };
+
+  const toggleCart = () => {
+    const next = !isCartOpen;
+    setIsCartOpen(next);
+    if (next) {
+      setIsWishlistOpen(false);
+      setSidebarView(null);
+      setIsMobileMenuOpen(false);
+    }
+  };
+
+  const toggleFilters = () => {
+    const next: SidebarView = sidebarView === "filters" ? null : "filters";
+    setSidebarView(next);
+    if (next) {
+      setIsCartOpen(false);
+      setIsWishlistOpen(false);
+      setIsMobileMenuOpen(false);
+    }
+  };
+
+  const toggleMenu = () => {
+    const next = !isMobileMenuOpen;
+    setIsMobileMenuOpen(next);
+    if (next) {
+      setIsCartOpen(false);
+      setIsWishlistOpen(false);
+      setSidebarView(null);
+    }
+  };
+
   const handleLogout = () => {
     localCart.clear();
     queryClient.invalidateQueries({
@@ -697,8 +741,8 @@ export default function Navbar({
           {/* Right Segment: Cart, Wishlist, Filter, Menu */}
           <div className="flex items-center justify-between bg-white sm:bg-[#562996] rounded-full sm:rounded-xl px-3.5 xs:px-4 sm:px-8 md:px-12 lg:px-16 h-9 sm:h-[60px] md:h-[64px] shadow-[0_6px_20px_rgba(0,0,0,0.08)] sm:shadow-2xl text-[#562996] sm:text-white sm:shrink-0 flex-[0.92] sm:flex-1 max-w-[480px] z-10 overflow-hidden min-w-0">
 
-            <button 
-              onClick={() => setIsWishlistOpen(true)} 
+            <button
+              onClick={toggleWishlist}
               className={`relative transition-all duration-200 hover:scale-110 flex items-center justify-center ${
                 isWishlistOpen
                   ? "text-[#562996] sm:text-white scale-110 opacity-100"
@@ -719,8 +763,8 @@ export default function Navbar({
               )}
             </button>
 
-            <button 
-              onClick={() => setIsCartOpen(true)} 
+            <button
+              onClick={toggleCart}
               className={`relative transition-all duration-200 hover:scale-110 ${
                 isCartOpen
                   ? "text-[#562996] sm:text-white scale-110 opacity-100"
@@ -755,11 +799,11 @@ export default function Navbar({
               />
             </button>
 
-            <button 
+            <button
               onClick={() => {
-                setSidebarView("filters");
+                toggleFilters();
                 onFilterClick?.();
-              }} 
+              }}
               className={`transition-all duration-200 hover:scale-110 ${
                 sidebarView === "filters"
                   ? "text-[#562996] sm:text-white scale-110 opacity-100"
@@ -774,8 +818,8 @@ export default function Navbar({
               />
             </button>
 
-            <button 
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            <button
+              onClick={toggleMenu}
               className={`transition-all duration-200 hover:scale-110 ${
                 isMobileMenuOpen
                   ? "text-[#562996] sm:text-white scale-110 opacity-100"
@@ -1086,7 +1130,9 @@ export default function Navbar({
 
 
 
-      {/* Menu Drawer (Now active on Mobile and Desktop) */}
+      {/* Menu Drawer (Now active on Mobile and Desktop) — full-screen,
+          bottom-up, sits below the floating nav bar's z-[90] so the bar
+          stays visible/usable over it, same trick the search panel uses. */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
@@ -1094,18 +1140,18 @@ export default function Navbar({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-[#6342B4]/35 z-[100] backdrop-blur-none"
+            className="fixed inset-0 bg-[#6342B4]/35 z-[85] backdrop-blur-none"
             onClick={() => setIsMobileMenuOpen(false)}
           />
         )}
         {isMobileMenuOpen && (
           <motion.div
             key="mobile-menu-panel"
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed top-0 right-0 bottom-0 w-[92%] sm:w-[500px] md:w-[520px] max-w-full bg-white z-[110] shadow-2xl rounded-l-3xl flex flex-col p-6 sm:p-8"
+            className="fixed inset-0 bg-white z-[86] shadow-2xl flex flex-col p-6 sm:p-8"
           >
             {/* Hidden Close Button */}
             <button onClick={() => setIsMobileMenuOpen(false)} className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-900 bg-white/80 rounded-full z-[80] transition-colors">

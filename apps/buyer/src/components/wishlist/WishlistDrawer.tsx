@@ -60,24 +60,27 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
+          {/* Backdrop — sits below the floating nav bar's z-[90] so the bar
+              stays visible/usable over the full-screen sheet, same trick the
+              search panel already uses. */}
           <motion.div
             key="wishlist-backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/50 z-[100]"
+            className="fixed inset-0 bg-black/50 z-[85]"
           />
 
-          {/* Drawer Panel */}
+          {/* Full-screen sheet, opens bottom-up (matches the search panel's
+              interaction model, not the old right-side drawer). */}
           <motion.div
             key="wishlist-panel"
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed top-0 right-0 h-full w-[95%] sm:w-[580px] md:w-[620px] max-w-full bg-white shadow-2xl z-[110] flex flex-col overflow-hidden rounded-l-3xl"
+            className="fixed inset-0 bg-white shadow-2xl z-[86] flex flex-col overflow-hidden"
           >
             {/* Custom Scrollbar Styles */}
             <style dangerouslySetInnerHTML={{ __html: `

@@ -191,7 +191,7 @@ export function useSellerOrder(orderId: string) {
 }
 
 export function useSellerOrderInvoices(orderId: string) {
-  return useQuery({ queryKey: ["seller", "order-invoices", orderId], queryFn: () => getSellerOrderInvoices(orderId), enabled: !!orderId, retry: 1 });
+  return useQuery({ queryKey: ["seller", "order-invoices", orderId], queryFn: () => getSellerOrderInvoices(orderId), enabled: !!orderId, retry: 1, staleTime: Infinity });
 }
 
 export function useAcceptSellerOrder() {

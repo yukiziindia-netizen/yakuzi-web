@@ -12,6 +12,7 @@ import {
   getSellerFullProfile, getProductRequests, createProductRequest, getSellerAnalytics,
   searchSuggestions, getCategoriesWithSubs,
   verifyGstOrPan, uploadKycDocument, uploadDrugLicense,
+  getSellerOrderInvoices,
 } from "@/api/seller.api";
 import type { ProductPayload } from "@yukizi/utils";
 import { useSellerAuth } from "@/store";
@@ -187,6 +188,10 @@ export function useAddTicketMessage() {
 // ─── Order Detail ─────────────────────────────────────
 export function useSellerOrder(orderId: string) {
   return useQuery({ queryKey: ["seller", "order", orderId], queryFn: () => getSellerOrderById(orderId), enabled: !!orderId, staleTime: 10_000, refetchInterval: 10000, retry: 1 });
+}
+
+export function useSellerOrderInvoices(orderId: string) {
+  return useQuery({ queryKey: ["seller", "order-invoices", orderId], queryFn: () => getSellerOrderInvoices(orderId), enabled: !!orderId, retry: 1 });
 }
 
 export function useAcceptSellerOrder() {

@@ -141,6 +141,58 @@ export async function getSellerOrderById(orderId: string) {
   return raw.order || raw.data || raw;
 }
 
+export interface SellerInvoiceLine {
+  serial: number;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  taxableValue: number;
+  gstRate: number;
+  gstAmount: number;
+  totalAmount: number;
+}
+
+export interface SellerInvoiceTaxLine {
+  rate: number;
+  componentRate: number;
+  taxableValue: number;
+  cgst: number;
+  sgst: number;
+  igst: number;
+}
+
+export interface SellerInvoiceParty {
+  name: string;
+  gstin: string | null;
+  address: string;
+  phone: string | null;
+  email: string | null;
+}
+
+export interface SellerOrderInvoice {
+  invoiceNumber: string;
+  invoiceDate: string;
+  orderReference: string;
+  seller: SellerInvoiceParty;
+  buyer: SellerInvoiceParty;
+  placeOfSupply: string;
+  isIntraState: boolean;
+  lines: SellerInvoiceLine[];
+  taxBreakdown: SellerInvoiceTaxLine[];
+  subtotal: number;
+  cgst: number;
+  sgst: number;
+  igst: number;
+  totalTax: number;
+  totalAmount: number;
+  amountInWords: string;
+}
+
+export async function getSellerOrderInvoices(orderId: string): Promise<SellerOrderInvoice[]> {
+  const { data } = await apiClient.get<any>(`/orders/${orderId}/invoices`);
+  return data.data ?? data;
+}
+
 export async function acceptSellerOrder(orderId: string) {
   const { data } = await apiClient.patch<any>(`/orders/${orderId}/status`, { status: "ACCEPTED" });
   return data.data ?? data.order ?? data;

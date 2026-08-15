@@ -599,12 +599,13 @@ export default function Navbar({
                     <Image src="/YukiziLogo.png" alt="YUKiZi" width={70} height={24} className="w-[38px] xs:w-[44px] object-contain" />
                   </Link>
 
-                  <Link
-                    href="/login"
+                  <button
+                    type="button"
+                    onClick={onLoginClick || (() => window.dispatchEvent(new CustomEvent('open-login')))}
                     className="h-[26px] flex items-center justify-center bg-[#854cbc] px-2 xs:px-2.5 rounded-[10px] shrink-0 cursor-pointer"
                   >
                     <span className="text-[10px] font-medium text-white whitespace-nowrap">Start Now</span>
-                  </Link>
+                  </button>
 
                   <button
                     onClick={() => {

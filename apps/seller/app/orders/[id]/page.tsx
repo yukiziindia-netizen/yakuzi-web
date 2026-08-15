@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   ArrowLeft, Package,
@@ -490,6 +491,19 @@ export default function OrderDetailPage() {
                   )}
                 </div>
               </div>
+            </div>
+
+            <div className="space-y-3 pt-6 border-t border-border/50">
+              <h3 className="text-sm font-medium text-foreground">Tax Invoice</h3>
+              <p className="text-xs text-muted-foreground">
+                The GST tax invoice generated for the customer on this order — separate from the shipping documents above.
+              </p>
+              <Link
+                href={`/orders/${id}/invoice`}
+                className="text-xs font-semibold text-primary underline underline-offset-2"
+              >
+                View / download tax invoice
+              </Link>
             </div>
 
             {!mainOrder.isShippingLocked && (

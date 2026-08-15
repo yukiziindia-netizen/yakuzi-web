@@ -128,14 +128,15 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
             className="fixed inset-0 bg-black/50 z-[85]"
           />
 
-          {/* Drawer Panel */}
+          {/* Full-screen sheet, opens bottom-up (matches the search panel's
+              interaction model, not the old right-side drawer). */}
           <motion.div
             key="cart-drawer-panel"
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed top-0 right-0 h-full w-[95%] sm:w-[580px] md:w-[620px] max-w-full bg-white shadow-2xl z-[86] flex flex-col overflow-hidden rounded-l-3xl"
+            className="fixed inset-0 bg-white shadow-2xl z-[86] flex flex-col overflow-hidden"
           >
             {/* Custom Scrollbar Styles */}
             <style dangerouslySetInnerHTML={{ __html: `
@@ -399,8 +400,10 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
               )}
             </div>
 
-            {/* Footer */}
-            <div className="px-5 pb-6 pt-3 border-t border-gray-100">
+            {/* Footer — pb-24 (not pb-6) so Order Now clears the floating
+                nav bar's z-[90] footprint, same clearance WishlistDrawer's
+                scroll area already uses for the same reason. */}
+            <div className="px-5 pb-24 pt-3 border-t border-gray-100">
               {/* Subtotal row */}
               <div className="flex items-center justify-between mb-2">
                 <span className="text-lg font-semibold text-gray-400 uppercase tracking-widest">Subtotal</span>

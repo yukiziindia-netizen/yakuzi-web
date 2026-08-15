@@ -6,13 +6,8 @@ export const revalidate = 3600; // rebuild at most hourly
 
 const STATIC_PATHS = ['/', '/blogs', '/about', '/contact', '/privacy', '/terms', '/returns', '/shipping', '/cookie-policy'];
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const entries: MetadataRoute.Sitemap = STATIC_PATHS.map((p) => ({
-    url: absoluteUrl(p),
-    changeFrequency: p === '/' ? 'daily' : 'weekly',
-    priority: p === '/' ? 1 : 0.5,
-  }));
-
+async function fetchProductEntries(): Promise<MetadataRoute.Sitemap> {
+  const entries: MetadataRoute.Sitemap = [];
   try {
     // catalog is small (~44); paginate defensively up to 5000
     let page = 1;
@@ -33,7 +28,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   } catch {
     /* fail-open: ship the static entries rather than a 500 sitemap */
   }
+  return entries;
+}
 
+async function fetchCategoryEntries(): Promise<MetadataRoute.Sitemap> {
+  const entries: MetadataRoute.Sitemap = [];
   try {
     // getCategories() returns Category[] directly, not wrapped in { data }.
     const cats = await getCategories();
@@ -43,7 +42,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   } catch {
     /* fail-open */
   }
+  return entries;
+}
 
+async function fetchBlogEntries(): Promise<MetadataRoute.Sitemap> {
+  const entries: MetadataRoute.Sitemap = [];
   try {
     const blogs = await getBlogs({ limit: 100, status: 'PUBLISHED' });
     for (const b of blogs.data) {
@@ -58,6 +61,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   } catch {
     /* fail-open */
   }
+  return entries;
+}
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const entries: MetadataRoute.Sitemap = STATIC_PATHS.map((p) => ({
+    url: absoluteUrl(p),
+    changeFrequency: p === '/' ? 'daily' : 'weekly',
+    priority: p === '/' ? 1 : 0.5,
+  }));
+
+  // Run independently of each other so one slow/timed-out call doesn't push
+  // the others past Vercel's 60s static-generation budget — previously these
+  // were awaited sequentially, so worst case (3 x 30s axios timeout) could
+  // exceed the limit on its own and fail the whole build (see PR #129/#130
+  // build failures: "Static page generation for /sitemap.xml is still
+  // timing out after 3 attempts").
+  const [products, categories, blogs] = await Promise.all([
+    fetchProductEntries(),
+    fetchCategoryEntries(),
+    fetchBlogEntries(),
+  ]);
+  entries.push(...products, ...categories, ...blogs);
 
   return entries;
 }

@@ -122,10 +122,22 @@ export default function Footer() {
             </div>
             <ul className="flex flex-col gap-2 text-sm font-semibold">
               <li>
-                <Link href="/login" className="hover:text-white transition-colors">Sign Up</Link>
+                <button
+                  type="button"
+                  onClick={() => window.dispatchEvent(new CustomEvent('open-login'))}
+                  className="hover:text-white transition-colors"
+                >
+                  Sign Up
+                </button>
               </li>
               <li>
-                <Link href="/login" className="hover:text-white transition-colors">Login</Link>
+                <button
+                  type="button"
+                  onClick={() => window.dispatchEvent(new CustomEvent('open-login'))}
+                  className="hover:text-white transition-colors"
+                >
+                  Login
+                </button>
               </li>
               <li>
                 <Link href="/" className="hover:text-white transition-colors">Browse</Link>

@@ -205,13 +205,13 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
 
   return (
     <div
-      className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 p-4 sm:bg-white sm:p-0"
+      className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 p-4"
       onClick={() => { if (!isSignupMode) onClose(); }}
     >
     <div
       role="dialog"
       onClick={(e) => e.stopPropagation()}
-      className="relative w-full max-w-sm max-h-[90vh] overflow-y-auto overflow-x-hidden rounded-[28px] bg-white px-6 py-10 shadow-2xl font-sans select-none sm:h-full sm:w-full sm:max-w-none sm:max-h-none sm:flex sm:flex-col sm:items-center sm:justify-center sm:rounded-none sm:px-6 sm:py-12 sm:shadow-none"
+      className="relative w-full max-w-sm max-h-[90vh] overflow-y-auto overflow-x-hidden rounded-[28px] bg-white px-6 py-10 shadow-2xl font-sans select-none"
     >
       <style dangerouslySetInnerHTML={{__html: `
         .custom-scrollbar::-webkit-scrollbar {
@@ -233,7 +233,7 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
 
       {/* Close Button */}
       {!isSignupMode && (
-        <button onClick={() => onClose()} className="absolute top-4 right-4 sm:fixed sm:top-6 sm:right-6 p-2 text-[#64748b] hover:text-[#593696] bg-[#ebe6f5] hover:bg-[#d1c2eb] rounded-full z-[150] shadow-md transition-all">
+        <button onClick={() => onClose()} className="absolute top-4 right-4 p-2 text-[#64748b] hover:text-[#593696] bg-[#ebe6f5] hover:bg-[#d1c2eb] rounded-full z-[150] shadow-md transition-all">
           <X size={24} strokeWidth={2.5} />
         </button>
       )}
@@ -249,7 +249,7 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
             else if (signupStep === 2) setSignupStep(1);
             else setIsSignupMode(false);
           }} 
-          className="absolute top-4 left-4 sm:fixed sm:top-6 sm:left-6 p-2 text-[#593696] hover:text-[#3d236b] z-[150] transition-colors"
+          className="absolute top-4 left-4 p-2 text-[#593696] hover:text-[#3d236b] z-[150] transition-colors"
         >
           <Undo2 size={32} strokeWidth={2.5} />
         </button>

@@ -29,7 +29,11 @@ import {
 // Combines a Collection/Sub-collection into one picker value: "category:<id>"
 // or "subcategory:<id>" — split back into categoryId/subCategoryId on submit.
 function parseSource(source: string): { categoryId?: string; subCategoryId?: string } {
-  const [kind, id] = source.split(":");
+  // Split on the first ":" only, not on every ":" — a naive split(":") would
+  // silently truncate an id that itself contained a colon.
+  const sep = source.indexOf(":");
+  const kind = source.slice(0, sep);
+  const id = source.slice(sep + 1);
   if (kind === "subcategory") return { subCategoryId: id };
   return { categoryId: id };
 }
@@ -60,7 +64,7 @@ function SortableRow({ section, disabled, children }: { section: any; disabled: 
   };
   return (
     <tr ref={setNodeRef} style={style} className={`hover:bg-accent/30 transition-colors ${isDragging ? "opacity-50 bg-accent/20" : ""}`}>
-      <td className={`px-3 py-4 text-muted-foreground ${disabled ? "cursor-not-allowed opacity-40" : "cursor-grab active:cursor-grabbing"}`} {...attributes} {...listeners}>
+      <td className={`px-3 py-4 text-muted-foreground ${disabled ? "cursor-not-allowed opacity-40" : "cursor-grab active:cursor-grabbing"}`} aria-label="Reorder" {...attributes} {...listeners}>
         <GripVertical className="h-4 w-4" />
       </td>
       {children}
@@ -148,6 +152,11 @@ export default function HomepageSectionsPage() {
   );
 
   const handleDragEnd = (event: DragEndEvent) => {
+    // Belt-and-suspenders alongside `disabled={reorderSections.isPending}` on
+    // each row: that prop only takes effect on the next render, so this stops
+    // a drag that started and ended within that same narrow window from
+    // firing a second overlapping reorder request.
+    if (reorderSections.isPending) return;
     const { active, over } = event;
     if (!over || active.id === over.id) return;
     const oldIndex = sections.findIndex((s) => s.id === active.id);

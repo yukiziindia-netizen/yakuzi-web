@@ -103,6 +103,9 @@ export default function AdminProductsPage() {
             <h1 className="font-semibold text-2xl text-foreground">Product Management</h1>
             <p className="text-sm text-muted-foreground mt-0.5">{filtered.length} unique products shown · {filtered.filter((p: any) => p.isActive).length} active</p>
           </div>
+          <Button onClick={() => router.push("/products/add-for-seller")} leftIcon={<Plus className="h-4 w-4" />}>
+            Add for Seller
+          </Button>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">

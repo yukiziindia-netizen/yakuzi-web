@@ -3,10 +3,11 @@ import { Loader2 } from 'lucide-react';
 import HomeNavbar from '@/components/landing/HomeNavbar';
 import HeroSection from '@/components/landing/HeroSection';
 import ProductCarousel from '@/components/landing/ProductCarousel';
+import CategoryScrollRow from '@/components/landing/CategoryScrollRow';
 import ComingSoon from '@/components/landing/ComingSoon';
 import dynamicComponent from 'next/dynamic';
 const Footer = dynamicComponent(() => import('@/components/landing/Footer'), { ssr: false });
-import { getProducts, getComingSoonStatus, getBanners } from '@yukizi/api-client';
+import { getProducts, getComingSoonStatus, getBanners, getHomepageSections, type HomepageSection } from '@yukizi/api-client';
 import type { Metadata } from 'next';
 import JsonLd from '@/components/seo/JsonLd';
 import { organizationSchema, webSiteSchema } from '@/lib/seo/schema';
@@ -20,6 +21,23 @@ export const dynamic = 'force-dynamic';
 export async function generateMetadata(): Promise<Metadata> {
   const derived: Metadata = { alternates: { canonical: absoluteUrl('/') } };
   return applySeoOverride(derived, await fetchSeoOverride('HOMEPAGE', '/'));
+}
+
+// The curated category rows are a "browse everything" landing-page feature —
+// they don't make sense once the homepage is being used as a search/filter
+// results view instead. Same param list CarouselSection already reads below.
+function hasSearchOrFilter(searchParams: any): boolean {
+  return !!(
+    searchParams?.search ||
+    searchParams?.isNew === 'true' ||
+    searchParams?.isYukiziChoice === 'true' ||
+    searchParams?.isBestSelling === 'true' ||
+    searchParams?.minPrice ||
+    searchParams?.maxPrice ||
+    (searchParams?.discountRange && searchParams.discountRange !== 'All') ||
+    (searchParams?.location && searchParams.location !== 'All') ||
+    (searchParams?.manufacturer && searchParams.manufacturer !== 'All')
+  );
 }
 
 // The product grid streams in after the shell: the (slow) products query no
@@ -57,18 +75,23 @@ export default async function HomePage({
 }: {
   searchParams: any;
 }) {
-  // One round trip instead of two: the coming-soon gate and the hero banners
-  // are independent, so they are fetched together. If the gate closes the
-  // page, the banner response is simply unused.
+  const showCuratedSections = !hasSearchOrFilter(searchParams);
+
+  // One round trip instead of two: the coming-soon gate, the hero banners,
+  // and (when relevant) the homepage sections are all independent, so they
+  // are fetched together. If the gate closes the page, the rest is unused.
   let isComingSoon = true;
   let initialBanners: any[] | undefined;
+  let sections: HomepageSection[] = [];
   try {
-    const [comingSoon, banners] = await Promise.all([
+    const [comingSoon, banners, homepageSections] = await Promise.all([
       getComingSoonStatus(),
       getBanners().catch(() => undefined),
+      showCuratedSections ? getHomepageSections().catch(() => []) : Promise.resolve([]),
     ]);
     isComingSoon = comingSoon;
     initialBanners = banners;
+    sections = homepageSections;
   } catch (e) {
     console.error("[HomePage] Failed to fetch coming soon status, defaulting to true:", e);
   }
@@ -87,6 +110,13 @@ export default async function HomePage({
           <div className="w-full flex-shrink-0 flex flex-col">
             <HeroSection initialBanners={initialBanners} />
           </div>
+          {showCuratedSections && sections.length > 0 && (
+            <div className="flex-shrink-0 flex flex-col pt-4 sm:pt-6">
+              {sections.map((section) => (
+                <CategoryScrollRow key={section.id} section={section} />
+              ))}
+            </div>
+          )}
           <div className="flex-1 min-h-[300px] overflow-hidden bg-transparent mt-0">
             <Suspense
               fallback={

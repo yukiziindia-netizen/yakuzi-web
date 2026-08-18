@@ -495,7 +495,7 @@ export function useCreateHomepageSection() {
 export function useUpdateHomepageSection() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: any }) => updateHomepageSection(id, payload),
+    mutationFn: ({ id, payload }: { id: string; payload: Parameters<typeof updateHomepageSection>[1] }) => updateHomepageSection(id, payload),
     onSuccess: () => void qc.invalidateQueries({ queryKey: ["admin", "homepage-sections"] }),
   });
 }

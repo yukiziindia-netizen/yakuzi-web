@@ -514,8 +514,16 @@ export function useReorderHomepageSections() {
       const previous = qc.getQueryData<any[]>(["admin", "homepage-sections"]);
       if (previous) {
         const byId = new Map(previous.map((s: any) => [s.id, s]));
-        const reordered = orderedIds.map((id, index) => ({ ...byId.get(id), order: index }));
-        qc.setQueryData(["admin", "homepage-sections"], reordered);
+        // Reindex only ids the cache actually has a row for, and keep any
+        // cached row orderedIds doesn't mention (e.g. one created/deleted by
+        // someone else between render and drop) at the end, untouched — the
+        // backend's own exact-set check is what ultimately catches the
+        // mismatch; this just keeps the optimistic UI from dropping/garbling
+        // rows in that narrow window.
+        const known = orderedIds.filter((id) => byId.has(id));
+        const reordered = known.map((id, index) => ({ ...byId.get(id), order: index }));
+        const leftover = previous.filter((s: any) => !known.includes(s.id));
+        qc.setQueryData(["admin", "homepage-sections"], [...reordered, ...leftover]);
       }
       return { previous };
     },

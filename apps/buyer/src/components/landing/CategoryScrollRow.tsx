@@ -10,6 +10,11 @@ import QuickReviewModal from './QuickReviewModal';
 export default function CategoryScrollRow({ section }: { section: HomepageSection }) {
   const [reviewProduct, setReviewProduct] = useState<any | null>(null);
 
+  // The API already omits sections with zero products (findAllPublic filters
+  // them server-side) — this is defense-in-depth against a contract violation,
+  // not the primary guard against an empty row rendering.
+  if (!section.products?.length) return null;
+
   return (
     <div className="w-full max-w-[1600px] 2xl:max-w-none mx-auto mb-8 sm:mb-12">
       <div className="flex items-center justify-between px-4 sm:px-8 mb-3">
@@ -25,7 +30,7 @@ export default function CategoryScrollRow({ section }: { section: HomepageSectio
 
       <div className="flex overflow-x-auto snap-x snap-mandatory gap-3.5 px-4 sm:px-8 pb-1 scrollbar-hide">
         {section.products.map((product, index) => (
-          <div key={`${product.id || 'prod'}-${index}`} className="snap-start shrink-0 w-[150px] sm:w-[210px]">
+          <div key={`${product?.id || 'prod'}-${index}`} className="snap-start shrink-0 w-[150px] sm:w-[210px]">
             <GridProductCard product={product} index={index} onOpenReview={setReviewProduct} />
           </div>
         ))}

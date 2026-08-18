@@ -449,18 +449,23 @@ export async function getHomepageSections() {
   return data.data;
 }
 
-export async function createHomepageSection(payload: { categoryId: string; title?: string | null; productLimit?: number; order?: number }) {
+export async function createHomepageSection(payload: { categoryId?: string; subCategoryId?: string; title?: string | null; productLimit?: number; order?: number }) {
   const { data } = await apiClient.post<{ data: any }>("/admin/homepage-sections", payload);
   return data.data;
 }
 
-export async function updateHomepageSection(id: string, payload: { categoryId?: string; title?: string | null; productLimit?: number; order?: number; isActive?: boolean }) {
+export async function updateHomepageSection(id: string, payload: { categoryId?: string; subCategoryId?: string; title?: string | null; productLimit?: number; order?: number; isActive?: boolean }) {
   const { data } = await apiClient.patch<{ data: any }>(`/admin/homepage-sections/${id}`, payload);
   return data.data;
 }
 
 export async function deleteHomepageSection(id: string) {
   const { data } = await apiClient.delete<{ data: any }>(`/admin/homepage-sections/${id}`);
+  return data.data;
+}
+
+export async function reorderHomepageSections(orderedIds: string[]) {
+  const { data } = await apiClient.patch<{ data: any }>("/admin/homepage-sections/reorder", { orderedIds });
   return data.data;
 }
 

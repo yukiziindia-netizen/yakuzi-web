@@ -14,7 +14,7 @@ import {
   getAdmins, createAdmin, updateAdmin, deleteAdmin,
   getSuggestions, createSuggestion, updateSuggestion, deleteSuggestion, importSuggestionsCsv,
   getBanners, createBanner, updateBanner, deleteBanner,
-  getHomepageSections, createHomepageSection, updateHomepageSection, deleteHomepageSection,
+  getHomepageSections, createHomepageSection, updateHomepageSection, deleteHomepageSection, reorderHomepageSections,
   getAdminBrands, createBrand, updateBrand, deleteBrand,
   getReferralCodes, createReferralCode, deleteReferralCode,
   broadcastNotification, getNotificationHistory, getMyBroadcastHistory, sendUserNotification,
@@ -503,6 +503,27 @@ export function useUpdateHomepageSection() {
 export function useDeleteHomepageSection() {
   const qc = useQueryClient();
   return useMutation({ mutationFn: deleteHomepageSection, onSuccess: () => void qc.invalidateQueries({ queryKey: ["admin", "homepage-sections"] }) });
+}
+
+export function useReorderHomepageSections() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: reorderHomepageSections,
+    onMutate: async (orderedIds: string[]) => {
+      await qc.cancelQueries({ queryKey: ["admin", "homepage-sections"] });
+      const previous = qc.getQueryData<any[]>(["admin", "homepage-sections"]);
+      if (previous) {
+        const byId = new Map(previous.map((s: any) => [s.id, s]));
+        const reordered = orderedIds.map((id, index) => ({ ...byId.get(id), order: index }));
+        qc.setQueryData(["admin", "homepage-sections"], reordered);
+      }
+      return { previous };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) qc.setQueryData(["admin", "homepage-sections"], context.previous);
+    },
+    onSettled: () => void qc.invalidateQueries({ queryKey: ["admin", "homepage-sections"] }),
+  });
 }
 
 // ─── Brands ──────────────────────────────────────────

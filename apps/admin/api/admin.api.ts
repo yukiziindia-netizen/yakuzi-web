@@ -438,6 +438,27 @@ export async function deleteBanner(id: string) {
   return data.data;
 }
 
+// ─── Homepage Sections ────────────────────────────────
+export async function getHomepageSections() {
+  const { data } = await apiClient.get<{ data: any }>("/admin/homepage-sections");
+  return data.data;
+}
+
+export async function createHomepageSection(payload: { categoryId: string; title?: string | null; productLimit?: number; order?: number }) {
+  const { data } = await apiClient.post<{ data: any }>("/admin/homepage-sections", payload);
+  return data.data;
+}
+
+export async function updateHomepageSection(id: string, payload: { categoryId?: string; title?: string | null; productLimit?: number; order?: number; isActive?: boolean }) {
+  const { data } = await apiClient.patch<{ data: any }>(`/admin/homepage-sections/${id}`, payload);
+  return data.data;
+}
+
+export async function deleteHomepageSection(id: string) {
+  const { data } = await apiClient.delete<{ data: any }>(`/admin/homepage-sections/${id}`);
+  return data.data;
+}
+
 // ─── Referral Codes ──────────────────────────────────
 export async function getReferralCodes(params: { page?: number; limit?: number; dateFrom?: string; dateTo?: string } = {}) {
   const qs = new URLSearchParams();

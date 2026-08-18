@@ -208,7 +208,7 @@ api.interceptors.response.use(
       const method = (originalRequest?.method || 'GET').toUpperCase();
 
       // Endpoints whose errors are handled gracefully by components (fallbacks, empty state, etc)
-      const silentEndpoints = ['/products', '/categories', '/manufacturers', '/locations', '/cities', '/discount', '/auth/me', '/config'];
+      const silentEndpoints = ['/products', '/categories', '/manufacturers', '/locations', '/cities', '/discount', '/auth/me', '/config', '/homepage-sections'];
       // Endpoints guarded by backend KYC middleware — suppress 403 for GET requests only
       const kycGuardedEndpoints = ['/cart', '/buyers', '/orders', '/notifications', '/wishlist'];
       const isWriteCartOp = url.startsWith('/cart/add') || url.startsWith('/cart/item/') || (url === '/cart' && method !== 'GET');

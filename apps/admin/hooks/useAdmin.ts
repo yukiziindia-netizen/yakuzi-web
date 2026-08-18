@@ -14,6 +14,7 @@ import {
   getAdmins, createAdmin, updateAdmin, deleteAdmin,
   getSuggestions, createSuggestion, updateSuggestion, deleteSuggestion, importSuggestionsCsv,
   getBanners, createBanner, updateBanner, deleteBanner,
+  getHomepageSections, createHomepageSection, updateHomepageSection, deleteHomepageSection,
   getAdminBrands, createBrand, updateBrand, deleteBrand,
   getReferralCodes, createReferralCode, deleteReferralCode,
   broadcastNotification, getNotificationHistory, getMyBroadcastHistory, sendUserNotification,
@@ -480,6 +481,28 @@ export function useUpdateBanner() {
 export function useDeleteBanner() {
   const qc = useQueryClient();
   return useMutation({ mutationFn: deleteBanner, onSuccess: () => void qc.invalidateQueries({ queryKey: ["admin", "banners"] }) });
+}
+
+// ─── Homepage Sections ────────────────────────────────
+
+export function useHomepageSections() { return useQuery({ queryKey: ["admin", "homepage-sections"], queryFn: getHomepageSections, staleTime: 60_000, retry: 1 }); }
+
+export function useCreateHomepageSection() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: createHomepageSection, onSuccess: () => void qc.invalidateQueries({ queryKey: ["admin", "homepage-sections"] }) });
+}
+
+export function useUpdateHomepageSection() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: Parameters<typeof updateHomepageSection>[1] }) => updateHomepageSection(id, payload),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ["admin", "homepage-sections"] }),
+  });
+}
+
+export function useDeleteHomepageSection() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: deleteHomepageSection, onSuccess: () => void qc.invalidateQueries({ queryKey: ["admin", "homepage-sections"] }) });
 }
 
 // ─── Brands ──────────────────────────────────────────

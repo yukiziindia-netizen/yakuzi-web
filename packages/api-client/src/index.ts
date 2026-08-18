@@ -217,3 +217,10 @@ export {
   getBanners,
   type Banner,
 } from './modules/banners.api';
+
+// Homepage Sections
+export {
+  getHomepageSections,
+  type HomepageSection,
+  type HomepageSectionCategory,
+} from './modules/homepage-sections.api';

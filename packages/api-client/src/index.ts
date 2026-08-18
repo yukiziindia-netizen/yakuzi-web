@@ -223,4 +223,5 @@ export {
   getHomepageSections,
   type HomepageSection,
   type HomepageSectionCategory,
+  type HomepageSectionSubCategory,
 } from './modules/homepage-sections.api';

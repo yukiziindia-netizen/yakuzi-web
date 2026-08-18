@@ -29,6 +29,8 @@ export async function generateMetadata(): Promise<Metadata> {
 function hasSearchOrFilter(searchParams: any): boolean {
   return !!(
     searchParams?.search ||
+    searchParams?.sortBy ||
+    searchParams?.sortOrder ||
     searchParams?.isNew === 'true' ||
     searchParams?.isYukiziChoice === 'true' ||
     searchParams?.isBestSelling === 'true' ||

@@ -444,12 +444,12 @@ export async function getHomepageSections() {
   return data.data;
 }
 
-export async function createHomepageSection(payload: { categoryId: string; title?: string; productLimit?: number; order?: number }) {
+export async function createHomepageSection(payload: { categoryId: string; title?: string | null; productLimit?: number; order?: number }) {
   const { data } = await apiClient.post<{ data: any }>("/admin/homepage-sections", payload);
   return data.data;
 }
 
-export async function updateHomepageSection(id: string, payload: { categoryId?: string; title?: string; productLimit?: number; order?: number; isActive?: boolean }) {
+export async function updateHomepageSection(id: string, payload: { categoryId?: string; title?: string | null; productLimit?: number; order?: number; isActive?: boolean }) {
   const { data } = await apiClient.patch<{ data: any }>(`/admin/homepage-sections/${id}`, payload);
   return data.data;
 }

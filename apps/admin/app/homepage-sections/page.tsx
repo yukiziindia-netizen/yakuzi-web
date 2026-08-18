@@ -49,7 +49,9 @@ export default function HomepageSectionsPage() {
     if (!formData.categoryId) return toast.error("Select a collection");
     const payload = {
       categoryId: formData.categoryId,
-      title: formData.title || undefined,
+      // null (not undefined) so a blanked-out override actually clears server-side —
+      // undefined would be dropped from the JSON body and the old title would stick.
+      title: formData.title || null,
       productLimit: Number(formData.productLimit) || 16,
       order: Number(formData.order) || 0,
       ...(editId ? { isActive: formData.isActive } : {}),

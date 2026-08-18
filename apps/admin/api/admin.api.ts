@@ -274,6 +274,11 @@ export async function getSellers(params: { page?: number; limit?: number; status
   return data.data;
 }
 
+export async function adminCreateProductForSeller(payload: Record<string, any>) {
+  const { data } = await apiClient.post<{ data: any }>("/admin/products", payload);
+  return data.data;
+}
+
 export async function updateUser(userId: string, payload: Record<string, any>) {
   const { data } = await apiClient.patch<{ data: any }>(`/admin/users/${userId}`, payload);
   return data.data;

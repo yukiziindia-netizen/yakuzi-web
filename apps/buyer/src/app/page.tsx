@@ -23,23 +23,32 @@ export async function generateMetadata(): Promise<Metadata> {
   return applySeoOverride(derived, await fetchSeoOverride('HOMEPAGE', '/'));
 }
 
+// Single source of truth for both "is this a filtered view" (hasSearchOrFilter)
+// and the actual getProducts() query (CarouselSection) — these two used to be
+// hand-maintained in parallel and drifted (sortBy/sortOrder were missing from
+// the filter check), so every param CarouselSection reads must be added here,
+// not duplicated at both call sites.
+function buildProductQueryParams(searchParams: any) {
+  return {
+    search: searchParams?.search || undefined,
+    sortBy: searchParams?.sortBy || undefined,
+    sortOrder: searchParams?.sortOrder === 'asc' || searchParams?.sortOrder === 'desc' ? searchParams.sortOrder : undefined,
+    minPrice: searchParams?.minPrice ? Number(searchParams.minPrice) : undefined,
+    maxPrice: searchParams?.maxPrice ? Number(searchParams.maxPrice) : undefined,
+    isNew: searchParams?.isNew === 'true' ? true : undefined,
+    isYukiziChoice: searchParams?.isYukiziChoice === 'true' ? true : undefined,
+    isBestSelling: searchParams?.isBestSelling === 'true' ? true : undefined,
+    discountRange: searchParams?.discountRange && searchParams.discountRange !== 'All' ? searchParams.discountRange : undefined,
+    location: searchParams?.location && searchParams.location !== 'All' ? searchParams.location : undefined,
+    manufacturer: searchParams?.manufacturer && searchParams.manufacturer !== 'All' ? searchParams.manufacturer : undefined,
+  };
+}
+
 // The curated category rows are a "browse everything" landing-page feature —
 // they don't make sense once the homepage is being used as a search/filter
-// results view instead. Same param list CarouselSection already reads below.
+// results view instead.
 function hasSearchOrFilter(searchParams: any): boolean {
-  return !!(
-    searchParams?.search ||
-    searchParams?.sortBy ||
-    searchParams?.sortOrder ||
-    searchParams?.isNew === 'true' ||
-    searchParams?.isYukiziChoice === 'true' ||
-    searchParams?.isBestSelling === 'true' ||
-    searchParams?.minPrice ||
-    searchParams?.maxPrice ||
-    (searchParams?.discountRange && searchParams.discountRange !== 'All') ||
-    (searchParams?.location && searchParams.location !== 'All') ||
-    (searchParams?.manufacturer && searchParams.manufacturer !== 'All')
-  );
+  return Object.values(buildProductQueryParams(searchParams)).some((v) => v !== undefined);
 }
 
 // The product grid streams in after the shell: the (slow) products query no
@@ -48,20 +57,9 @@ function hasSearchOrFilter(searchParams: any): boolean {
 async function CarouselSection({ searchParams }: { searchParams: any }) {
   let initialProducts: any[] = [];
   try {
-    const search = searchParams?.search;
     const res = await getProducts({
       limit: 100,
-      search,
-      sortBy: searchParams?.sortBy || undefined,
-      sortOrder: searchParams?.sortOrder === 'asc' || searchParams?.sortOrder === 'desc' ? searchParams.sortOrder : undefined,
-      minPrice: searchParams?.minPrice ? Number(searchParams.minPrice) : undefined,
-      maxPrice: searchParams?.maxPrice ? Number(searchParams.maxPrice) : undefined,
-      isNew: searchParams?.isNew === 'true' ? true : undefined,
-      isYukiziChoice: searchParams?.isYukiziChoice === 'true' ? true : undefined,
-      isBestSelling: searchParams?.isBestSelling === 'true' ? true : undefined,
-      discountRange: searchParams?.discountRange && searchParams.discountRange !== 'All' ? searchParams.discountRange : undefined,
-      location: searchParams?.location && searchParams.location !== 'All' ? searchParams.location : undefined,
-      manufacturer: searchParams?.manufacturer && searchParams.manufacturer !== 'All' ? searchParams.manufacturer : undefined,
+      ...buildProductQueryParams(searchParams),
     });
     if (res && res.data && Array.isArray(res.data)) {
       initialProducts = res.data;

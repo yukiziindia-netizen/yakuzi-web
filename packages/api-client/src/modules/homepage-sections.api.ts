@@ -7,11 +7,19 @@ export interface HomepageSectionCategory {
   slug: string;
 }
 
+export interface HomepageSectionSubCategory {
+  id: string;
+  name: string;
+  slug: string;
+  categorySlug: string;
+}
+
 export interface HomepageSection {
   id: string;
   title: string;
   order: number;
-  category: HomepageSectionCategory;
+  category: HomepageSectionCategory | null;
+  subCategory: HomepageSectionSubCategory | null;
   products: Product[];
 }
 

@@ -64,6 +64,11 @@ import { useWishlist } from "@/hooks/useWishlist";
 import { useScrollLock } from "@/hooks/useScrollLock";
 import { useIsDesktop } from "@/hooks/useIsDesktop";
 
+// A buyer reopening the site after being away this long gets a fresh chat -
+// the old conversation moves to history instead of reappearing as if
+// nothing happened.
+const CHAT_IDLE_RESET_MS = 60 * 60 * 1000;
+
 export default function Navbar({
   onLoginClick,
   showUserActions = false,
@@ -257,13 +262,36 @@ export default function Navbar({
     document.addEventListener('keydown', handleEscape);
 
     const savedSessions = localStorage.getItem('yukizi_chat_sessions');
+    let loadedSessions: { id: string, date: number, messages: ChatMessage[] }[] = [];
     if (savedSessions) {
-      try { setChatSessions(JSON.parse(savedSessions)); } catch (e) { console.error("Error loading chat sessions:", e); }
+      try { loadedSessions = JSON.parse(savedSessions); } catch (e) { console.error("Error loading chat sessions:", e); }
     }
+
     const savedCurrent = localStorage.getItem('yukizi_current_chat');
     if (savedCurrent) {
-      try { setChatMessages(JSON.parse(savedCurrent)); } catch (e) { console.error("Error loading current chat:", e); }
+      try {
+        const restoredMessages: ChatMessage[] = JSON.parse(savedCurrent);
+        const lastActiveRaw = localStorage.getItem('yukizi_chat_last_active');
+        const lastActive = lastActiveRaw ? Number(lastActiveRaw) : 0;
+        const isStale = restoredMessages.length > 0 && Date.now() - lastActive > CHAT_IDLE_RESET_MS;
+
+        if (isStale) {
+          // The buyer is opening the site again after being away over an
+          // hour (e.g. a fresh login) - the old conversation is unlikely to
+          // still be relevant context, so file it into history instead of
+          // dropping them back into a stale chat. Same shape handleNewChat()
+          // already produces, dated to when that chat actually happened
+          // rather than now.
+          loadedSessions = [
+            { id: Math.random().toString(36).substring(7), date: lastActive || Date.now(), messages: restoredMessages },
+            ...loadedSessions,
+          ];
+        } else {
+          setChatMessages(restoredMessages);
+        }
+      } catch (e) { console.error("Error loading current chat:", e); }
     }
+    setChatSessions(loadedSessions);
 
     return () => {
       if (scrollContainer) scrollContainer.removeEventListener('wheel', handleWheel);
@@ -281,6 +309,9 @@ export default function Navbar({
   useEffect(() => {
     if (isMounted) {
       localStorage.setItem('yukizi_current_chat', JSON.stringify(chatMessages));
+      if (chatMessages.length > 0) {
+        localStorage.setItem('yukizi_chat_last_active', String(Date.now()));
+      }
     }
     // Auto-scroll chat when messages change
     if (chatContainerRef.current) {

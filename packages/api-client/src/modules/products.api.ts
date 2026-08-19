@@ -191,6 +191,18 @@ export async function getManufacturers(): Promise<{ id: string; name: string; pr
   }
 }
 
+export async function validateProductIds(
+  ids: string[],
+): Promise<{ id: string; price: number; mrp: number; stock: number }[]> {
+  try {
+    const { data } = await api.post('/products/validate-ids', { ids });
+    return data?.data ?? [];
+  } catch (err) {
+    console.warn('[ValidateIds] Failed to validate product ids:', (err as any)?.response?.status, (err as any)?.message);
+    return [];
+  }
+}
+
 export async function getProductsByManufacturer(manufacturer: string, params?: {
   page?: number;
   limit?: number;

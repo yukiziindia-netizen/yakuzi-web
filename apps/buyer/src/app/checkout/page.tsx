@@ -221,6 +221,10 @@ export default function CheckoutPage() {
       state: address.state,
       pincode: String(address.pincode).replace(/\D/g, '').slice(0, 6), // digits only, max 6
       email: address.email.trim().toLowerCase(),
+      // Razorpay is the only method where the buyer hasn't actually paid
+      // yet at this point - COD/bank transfer/credit orders are correctly
+      // visible to sellers immediately, same as always.
+      deferSellerNotification: paymentMethod === 'RAZORPAY',
     };
 
     syncCart.mutate(undefined, {

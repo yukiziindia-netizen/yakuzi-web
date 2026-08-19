@@ -5,7 +5,16 @@ import { adminCreateProductForSeller } from "@/api/admin.api";
 
 async function getCategoriesWithSubs() {
   const { data } = await apiClient.get<{ data: any[] }>("/products/categories?includeSubs=true");
-  return data.data ?? [];
+  const categories = data.data ?? [];
+  // ProductForm.tsx reads `.subcategories` (lowercase) directly off each category for its
+  // platform-fee lookup — normalize to match apps/seller/api/seller.api.ts's
+  // getCategoriesWithSubs exactly, since the raw backend field is `subCategories`.
+  return Array.isArray(categories)
+    ? categories.map((c: any) => ({
+        ...c,
+        subcategories: c.subCategories || c.subcategories || [],
+      }))
+    : [];
 }
 
 async function searchSuggestions(query: string, type: "product" | "master" = "master") {

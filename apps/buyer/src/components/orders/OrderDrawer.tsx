@@ -104,7 +104,13 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
   }, [allOrders, filters]);
 
   const allOrderedItems = React.useMemo(() => {
-    const all = filteredOrders.flatMap((o: any) => o.items || o.orderItems || []);
+    // Each item needs to carry its own order back-reference - the click
+    // handler on an individual product card uses this to select that
+    // item's actual order, not whatever order happened to be selected
+    // (or the newest one) before the click.
+    const all = filteredOrders.flatMap((o: any) =>
+      (o.items || o.orderItems || []).map((item: any) => ({ ...item, order: o })),
+    );
     return all;
   }, [filteredOrders]);
 
@@ -218,7 +224,7 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
                   );
                   
                   return (
-                    <div key={item.id || index} onClick={() => setIsOrderedProductsOpen(true)} className="min-w-[150px] border border-gray-100 rounded-xl p-3 relative shadow-sm hover:shadow-md transition-shadow bg-white snap-center cursor-pointer">
+                    <div key={item.id || index} onClick={() => { setSelectedOrderId(item.order?.id || item.orderId || null); setIsOrderedProductsOpen(true); }} className="min-w-[150px] border border-gray-100 rounded-xl p-3 relative shadow-sm hover:shadow-md transition-shadow bg-white snap-center cursor-pointer">
                       <div className="flex justify-end items-start mb-2">
                         <button className="text-black hover:text-black/80" onClick={(e) => e.stopPropagation()}>
                           <Plus className="w-4 h-4" />
@@ -308,7 +314,7 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
                     const isSelected = group.orderIds.includes(effectiveOrderId);
 
                     return (
-                      <div key={group.dateString + idx} onClick={() => setSelectedOrderId(group.orderIds[0])} className={`min-w-[220px] max-w-[220px] border ${isSelected ? 'border-purple-600 ring-2 ring-purple-600 shadow-md' : 'border-gray-200'} rounded-xl p-3 shadow-sm bg-white snap-center cursor-pointer hover:shadow-md transition-all`}>
+                      <div key={group.dateString + idx} onClick={() => { setSelectedOrderId(group.orderIds[0]); setIsOrderedProductsOpen(true); }} className={`min-w-[220px] max-w-[220px] border ${isSelected ? 'border-purple-600 ring-2 ring-purple-600 shadow-md' : 'border-gray-200'} rounded-xl p-3 shadow-sm bg-white snap-center cursor-pointer hover:shadow-md transition-all`}>
                         <div className="flex justify-between items-center mb-3">
                            <span className={`text-base font-bold ${isSelected ? 'text-purple-600' : 'text-gray-500'}`}>{group.dateString}</span>
                            <ChevronRight className="w-5 h-5 text-gray-400" />

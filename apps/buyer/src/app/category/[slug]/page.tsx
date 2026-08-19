@@ -50,7 +50,7 @@ export async function generateMetadata({
   const derived: Metadata = {
     title,
     description,
-    alternates: { canonical: absoluteUrl(`/category/${slug}`) }, // ?sub= does not filter → always canonicalize to base
+    alternates: { canonical: absoluteUrl(`/category/${slug}`) }, // sub-category pages canonicalize to the parent category page to avoid duplicate-content indexing
     openGraph: { title, description, url: absoluteUrl(`/category/${slug}`) },
   };
   return applySeoOverride(derived, await fetchSeoOverride('CATEGORY', cat.id));
@@ -62,10 +62,12 @@ export async function generateMetadata({
 // crawlers see the same markup as before.
 async function CategoryProducts({
   categoryId,
+  subCategoryId,
   categoryName,
   searchParams,
 }: {
   categoryId: string;
+  subCategoryId?: string;
   categoryName: string;
   searchParams?: { [key: string]: string | string[] | undefined };
 }) {
@@ -77,6 +79,7 @@ async function CategoryProducts({
   try {
     const res = await getProducts({
       categoryId,
+      subCategoryId,
       limit: 100,
       sortBy: str(searchParams?.sortBy),
       sortOrder: str(searchParams?.sortOrder) === 'asc' || str(searchParams?.sortOrder) === 'desc' ? (searchParams?.sortOrder as 'asc' | 'desc') : undefined,
@@ -125,6 +128,7 @@ export default async function CategoryPage({
   const categoryData: any = await findCategory(slug);
   const allCategories: any[] = await getCategoriesCached();
 
+  let subCategoryId: string | undefined;
   if (categoryData) {
     categoryName = categoryData.name;
     categoryId = categoryData.id;
@@ -133,6 +137,17 @@ export default async function CategoryPage({
       url && url.startsWith('/') ? `${base}${url}` : url;
     categoryImage = absolute(categoryData.image || undefined);
     categoryMobileImage = absolute(categoryData.mobileImage || undefined);
+
+    // Resolve ?sub=<slug|id> against this category's own sub-categories so the
+    // product grid can actually be filtered to it (previously only used for
+    // the breadcrumb trail — the grid silently fell back to the whole parent
+    // category, e.g. every Figurine showing on a Funko Pop sub-category page).
+    if (subSlug && Array.isArray(categoryData.subCategories)) {
+      const matchedSub = categoryData.subCategories.find(
+        (s: any) => s.id === subSlug || s.slug === subSlug,
+      );
+      subCategoryId = matchedSub?.id;
+    }
   }
 
   let breadcrumbs: string[] = [];
@@ -211,7 +226,7 @@ export default async function CategoryPage({
                 </div>
               }
             >
-              <CategoryProducts categoryId={categoryId} categoryName={categoryName} searchParams={resolvedSearchParams} />
+              <CategoryProducts categoryId={categoryId} subCategoryId={subCategoryId} categoryName={categoryName} searchParams={resolvedSearchParams} />
             </Suspense>
           </div>
         </section>

@@ -80,6 +80,11 @@ export const CreateOrderSchema = z.object({
   // Optional: the companion API PR accepts this field as optional, so this
   // widening is safe regardless of merge order.
   email: z.string().optional(),
+  // Set for a Razorpay checkout: holds off telling sellers about the order
+  // (and showing it on their dashboard) until payment actually succeeds,
+  // instead of the moment the order record is created. Same companion-PR
+  // note as email above.
+  deferSellerNotification: z.boolean().optional(),
 });
 
 // ─── Types ──────────────────────────────────────────

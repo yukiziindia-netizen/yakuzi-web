@@ -1,3 +1,5 @@
+import { COMPANY } from '@/config/company';
+
 // Central SEO constants. NEXT_PUBLIC_SITE_URL must be set per environment
 // (dev: https://dev.yukizi.com, prod: the production domain, INCLUDING the scheme) — falls back to dev.
 const DEV_SITE_URL = 'https://dev.yukizi.com';
@@ -26,7 +28,10 @@ export const SITE_NAME = 'Yukizi';
 export const SITE_TAGLINE = 'Anime, Manga & Collectibles Marketplace';
 export const SITE_DESCRIPTION =
   'Shop authentic anime figures, manga, action figures, trading cards and pop-culture collectibles from verified sellers across India on Yukizi.';
-export const ORG_LEGAL_NAME = 'Yukizi Market Private Limited';
+// Sourced from the single COMPANY config (not a second hardcoded copy) so
+// this can't drift from the legal name shown on the About/Contact/policy
+// pages again - it already had, silently, until 19 August 2026.
+export const ORG_LEGAL_NAME = COMPANY.legalName;
 export const SUPPORT_EMAIL = 'support@yukizi.com';
 export const DEFAULT_OG_IMAGE = '/YukiziLogo.png';
 

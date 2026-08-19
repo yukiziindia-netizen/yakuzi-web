@@ -20,24 +20,25 @@ export const COMPANY = {
   brandName: 'Yukizi',
 
   /**
-   * Legal entity name as written in the supplied policy documents.
-   * NOTE: the AWS account for this project is registered as "Yukizi Market
-   * Services Private Limited" — one of the two is wrong and legal pages must
-   * name the entity exactly as incorporated.
+   * Legal entity name. Confirmed by Rishi 19 August 2026 (registered
+   * address/CIN/GSTIN supplied together) as "Yukizi Market Services Private
+   * Limited" - resolves the earlier discrepancy against the AWS account name,
+   * which used the same "Services" form; the supplied policy-page text
+   * without "Services" was the wrong one.
    */
-  legalName: 'Yukizi Market Private Limited',
+  legalName: 'Yukizi Market Services Private Limited',
 
   /** Public website URL quoted in the policy documents. */
   websiteUrl: 'https://yukizi.com/',
 
-  /** TO CONFIRM: full registered office address, including PIN code. */
-  registeredAddress: '[Registered office address — to be provided]',
+  /** Registered office address. Confirmed by Rishi 19 August 2026. */
+  registeredAddress: 'Phase 2, Laxmi Narayan Residency, Flat No. 103, Jekegram, Thane, Thane - 400606, Maharashtra',
 
-  /** TO CONFIRM: GSTIN. */
-  gstin: '[GSTIN — to be provided]',
+  /** GSTIN. Confirmed by Rishi 19 August 2026. */
+  gstin: '27AACCY1892P1ZJ',
 
-  /** TO CONFIRM: CIN from the incorporation certificate. */
-  cin: '[CIN — to be provided]',
+  /** CIN. Confirmed by Rishi 19 August 2026. */
+  cin: 'U62013MR2026PTC474669',
 
   /** TO CONFIRM: the address customers post returns to (often not the registered office). */
   returnsAddress: '[Returns address — to be provided]',

@@ -87,6 +87,15 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
 
   const paymentMethod = headerOrder?.paymentMethod === 'BANK_TRANSFER' ? 'BANK' : headerOrder?.paymentMethod || 'COD';
 
+  // COD/bank-transfer/credit orders are legitimately unpaid until delivery -
+  // only an online (Razorpay) order stuck unpaid means the buyer abandoned
+  // or lost the payment popup (e.g. dismissed the Razorpay modal) and the
+  // order still needs their attention, even though it was successfully placed.
+  const needsPayment =
+    headerOrder?.paymentMethod === 'RAZORPAY' &&
+    !!headerOrder?.paymentStatus &&
+    headerOrder.paymentStatus !== 'SUCCESS';
+
   if (!isOpen) return null;
 
   return (
@@ -158,6 +167,15 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
                 )}
               </div>
             </div>
+
+            {needsPayment && (
+              <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 rounded-lg px-3 py-2">
+                <XCircle className="w-4 h-4 shrink-0" />
+                <p className="text-xs sm:text-sm font-bold">
+                  Payment not completed for this order. It won&apos;t be processed until payment is received.
+                </p>
+              </div>
+            )}
           </div>
         </div>
 

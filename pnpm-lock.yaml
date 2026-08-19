@@ -60,6 +60,9 @@ importers:
       '@yukizi/api-client':
         specifier: workspace:*
         version: link:../../packages/api-client
+      '@yukizi/product-form':
+        specifier: workspace:*
+        version: link:../../packages/product-form
       '@yukizi/utils':
         specifier: workspace:*
         version: link:../../packages/utils
@@ -249,6 +252,9 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.51.1
         version: 5.90.21(react@18.3.1)
+      '@yukizi/product-form':
+        specifier: workspace:*
+        version: link:../../packages/product-form
       '@yukizi/utils':
         specifier: workspace:*
         version: link:../../packages/utils
@@ -349,6 +355,55 @@ importers:
         version: 18.3.28
       '@types/react-dom':
         specifier: ^18.2.0
+        version: 18.3.7(@types/react@18.3.28)
+      typescript:
+        specifier: ^5.4.0
+        version: 5.9.3
+
+  packages/product-form:
+    dependencies:
+      '@hookform/resolvers':
+        specifier: ^5.2.2
+        version: 5.2.2(react-hook-form@7.71.2(react@18.3.1))
+      '@tanstack/react-query':
+        specifier: ^5.51.1
+        version: 5.90.21(react@18.3.1)
+      '@yukizi/utils':
+        specifier: workspace:*
+        version: link:../utils
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      framer-motion:
+        specifier: ^11.3.8
+        version: 11.18.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      lucide-react:
+        specifier: ^0.414.0
+        version: 0.414.0(react@18.3.1)
+      next:
+        specifier: 14.2.5
+        version: 14.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: ^18.3.1
+        version: 18.3.1(react@18.3.1)
+      react-hook-form:
+        specifier: ^7.71.2
+        version: 7.71.2(react@18.3.1)
+      react-hot-toast:
+        specifier: ^2.4.1
+        version: 2.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      tailwind-merge:
+        specifier: ^2.4.0
+        version: 2.6.1
+    devDependencies:
+      '@types/react':
+        specifier: ^18
+        version: 18.3.28
+      '@types/react-dom':
+        specifier: ^18
         version: 18.3.7(@types/react@18.3.28)
       typescript:
         specifier: ^5.4.0

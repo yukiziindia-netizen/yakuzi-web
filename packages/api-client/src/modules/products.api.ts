@@ -191,16 +191,18 @@ export async function getManufacturers(): Promise<{ id: string; name: string; pr
   }
 }
 
+// Deliberately does NOT swallow errors into an empty array the way
+// getManufacturers/getCities above do — callers (the buyer cart sync) treat
+// "id absent from the result" as "no longer purchasable, remove it." An empty
+// array on a network failure would be indistinguishable from "everything in
+// the cart was deleted," silently wiping a buyer's cart on a flaky request
+// instead of leaving it untouched. Let it throw; callers decide what "the
+// request itself failed" should mean for them.
 export async function validateProductIds(
   ids: string[],
 ): Promise<{ id: string; price: number; mrp: number; stock: number }[]> {
-  try {
-    const { data } = await api.post('/products/validate-ids', { ids });
-    return data?.data ?? [];
-  } catch (err) {
-    console.warn('[ValidateIds] Failed to validate product ids:', (err as any)?.response?.status, (err as any)?.message);
-    return [];
-  }
+  const { data } = await api.post('/products/validate-ids', { ids });
+  return data?.data ?? [];
 }
 
 export async function getProductsByManufacturer(manufacturer: string, params?: {

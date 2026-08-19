@@ -36,19 +36,40 @@ export function useCart() {
         // its price/mrp/stock refreshed and its quantity clamped to live stock, so a
         // seller's price change or a stock drop shows up on the very next cart open
         // without the buyer needing to do anything.
+        //
+        // Only actually write back (and only then) when something changed. This
+        // isn't just an optimization: localCart.set() dispatches a 'storage' event
+        // that this hook's own effect listens for and turns into
+        // queryClient.invalidateQueries — an unconditional write on every poll
+        // would retrigger this same queryFn immediately, forever (set -> storage
+        // event -> invalidate -> refetch -> set -> ...), hammering the API.
+        let changed = false;
         const syncedItems = local.items
-          .filter((item: any) => liveById.has(item.productId))
+          .filter((item: any) => {
+            const stillLive = liveById.has(item.productId);
+            if (!stillLive) changed = true;
+            return stillLive;
+          })
           .map((item: any) => {
             const liveOffer = liveById.get(item.productId)!;
-            return {
-              ...item,
-              price: liveOffer.price,
-              mrp: liveOffer.mrp,
-              stock: liveOffer.stock,
-              quantity: Math.min(item.quantity, liveOffer.stock),
-            };
+            const quantity = Math.min(item.quantity, liveOffer.stock);
+            if (
+              item.price !== liveOffer.price ||
+              item.mrp !== liveOffer.mrp ||
+              item.stock !== liveOffer.stock ||
+              item.quantity !== quantity
+            ) {
+              changed = true;
+            }
+            return { ...item, price: liveOffer.price, mrp: liveOffer.mrp, stock: liveOffer.stock, quantity };
           })
-          .filter((item: any) => item.quantity > 0);
+          .filter((item: any) => {
+            if (item.quantity > 0) return true;
+            changed = true;
+            return false;
+          });
+
+        if (!changed) return local;
 
         const newCart = {
           ...local,

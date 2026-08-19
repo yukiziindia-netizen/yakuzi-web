@@ -1,6 +1,6 @@
 "use client";
-import React, { useState } from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import React from "react";
+import { Check } from "lucide-react";
 import { cn } from "./lib/utils";
 
 interface Props {

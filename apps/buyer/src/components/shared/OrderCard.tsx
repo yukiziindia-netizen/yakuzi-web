@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Package, ChevronRight, Clock, CheckCircle2, Truck, AlertCircle } from 'lucide-react';
+import { Package, ChevronRight, Clock, CheckCircle2, Truck, AlertCircle, CreditCard } from 'lucide-react';
 
 interface OrderCardProps {
   orderId: string;
@@ -11,9 +11,11 @@ interface OrderCardProps {
   itemCount: number;
   productName?: string;
   productImage?: string;
+  paymentMethod?: string;
+  paymentStatus?: string;
 }
 
-export default function OrderCard({ orderId, date, status, total, itemCount, productName, productImage }: OrderCardProps) {
+export default function OrderCard({ orderId, date, status, total, itemCount, productName, productImage, paymentMethod, paymentStatus }: OrderCardProps) {
   const getStatusConfig = (s: string) => {
     switch (s.toUpperCase()) {
       case 'DELIVERED': 
@@ -40,6 +42,14 @@ export default function OrderCard({ orderId, date, status, total, itemCount, pro
   const statusConfig = getStatusConfig(status);
   const StatusIcon = statusConfig.icon;
 
+  // COD/bank-transfer/credit orders are legitimately unpaid until delivery -
+  // only an online (Razorpay) order stuck unpaid means the buyer abandoned
+  // or lost the payment popup and the order needs their attention.
+  const needsPayment =
+    paymentMethod?.toUpperCase() === 'RAZORPAY' &&
+    !!paymentStatus &&
+    paymentStatus.toUpperCase() !== 'SUCCESS';
+
   return (
     <motion.div
       whileHover={{ y: -5, scale: 1.01 }}
@@ -64,6 +74,12 @@ export default function OrderCard({ orderId, date, status, total, itemCount, pro
                 <StatusIcon className="w-3 h-3" />
                 {status}
               </span>
+              {needsPayment && (
+                <span className="text-2xs font-bold uppercase tracking-[0.15em] px-2 sm:px-3 py-0.5 sm:py-1 rounded-full border bg-red-100 text-red-700 border-red-200 flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
+                  <CreditCard className="w-3 h-3" />
+                  Payment pending
+                </span>
+              )}
             </div>
             <p className="text-xs sm:text-sm text-gray-400 font-bold tracking-tight truncate">
               {productName ? `Order #${orderId} • ` : ''}{date} • <span className="text-gray-900">{itemCount} items</span>

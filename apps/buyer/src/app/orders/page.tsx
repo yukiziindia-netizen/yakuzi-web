@@ -144,6 +144,8 @@ function OrdersPageContent() {
                         itemCount={itemCount}
                         productName={productName}
                         productImage={productImage}
+                        paymentMethod={order.paymentMethod}
+                        paymentStatus={order.paymentStatus}
                       />
                     </div>
                   </motion.div>

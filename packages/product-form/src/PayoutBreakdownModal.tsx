@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { X, Calculator } from 'lucide-react';
-import { Button } from '@/components/ui';
+import { Button } from './primitives';
 import { calculatePricing, formatCurrency } from '@yukizi/utils';
 
 export interface PayoutBreakdownModalProps {

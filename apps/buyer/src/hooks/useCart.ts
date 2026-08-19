@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getCart, addToCart, updateCartItem, removeCartItem, clearCart, useAuth, api } from '@yukizi/api-client';
+import { getCart, addToCart, updateCartItem, removeCartItem, clearCart, useAuth, validateProductIds } from '@yukizi/api-client';
 import { localCart } from '@/lib/local-cart';
 import { track } from '@/lib/analytics/tracker';
 import { useEffect, useState } from 'react';
@@ -28,19 +28,36 @@ export function useCart() {
 
       const ids = local.items.map((i: any) => i.productId).filter(Boolean);
       try {
-        const res = await api.post('/products/validate-ids', { ids });
-        const activeIds = res.data?.data || [];
-        const activeItems = local.items.filter((item: any) => activeIds.includes(item.productId));
-        if (activeItems.length !== local.items.length) {
-          const newCart = {
-            ...local,
-            items: activeItems,
-            subtotal: activeItems.reduce((sum, item) => sum + (item.price || item.product?.price || 0) * item.quantity, 0),
-          };
-          newCart.total = newCart.subtotal;
-          localCart.set(newCart);
-          return newCart;
-        }
+        const live = await validateProductIds(ids);
+        const liveById = new Map(live.map((l) => [l.id, l]));
+
+        // Anything not in the live response is no longer purchasable (deactivated,
+        // deleted, or out of stock) — drop it silently. Anything that survives gets
+        // its price/mrp/stock refreshed and its quantity clamped to live stock, so a
+        // seller's price change or a stock drop shows up on the very next cart open
+        // without the buyer needing to do anything.
+        const syncedItems = local.items
+          .filter((item: any) => liveById.has(item.productId))
+          .map((item: any) => {
+            const liveOffer = liveById.get(item.productId)!;
+            return {
+              ...item,
+              price: liveOffer.price,
+              mrp: liveOffer.mrp,
+              stock: liveOffer.stock,
+              quantity: Math.min(item.quantity, liveOffer.stock),
+            };
+          })
+          .filter((item: any) => item.quantity > 0);
+
+        const newCart = {
+          ...local,
+          items: syncedItems,
+          subtotal: syncedItems.reduce((sum, item) => sum + (item.price || item.product?.price || 0) * item.quantity, 0),
+        };
+        newCart.total = newCart.subtotal;
+        localCart.set(newCart);
+        return newCart;
       } catch (e) {
         console.error("Failed to validate local cart items", e);
       }

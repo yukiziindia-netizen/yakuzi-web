@@ -12,6 +12,7 @@ import { useAddToWishlist, useWishlist, useRemoveFromWishlist } from '@/hooks/us
 import { useWaitlist, useAddToWaitlist, useRemoveFromWaitlist } from '@/hooks/useProducts';
 import { useToast } from '@/components/shared/Toast';
 import WishlistIcon from '@/components/shared/WishlistIcon';
+import { NotifyStockAlertModal } from '@/components/shared/NotifyStockAlertModal';
 
 interface ProductCarouselProps {
   reverse?: boolean;
@@ -121,11 +122,12 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
   const { mutate: addToWishlist } = useAddToWishlist();
   const { mutate: removeFromWishlist } = useRemoveFromWishlist();
   const { data: wishlistData } = useWishlist();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { data: waitlistData } = useWaitlist();
   const { mutate: addToWaitlist } = useAddToWaitlist();
   const { mutate: removeFromWaitlist } = useRemoveFromWaitlist();
   const { toast } = useToast();
+  const [isNotifyEmailModalOpen, setIsNotifyEmailModalOpen] = useState(false);
 
   const currentProductId = product?.id || `prod-${index}`;
   const targetProductId = product.bestListingId || currentProductId;
@@ -258,8 +260,13 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
       removeFromWaitlist(currentProductId, {
         onSuccess: () => toast('Removed from notify me', 'info')
       });
+    } else if (!user?.email) {
+      // The API requires an email on the account before it can waitlist -
+      // this project logs in by phone/OTP, so plenty of accounts have none.
+      // Collect it here instead of letting the request fail.
+      setIsNotifyEmailModalOpen(true);
     } else {
-      addToWaitlist(currentProductId, {
+      addToWaitlist({ productId: currentProductId }, {
         onSuccess: () => toast('Added to notify me', 'success')
       });
     }
@@ -287,6 +294,7 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
   const imageUrl = product?.images?.[0]?.url || product?.images?.[0] || product?.image || fallbackImage;
 
   return (
+    <>
     <div className="relative mt-3 group flex flex-col h-auto w-full max-w-[210px] sm:max-w-none mx-auto">
       {/* Yukizi Choice & Best Seller Tags */}
       <div className="absolute -top-[12px] left-1.5 sm:left-2 flex items-center gap-1.5 z-30">
@@ -447,6 +455,13 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
         </div>
       </div>
     </div>
+    <NotifyStockAlertModal
+      isOpen={isNotifyEmailModalOpen}
+      productName={product?.name || 'This product'}
+      productId={currentProductId}
+      onClose={() => setIsNotifyEmailModalOpen(false)}
+    />
+    </>
   );
 }
 

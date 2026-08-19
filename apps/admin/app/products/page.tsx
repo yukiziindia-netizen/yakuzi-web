@@ -1,10 +1,10 @@
 "use client";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, CheckCircle, XCircle, Trash2, Eye, ShieldCheck, ShieldX, Plus } from "lucide-react";
+import { Search, CheckCircle, XCircle, Trash2, Eye, ShieldCheck, ShieldX } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { AdminLayout } from "@/components/layout/admin-layout";
-import { Button, Input, Badge, Pagination } from "@/components/ui";
+import { Input, Badge, Pagination } from "@/components/ui";
 import { formatCurrency, calculatePricing } from "@yukizi/utils";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
@@ -98,14 +98,9 @@ export default function AdminProductsPage() {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="font-semibold text-2xl text-foreground">Product Management</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">{filtered.length} unique products shown · {filtered.filter((p: any) => p.isActive).length} active</p>
-          </div>
-          <Button onClick={() => router.push("/products/add-for-seller")} leftIcon={<Plus className="h-4 w-4" />}>
-            Add for Seller
-          </Button>
+        <div>
+          <h1 className="font-semibold text-2xl text-foreground">Product Management</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">{filtered.length} unique products shown · {filtered.filter((p: any) => p.isActive).length} active</p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">

@@ -13,6 +13,7 @@ const NAV = [
   { icon: Bot, label: "AI Chatbot", href: "/chatbot" },
   { icon: Users, label: "Users", href: "/users" },
   { icon: Package, label: "Products", href: "/products" },
+  { icon: PackagePlus, label: "Add for Seller", href: "/products/add-for-seller" },
   { icon: FileSpreadsheet, label: "Suggestions", href: "/suggestions" },
   { icon: Tag, label: "Brands", href: "/brands" },
   { icon: Image, label: "HeroSection Image", href: "/banners" },
@@ -58,20 +59,31 @@ export function AdminSidebar() {
       </div>
 
       <nav className="flex-1 py-4 px-2 space-y-1 overflow-y-auto no-sb">
-        {NAV.map(({ icon: Icon, label, href }) => {
-          const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
-          return (
-            <Link key={href} href={href} aria-current={active ? "page" : undefined}
-              className={cn("flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all fr relative overflow-hidden",
-                active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-accent/60")}>
-              {active && <motion.div layoutId="admin-active" className="absolute inset-0 bg-primary/10 rounded-xl" transition={{ duration: 0.2 }} />}
-              <Icon className={cn("h-4 w-4 flex-shrink-0 relative z-10", active && "text-primary")} aria-hidden />
-              <AnimatePresence>
-                {open && <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="whitespace-nowrap relative z-10">{label}</motion.span>}
-              </AnimatePresence>
-            </Link>
-          );
-        })}
+        {/* When a route is nested under another nav item's href (e.g. Add for
+            Seller under Products), only the longest/most specific matching
+            href should light up, not both. */}
+        {(() => {
+          const activeHref = NAV.reduce<string | null>((best, item) => {
+            const matches = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href + "/"));
+            if (!matches) return best;
+            return !best || item.href.length > best.length ? item.href : best;
+          }, null);
+
+          return NAV.map(({ icon: Icon, label, href }) => {
+            const active = href === activeHref;
+            return (
+              <Link key={href} href={href} aria-current={active ? "page" : undefined}
+                className={cn("flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all fr relative overflow-hidden",
+                  active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-accent/60")}>
+                {active && <motion.div layoutId="admin-active" className="absolute inset-0 bg-primary/10 rounded-xl" transition={{ duration: 0.2 }} />}
+                <Icon className={cn("h-4 w-4 flex-shrink-0 relative z-10", active && "text-primary")} aria-hidden />
+                <AnimatePresence>
+                  {open && <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="whitespace-nowrap relative z-10">{label}</motion.span>}
+                </AnimatePresence>
+              </Link>
+            );
+          });
+        })()}
       </nav>
 
       <div className="p-2 border-t border-white/20">

@@ -626,34 +626,6 @@ export function ProductForm({
           </div>
         </div>
 
-          {/* Shipping & Delivery */}
-          <div className="glass-card rounded-2xl p-6 space-y-4 relative z-[43] transition-opacity duration-300">
-            <h2 className="font-semibold text-lg text-foreground border-b border-border/50 pb-2">Shipping & Delivery</h2>
-            <div className="grid grid-cols-1 gap-4 pt-2">
-              <Input 
-                label="Delivery Time (in days)" 
-                type="number"
-                min={1}
-                placeholder="e.g. 3" 
-                error={errors.delivery_text?.message} 
-                {...register("delivery_text")} 
-              />
-              {variants.length === 0 && (
-                <div className="space-y-1">
-                  <Input 
-                    label="Base Shipping Price (₹)" 
-                    type="number"
-                    min={0}
-                    placeholder="0" 
-                    error={errors.shipping_charges?.message} 
-                    {...register("shipping_charges", { valueAsNumber: true })} 
-                    disabled={!!selectedMasterId}
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-
         {/* Pricing */}
         <div className="glass-card rounded-2xl p-6 space-y-4 relative z-[43] transition-opacity duration-300">
           <h2 className="font-semibold text-lg text-foreground border-b border-border/50 pb-2">Pricing</h2>

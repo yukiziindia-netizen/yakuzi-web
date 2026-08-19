@@ -43,14 +43,17 @@ export function NotifyStockAlertModal({
     }
 
     try {
-      await addToWaitlist.mutateAsync(productId);
+      await addToWaitlist.mutateAsync({ productId, email: email.trim() });
       toast(`We'll notify you when "${productName}" is back in stock!`, 'success');
       setEmail('');
       onSuccess?.();
       onClose();
     } catch (err: any) {
       console.error('[Stock Alert] Error:', err);
-      toast(err?.message || 'Failed to set up stock alert. Please try again.', 'error');
+      toast(
+        err?.response?.data?.message || err?.message || 'Failed to set up stock alert. Please try again.',
+        'error',
+      );
     }
   };
 

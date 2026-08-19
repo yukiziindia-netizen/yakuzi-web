@@ -261,8 +261,8 @@ export async function getMyWaitlist() {
   return data?.data ?? [];
 }
 
-export async function addToWaitlist(productId: string) {
-  const { data } = await api.post(`/products/${productId}/notify-me`);
+export async function addToWaitlist(productId: string, email?: string) {
+  const { data } = await api.post(`/products/${productId}/notify-me`, { email });
   return data;
 }
 

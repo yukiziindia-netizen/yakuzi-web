@@ -98,7 +98,8 @@ export function useWaitlist() {
 export function useAddToWaitlist() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (productId: string) => addToWaitlist(productId),
+    mutationFn: ({ productId, email }: { productId: string; email?: string }) =>
+      addToWaitlist(productId, email),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['waitlist'] });
     },

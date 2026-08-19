@@ -15,12 +15,14 @@ import { useRouter } from 'next/navigation';
 import { useScrollLock } from '@/hooks/useScrollLock';
 import { useState } from 'react';
 import { QuickViewModal } from '@/components/products/QuickViewModal';
+import { useIsDesktop } from '@/hooks/useIsDesktop';
 
 
 
 export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const { data: cart, isLoading, isError } = useCart();
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const isDesktop = useIsDesktop();
   const { data: config } = usePlatformConfig();
   const updateItem = useUpdateCartItem();
   const removeItem = useRemoveCartItem();
@@ -128,15 +130,18 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
             className="fixed inset-0 bg-black/50 z-[85]"
           />
 
-          {/* Full-screen sheet, opens bottom-up (matches the search panel's
-              interaction model, not the old right-side drawer). */}
+          {/* Mobile: full-screen sheet, opens bottom-up (matches the search
+              panel's interaction model). Desktop (lg+): a fixed-width panel
+              docked to the right edge, sliding in from the right instead -
+              full-bleed reads wrong once there's a whole desktop viewport
+              behind it. */}
           <motion.div
             key="cart-drawer-panel"
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
+            initial={isDesktop ? { x: '100%' } : { y: '100%' }}
+            animate={isDesktop ? { x: 0 } : { y: 0 }}
+            exit={isDesktop ? { x: '100%' } : { y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed inset-0 bg-white shadow-2xl z-[86] flex flex-col overflow-hidden"
+            className="fixed inset-0 lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[420px] lg:max-w-[90vw] bg-white shadow-2xl z-[86] flex flex-col overflow-hidden"
           >
             {/* Custom Scrollbar Styles */}
             <style dangerouslySetInnerHTML={{ __html: `

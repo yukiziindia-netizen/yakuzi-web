@@ -62,6 +62,7 @@ import { useCategories } from "@/hooks/useProducts";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useScrollLock } from "@/hooks/useScrollLock";
+import { useIsDesktop } from "@/hooks/useIsDesktop";
 
 export default function Navbar({
   onLoginClick,
@@ -95,6 +96,7 @@ export default function Navbar({
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [sidebarView, setSidebarView] = useState<SidebarView>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const isDesktop = useIsDesktop();
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
 
@@ -1131,9 +1133,12 @@ export default function Navbar({
 
 
 
-      {/* Menu Drawer (Now active on Mobile and Desktop) — full-screen,
-          bottom-up, sits below the floating nav bar's z-[90] so the bar
-          stays visible/usable over it, same trick the search panel uses. */}
+      {/* Menu Drawer. Mobile: full-screen, bottom-up, sits below the floating
+          nav bar's z-[90] so the bar stays visible/usable over it, same
+          trick the search panel uses. Desktop (lg+): a fixed-width panel
+          docked to the right edge, sliding in from the right instead -
+          full-bleed reads wrong once there's a whole desktop viewport
+          behind it. */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
@@ -1148,11 +1153,11 @@ export default function Navbar({
         {isMobileMenuOpen && (
           <motion.div
             key="mobile-menu-panel"
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
+            initial={isDesktop ? { x: "100%" } : { y: "100%" }}
+            animate={isDesktop ? { x: 0 } : { y: 0 }}
+            exit={isDesktop ? { x: "100%" } : { y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed inset-0 bg-white z-[86] shadow-2xl flex flex-col p-6 sm:p-8"
+            className="fixed inset-0 lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[420px] lg:max-w-[90vw] bg-white z-[86] shadow-2xl flex flex-col p-6 sm:p-8"
           >
             {/* Hidden Close Button */}
             <button onClick={() => setIsMobileMenuOpen(false)} className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-900 bg-white/80 rounded-full z-[80] transition-colors">

@@ -15,6 +15,7 @@ import { useCart, useUpdateCartItem, useRemoveCartItem } from "@/hooks/useCart";
 import { useCities, useManufacturers } from "@/hooks/useProducts";
 import { useToast } from "@/components/shared/Toast";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useIsDesktop } from "@/hooks/useIsDesktop";
 
 type SortOption = "Relevance" | "Price: Low to High" | "Price: High to Low" | "Newest First";
 
@@ -37,6 +38,7 @@ interface SidebarSheetProps {
 
 export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps) {
   const isOpen = view !== null;
+  const isDesktop = useIsDesktop();
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -525,15 +527,18 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
             className="fixed inset-0 bg-black/50 z-[85]"
           />
 
-          {/* Full-screen sheet, opens bottom-up (matches the search panel's
-              interaction model, not the old right-side drawer). */}
+          {/* Mobile: full-screen sheet, opens bottom-up (matches the search
+              panel's interaction model). Desktop (lg+): a fixed-width panel
+              docked to the right edge, sliding in from the right instead -
+              full-bleed reads wrong once there's a whole desktop viewport
+              behind it. */}
           <motion.div
             key="sidebar-panel"
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
+            initial={isDesktop ? { x: "100%" } : { y: "100%" }}
+            animate={isDesktop ? { x: 0 } : { y: 0 }}
+            exit={isDesktop ? { x: "100%" } : { y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed inset-0 bg-white z-[86] shadow-2xl flex flex-col overflow-hidden"
+            className="fixed inset-0 lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[420px] lg:max-w-[90vw] bg-white z-[86] shadow-2xl flex flex-col overflow-hidden"
           >
             {/* Hidden Close Button */}
             <button onClick={onClose} className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-900 bg-white/80 rounded-full z-[80] transition-colors">

@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Plus, GripVertical, Image as ImageIcon, Search, ArrowDownUp, Grid2X2, X, UploadCloud, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
-import { cn } from "@/lib/utils";
+import { cn } from "./lib/utils";
 import { calculatePricing, formatCurrency } from "@yukizi/utils";
 import type { DiscountFormDetails } from "@yukizi/utils";
 

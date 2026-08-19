@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "@yukizi/product-form": "workspace:*",
     "@yukizi/utils": "workspace:*",
     "@tanstack/react-query": "^5.51.1",
     "axios": "^1.6.0",

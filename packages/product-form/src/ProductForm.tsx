@@ -5,12 +5,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Trash2, ArrowLeft, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { useQuery } from "@tanstack/react-query";
 
-import { Button, Input, Textarea, Select, ExpiryPicker } from "@/components/ui";
-import { cn } from "@/lib/utils";
-import { ImageUploader } from "./ImageUploader";
+import { Button, Input } from "./primitives";
+import { cn } from "./lib/utils";
 import { CategorySelector } from "./CategorySelector";
-import { VariantBuilder, VariantOption, VariantCombination } from "../ui/variant-builder";
+import { VariantBuilder, VariantOption, VariantCombination } from "./VariantBuilder";
 import { PayoutBreakdownModal } from "./PayoutBreakdownModal";
 import type { DiscountFormDetails, Suggestion } from "@yukizi/utils";
 import {
@@ -19,13 +19,13 @@ import {
   VALID_GST_PERCENTAGES,
   calculatePricing
 } from "@yukizi/utils";
-import { useCreateSellerProduct, useUpdateSellerProduct, useSuggestionSearch, useCategories } from "@/hooks/useSeller";
-import { getSellerProductById } from "@/api/seller.api";
+import type { ProductFormAdapter } from "./types";
 
 type FormValues = ProductFormValues;
 
-export function ProductForm({ 
-  defaultValues, 
+export function ProductForm({
+  adapter,
+  defaultValues,
   productId,
   initialOptions = [],
   initialVariants = [],
@@ -34,8 +34,9 @@ export function ProductForm({
   initialMasterId,
   activeVariantId,
   initialPlatformFees,
-}: { 
-  defaultValues?: Partial<FormValues>; 
+}: {
+  adapter: ProductFormAdapter;
+  defaultValues?: Partial<FormValues>;
   productId?: string;
   initialOptions?: any[];
   initialVariants?: any[];
@@ -46,8 +47,6 @@ export function ProductForm({
   initialPlatformFees?: any;
 }) {
   const router = useRouter();
-  const createProduct = useCreateSellerProduct();
-  const updateProduct = useUpdateSellerProduct();
   const isEditing = !!productId;
 
   // Suggestion autocomplete state
@@ -58,7 +57,13 @@ export function ProductForm({
   const [selectedSuggestion, setSelectedSuggestion] = useState<Suggestion | null>(null);
   const [activeIndex, setActiveIndex] = useState(-1);
   const suggestionRef = useRef<HTMLDivElement>(null);
-  const { data: suggestions = [] } = useSuggestionSearch(searchQuery, "master");
+  const { data: suggestions = [] } = useQuery({
+    queryKey: ["product-form", "suggestions", searchQuery],
+    queryFn: () => adapter.searchSuggestions(searchQuery, "master"),
+    enabled: searchQuery.length >= 2,
+    staleTime: 30_000,
+    retry: 1,
+  });
 
   const { register, control, handleSubmit, setValue, getValues, formState: { errors, isSubmitting, isDirty }, watch } = useForm<FormValues>({
     mode: "onChange",
@@ -98,7 +103,12 @@ export function ProductForm({
   const [variants, setVariants] = useState<VariantCombination[]>(initialVariants);
   const [mediaItems, setMediaItems] = useState<any[]>([]);
 
-  const { data: allCategories } = useCategories();
+  const { data: allCategories, isLoading: categoriesLoading } = useQuery({
+    queryKey: ["product-form", "categories"],
+    queryFn: adapter.getCategories,
+    staleTime: 300_000,
+    retry: 1,
+  });
 
   useEffect(() => {
     if (allCategories && initialCategoryName && getValues("categories").length === 0) {
@@ -279,8 +289,9 @@ export function ProductForm({
 
     try {
       // Fetch the full product to ensure we get all variants, options, and extra fields
-      const fullProduct = await getSellerProductById(suggestion.id);
-      
+      const fullProduct = adapter.getSuggestionDetails ? await adapter.getSuggestionDetails(suggestion.id) : null;
+      if (!fullProduct) throw new Error("Suggestion details not available");
+
       // Sync sku and specifications from the full product (more complete data)
       const resolvedSku = (fullProduct as any)?.sku ?? (suggestion as any).sku ?? "";
       const resolvedSpecs = (fullProduct as any)?.specifications ?? (suggestion as any).specifications ?? "";
@@ -495,13 +506,14 @@ export function ProductForm({
       };
 
       if (isEditing) {
-        await updateProduct.mutateAsync({ productId: productId!, input: backendPayload as any });
+        if (!adapter.updateProduct) throw new Error("This form does not support editing");
+        await adapter.updateProduct(productId!, backendPayload);
         toast.success("Product updated successfully");
       } else {
-        await createProduct.mutateAsync(backendPayload as any);
+        await adapter.createProduct(backendPayload);
         toast.success("Product added successfully");
       }
-      if (isEditing) router.back(); else router.push("/products");
+      if (isEditing) router.back(); else adapter.onDone?.();
     } catch (err: any) {
       const errorMsg = err?.response?.data?.message || err.message || "Something went wrong saving the product";
       toast.error(Array.isArray(errorMsg) ? errorMsg.join(", ") : errorMsg);
@@ -513,7 +525,7 @@ export function ProductForm({
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={() => {
           if (isDirty && !window.confirm("You have unsaved changes. Discard?")) return;
-          if (isEditing) router.back(); else router.push("/products");
+          if (isEditing) router.back(); else adapter.onDone?.();
         }}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
@@ -598,6 +610,8 @@ export function ProductForm({
                   name="sub_categories"
                   render={({ field: { value: subcats, onChange: setSubcats } }: any) => (
                     <CategorySelector
+                      categories={allCategories ?? []}
+                      isLoadingCategories={categoriesLoading}
                       selectedCategoryIds={cats}
                       onChangeCategories={setCats}
                       selectedSubcategoryIds={subcats || []}
@@ -724,7 +738,7 @@ export function ProductForm({
         {/* Submit */}
         <div className="flex justify-end gap-3 sticky bottom-6 z-[100] p-4 bg-background/80 backdrop-blur-xl border border-border rounded-2xl shadow-lg">
           <Button type="button" variant="info" onClick={() => setShowPayoutModal(true)}>Estimate Payout</Button>
-          <Button type="button" variant="outline" onClick={() => isEditing ? router.back() : router.push("/products")} disabled={isSubmitting}>Cancel</Button>
+          <Button type="button" variant="outline" onClick={() => isEditing ? router.back() : adapter.onDone?.()} disabled={isSubmitting}>Cancel</Button>
           <Button type="submit" loading={isSubmitting}>{isEditing ? "Update Product" : "Add Product"}</Button>
         </div>
       </form>

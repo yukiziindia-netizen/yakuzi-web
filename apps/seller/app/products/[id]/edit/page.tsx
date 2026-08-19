@@ -1,7 +1,8 @@
 "use client";
 import React from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { ProductForm } from "@/components/products/ProductForm";
+import { ProductForm } from "@yukizi/product-form";
+import { useSellerProductFormAdapter } from "@/lib/productFormAdapter";
 import { useSellerProduct } from "@/hooks/useSeller";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui";
@@ -15,6 +16,7 @@ export default function EditProductPage() {
   const variantParam = searchParams.get("variant");
   const productId = params.id as string;
   const { data: product, isLoading, error } = useSellerProduct(productId);
+  const adapter = useSellerProductFormAdapter();
   const productAny = product as any;
   const productVariants = productAny?.variants || [];
   const productListings = productAny?.listings || [];
@@ -68,8 +70,9 @@ export default function EditProductPage() {
               <Button onClick={() => router.push("/products")} leftIcon={<ArrowLeft className="h-4 w-4" />}>Go back to Products</Button>
             </div>
           ) : (
-            <ProductForm 
-              productId={productId} 
+            <ProductForm
+              adapter={adapter}
+              productId={productId}
               defaultValues={{
                 product_name: product.name,
                 product_price: product.mrp ?? product.price,

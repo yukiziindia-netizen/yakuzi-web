@@ -1,10 +1,11 @@
 "use client";
-import React, { useState } from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useCategories } from "@/hooks/useSeller";
+import React from "react";
+import { Check } from "lucide-react";
+import { cn } from "./lib/utils";
 
 interface Props {
+  categories: any[];
+  isLoadingCategories?: boolean;
   selectedCategoryIds: string[];
   onChangeCategories: (ids: string[]) => void;
   selectedSubcategoryIds: string[];
@@ -13,9 +14,7 @@ interface Props {
   disabled?: boolean;
 }
 
-export function CategorySelector({ selectedCategoryIds, onChangeCategories, selectedSubcategoryIds, onChangeSubcategories, error, disabled }: Props) {
-  const { data: categories, isLoading } = useCategories();
-
+export function CategorySelector({ categories, isLoadingCategories, selectedCategoryIds, onChangeCategories, selectedSubcategoryIds, onChangeSubcategories, error, disabled }: Props) {
   // Safe default: assuming data is array of { id: string, name: string, subcategories?: ... }
   const safeCategories = Array.isArray(categories)
     ? categories.filter(c => c && typeof c === 'object' && c.id && c.name)
@@ -35,7 +34,7 @@ export function CategorySelector({ selectedCategoryIds, onChangeCategories, sele
     onChangeSubcategories([...selectedSubcategoryIds, id]);
   };
 
-  if (isLoading) {
+  if (isLoadingCategories) {
     return <div className="h-20 flex items-center justify-center text-sm text-muted-foreground bg-muted/20 rounded-xl">Loading categories...</div>;
   }
 
@@ -66,7 +65,7 @@ export function CategorySelector({ selectedCategoryIds, onChangeCategories, sele
     });
 
   const subcatsToDisplay = selectedSubcategoryIds.length === 0
-    ? availableSubcats 
+    ? availableSubcats
     : availableSubcats.filter((sc: any) => selectedSubcategoryIds.includes(sc.id));
 
   const categoriesToDisplay = selectedCategoryIds.length === 0
@@ -122,8 +121,8 @@ export function CategorySelector({ selectedCategoryIds, onChangeCategories, sele
                   onClick={() => toggleSubcategory(subId)}
                   className={cn(
                     "px-3 py-1.5 rounded-full text-xs font-medium border transition-all flex items-center gap-1.5",
-                    isSelected 
-                      ? "bg-secondary text-secondary-foreground border-secondary shadow-sm scale-[1.02]" 
+                    isSelected
+                      ? "bg-secondary text-secondary-foreground border-secondary shadow-sm scale-[1.02]"
                       : "bg-background text-muted-foreground border-border hover:bg-accent hover:text-foreground opacity-80 hover:opacity-100",
                     disabled && "opacity-50 cursor-not-allowed"
                   )}

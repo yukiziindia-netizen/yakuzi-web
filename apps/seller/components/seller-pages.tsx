@@ -128,6 +128,7 @@ export function NotifyMeContent() {
           <select
             value={productFilter}
             onChange={(e) => setProductFilter(e.target.value)}
+            aria-label="Filter by product"
             className="h-9 rounded-lg border border-white/20 bg-background/50 px-3 text-sm text-foreground focus:bg-background"
           >
             <option value="all">All products</option>

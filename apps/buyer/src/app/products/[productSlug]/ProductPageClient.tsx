@@ -1436,7 +1436,7 @@ export default function ProductPageClient({ productSlug, initialProduct }: { pro
             <div className="flex flex-col">
               {/* Title Block */}
               <div className="flex items-start justify-between w-full mb-4">
-                <h1 className="text-2xl sm:text-2xl xl:text-3xl 2xl:text-4xl font-medium text-gray-500 tracking-tight leading-tight max-w-[95%]">
+                <h1 className="text-2xl sm:text-2xl xl:text-3xl 2xl:text-4xl font-medium text-black tracking-tight leading-tight max-w-[95%]">
                   {product.name}
                 </h1>
               </div>

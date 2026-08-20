@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Camera, X, Check, Loader2 } from 'lucide-rea
 import { useBuyerProfile, useUpdateBuyerProfile } from '@/hooks/useBuyerProfile';
 import { useAuth } from '@yukizi/api-client';
 import { useToast } from '@/components/shared/Toast';
+import { useIsDesktop } from '@/hooks/useIsDesktop';
 
 interface EditProfileDrawerProps {
   isOpen: boolean;
@@ -22,6 +23,7 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
   } = useBuyerProfile();
   const { user, logout } = useAuth();
   const { mutateAsync: updateProfile, isPending: isUpdating } = useUpdateBuyerProfile();
+  const isDesktop = useIsDesktop();
   const { toast } = useToast();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -204,11 +206,11 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
 
       {/* Slide-over Panel */}
       <motion.div
-        initial={{ x: '100%' }}
-        animate={{ x: 0 }}
-        exit={{ x: '100%' }}
+        initial={isDesktop ? { x: '100%' } : { y: '100%' }}
+        animate={isDesktop ? { x: 0 } : { y: 0 }}
+        exit={isDesktop ? { x: '100%' } : { y: '100%' }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="fixed top-0 right-0 bottom-0 w-[92%] sm:w-[500px] md:w-[520px] max-w-full bg-white z-[110] shadow-2xl flex flex-col overflow-hidden rounded-l-3xl p-6 md:p-8 font-sans"
+        className="fixed inset-0 lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[500px] lg:max-w-[90vw] bg-white z-[110] shadow-2xl flex flex-col overflow-hidden lg:rounded-l-3xl p-6 md:p-8 font-sans"
       >
         {/* Header */}
         <div className="flex items-center justify-between mt-2 mb-8 relative">

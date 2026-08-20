@@ -317,13 +317,13 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
         </div>
       )}
 
-      <div 
+      <div
         className={`bg-white rounded-[6px] hover:shadow-md transition-shadow duration-200 group flex flex-col relative border ${
           isWaitlisted
             ? 'border-gray-900 ring-1 ring-gray-900 shadow-[0_2px_8px_rgba(0,0,0,0.06)]'
             : isYukiziChoice
               ? 'border-[#7B2FBE]/40 shadow-[0_2px_8px_rgba(123,47,190,0.15)]'
-              : 'border-gray-300 shadow-[0_2px_8px_rgba(0,0,0,0.06)]'
+              : 'border-transparent shadow-[0_2px_8px_rgba(0,0,0,0.06)]'
         } w-full h-auto overflow-hidden`}
       >
            {/* Top Right Plus / Cart Button / Waitlist Bell */}
@@ -400,14 +400,14 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
         </div>
 
         {/* Image Container - Fixed 190px/200px height matching Samplr */}
-        <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index, product?.slug)}`} className="relative w-full h-[130px] sm:h-[200px] bg-white overflow-hidden flex justify-center items-center shrink-0">
+        <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index, product?.slug)}`} className="relative w-full h-[160px] sm:h-[200px] bg-white overflow-hidden flex justify-center items-center shrink-0">
            {/* next/image so the ~1MB seller uploads are resized/re-encoded to
                the card's actual rendered width (the grid is 2-7 columns) —
                measured 65MB of card images on one homepage load without it. */}
            <Image src={imageUrl} alt={productName} fill sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 15vw" className="object-contain p-3 sm:p-2 group-hover:scale-105 transition-transform duration-300 ease-out" />
         </Link>
 
-         <div className="flex flex-col gap-1 p-[8px] sm:p-[10px] bg-white w-full">
+         <div className="flex flex-col gap-1 p-[8px] sm:p-[10px] bg-white w-full border-t border-gray-100">
             {/* Brand Subtitle & Title Line */}
             <div>
                <div className="flex items-start justify-between w-full gap-1.5">
@@ -417,9 +417,9 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
                     </h3>
                   </Link>
                   {onOpenReview ? (
-                    <button 
+                    <button
                        onClick={(e) => { e.preventDefault(); onOpenReview(product); }}
-                       className="flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform shrink-0 -mr-[4px] sm:-mr-[6px]"
+                       className="flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform shrink-0"
                        title="Quick view"
                     >
                        <Eye className="w-4 h-4 text-gray-400 hover:text-gray-600" />
@@ -427,7 +427,7 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
                   ) : (
                     <Link
                        href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index, product?.slug)}`}
-                       className="flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform shrink-0 -mr-[4px] sm:-mr-[6px]"
+                       className="flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform shrink-0"
                        title="Quick view"
                     >
                        <Eye className="w-4 h-4 text-gray-400 hover:text-gray-600" />

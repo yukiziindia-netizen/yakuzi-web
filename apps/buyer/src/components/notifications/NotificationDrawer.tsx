@@ -2,8 +2,8 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, X, Trash2, Star, Eye, Plus } from 'lucide-react';
-import { DeliveryTruckBadge } from '@/components/shared/DeliveryTruckBadge';
 import { useScrollLock } from '@/hooks/useScrollLock';
+import { useIsDesktop } from '@/hooks/useIsDesktop';
 
 const MOCK_NOTIFICATIONS = [
   { id: 1, type: 'promo', text: '20% off on Dragon Ball Z products.\nUse promo code 6256' },
@@ -87,6 +87,7 @@ const formatRelativeTime = (dateStr: string) => {
 
 export default function NotificationDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   useScrollLock(isOpen);
+  const isDesktop = useIsDesktop();
 
   const { data: notificationsData, isLoading: isNotificationsLoading } = useNotifications();
   const { data: waitlistData, isLoading: isWaitlistLoading } = useWaitlist();
@@ -113,11 +114,11 @@ export default function NotificationDrawer({ isOpen, onClose }: { isOpen: boolea
           {/* Drawer Panel */}
           <motion.div
             key="notification-panel"
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
+            initial={isDesktop ? { x: '100%' } : { y: '100%' }}
+            animate={isDesktop ? { x: 0 } : { y: 0 }}
+            exit={isDesktop ? { x: '100%' } : { y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed top-0 right-0 h-full w-[92%] sm:w-[500px] md:w-[520px] max-w-full bg-white shadow-2xl z-[110] flex flex-col overflow-hidden rounded-l-3xl"
+            className="fixed inset-0 lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[500px] lg:max-w-[90vw] bg-white shadow-2xl z-[110] flex flex-col overflow-hidden lg:rounded-l-3xl"
           >
             {/* Custom Scrollbar Styles */}
             <style dangerouslySetInnerHTML={{ __html: `
@@ -326,13 +327,10 @@ export default function NotificationDrawer({ isOpen, onClose }: { isOpen: boolea
                           </div>
                         </div>
 
-                        {/* Row 4: Backend Offers / Discount Tag & Delivery Badge */}
-                        <div className="flex items-center justify-between w-full pt-1.5 border-t border-gray-100/80">
+                        {/* Row 4: Backend Offers / Discount Tag */}
+                        <div className="flex items-center w-full pt-1.5 border-t border-gray-100/80">
                           <div className="text-[11px] sm:text-[12px] font-semibold text-gray-500">
                             {renderBuyerOfferBadge(product)}
-                          </div>
-                          <div className="-mr-[6px]">
-                            <DeliveryTruckBadge text="3 days" className="w-[52px] h-auto text-[#8c8c8c]" />
                           </div>
                         </div>
                       </div>

@@ -10,6 +10,13 @@ export async function getSellerDashboard(params: { dateFrom?: string; dateTo?: s
   return data.data;
 }
 
+export async function getSellerWaitlist(params: { productId?: string } = {}) {
+  const qs = new URLSearchParams();
+  if (params.productId) qs.set("productId", params.productId);
+  const { data } = await apiClient.get<{ data: any[] }>(`/sellers/waitlist?${qs}`);
+  return data.data ?? [];
+}
+
 export async function getSellerProfile() {
   const { data } = await apiClient.get<any>("/sellers/profile");
   return data.data ?? data.profile ?? data;

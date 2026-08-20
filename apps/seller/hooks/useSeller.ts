@@ -13,6 +13,7 @@ import {
   searchSuggestions, getCategoriesWithSubs,
   verifyGstOrPan, uploadKycDocument, uploadDrugLicense,
   getSellerOrderInvoices,
+  getSellerWaitlist,
 } from "@/api/seller.api";
 import type { ProductPayload } from "@yukizi/utils";
 import { useSellerAuth } from "@/store";
@@ -50,6 +51,8 @@ export function useSellerMe(enabled: boolean = false) {
 }
 
 export function useSellerDashboard(params: { dateFrom?: string; dateTo?: string } = {}) { return useQuery({ queryKey: ["seller", "dashboard", params], queryFn: () => getSellerDashboard(params), staleTime: 60_000, retry: 1 }); }
+
+export function useSellerWaitlist() { return useQuery({ queryKey: ["seller", "waitlist"], queryFn: () => getSellerWaitlist(), staleTime: 60_000, retry: 1 }); }
 
 export function useSellerProfile(enabled: boolean = true) {
   const { setUser, user } = useSellerAuth();

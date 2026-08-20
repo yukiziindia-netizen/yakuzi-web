@@ -18,6 +18,7 @@ import {
   useSellerCancelledOrders,
   useSellerDashboard,
   useSellerAnalytics,
+  useSellerWaitlist,
 } from "@/hooks/useSeller";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -97,6 +98,83 @@ export function OrderTable({ orders, settlements = [], showConfirm = false, upda
           ))}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+export function NotifyMeContent() {
+  const { data: entries, isLoading } = useSellerWaitlist();
+  const allEntries: any[] = Array.isArray(entries) ? entries : [];
+  const [productFilter, setProductFilter] = useState<string>("all");
+
+  const products = useMemo(() => {
+    const seen = new Map<string, string>();
+    allEntries.forEach((e) => { if (!seen.has(e.product.id)) seen.set(e.product.id, e.product.name); });
+    return Array.from(seen.entries()).map(([id, name]) => ({ id, name }));
+  }, [allEntries]);
+
+  const filtered = productFilter === "all" ? allEntries : allEntries.filter((e) => e.product.id === productFilter);
+
+  if (isLoading) return <div className="p-6 text-center text-muted-foreground">Loading waitlist...</div>;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="font-semibold text-2xl text-foreground">Notify Me</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Buyers waiting for your out-of-stock products</p>
+        </div>
+        {products.length > 0 && (
+          <select
+            value={productFilter}
+            onChange={(e) => setProductFilter(e.target.value)}
+            aria-label="Filter by product"
+            className="h-9 rounded-lg border border-white/20 bg-background/50 px-3 text-sm text-foreground focus:bg-background"
+          >
+            <option value="all">All products</option>
+            {products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
+        )}
+      </div>
+
+      {filtered.length === 0 ? (
+        <div className="glass-card rounded-2xl p-8 text-center text-muted-foreground text-sm">
+          {allEntries.length === 0 ? "No one's on the waitlist for your products yet" : "No waitlist entries for this product"}
+        </div>
+      ) : (
+        <div className="glass-card rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full" aria-label="Notify Me waitlist">
+              <thead>
+                <tr className="border-b border-border/50 bg-muted/20">
+                  {["Product", "Buyer", "Date", "Status"].map((h) => (
+                    <th key={h} scope="col" className="px-5 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/30">
+                {filtered.map((entry: any) => (
+                  <tr key={entry.id}>
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-3">
+                        {entry.product.image && (
+                          <img src={entry.product.image} alt={entry.product.name} className="h-9 w-9 rounded-lg object-contain bg-muted/40 flex-shrink-0" />
+                        )}
+                        <span className="text-sm font-medium text-foreground">{entry.product.name}</span>
+                      </div>
+                    </td>
+                    <td className="px-5 py-4 text-sm text-muted-foreground">{entry.buyer.name}</td>
+                    <td className="px-5 py-4 text-sm text-muted-foreground">{formatDate(entry.createdAt)}</td>
+                    <td className="px-5 py-4">
+                      <Badge variant={entry.isNotified ? "success" : "warning"}>{entry.isNotified ? "Notified" : "Waiting"}</Badge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

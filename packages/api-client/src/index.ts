@@ -43,6 +43,7 @@ export {
   getMyWaitlist,
   addToWaitlist,
   removeFromWaitlist,
+  validateProductIds,
   type Product,
   type ProductListResponse,
   type CreateProductInput,

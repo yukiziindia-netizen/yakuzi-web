@@ -700,12 +700,12 @@ export default function Navbar({
                 </div>
               ) : (
                 // AFTER LOGIN
-                <div className="flex items-center justify-between w-full h-full py-[6px] gap-2">
+                <div className="flex items-center w-full h-full py-[6px] gap-2">
                   <Link href="/" className="shrink-0 flex items-center pl-1">
                     <Image src="/YukiziLogo.png" alt="YUKiZi" width={70} height={24} className="w-[38px] xs:w-[45px] md:w-[65px] object-contain" />
                   </Link>
 
-                  <div className="flex items-center gap-1.5 xs:gap-2 h-full flex-1 justify-end mr-0.5 xs:mr-1">
+                  <div className="flex items-center gap-1.5 xs:gap-2 h-full ml-2 xs:ml-3 mr-0.5 xs:mr-1">
                     <button
                       onClick={() => setIsProfileOpen(true)}
                       className={`relative p-1 transition-all duration-200 shrink-0 ${
@@ -721,7 +721,7 @@ export default function Navbar({
 
                     <button
                       onClick={() => setIsNotificationsOpen(true)}
-                      className={`relative p-1 min-[390px]:mr-1.5 sm:mr-0 mr-0 transition-all duration-200 shrink-0 ${
+                      className={`relative p-1 transition-all duration-200 shrink-0 ${
                         isNotificationsOpen
                           ? "text-[#562996] scale-110 opacity-100"
                           : isAnyDrawerOpen

@@ -48,6 +48,17 @@ export function useAddToWishlist() {
     mutationFn: async (productData: any) => {
       return localWishlist.addItem(productData);
     },
+    // Flip the bookmark icon the instant you click, rather than waiting on the
+    // invalidate->refetch round trip — that chain of microtask hops is what
+    // made the button feel like it "reacts late".
+    onMutate: async (productData: any) => {
+      const id = productData?.productId ?? productData?.id;
+      await queryClient.cancelQueries({ queryKey: ['wishlist'] });
+      queryClient.setQueriesData({ queryKey: ['wishlist'] }, (old: any) => {
+        if (!old || old.items?.some((item: any) => item.productId === id)) return old;
+        return { ...old, items: [...(old.items || []), { id: `optimistic-${id}`, productId: id, product: productData }] };
+      });
+    },
     onSuccess: (_data, productData) => {
       queryClient.invalidateQueries({ queryKey: ['wishlist'] });
       track('wishlist_add', undefined, productData?.productId ?? productData?.id);
@@ -60,6 +71,13 @@ export function useRemoveFromWishlist() {
   return useMutation({
     mutationFn: async (productId: string) => {
       return localWishlist.removeItem(productId);
+    },
+    onMutate: async (productId: string) => {
+      await queryClient.cancelQueries({ queryKey: ['wishlist'] });
+      queryClient.setQueriesData({ queryKey: ['wishlist'] }, (old: any) => {
+        if (!old) return old;
+        return { ...old, items: (old.items || []).filter((item: any) => item.productId !== productId) };
+      });
     },
     onSuccess: (_data, productId) => {
       queryClient.invalidateQueries({ queryKey: ['wishlist'] });

@@ -126,9 +126,9 @@ export default async function CategoryPage({
   // rendering the raw slug as the category name with an (empty) product list.
   // Preserving that existing behavior.
   const categoryData: any = await findCategory(slug);
-  const allCategories: any[] = await getCategoriesCached();
 
   let subCategoryId: string | undefined;
+  let matchedSubName: string | undefined;
   if (categoryData) {
     categoryName = categoryData.name;
     categoryId = categoryData.id;
@@ -147,35 +147,22 @@ export default async function CategoryPage({
         (s: any) => s.id === subSlug || s.slug === subSlug,
       );
       subCategoryId = matchedSub?.id;
+      matchedSubName = matchedSub?.name;
     }
   }
 
-  let breadcrumbs: string[] = [];
-  if (categoryData) {
-    const findPath = (cats: any[], targetId: string, path: string[]): string[] | null => {
-      for (const c of cats) {
-        if (c.id === targetId || c.slug === targetId || c.name === targetId) return [...path, c.name];
-        if (c.subCategories && Array.isArray(c.subCategories)) {
-          const found = findPath(c.subCategories, targetId, [...path, c.name]);
-          if (found) return found;
-        }
-      }
-      return null;
-    };
-
-    // We wrap in try/catch just in case the categories array doesn't match expectations
-    try {
-      const targetSlug = subSlug || slug;
-      const path = findPath(allCategories, targetSlug, []);
-      if (path && path.length > 0) {
-        breadcrumbs = path;
-      } else {
-        breadcrumbs = [categoryName];
-      }
-    } catch (err) {
-      breadcrumbs = [categoryName];
-    }
-  }
+  // Built directly from the already-resolved categoryData/matchedSub above,
+  // not re-derived from a fresh slug search — a sub-category slug (e.g.
+  // "funko-pop") isn't globally unique, only unique per parent category, so
+  // searching the whole category tree by slug alone (the old `findPath`
+  // approach) could resolve to a *different* parent than the one this page
+  // actually matched, showing e.g. "DC Comics > Funko Pop" for a Funko Pop
+  // page reached via Collectables.
+  const breadcrumbs: string[] = categoryData
+    ? matchedSubName
+      ? [categoryName, matchedSubName]
+      : [categoryName]
+    : [];
 
   const displayCategoryName = breadcrumbs.length > 0 ? breadcrumbs[breadcrumbs.length - 1] : categoryName;
 

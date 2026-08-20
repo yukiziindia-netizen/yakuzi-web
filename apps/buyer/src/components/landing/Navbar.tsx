@@ -559,6 +559,34 @@ export default function Navbar({
     }
   };
 
+  // Notifications/Profile now stay reachable behind their own drawer (the nav
+  // bar no longer disappears while either is open), so tapping the same icon
+  // again needs to close it — matching the toggle-to-close convention the
+  // other panels above already use, instead of always forcing it open.
+  const toggleNotifications = () => {
+    const next = !isNotificationsOpen;
+    setIsNotificationsOpen(next);
+    if (next) {
+      setIsProfileOpen(false);
+      setIsCartOpen(false);
+      setIsWishlistOpen(false);
+      setSidebarView(null);
+      setIsMobileMenuOpen(false);
+    }
+  };
+
+  const toggleProfile = () => {
+    const next = !isProfileOpen;
+    setIsProfileOpen(next);
+    if (next) {
+      setIsNotificationsOpen(false);
+      setIsCartOpen(false);
+      setIsWishlistOpen(false);
+      setSidebarView(null);
+      setIsMobileMenuOpen(false);
+    }
+  };
+
   const handleLogout = () => {
     localCart.clear();
     queryClient.invalidateQueries({
@@ -627,14 +655,14 @@ export default function Navbar({
                       </button>
                     ) : (
                       <>
-                        <button onClick={() => setIsProfileOpen(true)} className="text-white hover:text-purple-300 transition-all duration-200 hover:scale-110 flex items-center">
+                        <button onClick={toggleProfile} className="text-white hover:text-purple-300 transition-all duration-200 hover:scale-110 flex items-center">
                           <User className="w-[24px] h-[24px] md:w-[26px] md:h-[26px] stroke-[2]" fill={isProfileOpen ? "currentColor" : "none"} />
                         </button>
                         {/* Vertical Divider between User and Bell */}
                         <div className="h-5 w-[1px] bg-white/20 ml-1 mr-3" />
 
-                        <button 
-                          onClick={() => setIsNotificationsOpen(true)} 
+                        <button
+                          onClick={toggleNotifications}
                           className={`relative transition-all duration-200 flex items-center ${
                             isNotificationsOpen
                               ? "text-white scale-110 opacity-100"
@@ -707,7 +735,7 @@ export default function Navbar({
 
                   <div className="flex items-center gap-1.5 xs:gap-2 h-full ml-2 xs:ml-3 mr-0.5 xs:mr-1">
                     <button
-                      onClick={() => setIsProfileOpen(true)}
+                      onClick={toggleProfile}
                       className={`relative p-1 transition-all duration-200 shrink-0 ${
                         isProfileOpen
                           ? "text-[#562996] scale-110 opacity-100"
@@ -720,7 +748,7 @@ export default function Navbar({
                     </button>
 
                     <button
-                      onClick={() => setIsNotificationsOpen(true)}
+                      onClick={toggleNotifications}
                       className={`relative p-1 transition-all duration-200 shrink-0 ${
                         isNotificationsOpen
                           ? "text-[#562996] scale-110 opacity-100"

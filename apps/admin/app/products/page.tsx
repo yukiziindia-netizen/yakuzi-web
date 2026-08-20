@@ -120,7 +120,7 @@ export default function AdminProductsPage() {
             <table className="w-full" aria-label="Products">
               <thead>
                 <tr className="border-b border-border/50 bg-muted/20">
-                  {["Product", "Manufacturer", "Category", "Pricing", "Stock", "Min Qty", "Max Qty", "Approval", "Status", "Actions"].map(h => (
+                  {["Product", "Manufacturer", "Sellers", "Category", "Pricing", "Stock", "Min Qty", "Max Qty", "Approval", "Status", "Actions"].map(h => (
                     <th key={h} scope="col" className="px-5 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
@@ -145,6 +145,17 @@ export default function AdminProductsPage() {
                       </div>
                     </td>
                     <td className="px-5 py-4 text-sm text-muted-foreground">{p.manufacturer ?? "—"}</td>
+                    <td className="px-5 py-4">
+                      <div className="text-sm font-medium text-foreground">{p.sellerCount ?? 1}</div>
+                      {p.sellers && p.sellers.length > 0 && (
+                        <div
+                          className="text-xs text-muted-foreground truncate max-w-[160px]"
+                          title={p.sellers.map((s: any) => s.companyName).join(", ")}
+                        >
+                          {p.sellers.map((s: any) => s.companyName).join(", ")}
+                        </div>
+                      )}
+                    </td>
                     <td className="px-5 py-4"><Badge className="capitalize">{p.category?.name ?? "—"}</Badge></td>
                     <td className="px-5 py-4 text-sm font-semibold text-foreground">
                       {p.finalCustomerPayable != null ? formatCurrency(Number(p.finalCustomerPayable)) : <span className="text-muted-foreground/50">—</span>}

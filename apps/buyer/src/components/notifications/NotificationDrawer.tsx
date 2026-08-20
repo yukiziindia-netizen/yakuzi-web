@@ -108,17 +108,20 @@ export default function NotificationDrawer({ isOpen, onClose }: { isOpen: boolea
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed top-0 left-0 right-0 bottom-[85px] sm:bottom-[100px] lg:inset-0 bg-black/50 z-[100]"
+            className="fixed inset-0 bg-black/50 z-[85]"
           />
 
-          {/* Drawer Panel */}
+          {/* Drawer Panel. z-[86] deliberately sits below the floating nav
+              bar's z-[90] (same trick the Menu drawer uses) so the bar stays
+              visible/usable over it, rather than carving a gap out of the
+              panel itself. */}
           <motion.div
             key="notification-panel"
             initial={isDesktop ? { x: '100%' } : { y: '100%' }}
             animate={isDesktop ? { x: 0 } : { y: 0 }}
             exit={isDesktop ? { x: '100%' } : { y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed top-0 left-0 right-0 bottom-[85px] sm:bottom-[100px] lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[500px] lg:max-w-[90vw] bg-white shadow-2xl z-[110] flex flex-col overflow-hidden rounded-t-3xl lg:rounded-t-none lg:rounded-l-3xl"
+            className="fixed inset-0 lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[500px] lg:max-w-[90vw] bg-white shadow-2xl z-[86] flex flex-col overflow-hidden lg:rounded-l-3xl"
           >
             {/* Custom Scrollbar Styles */}
             <style dangerouslySetInnerHTML={{ __html: `

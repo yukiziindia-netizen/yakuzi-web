@@ -25,6 +25,7 @@ export default function AdminSettingsPage() {
         otpExpiry: s.otpExpiry ?? 120,
         fraudAlertEmail: s.fraudAlertEmail ?? "",
         adminAlertEmail: s.adminAlertEmail ?? "",
+        mailFromAddress: s.mailFromAddress ?? "",
         allowSellerRegistration: s.allowSellerRegistration ?? true,
         expressLogin: s.expressLogin ?? true,
         creditLineOrders: s.creditLineOrders ?? true,
@@ -75,6 +76,7 @@ export default function AdminSettingsPage() {
     { id: "notifications", icon: Bell, title: "Notifications", fields: [
       { key: "fraudAlertEmail", label: "Fraud Alert Email" },
       { key: "adminAlertEmail", label: "Admin Alert Email" },
+      { key: "mailFromAddress", label: "Sender Email (must be a verified alias on the mail account, else Gmail will reject it)" },
     ]},
   ];
 

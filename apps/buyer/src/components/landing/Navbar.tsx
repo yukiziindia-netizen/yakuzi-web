@@ -634,14 +634,15 @@ export default function Navbar({
         />
         <div
           ref={navPanelRef}
-          // Scaled down 20% overall (rather than re-deriving every one of this
-          // bar's many hardcoded per-breakpoint sizes) — origin bottom-center
-          // so it shrinks toward the edge it's docked to instead of drifting.
+          // Desktop-only 20% shrink (rather than re-deriving every one of this
+          // bar's many hardcoded per-breakpoint sizes) — origin bottom-center so
+          // it shrinks toward the edge it's docked to instead of drifting. Left
+          // at full size on phones — the mobile bar was already sized for that
+          // viewport and shrinking it further just made it hard to tap.
           // Lives on this inner wrapper, not <nav> itself, because <nav> already
           // owns an imperative `style.transform` (see the footer-avoidance
           // effect above) that would silently overwrite a class-based scale.
-          style={{ transform: 'scale(0.8)', transformOrigin: 'bottom center' }}
-          className="flex items-center gap-1.5 xs:gap-2 sm:gap-6 md:gap-2 pointer-events-auto flex-nowrap justify-center w-full max-w-[1200px] px-1 sm:px-4 relative z-10"
+          className="flex items-center gap-1.5 xs:gap-2 sm:gap-6 md:gap-2 pointer-events-auto flex-nowrap justify-center w-full max-w-[1200px] px-1 sm:px-4 relative z-10 origin-bottom scale-100 sm:scale-[0.8]"
         >
           {/* Left Segment: Logo, Profile, Notifications, Search */}
           <div className="flex items-center bg-white sm:bg-[#562996] rounded-full sm:rounded-xl pl-2.5 pr-1.5 xs:pl-3 xs:pr-2 sm:px-4 md:px-6 h-9 sm:h-[60px] md:h-[64px] shadow-[0_6px_20px_rgba(0,0,0,0.08)] sm:shadow-2xl flex-[1.08] sm:flex-1 max-w-[480px] justify-between overflow-hidden min-w-0">

@@ -12,7 +12,7 @@ import {
 } from "@/hooks/useChatbot";
 
 export default function ChatbotAdminPage() {
-  const { data: rules = [], isLoading: rulesLoading } = useChatbotRules();
+  const { data: rules = [], isLoading: rulesLoading, isError: rulesError } = useChatbotRules();
   const createRule = useCreateChatbotRule();
   const updateRule = useUpdateChatbotRule();
   const deleteRule = useDeleteChatbotRule();
@@ -313,6 +313,8 @@ export default function ChatbotAdminPage() {
                 <tbody className="divide-y divide-border/50">
                   {rulesLoading ? (
                     <tr><td colSpan={4} className="py-8 text-center text-muted-foreground">Loading...</td></tr>
+                  ) : rulesError ? (
+                    <tr><td colSpan={4} className="py-8 text-center text-red-500">Couldn't load rules — try refreshing.</td></tr>
                   ) : rules.length === 0 ? (
                     <tr>
                       <td colSpan={4} className="py-8 text-center text-muted-foreground">
@@ -333,7 +335,8 @@ export default function ChatbotAdminPage() {
                           <div className="flex items-center justify-end gap-2">
                             <button
                               onClick={() => handleToggleRule(rule.id, rule.isActive)}
-                              className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                              disabled={updateRule.isPending}
+                              className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors disabled:opacity-30"
                               title={rule.isActive ? "Deactivate" : "Activate"}
                             >
                               {rule.isActive ? <PowerOff className="h-4 w-4" /> : <Power className="h-4 w-4" />}
@@ -373,6 +376,10 @@ export default function ChatbotAdminPage() {
                 type="text"
                 value={draftTrigger}
                 onChange={(e) => setDraftTrigger(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") setIsSaveModalOpen(false);
+                  if (e.key === "Enter") handleConfirmSave();
+                }}
                 placeholder="e.g. best comic recommendation"
                 className="w-full p-3 rounded-xl bg-accent border border-border text-sm outline-none focus:ring-2 focus:ring-primary mb-3"
                 autoFocus

@@ -634,6 +634,13 @@ export default function Navbar({
         />
         <div
           ref={navPanelRef}
+          // Scaled down 20% overall (rather than re-deriving every one of this
+          // bar's many hardcoded per-breakpoint sizes) — origin bottom-center
+          // so it shrinks toward the edge it's docked to instead of drifting.
+          // Lives on this inner wrapper, not <nav> itself, because <nav> already
+          // owns an imperative `style.transform` (see the footer-avoidance
+          // effect above) that would silently overwrite a class-based scale.
+          style={{ transform: 'scale(0.8)', transformOrigin: 'bottom center' }}
           className="flex items-center gap-1.5 xs:gap-2 sm:gap-6 md:gap-2 pointer-events-auto flex-nowrap justify-center w-full max-w-[1200px] px-1 sm:px-4 relative z-10"
         >
           {/* Left Segment: Logo, Profile, Notifications, Search */}

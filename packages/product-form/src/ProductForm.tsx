@@ -12,6 +12,7 @@ import { cn } from "./lib/utils";
 import { CategorySelector } from "./CategorySelector";
 import { VariantBuilder, VariantOption, VariantCombination } from "./VariantBuilder";
 import { PayoutBreakdownModal } from "./PayoutBreakdownModal";
+import { MediaUploader, type MediaItem } from "./MediaUploader";
 import type { DiscountFormDetails, Suggestion } from "@yukizi/utils";
 import {
   productFormSchema,
@@ -101,7 +102,15 @@ export function ProductForm({
     return initialOptions;
   });
   const [variants, setVariants] = useState<VariantCombination[]>(initialVariants);
-  const [mediaItems, setMediaItems] = useState<any[]>([]);
+  // Seeded from defaultValues.image_list (set by the edit page from the
+  // product's existing images) so re-opening an existing product shows its
+  // current photos instead of an empty uploader that looks like they were lost.
+  const [mediaItems, setMediaItems] = useState<MediaItem[]>(() =>
+    (defaultValues?.image_list || []).map((url) => ({
+      id: Math.random().toString(36).substring(7),
+      url,
+    }))
+  );
 
   const { data: allCategories, isLoading: categoriesLoading } = useQuery({
     queryKey: ["product-form", "categories"],
@@ -676,6 +685,33 @@ export function ProductForm({
           )}
         </div>
 
+        {/* Product Images */}
+        <div className="glass-card rounded-2xl p-6 space-y-4">
+          <div>
+            <h3 className="font-semibold text-foreground">Product Images</h3>
+            <p className="text-sm text-muted-foreground">
+              Upload one or more photos — they show as a swipeable gallery on the product page.
+            </p>
+          </div>
+          <MediaUploader
+            items={mediaItems}
+            onChange={(next) => {
+              setMediaItems((current) => {
+                const resolved = typeof next === "function" ? (next as (prev: MediaItem[]) => MediaItem[])(current) : next;
+                setValue("image_list", resolved.filter((i) => !i.isLoading).map((i) => i.url), { shouldDirty: true, shouldValidate: true });
+                return resolved;
+              });
+            }}
+            onUpload={(file) => {
+              if (!adapter.uploadMedia) return Promise.reject(new Error("This form does not support image uploads"));
+              return adapter.uploadMedia(file);
+            }}
+          />
+          {errors.image_list && (
+            <p className="text-sm text-red-500">{errors.image_list.message as string}</p>
+          )}
+        </div>
+
         {/* Variants */}
         <div className="glass-card rounded-2xl p-6 space-y-4 relative z-[42] transition-opacity duration-300">
           <VariantBuilder 
@@ -683,15 +719,6 @@ export function ProductForm({
             onChangeOptions={setOptions} 
             variants={variants}
             onChangeVariants={setVariants}
-            productMedia={mediaItems}
-            onAddProductMedia={(items) => {
-              const newItems = items.filter(i => !mediaItems.some(existing => existing.url === i.url));
-              if (newItems.length > 0) {
-                const updatedMedia = [...mediaItems, ...newItems];
-                setMediaItems(updatedMedia);
-                setValue("image_list", updatedMedia.map(m => m.url), { shouldDirty: true, shouldValidate: true });
-              }
-            }}
             gstPercent={watchGst}
             discountDetails={watchDiscount}
             shippingCharges={watchShippingCharges}

@@ -6,5 +6,6 @@ export interface ProductFormAdapter {
   getCategories: () => Promise<any[]>;
   searchSuggestions: (query: string, type?: "product" | "master") => Promise<Suggestion[]>;
   getSuggestionDetails?: (id: string) => Promise<any>;
+  uploadMedia?: (file: File) => Promise<string>;
   onDone?: () => void;
 }

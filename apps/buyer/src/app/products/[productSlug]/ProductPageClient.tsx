@@ -1075,7 +1075,16 @@ export default function ProductPageClient({ productSlug, initialProduct }: { pro
     if (isBookmarked) {
       removeFromWishlist.mutate(product.id);
     } else {
+      // Spread the full product (not just a handful of fields) so the saved
+      // item renders correctly in WishlistDrawer/WishlistPage — those read
+      // item.product.name/mrp/images/rating/etc., and a partial payload here
+      // (previously just productId/productName/price/originalPrice/image)
+      // meant items bookmarked from the product page showed up with a
+      // generic "Product" label and missing rating/discount, unlike items
+      // bookmarked from the grid card ribbon which already passes the whole
+      // product object.
       addToWishlist.mutate({
+        ...product,
         productId: product.id,
         productName: product.name,
         price: displayPrice || 0,

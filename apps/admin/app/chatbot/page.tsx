@@ -88,6 +88,7 @@ export default function ChatbotAdminPage() {
   };
 
   const handleConfirmSave = async () => {
+    if (createRule.isPending) return;
     if (!draftTrigger.trim() || !draftInstruction.trim()) {
       toast.error("Both fields are required.");
       return;

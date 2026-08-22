@@ -54,6 +54,15 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
   const onClose = onCloseProp !== undefined ? onCloseProp : () => setIsOpenState(false);
   useScrollLock(isOpen);
 
+  // Lets pages like AuthGuard know the user actively dismissed the modal
+  // (cancel, backdrop click, X button) without logging in, so they can stop
+  // showing "redirecting to login" forever. Only for true cancels, not the
+  // onClose() call inside handleCloseCleanup's success paths below.
+  const dismissWithoutLogin = () => {
+    if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('login-modal-closed'));
+    onClose();
+  };
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const savedPhone = sessionStorage.getItem('loginModal_phone');
@@ -206,7 +215,7 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
   return (
     <div
       className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 p-4"
-      onClick={() => { if (!isSignupMode) onClose(); }}
+      onClick={() => { if (!isSignupMode) dismissWithoutLogin(); }}
     >
     <div
       role="dialog"
@@ -233,7 +242,7 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
 
       {/* Close Button */}
       {!isSignupMode && (
-        <button onClick={() => onClose()} className="absolute top-4 right-4 p-2 text-[#64748b] hover:text-[#593696] bg-[#ebe6f5] hover:bg-[#d1c2eb] rounded-full z-[150] shadow-md transition-all">
+        <button onClick={() => dismissWithoutLogin()} className="absolute top-4 right-4 p-2 text-[#64748b] hover:text-[#593696] bg-[#ebe6f5] hover:bg-[#d1c2eb] rounded-full z-[150] shadow-md transition-all">
           <X size={24} strokeWidth={2.5} />
         </button>
       )}

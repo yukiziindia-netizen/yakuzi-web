@@ -26,6 +26,10 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       return () => clearTimeout(timeout);
     }
 
+    if (!isLoading && isAuthenticated) {
+      setShowRedirect(false);
+    }
+
     if (!isLoading && isAuthenticated && user) {
       // Check if buyer is verified: admin sets user.status = 'APPROVED' and buyerProfile.verificationStatus = 'VERIFIED'
       const bp = user.buyerProfile as any;
@@ -40,6 +44,17 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       }
     }
   }, [isLoading, isAuthenticated, user, router, pathname]);
+
+  // If the user cancels the login modal (X, backdrop click) instead of logging
+  // in, don't leave them stranded on the "redirecting to login" placeholder —
+  // send them back to the homepage so they can keep browsing.
+  useEffect(() => {
+    const handleDismissed = () => {
+      if (!isAuthenticated) router.push('/');
+    };
+    window.addEventListener('login-modal-closed', handleDismissed);
+    return () => window.removeEventListener('login-modal-closed', handleDismissed);
+  }, [isAuthenticated, router]);
 
   // Status Polling — poll every 10s while buyer is pending so approval reflects automatically
   useEffect(() => {

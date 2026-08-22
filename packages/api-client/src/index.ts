@@ -187,8 +187,21 @@ export {
   getBlogCategories,
   createBlogCategory,
   uploadBlogImage,
+  getAdminBlogPosts,
+  getAdminBlogById,
+  createAdminBlogPost,
+  updateAdminBlogPost,
+  updateAdminBlogPostStatus,
+  deleteAdminBlogPost,
+  getBlogAuthors,
+  createBlogAuthor,
+  getAdminBlogCategories,
+  createAdminBlogCategory,
   type BlogPost,
   type BlogListResponse,
+  type BlogAuthor,
+  type BlogCategory,
+  type UpsertBlogPostInput,
 } from './modules/blogs.api';
 
 // Custom Orders

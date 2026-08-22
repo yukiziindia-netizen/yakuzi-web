@@ -38,6 +38,11 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
   useScrollLock(isOpen);
 
   const items = cart?.items ?? [];
+  // Total units across all lines — what the nav bar's cart badge shows, so
+  // this footer count and the badge never disagree with the visible +/-
+  // stepper quantities (previously both showed the number of distinct
+  // product lines, e.g. "1 item" even with a single line at quantity 2).
+  const totalQuantity = items.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0);
 
   const handleCheckout = async () => {
     if (isAuthenticated) {
@@ -416,7 +421,7 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
               </div>
               {items.length > 0 && (
                 <p className="text-base text-gray-400 mb-4">
-                  {items.length} item{items.length > 1 ? 's' : ''} · Shipping calculated at checkout
+                  {totalQuantity} item{totalQuantity > 1 ? 's' : ''} · Shipping calculated at checkout
                 </p>
               )}
 

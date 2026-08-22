@@ -1,7 +1,17 @@
 "use client";
 import type { ProductFormAdapter } from "@yukizi/product-form";
 import { useCreateSellerProduct, useUpdateSellerProduct } from "@/hooks/useSeller";
-import { getCategoriesWithSubs, searchSuggestions, getSellerProductById } from "@/api/seller.api";
+import { getCategoriesWithSubs, searchSuggestions, getSellerProductById, uploadProductImage } from "@/api/seller.api";
+
+// uploadProductImage() takes a pre-built FormData and resolves the raw
+// response body ({ url } — see /storage/product-image's controller); the
+// shared ProductFormAdapter contract just wants a URL string back per file.
+async function uploadMedia(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const result = await uploadProductImage(formData);
+  return result?.url ?? result;
+}
 
 export function useSellerProductFormAdapter(onDone?: () => void): ProductFormAdapter {
   const createProduct = useCreateSellerProduct();
@@ -12,6 +22,7 @@ export function useSellerProductFormAdapter(onDone?: () => void): ProductFormAda
     getCategories: getCategoriesWithSubs,
     searchSuggestions,
     getSuggestionDetails: getSellerProductById,
+    uploadMedia,
     onDone,
   };
 }

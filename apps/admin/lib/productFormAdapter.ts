@@ -1,7 +1,7 @@
 "use client";
 import type { ProductFormAdapter } from "@yukizi/product-form";
 import { apiClient } from "@/lib/apiClient";
-import { adminCreateProductForSeller } from "@/api/admin.api";
+import { adminCreateProductForSeller, uploadProductMedia } from "@/api/admin.api";
 
 async function getCategoriesWithSubs() {
   const { data } = await apiClient.get<{ data: any[] }>("/products/categories?includeSubs=true");
@@ -33,6 +33,7 @@ export function useAdminProductFormAdapter(sellerId: string, onDone: () => void)
     getCategories: getCategoriesWithSubs,
     searchSuggestions,
     getSuggestionDetails: getProductById,
+    uploadMedia: uploadProductMedia,
     onDone,
   };
 }

@@ -1,47 +1,59 @@
 import { apiClient } from "@/lib/apiClient";
 
-export interface ChatbotRule {
+export type ChatbotTrainingTier = "CORE" | "SURFACE";
+
+export interface ChatbotTrainingMessage {
+  role: string;
+  content?: string;
+}
+
+export interface ChatbotTraining {
   id: string;
-  trigger: string;
-  instruction: string;
-  isActive: boolean;
+  label: string | null;
+  tier: ChatbotTrainingTier;
+  order: number;
+  history: ChatbotTrainingMessage[];
   createdAt: string;
   updatedAt: string;
 }
 
-export async function listChatbotRules(): Promise<ChatbotRule[]> {
-  const { data } = await apiClient.get<{ data: ChatbotRule[] }>("/admin/chatbot/rules");
+export async function listChatbotTrainings(): Promise<ChatbotTraining[]> {
+  const { data } = await apiClient.get<{ data: ChatbotTraining[] }>("/admin/chatbot/trainings");
   return data.data;
 }
 
-export async function createChatbotRule(payload: {
-  trigger: string;
-  instruction: string;
-}): Promise<ChatbotRule> {
-  const { data } = await apiClient.post<{ data: ChatbotRule }>("/admin/chatbot/rules", payload);
+export async function createChatbotTraining(payload: {
+  history: ChatbotTrainingMessage[];
+  tier?: ChatbotTrainingTier;
+  label?: string;
+}): Promise<ChatbotTraining> {
+  const { data } = await apiClient.post<{ data: ChatbotTraining }>("/admin/chatbot/trainings", payload);
   return data.data;
 }
 
-export async function updateChatbotRule(
+export async function updateChatbotTraining(
   id: string,
-  payload: Partial<{ trigger: string; instruction: string; isActive: boolean }>,
-): Promise<ChatbotRule> {
-  const { data } = await apiClient.patch<{ data: ChatbotRule }>(`/admin/chatbot/rules/${id}`, payload);
+  payload: Partial<{ tier: ChatbotTrainingTier; order: number; label: string }>,
+): Promise<ChatbotTraining> {
+  const { data } = await apiClient.patch<{ data: ChatbotTraining }>(`/admin/chatbot/trainings/${id}`, payload);
   return data.data;
 }
 
-export async function deleteChatbotRule(id: string): Promise<void> {
-  await apiClient.delete(`/admin/chatbot/rules/${id}`);
+export async function deleteChatbotTraining(id: string): Promise<void> {
+  await apiClient.delete(`/admin/chatbot/trainings/${id}`);
 }
 
-export interface ExtractedRuleDraft {
-  trigger: string;
-  instruction: string;
+export async function deleteAllChatbotTrainings(): Promise<void> {
+  await apiClient.delete("/admin/chatbot/trainings");
 }
 
-export async function extractChatbotRule(
-  history: { role: string; content?: string }[],
-): Promise<ExtractedRuleDraft> {
-  const { data } = await apiClient.post<ExtractedRuleDraft>("/chatbot/train/extract", { history });
-  return data;
+export async function reorderChatbotTrainings(
+  tier: ChatbotTrainingTier,
+  orderedIds: string[],
+): Promise<ChatbotTraining[]> {
+  const { data } = await apiClient.patch<{ data: ChatbotTraining[] }>("/admin/chatbot/trainings/reorder", {
+    tier,
+    orderedIds,
+  });
+  return data.data;
 }

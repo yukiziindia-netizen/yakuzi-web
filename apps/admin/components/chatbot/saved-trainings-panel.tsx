@@ -114,7 +114,12 @@ function TierColumn({ tier, trainings, onDelete, onToggleTier, reorderPending }:
     const reordered = [...trainings];
     const [moved] = reordered.splice(oldIndex, 1);
     reordered.splice(newIndex, 0, moved);
-    reorder.mutate({ tier, orderedIds: reordered.map((t) => t.id) });
+    // The apiClient interceptor only toasts on 401/403/5xx — a 400 from the
+    // server's exact-id-set check (stale list) would otherwise silently snap
+    // the row back with no explanation.
+    reorder.mutateAsync({ tier, orderedIds: reordered.map((t) => t.id) }).catch((err: any) => {
+      toast.error(err?.response?.data?.message ?? "Failed to reorder — refresh and try again.");
+    });
   };
 
   return (

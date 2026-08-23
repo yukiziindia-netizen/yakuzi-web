@@ -328,7 +328,7 @@ export async function updateProduct(productId: string, payload: Record<string, a
 }
 
 // ─── Orders (Extended) ───────────────────────────────
-export async function getAdminOrdersFiltered(params: { page?: number; limit?: number; status?: string; search?: string; dateFrom?: string; dateTo?: string } = {}) {
+export async function getAdminOrdersFiltered(params: { page?: number; limit?: number; status?: string; search?: string; dateFrom?: string; dateTo?: string; includeTestOrders?: string } = {}) {
   const qs = new URLSearchParams();
   Object.entries(params).forEach(([k, v]) => { if (v) qs.set(k, String(v)); });
   const { data } = await apiClient.get<any>(`/admin/orders?${qs}`);

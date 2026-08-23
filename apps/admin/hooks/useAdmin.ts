@@ -352,7 +352,7 @@ export function useRejectProduct() {
 
 // ─── Orders Extended ─────────────────────────────────
 
-export function useAdminOrdersFiltered(params: { page?: number; limit?: number; status?: string; search?: string; dateFrom?: string; dateTo?: string } = {}) {
+export function useAdminOrdersFiltered(params: { page?: number; limit?: number; status?: string; search?: string; dateFrom?: string; dateTo?: string; includeTestOrders?: string } = {}) {
   return useQuery({ queryKey: ["admin", "orders", params], queryFn: () => getAdminOrdersFiltered(params), staleTime: 60_000, retry: 1 });
 }
 

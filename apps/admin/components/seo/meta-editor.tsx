@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { History, RotateCcw, Save } from "lucide-react";
 import toast from "react-hot-toast";
 import { Badge, Button, Input, Modal, Select, Skeleton, Tabs, Textarea } from "@/components/ui";
-import { useRestoreSeoRevision, useSeoRevisions, useUpsertSeoMeta } from "@/hooks/useSeo";
+import { useRestoreSeoRevision, useSeoRevisions, useSeoProductSlug, useUpdateSeoProductSlug, useUpsertSeoMeta } from "@/hooks/useSeo";
 import type { SeoEntityType, SeoFaqEntry, SeoMetaRecord, UpsertSeoMetaPayload } from "@/api/seo.api";
 import { CharCounter, OgPreview, ScoreChip, SerpPreview } from "./serp-preview";
 import { ChipsInput } from "./chips-input";
@@ -11,6 +11,11 @@ import { FaqEditor } from "./faq-editor";
 import { EntityPicker, ENTITY_TYPE_LABELS } from "./entity-picker";
 
 const ROBOTS_PRESETS = ["", "index,follow", "noindex,follow", "noindex,nofollow"];
+
+/** Mirrors the backend's normalizeSlug: lowercase, non-alphanumerics → single hyphens. */
+function normalizeSlugInput(raw: string): string {
+  return raw.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-{2,}/g, "-");
+}
 
 /** Rough storefront path per type, purely for the previews. */
 function previewPath(type: SeoEntityType, entityId: string): string {
@@ -77,6 +82,17 @@ export function MetaEditor({ open, onClose, record, presetType, presetId }: {
   const [savedRecord, setSavedRecord] = useState<SeoMetaRecord | null>(record ?? null);
   const [showHistory, setShowHistory] = useState(false);
 
+  // The product's REAL URL slug — unlike everything else in this editor it is
+  // not SeoMeta; it lives on the catalog product and changes the live URL.
+  const isProduct = entityType === "PRODUCT" && !!entityId.trim();
+  const { data: slugInfo } = useSeoProductSlug(open && isProduct ? entityId : undefined);
+  const updateSlug = useUpdateSeoProductSlug();
+  const [slugDraft, setSlugDraft] = useState("");
+
+  useEffect(() => {
+    setSlugDraft(slugInfo?.slug ?? "");
+  }, [slugInfo, entityId]);
+
   // Re-seed when the modal opens on a different record.
   useEffect(() => {
     if (!open) return;
@@ -132,6 +148,21 @@ export function MetaEditor({ open, onClose, record, presetType, presetId }: {
       ...(structuredDataOverride !== undefined && { structuredDataOverride }),
       ...(imageAltOverrides !== undefined && { imageAltOverrides }),
     };
+
+    // The URL slug is not SeoMeta — it changes the product's real URL. Apply
+    // it first so a rejected slug (taken/invalid) stops the save while the
+    // admin can still see and fix it, instead of half-saving silently.
+    const trimmedSlug = slugDraft.trim().replace(/(^-|-$)+/g, "");
+    if (isProduct && slugInfo && trimmedSlug && trimmedSlug !== (slugInfo.slug ?? "")) {
+      try {
+        await updateSlug.mutateAsync({ id: entityId.trim(), slug: trimmedSlug });
+        toast.success("Product URL updated — the old URL now redirects to the new one.");
+      } catch (e: any) {
+        toast.error(e?.response?.data?.message ?? "Could not update the product URL slug.");
+        setTab("basic");
+        return;
+      }
+    }
 
     try {
       const saved = await upsert.mutateAsync(payload);
@@ -193,6 +224,23 @@ export function MetaEditor({ open, onClose, record, presetType, presetId }: {
 
         {tab === "basic" && (
           <div className="space-y-4">
+            {isProduct && (
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium text-foreground">URL slug</label>
+                <Input
+                  placeholder={slugInfo ? "e.g. dragon-ball-goku-figurine" : "Loading…"}
+                  value={slugDraft}
+                  onChange={(e) => setSlugDraft(normalizeSlugInput(e.target.value))}
+                  disabled={!slugInfo}
+                />
+                <p className="text-xs text-muted-foreground">
+                  This is the product's REAL address: <span className="font-medium text-foreground">yukizi.com/products/{slugDraft.replace(/(^-|-$)+/g, "") || "…"}</span>
+                  {slugInfo?.slug && slugDraft.replace(/(^-|-$)+/g, "") !== slugInfo.slug && (
+                    <> — saving redirects the old URL here automatically.</>
+                  )}
+                </p>
+              </div>
+            )}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <label className="block text-sm font-medium text-foreground">SEO title</label>
@@ -212,7 +260,7 @@ export function MetaEditor({ open, onClose, record, presetType, presetId }: {
                 <Input label="Canonical URL" placeholder="https://yukizi.com/…" value={form.canonicalUrl} onChange={(e) => set("canonicalUrl", e.target.value)} />
                 {entityType === "PRODUCT" && (
                   <p className="text-xs text-muted-foreground">
-                    This only sets the SEO canonical tag — it does not change the page's actual URL. Edit the URL slug from Products → the product → Edit instead.
+                    This only sets the SEO canonical tag. To change the page's actual URL, use the URL slug field at the top of this tab.
                   </p>
                 )}
               </div>

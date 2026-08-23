@@ -10,6 +10,7 @@ import {
   getSettlements, getSettlementsSummary, markSettlementPaid, getSellerSettlements, createSettlement, syncSettlements,
   getTickets, getTicketById, replyToTicket, updateTicketStatus,
   getCategories, createCategory, updateCategory, deleteCategory,
+  replaceCategoryBanners, replaceSubCategoryBanners,
   getSubCategories, createSubCategory, updateSubCategory, deleteSubCategory as deleteSubCategoryApi,
   getAdmins, createAdmin, updateAdmin, deleteAdmin,
   getSuggestions, createSuggestion, updateSuggestion, deleteSuggestion, importSuggestionsCsv,
@@ -222,6 +223,22 @@ export function useCategories() { return useQuery({ queryKey: ["admin", "categor
 export function useCreateCategory() {
   const qc = useQueryClient();
   return useMutation({ mutationFn: createCategory, onSuccess: () => void qc.invalidateQueries({ queryKey: ["admin", "categories"] }) });
+}
+
+export function useReplaceCategoryBanners() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, banners }: { id: string; banners: { image: string; mobileImage?: string }[] }) => replaceCategoryBanners(id, banners),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ["admin", "categories"] }),
+  });
+}
+
+export function useReplaceSubCategoryBanners() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, banners }: { id: string; banners: { image: string; mobileImage?: string }[] }) => replaceSubCategoryBanners(id, banners),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ["admin", "subcategories"] }),
+  });
 }
 
 export function useUpdateCategory() {

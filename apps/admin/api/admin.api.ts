@@ -222,6 +222,21 @@ export async function updateCategory(id: string, payload: { name?: string; image
   return data.data;
 }
 
+export type BannerSlidePayload = { image: string; mobileImage?: string };
+
+// Atomically replaces the whole slideshow (order = array index). Empty array
+// clears it. The backend keeps the legacy image/mobileImage columns in sync
+// with slide 1.
+export async function replaceCategoryBanners(id: string, banners: BannerSlidePayload[]) {
+  const { data } = await apiClient.put<{ data: any }>(`/admin/categories/${id}/banners`, { banners });
+  return data.data;
+}
+
+export async function replaceSubCategoryBanners(id: string, banners: BannerSlidePayload[]) {
+  const { data } = await apiClient.put<{ data: any }>(`/admin/subcategories/${id}/banners`, { banners });
+  return data.data;
+}
+
 export async function deleteCategory(id: string) {
   const { data } = await apiClient.delete<{ data: any }>(`/admin/categories/${id}`);
   return data.data; // Note: may not return data depending on backend

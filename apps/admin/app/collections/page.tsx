@@ -1,16 +1,77 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Plus, Edit2, Trash2, FolderTree, ArrowRight, Loader2, ChevronDown, Layers } from "lucide-react";
+import { Search, Plus, Edit2, Trash2, FolderTree, ArrowRight, Loader2, ChevronDown, Layers, GripVertical, X } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { Button, Input, Badge } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import {
   useCategories, useCreateCategory, useUpdateCategory, useDeleteCategory,
-  useSubCategories, useCreateSubCategory, useUpdateSubCategory, useDeleteSubCategory
+  useSubCategories, useCreateSubCategory, useUpdateSubCategory, useDeleteSubCategory,
+  useReplaceCategoryBanners, useReplaceSubCategoryBanners,
 } from "@/hooks/useAdmin";
 import { uploadImage } from "@/api/admin.api";
+
+const MAX_SLIDES = 10;
+
+// One slide of the banner slideshow being edited. `image`/`mobileImage` hold
+// already-uploaded URLs; `file`/`mobileFile` hold not-yet-uploaded picks
+// (uploaded only on Save, so Cancel never leaves orphan uploads).
+type BannerSlideDraft = {
+  key: string;
+  image: string;
+  mobileImage: string;
+  file: File | null;
+  mobileFile: File | null;
+  preview: string | null;
+  mobilePreview: string | null;
+};
+
+let slideKeySeq = 0;
+const newSlideKey = () => `slide-${++slideKeySeq}`;
+
+const emptySlide = (): BannerSlideDraft => ({
+  key: newSlideKey(),
+  image: "",
+  mobileImage: "",
+  file: null,
+  mobileFile: null,
+  preview: null,
+  mobilePreview: null,
+});
+
+function SortableSlide({ id, disabled, children }: { id: string; disabled: boolean; children: React.ReactNode }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id, disabled });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 10 : undefined,
+  };
+  return (
+    <div ref={setNodeRef} style={style} className={cn("flex gap-3 items-start rounded-xl border border-border/60 bg-background/40 p-3", isDragging && "opacity-50")}>
+      <div className={cn("pt-8 text-muted-foreground", disabled ? "cursor-not-allowed opacity-40" : "cursor-grab active:cursor-grabbing")} aria-label="Reorder" {...attributes} {...listeners}>
+        <GripVertical className="h-4 w-4" />
+      </div>
+      {children}
+    </div>
+  );
+}
 
 export default function AdminCollectionsPage() {
   const [view, setView] = useState<"categories" | "subcategories">("categories");
@@ -25,6 +86,8 @@ export default function AdminCollectionsPage() {
   const createSubCat = useCreateSubCategory();
   const updateSubCat = useUpdateSubCategory();
   const deleteSubCat = useDeleteSubCategory();
+  const replaceCatBanners = useReplaceCategoryBanners();
+  const replaceSubCatBanners = useReplaceSubCategoryBanners();
 
   // Add-type picker dropdown
   const [addPickerOpen, setAddPickerOpen] = useState(false);
@@ -45,17 +108,38 @@ export default function AdminCollectionsPage() {
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const [addType, setAddType] = useState<"categories" | "subcategories">("categories");
   const [editId, setEditId] = useState("");
-  const [formData, setFormData] = useState({ name: "", categoryId: "", image: "", mobileImage: "" });
-  const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
-  const [mobileFile, setMobileFile] = useState<File | null>(null);
-  const [mobilePreview, setMobilePreview] = useState<string | null>(null);
-  const mobileFileRef = useRef<HTMLInputElement>(null);
+  const [formData, setFormData] = useState({ name: "", categoryId: "" });
+  const [slides, setSlides] = useState<BannerSlideDraft[]>([]);
   const [uploading, setUploading] = useState(false);
+
+  // One shared hidden file input; this ref records which slide/side the next
+  // pick belongs to (avoids a ref per slide).
+  const fileRef = useRef<HTMLInputElement>(null);
+  const uploadTargetRef = useRef<{ key: string; field: "desktop" | "mobile" } | null>(null);
+
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   const categories = Array.isArray(categoriesData) ? categoriesData : (categoriesData?.categories ?? []);
   const subCategories = Array.isArray(subCatsData) ? subCatsData : (subCatsData?.subCategories ?? []);
+
+  // Prefill slides from the item's slideshow; fall back to the legacy single
+  // image pair for categories that predate the slideshow migration.
+  const slidesFromItem = (item: any): BannerSlideDraft[] => {
+    const rows = Array.isArray(item.bannerImages) && item.bannerImages.length > 0
+      ? item.bannerImages
+      : item.image
+        ? [{ image: item.image, mobileImage: item.mobileImage }]
+        : [];
+    return rows.map((r: any) => ({
+      key: newSlideKey(),
+      image: r.image || "",
+      mobileImage: r.mobileImage || "",
+      file: null,
+      mobileFile: null,
+      preview: r.image || null,
+      mobilePreview: r.mobileImage || null,
+    }));
+  };
 
   const openCreateModal = (type: "categories" | "subcategories") => {
     setAddType(type);
@@ -63,14 +147,9 @@ export default function AdminCollectionsPage() {
     setEditId("");
     setFormData({
       name: "",
-      categoryId: categories.length > 0 ? categories[0].id : "",
-      image: "",
-      mobileImage: "",
+      categoryId: type === "subcategories" && categories.length > 0 ? categories[0].id : "",
     });
-    setFile(null);
-    setPreview(null);
-    setMobileFile(null);
-    setMobilePreview(null);
+    setSlides([]);
     setAddPickerOpen(false);
     setModalOpen(true);
   };
@@ -84,83 +163,104 @@ export default function AdminCollectionsPage() {
     setFormData({
       name: item.name || "",
       categoryId: item.categoryId || (categories.length > 0 ? categories[0].id : ""),
-      image: item.image || "",
-      mobileImage: item.mobileImage || "",
     });
-    setFile(null);
-    setPreview(item.image || null);
-    setMobileFile(null);
-    setMobilePreview(item.mobileImage || null);
+    setSlides(slidesFromItem(item));
     setModalOpen(true);
   };
 
   const closeModal = () => {
     setModalOpen(false);
-    setFormData({ name: "", categoryId: "", image: "", mobileImage: "" });
-    setFile(null);
-    setPreview(null);
-    setMobileFile(null);
-    setMobilePreview(null);
+    setFormData({ name: "", categoryId: "" });
+    setSlides([]);
+  };
+
+  const pickFile = (key: string, field: "desktop" | "mobile") => {
+    uploadTargetRef.current = { key, field };
+    fileRef.current?.click();
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
-    if (!f) return;
-    setFile(f);
+    const target = uploadTargetRef.current;
+    // Allow re-picking the same file later.
+    e.target.value = "";
+    if (!f || !target) return;
     const reader = new FileReader();
-    reader.onloadend = () => setPreview(reader.result as string);
+    reader.onloadend = () => {
+      const dataUrl = reader.result as string;
+      setSlides((prev) => prev.map((s) => {
+        if (s.key !== target.key) return s;
+        return target.field === "desktop"
+          ? { ...s, file: f, preview: dataUrl }
+          : { ...s, mobileFile: f, mobilePreview: dataUrl };
+      }));
+    };
     reader.readAsDataURL(f);
   };
 
-  const handleMobileFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0];
-    if (!f) return;
-    setMobileFile(f);
-    const reader = new FileReader();
-    reader.onloadend = () => setMobilePreview(reader.result as string);
-    reader.readAsDataURL(f);
+  const clearSlideMobile = (key: string) => {
+    setSlides((prev) => prev.map((s) => (s.key === key ? { ...s, mobileFile: null, mobilePreview: null, mobileImage: "" } : s)));
   };
 
-  // Clearing sends "" so the API nulls the column and the storefront falls
-  // back to the desktop image, rather than leaving the old phone banner.
-  const clearMobileImage = () => {
-    setMobileFile(null);
-    setMobilePreview(null);
-    setFormData((prev) => ({ ...prev, mobileImage: "" }));
-    if (mobileFileRef.current) mobileFileRef.current.value = "";
+  const removeSlide = (key: string) => {
+    setSlides((prev) => prev.filter((s) => s.key !== key));
+  };
+
+  const addSlide = () => {
+    setSlides((prev) => (prev.length >= MAX_SLIDES ? prev : [...prev, emptySlide()]));
+  };
+
+  const handleSlideDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    setSlides((prev) => {
+      const oldIndex = prev.findIndex((s) => s.key === active.id);
+      const newIndex = prev.findIndex((s) => s.key === over.id);
+      if (oldIndex < 0 || newIndex < 0) return prev;
+      return arrayMove(prev, oldIndex, newIndex);
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      let finalImage = formData.image;
-      let finalMobileImage = formData.mobileImage;
-      if (file || mobileFile) {
-        setUploading(true);
-        try {
-          if (file) finalImage = await uploadImage(file);
-          if (mobileFile) finalMobileImage = await uploadImage(mobileFile);
-        } finally {
-          // Without this an upload failure leaves the button spinning forever.
-          setUploading(false);
-        }
+      if (slides.some((s) => !s.file && !s.image)) {
+        return toast.error("Every banner needs a desktop image (or remove the empty slide)");
+      }
+
+      // Upload any newly picked files, then send the whole ordered list.
+      let banners: { image: string; mobileImage?: string }[];
+      setUploading(true);
+      try {
+        banners = await Promise.all(slides.map(async (s) => {
+          const image = s.file ? await uploadImage(s.file) : s.image;
+          const mobileImage = s.mobileFile ? await uploadImage(s.mobileFile) : s.mobileImage;
+          return { image, ...(mobileImage ? { mobileImage } : {}) };
+        }));
+      } finally {
+        // Without this an upload failure leaves the button spinning forever.
+        setUploading(false);
       }
 
       if (addType === "categories") {
         if (modalMode === "create") {
-          await createCat.mutateAsync({ name: formData.name, image: finalImage, mobileImage: finalMobileImage });
+          const created = await createCat.mutateAsync({ name: formData.name });
+          await replaceCatBanners.mutateAsync({ id: created.id, banners });
           toast.success("Collection created");
         } else {
-          await updateCat.mutateAsync({ id: editId, payload: { name: formData.name, image: finalImage, mobileImage: finalMobileImage } });
+          await updateCat.mutateAsync({ id: editId, payload: { name: formData.name } });
+          await replaceCatBanners.mutateAsync({ id: editId, banners });
           toast.success("Collection updated");
         }
       } else {
         if (!formData.categoryId) return toast.error("Select a parent collection");
         if (modalMode === "create") {
-          await createSubCat.mutateAsync({ name: formData.name, categoryId: formData.categoryId });
+          const created = await createSubCat.mutateAsync({ name: formData.name, categoryId: formData.categoryId });
+          await replaceSubCatBanners.mutateAsync({ id: created.id, banners });
           toast.success("Sub-collection created");
         } else {
           await updateSubCat.mutateAsync({ id: editId, payload: { name: formData.name, categoryId: formData.categoryId } });
+          await replaceSubCatBanners.mutateAsync({ id: editId, banners });
           toast.success("Sub-collection updated");
         }
       }
@@ -192,6 +292,9 @@ export default function AdminCollectionsPage() {
     c.slug.toLowerCase().includes(search.toLowerCase()) ||
     (view === "subcategories" && c.category?.name?.toLowerCase().includes(search.toLowerCase()))
   );
+
+  const isSaving = createCat.isPending || updateCat.isPending || createSubCat.isPending || updateSubCat.isPending
+    || replaceCatBanners.isPending || replaceSubCatBanners.isPending || uploading;
 
   return (
     <AdminLayout>
@@ -264,6 +367,7 @@ export default function AdminCollectionsPage() {
                   <th scope="col" className="px-5 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">Name</th>
                   <th scope="col" className="px-5 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">Slug</th>
                   {view === "subcategories" && <th scope="col" className="px-5 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">Parent Collection</th>}
+                  <th scope="col" className="px-5 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">Banners</th>
                   <th scope="col" className="px-5 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap text-right">Actions</th>
                 </tr>
               </thead>
@@ -283,6 +387,9 @@ export default function AdminCollectionsPage() {
                         </Badge>
                       </td>
                     )}
+                    <td className="px-5 py-4 text-sm text-muted-foreground">
+                      {(Array.isArray(item.bannerImages) ? item.bannerImages.length : 0) || (item.image ? 1 : 0) || "—"}
+                    </td>
                     <td className="px-5 py-4 text-right">
                       <div className="flex items-center justify-end gap-1">
                         <button onClick={() => openEditModal(item)} aria-label="Edit" title="Edit"
@@ -309,8 +416,8 @@ export default function AdminCollectionsPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={closeModal} />
             <motion.div initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="relative w-full max-w-md bg-card/60 glass-card rounded-2xl shadow-xl overflow-hidden border border-border">
-              <div className="p-6">
+              className="relative w-full max-w-lg bg-card/60 glass-card rounded-2xl shadow-xl overflow-hidden border border-border">
+              <div className="p-6 max-h-[85vh] overflow-y-auto">
                 <h2 className="text-xl font-semibold mb-1">
                   {modalMode === "create" ? "Add" : "Edit"} {addType === "categories" ? "Collection" : "Sub-collection"}
                 </h2>
@@ -328,77 +435,99 @@ export default function AdminCollectionsPage() {
                       </select>
                     </div>
                   )}
-                  <Input label="Name" value={formData.name} onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))} placeholder="e.g. Antibiotics" required autoFocus />
-                  
-                  {addType === "categories" && (
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-1.5">Collection Image <span className="text-muted-foreground font-normal">(desktop)</span></label>
-                      <input ref={fileRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
-                      {preview ? (
-                        <div className="relative aspect-[16/9] w-full rounded-xl overflow-hidden group">
-                          <img src={preview} alt="Preview" className="w-full h-full object-cover" />
-                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button type="button" variant="ghost" className="text-white hover:bg-white/20" onClick={() => fileRef.current?.click()}>
-                              Change Image
-                            </Button>
-                          </div>
-                        </div>
-                      ) : (
-                        <button type="button" onClick={() => fileRef.current?.click()}
-                          className="w-full aspect-[16/9] border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-muted/50 hover:border-primary/50 transition-colors">
-                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                            <Plus className="h-5 w-5" />
-                          </div>
-                          <div className="text-sm font-medium text-foreground">Upload Image</div>
-                          <div className="text-xs text-muted-foreground">Recommend 1200x400px</div>
-                        </button>
-                      )}
+                  <Input label="Name" value={formData.name} onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))} placeholder="e.g. Figurines" required autoFocus />
 
-                      {/* Optional phone banner. Left empty, the desktop image is
-                          used on every screen, which is how every existing
-                          collection behaves. */}
-                      <div className="mt-5">
-                        <div className="flex items-center justify-between mb-1.5">
-                          <label className="block text-sm font-medium text-foreground">
-                            Mobile Image <span className="text-muted-foreground font-normal">(optional)</span>
-                          </label>
-                          {mobilePreview && (
-                            <button type="button" onClick={clearMobileImage}
-                              className="text-xs font-medium text-muted-foreground hover:text-destructive transition-colors">
-                              Remove
-                            </button>
-                          )}
-                        </div>
-                        <input ref={mobileFileRef} type="file" accept="image/*" onChange={handleMobileFileChange} className="hidden" />
-                        {mobilePreview ? (
-                          <div className="relative aspect-[4/3] w-40 rounded-xl overflow-hidden group">
-                            <img src={mobilePreview} alt="Mobile preview" className="w-full h-full object-cover" />
-                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Button type="button" variant="ghost" className="text-white hover:bg-white/20" onClick={() => mobileFileRef.current?.click()}>
-                                Change
-                              </Button>
-                            </div>
-                          </div>
-                        ) : (
-                          <button type="button" onClick={() => mobileFileRef.current?.click()}
-                            className="w-40 aspect-[4/3] border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center gap-1.5 hover:bg-muted/50 hover:border-primary/50 transition-colors">
-                            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                              <Plus className="h-4 w-4" />
-                            </div>
-                            <div className="text-xs font-medium text-foreground">Upload</div>
-                            <div className="text-[11px] text-muted-foreground px-2 text-center">Recommend 800x600px</div>
-                          </button>
-                        )}
-                        <p className="text-xs text-muted-foreground mt-2">
-                          Shown on phones. Leave empty to use the desktop image everywhere.
-                        </p>
-                      </div>
+                  {/* Banner slideshow. Order here is the order buyers see; drag
+                      the handle to rearrange. Slide 1 also fills the legacy
+                      single-image slots older screens still read. */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="block text-sm font-medium text-foreground">
+                        Banner slideshow <span className="text-muted-foreground font-normal">({slides.length}/{MAX_SLIDES})</span>
+                      </label>
+                      <Button type="button" variant="ghost" size="sm" onClick={addSlide} disabled={slides.length >= MAX_SLIDES} leftIcon={<Plus className="h-3.5 w-3.5" />}>
+                        Add banner
+                      </Button>
                     </div>
-                  )}
+                    <input ref={fileRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+
+                    {slides.length === 0 ? (
+                      <button type="button" onClick={addSlide}
+                        className="w-full aspect-[16/6] border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-muted/50 hover:border-primary/50 transition-colors">
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                          <Plus className="h-5 w-5" />
+                        </div>
+                        <div className="text-sm font-medium text-foreground">Add your first banner</div>
+                        <div className="text-xs text-muted-foreground">Recommend 1200x400px. Add more for a slideshow.</div>
+                      </button>
+                    ) : (
+                      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleSlideDragEnd}>
+                        <SortableContext items={slides.map((s) => s.key)} strategy={verticalListSortingStrategy}>
+                          <div className="space-y-3">
+                            {slides.map((slide, index) => (
+                              <SortableSlide key={slide.key} id={slide.key} disabled={isSaving}>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center justify-between mb-1.5">
+                                    <span className="text-xs font-semibold text-muted-foreground">Banner {index + 1}</span>
+                                    <button type="button" onClick={() => removeSlide(slide.key)} aria-label={`Remove banner ${index + 1}`}
+                                      className="h-6 w-6 rounded-md flex items-center justify-center text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                                      <X className="h-3.5 w-3.5" />
+                                    </button>
+                                  </div>
+                                  <div className="flex gap-3">
+                                    {/* Desktop image */}
+                                    <div className="flex-1 min-w-0">
+                                      {slide.preview ? (
+                                        <div className="relative aspect-[16/6] w-full rounded-lg overflow-hidden group/img">
+                                          <img src={slide.preview} alt={`Banner ${index + 1} desktop`} className="w-full h-full object-cover" />
+                                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity">
+                                            <Button type="button" variant="ghost" size="sm" className="text-white hover:bg-white/20" onClick={() => pickFile(slide.key, "desktop")}>
+                                              Change
+                                            </Button>
+                                          </div>
+                                        </div>
+                                      ) : (
+                                        <button type="button" onClick={() => pickFile(slide.key, "desktop")}
+                                          className="w-full aspect-[16/6] border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-1 hover:bg-muted/50 hover:border-primary/50 transition-colors">
+                                          <Plus className="h-4 w-4 text-primary" />
+                                          <span className="text-xs font-medium text-foreground">Desktop image</span>
+                                        </button>
+                                      )}
+                                    </div>
+                                    {/* Mobile image */}
+                                    <div className="w-24 shrink-0">
+                                      {slide.mobilePreview ? (
+                                        <div className="relative aspect-[3/4] w-full rounded-lg overflow-hidden group/img">
+                                          <img src={slide.mobilePreview} alt={`Banner ${index + 1} mobile`} className="w-full h-full object-cover" />
+                                          <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-1 opacity-0 group-hover/img:opacity-100 transition-opacity">
+                                            <button type="button" className="text-[11px] font-medium text-white hover:underline" onClick={() => pickFile(slide.key, "mobile")}>Change</button>
+                                            <button type="button" className="text-[11px] font-medium text-white hover:underline" onClick={() => clearSlideMobile(slide.key)}>Remove</button>
+                                          </div>
+                                        </div>
+                                      ) : (
+                                        <button type="button" onClick={() => pickFile(slide.key, "mobile")}
+                                          className="w-full aspect-[3/4] border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-1 hover:bg-muted/50 hover:border-primary/50 transition-colors">
+                                          <Plus className="h-3.5 w-3.5 text-primary" />
+                                          <span className="text-[11px] font-medium text-foreground text-center px-1">Mobile (optional)</span>
+                                        </button>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </SortableSlide>
+                            ))}
+                          </div>
+                        </SortableContext>
+                      </DndContext>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Buyers see these in order as a slideshow on the {addType === "categories" ? "collection" : "sub-collection"} page. Mobile image is shown on phones; leave it empty to use the desktop image everywhere.
+                    </p>
+                  </div>
 
                   <div className="pt-4 flex justify-end gap-3">
                     <Button type="button" variant="ghost" onClick={closeModal}>Cancel</Button>
-                    <Button type="submit" loading={createCat.isPending || updateCat.isPending || createSubCat.isPending || updateSubCat.isPending || uploading}>
+                    <Button type="submit" loading={isSaving}>
                       {modalMode === "create" ? "Create" : "Save Changes"}
                     </Button>
                   </div>

@@ -69,12 +69,22 @@ export type CreateProductInput = z.infer<typeof CreateProductSchema>;
 
 // ─── Category Schema ────────────────────────────────
 
+/** One slide of a category/sub-category banner slideshow. */
+export const CategoryBannerImageSchema = z.object({
+  id: z.string(),
+  image: z.string(),
+  /** Phone image for this slide. Absent or null means "use image". */
+  mobileImage: z.string().optional().nullable(),
+  order: z.number().optional(),
+});
+
 export const SubCategorySchema = z.object({
   id: z.string(),
   name: z.string(),
   slug: z.string().optional(),
   categoryId: z.string(),
   productCount: z.number().optional(),
+  bannerImages: z.array(CategoryBannerImageSchema).optional(),
 });
 
 export const CategorySchema = z.object({
@@ -88,10 +98,12 @@ export const CategorySchema = z.object({
   description: z.string().optional(),
   productCount: z.number().optional(),
   subCategories: z.array(SubCategorySchema).optional(),
+  bannerImages: z.array(CategoryBannerImageSchema).optional(),
 });
 
 export type SubCategory = z.infer<typeof SubCategorySchema>;
 export type Category = z.infer<typeof CategorySchema>;
+export type CategoryBannerImage = z.infer<typeof CategoryBannerImageSchema>;
 
 // ─── API Functions ──────────────────────────────────
 

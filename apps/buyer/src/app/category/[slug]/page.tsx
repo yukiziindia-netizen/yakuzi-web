@@ -120,8 +120,7 @@ export default async function CategoryPage({
 
   let categoryName = slug;
   let categoryId = slug;
-  let categoryImage: string | undefined = undefined;
-  let categoryMobileImage: string | undefined = undefined;
+  let bannerSlides: { id?: string; image: string; mobileImage?: string | null }[] = [];
   // NOTE: unknown slugs intentionally do NOT 404 here — the page falls back to
   // rendering the raw slug as the category name with an (empty) product list.
   // Preserving that existing behavior.
@@ -135,19 +134,46 @@ export default async function CategoryPage({
     const base = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000").replace(/\/api$/, "");
     const absolute = (url?: string) =>
       url && url.startsWith('/') ? `${base}${url}` : url;
-    categoryImage = absolute(categoryData.image || undefined);
-    categoryMobileImage = absolute(categoryData.mobileImage || undefined);
 
     // Resolve ?sub=<slug|id> against this category's own sub-categories so the
     // product grid can actually be filtered to it (previously only used for
     // the breadcrumb trail — the grid silently fell back to the whole parent
     // category, e.g. every Figurine showing on a Funko Pop sub-category page).
+    let matchedSub: any;
     if (subSlug && Array.isArray(categoryData.subCategories)) {
-      const matchedSub = categoryData.subCategories.find(
+      matchedSub = categoryData.subCategories.find(
         (s: any) => s.id === subSlug || s.slug === subSlug,
       );
       subCategoryId = matchedSub?.id;
       matchedSubName = matchedSub?.name;
+    }
+
+    // Banner slideshow: the matched sub-category's own slides when it has
+    // any, else the parent category's, else the category's legacy single
+    // image pair (safety for the window before the API deploy backfills
+    // bannerImages).
+    const toSlides = (rows: any[]): typeof bannerSlides =>
+      rows
+        .filter((r) => r?.image)
+        .map((r) => ({
+          id: r.id,
+          image: absolute(r.image)!,
+          mobileImage: absolute(r.mobileImage || undefined) ?? null,
+        }));
+    const subSlides = Array.isArray(matchedSub?.bannerImages)
+      ? toSlides(matchedSub.bannerImages)
+      : [];
+    const categorySlides = Array.isArray(categoryData.bannerImages)
+      ? toSlides(categoryData.bannerImages)
+      : [];
+    bannerSlides = subSlides.length > 0 ? subSlides : categorySlides;
+    if (bannerSlides.length === 0 && categoryData.image) {
+      bannerSlides = [
+        {
+          image: absolute(categoryData.image)!,
+          mobileImage: absolute(categoryData.mobileImage || undefined) ?? null,
+        },
+      ];
     }
   }
 
@@ -177,15 +203,13 @@ export default async function CategoryPage({
 
       <div className="w-full max-w-[1600px] 2xl:max-w-none mx-auto bg-white overflow-hidden flex flex-col relative min-h-screen">
         <section className="flex-1 flex flex-col w-full">
-          {/* Banner. One responsive component rather than a desktop-only block:
-              it picks the phone artwork itself and falls back to the desktop
-              image when a collection has no separate mobile upload. */}
+          {/* Banner slideshow. One responsive component rather than a
+              desktop-only block: each slide picks the phone artwork itself
+              and falls back to its desktop image when a collection has no
+              separate mobile upload. Sub-category pages show the sub's own
+              slides when it has any, else the parent category's. */}
           <div className="w-full flex-shrink-0 flex flex-col">
-            <CategoryBanner
-              title={categoryName}
-              imageUrl={categoryImage}
-              mobileImageUrl={categoryMobileImage}
-            />
+            <CategoryBanner title={categoryName} banners={bannerSlides} />
           </div>
 
           {/* Mobile Header (Category Name & Breadcrumb) */}

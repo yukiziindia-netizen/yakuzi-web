@@ -5,8 +5,30 @@ import {
   listSeoRedirects, createSeoRedirect, updateSeoRedirect, deleteSeoRedirect,
   listSeoKeywords, createSeoKeyword, updateSeoKeyword, deleteSeoKeyword,
   getSeoKeywordLinks, linkSeoKeyword, unlinkSeoKeyword,
+  getSeoProductSlug, updateSeoProductSlug,
   type SeoEntityType, type KeywordType, type UpsertSeoMetaPayload,
 } from "@/api/seo.api";
+
+// ─── Product URL slug ────────────────────────────────
+
+export function useSeoProductSlug(id?: string) {
+  return useQuery({
+    queryKey: ["admin", "seo", "product-slug", id],
+    queryFn: () => getSeoProductSlug(id as string),
+    enabled: !!id,
+    staleTime: 30_000,
+    retry: 1,
+  });
+}
+
+export function useUpdateSeoProductSlug() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, slug }: { id: string; slug: string }) => updateSeoProductSlug(id, slug),
+    onSuccess: (_data, { id }) =>
+      void qc.invalidateQueries({ queryKey: ["admin", "seo", "product-slug", id] }),
+  });
+}
 
 // ─── Metadata ────────────────────────────────────────
 

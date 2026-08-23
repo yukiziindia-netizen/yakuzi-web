@@ -129,6 +129,32 @@ export interface UpsertSeoMetaPayload {
   imageAltOverrides?: Record<string, string>;
 }
 
+// ─── Product URL slug ────────────────────────────────
+// Catalog-id keyed, same keyspace as PRODUCT SeoMeta records. Unlike the
+// Canonical URL field (a meta tag only), this changes the product's REAL
+// public URL — the backend 301-redirects the old URL automatically.
+
+export interface ProductSlugInfo {
+  id: string;
+  name: string;
+  slug: string | null;
+}
+
+export async function getSeoProductSlug(id: string): Promise<ProductSlugInfo> {
+  const { data } = await apiClient.get<{ data: ProductSlugInfo }>(
+    `/admin/seo/product-slug/${id}`
+  );
+  return data.data;
+}
+
+export async function updateSeoProductSlug(id: string, slug: string): Promise<{ id: string; slug: string }> {
+  const { data } = await apiClient.patch<{ data: { id: string; slug: string } }>(
+    `/admin/seo/product-slug/${id}`,
+    { slug }
+  );
+  return data.data;
+}
+
 // ─── Metadata ────────────────────────────────────────
 
 export async function listSeoMeta(params: {

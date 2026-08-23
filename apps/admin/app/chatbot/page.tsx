@@ -7,12 +7,13 @@ import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { sendChatMessageFull, type ChatMessage } from "@yukizi/api-client";
-import { useCreateChatbotRule, useExtractChatbotRule } from "@/hooks/useChatbot";
+import { useCreateChatbotRule, useExtractChatbotRule, useUpdateChatbotRule } from "@/hooks/useChatbot";
 import { SavedTrainingsPanel } from "@/components/chatbot/saved-trainings-panel";
-import type { ChatbotRuleTier } from "@/api/chatbot.api";
+import type { ChatbotRule, ChatbotRuleTier } from "@/api/chatbot.api";
 
 export default function ChatbotAdminPage() {
   const createRule = useCreateChatbotRule();
+  const updateRule = useUpdateChatbotRule();
   const extractRule = useExtractChatbotRule();
 
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -35,8 +36,40 @@ export default function ChatbotAdminPage() {
   const [draftTrigger, setDraftTrigger] = useState("");
   const [draftInstruction, setDraftInstruction] = useState("");
   const [draftTier, setDraftTier] = useState<ChatbotRuleTier>("SURFACE");
+  // Set while re-teaching an existing training — Save then UPDATES that rule
+  // instead of creating a new one.
+  const [resaveRule, setResaveRule] = useState<ChatbotRule | null>(null);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const sandboxTopRef = useRef<HTMLDivElement>(null);
+
+  const handleContinueTraining = (rule: ChatbotRule) => {
+    const stored = Array.isArray(rule.history) ? rule.history : [];
+    if (stored.length > 0) {
+      setMessages(stored.map((m) => ({ role: m.role, content: m.content ?? "" })));
+    } else {
+      // Rules saved before conversations were stored: seed the sandbox with a
+      // recap of the rule so the bot has the context to build on.
+      setMessages([
+        {
+          role: "user",
+          content: `Earlier training — when someone asks about "${rule.trigger}", you should: ${rule.instruction}`,
+        },
+        {
+          role: "assistant",
+          content: "Understood — that's my current training on this. Tell me how you'd like to refine it. 😊",
+        },
+      ]);
+    }
+    setResaveRule(rule);
+    sandboxTopRef.current?.scrollIntoView({ behavior: "smooth" });
+    toast.success("Training loaded — keep teaching, then hit Resave training.");
+  };
+
+  const cancelResave = () => {
+    setResaveRule(null);
+    setMessages([]);
+  };
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -72,7 +105,7 @@ export default function ChatbotAdminPage() {
       toast.error("You need at least one user-assistant exchange to save a training.");
       return;
     }
-    setDraftTier("SURFACE");
+    setDraftTier(resaveRule?.tier ?? "SURFACE");
     try {
       // Gemini distills the conversation into an editable trigger→instruction
       // draft. Failing extraction shouldn't block saving — fill in manually.
@@ -80,26 +113,35 @@ export default function ChatbotAdminPage() {
       setDraftTrigger(draft.trigger);
       setDraftInstruction(draft.instruction);
     } catch {
-      setDraftTrigger("");
-      setDraftInstruction("");
+      // On a resave, the rule's current values are a better fallback than blanks.
+      setDraftTrigger(resaveRule?.trigger ?? "");
+      setDraftInstruction(resaveRule?.instruction ?? "");
       toast.error("Couldn't auto-extract a rule — fill it in manually below.");
     }
     setIsSaveModalOpen(true);
   };
 
   const handleConfirmSave = async () => {
-    if (createRule.isPending) return;
+    if (createRule.isPending || updateRule.isPending) return;
     if (!draftTrigger.trim() || !draftInstruction.trim()) {
       toast.error("Both fields are required.");
       return;
     }
+    const payload = {
+      trigger: draftTrigger.trim(),
+      instruction: draftInstruction.trim(),
+      tier: draftTier,
+      history: messages.map((m) => ({ role: m.role, content: m.content })),
+    };
     try {
-      await createRule.mutateAsync({
-        trigger: draftTrigger.trim(),
-        instruction: draftInstruction.trim(),
-        tier: draftTier,
-      });
-      toast.success("Training saved — the live chatbot updates immediately.");
+      if (resaveRule) {
+        await updateRule.mutateAsync({ id: resaveRule.id, payload });
+        toast.success("Training resaved — the live chatbot updates immediately.");
+        setResaveRule(null);
+      } else {
+        await createRule.mutateAsync(payload);
+        toast.success("Training saved — the live chatbot updates immediately.");
+      }
       setIsSaveModalOpen(false);
     } catch (err: any) {
       toast.error(err?.response?.data?.message ?? "Failed to save training.");
@@ -157,6 +199,7 @@ export default function ChatbotAdminPage() {
         </div>
 
         <div className="max-w-3xl mx-auto">
+          <div ref={sandboxTopRef} />
           {/* Sandbox Chat */}
           <div className="glass flex flex-col rounded-2xl border border-white/20 h-[700px] overflow-hidden shadow-2xl mb-8">
             <div className="p-4 border-b border-white/20 bg-accent/20 flex items-center justify-between">
@@ -170,8 +213,10 @@ export default function ChatbotAdminPage() {
                     setConfirmDialog({
                       isOpen: true,
                       title: "Clear Chat",
-                      message: "Are you sure you want to clear the sandbox chat?",
-                      onConfirm: () => setMessages([]),
+                      message: resaveRule
+                        ? "Clear the sandbox chat? This also stops re-teaching the loaded training (the training itself is untouched)."
+                        : "Are you sure you want to clear the sandbox chat?",
+                      onConfirm: cancelResave,
                     });
                   }}
                   disabled={messages.length === 0}
@@ -186,10 +231,25 @@ export default function ChatbotAdminPage() {
                   className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-primary transition-colors disabled:opacity-30 disabled:hover:text-muted-foreground"
                 >
                   <Save className="h-3.5 w-3.5" />
-                  {extractRule.isPending ? "Extracting…" : "Save conversation"}
+                  {extractRule.isPending ? "Extracting…" : resaveRule ? "Resave training" : "Save conversation"}
                 </button>
               </div>
             </div>
+
+            {resaveRule && (
+              <div className="px-4 py-2 bg-primary/5 border-b border-primary/20 flex items-center justify-between gap-2 text-xs">
+                <span className="text-primary font-medium truncate">
+                  Re-teaching: {resaveRule.trigger}
+                </span>
+                <button
+                  type="button"
+                  onClick={cancelResave}
+                  className="text-muted-foreground hover:text-foreground font-medium flex-shrink-0"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
 
             <div className="flex-1 p-4 overflow-y-auto space-y-4">
               {messages.length === 0 && (
@@ -251,7 +311,7 @@ export default function ChatbotAdminPage() {
             </form>
           </div>
 
-          <SavedTrainingsPanel />
+          <SavedTrainingsPanel onContinueTraining={handleContinueTraining} />
         </div>
 
         {/* Save Conversation Modal */}
@@ -262,7 +322,7 @@ export default function ChatbotAdminPage() {
               animate={{ opacity: 1, scale: 1 }}
               className="bg-background border border-border rounded-2xl p-6 w-full max-w-md shadow-2xl"
             >
-              <h3 className="text-lg font-bold mb-2">Save this conversation as training</h3>
+              <h3 className="text-lg font-bold mb-2">{resaveRule ? "Resave this training" : "Save this conversation as training"}</h3>
               <p className="text-sm text-muted-foreground mb-4">
                 Review or edit the extracted rule — it becomes live for every customer immediately.
               </p>
@@ -312,7 +372,7 @@ export default function ChatbotAdminPage() {
                 </button>
                 <button
                   onClick={handleConfirmSave}
-                  disabled={createRule.isPending}
+                  disabled={createRule.isPending || updateRule.isPending}
                   className="px-4 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
                 >
                   Confirm

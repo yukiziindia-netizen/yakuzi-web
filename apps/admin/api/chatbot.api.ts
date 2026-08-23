@@ -6,6 +6,11 @@ import { apiClient } from "@/lib/apiClient";
 
 export type ChatbotRuleTier = "CORE" | "SURFACE";
 
+export interface ChatbotRuleHistoryMessage {
+  role: string;
+  content?: string;
+}
+
 export interface ChatbotRule {
   id: string;
   trigger: string;
@@ -13,6 +18,9 @@ export interface ChatbotRule {
   isActive: boolean;
   tier: ChatbotRuleTier;
   order: number;
+  /** The sandbox conversation this rule was distilled from (api#73+);
+   * null/undefined on rules saved before that shipped. */
+  history?: ChatbotRuleHistoryMessage[] | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -26,6 +34,7 @@ export async function createChatbotRule(payload: {
   trigger: string;
   instruction: string;
   tier?: ChatbotRuleTier;
+  history?: ChatbotRuleHistoryMessage[];
 }): Promise<ChatbotRule> {
   const { data } = await apiClient.post<{ data: ChatbotRule }>("/admin/chatbot/rules", payload);
   return data.data;
@@ -33,7 +42,14 @@ export async function createChatbotRule(payload: {
 
 export async function updateChatbotRule(
   id: string,
-  payload: Partial<{ trigger: string; instruction: string; isActive: boolean; tier: ChatbotRuleTier; order: number }>,
+  payload: Partial<{
+    trigger: string;
+    instruction: string;
+    isActive: boolean;
+    tier: ChatbotRuleTier;
+    order: number;
+    history: ChatbotRuleHistoryMessage[];
+  }>,
 ): Promise<ChatbotRule> {
   const { data } = await apiClient.patch<{ data: ChatbotRule }>(`/admin/chatbot/rules/${id}`, payload);
   return data.data;

@@ -7,7 +7,7 @@ import {
   SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Trash2, GripVertical, ChevronDown, Layers, Power, PowerOff } from "lucide-react";
+import { Trash2, GripVertical, ChevronDown, Layers, Power, PowerOff, Pencil, MessageSquare } from "lucide-react";
 import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
 import {
@@ -19,12 +19,14 @@ import type { ChatbotRule, ChatbotRuleTier } from "@/api/chatbot.api";
 // A plain <div> (not motion) deliberately, same reasoning as the homepage-sections
 // list: dnd-kit's drag transform and any enter-animation library would fight over
 // the same CSS transform property on the same element.
-function SortableRuleRow({ rule, disabled, onDelete, onToggleTier, onToggleActive }: {
+function SortableRuleRow({ rule, disabled, onDelete, onToggleTier, onToggleActive, onEdit, onContinueTraining }: {
   rule: ChatbotRule;
   disabled: boolean;
   onDelete: (id: string) => void;
   onToggleTier: (rule: ChatbotRule) => void;
   onToggleActive: (rule: ChatbotRule) => void;
+  onEdit: (rule: ChatbotRule) => void;
+  onContinueTraining?: (rule: ChatbotRule) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: rule.id,
@@ -67,6 +69,24 @@ function SortableRuleRow({ rule, disabled, onDelete, onToggleTier, onToggleActiv
         >
           {rule.tier}
         </button>
+        {onContinueTraining && (
+          <button
+            type="button"
+            onClick={() => onContinueTraining(rule)}
+            className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors flex-shrink-0"
+            title="Reopen this training's conversation in the sandbox to keep teaching, then resave"
+          >
+            <MessageSquare className="h-4 w-4" />
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={() => onEdit(rule)}
+          className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors flex-shrink-0"
+          title="Edit trigger / instruction"
+        >
+          <Pencil className="h-4 w-4" />
+        </button>
         <button
           type="button"
           onClick={() => onToggleActive(rule)}
@@ -93,12 +113,14 @@ function SortableRuleRow({ rule, disabled, onDelete, onToggleTier, onToggleActiv
   );
 }
 
-function TierColumn({ tier, rules, onDelete, onToggleTier, onToggleActive, mutationPending }: {
+function TierColumn({ tier, rules, onDelete, onToggleTier, onToggleActive, onEdit, onContinueTraining, mutationPending }: {
   tier: ChatbotRuleTier;
   rules: ChatbotRule[];
   onDelete: (id: string) => void;
   onToggleTier: (rule: ChatbotRule) => void;
   onToggleActive: (rule: ChatbotRule) => void;
+  onEdit: (rule: ChatbotRule) => void;
+  onContinueTraining?: (rule: ChatbotRule) => void;
   mutationPending: boolean;
 }) {
   const reorder = useReorderChatbotRules();
@@ -146,6 +168,8 @@ function TierColumn({ tier, rules, onDelete, onToggleTier, onToggleActive, mutat
                   onDelete={onDelete}
                   onToggleTier={onToggleTier}
                   onToggleActive={onToggleActive}
+                  onEdit={onEdit}
+                  onContinueTraining={onContinueTraining}
                 />
               ))}
             </div>
@@ -156,12 +180,42 @@ function TierColumn({ tier, rules, onDelete, onToggleTier, onToggleActive, mutat
   );
 }
 
-export function SavedTrainingsPanel() {
+export function SavedTrainingsPanel({ onContinueTraining }: {
+  /** Reopens a saved training's conversation in the sandbox for re-teaching. */
+  onContinueTraining?: (rule: ChatbotRule) => void;
+}) {
   const { data: rules = [], isLoading, isError } = useChatbotRules();
   const deleteRule = useDeleteChatbotRule();
   const updateRule = useUpdateChatbotRule();
   const deleteAll = useDeleteAllChatbotRules();
   const [confirmDeleteAll, setConfirmDeleteAll] = useState(false);
+  const [editingRule, setEditingRule] = useState<ChatbotRule | null>(null);
+  const [editTrigger, setEditTrigger] = useState("");
+  const [editInstruction, setEditInstruction] = useState("");
+
+  const openEdit = (rule: ChatbotRule) => {
+    setEditingRule(rule);
+    setEditTrigger(rule.trigger);
+    setEditInstruction(rule.instruction);
+  };
+
+  const handleConfirmEdit = async () => {
+    if (!editingRule || updateRule.isPending) return;
+    if (!editTrigger.trim() || !editInstruction.trim()) {
+      toast.error("Both fields are required.");
+      return;
+    }
+    try {
+      await updateRule.mutateAsync({
+        id: editingRule.id,
+        payload: { trigger: editTrigger.trim(), instruction: editInstruction.trim() },
+      });
+      toast.success("Training updated — live immediately.");
+      setEditingRule(null);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? "Failed to update training.");
+    }
+  };
 
   const core = rules.filter((r) => r.tier === "CORE");
   const surface = rules.filter((r) => r.tier === "SURFACE");
@@ -233,8 +287,46 @@ export function SavedTrainingsPanel() {
         </p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <TierColumn tier="CORE" rules={core} onDelete={handleDelete} onToggleTier={handleToggleTier} onToggleActive={handleToggleActive} mutationPending={updateRule.isPending} />
-          <TierColumn tier="SURFACE" rules={surface} onDelete={handleDelete} onToggleTier={handleToggleTier} onToggleActive={handleToggleActive} mutationPending={updateRule.isPending} />
+          <TierColumn tier="CORE" rules={core} onDelete={handleDelete} onToggleTier={handleToggleTier} onToggleActive={handleToggleActive} onEdit={openEdit} onContinueTraining={onContinueTraining} mutationPending={updateRule.isPending} />
+          <TierColumn tier="SURFACE" rules={surface} onDelete={handleDelete} onToggleTier={handleToggleTier} onToggleActive={handleToggleActive} onEdit={openEdit} onContinueTraining={onContinueTraining} mutationPending={updateRule.isPending} />
+        </div>
+      )}
+
+      {editingRule && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-background border border-border p-6 rounded-2xl shadow-xl max-w-md w-full">
+            <h3 className="text-lg font-bold mb-2">Edit training</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Changes go live for every customer immediately.
+            </p>
+            <label className="block text-xs font-medium text-muted-foreground mb-1">Trigger (when a customer asks about…)</label>
+            <input
+              type="text"
+              value={editTrigger}
+              onChange={(e) => setEditTrigger(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") setEditingRule(null);
+                if (e.key === "Enter") handleConfirmEdit();
+              }}
+              className="w-full p-3 rounded-xl bg-accent border border-border text-sm outline-none focus:ring-2 focus:ring-primary mb-3"
+              autoFocus
+            />
+            <label className="block text-xs font-medium text-muted-foreground mb-1">Instruction (the bot should…)</label>
+            <textarea
+              value={editInstruction}
+              onChange={(e) => setEditInstruction(e.target.value)}
+              rows={3}
+              className="w-full p-3 rounded-xl bg-accent border border-border text-sm outline-none focus:ring-2 focus:ring-primary mb-6"
+            />
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setEditingRule(null)} className="px-4 py-2 text-sm font-medium hover:bg-accent rounded-xl transition-colors">
+                Cancel
+              </button>
+              <button onClick={handleConfirmEdit} disabled={updateRule.isPending} className="px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50">
+                Save
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

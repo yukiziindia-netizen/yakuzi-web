@@ -7,26 +7,27 @@ import {
   SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Trash2, GripVertical, ChevronDown, Layers } from "lucide-react";
+import { Trash2, GripVertical, ChevronDown, Layers, Power, PowerOff } from "lucide-react";
 import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
 import {
-  useChatbotTrainings, useDeleteChatbotTraining, useUpdateChatbotTraining,
-  useReorderChatbotTrainings, useDeleteAllChatbotTrainings,
+  useChatbotRules, useDeleteChatbotRule, useUpdateChatbotRule,
+  useReorderChatbotRules, useDeleteAllChatbotRules,
 } from "@/hooks/useChatbot";
-import type { ChatbotTraining, ChatbotTrainingTier } from "@/api/chatbot.api";
+import type { ChatbotRule, ChatbotRuleTier } from "@/api/chatbot.api";
 
 // A plain <div> (not motion) deliberately, same reasoning as the homepage-sections
 // list: dnd-kit's drag transform and any enter-animation library would fight over
 // the same CSS transform property on the same element.
-function SortableTrainingRow({ training, disabled, onDelete, onToggleTier }: {
-  training: ChatbotTraining;
+function SortableRuleRow({ rule, disabled, onDelete, onToggleTier, onToggleActive }: {
+  rule: ChatbotRule;
   disabled: boolean;
   onDelete: (id: string) => void;
-  onToggleTier: (training: ChatbotTraining) => void;
+  onToggleTier: (rule: ChatbotRule) => void;
+  onToggleActive: (rule: ChatbotRule) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: training.id,
+    id: rule.id,
     disabled,
   });
   const [expanded, setExpanded] = useState(false);
@@ -36,6 +37,7 @@ function SortableTrainingRow({ training, disabled, onDelete, onToggleTier }: {
     <div ref={setNodeRef} style={style} className={cn(
       "rounded-xl border border-border/60 bg-background",
       isDragging && "opacity-50 bg-accent/20",
+      !rule.isActive && "opacity-60",
     )}>
       <div className="flex items-center gap-2 px-3 py-2.5">
         <span
@@ -52,53 +54,54 @@ function SortableTrainingRow({ training, disabled, onDelete, onToggleTier }: {
           className="flex-1 min-w-0 flex items-center gap-2 text-left"
         >
           <ChevronDown className={cn("h-3.5 w-3.5 flex-shrink-0 text-muted-foreground transition-transform", expanded && "rotate-180")} />
-          <span className="truncate text-sm font-medium text-foreground">{training.label || "Untitled training"}</span>
+          <span className="truncate text-sm font-medium text-foreground">{rule.trigger}</span>
         </button>
         <button
           type="button"
-          onClick={() => onToggleTier(training)}
+          onClick={() => onToggleTier(rule)}
           className={cn(
             "text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0",
-            training.tier === "CORE" ? "bg-primary/15 text-primary" : "bg-gray-100 text-gray-700",
+            rule.tier === "CORE" ? "bg-primary/15 text-primary" : "bg-gray-100 text-gray-700",
           )}
           title="Click to move to the other tier"
         >
-          {training.tier}
+          {rule.tier}
         </button>
-        <span className="text-xs text-muted-foreground flex-shrink-0 hidden sm:block">
-          {new Date(training.createdAt).toLocaleDateString()}
-        </span>
         <button
           type="button"
-          onClick={() => onDelete(training.id)}
+          onClick={() => onToggleActive(rule)}
+          className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors flex-shrink-0"
+          title={rule.isActive ? "Deactivate (bot stops following this rule)" : "Activate"}
+        >
+          {rule.isActive ? <PowerOff className="h-4 w-4" /> : <Power className="h-4 w-4" />}
+        </button>
+        <button
+          type="button"
+          onClick={() => onDelete(rule.id)}
           className="p-1.5 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors flex-shrink-0"
-          title="Delete training"
+          title="Delete rule"
         >
           <Trash2 className="h-4 w-4" />
         </button>
       </div>
       {expanded && (
-        <div className="px-4 pb-3 space-y-2 border-t border-border/40 pt-2">
-          {training.history.map((m, i) => (
-            <div key={i} className="text-xs">
-              <span className="font-semibold text-muted-foreground">{m.role === "user" ? "User: " : "Assistant: "}</span>
-              <span className="text-foreground">{m.content}</span>
-            </div>
-          ))}
+        <div className="px-4 pb-3 border-t border-border/40 pt-2">
+          <p className="text-xs text-foreground whitespace-pre-wrap">{rule.instruction}</p>
         </div>
       )}
     </div>
   );
 }
 
-function TierColumn({ tier, trainings, onDelete, onToggleTier, reorderPending }: {
-  tier: ChatbotTrainingTier;
-  trainings: ChatbotTraining[];
+function TierColumn({ tier, rules, onDelete, onToggleTier, onToggleActive, mutationPending }: {
+  tier: ChatbotRuleTier;
+  rules: ChatbotRule[];
   onDelete: (id: string) => void;
-  onToggleTier: (training: ChatbotTraining) => void;
-  reorderPending: boolean;
+  onToggleTier: (rule: ChatbotRule) => void;
+  onToggleActive: (rule: ChatbotRule) => void;
+  mutationPending: boolean;
 }) {
-  const reorder = useReorderChatbotTrainings();
+  const reorder = useReorderChatbotRules();
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -108,16 +111,16 @@ function TierColumn({ tier, trainings, onDelete, onToggleTier, reorderPending }:
     if (reorder.isPending) return;
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const oldIndex = trainings.findIndex((t) => t.id === active.id);
-    const newIndex = trainings.findIndex((t) => t.id === over.id);
+    const oldIndex = rules.findIndex((r) => r.id === active.id);
+    const newIndex = rules.findIndex((r) => r.id === over.id);
     if (oldIndex === -1 || newIndex === -1) return;
-    const reordered = [...trainings];
+    const reordered = [...rules];
     const [moved] = reordered.splice(oldIndex, 1);
     reordered.splice(newIndex, 0, moved);
     // The apiClient interceptor only toasts on 401/403/5xx — a 400 from the
     // server's exact-id-set check (stale list) would otherwise silently snap
     // the row back with no explanation.
-    reorder.mutateAsync({ tier, orderedIds: reordered.map((t) => t.id) }).catch((err: any) => {
+    reorder.mutateAsync({ tier, orderedIds: reordered.map((r) => r.id) }).catch((err: any) => {
       toast.error(err?.response?.data?.message ?? "Failed to reorder — refresh and try again.");
     });
   };
@@ -127,21 +130,22 @@ function TierColumn({ tier, trainings, onDelete, onToggleTier, reorderPending }:
       <h3 className="text-xs font-bold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
         <Layers className="h-3.5 w-3.5" /> {tier === "CORE" ? "Core" : "Surface"}
       </h3>
-      {trainings.length === 0 ? (
+      {rules.length === 0 ? (
         <p className="text-sm text-muted-foreground py-4 text-center border border-dashed border-border/60 rounded-xl">
           {tier === "CORE" ? "No core trainings yet." : "No surface trainings yet."}
         </p>
       ) : (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={trainings.map((t) => t.id)} strategy={verticalListSortingStrategy}>
+          <SortableContext items={rules.map((r) => r.id)} strategy={verticalListSortingStrategy}>
             <div className="space-y-1.5">
-              {trainings.map((training) => (
-                <SortableTrainingRow
-                  key={training.id}
-                  training={training}
-                  disabled={reorder.isPending || reorderPending}
+              {rules.map((rule) => (
+                <SortableRuleRow
+                  key={rule.id}
+                  rule={rule}
+                  disabled={reorder.isPending || mutationPending}
                   onDelete={onDelete}
                   onToggleTier={onToggleTier}
+                  onToggleActive={onToggleActive}
                 />
               ))}
             </div>
@@ -153,30 +157,38 @@ function TierColumn({ tier, trainings, onDelete, onToggleTier, reorderPending }:
 }
 
 export function SavedTrainingsPanel() {
-  const { data: trainings = [], isLoading, isError } = useChatbotTrainings();
-  const deleteTraining = useDeleteChatbotTraining();
-  const updateTraining = useUpdateChatbotTraining();
-  const deleteAll = useDeleteAllChatbotTrainings();
+  const { data: rules = [], isLoading, isError } = useChatbotRules();
+  const deleteRule = useDeleteChatbotRule();
+  const updateRule = useUpdateChatbotRule();
+  const deleteAll = useDeleteAllChatbotRules();
   const [confirmDeleteAll, setConfirmDeleteAll] = useState(false);
 
-  const core = trainings.filter((t) => t.tier === "CORE");
-  const surface = trainings.filter((t) => t.tier === "SURFACE");
+  const core = rules.filter((r) => r.tier === "CORE");
+  const surface = rules.filter((r) => r.tier === "SURFACE");
 
   const handleDelete = async (id: string) => {
     try {
-      await deleteTraining.mutateAsync(id);
+      await deleteRule.mutateAsync(id);
       toast.success("Training deleted.");
     } catch {
       toast.error("Failed to delete training.");
     }
   };
 
-  const handleToggleTier = async (training: ChatbotTraining) => {
-    const nextTier = training.tier === "CORE" ? "SURFACE" : "CORE";
+  const handleToggleTier = async (rule: ChatbotRule) => {
+    const nextTier = rule.tier === "CORE" ? "SURFACE" : "CORE";
     try {
-      await updateTraining.mutateAsync({ id: training.id, payload: { tier: nextTier } });
+      await updateRule.mutateAsync({ id: rule.id, payload: { tier: nextTier } });
     } catch {
       toast.error("Failed to move training.");
+    }
+  };
+
+  const handleToggleActive = async (rule: ChatbotRule) => {
+    try {
+      await updateRule.mutateAsync({ id: rule.id, payload: { isActive: !rule.isActive } });
+    } catch {
+      toast.error("Failed to update training.");
     }
   };
 
@@ -200,7 +212,7 @@ export function SavedTrainingsPanel() {
             Core trainings are treated as foundational; surface trainings layer on top.
           </p>
         </div>
-        {trainings.length > 0 && (
+        {rules.length > 0 && (
           <button
             type="button"
             onClick={() => setConfirmDeleteAll(true)}
@@ -215,14 +227,14 @@ export function SavedTrainingsPanel() {
         <p className="text-sm text-muted-foreground py-8 text-center">Loading…</p>
       ) : isError ? (
         <p className="text-sm text-red-500 py-8 text-center">Couldn't load trainings — try refreshing.</p>
-      ) : trainings.length === 0 ? (
+      ) : rules.length === 0 ? (
         <p className="text-sm text-muted-foreground py-8 text-center">
           No trainings yet. Teach the bot something in the sandbox above, then "Save conversation."
         </p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <TierColumn tier="CORE" trainings={core} onDelete={handleDelete} onToggleTier={handleToggleTier} reorderPending={updateTraining.isPending} />
-          <TierColumn tier="SURFACE" trainings={surface} onDelete={handleDelete} onToggleTier={handleToggleTier} reorderPending={updateTraining.isPending} />
+          <TierColumn tier="CORE" rules={core} onDelete={handleDelete} onToggleTier={handleToggleTier} onToggleActive={handleToggleActive} mutationPending={updateRule.isPending} />
+          <TierColumn tier="SURFACE" rules={surface} onDelete={handleDelete} onToggleTier={handleToggleTier} onToggleActive={handleToggleActive} mutationPending={updateRule.isPending} />
         </div>
       )}
 

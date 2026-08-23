@@ -2,21 +2,17 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Bot, Save, Send, Trash2, Eraser, Brain, Power, PowerOff } from "lucide-react";
+import { Bot, Save, Send, Eraser, Brain } from "lucide-react";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { sendChatMessageFull, type ChatMessage } from "@yukizi/api-client";
-import {
-  useChatbotRules, useCreateChatbotRule, useUpdateChatbotRule, useDeleteChatbotRule, useExtractChatbotRule,
-} from "@/hooks/useChatbot";
+import { useCreateChatbotTraining } from "@/hooks/useChatbot";
+import { SavedTrainingsPanel } from "@/components/chatbot/saved-trainings-panel";
+import type { ChatbotTrainingTier } from "@/api/chatbot.api";
 
 export default function ChatbotAdminPage() {
-  const { data: rules = [], isLoading: rulesLoading, isError: rulesError } = useChatbotRules();
-  const createRule = useCreateChatbotRule();
-  const updateRule = useUpdateChatbotRule();
-  const deleteRule = useDeleteChatbotRule();
-  const extractRule = useExtractChatbotRule();
+  const createTraining = useCreateChatbotTraining();
 
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean;
@@ -35,8 +31,8 @@ export default function ChatbotAdminPage() {
   const [isTyping, setIsTyping] = useState(false);
 
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
-  const [draftTrigger, setDraftTrigger] = useState("");
-  const [draftInstruction, setDraftInstruction] = useState("");
+  const [draftLabel, setDraftLabel] = useState("");
+  const [draftTier, setDraftTier] = useState<ChatbotTrainingTier>("SURFACE");
 
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -69,77 +65,30 @@ export default function ChatbotAdminPage() {
     }
   };
 
-  const handleOpenSaveModal = async () => {
+  const handleOpenSaveModal = () => {
     if (messages.length < 2) {
-      toast.error("You need at least one user-assistant exchange to save a rule.");
+      toast.error("You need at least one user-assistant exchange to save a training.");
       return;
     }
-    try {
-      const draft = await extractRule.mutateAsync(messages.map((m) => ({ role: m.role, content: m.content })));
-      setDraftTrigger(draft.trigger);
-      setDraftInstruction(draft.instruction);
-    } catch (err) {
-      // Extraction failing shouldn't block saving — admin can type it manually.
-      setDraftTrigger("");
-      setDraftInstruction("");
-      toast.error("Couldn't auto-extract a rule — fill it in manually below.");
-    }
+    const firstUserMessage = messages.find((m) => m.role === "user")?.content ?? "";
+    setDraftLabel(firstUserMessage.slice(0, 80));
+    setDraftTier("SURFACE");
     setIsSaveModalOpen(true);
   };
 
   const handleConfirmSave = async () => {
-    if (createRule.isPending) return;
-    if (!draftTrigger.trim() || !draftInstruction.trim()) {
-      toast.error("Both fields are required.");
-      return;
-    }
+    if (createTraining.isPending) return;
     try {
-      await createRule.mutateAsync({ trigger: draftTrigger.trim(), instruction: draftInstruction.trim() });
-      toast.success("Rule saved.");
+      await createTraining.mutateAsync({
+        history: messages.map((m) => ({ role: m.role, content: m.content })),
+        tier: draftTier,
+        label: draftLabel.trim() || undefined,
+      });
+      toast.success("Training saved — the live chatbot updates immediately.");
       setIsSaveModalOpen(false);
-    } catch (err) {
-      toast.error("Failed to save rule.");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? "Failed to save training.");
     }
-  };
-
-  const handleToggleRule = async (id: string, isActive: boolean) => {
-    try {
-      await updateRule.mutateAsync({ id, payload: { isActive: !isActive } });
-    } catch {
-      toast.error("Failed to update rule.");
-    }
-  };
-
-  const handleDeleteRule = (id: string) => {
-    setConfirmDialog({
-      isOpen: true,
-      title: "Delete Rule",
-      message: "Are you sure you want to delete this rule? The live chatbot will stop following it immediately.",
-      onConfirm: async () => {
-        try {
-          await deleteRule.mutateAsync(id);
-          toast.success("Rule deleted.");
-        } catch {
-          toast.error("Failed to delete rule.");
-        }
-      },
-    });
-  };
-
-  const handleClearAllRules = () => {
-    setConfirmDialog({
-      isOpen: true,
-      title: "Clear All Rules & Reset Memory",
-      message: "Are you sure you want to delete every learned rule? The chatbot will be reset to its default persona.",
-      onConfirm: async () => {
-        try {
-          await Promise.all(rules.map((rule) => deleteRule.mutateAsync(rule.id)));
-          toast.success("All rules cleared — chatbot reset to default persona.");
-        } catch {
-          toast.error("Failed to clear all rules.");
-        }
-      },
-    });
   };
 
   const formatFormattedMessage = (content: string) => {
@@ -218,7 +167,7 @@ export default function ChatbotAdminPage() {
                 </button>
                 <button
                   onClick={handleOpenSaveModal}
-                  disabled={extractRule.isPending || messages.length < 2}
+                  disabled={messages.length < 2}
                   className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-primary transition-colors disabled:opacity-30 disabled:hover:text-muted-foreground"
                 >
                   <Save className="h-3.5 w-3.5" />
@@ -287,77 +236,7 @@ export default function ChatbotAdminPage() {
             </form>
           </div>
 
-          {/* Rules */}
-          <div className="glass p-6 rounded-2xl border border-white/20">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Learned Rules</h2>
-              {rules.length > 0 && (
-                <button
-                  onClick={handleClearAllRules}
-                  className="flex items-center gap-1.5 text-xs font-medium text-red-500 hover:text-red-600 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-500/10"
-                  title="Delete every rule and reset the chatbot to its default persona"
-                >
-                  <Trash2 className="h-3.5 w-3.5" /> Clear All & Reset Memory
-                </button>
-              )}
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead>
-                  <tr className="border-b border-border text-muted-foreground">
-                    <th className="py-3 px-4 font-medium">Trigger</th>
-                    <th className="py-3 px-4 font-medium">Instruction</th>
-                    <th className="py-3 px-4 font-medium">Status</th>
-                    <th className="py-3 px-4 font-medium text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/50">
-                  {rulesLoading ? (
-                    <tr><td colSpan={4} className="py-8 text-center text-muted-foreground">Loading...</td></tr>
-                  ) : rulesError ? (
-                    <tr><td colSpan={4} className="py-8 text-center text-red-500">Couldn't load rules — try refreshing.</td></tr>
-                  ) : rules.length === 0 ? (
-                    <tr>
-                      <td colSpan={4} className="py-8 text-center text-muted-foreground">
-                        No rules yet. Teach the bot something in the sandbox above, then "Save conversation."
-                      </td>
-                    </tr>
-                  ) : (
-                    rules.map((rule) => (
-                      <tr key={rule.id} className="hover:bg-accent/20">
-                        <td className="py-3 px-4 font-medium">{rule.trigger}</td>
-                        <td className="py-3 px-4 text-muted-foreground">{rule.instruction}</td>
-                        <td className="py-3 px-4">
-                          <span className={cn("text-xs font-bold px-2 py-0.5 rounded-full", rule.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700')}>
-                            {rule.isActive ? 'ACTIVE' : 'INACTIVE'}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <button
-                              onClick={() => handleToggleRule(rule.id, rule.isActive)}
-                              disabled={updateRule.isPending}
-                              className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors disabled:opacity-30"
-                              title={rule.isActive ? "Deactivate" : "Activate"}
-                            >
-                              {rule.isActive ? <PowerOff className="h-4 w-4" /> : <Power className="h-4 w-4" />}
-                            </button>
-                            <button
-                              onClick={() => handleDeleteRule(rule.id)}
-                              className="p-1.5 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
-                              title="Delete rule"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <SavedTrainingsPanel />
         </div>
 
         {/* Save Conversation Modal */}
@@ -368,31 +247,39 @@ export default function ChatbotAdminPage() {
               animate={{ opacity: 1, scale: 1 }}
               className="bg-background border border-border rounded-2xl p-6 w-full max-w-md shadow-2xl"
             >
-              <h3 className="text-lg font-bold mb-2">Save conversation as a rule</h3>
+              <h3 className="text-lg font-bold mb-2">Save this conversation as training</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Review or edit before saving — this becomes live for every customer immediately.
+                This becomes live for every customer immediately.
               </p>
-              <label className="block text-xs font-medium text-muted-foreground mb-1">Trigger</label>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">Label</label>
               <input
                 type="text"
-                value={draftTrigger}
-                onChange={(e) => setDraftTrigger(e.target.value)}
+                value={draftLabel}
+                onChange={(e) => setDraftLabel(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Escape") setIsSaveModalOpen(false);
                   if (e.key === "Enter") handleConfirmSave();
                 }}
-                placeholder="e.g. best comic recommendation"
+                placeholder="e.g. return policy question"
                 className="w-full p-3 rounded-xl bg-accent border border-border text-sm outline-none focus:ring-2 focus:ring-primary mb-3"
                 autoFocus
               />
-              <label className="block text-xs font-medium text-muted-foreground mb-1">Instruction</label>
-              <textarea
-                value={draftInstruction}
-                onChange={(e) => setDraftInstruction(e.target.value)}
-                placeholder="e.g. must say kuji kari"
-                rows={3}
-                className="w-full p-3 rounded-xl bg-accent border border-border text-sm outline-none focus:ring-2 focus:ring-primary mb-6"
-              />
+              <label className="block text-xs font-medium text-muted-foreground mb-1">Tier</label>
+              <div className="flex gap-2 mb-6">
+                {(["SURFACE", "CORE"] as const).map((tier) => (
+                  <button
+                    key={tier}
+                    type="button"
+                    onClick={() => setDraftTier(tier)}
+                    className={cn(
+                      "flex-1 px-3 py-2 rounded-xl text-sm font-medium border transition-colors",
+                      draftTier === tier ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-accent",
+                    )}
+                  >
+                    {tier === "CORE" ? "Core" : "Surface"}
+                  </button>
+                ))}
+              </div>
               <div className="flex items-center justify-end gap-3">
                 <button
                   onClick={() => setIsSaveModalOpen(false)}
@@ -402,7 +289,7 @@ export default function ChatbotAdminPage() {
                 </button>
                 <button
                   onClick={handleConfirmSave}
-                  disabled={createRule.isPending}
+                  disabled={createTraining.isPending}
                   className="px-4 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
                 >
                   Confirm

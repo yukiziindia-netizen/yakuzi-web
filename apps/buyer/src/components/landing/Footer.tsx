@@ -66,7 +66,7 @@ export default function Footer() {
               />
             </div>
             <p className="text-sm font-semibold text-gray-400 max-w-xs leading-relaxed mt-2">
-              Delighting pharmacies, one order at a time
+              Delighting fans, one order at a time
             </p>
             <div className="w-16 h-1 bg-purple-600 rounded"></div>
           </div>

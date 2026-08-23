@@ -96,6 +96,8 @@ export default function WishlistPage() {
               <AnimatePresence mode="popLayout">
                 {items.map((item) => {
                   const product = item.product;
+                  const rawImage = product?.images?.[0];
+                  const imageSrc = typeof rawImage === 'string' ? rawImage : (rawImage as any)?.url;
                   return (
                     <motion.div
                       key={item.id}
@@ -107,10 +109,10 @@ export default function WishlistPage() {
                     >
                       {/* Product Image */}
                       <Link href={`/products/${generateProductSlug(product?.name || 'Product', item.productId, product?.slug)}`} className="block relative h-48 bg-gray-50 overflow-hidden">
-                        {product?.images?.[0] ? (
+                        {imageSrc ? (
                           <Image
-                            src={(typeof product.images[0] === 'string' ? product.images[0] : (product.images[0] as any)?.url) || '/products/pharma_bottle.png'}
-                            alt={product.name}
+                            src={imageSrc}
+                            alt={product?.name ?? 'Product'}
                             fill
                             className="object-contain group-hover:scale-105 transition-transform duration-300"
                             sizes="(max-width: 768px) 50vw, 25vw"

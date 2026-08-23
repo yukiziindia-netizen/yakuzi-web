@@ -1,67 +1,71 @@
 "use client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  listChatbotTrainings, createChatbotTraining, updateChatbotTraining, deleteChatbotTraining,
-  deleteAllChatbotTrainings, reorderChatbotTrainings,
-  type ChatbotTrainingTier,
+  listChatbotRules, createChatbotRule, updateChatbotRule, deleteChatbotRule,
+  deleteAllChatbotRules, reorderChatbotRules, extractChatbotRule,
+  type ChatbotRuleTier,
 } from "@/api/chatbot.api";
 
-const KEY = ["admin", "chatbot", "trainings"];
+const KEY = ["admin", "chatbot", "rules"];
 
-export function useChatbotTrainings() {
-  return useQuery({ queryKey: KEY, queryFn: listChatbotTrainings, staleTime: 30_000, retry: 1 });
+export function useChatbotRules() {
+  return useQuery({ queryKey: KEY, queryFn: listChatbotRules, staleTime: 30_000, retry: 1 });
 }
 
-export function useCreateChatbotTraining() {
+export function useCreateChatbotRule() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: createChatbotTraining,
+    mutationFn: createChatbotRule,
     onSuccess: () => void qc.invalidateQueries({ queryKey: KEY }),
   });
 }
 
-export function useUpdateChatbotTraining() {
+export function useUpdateChatbotRule() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: Parameters<typeof updateChatbotTraining>[1] }) =>
-      updateChatbotTraining(id, payload),
+    mutationFn: ({ id, payload }: { id: string; payload: Parameters<typeof updateChatbotRule>[1] }) =>
+      updateChatbotRule(id, payload),
     onSuccess: () => void qc.invalidateQueries({ queryKey: KEY }),
   });
 }
 
-export function useDeleteChatbotTraining() {
+export function useDeleteChatbotRule() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: deleteChatbotTraining,
+    mutationFn: deleteChatbotRule,
     onSuccess: () => void qc.invalidateQueries({ queryKey: KEY }),
   });
 }
 
-export function useDeleteAllChatbotTrainings() {
+export function useDeleteAllChatbotRules() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: deleteAllChatbotTrainings,
+    mutationFn: deleteAllChatbotRules,
     onSuccess: () => void qc.invalidateQueries({ queryKey: KEY }),
   });
 }
 
-export function useReorderChatbotTrainings() {
+export function useExtractChatbotRule() {
+  return useMutation({ mutationFn: extractChatbotRule });
+}
+
+export function useReorderChatbotRules() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ tier, orderedIds }: { tier: ChatbotTrainingTier; orderedIds: string[] }) =>
-      reorderChatbotTrainings(tier, orderedIds),
+    mutationFn: ({ tier, orderedIds }: { tier: ChatbotRuleTier; orderedIds: string[] }) =>
+      reorderChatbotRules(tier, orderedIds),
     onMutate: async ({ tier, orderedIds }) => {
       await qc.cancelQueries({ queryKey: KEY });
-      const previous = qc.getQueryData<Awaited<ReturnType<typeof listChatbotTrainings>>>(KEY);
+      const previous = qc.getQueryData<Awaited<ReturnType<typeof listChatbotRules>>>(KEY);
       if (previous) {
-        const byId = new Map(previous.map((t) => [t.id, t]));
+        const byId = new Map(previous.map((r) => [r.id, r]));
         const reordered = orderedIds
           .map((id, index) => {
-            const t = byId.get(id);
-            return t ? { ...t, order: index } : undefined;
+            const r = byId.get(id);
+            return r ? { ...r, order: index } : undefined;
           })
-          .filter((t): t is NonNullable<typeof t> => !!t);
-        const others = previous.filter((t) => t.tier !== tier);
+          .filter((r): r is NonNullable<typeof r> => !!r);
+        const others = previous.filter((r) => r.tier !== tier);
         qc.setQueryData(KEY, [...others, ...reordered]);
       }
       return { previous };

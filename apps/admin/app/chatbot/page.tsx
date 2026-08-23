@@ -7,12 +7,13 @@ import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { sendChatMessageFull, type ChatMessage } from "@yukizi/api-client";
-import { useCreateChatbotTraining } from "@/hooks/useChatbot";
+import { useCreateChatbotRule, useExtractChatbotRule } from "@/hooks/useChatbot";
 import { SavedTrainingsPanel } from "@/components/chatbot/saved-trainings-panel";
-import type { ChatbotTrainingTier } from "@/api/chatbot.api";
+import type { ChatbotRuleTier } from "@/api/chatbot.api";
 
 export default function ChatbotAdminPage() {
-  const createTraining = useCreateChatbotTraining();
+  const createRule = useCreateChatbotRule();
+  const extractRule = useExtractChatbotRule();
 
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean;
@@ -31,8 +32,9 @@ export default function ChatbotAdminPage() {
   const [isTyping, setIsTyping] = useState(false);
 
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
-  const [draftLabel, setDraftLabel] = useState("");
-  const [draftTier, setDraftTier] = useState<ChatbotTrainingTier>("SURFACE");
+  const [draftTrigger, setDraftTrigger] = useState("");
+  const [draftInstruction, setDraftInstruction] = useState("");
+  const [draftTier, setDraftTier] = useState<ChatbotRuleTier>("SURFACE");
 
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -65,24 +67,37 @@ export default function ChatbotAdminPage() {
     }
   };
 
-  const handleOpenSaveModal = () => {
+  const handleOpenSaveModal = async () => {
     if (messages.length < 2) {
       toast.error("You need at least one user-assistant exchange to save a training.");
       return;
     }
-    const firstUserMessage = messages.find((m) => m.role === "user")?.content ?? "";
-    setDraftLabel(firstUserMessage.slice(0, 80));
     setDraftTier("SURFACE");
+    try {
+      // Gemini distills the conversation into an editable trigger→instruction
+      // draft. Failing extraction shouldn't block saving — fill in manually.
+      const draft = await extractRule.mutateAsync(messages.map((m) => ({ role: m.role, content: m.content })));
+      setDraftTrigger(draft.trigger);
+      setDraftInstruction(draft.instruction);
+    } catch {
+      setDraftTrigger("");
+      setDraftInstruction("");
+      toast.error("Couldn't auto-extract a rule — fill it in manually below.");
+    }
     setIsSaveModalOpen(true);
   };
 
   const handleConfirmSave = async () => {
-    if (createTraining.isPending) return;
+    if (createRule.isPending) return;
+    if (!draftTrigger.trim() || !draftInstruction.trim()) {
+      toast.error("Both fields are required.");
+      return;
+    }
     try {
-      await createTraining.mutateAsync({
-        history: messages.map((m) => ({ role: m.role, content: m.content })),
+      await createRule.mutateAsync({
+        trigger: draftTrigger.trim(),
+        instruction: draftInstruction.trim(),
         tier: draftTier,
-        label: draftLabel.trim() || undefined,
       });
       toast.success("Training saved — the live chatbot updates immediately.");
       setIsSaveModalOpen(false);
@@ -167,11 +182,11 @@ export default function ChatbotAdminPage() {
                 </button>
                 <button
                   onClick={handleOpenSaveModal}
-                  disabled={messages.length < 2}
+                  disabled={extractRule.isPending || messages.length < 2}
                   className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-primary transition-colors disabled:opacity-30 disabled:hover:text-muted-foreground"
                 >
                   <Save className="h-3.5 w-3.5" />
-                  Save conversation
+                  {extractRule.isPending ? "Extracting…" : "Save conversation"}
                 </button>
               </div>
             </div>
@@ -249,20 +264,28 @@ export default function ChatbotAdminPage() {
             >
               <h3 className="text-lg font-bold mb-2">Save this conversation as training</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                This becomes live for every customer immediately.
+                Review or edit the extracted rule — it becomes live for every customer immediately.
               </p>
-              <label className="block text-xs font-medium text-muted-foreground mb-1">Label</label>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">Trigger (when a customer asks about…)</label>
               <input
                 type="text"
-                value={draftLabel}
-                onChange={(e) => setDraftLabel(e.target.value)}
+                value={draftTrigger}
+                onChange={(e) => setDraftTrigger(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Escape") setIsSaveModalOpen(false);
                   if (e.key === "Enter") handleConfirmSave();
                 }}
-                placeholder="e.g. return policy question"
+                placeholder="e.g. best comic recommendation"
                 className="w-full p-3 rounded-xl bg-accent border border-border text-sm outline-none focus:ring-2 focus:ring-primary mb-3"
                 autoFocus
+              />
+              <label className="block text-xs font-medium text-muted-foreground mb-1">Instruction (the bot should…)</label>
+              <textarea
+                value={draftInstruction}
+                onChange={(e) => setDraftInstruction(e.target.value)}
+                placeholder="e.g. recommend Maayan and mention it ships free"
+                rows={3}
+                className="w-full p-3 rounded-xl bg-accent border border-border text-sm outline-none focus:ring-2 focus:ring-primary mb-3"
               />
               <label className="block text-xs font-medium text-muted-foreground mb-1">Tier</label>
               <div className="flex gap-2 mb-6">
@@ -289,7 +312,7 @@ export default function ChatbotAdminPage() {
                 </button>
                 <button
                   onClick={handleConfirmSave}
-                  disabled={createTraining.isPending}
+                  disabled={createRule.isPending}
                   className="px-4 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
                 >
                   Confirm

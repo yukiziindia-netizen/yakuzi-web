@@ -3,15 +3,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Building2, FileText, Upload, CheckCircle2, AlertCircle, ArrowRight,
+  Building2, CheckCircle2, AlertCircle, ArrowRight,
   ArrowLeft, Loader2, Shield, MapPin, Phone, Mail, User, Gift
 } from 'lucide-react';
 import Navbar from '@/components/landing/Navbar';
 import LoginModal from '@/components/landing/LoginModal';
 import AuthGuard from '@/components/shared/AuthGuard';
-import { ExpiryPicker } from '@/components/shared/ExpiryPicker';
 import { useCreateBuyerProfile, useUpdateBuyerProfile, useVerifyPanGst, useBuyerProfile } from '@/hooks/useBuyerProfile';
-import { useUploadDrugLicense } from '@/hooks/useStorage';
 import { useToast } from '@/components/shared/Toast';
 import { useAuth } from '@yukizi/api-client';
 import { useRouter } from 'next/navigation';
@@ -34,10 +32,7 @@ export default function OnboardingPage() {
   const createProfile = useCreateBuyerProfile();
   const updateProfile = useUpdateBuyerProfile();
   const verifyPanGst = useVerifyPanGst();
-  const uploadKyc = useUploadDrugLicense();
   const { data: existingProfile, isLoading: isProfileLoading } = useBuyerProfile();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const fileInputRef2 = useRef<HTMLInputElement>(null);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
 
   const [step, setStep] = useState<Step>(1);
@@ -46,12 +41,6 @@ export default function OnboardingPage() {
     email: '',
     gstNumber: '',
     panNumber: '',
-    drugLicenseNumber: '',
-    drugLicenseUrl: '',
-    drugLicenseExpiry: (() => { const d = new Date(); d.setFullYear(d.getFullYear() + 1); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; })(),
-    drugLicenseNumber2: '',
-    drugLicenseUrl2: '',
-    drugLicenseExpiry2: (() => { const d = new Date(); d.setFullYear(d.getFullYear() + 1); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; })(),
     address: '',
     city: '',
     state: '',
@@ -63,10 +52,6 @@ export default function OnboardingPage() {
   const [panVerified, setPanVerified] = useState(false);
   const [verifyType, setVerifyType] = useState<'GST' | 'PAN'>('GST');
   const [verificationResult, setVerificationResult] = useState<{ legalName?: string; address?: string; status?: boolean; message?: string } | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [uploading2, setUploading2] = useState(false);
-  const [uploadedFileName, setUploadedFileName] = useState('');
-  const [uploadedFileName2, setUploadedFileName2] = useState('');
   const [isFetchingPincode, setIsFetchingPincode] = useState(false);
 
   // Auto-fill City/State from Pincode
@@ -121,11 +106,6 @@ export default function OnboardingPage() {
       if (!panVerified) e.panNumber = 'Please verify your PAN number first';
     }
     
-    if (!form.drugLicenseNumber.trim()) e.drugLicenseNumber = 'Drug license 1 is required';
-    if (!form.drugLicenseNumber2.trim()) e.drugLicenseNumber2 = 'Drug license 2 is required';
-    if (!form.drugLicenseUrl) e.drugLicenseUrl = 'Please upload license 1 document';
-    if (!form.drugLicenseUrl2) e.drugLicenseUrl2 = 'Please upload license 2 document';
-
     // Address validation (merged from step 2)
     if (!form.address.trim()) e.address = 'Address is required';
     if (!form.city.trim()) e.city = 'City is required';
@@ -181,36 +161,6 @@ export default function OnboardingPage() {
     });
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'drugLicenseUrl' | 'drugLicenseUrl2') => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      toast('File size must be less than 5MB', 'error');
-      return;
-    }
-    const isField1 = field === 'drugLicenseUrl';
-    if (isField1) setUploading(true);
-    else setUploading2(true);
-
-    uploadKyc.mutate(file, {
-      onSuccess: (res: any) => {
-        const urlOrKey = res.url || res.key || (typeof res === 'string' ? res : '');
-        updateField(field, urlOrKey);
-        if (isField1) setUploadedFileName(file.name);
-        else setUploadedFileName2(file.name);
-        
-        if (isField1) setUploading(false);
-        else setUploading2(false);
-        toast('Document uploaded', 'success');
-      },
-      onError: () => {
-        if (isField1) setUploading(false);
-        else setUploading2(false);
-        toast('Upload failed', 'error');
-      },
-    });
-  };
-
   const handleNext = () => {
     if (step === 1 && validateStep1()) setStep(2);
   };
@@ -220,12 +170,6 @@ export default function OnboardingPage() {
       legalName: form.legalName.trim(),
       gstNumber: form.gstNumber.trim().toUpperCase(),
       panNumber: form.panNumber.trim().toUpperCase(),
-      drugLicenseNumber: form.drugLicenseNumber.trim(),
-      drugLicenseUrl: form.drugLicenseUrl || undefined,
-      drugLicenseExpiry: form.drugLicenseExpiry ? new Date(form.drugLicenseExpiry).toISOString() : undefined,
-      drugLicenseNumber2: form.drugLicenseNumber2.trim(),
-      drugLicenseUrl2: form.drugLicenseUrl2 || undefined,
-      drugLicenseExpiry2: form.drugLicenseExpiry2 ? new Date(form.drugLicenseExpiry2).toISOString() : undefined,
       address: {
         street1: form.address.trim(),
         street2: '',
@@ -233,20 +177,6 @@ export default function OnboardingPage() {
         state: form.state,
         pincode: form.pincode.trim(),
       },
-      licence: form.drugLicenseNumber.trim() ? [
-        {
-          type: 'DL20B',
-          number: form.drugLicenseNumber.trim(),
-          expiry: form.drugLicenseExpiry || '',
-          imgUrl: form.drugLicenseUrl || undefined,
-        },
-        ...(form.drugLicenseNumber2.trim() ? [{
-          type: 'DL21B',
-          number: form.drugLicenseNumber2.trim(),
-          expiry: form.drugLicenseExpiry2 || '',
-          imgUrl: form.drugLicenseUrl2 || undefined,
-        }] : [])
-      ] : undefined,
       gstPanResponse: verificationResult || undefined,
       inviteCode: form.inviteCode.trim() || undefined,
     };
@@ -496,88 +426,6 @@ export default function OnboardingPage() {
                       {errors.legalName && <p className="text-xs text-red-500 mt-1">{errors.legalName}</p>}
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Drug License Number 1 (Form 20B)</label>
-                        <input
-                          type="text"
-                          value={form.drugLicenseNumber}
-                          onChange={(e) => updateField('drugLicenseNumber', e.target.value)}
-                          placeholder="Enter license number"
-                          className={`w-full px-4 py-3 rounded-xl border ${errors.drugLicenseNumber ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-gray-50/50'} focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 outline-none transition-colors`}
-                        />
-                        {errors.drugLicenseNumber && <p className="text-xs text-red-500 mt-1">{errors.drugLicenseNumber}</p>}
-                      </div>
-                      <div>
-                        <ExpiryPicker
-                          label="Expiry Date 1"
-                          value={form.drugLicenseExpiry}
-                          onChange={(val) => updateField('drugLicenseExpiry', val)}
-                          error={errors.drugLicenseExpiry}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Drug License Number 2 (Form 21B)</label>
-                        <input
-                          type="text"
-                          value={form.drugLicenseNumber2}
-                          onChange={(e) => updateField('drugLicenseNumber2', e.target.value)}
-                          placeholder="Enter second license number"
-                          className={`w-full px-4 py-3 rounded-xl border ${errors.drugLicenseNumber2 ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-gray-50/50'} focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 outline-none transition-colors`}
-                        />
-                        {errors.drugLicenseNumber2 && <p className="text-xs text-red-500 mt-1">{errors.drugLicenseNumber2}</p>}
-                      </div>
-                      <div>
-                        <ExpiryPicker
-                          label="Expiry Date 2"
-                          value={form.drugLicenseExpiry2}
-                          onChange={(val) => updateField('drugLicenseExpiry2', val)}
-                          error={errors.drugLicenseExpiry2}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Upload License 1</label>
-                        <input ref={fileInputRef} type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => handleFileUpload(e, 'drugLicenseUrl')} className="hidden" />
-                        <button
-                          onClick={() => fileInputRef.current?.click()}
-                          disabled={uploading}
-                          className={`w-full flex items-center justify-center gap-2 px-4 py-6 border-2 border-dashed ${errors.drugLicenseUrl ? 'border-red-300 bg-red-50' : 'border-gray-200'} rounded-xl hover:border-emerald-400 transition-colors text-gray-500 hover:text-emerald-600`}
-                        >
-                          {uploading ? (
-                            <><Loader2 className="w-4 h-4 animate-spin" /> Uploading...</>
-                          ) : uploadedFileName ? (
-                            <><CheckCircle2 className="w-4 h-4 text-emerald-500" /> {uploadedFileName.slice(0, 15)}...</>
-                          ) : (
-                            <><Upload className="w-4 h-4" /> Upload 1 (PDF/JPG)</>
-                          )}
-                        </button>
-                        {errors.drugLicenseUrl && <p className="text-xs text-red-500 mt-1">{errors.drugLicenseUrl}</p>}
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Upload License 2</label>
-                        <input ref={fileInputRef2} type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => handleFileUpload(e, 'drugLicenseUrl2')} className="hidden" />
-                        <button
-                          onClick={() => fileInputRef2.current?.click()}
-                          disabled={uploading2}
-                          className={`w-full flex items-center justify-center gap-2 px-4 py-6 border-2 border-dashed ${errors.drugLicenseUrl2 ? 'border-red-300 bg-red-50' : 'border-gray-200'} rounded-xl hover:border-emerald-400 transition-colors text-gray-500 hover:text-emerald-600`}
-                        >
-                          {uploading2 ? (
-                            <><Loader2 className="w-4 h-4 animate-spin" /> Uploading...</>
-                          ) : uploadedFileName2 ? (
-                            <><CheckCircle2 className="w-4 h-4 text-emerald-500" /> {uploadedFileName2.slice(0, 15)}...</>
-                          ) : (
-                            <><Upload className="w-4 h-4" /> Upload 2 (PDF/JPG)</>
-                          )}
-                        </button>
-                        {errors.drugLicenseUrl2 && <p className="text-xs text-red-500 mt-1">{errors.drugLicenseUrl2}</p>}
-                      </div>
-                    </div>
                   </div>
 
                   <div className="space-y-5 pt-8 border-t border-gray-100">
@@ -669,10 +517,6 @@ export default function OnboardingPage() {
                         { label: 'Business Name', value: form.legalName },
                         { label: 'GST Number', value: form.gstNumber, verified: gstVerified },
                         { label: 'PAN Number', value: form.panNumber, verified: panVerified },
-                        { label: 'Drug License 1', value: form.drugLicenseNumber },
-                        { label: 'Expiry 1', value: form.drugLicenseExpiry ? new Date(form.drugLicenseExpiry).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }) : '—' },
-                        { label: 'Drug License 2', value: form.drugLicenseNumber2 },
-                        { label: 'Expiry 2', value: form.drugLicenseExpiry2 ? new Date(form.drugLicenseExpiry2).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }) : '—' },
                         { label: 'City', value: form.city },
                         { label: 'State', value: form.state },
                         { label: 'Pincode', value: form.pincode },
@@ -690,22 +534,6 @@ export default function OnboardingPage() {
                       <p className="text-xs text-gray-500 mb-0.5">Address</p>
                       <p className="text-sm font-medium text-gray-900">{form.address || '—'}</p>
                     </div>
-                    {uploadedFileName && (
-                      <div className="bg-gray-50 rounded-xl p-3">
-                        <p className="text-xs text-gray-500 mb-0.5">Drug License 1</p>
-                        <p className="text-sm font-medium text-emerald-700 flex items-center gap-1">
-                          <FileText className="w-3.5 h-3.5" /> {uploadedFileName}
-                        </p>
-                      </div>
-                    )}
-                    {uploadedFileName2 && (
-                      <div className="bg-gray-50 rounded-xl p-3">
-                        <p className="text-xs text-gray-500 mb-0.5">Drug License 2</p>
-                        <p className="text-sm font-medium text-emerald-700 flex items-center gap-1">
-                          <FileText className="w-3.5 h-3.5" /> {uploadedFileName2}
-                        </p>
-                      </div>
-                    )}
                   </div>
 
                   <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-100 rounded-xl">

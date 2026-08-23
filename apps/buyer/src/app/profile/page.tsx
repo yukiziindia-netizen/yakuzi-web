@@ -129,10 +129,6 @@ export default function ProfilePage() {
                     <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-1">PAN Number</label>
                     <p className="text-lg font-bold text-gray-800">{profile.panNumber || '—'}</p>
                   </div>
-                  <div>
-                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-1">Drug License</label>
-                    <p className="text-lg font-bold text-gray-800">{profile.drugLicenseNumber || '—'}</p>
-                  </div>
                 </div>
               </motion.div>
 

@@ -167,7 +167,7 @@ export default function SearchBar({ isOpen = false, onClose }: SearchBarProps) {
                           <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center flex-shrink-0">
                             {product.images?.[0] ? (
                               <img
-                                src={typeof product.images[0] === 'string' ? product.images[0] : (product.images[0] as any)?.url || '/products/pharma_bottle.png'}
+                                src={typeof product.images[0] === 'string' ? product.images[0] : ((product.images[0] as any)?.url || `https://placehold.co/80x80/10b981/ffffff?text=${encodeURIComponent((product.name || 'P').trim().substring(0, 2).toUpperCase())}`)}
                                 alt={product.name ?? 'Product'}
                                 loading="lazy"
                                 decoding="async"

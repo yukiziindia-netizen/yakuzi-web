@@ -13,7 +13,7 @@ import { useClearCart } from '@/hooks/useCart';
 import AuthGuard from '@/components/shared/AuthGuard';
 import { generateProductSlug } from '@yukizi/utils';
 
-const STATUS_ORDER = ['PLACED', 'ACCEPTED', 'PAYMENT_RECEIVED', 'READY_TO_SHIP', 'DISPATCHED_FROM_SELLER', 'RECEIVED_AT_WAREHOUSE', 'SHIPPED', 'OUT_FOR_DELIVERY', 'DELIVERED'];
+const STATUS_ORDER = ['PLACED', 'ACCEPTED', 'READY_TO_SHIP', 'DISPATCHED_FROM_SELLER', 'SHIPPED', 'OUT_FOR_DELIVERY', 'DELIVERED'];
 
 function normalizeStatus(s: string | undefined): string {
   const status = (s || '').toUpperCase();
@@ -24,6 +24,10 @@ function normalizeStatus(s: string | undefined): string {
     READY_FOR_PICKUP: 'SHIPPED',
     OUT_FOR_DELIVERY: 'OUT_FOR_DELIVERY',
     COMPLETED: 'DELIVERED',
+    // "Paid" and "At Warehouse" were removed from the pipeline; legacy
+    // orders still in those states render at the nearest surviving step.
+    PAYMENT_RECEIVED: 'ACCEPTED',
+    RECEIVED_AT_WAREHOUSE: 'DISPATCHED_FROM_SELLER',
   };
   return map[status] ?? status;
 }
@@ -58,7 +62,7 @@ function buildTimelineSteps(status: string | undefined, order?: any) {
     ];
   }
 
-  const labels = ['Order Placed', 'Confirmed', 'Paid', 'Ready to Ship', 'Dispatched from Seller', 'Received at Warehouse', 'Shipped', 'Out for Delivery', 'Delivered'];
+  const labels = ['Order Placed', 'Confirmed', 'Ready to Ship', 'Dispatched from Seller', 'Shipped', 'Out for Delivery', 'Delivered'];
   const currentIdx = STATUS_ORDER.indexOf(normalized);
   
   // Also handle cases where status might be slightly ahead/behind
@@ -70,7 +74,10 @@ function buildTimelineSteps(status: string | undefined, order?: any) {
     description: idx <= activeIdx ? '' : 'Pending',
     isCompleted: idx <= activeIdx,
     isActive: idx === activeIdx + 1,
-    action: label === 'Paid' && idx === activeIdx + 1 && !order?.payments?.some((p: any) => p.proofUrl) ? (
+    // The Pay Now affordance used to hang off the removed "Paid" step;
+    // surface it on the Confirmed step instead while payment proof is
+    // still missing, so unpaid buyers keep a visible path to pay.
+    action: label === 'Confirmed' && idx >= activeIdx && !order?.payments?.some((p: any) => p.proofUrl) && order?.paymentStatus !== 'SUCCESS' ? (
       <Link 
         href={`/payments/${order.id}`} 
         className="px-4 py-1.5 bg-lime-400 hover:bg-lime-500 text-gray-900 rounded-full text-xs font-bold uppercase tracking-wider transition-all shadow-lg shadow-lime-200/50 flex items-center gap-1.5"

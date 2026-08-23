@@ -32,6 +32,7 @@ export default function AdminOrdersPage() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<string>("all");
   const [page, setPage] = useState(1);
+  const [showTestOrders, setShowTestOrders] = useState(false);
   const PAGE_LIMIT = 20;
 
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
@@ -41,7 +42,7 @@ export default function AdminOrdersPage() {
 
   useEffect(() => {
     setPage(1);
-  }, [search, filter, dateRange]);
+  }, [search, filter, dateRange, showTestOrders]);
 
   const { data: ordersData, isLoading } = useAdminOrdersFiltered({
     page,
@@ -50,6 +51,7 @@ export default function AdminOrdersPage() {
     search: search || undefined,
     dateFrom: dateRange?.from?.toISOString(),
     dateTo: dateRange?.to?.toISOString(),
+    includeTestOrders: showTestOrders ? "true" : undefined,
   });
   const updateStatus = useUpdateAdminOrderStatus();
 
@@ -142,6 +144,17 @@ export default function AdminOrdersPage() {
               <button key={v} onClick={() => setFilter(v)}
                 className={cn("px-3 py-2 rounded-xl text-xs font-medium border transition-all", filter === v ? "bg-primary text-white border-primary" : "border-border text-muted-foreground hover:bg-accent/60")}>{label}</button>
             ))}
+          </div>
+          <div className="flex gap-1.5 flex-wrap">
+            <button
+              onClick={() => setShowTestOrders((v) => !v)}
+              className={cn(
+                "px-3 py-2 rounded-xl text-xs font-medium border transition-all whitespace-nowrap",
+                showTestOrders ? "bg-primary text-white border-primary" : "border-border text-muted-foreground hover:bg-accent/60"
+              )}
+            >
+              {showTestOrders ? "Hide test orders" : "Show test orders"}
+            </button>
           </div>
         </div>
 

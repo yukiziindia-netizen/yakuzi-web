@@ -15,10 +15,8 @@ import toast from "react-hot-toast";
 const ORDER_STATUSES = [
   { key: "PLACED", label: "Placed", icon: Clock, color: "bg-yellow-500" },
   { key: "ACCEPTED", label: "Accepted", icon: CheckCircle, color: "bg-blue-500" },
-  { key: "PAYMENT_RECEIVED", label: "Paid", icon: CreditCard, color: "bg-teal-500" },
   { key: "READY_TO_SHIP", label: "Ready to Ship", icon: Package, color: "bg-cyan-500" },
   { key: "DISPATCHED_FROM_SELLER", label: "Dispatched", icon: Package, color: "bg-orange-500" },
-  { key: "RECEIVED_AT_WAREHOUSE", label: "At Warehouse", icon: MapPin, color: "bg-amber-500" },
   { key: "SHIPPED", label: "Shipped", icon: Truck, color: "bg-indigo-500" },
   { key: "OUT_FOR_DELIVERY", label: "Out for Delivery", icon: Package, color: "bg-purple-500" },
   { key: "DELIVERED", label: "Delivered", icon: CheckCircle, color: "bg-green-500" },
@@ -153,7 +151,16 @@ export default function OrderDetailPage() {
 
   // Normalize legacy status values from backend
   const normalizeStatus = (s: string) => {
-    const map: Record<string, string> = { CONFIRMED: "ACCEPTED", PROCESSING: "ACCEPTED", TRANSIT: "SHIPPED" };
+    // PAYMENT_RECEIVED ("Paid") and RECEIVED_AT_WAREHOUSE ("At Warehouse")
+    // were removed from the pipeline; legacy orders still in them render at
+    // the nearest surviving step.
+    const map: Record<string, string> = {
+      CONFIRMED: "ACCEPTED",
+      PROCESSING: "ACCEPTED",
+      TRANSIT: "SHIPPED",
+      PAYMENT_RECEIVED: "ACCEPTED",
+      RECEIVED_AT_WAREHOUSE: "DISPATCHED_FROM_SELLER",
+    };
     return map[s] ?? s;
   };
   const normalizedStatus = normalizeStatus(order.orderStatus);

@@ -15,9 +15,8 @@ const STATUS_FILTERS = [
   { label: "All", v: "all" },
   { label: "Placed", v: "PLACED" },
   { label: "Accepted", v: "ACCEPTED" },
-  { label: "Paid", v: "PAYMENT_RECEIVED" },
+  { label: "Ready to Ship", v: "READY_TO_SHIP" },
   { label: "Dispatched", v: "DISPATCHED_FROM_SELLER" },
-  { label: "At Warehouse", v: "RECEIVED_AT_WAREHOUSE" },
   { label: "Shipped", v: "SHIPPED" },
   { label: "Delivered", v: "DELIVERED" },
   { label: "Cancelled", v: "CANCELLED" },
@@ -64,16 +63,18 @@ export default function AdminOrdersPage() {
 
   const handleOverride = async (e: React.MouseEvent, orderId: string, currentStatus: string, targetStatus?: string) => {
     e.stopPropagation();
+    // "Paid" and "At Warehouse" were removed from the pipeline — they no
+    // longer appear as targets, but stay as SOURCE keys so legacy orders
+    // sitting in them can still be advanced. READY_TO_SHIP stays in the
+    // sequence — it's the transition that pushes the order to Shiprocket
+    // (see OrdersService.pushOrderToShiprocketIfNeeded) for any order the
+    // seller-shipping-details auto-push missed.
     const nextMap: Record<string, string> = {
       PLACED: "ACCEPTED",
-      ACCEPTED: "PAYMENT_RECEIVED",
-      // READY_TO_SHIP must stay in this sequence — it's the transition that
-      // pushes the order to Shiprocket (see OrdersService.pushOrderToShiprocketIfNeeded).
-      // Skipping straight to DISPATCHED_FROM_SELLER here silently never creates
-      // the Shiprocket shipment.
+      ACCEPTED: "READY_TO_SHIP",
       PAYMENT_RECEIVED: "READY_TO_SHIP",
       READY_TO_SHIP: "DISPATCHED_FROM_SELLER",
-      DISPATCHED_FROM_SELLER: "RECEIVED_AT_WAREHOUSE",
+      DISPATCHED_FROM_SELLER: "SHIPPED",
       RECEIVED_AT_WAREHOUSE: "SHIPPED",
       SHIPPED: "OUT_FOR_DELIVERY",
       OUT_FOR_DELIVERY: "DELIVERED",
@@ -209,10 +210,10 @@ export default function AdminOrdersPage() {
                       </div>
                     </td>
                     <td className="px-5 py-4">
-                      {["PLACED", "ACCEPTED", "PAYMENT_RECEIVED", "READY_TO_SHIP", "DISPATCHED_FROM_SELLER", "RECEIVED_AT_WAREHOUSE", "SHIPPED", "OUT_FOR_DELIVERY"].includes(o.orderStatus) && (
+                      {["PLACED", "ACCEPTED", "PAYMENT_RECEIVED", "READY_TO_SHIP", "DISPATCHED_FROM_SELLER", "RECEIVED_AT_WAREHOUSE", "SHIPPED", "OUT_FOR_DELIVERY"].includes(o.orderStatus) && ( /* legacy statuses kept so old orders stay advanceable */
                         <div className="flex flex-col items-start gap-1">
                           <button onClick={(e) => void handleOverride(e, o.id, o.orderStatus)} className="text-xs text-primary underline hover:text-primary/80">
-                            → {o.orderStatus === "PLACED" ? "Accept" : o.orderStatus === "ACCEPTED" ? "Mark Paid" : o.orderStatus === "PAYMENT_RECEIVED" ? "Ready to Ship" : o.orderStatus === "READY_TO_SHIP" ? "Dispatch" : o.orderStatus === "DISPATCHED_FROM_SELLER" ? "Recv at Wh" : o.orderStatus === "RECEIVED_AT_WAREHOUSE" ? "Ship" : o.orderStatus === "SHIPPED" ? "Out for Delivery" : "Deliver"}
+                            → {o.orderStatus === "PLACED" ? "Accept" : o.orderStatus === "ACCEPTED" ? "Ready to Ship" : o.orderStatus === "PAYMENT_RECEIVED" ? "Ready to Ship" : o.orderStatus === "READY_TO_SHIP" ? "Dispatch" : o.orderStatus === "DISPATCHED_FROM_SELLER" ? "Ship" : o.orderStatus === "RECEIVED_AT_WAREHOUSE" ? "Ship" : o.orderStatus === "SHIPPED" ? "Out for Delivery" : "Deliver"}
                           </button>
                         </div>
                       )}

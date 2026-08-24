@@ -133,16 +133,19 @@ export default function HeroSection({ initialBanners }: { initialBanners?: any[]
     <div className="relative z-10 flex w-full flex-col bg-white">
       {/* Top Main Section: full-width banner, cycling when there is more than one */}
       <div className="border-b border-gray-200">
-        {/* Desktop (lg+, where the wide banner art shows): the box keeps the
-            banner's own aspect ratio instead of a fixed height, so the art is
-            never cropped on narrower laptops (a 300px-tall box is only ~4.3:1
-            at 1280px while the uploads are 1600x279 = 5.73:1 — the sides were
-            getting cut). If future uploads use a different ratio they
-            letterbox on the white background rather than crop. Phones/tablets
-            keep the fixed heights: the separate mobile art (~1.5:1) already
-            matches those boxes. */}
+        {/* The box keeps the banner art's own aspect ratio at every width
+            instead of a fixed height, so the art is never cropped. This used
+            to be lg+-only (desktop boxes were fixed-height, e.g. 300px at
+            1280px is only ~4.3:1 against 1600x279 = 5.73:1 art — the sides
+            got cut) with phones/tablets left on fixed heights on the theory
+            that the mobile art (~1.5:1) was close enough - it wasn't at
+            tablet widths (e.g. 768px/300px ≈ 2.56:1 against 1.52:1 art crops
+            the top/bottom by nearly half). Now aspect-ratio-driven
+            everywhere, with object-contain so any future upload at a
+            different ratio letterboxes on the white background rather than
+            cropping. */}
         <div
-          className="relative h-[250px] w-full overflow-hidden bg-white md:h-[300px] lg:aspect-[1600/279] lg:h-auto"
+          className="relative w-full overflow-hidden bg-white aspect-[1920/1264] lg:aspect-[1600/279]"
           onMouseEnter={() => setIsBannerPaused(true)}
           onMouseLeave={() => setIsBannerPaused(false)}
           role={hasBannerSlideshow ? 'region' : undefined}
@@ -153,7 +156,7 @@ export default function HeroSection({ initialBanners }: { initialBanners?: any[]
             <img
               src={heroBannerImage}
               alt="Featured"
-              className="h-full w-full object-cover lg:object-contain"
+              className="h-full w-full object-contain"
             />
           ) : (
             banners.map((banner, index) => {
@@ -174,7 +177,7 @@ export default function HeroSection({ initialBanners }: { initialBanners?: any[]
                     srcSet={bannerSrcSet(mobileImage)}
                     sizes={bannerSrcSet(mobileImage) ? '100vw' : undefined}
                     alt={banner?.title || 'Featured'}
-                    className="h-full w-full object-cover lg:object-contain"
+                    className="h-full w-full object-contain"
                     // The first slide is the LCP element: ask the browser to
                     // fetch it ahead of the rest of the image flood. Lowercase
                     // because React 18 only passes the hint through as a plain

@@ -69,6 +69,12 @@ export default function OrderDetailPage() {
   const mainOrder = order.order || order.data || order;
   const items: any[] = mainOrder.items ?? mainOrder.products ?? [];
 
+  // Unpaid orders are visible to sellers (product decision, 2026-08-24) but
+  // cannot be accepted/shipped — the backend rejects the shipping save too;
+  // this just keeps the form honest instead of surfacing a server error.
+  const paymentState = String(mainOrder.paymentStatus || "").toUpperCase();
+  const isUnpaid = paymentState === "PENDING" || paymentState === "FAILED";
+
   const handleAccept = () => {
     acceptOrder.mutate(id, {
       onSuccess: () => toast.success("Order accepted"),
@@ -398,6 +404,18 @@ export default function OrderDetailPage() {
             {/* The admin lock hides every input in this card. Without this notice the
                 section just renders blank and the seller has no way to tell whether
                 something is missing or whether they are simply not allowed to edit. */}
+            {isUnpaid && (
+              <div className="flex items-start gap-2.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3.5 py-3">
+                <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
+                <div className="space-y-0.5">
+                  <p className="text-xs font-semibold text-amber-700 dark:text-amber-400">Awaiting payment</p>
+                  <p className="text-xs text-amber-700/80 dark:text-amber-400/80">
+                    The buyer hasn't completed payment for this order yet. Shipping details unlock automatically once payment is received — do not pack or ship before then.
+                  </p>
+                </div>
+              </div>
+            )}
+
             {mainOrder.isShippingLocked && (
               <div className="flex items-start gap-2.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3.5 py-3">
                 <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
@@ -413,19 +431,19 @@ export default function OrderDetailPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-muted-foreground">Length (cm)</label>
-                <input type="number" step="0.01" className="w-full bg-background border border-input rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none disabled:opacity-50" value={shippingData.length} onChange={(e) => setShippingData({...shippingData, length: e.target.value})} disabled={mainOrder.isShippingLocked} placeholder={mainOrder.packageLength?.toString() || "0"} />
+                <input type="number" step="0.01" className="w-full bg-background border border-input rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none disabled:opacity-50" value={shippingData.length} onChange={(e) => setShippingData({...shippingData, length: e.target.value})} disabled={mainOrder.isShippingLocked || isUnpaid} placeholder={mainOrder.packageLength?.toString() || "0"} />
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-muted-foreground">Breadth (cm)</label>
-                <input type="number" step="0.01" className="w-full bg-background border border-input rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none disabled:opacity-50" value={shippingData.breadth} onChange={(e) => setShippingData({...shippingData, breadth: e.target.value})} disabled={mainOrder.isShippingLocked} placeholder={mainOrder.packageBreadth?.toString() || "0"} />
+                <input type="number" step="0.01" className="w-full bg-background border border-input rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none disabled:opacity-50" value={shippingData.breadth} onChange={(e) => setShippingData({...shippingData, breadth: e.target.value})} disabled={mainOrder.isShippingLocked || isUnpaid} placeholder={mainOrder.packageBreadth?.toString() || "0"} />
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-muted-foreground">Height (cm)</label>
-                <input type="number" step="0.01" className="w-full bg-background border border-input rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none disabled:opacity-50" value={shippingData.height} onChange={(e) => setShippingData({...shippingData, height: e.target.value})} disabled={mainOrder.isShippingLocked} placeholder={mainOrder.packageHeight?.toString() || "0"} />
+                <input type="number" step="0.01" className="w-full bg-background border border-input rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none disabled:opacity-50" value={shippingData.height} onChange={(e) => setShippingData({...shippingData, height: e.target.value})} disabled={mainOrder.isShippingLocked || isUnpaid} placeholder={mainOrder.packageHeight?.toString() || "0"} />
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-muted-foreground">Weight (kg)</label>
-                <input type="number" step="0.01" className="w-full bg-background border border-input rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none disabled:opacity-50" value={shippingData.weight} onChange={(e) => setShippingData({...shippingData, weight: e.target.value})} disabled={mainOrder.isShippingLocked} placeholder={mainOrder.packageWeight?.toString() || "0"} />
+                <input type="number" step="0.01" className="w-full bg-background border border-input rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none disabled:opacity-50" value={shippingData.weight} onChange={(e) => setShippingData({...shippingData, weight: e.target.value})} disabled={mainOrder.isShippingLocked || isUnpaid} placeholder={mainOrder.packageWeight?.toString() || "0"} />
               </div>
             </div>
 
@@ -446,7 +464,7 @@ export default function OrderDetailPage() {
                       ) : (
                          <span className="text-xs text-muted-foreground block">Not uploaded</span>
                       )}
-                      {!mainOrder.isShippingLocked && (
+                      {!mainOrder.isShippingLocked && !isUnpaid && (
                         <input type="file" accept="image/*" onChange={(e) => setShippingFiles(p => ({...p, [f.key]: e.target.files?.[0] || null}))} className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-primary/10 file:text-primary hover:file:bg-primary/20 disabled:opacity-50" />
                       )}
                     </div>
@@ -506,7 +524,7 @@ export default function OrderDetailPage() {
               </Link>
             </div>
 
-            {!mainOrder.isShippingLocked && (
+            {!mainOrder.isShippingLocked && !isUnpaid && (
               <div className="pt-4 flex justify-end">
                 <Button size="sm" onClick={handleShippingSubmit} loading={updateShipping.isPending}>
                   Save Shipping Details

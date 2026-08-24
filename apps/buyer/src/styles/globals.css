@@ -65,11 +65,17 @@
      reference. clamp() floors it at 16px - the old reference size, so
      nothing gets smaller than before - with a modest ~6% bump to the
      target itself (16px -> 17px) and a capped ceiling so it doesn't run
-     away near the top of a band either. */
+     away near the top of a band either.
+
+     Mobile got a second, larger pass on top of that: real phones cluster
+     close to the 393px reference (390-430px covers most modern iPhones and
+     Android), so the floor alone barely moved anything there - direct
+     feedback that mobile still read too small confirmed it needed its own
+     bump, not just the shrink-bug fix. */
   html {
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
-    font-size: clamp(16px, calc(17px * (100vw / 393)), 19px);
+    font-size: clamp(17px, calc(18px * (100vw / 393)), 20px);
   }
 
   @media (min-width: 640px) {

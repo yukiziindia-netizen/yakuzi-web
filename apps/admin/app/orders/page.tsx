@@ -7,7 +7,7 @@ import { AdminLayout } from "@/components/layout/admin-layout";
 import { Button, Input, Badge, Pagination, Modal } from "@/components/ui";
 import { formatCurrency } from "@yukizi/utils";
 import { cn } from "@/lib/utils";
-import { useAdminOrdersFiltered, useUpdateAdminOrderStatus } from "@/hooks/useAdmin";
+import { useAdminOrdersFiltered, useUpdateAdminOrderStatus, useCancelTestOrders, useTestOrdersCount } from "@/hooks/useAdmin";
 import { getPresignedUrl } from "@yukizi/api-client";
 import toast from "react-hot-toast";
 
@@ -32,6 +32,7 @@ export default function AdminOrdersPage() {
   const [filter, setFilter] = useState<string>("all");
   const [page, setPage] = useState(1);
   const [showTestOrders, setShowTestOrders] = useState(false);
+  const [showCancelTestOrdersModal, setShowCancelTestOrdersModal] = useState(false);
   const PAGE_LIMIT = 20;
 
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
@@ -53,6 +54,22 @@ export default function AdminOrdersPage() {
     includeTestOrders: showTestOrders ? "true" : undefined,
   });
   const updateStatus = useUpdateAdminOrderStatus();
+  const cancelTestOrders = useCancelTestOrders();
+  const { data: testOrdersCount, isLoading: isCountLoading } = useTestOrdersCount(showCancelTestOrdersModal);
+
+  const handleCancelTestOrders = async () => {
+    try {
+      const result = await cancelTestOrders.mutateAsync();
+      toast.success(
+        result.total === 0
+          ? "No test orders to cancel"
+          : `Cancelled ${result.cancelled} of ${result.total} test order(s)${result.failed > 0 ? ` — ${result.failed} could not be cancelled` : ""}`,
+      );
+      setShowCancelTestOrdersModal(false);
+    } catch {
+      toast.error("Failed to cancel test orders");
+    }
+  };
 
   // Backend returns { data: [...], total: ... }
   const allOrders: any[] = Array.isArray(ordersData) ? ordersData : (ordersData?.data ?? []);
@@ -156,6 +173,12 @@ export default function AdminOrdersPage() {
             >
               {showTestOrders ? "Hide test orders" : "Show test orders"}
             </button>
+            <button
+              onClick={() => setShowCancelTestOrdersModal(true)}
+              className="px-3 py-2 rounded-xl text-xs font-medium border border-destructive/40 text-destructive hover:bg-destructive/10 transition-all whitespace-nowrap"
+            >
+              Cancel all test orders
+            </button>
           </div>
         </div>
 
@@ -247,6 +270,29 @@ export default function AdminOrdersPage() {
               <p className="text-sm text-muted-foreground">Fetching secure image link...</p>
             </div>
           )}
+        </div>
+      </Modal>
+
+      <Modal open={showCancelTestOrdersModal} onClose={() => setShowCancelTestOrdersModal(false)} title="Cancel All Test Orders">
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            This cancels every still-cancellable order placed by the internal test/QA buyer account(s) and restores their stock.
+            Real customer orders are never touched. This action cannot be undone.
+          </p>
+          <p className="text-sm font-medium text-foreground">
+            {isCountLoading ? "Checking how many test orders exist…" : `This will cancel ${testOrdersCount ?? 0} order(s).`}
+          </p>
+          <div className="flex justify-end gap-3 pt-2">
+            <Button variant="ghost" onClick={() => setShowCancelTestOrdersModal(false)}>Keep Orders</Button>
+            <Button
+              variant="danger"
+              onClick={handleCancelTestOrders}
+              loading={cancelTestOrders.isPending}
+              disabled={isCountLoading || !testOrdersCount}
+            >
+              Cancel All Test Orders
+            </Button>
+          </div>
         </div>
       </Modal>
     </AdminLayout>

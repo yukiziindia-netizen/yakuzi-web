@@ -357,6 +357,18 @@ export async function cancelOrder(orderId: string, reason?: string) {
   return data.data;
 }
 
+export async function getTestOrdersCount() {
+  const { data } = await apiClient.get<{ data: number }>(`/admin/orders/test-orders-count`);
+  return data.data;
+}
+
+export async function cancelTestOrders() {
+  const { data } = await apiClient.post<{ data: { cancelled: number; failed: number; total: number } }>(
+    `/admin/orders/cancel-test-orders`,
+  );
+  return data.data;
+}
+
 export async function getOrderInvoice(orderId: string) {
   const { data } = await apiClient.get<{ data: any }>(`/admin/orders/${orderId}/invoice`);
   return data.data;

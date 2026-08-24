@@ -42,7 +42,17 @@ export default function CategoryBanner({ title, banners }: CategoryBannerProps) 
 
   return (
     <div
-      className="relative w-full h-[250px] md:h-[350px] lg:h-[450px] overflow-hidden group"
+      // Every category banner uploaded so far is authored at the same two
+      // ratios (~1920x335 desktop, ~1920x1264 mobile - a wide, short
+      // "ribbon" shape). The old fixed-pixel heights (250/350/450px) didn't
+      // match that ratio at any real viewport width, so bg-cover had to
+      // crop 30-40% off each side to fill the box - cutting off text like
+      // a category title positioned near the edge of the artwork. Sizing
+      // the container by aspect-ratio instead keeps its shape proportional
+      // to the actual image at every width, so cover never needs to crop
+      // more than a rounding pixel. Capped at the images' native width so
+      // it's never upscaled past source resolution on very wide screens.
+      className="relative w-full max-w-[1920px] mx-auto aspect-[1920/1264] sm:aspect-[1920/335] overflow-hidden group"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >

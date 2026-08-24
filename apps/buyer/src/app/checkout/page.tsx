@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Search, HelpCircle, AlertCircle, ShieldCheck, Truck } from 'lucide-react';
 import { useCart, useSyncCart, useClearCart } from '@/hooks/useCart';
 import { useCreateOrder } from '@/hooks/useOrders';
@@ -12,7 +12,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import AuthGuard from '@/components/shared/AuthGuard';
-import { useAuth, createRazorpayOrder, verifyRazorpayPayment } from '@yukizi/api-client';
+import { useAuth, createRazorpayOrder, verifyRazorpayPayment, cancelOrder } from '@yukizi/api-client';
 import { track } from '@/lib/analytics/tracker';
 
 type PaymentMethod = 'BANK_TRANSFER' | 'UPI' | 'COD' | 'CREDIT' | 'RAZORPAY';
@@ -48,6 +48,11 @@ export default function CheckoutPage() {
   const clearCart = useClearCart();
   const { data: platformConfig } = usePlatformConfig();
   const syncCart = useSyncCart();
+  // Razorpay's checkout.js can fire modal.ondismiss on/around a successful
+  // handler callback (the popup closing on completion can still trip it).
+  // Set as soon as handler starts, before any await, so ondismiss can tell
+  // "payment is being handled" apart from "buyer actually backed out".
+  const paymentHandledRef = useRef(false);
 
   // Online payment is the only method offered at checkout.
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('RAZORPAY');
@@ -111,6 +116,40 @@ export default function CheckoutPage() {
     });
 
   /**
+   * Cancels an order that was created for a Razorpay checkout but never got
+   * paid — the buyer never reached (or backed out of) the payment step, so
+   * nothing was ever charged. Cancelling restores stock and marks it
+   * CANCELLED instead of leaving a phantom PLACED order in the buyer's
+   * history forever.
+   *
+   * The backend refuses to cancel an already-paid order (see
+   * OrdersService.cancelOrder's paymentStatus guard), so this is safe even
+   * if it somehow ran against an order that got paid moments earlier - it
+   * would just fail harmlessly. Awaited by every caller so the toast we show
+   * next can honestly reflect whether the order was actually cancelled.
+   */
+  const abandonUnpaidOrder = async (orderId: string): Promise<boolean> => {
+    try {
+      await cancelOrder(orderId);
+      return true;
+    } catch (e: any) {
+      track('checkout_abandon_cancel_failed', { orderId, message: e?.message });
+      return false;
+    }
+  };
+
+  const redirectAfterAbandon = async (orderId: string, cancelledMessage: string) => {
+    const cancelled = await abandonUnpaidOrder(orderId);
+    toast(
+      cancelled
+        ? cancelledMessage
+        : `${cancelledMessage} We couldn't confirm the cancellation just now - you can cancel it yourself from My Orders if it's still showing.`,
+      'error',
+    );
+    window.location.href = `/orders?drawer=${orderId}`;
+  };
+
+  /**
    * Takes payment for an order that has already been created.
    *
    * The order is left untouched if anything here fails: an unpaid order the
@@ -118,10 +157,11 @@ export default function CheckoutPage() {
    * never completed is not.
    */
   const payOnline = async (orderId: string) => {
+    paymentHandledRef.current = false;
+
     const ready = await loadRazorpayCheckout();
     if (!ready) {
-      toast('Could not reach the payment provider. Your order is saved as unpaid.', 'error');
-      window.location.href = `/orders?drawer=${orderId}`;
+      await redirectAfterAbandon(orderId, 'Could not reach the payment provider. Your order was cancelled.');
       return;
     }
 
@@ -129,11 +169,10 @@ export default function CheckoutPage() {
     try {
       rzpOrder = await createRazorpayOrder(orderId);
     } catch (e: any) {
-      toast(
-        e?.response?.data?.message || 'Could not start the payment. Your order is saved as unpaid.',
-        'error',
+      await redirectAfterAbandon(
+        orderId,
+        e?.response?.data?.message || 'Could not start the payment. Your order was cancelled.',
       );
-      window.location.href = `/orders?drawer=${orderId}`;
       return;
     }
 
@@ -150,6 +189,7 @@ export default function CheckoutPage() {
         email: address.email || user?.email || '',
       },
       handler: async (response: any) => {
+        paymentHandledRef.current = true;
         try {
           await verifyRazorpayPayment({
             razorpayOrderId: response.razorpay_order_id,
@@ -172,8 +212,11 @@ export default function CheckoutPage() {
       },
       modal: {
         ondismiss: () => {
-          toast('Payment cancelled. Your order is saved as unpaid.', 'error');
-          window.location.href = `/orders?drawer=${orderId}`;
+          // checkout.js can fire this on/around a successful handler call
+          // (the popup auto-closing on completion can still trip it) - if
+          // handler already started, this is not a real cancellation.
+          if (paymentHandledRef.current) return;
+          redirectAfterAbandon(orderId, 'Payment cancelled. Your order was cancelled.');
         },
       },
       theme: { color: '#562996' },

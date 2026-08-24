@@ -31,7 +31,7 @@
   html {
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
-    font-size: clamp(16px, calc(17px * (100vw / 393)), 19px);
+    font-size: clamp(17px, calc(18px * (100vw / 393)), 20px);
   }
 
   @media (min-width: 640px) {

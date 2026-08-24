@@ -5,7 +5,7 @@ import {
   getAdminDashboard, getAdminUsers, getUserById, approveUser, rejectUser, blockUser, unblockUser,
   getBuyers, getSellers, updateUser, deleteUser, updateUserStatus, updateGstPanStatus, updateSellerProfile,
   getAdminProducts, getAdminProductsFiltered, getProductById, disableProduct, enableProduct, deleteProduct, createProduct, updateProduct, approveProduct, rejectProduct,
-  getAdminOrders, getAdminOrdersFiltered, getOrderById, updateAdminOrderStatus, updateAdminShippingDocs, uploadAdminOrderDocument, cancelOrder, getOrderInvoice, getOrderTracking,
+  getAdminOrders, getAdminOrdersFiltered, getOrderById, updateAdminOrderStatus, updateAdminShippingDocs, uploadAdminOrderDocument, cancelOrder, getTestOrdersCount, cancelTestOrders, getOrderInvoice, getOrderTracking,
   getPayments, confirmPayment, rejectPayment,
   getSettlements, getSettlementsSummary, markSettlementPaid, getSellerSettlements, createSettlement, syncSettlements,
   getTickets, getTicketById, replyToTicket, updateTicketStatus,
@@ -384,6 +384,24 @@ export function useCancelOrder() {
     onSuccess: (_, { orderId }) => {
       void qc.invalidateQueries({ queryKey: ["admin", "orders"] });
       void qc.invalidateQueries({ queryKey: ["admin", "order", orderId] });
+    },
+  });
+}
+
+export function useTestOrdersCount(enabled: boolean) {
+  return useQuery({
+    queryKey: ["admin", "orders", "test-orders-count"],
+    queryFn: () => getTestOrdersCount(),
+    enabled,
+  });
+}
+
+export function useCancelTestOrders() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => cancelTestOrders(),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["admin", "orders"] });
     },
   });
 }

@@ -65,6 +65,12 @@ export function OrderTable({ orders, settlements = [], showConfirm = false, upda
                         if (["DELIVERED", "RETURNED", "CANCELLED"].includes(oStatus)) {
                            return <Badge variant={oStatus === "DELIVERED" ? "success" : "error"}>{oStatus}</Badge>;
                         }
+                        // Unpaid orders are now visible to sellers (product
+                        // decision) but can't be accepted/shipped until paid.
+                        const pStatus = (order.paymentStatus || "").toUpperCase();
+                        if (pStatus === "PENDING" || pStatus === "FAILED") {
+                          return <Badge variant="warning">AWAITING PAYMENT</Badge>;
+                        }
                         return <Badge variant="default">IN PROGRESS</Badge>;
                       })()}
                     </td>

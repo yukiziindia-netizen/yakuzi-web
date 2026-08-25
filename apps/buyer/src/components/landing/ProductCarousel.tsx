@@ -114,7 +114,7 @@ export const renderBuyerOfferBadge = (p: any, accentGreen = false, compact = fal
   return <span className={OFFER_TEXT}>{p.discountType.replace(/_/g, ' ')}</span>;
 };
 
-export function GridProductCard({ product, index, onOpenReview }: { product: any; index: number; onOpenReview?: (p: any) => void }) {
+export function GridProductCard({ product, index, onOpenReview, showFullTitle }: { product: any; index: number; onOpenReview?: (p: any) => void; showFullTitle?: boolean }) {
   const { data: cartData } = useCart();
   const { mutate: addToCart } = useAddToCart();
   const { mutate: updateCartItem } = useUpdateCartItem();
@@ -412,7 +412,7 @@ export function GridProductCard({ product, index, onOpenReview }: { product: any
             <div>
                <div className="flex items-start justify-between w-full gap-1.5">
                   <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index, product?.slug)}`} className="flex-1">
-                    <h3 className="text-xs sm:text-sm font-medium text-[#333333] leading-snug line-clamp-1 hover:text-[#7B2FBE] transition-colors">
+                    <h3 className={`text-xs sm:text-sm font-medium text-[#333333] leading-snug hover:text-[#7B2FBE] transition-colors ${showFullTitle ? '' : 'line-clamp-1'}`}>
                        {productName}
                     </h3>
                   </Link>

@@ -80,7 +80,7 @@ const config: Config = {
         sm: 'calc(var(--radius) - 4px)',
       },
       fontFamily: {
-        sans: ['"Google Sans"', 'var(--font-open-sans)', '"Open Sans"', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-inter)', '"Inter"', 'system-ui', 'sans-serif'],
       },
       fontSize: {
         '2xs': ['0.625rem', { lineHeight: '0.875rem', letterSpacing: '0.01em' }],

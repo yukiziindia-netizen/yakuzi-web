@@ -96,7 +96,7 @@
     }
   }
   body, h1, h2, h3, h4, h5, h6, button, input, select, textarea {
-    font-family: 'Google Sans', var(--font-open-sans, 'Open Sans'), system-ui, sans-serif !important;
+    font-family: var(--font-inter, 'Inter'), system-ui, sans-serif !important;
   }
   body {
     @apply text-foreground antialiased;

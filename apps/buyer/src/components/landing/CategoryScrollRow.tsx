@@ -36,7 +36,7 @@ export default function CategoryScrollRow({ section }: { section: HomepageSectio
           // consumer (the category-page grid, product-detail related items)
           // is affected, since none of them read this wrapper's width.
           <div key={`${product?.id || 'prod'}-${index}`} className="snap-start shrink-0 w-[200px] sm:w-[210px]">
-            <GridProductCard product={product} index={index} onOpenReview={setReviewProduct} />
+            <GridProductCard product={product} index={index} onOpenReview={setReviewProduct} showFullTitle />
           </div>
         ))}
       </div>

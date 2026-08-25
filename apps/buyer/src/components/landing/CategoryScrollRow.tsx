@@ -30,7 +30,12 @@ export default function CategoryScrollRow({ section }: { section: HomepageSectio
 
       <div className="flex overflow-x-auto snap-x snap-mandatory gap-3.5 px-4 sm:px-8 pb-1 scrollbar-hide">
         {section.products.map((product, index) => (
-          <div key={`${product?.id || 'prod'}-${index}`} className="snap-start shrink-0 w-[150px] sm:w-[210px]">
+          // 200px on mobile (was 150px) - the card's own internal max-w-[210px]
+          // cap (ProductCarousel.tsx) already allows this width, so this is a
+          // self-contained change to this row only: no other GridProductCard
+          // consumer (the category-page grid, product-detail related items)
+          // is affected, since none of them read this wrapper's width.
+          <div key={`${product?.id || 'prod'}-${index}`} className="snap-start shrink-0 w-[200px] sm:w-[210px]">
             <GridProductCard product={product} index={index} onOpenReview={setReviewProduct} />
           </div>
         ))}

@@ -222,6 +222,11 @@ export async function updateShippingDetails(orderId: string, payload: any) {
   return data.data ?? data;
 }
 
+export async function submitSelfShipTracking(orderId: string, payload: { trackingUrl: string; courierName?: string }) {
+  const { data } = await apiClient.patch<any>(`/orders/${orderId}/self-ship-tracking`, payload);
+  return data.data ?? data;
+}
+
 export async function getSellerCustomOrders() {
   const { data } = await apiClient.get<any>("/orders/seller?type=custom");
   const raw = data.data ?? data;

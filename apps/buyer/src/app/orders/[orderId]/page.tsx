@@ -9,6 +9,13 @@ import Timeline from '@/components/shared/Timeline';
 import { useToast } from '@/components/shared/Toast';
 import Link from 'next/link';
 import { useOrderById, useCancelOrder, useOrderTracking } from '@/hooks/useOrders';
+import { TrackOrderButton } from '@/components/orders/TrackOrderButton';
+
+// The step-by-step progress timeline was replaced by a single "Track order"
+// button (2026-08-26, self-ship feature — identical UI for every fulfillment
+// mode). Flip this to false to restore the old Timeline rendering below,
+// which is kept intact for a trivial revert.
+const TRACK_BUTTON_ONLY = true;
 import { useClearCart } from '@/hooks/useCart';
 import AuthGuard from '@/components/shared/AuthGuard';
 import { generateProductSlug } from '@yukizi/utils';
@@ -310,8 +317,50 @@ export default function OrderIdPage({ params }: { params: { orderId: string } })
               )}
             </div>
 
-            {/* Right Col: Timeline */}
-            {steps.length > 0 && (
+            {/* Right Col: Track order button (both fulfillment modes) */}
+            {TRACK_BUTTON_ONLY && (
+              <div className="bg-white/40 backdrop-blur-xl p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl md:rounded-[40px] border border-white/40 shadow-xl h-fit sticky top-24 sm:top-32">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 bg-lime-100 rounded-xl">
+                    <Truck className="w-5 h-5 text-gray-900" />
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900 tracking-tight">Track Order</h2>
+                </div>
+
+                {normalizeStatus(status) === 'CANCELLED' ? (
+                  <p className="text-sm font-semibold text-red-500">This order was cancelled.</p>
+                ) : (
+                  <TrackOrderButton trackingUrl={order.trackingUrl || tracking?.track_url} />
+                )}
+
+                {['PLACED', 'ACCEPTED'].includes(normalizeStatus(status)) && (
+                  <div className="mt-8">
+                    {!order.payments?.some((p: any) => p.proofUrl) ? (
+                      <Link
+                        href={`/payments/${order.id}`}
+                        className="w-full py-4 bg-lime-300 hover:bg-lime-400 text-gray-900 rounded-2xl font-bold transition-all shadow-lg shadow-lime-200/50 flex items-center justify-center gap-2"
+                      >
+                        <FileText className="w-5 h-5" />
+                        Pay Now
+                      </Link>
+                    ) : (
+                      <a
+                        href={order.payments.find((p: any) => p.proofUrl)?.proofUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full py-4 bg-gray-50 hover:bg-gray-100 text-gray-500 rounded-2xl font-bold transition-all border border-dashed border-gray-200 flex items-center justify-center gap-2"
+                      >
+                        <CheckCircle2 className="w-5 h-5 text-gray-400" />
+                        Review Proof Uploaded
+                      </a>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Right Col: Timeline (legacy progress UI, kept for easy revert) */}
+            {!TRACK_BUTTON_ONLY && steps.length > 0 && (
               <div className="bg-white/40 backdrop-blur-xl p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl md:rounded-[40px] border border-white/40 shadow-xl h-fit sticky top-24 sm:top-32">
                 <div className="flex items-center gap-3 mb-8">
                   <div className="p-2 bg-lime-100 rounded-xl">

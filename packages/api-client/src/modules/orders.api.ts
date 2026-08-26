@@ -52,6 +52,10 @@ export const OrderSchema = z.object({
   sellerName: z.string().optional(),
   finalAmount: z.number().optional(),
   cancelReason: z.string().optional(),
+  // Courier tracking page for the "Track order" button. Deliberately the only
+  // fulfillment field exposed to buyers - the UI must not reveal whether an
+  // order shipped via Shiprocket or the seller's own courier.
+  trackingUrl: z.string().nullable().optional(),
   buyer: z.any().optional(),
   seller: z.any().optional(),
   createdAt: z.string(),

@@ -16,6 +16,7 @@ import {
 } from "@/hooks/useSeller";
 import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
+import { SelfShipTrackingCard } from "@/components/orders/SelfShipTrackingCard";
 
 
 
@@ -74,6 +75,11 @@ export default function OrderDetailPage() {
   // this just keeps the form honest instead of surfacing a server error.
   const paymentState = String(mainOrder.paymentStatus || "").toUpperCase();
   const isUnpaid = paymentState === "PENDING" || paymentState === "FAILED";
+
+  // Self-ship orders (fulfillmentMode snapshotted at checkout) skip the whole
+  // measurements/photos/Shiprocket-documents flow — the backend rejects those
+  // writes too; the seller submits a courier tracking link instead.
+  const isSelfShip = mainOrder.fulfillmentMode === "self_ship";
 
   const handleAccept = () => {
     acceptOrder.mutate(id, {
@@ -394,7 +400,11 @@ export default function OrderDetailPage() {
             })()}
           </motion.div>
 
-          {/* Shipping & Fulfillment */}
+          {/* Shipping & Fulfillment — self-ship orders render the tracking-link
+              card instead of the measurements/Shiprocket-documents flow. */}
+          {isSelfShip ? (
+            <SelfShipTrackingCard order={mainOrder} orderId={id} isUnpaid={isUnpaid} />
+          ) : (
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glass-card rounded-2xl overflow-hidden p-5 space-y-4">
             <div className="border-b border-border/50 pb-4">
               <h2 className="font-semibold text-foreground flex items-center gap-2"><Package className="h-4 w-4 text-primary" />Shipping & Fulfillment</h2>
@@ -574,6 +584,7 @@ export default function OrderDetailPage() {
               </div>
             </div>
           </motion.div>
+          )}
         </div>
 
         {/* Sidebar Info */}

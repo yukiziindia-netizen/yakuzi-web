@@ -6,7 +6,7 @@ import {
   getSellerSettlementSummary, requestSellerPayout, createSellerProduct, updateSellerProduct, deleteSellerProduct,
   updateSellerOrderStatus, getSellerProfile, updateSellerProfile, getSellerProductById,
   getCategories, toggleVacationMode, getSellerTickets, getSellerTicketById, createSellerTicket, addTicketMessage,
-  getSellerOrderById, acceptSellerOrder, rejectSellerOrder, uploadOrderDocument, updateShippingDetails,
+  getSellerOrderById, acceptSellerOrder, rejectSellerOrder, uploadOrderDocument, updateShippingDetails, submitSelfShipTracking,
   getSellerCustomOrders, getSellerCancelledOrders,
   getSellerNotifications, markNotificationRead, markAllNotificationsRead,
   getSellerFullProfile, getProductRequests, createProductRequest, getSellerAnalytics,
@@ -223,6 +223,18 @@ export function useUpdateShippingDetails() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ orderId, payload }: { orderId: string; payload: any }) => updateShippingDetails(orderId, payload),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["seller", "orders"] });
+      void qc.invalidateQueries({ queryKey: ["seller", "order"] });
+    },
+  });
+}
+
+export function useSubmitSelfShipTracking() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ orderId, payload }: { orderId: string; payload: { trackingUrl: string; courierName?: string } }) =>
+      submitSelfShipTracking(orderId, payload),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["seller", "orders"] });
       void qc.invalidateQueries({ queryKey: ["seller", "order"] });

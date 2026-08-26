@@ -4,6 +4,12 @@ import { DeliveryTruckBadge } from '../shared/DeliveryTruckBadge';
 import Image from 'next/image';
 import { useOrders, useOrderTracking } from '@/hooks/useOrders';
 import Link from 'next/link';
+import { TrackOrderButton } from './TrackOrderButton';
+
+// The per-item shipment stepper was replaced by a single "Track order" button
+// (2026-08-26, self-ship feature — identical UI for every fulfillment mode).
+// Flip this to false to restore the old stepper, kept intact below.
+const TRACK_BUTTON_ONLY = true;
 
 
 function formatDateShort(dStr: string | null | undefined) {
@@ -330,7 +336,14 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
                      <>
                        {/* Divider */}
                        <div className="w-full h-[1px] bg-gray-100 my-1"></div>
-                       
+
+                       {TRACK_BUTTON_ONLY && (
+                         <div className="pt-2 pb-1 animate-in fade-in duration-200">
+                           <TrackOrderButton trackingUrl={itemOrder.trackingUrl} />
+                         </div>
+                       )}
+
+                       {!TRACK_BUTTON_ONLY && (
                        <div className="relative pt-2 pb-1 animate-in fade-in duration-200">
                          <div className="absolute top-6 left-[20px] right-[20px] h-[2px] bg-gray-200 z-0"></div>
                          <div className="absolute top-6 left-[20px] h-[2px] bg-[#8b3dcc] z-0 transition-all duration-500" style={{ width: `calc(${((stepCount - 1) / 4) * 100}% - 40px)` }}></div>
@@ -349,6 +362,7 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
                            ))}
                          </div>
                        </div>
+                       )}
                      </>
                    )}
  

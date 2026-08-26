@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { sendOtp, verifyOtp, getCurrentUser } from "@/api/auth.api";
 import {
   getAdminDashboard, getAdminUsers, getUserById, approveUser, rejectUser, blockUser, unblockUser,
-  getBuyers, getSellers, updateUser, deleteUser, updateUserStatus, updateGstPanStatus, updateSellerProfile,
+  getBuyers, getSellers, setSellerSelfShip, updateUser, deleteUser, updateUserStatus, updateGstPanStatus, updateSellerProfile,
   getAdminProducts, getAdminProductsFiltered, getProductById, disableProduct, enableProduct, deleteProduct, createProduct, updateProduct, approveProduct, rejectProduct,
   getAdminOrders, getAdminOrdersFiltered, getOrderById, updateAdminOrderStatus, updateAdminShippingDocs, uploadAdminOrderDocument, cancelOrder, getTestOrdersCount, cancelTestOrders, getOrderInvoice, getOrderTracking,
   getPayments, confirmPayment, rejectPayment,
@@ -71,6 +71,15 @@ export function useAdminDashboard(params: { dateFrom?: string; dateTo?: string }
 export function useAdminUsers(params: { page?: number; limit?: number; dateFrom?: string; dateTo?: string } = {}) { return useQuery({ queryKey: ["admin", "users", params], queryFn: () => getAdminUsers(params), staleTime: 60_000, retry: 1 }); }
 
 export function useAdminSellers() { return useQuery({ queryKey: ["admin", "sellers"], queryFn: () => getSellers({ limit: 500 }), staleTime: 60_000, retry: 1 }); }
+
+export function useSetSellerSelfShip() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ sellerId, selfShipEnabled }: { sellerId: string; selfShipEnabled: boolean }) =>
+      setSellerSelfShip(sellerId, selfShipEnabled),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ["admin", "sellers"] }),
+  });
+}
 
 export function useUserById(userId: string) { return useQuery({ queryKey: ["admin", "user", userId], queryFn: () => getUserById(userId), enabled: !!userId, staleTime: 60_000, retry: 1 }); }
 

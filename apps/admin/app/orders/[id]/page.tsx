@@ -167,6 +167,9 @@ export default function OrderDetailPage() {
   const currentStatusIdx = ORDER_STATUSES.findIndex(s => s.key === normalizedStatus);
   const items: any[] = order.items ?? order.orderItems ?? [];
   const isCancelled = order.orderStatus === "CANCELLED";
+  // Self-ship orders are fulfilled by the seller's own courier: no Shiprocket
+  // push, no label/manifest/invoice uploads — just the seller's tracking link.
+  const isSelfShip = order.fulfillmentMode === "self_ship";
 
   const itemsBySeller = order ? order.items.reduce((acc: any, item: any) => {
     const sId = item.sellerId;
@@ -220,7 +223,17 @@ export default function OrderDetailPage() {
               <ArrowLeft className="h-4 w-4" />
             </button>
             <div>
-              <h1 className="font-semibold text-2xl text-foreground">Order #{order.id?.slice(0, 8).toUpperCase()}</h1>
+              <h1 className="font-semibold text-2xl text-foreground flex items-center gap-2.5">
+                Order #{order.id?.slice(0, 8).toUpperCase()}
+                <span className={cn(
+                  "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border",
+                  isSelfShip
+                    ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30"
+                    : "bg-primary/10 text-primary border-primary/30",
+                )}>
+                  {isSelfShip ? "Self Ship" : "Shiprocket"}
+                </span>
+              </h1>
               <p className="text-sm text-muted-foreground mt-0.5">
                 Placed on {order.createdAt ? new Date(order.createdAt).toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" }) : "—"}
               </p>
@@ -745,8 +758,37 @@ export default function OrderDetailPage() {
               </motion.div>
             )}
 
+            {/* Self-ship: read-only tracking supplied by the seller — no
+                Shiprocket push, no label/manifest/invoice uploads apply. */}
+            {isSelfShip && (
+              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }} className="glass-card rounded-2xl p-6">
+                <h2 className="font-semibold text-foreground flex items-center gap-2 mb-4">
+                  <Navigation className="h-4 w-4 text-primary" /> Self-Ship Tracking
+                </h2>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-sm text-muted-foreground">Courier</span>
+                    <span className="text-sm font-semibold text-foreground">{order.courierName || "—"}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-sm text-muted-foreground">Shipped At</span>
+                    <span className="text-sm font-semibold text-foreground">
+                      {order.shippedAt ? new Date(order.shippedAt).toLocaleDateString("en-IN", { year: "numeric", month: "short", day: "numeric" }) : "—"}
+                    </span>
+                  </div>
+                  {order.trackingUrl ? (
+                    <a href={order.trackingUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-sm font-medium text-primary hover:underline break-all">
+                      {order.trackingUrl} <ExternalLink className="h-3 w-3 shrink-0" />
+                    </a>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">The seller has not submitted a tracking link yet.</p>
+                  )}
+                </div>
+              </motion.div>
+            )}
+
             {/* Shipping & Fulfillment Details (Grouped by Seller) */}
-            {Object.values(itemsBySeller).map((sellerGroup: any) => {
+            {!isSelfShip && Object.values(itemsBySeller).map((sellerGroup: any) => {
               const sellerId = sellerGroup.seller.id;
               const sellerName = sellerGroup.seller.companyName || sellerGroup.seller.name || "Seller";
               const filesForSeller = adminFiles[sellerId] || { label: null, invoice: null, manifest: null, sellerInvoice: null };

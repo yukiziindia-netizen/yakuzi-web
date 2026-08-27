@@ -32,7 +32,7 @@ export function TrackOrderButton({
       href={trackingUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className={`w-full py-4 bg-lime-300 hover:bg-lime-400 text-gray-900 rounded-2xl font-bold transition-all shadow-lg shadow-lime-200/50 flex items-center justify-center gap-2 ${className}`}
+      className={`w-full py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl font-bold transition-all shadow-lg shadow-purple-200/50 flex items-center justify-center gap-2 ${className}`}
     >
       <Truck className="w-5 h-5" />
       Track order

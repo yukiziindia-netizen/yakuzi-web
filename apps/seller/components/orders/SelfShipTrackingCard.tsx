@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Truck, ExternalLink, Pencil } from "lucide-react";
+import { Truck, ExternalLink, Pencil, MapPin } from "lucide-react";
 import { Button } from "@/components/ui";
 import { useSubmitSelfShipTracking } from "@/hooks/useSeller";
 import toast from "react-hot-toast";
@@ -59,6 +59,26 @@ export function SelfShipTrackingCard({ order, orderId, isUnpaid }: { order: any;
           documents) does not apply to this order.
         </p>
       </div>
+
+      {/* The buyer's ship-to address: in the Shiprocket flow this lives on the
+          shipping label the admin uploads, but a self-ship seller books the
+          courier themselves and has no other way to see it. */}
+      {order.address && (
+        <div className="rounded-xl border border-border/50 bg-muted/20 px-4 py-3 space-y-1">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+            <MapPin className="h-3.5 w-3.5 text-primary" /> Ship To
+          </p>
+          {order.address.name && <p className="text-sm font-semibold text-foreground">{order.address.name}</p>}
+          <p className="text-sm text-foreground">
+            {[order.address.address, order.address.city, order.address.state, order.address.pincode]
+              .filter(Boolean)
+              .join(", ")}
+          </p>
+          {order.address.phone && (
+            <p className="text-sm text-muted-foreground">Phone: {order.address.phone}</p>
+          )}
+        </div>
+      )}
 
       {isUnpaid ? (
         <div className="flex items-start gap-2.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3.5 py-3">

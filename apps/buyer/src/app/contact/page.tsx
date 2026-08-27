@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
+import { absoluteUrl } from '@/lib/seo/site';
 import PolicyPage, { PolicySection } from '@/components/shared/PolicyPage';
 import { COMPANY } from '@/config/company';
 
 export const metadata: Metadata = {
-  title: 'Contact Us | Yukizi',
+  title: 'Contact Us',
+  alternates: { canonical: absoluteUrl('/contact') },
   description:
     'Contact details for Yukizi customer support, including our grievance officer and registered office address.',
 };

@@ -103,6 +103,12 @@ export default async function HomePage({
   return (
     <main className="w-full bg-gray-50 min-h-screen relative pb-24 sm:pb-32">
       <JsonLd data={[organizationSchema(), webSiteSchema()]} />
+      {/* The hero is pure banner artwork, so the page's one H1 is screen-reader
+          only — same pattern CategoryBanner already uses. Without it the
+          homepage has NO h1 at all (only the category-row h2s). */}
+      <h1 className="sr-only">
+        Yukizi — anime figures, manga and pop-culture collectibles marketplace in India
+      </h1>
       <HomeNavbar />
 
       <div className="w-full max-w-[1600px] 2xl:max-w-none mx-auto bg-gray-50 overflow-hidden flex flex-col relative min-h-screen">

@@ -212,11 +212,14 @@ export default async function CategoryPage({
             <CategoryBanner title={categoryName} banners={bannerSlides} />
           </div>
 
-          {/* Mobile Header (Category Name & Breadcrumb) */}
+          {/* Mobile Header (Category Name & Breadcrumb). Not an h1 — the page's
+              single h1 is CategoryBanner's sr-only one, and this block stays in
+              the DOM at every viewport (sm:hidden only hides it visually), so an
+              h1 here made every category page carry TWO h1s. */}
           <div className="flex flex-col px-4 sm:hidden pt-4 pb-2">
-            <h1 className="text-3xl xs:text-3xl font-bold text-gray-500 tracking-tight leading-none mb-1.5">
+            <p aria-hidden="true" className="text-3xl xs:text-3xl font-bold text-gray-500 tracking-tight leading-none mb-1.5">
               {displayCategoryName}
-            </h1>
+            </p>
             <p className="text-sm xs:text-sm text-gray-400 font-medium flex flex-wrap gap-1 items-center">
               {breadcrumbs.length > 0
                 ? breadcrumbs.map((crumb, idx) => (

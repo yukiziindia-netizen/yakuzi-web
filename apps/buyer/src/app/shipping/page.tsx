@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
+import { absoluteUrl } from '@/lib/seo/site';
 import PolicyPage, { PolicySection } from '@/components/shared/PolicyPage';
 import { COMPANY } from '@/config/company';
 
 export const metadata: Metadata = {
-  title: 'Shipping Policy | Yukizi',
+  title: 'Shipping Policy',
+  alternates: { canonical: absoluteUrl('/shipping') },
   description:
     'Yukizi order processing times, shipping charges, delivery timelines, tracking and coverage.',
 };

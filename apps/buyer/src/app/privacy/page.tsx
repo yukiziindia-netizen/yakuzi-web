@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
+import { absoluteUrl } from '@/lib/seo/site';
 import PolicyPage, { PolicySection } from '@/components/shared/PolicyPage';
 import { COMPANY } from '@/config/company';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy | Yukizi',
+  title: 'Privacy Policy',
+  alternates: { canonical: absoluteUrl('/privacy') },
   description:
     'How Yukizi collects, uses, shares and protects your personal information, and the rights you have over it.',
 };

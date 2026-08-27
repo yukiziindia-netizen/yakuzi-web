@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
+import { absoluteUrl } from '@/lib/seo/site';
 import PolicyPage, { PolicySection } from '@/components/shared/PolicyPage';
 import { COMPANY } from '@/config/company';
 
 export const metadata: Metadata = {
-  title: 'Terms of Use | Yukizi',
+  title: 'Terms of Use',
+  alternates: { canonical: absoluteUrl('/terms') },
   description:
     'The terms you agree to when you access Yukizi, create an account or place an order.',
 };

@@ -20,6 +20,16 @@ export const metadata: Metadata = {
     images: [{ url: DEFAULT_OG_IMAGE }],
   },
   twitter: { card: 'summary_large_image' },
+  // Search-engine ownership verification, env-gated so the tags only render
+  // once the tokens are pasted into Vercel (Settings → Environment Variables).
+  // GOOGLE_SITE_VERIFICATION: GSC → Add property → URL prefix → HTML tag value.
+  // BING_SITE_VERIFICATION: Bing Webmaster Tools → same flow (msvalidate.01).
+  verification: {
+    ...(process.env.GOOGLE_SITE_VERIFICATION ? { google: process.env.GOOGLE_SITE_VERIFICATION } : {}),
+    ...(process.env.BING_SITE_VERIFICATION
+      ? { other: { 'msvalidate.01': process.env.BING_SITE_VERIFICATION } }
+      : {}),
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

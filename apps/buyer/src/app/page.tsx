@@ -80,7 +80,9 @@ export default async function HomePage({
   // One round trip instead of two: the coming-soon gate, the hero banners,
   // and (when relevant) the homepage sections are all independent, so they
   // are fetched together. If the gate closes the page, the rest is unused.
-  let isComingSoon = true;
+  // Fails open — see getComingSoonStatus. An unreachable API must degrade to a
+  // thin storefront, never to the pre-launch splash over the whole site.
+  let isComingSoon = false;
   let initialBanners: any[] | undefined;
   let sections: HomepageSection[] = [];
   try {
@@ -93,7 +95,7 @@ export default async function HomePage({
     initialBanners = banners;
     sections = homepageSections;
   } catch (e) {
-    console.error("[HomePage] Failed to fetch coming soon status, defaulting to true:", e);
+    console.error("[HomePage] Failed to fetch coming soon status, showing the storefront:", e);
   }
 
   if (isComingSoon) {

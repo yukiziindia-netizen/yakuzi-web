@@ -72,7 +72,7 @@ export default function PostPage({ params }: { params: { id: string } }) {
         <div className="mb-12">
           <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-gray-500 mb-6">
             <span className="px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
-              {post.category?.name || 'Pharma Insights'}
+              {post.category?.name || 'Collectibles'}
             </span>
             <span className="flex items-center gap-1.5"><Calendar size={16} /> {new Date(post.createdAt).toLocaleDateString()}</span>
             <span className="flex items-center gap-1.5"><Clock size={16} /> 8 min read</span>
@@ -122,7 +122,7 @@ export default function PostPage({ params }: { params: { id: string } }) {
         {/* Footer Navigation */}
         <div className="flex flex-col md:flex-row items-center justify-between p-10 glass-card rounded-3xl gap-8 shadow-xl shadow-primary/5">
           <div className="text-center md:text-left">
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">Want more pharmaceutical insights?</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">Want more collector guides and stories?</h3>
             <p className="text-gray-600">Explore our knowledge hub for the latest industry updates.</p>
           </div>
           <Link href="/" className="px-8 py-4 bg-primary text-white rounded-2xl font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 whitespace-nowrap">

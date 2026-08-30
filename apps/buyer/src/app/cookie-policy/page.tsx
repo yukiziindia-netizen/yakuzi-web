@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
+import { absoluteUrl } from '@/lib/seo/site';
 import PolicyPage, { PolicySection } from '@/components/shared/PolicyPage';
 import { COMPANY } from '@/config/company';
 
 export const metadata: Metadata = {
-  title: 'Cookie Policy | Yukizi',
+  title: 'Cookie Policy',
+  alternates: { canonical: absoluteUrl('/cookie-policy') },
   description:
     'What cookies Yukizi uses, why, and how you can manage your cookie preferences.',
 };

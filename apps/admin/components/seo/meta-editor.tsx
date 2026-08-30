@@ -85,7 +85,7 @@ export function MetaEditor({ open, onClose, record, presetType, presetId }: {
   // The product's REAL URL slug — unlike everything else in this editor it is
   // not SeoMeta; it lives on the catalog product and changes the live URL.
   const isProduct = entityType === "PRODUCT" && !!entityId.trim();
-  const { data: slugInfo } = useSeoProductSlug(open && isProduct ? entityId : undefined);
+  const { data: slugInfo, isError: slugLoadFailed } = useSeoProductSlug(open && isProduct ? entityId : undefined);
   const updateSlug = useUpdateSeoProductSlug();
   const [slugDraft, setSlugDraft] = useState("");
 
@@ -153,6 +153,16 @@ export function MetaEditor({ open, onClose, record, presetType, presetId }: {
     // it first so a rejected slug (taken/invalid) stops the save while the
     // admin can still see and fix it, instead of half-saving silently.
     const trimmedSlug = slugDraft.trim().replace(/(^-|-$)+/g, "");
+    // If the admin typed a slug but the product's current slug never loaded,
+    // refuse to save rather than silently skipping the URL change — that
+    // silent skip is indistinguishable from "the URL feature doesn't work".
+    if (isProduct && trimmedSlug && !slugInfo) {
+      toast.error(
+        "The product's current URL could not be loaded, so the URL slug was NOT changed. Check the entity id is a catalog product and try again."
+      );
+      setTab("basic");
+      return;
+    }
     if (isProduct && slugInfo && trimmedSlug && trimmedSlug !== (slugInfo.slug ?? "")) {
       try {
         await updateSlug.mutateAsync({ id: entityId.trim(), slug: trimmedSlug });
@@ -228,11 +238,17 @@ export function MetaEditor({ open, onClose, record, presetType, presetId }: {
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium text-foreground">URL slug</label>
                 <Input
-                  placeholder={slugInfo ? "e.g. dragon-ball-goku-figurine" : "Loading…"}
+                  placeholder={slugInfo ? "e.g. dragon-ball-goku-figurine" : slugLoadFailed ? "Could not load" : "Loading…"}
                   value={slugDraft}
                   onChange={(e) => setSlugDraft(normalizeSlugInput(e.target.value))}
                   disabled={!slugInfo}
                 />
+                {slugLoadFailed && (
+                  <p className="text-xs text-red-500">
+                    Could not load this product&apos;s current URL — the entity id must be a catalog product id
+                    (pick the product from the list when creating the record). The URL cannot be changed until this loads.
+                  </p>
+                )}
                 <p className="text-xs text-muted-foreground">
                   This is the product's REAL address: <span className="font-medium text-foreground">yukizi.com/products/{slugDraft.replace(/(^-|-$)+/g, "") || "…"}</span>
                   {slugInfo?.slug && slugDraft.replace(/(^-|-$)+/g, "") !== slugInfo.slug && (

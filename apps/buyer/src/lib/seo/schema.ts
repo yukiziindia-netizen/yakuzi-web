@@ -1,3 +1,4 @@
+import { COMPANY } from '@/config/company';
 import { SITE_NAME, SITE_URL, ORG_LEGAL_NAME, SUPPORT_EMAIL, absoluteUrl } from './site';
 
 export function organizationSchema() {
@@ -10,6 +11,24 @@ export function organizationSchema() {
     url: SITE_URL,
     logo: absoluteUrl('/YukiziLogo.png'),
     email: SUPPORT_EMAIL,
+    // Real, published details only (the same values the Contact page shows) —
+    // they let Google/LLMs pin the entity to a concrete registered business.
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: 'Phase 2, Laxmi Narayan Residency, Flat No. 103, Jekegram',
+      addressLocality: 'Thane',
+      addressRegion: 'Maharashtra',
+      postalCode: '400606',
+      addressCountry: 'IN',
+    },
+    contactPoint: {
+      '@type': 'ContactPoint',
+      contactType: 'customer support',
+      telephone: COMPANY.supportPhone,
+      email: SUPPORT_EMAIL,
+      areaServed: 'IN',
+      availableLanguage: ['en'],
+    },
   };
 }
 
@@ -21,6 +40,16 @@ export function webSiteSchema() {
     name: SITE_NAME,
     url: SITE_URL,
     publisher: { '@id': `${SITE_URL}/#organization` },
+    // The homepage doubles as the search-results view (?search=…), so this is
+    // a real, working target — enables sitelinks-search-box eligibility.
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${SITE_URL}/?search={search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
+    },
   };
 }
 

@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
+import { absoluteUrl } from '@/lib/seo/site';
 import PolicyPage, { PolicySection } from '@/components/shared/PolicyPage';
 import { COMPANY } from '@/config/company';
 
 export const metadata: Metadata = {
-  title: 'Return & Refund Policy | Yukizi',
+  title: 'Return & Refund Policy',
+  alternates: { canonical: absoluteUrl('/returns') },
   description:
     'When Yukizi accepts a return, the proof required, how requests are verified and how refunds are processed.',
 };

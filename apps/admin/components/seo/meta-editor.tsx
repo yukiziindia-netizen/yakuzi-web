@@ -88,6 +88,9 @@ export function MetaEditor({ open, onClose, record, presetType, presetId }: {
   const { data: slugInfo, isError: slugLoadFailed } = useSeoProductSlug(open && isProduct ? entityId : undefined);
   const updateSlug = useUpdateSeoProductSlug();
   const [slugDraft, setSlugDraft] = useState("");
+  // 301 the old URL to the new one on slug change. Default ON - opting out
+  // is for URLs that were never shared/indexed.
+  const [slugRedirect, setSlugRedirect] = useState(true);
 
   useEffect(() => {
     setSlugDraft(slugInfo?.slug ?? "");
@@ -97,6 +100,7 @@ export function MetaEditor({ open, onClose, record, presetType, presetId }: {
   useEffect(() => {
     if (!open) return;
     setTab("basic");
+    setSlugRedirect(true);
     setShowHistory(false);
     setEntityType(record?.entityType ?? presetType ?? "PRODUCT");
     setEntityId(record?.entityId ?? presetId ?? (presetType === "HOMEPAGE" ? "/" : ""));
@@ -165,8 +169,12 @@ export function MetaEditor({ open, onClose, record, presetType, presetId }: {
     }
     if (isProduct && slugInfo && trimmedSlug && trimmedSlug !== (slugInfo.slug ?? "")) {
       try {
-        await updateSlug.mutateAsync({ id: entityId.trim(), slug: trimmedSlug });
-        toast.success("Product URL updated — the old URL now redirects to the new one.");
+        await updateSlug.mutateAsync({ id: entityId.trim(), slug: trimmedSlug, createRedirect: slugRedirect });
+        toast.success(
+          slugRedirect
+            ? "Product URL updated — the old URL now redirects to the new one."
+            : "Product URL updated — no redirect was created from the old URL.",
+        );
       } catch (e: any) {
         toast.error(e?.response?.data?.message ?? "Could not update the product URL slug.");
         setTab("basic");
@@ -248,6 +256,17 @@ export function MetaEditor({ open, onClose, record, presetType, presetId }: {
                     Could not load this product&apos;s current URL — the entity id must be a catalog product id
                     (pick the product from the list when creating the record). The URL cannot be changed until this loads.
                   </p>
+                )}
+                {slugInfo?.slug && slugDraft.replace(/(^-|-$)+/g, "") !== slugInfo.slug && (
+                  <label className="flex items-center gap-2 text-xs text-foreground cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={slugRedirect}
+                      onChange={(e) => setSlugRedirect(e.target.checked)}
+                      className="h-3.5 w-3.5 accent-primary"
+                    />
+                    Redirect the old URL to the new one (recommended — keeps Google results and shared links working)
+                  </label>
                 )}
                 <p className="text-xs text-muted-foreground">
                   This is the product's REAL address: <span className="font-medium text-foreground">yukizi.com/products/{slugDraft.replace(/(^-|-$)+/g, "") || "…"}</span>

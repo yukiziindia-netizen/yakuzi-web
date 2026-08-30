@@ -24,7 +24,8 @@ export function useSeoProductSlug(id?: string) {
 export function useUpdateSeoProductSlug() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, slug }: { id: string; slug: string }) => updateSeoProductSlug(id, slug),
+    mutationFn: ({ id, slug, createRedirect }: { id: string; slug: string; createRedirect?: boolean }) =>
+      updateSeoProductSlug(id, slug, createRedirect),
     onSuccess: (_data, { id }) =>
       void qc.invalidateQueries({ queryKey: ["admin", "seo", "product-slug", id] }),
   });

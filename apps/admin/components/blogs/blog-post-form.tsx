@@ -41,6 +41,8 @@ export function BlogPostForm({ post }: { post?: BlogPost }) {
   const [title, setTitle] = useState(post?.title ?? "");
   const [slug, setSlug] = useState(post?.slug ?? "");
   const [slugTouched, setSlugTouched] = useState(isEdit);
+  // 301 the old URL to the new one when an existing post's slug changes.
+  const [redirectOldUrl, setRedirectOldUrl] = useState(true);
   const [excerpt, setExcerpt] = useState(post?.excerpt ?? "");
   const [content, setContent] = useState(post?.content ?? "");
   const [featuredImage, setFeaturedImage] = useState(post?.featuredImage ?? "");
@@ -116,7 +118,13 @@ export function BlogPostForm({ post }: { post?: BlogPost }) {
     const payload = { ...buildPayload(), status: nextStatus ?? status };
     try {
       if (isEdit && post) {
-        await updatePost.mutateAsync({ id: post.id, payload });
+        // createRedirect only exists on the update DTO (the API strips it
+        // before persisting) — never send it on create.
+        const slugChanged = !!payload.slug && payload.slug !== post.slug;
+        await updatePost.mutateAsync({
+          id: post.id,
+          payload: slugChanged ? { ...payload, createRedirect: redirectOldUrl } : payload,
+        });
         toast.success("Post updated.");
       } else {
         const created = await createPost.mutateAsync(payload);
@@ -151,6 +159,17 @@ export function BlogPostForm({ post }: { post?: BlogPost }) {
               placeholder="best-demon-slayer-figures-india"
             />
             <p className="text-xs text-muted-foreground">yukizi.com/blogs/{slug || "…"}</p>
+            {isEdit && post && slug && slug !== post.slug && (
+              <label className="flex items-center gap-2 text-xs text-foreground cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={redirectOldUrl}
+                  onChange={(e) => setRedirectOldUrl(e.target.checked)}
+                  className="h-3.5 w-3.5 accent-primary"
+                />
+                Redirect the old URL to the new one (recommended — keeps Google results and shared links working)
+              </label>
+            )}
           </div>
           <Textarea label="Excerpt" rows={2} maxLength={500} value={excerpt} onChange={(e) => setExcerpt(e.target.value)} placeholder="Short summary shown on the blog list page." />
         </div>

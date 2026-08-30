@@ -19,6 +19,8 @@ export default function ProductDetailPage() {
   const updateProduct = useUpdateProduct();
   const deleteProduct = useDeleteProduct();
   const [editing, setEditing] = useState(false);
+  // 301 old URL -> new URL when the slug changes. Default ON.
+  const [slugRedirect, setSlugRedirect] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [form, setForm] = useState<Record<string, any>>({});
 
@@ -56,10 +58,13 @@ export default function ProductDetailPage() {
       }
       const changingSlug =
         payload.slug && payload.slug !== (product?.variant?.catalogProduct?.slug ?? "");
+      if (changingSlug) payload.slugRedirect = slugRedirect;
       await updateProduct.mutateAsync({ productId: id, payload });
       toast.success(
         changingSlug
-          ? "Product updated — old URL now 301-redirects to the new one"
+          ? slugRedirect
+            ? "Product updated — old URL now 301-redirects to the new one"
+            : "Product updated — no redirect was created from the old URL"
           : "Product updated"
       );
       setEditing(false);
@@ -168,6 +173,17 @@ export default function ProductDetailPage() {
                     yukizi.com/products/<span className="text-foreground">{form.slug || "…"}</span> — changing this
                     auto-creates a 301 redirect from the old URL, so existing links keep working.
                   </p>
+                  {form.slug !== (product?.variant?.catalogProduct?.slug ?? "") && form.slug && (
+                    <label className="mt-1.5 flex items-center gap-2 text-xs text-foreground cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={slugRedirect}
+                        onChange={(e) => setSlugRedirect(e.target.checked)}
+                        className="h-3.5 w-3.5 accent-primary"
+                      />
+                      Redirect the old URL to the new one (recommended — keeps Google results and shared links working)
+                    </label>
+                  )}
                 </div>
                 <Input label="Manufacturer" value={form.manufacturer} onChange={e => setForm(f => ({ ...f, manufacturer: e.target.value }))} />
                 <Input label="Chemical Composition" value={form.chemicalComposition} onChange={e => setForm(f => ({ ...f, chemicalComposition: e.target.value }))} />

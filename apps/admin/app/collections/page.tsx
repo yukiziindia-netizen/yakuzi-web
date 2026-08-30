@@ -108,7 +108,7 @@ export default function AdminCollectionsPage() {
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const [addType, setAddType] = useState<"categories" | "subcategories">("categories");
   const [editId, setEditId] = useState("");
-  const [formData, setFormData] = useState({ name: "", categoryId: "" });
+  const [formData, setFormData] = useState({ name: "", categoryId: "", description: "" });
   const [slides, setSlides] = useState<BannerSlideDraft[]>([]);
   const [uploading, setUploading] = useState(false);
 
@@ -148,6 +148,7 @@ export default function AdminCollectionsPage() {
     setFormData({
       name: "",
       categoryId: type === "subcategories" && categories.length > 0 ? categories[0].id : "",
+      description: "",
     });
     setSlides([]);
     setAddPickerOpen(false);
@@ -163,6 +164,7 @@ export default function AdminCollectionsPage() {
     setFormData({
       name: item.name || "",
       categoryId: item.categoryId || (categories.length > 0 ? categories[0].id : ""),
+      description: item.description || "",
     });
     setSlides(slidesFromItem(item));
     setModalOpen(true);
@@ -170,7 +172,7 @@ export default function AdminCollectionsPage() {
 
   const closeModal = () => {
     setModalOpen(false);
-    setFormData({ name: "", categoryId: "" });
+    setFormData({ name: "", categoryId: "", description: "" });
     setSlides([]);
   };
 
@@ -245,10 +247,11 @@ export default function AdminCollectionsPage() {
       if (addType === "categories") {
         if (modalMode === "create") {
           const created = await createCat.mutateAsync({ name: formData.name });
+          if (formData.description.trim()) await updateCat.mutateAsync({ id: created.id, payload: { description: formData.description } });
           await replaceCatBanners.mutateAsync({ id: created.id, banners });
           toast.success("Collection created");
         } else {
-          await updateCat.mutateAsync({ id: editId, payload: { name: formData.name } });
+          await updateCat.mutateAsync({ id: editId, payload: { name: formData.name, description: formData.description } });
           await replaceCatBanners.mutateAsync({ id: editId, banners });
           toast.success("Collection updated");
         }
@@ -436,6 +439,22 @@ export default function AdminCollectionsPage() {
                     </div>
                   )}
                   <Input label="Name" value={formData.name} onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))} placeholder="e.g. Figurines" required autoFocus />
+
+                  {addType === "categories" && (
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-1.5">
+                        Description <span className="text-muted-foreground font-normal">(shown on the collection page and used for SEO — a couple of sentences about what buyers find here)</span>
+                      </label>
+                      <textarea
+                        value={formData.description}
+                        onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                        rows={3}
+                        maxLength={5000}
+                        placeholder="e.g. Authentic anime figurines — scale figures, Nendoroids and prize figures from verified sellers across India."
+                        className="w-full rounded-xl border border-input bg-background/50 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/60 transition-all resize-y"
+                      />
+                    </div>
+                  )}
 
                   {/* Banner slideshow. Order here is the order buyers see; drag
                       the handle to rearrange. Slide 1 also fills the legacy

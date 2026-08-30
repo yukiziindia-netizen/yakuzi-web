@@ -234,6 +234,18 @@ export default async function CategoryPage({
             <CategoryBanner title={categoryName} banners={bannerSlides} />
           </div>
 
+          {/* Admin-authored intro copy (Collections modal -> Description).
+              Server-rendered, so crawlers finally get real words on what was
+              previously a name + product grid. Feeds the meta description via
+              generateMetadata's existing cat.description read. */}
+          {categoryData?.description && (
+            <div className="px-4 sm:px-6 pt-3 sm:pt-4 max-w-3xl">
+              <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                {categoryData.description}
+              </p>
+            </div>
+          )}
+
           {/* Mobile Header (Category Name & Breadcrumb). Not an h1 — the page's
               single h1 is CategoryBanner's sr-only one, and this block stays in
               the DOM at every viewport (sm:hidden only hides it visually), so an

@@ -50,6 +50,18 @@ async function getMap(): Promise<RedirectMap> {
 }
 
 export async function middleware(req: NextRequest) {
+  // Mixed-case URLs (e.g. /CATEGORY/figurines) previously served 200 as
+  // duplicates of the lowercase page, leaving canonical tags to clean up.
+  // Every route and every stored slug on this site is lowercase, so a
+  // permanent redirect is always correct. Runs before the redirect-map fetch
+  // so these requests never touch the API. Query string is preserved as-is
+  // (?sub= values are matched case-sensitively by id as well as slug).
+  if (/[A-Z]/.test(req.nextUrl.pathname)) {
+    const url = req.nextUrl.clone();
+    url.pathname = req.nextUrl.pathname.toLowerCase();
+    return NextResponse.redirect(url, 308);
+  }
+
   const map = await getMap();
 
   // The API stores fromPath lowercase without a trailing slash.

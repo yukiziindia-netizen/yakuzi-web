@@ -47,11 +47,24 @@ export async function generateMetadata({
   const description = metaTruncate(
     cat.description || `Shop ${cat.name} on ${SITE_NAME}: authentic products from verified sellers with fast shipping across India.`,
   );
+  // Category pages previously shipped NO og:image at all (the site logo isn't
+  // even inherited here) — use the category's own banner artwork, matching the
+  // fallback order the page body uses for the visible banner.
+  const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000').replace(/\/api$/, '');
+  const absoluteImage = (url?: string) => (url && url.startsWith('/') ? `${apiBase}${url}` : url);
+  const ogImage = absoluteImage(
+    (Array.isArray(cat.bannerImages) && cat.bannerImages[0]?.image) || cat.image || undefined,
+  );
   const derived: Metadata = {
     title,
     description,
     alternates: { canonical: absoluteUrl(`/category/${slug}`) }, // sub-category pages canonicalize to the parent category page to avoid duplicate-content indexing
-    openGraph: { title, description, url: absoluteUrl(`/category/${slug}`) },
+    openGraph: {
+      title,
+      description,
+      url: absoluteUrl(`/category/${slug}`),
+      ...(ogImage ? { images: [{ url: ogImage }] } : {}),
+    },
   };
   return applySeoOverride(derived, await fetchSeoOverride('CATEGORY', cat.id));
 }

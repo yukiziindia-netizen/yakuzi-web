@@ -50,8 +50,20 @@ function buildSchemaInput(p: any) {
   return {
     ...p,
     ...(chosen
-      ? { price: chosen.price ?? p.price, stock: chosen.stock, sellerName: chosen.sellerName || undefined }
-      : { stock: 0, sellerName: undefined }),
+      ? {
+          price: chosen.price ?? p.price,
+          stock: chosen.stock,
+          sellerName: chosen.sellerName || undefined,
+          // Same-listing rule applies to shipping too: prefer the chosen
+          // listing's own shipping price, fall back to the top-level one.
+          shippingPrice:
+            chosen.finalShippingPrice ?? chosen.shippingCharges ?? p.finalShippingPrice ?? p.shippingCharges ?? null,
+        }
+      : {
+          stock: 0,
+          sellerName: undefined,
+          shippingPrice: p.finalShippingPrice ?? p.shippingCharges ?? null,
+        }),
   };
 }
 

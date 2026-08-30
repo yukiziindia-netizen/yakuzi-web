@@ -44,7 +44,7 @@ export function productSchema(p: {
   name?: string; slug?: string; id: string; description?: string;
   image?: string | null; images?: Array<{ url?: string } | string> | null;
   manufacturer?: string; price?: number | null; mrp?: number | null;
-  stock?: number; hasSellers?: boolean;
+  stock?: number; hasSellers?: boolean; shippingPrice?: number | null;
   category?: { name?: string } | null;
   reviewSummary?: { average?: number; count?: number } | null;
   listings?: unknown[] | null; sellerCount?: number; sellerName?: string;
@@ -80,6 +80,33 @@ export function productSchema(p: {
                 ? 'https://schema.org/InStock'
                 : 'https://schema.org/OutOfStock',
             ...(p.sellerName ? { seller: { '@type': 'Organization', name: p.sellerName } } : {}),
+            // The platform has no used/refurbished concept — every listing is new.
+            itemCondition: 'https://schema.org/NewCondition',
+            // Real policy from /returns: damaged/wrong-item only, buyer must
+            // notify within 3 days of delivery. Don't invent returnFees — the
+            // policy page doesn't state who pays.
+            hasMerchantReturnPolicy: {
+              '@type': 'MerchantReturnPolicy',
+              applicableCountry: 'IN',
+              returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+              merchandiseReturnDays: 3,
+              url: absoluteUrl('/returns'),
+            },
+            // Only when the payload carries a real per-listing shipping price;
+            // no deliveryTime — deliveryText is free-form and unparseable.
+            ...(p.shippingPrice != null
+              ? {
+                  shippingDetails: {
+                    '@type': 'OfferShippingDetails',
+                    shippingRate: {
+                      '@type': 'MonetaryAmount',
+                      value: String(p.shippingPrice),
+                      currency: 'INR',
+                    },
+                    shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'IN' },
+                  },
+                }
+              : {}),
           },
         }
       : {}),

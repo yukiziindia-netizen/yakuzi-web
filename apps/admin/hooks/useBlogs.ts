@@ -29,7 +29,8 @@ export function useCreateBlogPost() {
 export function useUpdateBlogPost() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: Partial<UpsertBlogPostPayload> }) => updateAdminBlogPost(id, payload),
+    mutationFn: ({ id, payload }: { id: string; payload: Partial<UpsertBlogPostPayload> & { createRedirect?: boolean } }) =>
+      updateAdminBlogPost(id, payload),
     onSuccess: () => void qc.invalidateQueries({ queryKey: KEY }),
   });
 }

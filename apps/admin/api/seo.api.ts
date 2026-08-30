@@ -152,10 +152,10 @@ export async function getSeoProductSlug(id: string): Promise<ProductSlugInfo> {
   return data.data;
 }
 
-export async function updateSeoProductSlug(id: string, slug: string): Promise<{ id: string; slug: string }> {
+export async function updateSeoProductSlug(id: string, slug: string, createRedirect = true): Promise<{ id: string; slug: string }> {
   const { data } = await apiClient.patch<{ data: { id: string; slug: string } }>(
     `/admin/seo/product-slug/${id}`,
-    { slug }
+    { slug, createRedirect }
   );
   return data.data;
 }

@@ -107,7 +107,12 @@ export async function createAdminBlogPost(payload: UpsertBlogPostPayload): Promi
   return data.data ?? data;
 }
 
-export async function updateAdminBlogPost(id: string, payload: Partial<UpsertBlogPostPayload>): Promise<BlogPost> {
+export async function updateAdminBlogPost(
+  id: string,
+  // createRedirect: 301 the old URL to the new one on slug change (update-only
+  // field — the API strips it before persisting).
+  payload: Partial<UpsertBlogPostPayload> & { createRedirect?: boolean },
+): Promise<BlogPost> {
   const { data } = await apiClient.put(`/admin/blogs/${id}`, payload);
   return data.data ?? data;
 }

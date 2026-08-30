@@ -69,11 +69,13 @@ function useEntityOptions(type: SeoEntityType, search: string) {
  * storefront queries with: the DB id for catalog rows, "/" for HOMEPAGE, the
  * URL path for static/landing pages.
  */
-export function EntityPicker({ type, entityId, onTypeChange, onSelect }: {
+export function EntityPicker({ type, entityId, onTypeChange, onSelect, types }: {
   type: SeoEntityType;
   entityId: string;
   onTypeChange: (t: SeoEntityType) => void;
   onSelect: (id: string, label?: string) => void;
+  /** Which entity types to offer; defaults to all. */
+  types?: SeoEntityType[];
 }) {
   const [search, setSearch] = useState("");
   const listMode = !FREE_TEXT_TYPES.includes(type) && type !== "HOMEPAGE";
@@ -87,7 +89,7 @@ export function EntityPicker({ type, entityId, onTypeChange, onSelect }: {
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3">
         <Select label="Page type" value={type} onChange={(e) => { setSearch(""); onTypeChange(e.target.value as SeoEntityType); onSelect(e.target.value === "HOMEPAGE" ? "/" : ""); }}>
-          {SEO_ENTITY_TYPES.map((t) => <option key={t} value={t}>{ENTITY_TYPE_LABELS[t]}</option>)}
+          {(types ?? SEO_ENTITY_TYPES).map((t) => <option key={t} value={t}>{ENTITY_TYPE_LABELS[t]}</option>)}
         </Select>
         {type === "HOMEPAGE" && <Input label="Entity" value="/" disabled />}
         {FREE_TEXT_TYPES.includes(type) && (

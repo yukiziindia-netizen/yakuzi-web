@@ -112,7 +112,7 @@ export default function NewPostPage() {
               New Publication
             </div>
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-gray-900 leading-tight">Create Insight</h1>
-            <p className="text-gray-500 mt-2 font-medium">Draft your next pharmaceutical breakthrough update.</p>
+            <p className="text-gray-500 mt-2 font-medium">Draft your next collector guide or story.</p>
           </div>
           
           <div className="flex items-center gap-3 bg-white/50 backdrop-blur-md p-2 rounded-2xl border border-white/60 shadow-xl shadow-primary/5">
@@ -148,7 +148,7 @@ export default function NewPostPage() {
                 type="text"
                 value={formData.title}
                 onChange={(e) => setFormData({...formData, title: e.target.value})}
-                placeholder="The Future of Pharmaceutical Logistics..."
+                placeholder="The Collector's Guide to Anime Figurines..."
                 className="w-full bg-white/40 border border-white/60 rounded-2xl py-5 px-8 text-3xl font-extrabold text-gray-900 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all placeholder:text-gray-200 shadow-inner"
                 required
               />
@@ -163,7 +163,7 @@ export default function NewPostPage() {
                   type="text"
                   value={formData.slug}
                   onChange={(e) => setFormData({...formData, slug: e.target.value})}
-                  placeholder="future-pharma-logistics"
+                  placeholder="collectors-guide-anime-figurines"
                   className="w-full bg-white/40 border border-white/60 rounded-xl py-3.5 px-6 focus:outline-none focus:border-primary transition-all font-mono text-sm text-gray-600 shadow-inner"
                 />
               </div>

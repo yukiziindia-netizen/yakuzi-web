@@ -130,7 +130,7 @@ export default function AdminDashboard() {
               <span className="text-sm uppercase tracking-widest">Dashboard</span>
             </div>
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-gray-900 leading-tight">Content Overview</h1>
-            <p className="text-gray-500 mt-2 font-medium">Manage and monitor your pharmacological publications.</p>
+            <p className="text-gray-500 mt-2 font-medium">Manage and monitor your blog posts.</p>
           </div>
           <Link 
             href="/admin/new"
@@ -196,7 +196,7 @@ export default function AdminDashboard() {
                           {post.title}
                         </span>
                         <div className="text-xs text-gray-500 font-medium flex items-center gap-2">
-                          <span className="text-primary/70">{post.category?.name || 'Pharma'}</span>
+                          <span className="text-primary/70">{post.category?.name || 'Collectibles'}</span>
                           <span className="w-1 h-1 rounded-full bg-gray-300" />
                           {new Date(post.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                         </div>
@@ -246,7 +246,7 @@ export default function AdminDashboard() {
                 <FileText size={40} />
               </div>
               <h3 className="text-2xl font-extrabold text-gray-900 mb-2">No publications yet</h3>
-              <p className="text-gray-500 font-medium max-w-xs mx-auto">Start sharing your pharmaceutical expertise with the world.</p>
+              <p className="text-gray-500 font-medium max-w-xs mx-auto">Start sharing your collectibles expertise with the world.</p>
               <Link href="/admin/new" className="inline-block mt-8 text-primary font-bold hover:underline">
                 Create your first post →
               </Link>

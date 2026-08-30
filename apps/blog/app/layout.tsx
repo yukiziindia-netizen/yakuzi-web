@@ -12,8 +12,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Yukizi Blog | Pharmaceutical Insights & Updates",
-  description: "Stay updated with the latest trends and updates from Yukizi.",
+  title: "Yukizi Blog | Anime, Manga & Collectibles",
+  description: "Guides, news and stories from the world of anime, manga and collectibles — from the Yukizi team.",
 };
 
 export default function RootLayout({

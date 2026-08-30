@@ -134,7 +134,7 @@ export default function EditPostPage() {
               Refining Insight
             </div>
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-gray-900 leading-tight">Edit Publication</h1>
-            <p className="text-gray-500 mt-2 font-medium font-sans">Modify your pharmacological publication details.</p>
+            <p className="text-gray-500 mt-2 font-medium font-sans">Modify your blog post details.</p>
           </div>
           
           <div className="flex items-center gap-3 bg-white/50 backdrop-blur-md p-2 rounded-2xl border border-white/60 shadow-xl shadow-primary/5">

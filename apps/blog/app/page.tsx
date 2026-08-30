@@ -66,10 +66,10 @@ export default function BlogHome() {
             Official Blog
           </span>
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 text-gray-900 leading-[1.1]">
-            Insights for the <span className="text-primary italic">Future</span> of Pharma
+            Stories for the <span className="text-primary italic">Collector</span> in You
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            Exploring the intersection of healthcare, supply chain innovation, and technology at Yukizi.
+            Guides, deep dives and news from the world of anime, manga and pop-culture collectibles at Yukizi.
           </p>
         </section>
 
@@ -96,7 +96,7 @@ export default function BlogHome() {
                   />
                   <div className="absolute top-4 left-4">
                     <span className="px-3 py-1.5 rounded-lg bg-white/90 backdrop-blur-sm text-primary text-[10px] font-bold uppercase tracking-wider border border-white shadow-sm">
-                      {post.category?.name || 'Pharma'}
+                      {post.category?.name || 'Collectibles'}
                     </span>
                   </div>
                 </div>

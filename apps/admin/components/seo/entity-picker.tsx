@@ -5,7 +5,7 @@ import { Search, Check } from "lucide-react";
 import { Input, Select, Skeleton } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { getSuggestions, getCategories, getSubCategories, getAdminBrands } from "@/api/admin.api";
-import { getBlogPostsForPicker, SEO_ENTITY_TYPES, type SeoEntityType } from "@/api/seo.api";
+import { SEO_ENTITY_TYPES, type SeoEntityType } from "@/api/seo.api";
 
 export const ENTITY_TYPE_LABELS: Record<SeoEntityType, string> = {
   PRODUCT: "Product",
@@ -53,10 +53,6 @@ function useEntityOptions(type: SeoEntityType, search: string) {
         case "BRAND": {
           const raw = await getAdminBrands();
           return asArray(raw).map((b: any) => ({ id: b.id, label: b.name ?? b.id }));
-        }
-        case "BLOG_POST": {
-          const posts = await getBlogPostsForPicker();
-          return posts.map((p: any) => ({ id: p.id, label: p.title ?? p.slug ?? p.id, hint: p.status }));
         }
         default:
           return [];

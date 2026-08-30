@@ -24,9 +24,14 @@ export type KeywordType =
   | "NEGATIVE"
   | "SEASONAL";
 
+// BLOG_POST is deliberately NOT offered here: blog posts carry their own SEO
+// fields (meta title/description, canonical, OG image) in the blog editor,
+// which is what the live post page actually reads — offering them here too
+// created a second, silently-dead control surface. The type stays in the
+// union so any historical records still render labels without crashing.
 export const SEO_ENTITY_TYPES: SeoEntityType[] = [
   "PRODUCT", "CATEGORY", "SUB_CATEGORY", "BRAND", "COLLECTION",
-  "BLOG_POST", "STATIC_PAGE", "HOMEPAGE", "LANDING_PAGE",
+  "STATIC_PAGE", "HOMEPAGE", "LANDING_PAGE",
 ];
 
 export const KEYWORD_TYPES: KeywordType[] = [

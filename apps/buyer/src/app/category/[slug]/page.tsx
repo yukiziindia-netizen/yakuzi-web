@@ -6,9 +6,10 @@ import CategoryBanner from '@/components/landing/CategoryBanner';
 import ProductCarousel from '@/components/landing/ProductCarousel';
 import { getCategories, getProducts } from '@yukizi/api-client';
 import { absoluteUrl, metaTruncate, SITE_NAME } from '@/lib/seo/site';
-import { applySeoOverride, fetchSeoOverride } from '@/lib/seo/overrides';
-import { breadcrumbSchema, itemListSchema } from '@/lib/seo/schema';
+import { applySeoOverride, fetchSeoOverride, validFaqs } from '@/lib/seo/overrides';
+import { breadcrumbSchema, faqPageSchema, itemListSchema } from '@/lib/seo/schema';
 import JsonLd from '@/components/seo/JsonLd';
+import SeoFaq from '@/components/seo/SeoFaq';
 
 export const dynamic = 'force-dynamic';
 
@@ -205,13 +206,21 @@ export default async function CategoryPage({
 
   const displayCategoryName = breadcrumbs.length > 0 ? breadcrumbs[breadcrumbs.length - 1] : categoryName;
 
+  // Admin-authored category FAQs (SEO dashboard → CATEGORY override), same
+  // pattern the PDP uses: visible <SeoFaq> + FAQPage JSON-LD from the SAME
+  // entries, so the markup never advertises hidden content. Renders nothing
+  // until an admin actually writes FAQs for this category. The override fetch
+  // is Next-cached (revalidate 300), so generateMetadata's identical call and
+  // this one cost a single origin request between them.
+  const faqs = categoryData ? validFaqs((await fetchSeoOverride('CATEGORY', categoryData.id))?.faq) : [];
+  const jsonLd: object[] = [
+    breadcrumbSchema([{ name: 'Home', path: '/' }, { name: categoryName }]),
+  ];
+  if (faqs.length) jsonLd.push(faqPageSchema(faqs));
+
   return (
     <main className="w-full bg-white min-h-screen relative pb-24 sm:pb-32">
-      <JsonLd
-        data={[
-          breadcrumbSchema([{ name: 'Home', path: '/' }, { name: categoryName }]),
-        ]}
-      />
+      <JsonLd data={jsonLd} />
       <HomeNavbar />
 
       <div className="w-full max-w-[1600px] 2xl:max-w-none mx-auto bg-white overflow-hidden flex flex-col relative min-h-screen">
@@ -256,6 +265,8 @@ export default async function CategoryPage({
               <CategoryProducts categoryId={categoryId} subCategoryId={subCategoryId} categoryName={categoryName} searchParams={resolvedSearchParams} />
             </Suspense>
           </div>
+
+          <SeoFaq faqs={faqs} />
         </section>
       </div>
     </main>

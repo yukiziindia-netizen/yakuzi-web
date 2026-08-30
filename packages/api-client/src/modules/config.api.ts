@@ -10,7 +10,9 @@ export const PlatformConfigSchema = z.object({
   shipping_fee: z.number().optional().default(250),
   default_moq: z.number().optional().default(1),
   max_order_qty: z.number().optional().default(100),
-  comingSoonMode: z.boolean().optional().default(true),
+  // Fail open: the storefront is live, so an absent/unreadable flag must never
+  // be treated as "coming soon" — see getComingSoonStatus below.
+  comingSoonMode: z.boolean().optional().default(false),
   maintenanceMode: z.boolean().optional().default(false),
 });
 
@@ -25,7 +27,7 @@ const DEFAULT_CONFIG: PlatformConfig = {
   shipping_fee: 250,
   default_moq: 1,
   max_order_qty: 100,
-  comingSoonMode: true,
+  comingSoonMode: false,
   maintenanceMode: false,
 };
 
@@ -60,12 +62,21 @@ export async function getPlatformConfig(): Promise<PlatformConfig> {
   }
 }
 
+/**
+ * Whether to show the pre-launch splash instead of the storefront.
+ *
+ * Fails OPEN on purpose. This gate replaces the ENTIRE homepage, so treating an
+ * unreachable API as "coming soon" turns any backend blip into a full-store
+ * outage — which is exactly what happened on 2026-08-28, when the API went down
+ * and yukizi.com served the launch splash for ~24h while comingSoonMode was
+ * actually false. Only an explicit `true` from a successful response counts.
+ */
 export async function getComingSoonStatus(): Promise<boolean> {
   try {
     const config = await getPlatformConfig();
     return Boolean(config.comingSoonMode);
   } catch {
-    return true;
+    return false;
   }
 }
 

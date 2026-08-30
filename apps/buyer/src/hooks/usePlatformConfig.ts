@@ -10,7 +10,7 @@ const DEFAULTS: PlatformConfig = {
   shipping_fee: 250,
   default_moq: 1,
   max_order_qty: 100,
-  comingSoonMode: true,
+  comingSoonMode: false,
   maintenanceMode: false,
 };
 

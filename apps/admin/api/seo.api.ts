@@ -34,6 +34,16 @@ export const SEO_ENTITY_TYPES: SeoEntityType[] = [
   "STATIC_PAGE", "HOMEPAGE", "LANDING_PAGE",
 ];
 
+// The meta editor's create flow deliberately does NOT offer PRODUCT: product
+// SEO (meta, slug/301s, FAQs, keywords, structured data) is edited on the
+// product add/edit pages themselves, which save to the same SeoMeta record.
+// Per Rishi: one editing surface per thing. PRODUCT stays in SEO_ENTITY_TYPES
+// so the records list can still filter/label product rows, and the keywords
+// page can still link keywords to products (not duplicated anywhere else).
+export const META_EDITOR_ENTITY_TYPES: SeoEntityType[] = SEO_ENTITY_TYPES.filter(
+  (t) => t !== "PRODUCT",
+);
+
 export const KEYWORD_TYPES: KeywordType[] = [
   "PRIMARY_TOPIC", "SECONDARY_TOPIC", "SYNONYM", "RELATED_ENTITY",
   "BRAND_ENTITY", "CATEGORY_ENTITY", "NEGATIVE", "SEASONAL",

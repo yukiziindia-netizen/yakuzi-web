@@ -9,6 +9,7 @@ import { CharCounter, OgPreview, ScoreChip, SerpPreview } from "./serp-preview";
 import { ChipsInput } from "./chips-input";
 import { FaqEditor } from "./faq-editor";
 import { EntityPicker, ENTITY_TYPE_LABELS } from "./entity-picker";
+import { META_EDITOR_ENTITY_TYPES } from "@/api/seo.api";
 
 const ROBOTS_PRESETS = ["", "index,follow", "noindex,follow", "noindex,nofollow"];
 
@@ -75,7 +76,7 @@ export function MetaEditor({ open, onClose, record, presetType, presetId }: {
   const restore = useRestoreSeoRevision();
 
   const [tab, setTab] = useState("basic");
-  const [entityType, setEntityType] = useState<SeoEntityType>(record?.entityType ?? presetType ?? "PRODUCT");
+  const [entityType, setEntityType] = useState<SeoEntityType>(record?.entityType ?? presetType ?? "CATEGORY");
   const [entityId, setEntityId] = useState(record?.entityId ?? presetId ?? "");
   const [entityLabel, setEntityLabel] = useState<string>("");
   const [form, setForm] = useState<FormState>(() => toForm(record));
@@ -98,7 +99,7 @@ export function MetaEditor({ open, onClose, record, presetType, presetId }: {
     if (!open) return;
     setTab("basic");
     setShowHistory(false);
-    setEntityType(record?.entityType ?? presetType ?? "PRODUCT");
+    setEntityType(record?.entityType ?? presetType ?? "CATEGORY");
     setEntityId(record?.entityId ?? presetId ?? (presetType === "HOMEPAGE" ? "/" : ""));
     setEntityLabel("");
     setForm(toForm(record));
@@ -222,6 +223,9 @@ export function MetaEditor({ open, onClose, record, presetType, presetId }: {
             entityId={entityId}
             onTypeChange={setEntityType}
             onSelect={(id, label) => { setEntityId(id); if (label) setEntityLabel(label); }}
+            // Products are edited on their own add/edit pages (same SeoMeta
+            // record) — not offered here to keep one editing surface per thing.
+            types={META_EDITOR_ENTITY_TYPES}
           />
         )}
         {!record && entityId && (

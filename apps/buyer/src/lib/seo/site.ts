@@ -33,7 +33,9 @@ export const SITE_DESCRIPTION =
 // pages again - it already had, silently, until 19 August 2026.
 export const ORG_LEGAL_NAME = COMPANY.legalName;
 export const SUPPORT_EMAIL = 'support@yukizi.com';
-export const DEFAULT_OG_IMAGE = '/YukiziLogo.png';
+// 1200x630 branded share card (logo + mascot + tagline). The old value was
+// the raw square logo, which platforms crop/squish in link previews.
+export const DEFAULT_OG_IMAGE = '/og-default.png';
 
 export function absoluteUrl(path: string): string {
   if (path.startsWith('//')) return `https:${path}`;

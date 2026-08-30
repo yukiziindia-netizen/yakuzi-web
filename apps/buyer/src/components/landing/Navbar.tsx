@@ -798,7 +798,10 @@ export default function Navbar({
             }}
             className="relative -mt-2 sm:-mt-1.5 md:-mt-2 z-20 w-11 h-[54px] xs:w-12 xs:h-[59px] sm:w-20 sm:h-20 md:w-24 md:h-24 bg-[#f76409] rounded-xl xs:rounded-[14px] sm:rounded-2xl md:rounded-[1.5rem] flex items-center justify-center shadow-[0_6px_16px_rgba(247,100,9,0.3)] sm:shadow-[0_4px_20px_rgba(247,100,9,0.45)] hover:-translate-y-1 sm:hover:-translate-y-2 transition-transform cursor-pointer shrink-0 border-0 sm:border-[6px] md:border-[7px] border-[#ffa168] mx-0.5 xs:mx-1 sm:mx-2 md:mx-2"
           >
-            <Image src="/yukizi.jpg" alt="Mascot" width={96} height={96} className="w-full h-full object-cover rounded-xl xs:rounded-[14px] sm:rounded-xl md:rounded-[1.1rem]" />
+            {/* unoptimized: next/image's optimizer serves a single frame for
+                animated GIFs — this must stay dancing. 192px source (2x of the
+                largest 96px render), palette-optimized to ~200KB. */}
+            <Image src="/yukizi-happy-dance.gif" alt="Mascot" width={96} height={96} unoptimized className="w-full h-full object-cover rounded-xl xs:rounded-[14px] sm:rounded-xl md:rounded-[1.1rem]" />
 
             {/* Top dots */}
             <div className="absolute -top-[8px] left-[32%] w-[4px] h-[4px] sm:-top-[14px] sm:left-[32%] sm:w-[6px] sm:h-[6px] bg-[#ffa168] rounded-[1px] shadow-[0_0_4px_rgba(255,161,104,0.6)]" />

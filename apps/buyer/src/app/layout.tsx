@@ -20,6 +20,9 @@ export const metadata: Metadata = {
     images: [{ url: DEFAULT_OG_IMAGE }],
   },
   twitter: { card: 'summary_large_image' },
+  // Animated mascot favicon (the tab previously had no icon at all).
+  // Firefox animates GIF favicons; Chrome/Safari show the first frame.
+  icons: { icon: [{ url: '/favicon.gif', type: 'image/gif' }] },
   // Search-engine ownership verification, env-gated so the tags only render
   // once the tokens are pasted into Vercel (Settings → Environment Variables).
   // GOOGLE_SITE_VERIFICATION: GSC → Add property → URL prefix → HTML tag value.

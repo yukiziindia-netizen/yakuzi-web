@@ -62,10 +62,14 @@ export function OrderDrawer({ isOpen, onClose, orderId, onLoginClick }: OrderDra
     orderYear = d.getFullYear().toString();
   }
 
+  // year defaulted to the hardcoded string '2026', so this list silently
+  // showed only orders placed in 2026 and would have emptied itself in
+  // January. Defaults are now "everything", which is what an unfiltered list
+  // should show.
   const [filters, setFilters] = useState<OrderFilters>({
     paymentStatus: 'All',
     orderStatus: 'All orders',
-    year: '2026',
+    year: 'All',
     month: 'All'
   });
 

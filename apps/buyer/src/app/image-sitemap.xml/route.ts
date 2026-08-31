@@ -24,14 +24,28 @@ export async function GET(): Promise<Response> {
     for (let page = 1; page <= 50; page++) {
       const res = await getProducts({ page, limit: 100 });
       for (const p of res.data) {
-        const raw = (p as { image?: unknown }).image;
-        if (!raw || typeof raw !== 'string') continue;
-        const loc = absoluteUrl(`/products/${(p as { slug?: string }).slug ?? p.id}`);
-        urls.push(
-          `<url><loc>${esc(loc)}</loc><image:image><image:loc>${esc(raw)}</image:loc>` +
-            `<image:title>${esc(String((p as { name?: string }).name ?? ''))} - Yukizi</image:title>` +
-            `</image:image></url>`,
-        );
+        const row = p as { image?: unknown; images?: unknown; slug?: string; name?: string };
+        // Every picture, not just the primary one. This listed a single image
+        // per product until the list payload started returning them all
+        // (api#107) — on a collectibles catalogue that left most of the
+        // imagery undiscoverable in Google Images.
+        const all = Array.isArray(row.images) ? row.images : [];
+        const picked = [
+          ...(typeof row.image === 'string' ? [row.image] : []),
+          ...all.filter((u): u is string => typeof u === 'string'),
+        ];
+        const unique = [...new Set(picked)];
+        if (!unique.length) continue;
+
+        const loc = absoluteUrl(`/products/${row.slug ?? p.id}`);
+        const title = `${esc(String(row.name ?? ''))} - Yukizi`;
+        // Google caps an image sitemap at 1,000 images per URL; a product
+        // gallery never approaches that, but slice defensively anyway.
+        const tags = unique
+          .slice(0, 1000)
+          .map((u) => `<image:image><image:loc>${esc(u)}</image:loc><image:title>${title}</image:title></image:image>`)
+          .join('');
+        urls.push(`<url><loc>${esc(loc)}</loc>${tags}</url>`);
       }
       if (page * res.limit >= res.total || page >= 50) break;
     }

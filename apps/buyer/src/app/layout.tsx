@@ -107,8 +107,28 @@ const baseMetadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  // Where every page's data and imagery comes from. Without these the first
+  // request to each host pays a full DNS lookup and TLS handshake before a
+  // single byte of product data or a single image starts downloading — on a
+  // mobile connection that is a visible delay on the largest element.
+  const apiOrigin = (() => {
+    try {
+      const base = process.env.NEXT_PUBLIC_API_BASE_URL;
+      return base ? new URL(base).origin : null;
+    } catch {
+      return null;
+    }
+  })();
+
   return (
     <html lang="en" className={inter.variable}>
+      <head>
+        {apiOrigin && <link rel="preconnect" href={apiOrigin} crossOrigin="" />}
+        <link rel="preconnect" href="https://storage.googleapis.com" crossOrigin="" />
+        {/* dns-prefetch as the fallback for anything that ignores preconnect. */}
+        {apiOrigin && <link rel="dns-prefetch" href={apiOrigin} />}
+        <link rel="dns-prefetch" href="https://storage.googleapis.com" />
+      </head>
       <body className={`${inter.className} font-sans`}>
         <Providers>
           <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>

@@ -1,9 +1,9 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getAdminReviews, deleteAdminReview } from '@yukizi/api-client';
+import { getAdminReviews, deleteAdminReview, type AdminReviewFilters } from '@yukizi/api-client';
 
-export function useAdminReviews(params?: { page?: number; limit?: number }) {
+export function useAdminReviews(params?: AdminReviewFilters) {
   return useQuery({
     queryKey: ['admin-reviews', params],
     queryFn: () => getAdminReviews(params),

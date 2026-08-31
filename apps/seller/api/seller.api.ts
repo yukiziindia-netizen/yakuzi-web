@@ -554,3 +554,24 @@ export async function getBuyerProfile(buyerId: string) {
   const { data } = await apiClient.get<any>(`/buyers/${buyerId}`);
   return data.data ?? data;
 }
+
+/** Seller-facing review filters — no customer dimension by design. */
+export interface SellerReviewFilters {
+  page?: number;
+  limit?: number;
+  productId?: string;
+  categoryId?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  rating?: number;
+}
+
+/**
+ * Reviews from buyers who purchased THIS seller's listing. Scoped
+ * server-side, so another seller's reviews of the same catalog product never
+ * appear, and no buyer identity is returned.
+ */
+export async function getSellerReviews(params: SellerReviewFilters = {}) {
+  const { data } = await apiClient.get<{ data: any }>("/reviews/seller", { params });
+  return data.data ?? data;
+}

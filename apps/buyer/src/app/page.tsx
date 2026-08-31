@@ -6,7 +6,6 @@ import ProductCarousel from '@/components/landing/ProductCarousel';
 import CategoryScrollRow from '@/components/landing/CategoryScrollRow';
 import ComingSoon from '@/components/landing/ComingSoon';
 import dynamicComponent from 'next/dynamic';
-const Footer = dynamicComponent(() => import('@/components/landing/Footer'), { ssr: false });
 import { getProducts, getComingSoonStatus, getBanners, getHomepageSections, type HomepageSection } from '@yukizi/api-client';
 import type { Metadata } from 'next';
 import JsonLd from '@/components/seo/JsonLd';
@@ -142,7 +141,6 @@ export default async function HomePage({
           </div>
         </section>
       </div>
-      <Footer social={social} />
     </main>
   );
 }

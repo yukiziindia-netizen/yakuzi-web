@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { Package, Truck, ChevronLeft, Calendar, FileText, Loader2, AlertCircle, XCircle, CheckCircle2, CreditCard } from 'lucide-react';
 import Navbar from '@/components/landing/Navbar';
 import dynamicComponent from 'next/dynamic';
-const Footer = dynamicComponent(() => import('@/components/landing/Footer'), { ssr: false });
 import Timeline from '@/components/shared/Timeline';
 import { useToast } from '@/components/shared/Toast';
 import Link from 'next/link';
@@ -124,7 +123,6 @@ export default function OrderIdPage({ params }: { params: { orderId: string } })
         <div className="pt-32 pb-20 flex items-center justify-center">
           <Loader2 className="w-8 h-8 text-gray-300 animate-spin" />
         </div>
-        <Footer />
       </main>
     );
   }
@@ -140,7 +138,6 @@ export default function OrderIdPage({ params }: { params: { orderId: string } })
             Back to Orders
           </Link>
         </div>
-        <Footer />
       </main>
     );
   }
@@ -410,8 +407,6 @@ export default function OrderIdPage({ params }: { params: { orderId: string } })
           </div>
         </motion.div>
       </div>
-
-      <Footer />
     </main>
     </AuthGuard>
   );

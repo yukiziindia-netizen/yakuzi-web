@@ -50,6 +50,7 @@ import EditProfileDrawer from "@/components/profile/EditProfileDrawer";
 import CartDrawer from "@/components/cart/CartDrawer";
 import WishlistDrawer from "@/components/wishlist/WishlistDrawer";
 import SupportDrawer from "@/components/shared/SupportDrawer";
+import { useToast } from "@/components/shared/Toast";
 import NotificationDrawer from "@/components/notifications/NotificationDrawer";
 import SearchBar from "@/components/shared/SearchBar";
 import { SidebarSheet, type SidebarView } from "@/components/landing/SidebarSheet";
@@ -80,6 +81,10 @@ export default function Navbar({
   onFilterClick?: () => void;
 }) {
   const { isAuthenticated, logout } = useAuth();
+  // Replaces the blocking window.alert() calls in the chat panel: a native
+  // modal freezes the page and cannot be styled, and this app already has a
+  // toast system mounted globally in providers.tsx.
+  const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: cartData } = useCart();
   const { data: notificationsData } = useNotifications();
@@ -387,13 +392,13 @@ export default function Navbar({
 
   // 1. Share Chat Logic
   const handleShare = async () => {
-    if (chatMessages.length === 0) return alert("Nothing to share yet! Send a message first.");
+    if (chatMessages.length === 0) return toast("Nothing to share yet! Send a message first.", "info");
     const transcript = chatMessages.map(m => `${m.role === 'user' ? 'You' : 'Yukizi AI'}: ${m.content}`).join('\n\n');
     if (navigator.share) {
       try { await navigator.share({ title: 'Yukizi Chat Transcript', text: transcript }); } catch (err) { console.error("Share failed", err); }
     } else {
       navigator.clipboard.writeText(transcript);
-      alert('Transcript copied to clipboard!');
+      toast('Transcript copied to clipboard!', 'success');
     }
   };
 
@@ -435,7 +440,7 @@ export default function Navbar({
   // 3. Regenerate Logic
   const handleRegenerate = async () => {
     if (chatMessages.length < 2 || isChatLoading) {
-      if (chatMessages.length < 2) alert("Need at least one exchange to regenerate.");
+      if (chatMessages.length < 2) toast("Need at least one exchange to regenerate.", "info");
       return;
     }
     let lastUserMsgIndex = -1;
@@ -446,7 +451,7 @@ export default function Navbar({
       }
     }
     if (lastUserMsgIndex === -1) {
-      alert("No previous user message found to regenerate.");
+      toast("No previous user message found to regenerate.", "info");
       return;
     }
     const lastUserMsg = chatMessages[lastUserMsgIndex];
@@ -475,7 +480,7 @@ export default function Navbar({
   const handleVoiceInput = () => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert("Your browser doesn't support voice input. (Try Chrome)");
+      toast("Your browser doesn't support voice input. Try Chrome.", "error");
       return;
     }
     try {
@@ -486,7 +491,7 @@ export default function Navbar({
       recognition.onstart = () => setIsRecording(true);
       recognition.onend = () => setIsRecording(false);
       recognition.onerror = (event: any) => {
-        alert(`Voice input error: ${event.error}`);
+        toast(`Voice input error: ${event.error}`, "error");
         setIsRecording(false);
       };
       recognition.onresult = (event: any) => {
@@ -495,7 +500,7 @@ export default function Navbar({
       };
       recognition.start();
     } catch (e) {
-      alert("Failed to start microphone. Please check permissions.");
+      toast("Failed to start microphone. Please check permissions.", "error");
     }
   };
 

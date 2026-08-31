@@ -121,9 +121,16 @@ export default function AdminCollectionsPage() {
   const upsertSeo = useUpsertSeoMeta();
   const [seoForm, setSeoForm] = useState<ProductSeoForm>(emptyProductSeoForm());
   const [editSlug, setEditSlug] = useState("");
+  // Seed ONCE per edit session: react-query refetches on window refocus, and
+  // re-seeding on every data change would silently wipe in-progress edits.
+  const seoSeededFor = useRef<string | null>(null);
   useEffect(() => {
-    if (modalOpen && modalMode === "edit") setSeoForm(productSeoFormFromRecord(modalSeo));
-  }, [modalSeo, modalOpen, modalMode]);
+    if (!modalOpen || modalMode !== "edit") { seoSeededFor.current = null; return; }
+    if (modalSeo === undefined) return; // still loading
+    if (seoSeededFor.current === editId) return;
+    seoSeededFor.current = editId;
+    setSeoForm(productSeoFormFromRecord(modalSeo));
+  }, [modalSeo, modalOpen, modalMode, editId]);
   /** Validate the SEO JSON fields BEFORE creating/updating, so a bad value
    *  can't leave a collection saved but its SEO silently dropped. */
   const validateModalSeo = (): boolean => {

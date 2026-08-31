@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Check, ChevronDown, ChevronUp, X } from 'lucide-react';
 import { useCategories, useCities, useManufacturers } from '@/hooks/useProducts';
 import { track } from '@/lib/analytics/tracker';
-import { configParamKeys } from '@/lib/filters/types';
 import type { FilterConfig, FilterField, SelectOption } from '@/lib/filters/types';
 
 /**
@@ -117,7 +116,6 @@ export function FilterPanel({ config, isOpen, onClose, isDesktop }: FilterPanelP
   );
 
   const params = useMemo(() => new URLSearchParams(searchParams.toString()), [searchParams]);
-  const count = activeFilterCount(config, params);
 
   /**
    * Write params and navigate.
@@ -135,13 +133,6 @@ export function FilterPanel({ config, isOpen, onClose, isDesktop }: FilterPanelP
     }
     const qs = next.toString();
     track('filter_use', { path: pathname, query: qs.slice(0, 300) });
-    router.push(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-  };
-
-  const clearAll = () => {
-    const next = new URLSearchParams(searchParams.toString());
-    for (const key of configParamKeys(config)) next.delete(key);
-    const qs = next.toString();
     router.push(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
   };
 
@@ -398,25 +389,6 @@ export function FilterPanel({ config, isOpen, onClose, isDesktop }: FilterPanelP
               </div>
             </div>
 
-            {/* Filters apply the moment they change, as they always have. This
-                bar only offers a way back out of them. */}
-            <div className="absolute inset-x-0 bottom-0 flex gap-3 border-t border-gray-100 bg-white px-6 py-4 pb-24 lg:pb-4">
-              <button
-                type="button"
-                onClick={clearAll}
-                disabled={count === 0}
-                className="flex-1 rounded-full border border-gray-200 py-3 text-sm font-bold text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-40"
-              >
-                Clear all
-              </button>
-              <button
-                type="button"
-                onClick={onClose}
-                className="flex-1 rounded-full bg-[#854cbc] py-3 text-sm font-bold text-white transition-opacity hover:opacity-90"
-              >
-                Show results{count > 0 ? ` (${count})` : ''}
-              </button>
-            </div>
           </motion.div>
         </>
       )}

@@ -1,56 +1,17 @@
 import Link from 'next/link';
-import { headers } from 'next/headers';
+import NotFoundReporter from '@/components/seo/NotFoundReporter';
 
 export const metadata = { title: 'Page not found' };
 
-// Next prerenders the root not-found page by default, which would freeze it at
-// build time and mean the 404 report below never ran. Reading request headers
-// is the whole point here, so it has to be rendered per request.
-export const dynamic = 'force-dynamic';
-
-/**
- * Report the 404 so it lands in Admin -> SEO -> Redirects -> Broken links.
- *
- * Without this, a broken URL only ever surfaces in Search Console — weeks
- * after the link rotted, and only for pages Google happened to recrawl.
- *
- * The path comes from a header set by middleware, because a server component
- * has no other way to learn which URL was requested. Awaited but bounded at
- * one second: a 404 page must not hang on a reporting call, and a report
- * that never arrives is a missing row, not a broken page.
- */
-async function reportNotFound() {
-  const base = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '');
-  if (!base) return;
-
-  const h = headers();
-  const path = h.get('x-yukizi-path');
-  if (!path) return;
-
-  try {
-    await Promise.race([
-      fetch(`${base}/seo/not-found`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          path,
-          referrer: h.get('referer') ?? undefined,
-          userAgent: h.get('user-agent') ?? undefined,
-        }),
-        cache: 'no-store',
-      }),
-      new Promise((resolve) => setTimeout(resolve, 1000)),
-    ]);
-  } catch {
-    // Never let bookkeeping break the page the visitor is already on.
-  }
-}
-
-export default async function NotFound() {
-  await reportNotFound();
-
+export default function NotFound() {
   return (
     <>
+      {/* Records the broken URL for Admin -> SEO -> Broken links. Client-side
+          on purpose: the server version read a request header that middleware
+          had to set, and that mutation made every page on the site
+          uncacheable. force-dynamic is gone with it — this page can be
+          prerendered again. */}
+      <NotFoundReporter />
       <header className="border-b px-4 py-4">
         <Link href="/" className="inline-flex items-center">
           <img src="/YukiziLogo.png" alt="Yukizi" className="h-8 w-auto" />

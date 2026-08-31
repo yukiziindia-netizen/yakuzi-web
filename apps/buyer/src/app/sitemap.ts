@@ -40,18 +40,21 @@ async function fetchCategoryEntries(): Promise<MetadataRoute.Sitemap> {
     for (const c of Array.isArray(cats) ? cats : []) {
       if (!c?.slug) continue;
       entries.push({ url: absoluteUrl(`/category/${c.slug}`), changeFrequency: 'weekly', priority: 0.7 });
-      // Sub-collection pages were missing entirely — they're the most
-      // commercially-targeted URLs on the site and were discoverable only by
-      // internal crawling.
-      for (const sub of Array.isArray((c as any).subCategories) ? (c as any).subCategories : []) {
-        if (sub?.slug) {
-          entries.push({
-            url: absoluteUrl(`/category/${c.slug}?sub=${sub.slug}`),
-            changeFrequency: 'weekly',
-            priority: 0.65,
-          });
-        }
-      }
+      // Sub-collection URLs are deliberately NOT listed.
+      //
+      // They were added here on the reasoning that they are the most
+      // commercially-targeted URLs on the site — but every one of them
+      // canonicalises to its parent category, and all 45 shared the parent's
+      // title and meta description verbatim. Listing a URL in the sitemap
+      // while its canonical points elsewhere is a contradiction: the sitemap
+      // says "index this", the canonical says "index the parent instead".
+      // Google crawls them, discards them as "Alternate page with proper
+      // canonical tag", and trusts the sitemap a little less.
+      //
+      // Making them indexable in their own right is the better long-term
+      // answer, but that needs distinct titles, descriptions and enough
+      // products per sub-collection to not be thin — several currently have
+      // none. Until then, one honest signal beats two conflicting ones.
     }
   } catch {
     /* fail-open */

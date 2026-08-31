@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, Calendar, Share2, Clock, Loader2, Search } from "lucide-react";
 import { getBlogBySlug, BlogPost } from "@yukizi/api-client";
+import { sanitizeHtml } from "../../lib/sanitize";
 
 export default function PostPage({ params }: { params: { id: string } }) {
   const [post, setPost] = useState<BlogPost | null>(null);
@@ -112,8 +113,9 @@ export default function PostPage({ params }: { params: { id: string } }) {
 
         {/* Post Content */}
         <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed mb-20 bg-white/30 backdrop-blur-sm p-8 md:p-12 rounded-3xl border border-white/40">
+          {/* CMS HTML is sanitised before injection — see app/lib/sanitize.ts. */}
            {typeof post.content === 'string' ? (
-             <div dangerouslySetInnerHTML={{ __html: post.content }} />
+             <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content) }} />
            ) : (
              <p>{JSON.stringify(post.content)}</p>
            )}

@@ -42,9 +42,13 @@ export const SEO_ENTITY_TYPES: SeoEntityType[] = [
 //   canonicalize to the parent collection URL, so the parent's SEO applies
 // All types stay in SEO_ENTITY_TYPES so the records list still filters and
 // labels existing rows, and the keywords page keeps its own linking.
-export const META_EDITOR_ENTITY_TYPES: SeoEntityType[] = SEO_ENTITY_TYPES.filter(
-  (t) => t !== "PRODUCT" && t !== "CATEGORY" && t !== "SUB_CATEGORY",
-);
+// One editing surface per thing, and ONLY surfaces something actually
+// consumes. Products/categories/sub-categories/blogs are edited at their
+// source pages; BRAND, COLLECTION and LANDING_PAGE are hidden until buyer
+// pages exist that read them (nothing does today — offering them here would
+// be write-only knobs). All types stay in SEO_ENTITY_TYPES so the records
+// list still filters/labels historical rows.
+export const META_EDITOR_ENTITY_TYPES: SeoEntityType[] = ["STATIC_PAGE", "HOMEPAGE"];
 
 export const KEYWORD_TYPES: KeywordType[] = [
   "PRIMARY_TOPIC", "SECONDARY_TOPIC", "SYNONYM", "RELATED_ENTITY",

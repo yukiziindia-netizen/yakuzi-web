@@ -1,14 +1,19 @@
 import type { Metadata } from 'next';
 import { absoluteUrl } from '@/lib/seo/site';
+import { staticPageMetadata } from '@/lib/seo/overrides';
 import PolicyPage, { PolicySection } from '@/components/shared/PolicyPage';
 import { COMPANY } from '@/config/company';
 
-export const metadata: Metadata = {
+const derivedMetadata: Metadata = {
   title: 'Cookie Policy',
   alternates: { canonical: absoluteUrl('/cookie-policy') },
   description:
     'What cookies Yukizi uses, why, and how you can manage your cookie preferences.',
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  return staticPageMetadata('/cookie-policy', derivedMetadata);
+}
 
 export default function CookiePolicyPage() {
   return (

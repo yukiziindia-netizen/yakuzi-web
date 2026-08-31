@@ -1,14 +1,19 @@
 import type { Metadata } from 'next';
 import { absoluteUrl } from '@/lib/seo/site';
+import { staticPageMetadata } from '@/lib/seo/overrides';
 import PolicyPage, { PolicySection } from '@/components/shared/PolicyPage';
 import { COMPANY } from '@/config/company';
 
-export const metadata: Metadata = {
+const derivedMetadata: Metadata = {
   title: 'Privacy Policy',
   alternates: { canonical: absoluteUrl('/privacy') },
   description:
     'How Yukizi collects, uses, shares and protects your personal information, and the rights you have over it.',
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  return staticPageMetadata('/privacy', derivedMetadata);
+}
 
 export default function PrivacyPage() {
   return (

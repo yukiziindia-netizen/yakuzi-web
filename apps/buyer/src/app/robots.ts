@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next';
 import { absoluteUrl } from '@/lib/seo/site';
 
 const PRIVATE = ['/checkout', '/orders', '/payments', '/profile', '/wishlist',
-  '/notifications', '/login', '/onboarding', '/support', '/credit', '/order-drawer-demo', '/api/'];
+  '/notifications', '/login', '/onboarding', '/support', '/credit', '/api/'];
 
 export default function robots(): MetadataRoute.Robots {
   return {

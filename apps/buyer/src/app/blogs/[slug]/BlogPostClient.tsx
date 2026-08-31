@@ -7,6 +7,7 @@ import { ArrowLeft, Calendar, User, Tag } from 'lucide-react';
 import Navbar from '@/components/landing/Navbar';
 import LoginModal from '@/components/landing/LoginModal';
 import { useBlogBySlug } from '@/hooks/useBlogs';
+import { sanitizeHtml } from '@/lib/sanitize';
 
 export default function BlogDetailPage({
   slug,
@@ -145,7 +146,8 @@ export default function BlogDetailPage({
             {blog.content ? (
               <div
                 className="prose prose-gray max-w-none prose-headings:font-bold prose-a:text-lime-600 prose-img:rounded-xl"
-                dangerouslySetInnerHTML={{ __html: blog.content }}
+                // CMS HTML is sanitised before injection — see lib/sanitize.ts.
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(blog.content) }}
               />
             ) : (
               <p className="text-gray-500">No content available for this blog post.</p>

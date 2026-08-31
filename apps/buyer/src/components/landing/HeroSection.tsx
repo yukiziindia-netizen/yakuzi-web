@@ -83,32 +83,14 @@ export default function HeroSection({ initialBanners }: { initialBanners?: any[]
 
   const brands = Array.isArray(brandsData) ? brandsData.filter((b) => b.isActive !== false) : [];
 
-  // Fallback images if no brands exist in the database yet
-  const fallbackBrands = [
-    {
-      id: '1',
-      name: 'Naruto',
-      imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/c/c9/Naruto_logo.svg',
-    },
-    {
-      id: '2',
-      name: 'Attack on Titan',
-      imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/d/d8/Attack_on_Titan_logo.png',
-    },
-    {
-      id: '3',
-      name: 'One Piece',
-      imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/2/29/One_Piece_Logo.svg',
-    },
-    {
-      id: '4',
-      name: 'Demon Slayer',
-      imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/9/91/Demon_Slayer_Kimetsu_no_Yaiba_logo.svg',
-    },
-  ];
-
-  const displayBrands = brands.length > 0 ? brands : fallbackBrands;
+  // Brands come from Admin -> Brands. There used to be a hardcoded fallback of
+  // four anime logos hotlinked straight from upload.wikimedia.org, shown
+  // whenever the brand list was empty. Two problems with that: it hotlinked a
+  // third party's server from the hero (their availability, their rate limits,
+  // their referrer policy), and it presented trademarked series logos as brand
+  // associations Yukizi has not established. The strip now simply renders
+  // nothing until real brands are configured.
+  const displayBrands = brands;
 
   // The strip revolves continuously rather than stepping through pages, so it
   // needs no index, no timer and no arrows - the animation is entirely in CSS.
@@ -258,7 +240,10 @@ export default function HeroSection({ initialBanners }: { initialBanners?: any[]
           )}
         </div>
       </div>
-      {/* Bottom Strip: brand logos, revolving continuously */}
+      {/* Bottom Strip: brand logos, revolving continuously. Hidden entirely
+          when no brands are configured — an empty grey bar is worse than no
+          bar, and there is no longer a hardcoded fallback to fill it. */}
+      {(isLoadingBrands || displayBrands.length > 0) && (
       <div className="border-b border-gray-300 bg-[#e2e2e2] px-4 py-1.5 sm:py-2">
         {isLoadingBrands ? (
           <div className="flex justify-center">
@@ -294,6 +279,7 @@ export default function HeroSection({ initialBanners }: { initialBanners?: any[]
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }

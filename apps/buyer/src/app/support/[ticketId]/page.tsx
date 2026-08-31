@@ -17,11 +17,13 @@ import Navbar from '@/components/landing/Navbar';
 import { useTicketById, useAddTicketMessage } from '@/hooks/useTickets';
 import Link from 'next/link';
 import AuthGuard from '@/components/shared/AuthGuard';
+import { useToast } from '@/components/shared/Toast';
 
 export default function TicketDetailPage() {
   const { ticketId } = useParams() as { ticketId: string };
   const { data: ticket, isLoading } = useTicketById(ticketId);
   const addMessage = useAddTicketMessage();
+  const { toast } = useToast();
   const [newMessage, setNewMessage] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -53,7 +55,7 @@ export default function TicketDetailPage() {
       onSuccess: () => setNewMessage(''),
       onError: (error: any) => {
         const msg = error?.response?.data?.message || 'Failed to send message';
-        alert(msg); // minimal invasive error without triggering toast imports
+        toast(msg, 'error');
       }
     });
   };

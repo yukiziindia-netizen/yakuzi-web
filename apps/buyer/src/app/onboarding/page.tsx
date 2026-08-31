@@ -60,28 +60,46 @@ export default function OnboardingPage() {
     const pc = form.pincode.trim();
     if (pc.length === 6 && pc !== lastPincodeRef.current) {
       lastPincodeRef.current = pc;
+      // City/state autofill from a free third-party postal API. It is a
+      // convenience only — the fields stay editable and signup never depends
+      // on it — but it sits in the signup path, so it gets a hard timeout and
+      // is abandoned if the buyer types a different pincode meanwhile.
+      // Without the abort, a slow reply for an old pincode could land after a
+      // newer one and overwrite the city/state with the wrong place.
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 4000);
       const fetchAddress = async () => {
         setIsFetchingPincode(true);
         try {
-          const res = await fetch(`https://api.postalpincode.in/pincode/${pc}`);
+          const res = await fetch(`https://api.postalpincode.in/pincode/${pc}`, {
+            signal: controller.signal,
+          });
           const data = await res.json();
+          // Ignore a reply that arrived after the buyer moved on.
+          if (lastPincodeRef.current !== pc) return;
           if (data?.[0]?.Status === 'Success') {
-            const po = data[0].PostOffice[0];
-            const city = po.District || po.Name;
-            const state = po.State;
-            setForm(prev => ({ 
-              ...prev, 
-              city: prev.city || city || '', 
-              state: prev.state || state || '' 
+            const po = data[0].PostOffice?.[0];
+            const city = po?.District || po?.Name;
+            const state = po?.State;
+            setForm(prev => ({
+              ...prev,
+              city: prev.city || city || '',
+              state: prev.state || state || '',
             }));
           }
-        } catch (e) {
-          console.error('Pincode fetch failed', e);
+        } catch {
+          // Timed out, offline, or the service is down: leave the fields for
+          // the buyer to fill in themselves. Never blocks signup.
         } finally {
+          clearTimeout(timeout);
           setIsFetchingPincode(false);
         }
       };
       fetchAddress();
+      return () => {
+        clearTimeout(timeout);
+        controller.abort();
+      };
     }
   }, [form.pincode]);
 

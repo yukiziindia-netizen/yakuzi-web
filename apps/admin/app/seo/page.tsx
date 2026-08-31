@@ -72,6 +72,43 @@ export default function SeoOverviewPage() {
       setDefsSeeded(true);
     }
   }, [settings, defsSeeded]);
+  // Social profile URLs — rendered in the storefront footer AND emitted as
+  // schema.org sameAs, the link Google/AI use to connect this site to the
+  // brand elsewhere.
+  const SOCIAL_FIELDS: { key: string; label: string; placeholder: string }[] = [
+    { key: "socialInstagram", label: "Instagram", placeholder: "https://instagram.com/yukizi" },
+    { key: "socialFacebook", label: "Facebook", placeholder: "https://facebook.com/yukizi" },
+    { key: "socialYoutube", label: "YouTube", placeholder: "https://youtube.com/@yukizi" },
+    { key: "socialX", label: "X (Twitter)", placeholder: "https://x.com/yukizi" },
+    { key: "socialDiscord", label: "Discord", placeholder: "https://discord.gg/…" },
+    { key: "socialLinkedin", label: "LinkedIn", placeholder: "https://linkedin.com/company/yukizi" },
+    { key: "socialWhatsapp", label: "WhatsApp", placeholder: "https://wa.me/9182912…" },
+  ];
+  const [socials, setSocials] = useState<Record<string, string>>({});
+  const [socialsSeeded, setSocialsSeeded] = useState(false);
+  const [socialsSaving, setSocialsSaving] = useState(false);
+  useEffect(() => {
+    if (!socialsSeeded && settings) {
+      const src = settings as Record<string, unknown>;
+      const next: Record<string, string> = {};
+      SOCIAL_FIELDS.forEach((f) => { next[f.key] = String(src[f.key] ?? ""); });
+      setSocials(next);
+      setSocialsSeeded(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settings, socialsSeeded]);
+  const saveSocials = async () => {
+    setSocialsSaving(true);
+    try {
+      await updateSettings.mutateAsync({ ...(settings as Record<string, unknown> ?? {}), ...socials } as any);
+      toast.success("Social profiles saved — footer and schema update within ~5 minutes");
+    } catch {
+      toast.error("Could not save the social profiles");
+    } finally {
+      setSocialsSaving(false);
+    }
+  };
+
   const saveDefaults = async () => {
     setDefsSaving(true);
     try {
@@ -186,6 +223,23 @@ export default function SeoOverviewPage() {
             {(gsc.trim() || bing.trim()) && <Badge variant="success">Configured</Badge>}
             {!gsc.trim() && !bing.trim() && <Badge variant="outline">Not connected</Badge>}
           </div>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.295, duration: 0.4 }} className="glass-card rounded-2xl p-5 space-y-3">
+          <div>
+            <h2 className="font-semibold text-foreground text-sm">Social profiles</h2>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Paste the full URL of each profile you have. They appear as icons in the storefront footer <strong>and</strong> as <code className="text-xs">sameAs</code> in your Organization schema — the link Google and AI assistants use to connect yukizi.com to your brand elsewhere. Leave blank to hide.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {SOCIAL_FIELDS.map((f) => (
+              <Input key={f.key} label={f.label} placeholder={f.placeholder}
+                value={socials[f.key] ?? ""}
+                onChange={(e) => setSocials((v) => ({ ...v, [f.key]: e.target.value }))} />
+            ))}
+          </div>
+          <Button onClick={saveSocials} loading={socialsSaving} disabled={socialsSaving}>Save social profiles</Button>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.29, duration: 0.4 }} className="glass-card rounded-2xl p-5 space-y-3">

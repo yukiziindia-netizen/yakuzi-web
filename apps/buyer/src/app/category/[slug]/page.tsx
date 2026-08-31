@@ -135,6 +135,12 @@ async function CategoryProducts({
         name: categoryName,
         path: `/category/${categorySlug}`,
         items: initialProducts.slice(0, 24),
+        // Newest product change in the set = when this listing last changed.
+        dateModified: initialProducts
+          .map((p: any) => p?.updatedAt)
+          .filter(Boolean)
+          .sort()
+          .pop() ?? null,
       })]} />
       <ProductCarousel categoryId={categoryId} initialProducts={initialProducts} />
     </>

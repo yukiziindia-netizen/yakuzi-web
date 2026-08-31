@@ -170,7 +170,7 @@ export function Tabs({ tabs, active, onChange }: TabsProps) {
   return (
     <div className="flex gap-1 border-b border-border/50 overflow-x-auto no-sb">
       {tabs.map(({ label, value, count }) => (
-        <button key={value} onClick={() => onChange(value)}
+        <button key={value} type="button" onClick={() => onChange(value)}
           className={cn("relative px-4 py-2.5 text-sm font-medium transition-colors whitespace-nowrap",
             active === value ? "text-primary" : "text-muted-foreground hover:text-foreground")}>
           {label}{count !== undefined && <span className="ml-1.5 text-xs opacity-70">({count})</span>}

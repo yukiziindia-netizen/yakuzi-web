@@ -23,13 +23,13 @@ export function FaqEditor({ value, onChange }: {
               <Input placeholder={`Question ${i + 1}`} value={row.question} onChange={(e) => setRow(i, { question: e.target.value })} />
               <Textarea placeholder="Answer" rows={2} value={row.answer} onChange={(e) => setRow(i, { answer: e.target.value })} />
             </div>
-            <Button variant="ghost" size="icon" onClick={() => onChange(value.filter((_, j) => j !== i))} aria-label={`Remove FAQ ${i + 1}`}>
+            <Button type="button" variant="ghost" size="icon" onClick={() => onChange(value.filter((_, j) => j !== i))} aria-label={`Remove FAQ ${i + 1}`}>
               <Trash2 className="h-4 w-4 text-red-500" />
             </Button>
           </div>
         </div>
       ))}
-      <Button variant="outline" size="sm" leftIcon={<Plus className="h-4 w-4" />} onClick={() => onChange([...value, { question: "", answer: "" }])}>
+      <Button type="button" variant="outline" size="sm" leftIcon={<Plus className="h-4 w-4" />} onClick={() => onChange([...value, { question: "", answer: "" }])}>
         Add question
       </Button>
     </div>

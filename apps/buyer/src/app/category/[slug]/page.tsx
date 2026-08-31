@@ -37,13 +37,20 @@ const findCategory = cache(async (slug: string) => {
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: { slug: string } | Promise<{ slug: string }>;
+  searchParams?: { [key: string]: string | string[] | undefined } | Promise<{ [key: string]: string | string[] | undefined }>;
 }): Promise<Metadata> {
   const resolvedParams = params instanceof Promise ? await params : params;
   const slug = resolvedParams.slug;
   const cat: any = await findCategory(slug);
   if (!cat) return { title: 'Category not found', robots: { index: false } };
+  const resolvedSearch = searchParams instanceof Promise ? await searchParams : searchParams;
+  const subParam = typeof resolvedSearch?.sub === 'string' ? resolvedSearch.sub : undefined;
+  const matchedSub = subParam && Array.isArray(cat.subCategories)
+    ? cat.subCategories.find((sc: any) => sc.id === subParam || sc.slug === subParam)
+    : undefined;
   const title = `${cat.name} — Buy Online`;
   const description = metaTruncate(
     cat.description || `Shop ${cat.name} on ${SITE_NAME}: authentic products from verified sellers with fast shipping across India.`,
@@ -67,6 +74,13 @@ export async function generateMetadata({
       ...(ogImage ? { images: [{ url: ogImage }] } : {}),
     },
   };
+  // Sub-collection pages: admin-set meta title/description apply, but the
+  // canonical DEFAULTS to the parent URL (duplicate-content protection) —
+  // only an explicitly-set canonicalUrl on the sub's record overrides it.
+  if (matchedSub) {
+    const subOverride = await fetchSeoOverride('SUB_CATEGORY', matchedSub.id);
+    if (subOverride) return applySeoOverride(derived, subOverride);
+  }
   return applySeoOverride(derived, await fetchSeoOverride('CATEGORY', cat.id));
 }
 
@@ -212,7 +226,17 @@ export default async function CategoryPage({
   // until an admin actually writes FAQs for this category. The override fetch
   // is Next-cached (revalidate 300), so generateMetadata's identical call and
   // this one cost a single origin request between them.
-  const faqs = categoryData ? validFaqs((await fetchSeoOverride('CATEGORY', categoryData.id))?.faq) : [];
+  // Sub-collection pages show the sub's own FAQs when an admin has written
+  // any, else the parent collection's.
+  let faqs: ReturnType<typeof validFaqs> = [];
+  if (categoryData) {
+    if (subCategoryId) {
+      faqs = validFaqs((await fetchSeoOverride('SUB_CATEGORY', subCategoryId))?.faq);
+    }
+    if (faqs.length === 0) {
+      faqs = validFaqs((await fetchSeoOverride('CATEGORY', categoryData.id))?.faq);
+    }
+  }
   const jsonLd: object[] = [
     breadcrumbSchema([{ name: 'Home', path: '/' }, { name: categoryName }]),
   ];

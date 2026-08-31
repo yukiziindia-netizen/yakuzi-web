@@ -1,7 +1,7 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Plus, Edit2, Trash2, FolderTree, ArrowRight, Loader2, ChevronDown, Layers, GripVertical, X } from "lucide-react";
+import { Search, Plus, Edit2, Trash2, FolderTree, ArrowRight, Loader2, ChevronDown, Layers, GripVertical, X, Sparkles } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -18,6 +18,8 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { AdminLayout } from "@/components/layout/admin-layout";
+import { MetaEditor } from "@/components/seo/meta-editor";
+import { useSeoMetaOne, useUpsertSeoMeta } from "@/hooks/useSeo";
 import { Button, Input, Badge } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
@@ -75,6 +77,15 @@ function SortableSlide({ id, disabled, children }: { id: string; disabled: boole
 
 export default function AdminCollectionsPage() {
   const [view, setView] = useState<"categories" | "subcategories">("categories");
+  // Per-collection Advanced SEO (meta/social/keywords/FAQ) — the same editor
+  // the SEO tab used to host, now opened from the source row. Sub-collections
+  // deliberately have none: their pages canonicalize to the parent URL, so
+  // the parent's SEO is their SEO.
+  const [seoTarget, setSeoTarget] = useState<{ id: string; name: string; type: "CATEGORY" | "SUB_CATEGORY" } | null>(null);
+  const { data: seoRecord, isLoading: seoLoading } = useSeoMetaOne(
+    seoTarget?.type,
+    seoTarget?.id,
+  );
   const [search, setSearch] = useState("");
 
   const { data: categoriesData, isLoading: catLoading } = useCategories();
@@ -108,7 +119,38 @@ export default function AdminCollectionsPage() {
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const [addType, setAddType] = useState<"categories" | "subcategories">("categories");
   const [editId, setEditId] = useState("");
-  const [formData, setFormData] = useState({ name: "", categoryId: "", description: "" });
+  // Modal-embedded SEO basics (meta title/description) — same SeoMeta record
+  // the full editor writes; prefilled when editing, saved after create/update.
+  const modalSeoType = addType === "categories" ? "CATEGORY" : "SUB_CATEGORY";
+  const { data: modalSeo } = useSeoMetaOne(
+    modalOpen && modalMode === "edit" ? modalSeoType : undefined,
+    editId || undefined,
+  );
+  const upsertSeo = useUpsertSeoMeta();
+  useEffect(() => {
+    if (modalOpen && modalMode === "edit") {
+      setFormData((f) => ({
+        ...f,
+        metaTitle: modalSeo?.title ?? "",
+        metaDescription: modalSeo?.description ?? "",
+      }));
+    }
+  }, [modalSeo, modalOpen, modalMode]);
+  const saveModalSeo = async (entityId: string) => {
+    const title = formData.metaTitle.trim();
+    const description = formData.metaDescription.trim();
+    // Upsert when something was written, or when a record exists (so clearing
+    // the fields actually clears them). Best-effort: an SEO save failure must
+    // not fail the collection save.
+    if (!title && !description && !modalSeo) return;
+    try {
+      await upsertSeo.mutateAsync({ entityType: modalSeoType, entityId, title, description });
+    } catch {
+      toast.error("Collection saved, but its SEO could not be saved — try the row's SEO button.");
+    }
+  };
+
+  const [formData, setFormData] = useState({ name: "", categoryId: "", description: "", metaTitle: "", metaDescription: "" });
   const [slides, setSlides] = useState<BannerSlideDraft[]>([]);
   const [uploading, setUploading] = useState(false);
 
@@ -149,6 +191,8 @@ export default function AdminCollectionsPage() {
       name: "",
       categoryId: type === "subcategories" && categories.length > 0 ? categories[0].id : "",
       description: "",
+      metaTitle: "",
+      metaDescription: "",
     });
     setSlides([]);
     setAddPickerOpen(false);
@@ -165,6 +209,8 @@ export default function AdminCollectionsPage() {
       name: item.name || "",
       categoryId: item.categoryId || (categories.length > 0 ? categories[0].id : ""),
       description: item.description || "",
+      metaTitle: "",
+      metaDescription: "",
     });
     setSlides(slidesFromItem(item));
     setModalOpen(true);
@@ -172,7 +218,7 @@ export default function AdminCollectionsPage() {
 
   const closeModal = () => {
     setModalOpen(false);
-    setFormData({ name: "", categoryId: "", description: "" });
+    setFormData({ name: "", categoryId: "", description: "", metaTitle: "", metaDescription: "" });
     setSlides([]);
   };
 
@@ -248,10 +294,12 @@ export default function AdminCollectionsPage() {
         if (modalMode === "create") {
           const created = await createCat.mutateAsync({ name: formData.name });
           if (formData.description.trim()) await updateCat.mutateAsync({ id: created.id, payload: { description: formData.description } });
+          await saveModalSeo(created.id);
           await replaceCatBanners.mutateAsync({ id: created.id, banners });
           toast.success("Collection created");
         } else {
           await updateCat.mutateAsync({ id: editId, payload: { name: formData.name, description: formData.description } });
+          await saveModalSeo(editId);
           await replaceCatBanners.mutateAsync({ id: editId, banners });
           toast.success("Collection updated");
         }
@@ -259,10 +307,12 @@ export default function AdminCollectionsPage() {
         if (!formData.categoryId) return toast.error("Select a parent collection");
         if (modalMode === "create") {
           const created = await createSubCat.mutateAsync({ name: formData.name, categoryId: formData.categoryId });
+          await saveModalSeo(created.id);
           await replaceSubCatBanners.mutateAsync({ id: created.id, banners });
           toast.success("Sub-collection created");
         } else {
           await updateSubCat.mutateAsync({ id: editId, payload: { name: formData.name, categoryId: formData.categoryId } });
+          await saveModalSeo(editId);
           await replaceSubCatBanners.mutateAsync({ id: editId, banners });
           toast.success("Sub-collection updated");
         }
@@ -361,6 +411,11 @@ export default function AdminCollectionsPage() {
             <Input placeholder={`Search ${view === 'categories' ? 'collections' : 'sub-collections'}…`} value={search} onChange={e => setSearch(e.target.value)} leftIcon={<Search className="h-4 w-4" />} />
           </div>
         </div>
+        {view === "subcategories" && (
+          <p className="text-xs text-muted-foreground">
+            Sub-collection pages canonicalize to their parent collection's URL (duplicate-content protection) — but their meta title, description and FAQs are editable here and show on the sub-collection page.
+          </p>
+        )}
 
         <div className="glass-card rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
@@ -395,6 +450,12 @@ export default function AdminCollectionsPage() {
                     </td>
                     <td className="px-5 py-4 text-right">
                       <div className="flex items-center justify-end gap-1">
+                        {(
+                          <button onClick={() => setSeoTarget({ id: item.id, name: item.name, type: view === "categories" ? "CATEGORY" : "SUB_CATEGORY" })} aria-label="SEO" title="SEO (meta, FAQ, keywords)"
+                            className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors">
+                            <Sparkles className="h-4 w-4" />
+                          </button>
+                        )}
                         <button onClick={() => openEditModal(item)} aria-label="Edit" title="Edit"
                           className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors">
                           <Edit2 className="h-4 w-4" />
@@ -455,6 +516,31 @@ export default function AdminCollectionsPage() {
                       />
                     </div>
                   )}
+
+                  <div className="space-y-3 rounded-xl border border-border/60 p-3">
+                    <p className="text-xs font-semibold text-foreground">
+                      Search engine optimization <span className="text-muted-foreground font-normal">(optional — blank fields fall back to generated defaults{addType === "categories" ? "; the row's SEO button has the full editor: social, keywords, FAQ" : ""})</span>
+                    </p>
+                    <Input label="Meta title" value={formData.metaTitle} maxLength={70}
+                      onChange={e => setFormData(prev => ({ ...prev, metaTitle: e.target.value }))}
+                      placeholder="e.g. Anime Figurines — Buy Online in India" />
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-1.5">Meta description</label>
+                      <textarea
+                        value={formData.metaDescription}
+                        onChange={e => setFormData(prev => ({ ...prev, metaDescription: e.target.value }))}
+                        rows={2}
+                        maxLength={160}
+                        placeholder="The one or two sentences shown under the title in Google results."
+                        className="w-full rounded-xl border border-input bg-background/50 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/60 transition-all resize-y"
+                      />
+                    </div>
+                    {addType === "subcategories" && (
+                      <p className="text-2xs text-muted-foreground">
+                        Sub-collection pages keep their canonical URL pointed at the parent collection (duplicate-content protection); these fields control the title/description shown for the sub-collection page itself.
+                      </p>
+                    )}
+                  </div>
 
                   {/* Banner slideshow. Order here is the order buyers see; drag
                       the handle to rearrange. Slide 1 also fills the legacy
@@ -556,6 +642,15 @@ export default function AdminCollectionsPage() {
           </div>
         )}
       </AnimatePresence>
+      {seoTarget && (
+        <MetaEditor
+          open={!!seoTarget && !seoLoading}
+          onClose={() => setSeoTarget(null)}
+          record={seoRecord ?? null}
+          presetType={seoTarget.type}
+          presetId={seoTarget.id}
+        />
+      )}
     </AdminLayout>
   );
 }

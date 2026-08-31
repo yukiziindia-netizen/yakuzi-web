@@ -76,7 +76,7 @@ export function MetaEditor({ open, onClose, record, presetType, presetId }: {
   const restore = useRestoreSeoRevision();
 
   const [tab, setTab] = useState("basic");
-  const [entityType, setEntityType] = useState<SeoEntityType>(record?.entityType ?? presetType ?? "CATEGORY");
+  const [entityType, setEntityType] = useState<SeoEntityType>(record?.entityType ?? presetType ?? "STATIC_PAGE");
   const [entityId, setEntityId] = useState(record?.entityId ?? presetId ?? "");
   const [entityLabel, setEntityLabel] = useState<string>("");
   const [form, setForm] = useState<FormState>(() => toForm(record));
@@ -103,7 +103,7 @@ export function MetaEditor({ open, onClose, record, presetType, presetId }: {
     setTab("basic");
     setSlugRedirect(true);
     setShowHistory(false);
-    setEntityType(record?.entityType ?? presetType ?? "CATEGORY");
+    setEntityType(record?.entityType ?? presetType ?? "STATIC_PAGE");
     setEntityId(record?.entityId ?? presetId ?? (presetType === "HOMEPAGE" ? "/" : ""));
     setEntityLabel("");
     setForm(toForm(record));

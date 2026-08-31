@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Instagram, Facebook, Youtube, Linkedin, MessageCircle } from 'lucide-react';
+import { Instagram, Facebook, Youtube, Linkedin, MessageCircle, Twitter, MessageSquare } from 'lucide-react';
 import { COMPANY } from '@/config/company';
 import { fetchSocialLinks } from '@/lib/seo/social';
 
@@ -20,6 +20,11 @@ export default async function SiteFooter() {
     { href: social.instagram, label: "Instagram", Icon: Instagram },
     { href: social.facebook, label: "Facebook", Icon: Facebook },
     { href: social.youtube, label: "YouTube", Icon: Youtube },
+    // X and WhatsApp are collected in admin and already emitted in the
+    // Organization sameAs, but were absent here — two configured profiles
+    // that rendered nowhere on the storefront.
+    { href: social.x, label: "X (Twitter)", Icon: Twitter },
+    { href: social.whatsapp, label: "WhatsApp", Icon: MessageSquare },
     { href: social.linkedin, label: "LinkedIn", Icon: Linkedin },
     { href: social.discord, label: "Discord", Icon: MessageCircle },
   ].filter((i) => !!i.href);

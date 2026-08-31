@@ -610,10 +610,26 @@ export default function CheckoutPage() {
                 : `Place order`}
             </button>
 
-            {/* Footer links */}
+            {/* Footer links. Every one of these pages exists; they were all
+                href="#" until now, on the one page where a buyer is most
+                likely to want to read a policy before paying. */}
             <div style={{ marginTop: 28, display: 'flex', flexWrap: 'wrap', gap: '8px 20px' }}>
-              {['Refund policy', 'Shipping', 'Privacy policy', 'Terms of service', 'Contact'].map((link) => (
-                <a key={link} href="#" style={{ fontSize: 12, color: '#0066cc', textDecoration: 'none' }}>{link}</a>
+              {[
+                { label: 'Refund policy', href: '/returns' },
+                { label: 'Shipping', href: '/shipping' },
+                { label: 'Privacy policy', href: '/privacy' },
+                { label: 'Terms of service', href: '/terms' },
+                { label: 'Contact', href: '/contact' },
+              ].map(({ label, href }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ fontSize: 12, color: '#0066cc', textDecoration: 'none' }}
+                >
+                  {label}
+                </a>
               ))}
             </div>
           </div>

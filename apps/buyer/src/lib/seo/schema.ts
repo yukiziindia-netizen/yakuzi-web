@@ -79,6 +79,7 @@ export function productSchema(p: {
   manufacturer?: string; price?: number | null; mrp?: number | null;
   stock?: number; hasSellers?: boolean; shippingPrice?: number | null;
   sku?: string | null; mpn?: string | null; gtin?: string | null;
+  updatedAt?: string | Date | null;
   category?: { name?: string } | null;
   reviewSummary?: { average?: number; count?: number } | null;
   listings?: unknown[] | null; sellerCount?: number; sellerName?: string;
@@ -107,6 +108,9 @@ export function productSchema(p: {
     ...(p.sku ? { sku: p.sku } : {}),
     ...(p.mpn ? { mpn: p.mpn } : {}),
     ...(p.gtin ? { gtin: p.gtin } : {}),
+    // Freshness: assistants weight recency when choosing between sources,
+    // and a page that can't prove it loses to one that can.
+    ...(p.updatedAt ? { dateModified: new Date(p.updatedAt).toISOString() } : {}),
     ...(price != null && hasSellers
       ? {
           offers: {
@@ -223,6 +227,8 @@ export function collectionPageSchema(opts: {
   path: string;
   description?: string | null;
   items: Array<{ name?: string; slug?: string; id: string }>;
+  /** Newest product update in the set — the page's own freshness. */
+  dateModified?: string | Date | null;
 }) {
   const url = absoluteUrl(opts.path);
   return {
@@ -233,6 +239,9 @@ export function collectionPageSchema(opts: {
     url,
     ...(opts.description ? { description: opts.description } : {}),
     isPartOf: { '@id': `${SITE_URL}/#website` },
+    ...(opts.dateModified
+      ? { dateModified: new Date(opts.dateModified).toISOString() }
+      : {}),
     mainEntity: {
       '@type': 'ItemList',
       name: opts.name,

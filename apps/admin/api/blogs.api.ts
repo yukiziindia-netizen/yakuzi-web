@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/apiClient";
+import { seoRenameFile } from "@/lib/seo-image";
 
 // Mirrors the yakuzi-api BlogAdminController (/admin/blogs). Kept separate
 // from the shared @yukizi/api-client blogs module (used by the buyer app's
@@ -154,9 +155,9 @@ export async function createAdminBlogCategory(payload: { name: string; slug?: st
 
 // ─── Image upload ────────────────────────────────────
 
-export async function uploadBlogImage(file: File): Promise<string> {
+export async function uploadBlogImage(file: File, nameHint?: string): Promise<string> {
   const formData = new FormData();
-  formData.append("file", file);
+  formData.append("file", seoRenameFile(file, nameHint));
   const { data } = await apiClient.post("/storage/blog-image", formData);
   return data.data.url;
 }

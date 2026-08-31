@@ -177,7 +177,7 @@ export default function AddProductPage() {
             {/* Media */}
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="glass-card rounded-2xl p-6 border border-border/50 space-y-4">
               <h3 className="text-base font-semibold text-foreground">Media</h3>
-              <MediaUploader items={mediaItems} onChange={setMediaItems} />
+              <MediaUploader items={mediaItems} onChange={setMediaItems} filenameHint={form.title} />
             </motion.div>
 
             {/* Pricing */}

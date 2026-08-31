@@ -78,7 +78,7 @@ export function BlogPostForm({ post }: { post?: BlogPost }) {
     if (!file) return;
     setUploading(true);
     try {
-      const url = await uploadBlogImage(file);
+      const url = await uploadBlogImage(file, title);
       setFeaturedImage(url);
     } catch {
       toast.error("Image upload failed.");
@@ -176,7 +176,7 @@ export function BlogPostForm({ post }: { post?: BlogPost }) {
 
         <div className="glass-card rounded-2xl p-5 space-y-2">
           <label className="block text-sm font-medium text-foreground">Content</label>
-          <RichTextEditor value={content} onChange={setContent} onUploadImage={uploadBlogImage} />
+          <RichTextEditor value={content} onChange={setContent} onUploadImage={(f) => uploadBlogImage(f, title)} />
         </div>
 
         <div className="glass-card rounded-2xl p-5 space-y-4">

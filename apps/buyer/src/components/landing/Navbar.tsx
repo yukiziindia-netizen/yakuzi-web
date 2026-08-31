@@ -1156,7 +1156,7 @@ export default function Navbar({
                               >
                                 <img
                                   src={p.image || 'https://placehold.co/96x96/f3f4f6/9ca3af?text=%20'}
-                                  alt=""
+                                  alt={`${p.name ?? ''} - Yukizi`}
                                   className="w-12 h-12 rounded-lg object-cover bg-gray-100 shrink-0"
                                 />
                                 <span className="flex-1 min-w-0">

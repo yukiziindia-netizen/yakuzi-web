@@ -114,7 +114,7 @@ export default async function ProductPage({ params }: { params: { productSlug: s
   return (
     <>
       <JsonLd data={jsonLd} />
-      <ProductPageClient productSlug={params.productSlug} initialProduct={product} />
+      <ProductPageClient productSlug={params.productSlug} initialProduct={product} imageAltOverrides={override?.imageAltOverrides ?? undefined} />
       {/* Visible, server-rendered — outside the client component, so the PDP's
           mobile/desktop dual JSX trees are not involved. */}
       <SeoFaq faqs={faqs} />

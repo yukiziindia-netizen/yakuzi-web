@@ -20,6 +20,7 @@ import { Plus, X, UploadCloud, Loader2, Video } from "lucide-react";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { uploadProductMedia } from "@/api/admin.api";
+import { seoRenameFile } from "@/lib/seo-image";
 
 export type MediaItem = {
   id: string;
@@ -31,6 +32,8 @@ export type MediaItem = {
 interface MediaUploaderProps {
   items: MediaItem[];
   onChange: (items: MediaItem[]) => void;
+  /** Slugified into the stored filename: "<hint>-yukizi-<rand>.<ext>". */
+  filenameHint?: string;
 }
 
 // Sub-component for individual sortable item
@@ -93,7 +96,7 @@ function SortableMediaItem({ item, onRemove }: { item: MediaItem; onRemove: (id:
   );
 }
 
-export function MediaUploader({ items, onChange }: MediaUploaderProps) {
+export function MediaUploader({ items, onChange, filenameHint }: MediaUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const sensors = useSensors(
@@ -143,7 +146,7 @@ export function MediaUploader({ items, onChange }: MediaUploaderProps) {
     const uploadedItems = await Promise.all(
       files.map(async (file, index) => {
         try {
-          const url = await uploadProductMedia(file);
+          const url = await uploadProductMedia(seoRenameFile(file, filenameHint));
           return { ...newItems[index], url, isLoading: false };
         } catch (error) {
           toast.error(`Failed to upload ${file.name}`);

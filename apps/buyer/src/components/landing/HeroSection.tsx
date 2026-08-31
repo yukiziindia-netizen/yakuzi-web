@@ -155,7 +155,7 @@ export default function HeroSection({ initialBanners }: { initialBanners?: any[]
           {banners.length === 0 ? (
             <img
               src={heroBannerImage}
-              alt="Featured"
+              alt="Yukizi - featured collection"
               className="h-full w-full object-contain"
             />
           ) : (
@@ -176,7 +176,7 @@ export default function HeroSection({ initialBanners }: { initialBanners?: any[]
                     src={mobileImage}
                     srcSet={bannerSrcSet(mobileImage)}
                     sizes={bannerSrcSet(mobileImage) ? '100vw' : undefined}
-                    alt={banner?.title || 'Featured'}
+                    alt={banner?.title || 'Yukizi - featured banner'}
                     className="h-full w-full object-contain"
                     // The first slide is the LCP element: ask the browser to
                     // fetch it ahead of the rest of the image flood. Lowercase

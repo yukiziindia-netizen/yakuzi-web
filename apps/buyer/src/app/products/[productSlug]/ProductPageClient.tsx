@@ -26,6 +26,7 @@ import {
   X,
 } from 'lucide-react';
 import Image from 'next/image';
+import { productImageAlt } from '@/lib/seo/image-alt';
 import { trackProductView } from '@/lib/analytics/tracker';
 import Link from 'next/link';
 import { useProductById, useProducts, useWaitlist, useAddToWaitlist, useRemoveFromWaitlist } from '@/hooks/useProducts';
@@ -147,6 +148,7 @@ function ProductBannerCard({
   productId = '',
   productPrice = 0,
   variant = 'mobile',
+  altOverrides,
 }: {
   images: string[];
   activeImageIndex: number;
@@ -157,6 +159,7 @@ function ProductBannerCard({
   productId?: string;
   productPrice?: number;
   variant?: 'mobile' | 'desktop';
+  altOverrides?: Record<string, string>;
 }) {
   const activeImage = images[activeImageIndex % images.length];
   const isDesktop = variant === 'desktop';
@@ -198,7 +201,7 @@ function ProductBannerCard({
           >
             <Image
               src={img}
-              alt=""
+              alt={productImageAlt(productName, altOverrides?.[img], idx)}
               width={72}
               height={72}
               className="w-full h-full object-contain"
@@ -219,7 +222,7 @@ function ProductBannerCard({
           >
             <Image
               src={activeImage}
-              alt={productName}
+              alt={productImageAlt(productName, altOverrides?.[activeImage], activeImageIndex % images.length)}
               fill
               className="object-contain hover:scale-105 transition-transform duration-500"
               priority
@@ -284,7 +287,7 @@ function ProductBannerCard({
             >
               <Image
                 src={activeImage}
-                alt={productName}
+                alt={productImageAlt(productName, altOverrides?.[activeImage], activeImageIndex % images.length)}
                 fill
                 className="object-contain"
                 sizes="100vw"
@@ -802,7 +805,7 @@ function ReviewSubmissionForm({
   );
 }
 
-export default function ProductPageClient({ productSlug, initialProduct }: { productSlug: string; initialProduct?: any }) {
+export default function ProductPageClient({ productSlug, initialProduct, imageAltOverrides }: { productSlug: string; initialProduct?: any; imageAltOverrides?: Record<string, string> }) {
   const [activeImage, setActiveImage] = useState(0);
   const [selectedVariantName, setSelectedVariantName] = useState<string>('');
 
@@ -1181,7 +1184,7 @@ export default function ProductPageClient({ productSlug, initialProduct }: { pro
           )}
 
           {/* Banner Card */}
-          <ProductBannerCard
+          <ProductBannerCard altOverrides={imageAltOverrides}
             images={displayImages}
             activeImageIndex={activeImage}
             setActiveImageIndex={setActiveImage}
@@ -1404,7 +1407,7 @@ export default function ProductPageClient({ productSlug, initialProduct }: { pro
                 </div>
               )}
               {/* Product Image Banner */}
-              <ProductBannerCard
+              <ProductBannerCard altOverrides={imageAltOverrides}
                 images={displayImages}
                 activeImageIndex={activeImage}
                 setActiveImageIndex={setActiveImage}

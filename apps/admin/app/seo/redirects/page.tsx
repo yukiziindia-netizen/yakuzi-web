@@ -608,6 +608,12 @@ export default function RedirectsPage() {
       <Modal open={showModal} onClose={() => setShowModal(false)} title={editing ? "Edit redirect" : "New redirect"}>
         <div className="space-y-4">
           <Input label="From path" placeholder="/old-collection" value={form.fromPath} onChange={(e) => setForm((f) => ({ ...f, fromPath: e.target.value }))} />
+          <p className="-mt-2 text-xs text-muted-foreground">
+            End with <code className="text-xs">/*</code> to move a whole section:{" "}
+            <code className="text-xs">/old-shop/*</code> to <code className="text-xs">/shop/*</code> sends
+            <code className="text-xs"> /old-shop/a/b</code> to <code className="text-xs">/shop/a/b</code>. An exact
+            rule always wins over a wildcard.
+          </p>
           <Select label="Status code" value={String(form.statusCode)} onChange={(e) => setForm((f) => ({ ...f, statusCode: Number(e.target.value) }))}>
             {STATUS_CODES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
           </Select>

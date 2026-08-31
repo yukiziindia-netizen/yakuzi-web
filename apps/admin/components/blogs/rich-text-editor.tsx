@@ -4,6 +4,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
+import toast from "react-hot-toast";
 import {
   Bold, Italic, Strikethrough, List, ListOrdered, Quote, Undo, Redo,
   Link as LinkIcon, Image as ImageIcon, Heading2, Heading3,
@@ -79,7 +80,9 @@ export function RichTextEditor({ value, onChange, onUploadImage }: {
         const url = await onUploadImage(file);
         editor.chain().focus().setImage({ src: url }).run();
       } catch {
-        window.alert("Image upload failed.");
+        // Was window.alert(): a native modal blocks the editor and cannot be
+        // styled, and this app has react-hot-toast mounted already.
+        toast.error("Could not upload that image. Please try again.");
       }
     };
     input.click();

@@ -28,7 +28,7 @@ export type FilterField =
       options: { label: string; params: Record<string, string | null> }[];
     }
   /** On/off. Absent from the URL when off, never `?flag=false`. */
-  | { kind: 'toggle'; key: string; label: string; hint?: string }
+  | { kind: 'toggle'; key: string; label: string; hint?: string; trueValue?: string }
   /** Two-handle numeric range. */
   | { kind: 'range'; minKey: string; maxKey: string; label: string; ceiling: number; step: number; prefix?: string }
   /** Dropdown; `options` or `source` (fetched), not both. */

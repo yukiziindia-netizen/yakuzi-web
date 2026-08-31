@@ -20,13 +20,6 @@ const SORT_CATALOGUE = {
   ],
 };
 
-const DISCOUNT_OPTIONS = [
-  { label: 'Any discount', value: 'All' },
-  { label: '10% and above', value: '10' },
-  { label: '25% and above', value: '25' },
-  { label: '50% and above', value: '50' },
-];
-
 /**
  * Catalogue filters — the params the homepage and category pages already read
  * in buildProductQueryParams / the category page's getProducts call. Nothing
@@ -63,9 +56,14 @@ function catalogueConfig(opts: { title: string; subtitle: string; priceCeiling: 
         ],
       },
       {
+        // The API treats any non-"All" discountRange as "has some discount" —
+        // it never reads the value (products.service.ts:1050). The original
+        // four options ("<50+", "30-35", "50-90", ">50++") were therefore all
+        // identical, and offering thresholds here would promise a filter the
+        // backend cannot honour. One honest toggle instead.
         id: 'discount',
         title: 'Discount',
-        fields: [{ kind: 'chips', key: 'discountRange', label: 'Minimum discount', options: DISCOUNT_OPTIONS }],
+        fields: [{ kind: 'toggle', key: 'discountRange', label: 'On discount', trueValue: 'any' }],
       },
       {
         id: 'brand',

@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { formatCurrency, formatDate } from "@yukizi/utils";
 import { OrderStatusBadge, Button, Badge, StatCard, Input } from "@/components/ui";
-import { Package, Warehouse, CreditCard, TrendingUp, AlertTriangle, CheckCircle, Clock, Eye, Loader2, ShoppingBag, Search } from "lucide-react";
+import { Package, Warehouse, CreditCard, TrendingUp, AlertTriangle, CheckCircle, Clock, Eye, Loader2, ShoppingBag, Search, Star } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, LineChart, Line } from "recharts";
 import {
   useSellerOrders,
@@ -18,8 +18,7 @@ import {
   useSellerCancelledOrders,
   useSellerDashboard,
   useSellerAnalytics,
-  useSellerWaitlist,
-} from "@/hooks/useSeller";
+  useSellerWaitlist, useSellerReviews, useCategories } from "@/hooks/useSeller";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
@@ -559,6 +558,140 @@ export function PayoutsContent() {
           </table>
         </div>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Seller-facing reviews. Shows ONLY reviews from buyers who bought this
+ * seller's own listing — another seller's reviews of the same catalog product
+ * never appear (scoped server-side by the purchased listing). No buyer
+ * identity is shown or filterable, by design.
+ */
+export function ReviewsContent() {
+  const [productId, setProductId] = useState("");
+  const [categoryId, setCategoryId] = useState("");
+  const [rating, setRating] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+
+  const filters = useMemo(() => ({
+    ...(productId && { productId }),
+    ...(categoryId && { categoryId }),
+    ...(rating && { rating: Number(rating) }),
+    ...(dateFrom && { dateFrom }),
+    ...(dateTo && { dateTo }),
+    limit: 50,
+  }), [productId, categoryId, rating, dateFrom, dateTo]);
+
+  const { data, isLoading } = useSellerReviews(filters);
+  const payload = data as { data?: any[]; summary?: { average: number | null; count: number } } | undefined;
+  const reviews: any[] = payload?.data ?? [];
+  const summary = payload?.summary ?? { average: null as number | null, count: 0 };
+  const { data: categoriesData } = useCategories();
+  const categories: any[] = Array.isArray(categoriesData) ? categoriesData : [];
+
+  // Product options come from the reviews themselves — a seller only ever
+  // filters within products that actually have reviews.
+  const products = useMemo(() => {
+    const seen = new Map<string, string>();
+    reviews.forEach((r) => { if (r.catalogProductId) seen.set(r.catalogProductId, r.productName); });
+    return Array.from(seen.entries()).map(([id, name]) => ({ id, name }));
+  }, [reviews]);
+
+  const hasFilters = !!(productId || categoryId || rating || dateFrom || dateTo);
+  const clear = () => { setProductId(""); setCategoryId(""); setRating(""); setDateFrom(""); setDateTo(""); };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="font-semibold text-2xl text-foreground">Reviews</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            What buyers said about products they bought from you
+          </p>
+        </div>
+        <div className="flex items-center gap-2 rounded-xl border border-white/20 px-4 py-2">
+          <Star className="h-4 w-4 text-yellow-500 fill-current" />
+          <span className="font-semibold text-foreground">
+            {summary.average != null ? summary.average.toFixed(1) : "—"}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {summary.count} review{summary.count === 1 ? "" : "s"} all time
+          </span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        <select value={productId} onChange={(e) => setProductId(e.target.value)} aria-label="Filter by product"
+          className="h-9 rounded-lg border border-white/20 bg-background/50 px-3 text-sm text-foreground focus:bg-background">
+          <option value="">All products</option>
+          {products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+        </select>
+        <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} aria-label="Filter by category"
+          className="h-9 rounded-lg border border-white/20 bg-background/50 px-3 text-sm text-foreground focus:bg-background">
+          <option value="">All categories</option>
+          {categories.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
+        <select value={rating} onChange={(e) => setRating(e.target.value)} aria-label="Filter by rating"
+          className="h-9 rounded-lg border border-white/20 bg-background/50 px-3 text-sm text-foreground focus:bg-background">
+          <option value="">Any rating</option>
+          {[5, 4, 3, 2, 1].map((r) => <option key={r} value={r}>{r} star{r > 1 ? "s" : ""}</option>)}
+        </select>
+        <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} aria-label="From date"
+          className="h-9 rounded-lg border border-white/20 bg-background/50 px-3 text-sm text-foreground focus:bg-background" />
+        <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} aria-label="To date"
+          className="h-9 rounded-lg border border-white/20 bg-background/50 px-3 text-sm text-foreground focus:bg-background" />
+      </div>
+      {hasFilters && (
+        <button onClick={clear} className="text-xs text-primary hover:underline">Clear filters</button>
+      )}
+
+      {isLoading ? (
+        <div className="p-6 text-center text-muted-foreground">Loading reviews…</div>
+      ) : reviews.length === 0 ? (
+        <div className="rounded-2xl border border-white/10 p-10 text-center">
+          <Star className="h-8 w-8 mx-auto text-muted-foreground/40" />
+          <p className="mt-3 font-medium text-foreground">
+            {hasFilters ? "No reviews match these filters" : "No reviews yet"}
+          </p>
+          <p className="text-sm text-muted-foreground mt-1">
+            {hasFilters
+              ? "Try widening the date range or clearing filters."
+              : "Reviews appear here once buyers who purchased from you leave feedback."}
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {reviews.map((r) => (
+            <div key={r.id} className="rounded-2xl border border-white/10 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-0.5">
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <Star key={n}
+                        className={`h-3.5 w-3.5 ${n <= r.rating ? "text-yellow-500 fill-current" : "text-muted-foreground/30"}`} />
+                    ))}
+                  </div>
+                  <span className="font-medium text-foreground">{r.productName}</span>
+                  {r.categoryName && <Badge variant="default">{r.categoryName}</Badge>}
+                </div>
+                <span className="text-xs text-muted-foreground">{formatDate(r.createdAt)}</span>
+              </div>
+              {r.comment && <p className="text-sm text-muted-foreground mt-2">{r.comment}</p>}
+              {Array.isArray(r.images) && r.images.length > 0 && (
+                <div className="flex gap-2 mt-3">
+                  {r.images.slice(0, 4).map((img: string, i: number) => (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img key={i} src={img} alt={`Review photo ${i + 1}`}
+                      className="h-14 w-14 rounded-lg object-cover border border-white/10" />
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

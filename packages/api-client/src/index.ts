@@ -113,6 +113,7 @@ export {
 export {
   getProductReviews,
   getAdminReviews,
+  getSellerReviews,
   createReview,
   updateReview,
   deleteReview,
@@ -121,6 +122,8 @@ export {
   type Review,
   type ReviewListResponse,
   type CreateReviewInput,
+  type AdminReviewFilters,
+  type SellerReviewFilters,
   type ReviewEligibility,
 } from './modules/reviews.api';
 

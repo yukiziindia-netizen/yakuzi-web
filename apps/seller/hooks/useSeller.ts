@@ -13,8 +13,7 @@ import {
   searchSuggestions, getCategoriesWithSubs,
   verifyGstOrPan, uploadKycDocument, uploadDrugLicense,
   getSellerOrderInvoices,
-  getSellerWaitlist,
-} from "@/api/seller.api";
+  getSellerWaitlist, getSellerReviews, type SellerReviewFilters } from "@/api/seller.api";
 import type { ProductPayload } from "@yukizi/utils";
 import { useSellerAuth } from "@/store";
 
@@ -334,5 +333,21 @@ export function useUploadKycDocument() {
 export function useUploadDrugLicense() {
   return useMutation({
     mutationFn: (formData: FormData) => uploadDrugLicense(formData),
+  });
+}
+
+/**
+ * Reviews left by buyers who purchased from THIS seller.
+ *
+ * Scoped server-side by the purchased listing, so a seller never sees another
+ * seller's reviews of the same catalog product. The payload carries no buyer
+ * identity by design — sellers filter by product/category/date, not customer.
+ */
+export function useSellerReviews(params: SellerReviewFilters = {}) {
+  return useQuery({
+    queryKey: ["seller", "reviews", params],
+    queryFn: () => getSellerReviews(params),
+    staleTime: 60_000,
+    retry: 1,
   });
 }

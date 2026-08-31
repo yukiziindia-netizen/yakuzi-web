@@ -62,8 +62,38 @@ export async function getReviewEligibility(productId: string): Promise<ReviewEli
   return ReviewEligibilitySchema.parse(data);
 }
 
-export async function getAdminReviews(params?: { page?: number; limit?: number }) {
+export interface AdminReviewFilters {
+  page?: number;
+  limit?: number;
+  /** Seller whose LISTING was purchased — not "sellers of this product". */
+  sellerId?: string;
+  productId?: string;
+  userId?: string;
+  categoryId?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  rating?: number;
+  search?: string;
+}
+
+export async function getAdminReviews(params?: AdminReviewFilters) {
   const { data } = await api.get('/reviews/admin', { params });
+  return data;
+}
+
+/** Seller-facing filters: no customer dimension by design. */
+export interface SellerReviewFilters {
+  page?: number;
+  limit?: number;
+  productId?: string;
+  categoryId?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  rating?: number;
+}
+
+export async function getSellerReviews(params?: SellerReviewFilters) {
+  const { data } = await api.get('/reviews/seller', { params });
   return data;
 }
 

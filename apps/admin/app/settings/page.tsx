@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Shield, Bell, Globe, Key, Search } from "lucide-react";
+import { Shield, Bell, Globe, Key } from "lucide-react";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { Button, Input, Skeleton } from "@/components/ui";
 import toast from "react-hot-toast";
@@ -74,10 +74,6 @@ export default function AdminSettingsPage() {
       { key: "sessionTimeout", label: "Session Timeout (mins)", type: "number" },
       { key: "maxLoginAttempts", label: "Max Login Attempts", type: "number" },
       { key: "otpExpiry", label: "OTP Expiry (secs)", type: "number" },
-    ]},
-    { id: "seo", icon: Search, title: "Search Engine Connections", fields: [
-      { key: "googleSiteVerification", label: "Google Search Console verification token (HTML-tag content value)" },
-      { key: "bingSiteVerification", label: "Bing Webmaster Tools verification token (msvalidate.01 value)" },
     ]},
     { id: "notifications", icon: Bell, title: "Notifications", fields: [
       { key: "fraudAlertEmail", label: "Fraud Alert Email" },

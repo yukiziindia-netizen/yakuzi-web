@@ -79,7 +79,12 @@ export function productSeoFormHasContent(form: ProductSeoForm): boolean {
  * Builds the upsert payload; returns null (with a toast) when a JSON field is
  * invalid so callers can abort the save.
  */
-export function productSeoFormToPayload(form: ProductSeoForm, catalogProductId: string): UpsertSeoMetaPayload | null {
+export function productSeoFormToPayload(
+  form: ProductSeoForm,
+  entityId: string,
+  // The form is entity-agnostic; collections reuse it with their own type.
+  entityType: UpsertSeoMetaPayload["entityType"] = "PRODUCT",
+): UpsertSeoMetaPayload | null {
   let structuredDataOverride: Record<string, unknown> | undefined;
   if (form.structuredDataJson.trim()) {
     try {
@@ -97,8 +102,8 @@ export function productSeoFormToPayload(form: ProductSeoForm, catalogProductId: 
     } catch { toast.error('SEO: image ALT overrides must be a JSON object like {"image-url": "alt"}.'); return null; }
   }
   return {
-    entityType: "PRODUCT",
-    entityId: catalogProductId,
+    entityType,
+    entityId,
     title: form.title,
     description: form.description,
     canonicalUrl: form.canonicalUrl,
@@ -189,16 +194,20 @@ const TABS = [
 
 const ROBOTS_PRESETS = ["", "index,follow", "noindex,follow", "noindex,nofollow"];
 
-export function ProductSeoFields({ value, onChange, productName, slug }: {
+export function ProductSeoFields({ value, onChange, productName, slug, previewPath: previewPathProp, entityLabel = "product" }: {
   value: ProductSeoForm;
   onChange: (next: ProductSeoForm) => void;
   /** Used for preview fallbacks so the SERP card reflects the product being edited. */
   productName?: string;
   slug?: string;
+  /** Overrides the SERP-preview path (non-product entities). */
+  previewPath?: string;
+  /** Wording in hints; "product" keeps the original copy. */
+  entityLabel?: string;
 }) {
   const [tab, setTab] = useState("basic");
   const set = <K extends keyof ProductSeoForm>(key: K, v: ProductSeoForm[K]) => onChange({ ...value, [key]: v });
-  const previewPath = slug ? `/products/${slug}` : "/products/…";
+  const previewPath = previewPathProp ?? (slug ? `/products/${slug}` : "/products/…");
 
   return (
     <div className="space-y-4">
@@ -227,7 +236,7 @@ export function ProductSeoFields({ value, onChange, productName, slug }: {
               <Input label="Canonical URL (advanced)" placeholder="Almost always leave empty"
                 value={value.canonicalUrl} onChange={(e) => set("canonicalUrl", e.target.value)} />
               <p className="text-[11px] text-muted-foreground">
-                Invisible duplicate-content hint for Google — does NOT change the page URL. Use the product's URL slug for that.
+                Invisible duplicate-content hint for Google — does NOT change the page URL{entityLabel === "product" ? " — use the product's URL slug for that" : ""}.
               </p>
             </div>
             <Select label="Robots" value={value.robots} onChange={(e) => set("robots", e.target.value)}>

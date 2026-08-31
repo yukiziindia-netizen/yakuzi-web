@@ -182,10 +182,14 @@ export function BlogPostForm({ post }: { post?: BlogPost }) {
         <div className="glass-card rounded-2xl p-5 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-foreground">SEO</h3>
-            {isEdit && (
+            {isEdit ? (
               <Button type="button" variant="outline" size="sm" leftIcon={<Sparkles className="h-3.5 w-3.5" />} onClick={() => setShowAdvancedSeo(true)}>
                 Advanced SEO (AI summary, FAQ, keywords)
               </Button>
+            ) : (
+              <span className="text-xs text-muted-foreground">
+                FAQ, keywords &amp; advanced SEO unlock after the first save (they attach to the saved post).
+              </span>
             )}
           </div>
           <div className="space-y-1.5">

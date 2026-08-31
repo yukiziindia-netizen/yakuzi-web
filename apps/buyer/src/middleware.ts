@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextFetchEvent, NextRequest, NextResponse } from 'next/server';
 
 /**
  * Admin-managed redirects (yakuzi-api /seo/redirects/map).
@@ -49,7 +49,27 @@ async function getMap(): Promise<RedirectMap> {
   return inflight;
 }
 
-export async function middleware(req: NextRequest) {
+/**
+ * Tell the API a rule fired, so the admin's hit counters mean something.
+ *
+ * Fire-and-forget through waitUntil: the redirect response is returned
+ * immediately and the report finishes afterwards, so counting never adds
+ * latency for the visitor. Failures are swallowed — a redirect that works but
+ * is not counted is infinitely better than one that stalls.
+ */
+function reportHit(event: NextFetchEvent, path: string) {
+  const base = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '');
+  if (!base) return;
+  event.waitUntil(
+    fetch(`${base}/seo/redirects/hit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path }),
+    }).catch(() => {}),
+  );
+}
+
+export async function middleware(req: NextRequest, event: NextFetchEvent) {
   // Mixed-case URLs (e.g. /CATEGORY/figurines) previously served 200 as
   // duplicates of the lowercase page, leaving canonical tags to clean up.
   // Every route and every stored slug on this site is lowercase, so a
@@ -69,7 +89,15 @@ export async function middleware(req: NextRequest) {
   if (path.length > 1 && path.endsWith('/')) path = path.slice(0, -1);
 
   const entry = map[path];
-  if (!entry) return NextResponse.next();
+  if (!entry) {
+    // Pass the requested path along so the not-found boundary can report it —
+    // a server component otherwise has no way to know which URL was asked for.
+    const headers = new Headers(req.headers);
+    headers.set('x-yukizi-path', path);
+    return NextResponse.next({ request: { headers } });
+  }
+
+  reportHit(event, path);
 
   if (entry.code === 410) return new NextResponse(null, { status: 410 });
 

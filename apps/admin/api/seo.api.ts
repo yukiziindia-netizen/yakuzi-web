@@ -217,12 +217,122 @@ export async function restoreSeoRevision(metaId: string, revisionId: string): Pr
 
 // ─── Redirects ───────────────────────────────────────
 
-export async function listSeoRedirects(params: { search?: string; page?: number; limit?: number } = {}):
+export interface RedirectListParams {
+  search?: string;
+  page?: number;
+  limit?: number;
+  isActive?: boolean;
+  statusCode?: number;
+  sort?: "recent" | "hits" | "path";
+}
+
+export async function listSeoRedirects(params: RedirectListParams = {}):
   Promise<{ items: SeoRedirect[]; total: number; page: number; limit: number }> {
   const qs = new URLSearchParams();
-  Object.entries(params).forEach(([k, v]) => { if (v) qs.set(k, String(v)); });
+  // Not a truthiness check: isActive=false and statusCode=0 must survive.
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== "") qs.set(k, String(v));
+  });
   const { data } = await apiClient.get<{ data: any }>(`/admin/seo/redirects?${qs}`);
   return data.data ?? { items: [], total: 0, page: 1, limit: 20 };
+}
+
+// ─── Redirect tool: tester, bulk, export, 404 log ────
+
+export interface RedirectHop { from: string; to: string; statusCode: number; }
+export interface RedirectResolution {
+  path: string;
+  outcome: "no-redirect" | "inactive" | "redirect" | "chain" | "loop";
+  chain: RedirectHop[];
+  finalPath: string;
+  note?: string;
+}
+
+export async function resolveSeoRedirect(path: string): Promise<RedirectResolution> {
+  const { data } = await apiClient.get<{ data: RedirectResolution }>(
+    `/admin/seo/redirects/resolve?path=${encodeURIComponent(path)}`,
+  );
+  return data.data;
+}
+
+export async function exportSeoRedirects(): Promise<SeoRedirect[]> {
+  const { data } = await apiClient.get<{ data: SeoRedirect[] }>("/admin/seo/redirects/export");
+  return data.data ?? [];
+}
+
+export interface BulkImportResult {
+  created: number;
+  createdPaths: string[];
+  failed: { fromPath: string; reason: string }[];
+}
+
+export async function bulkCreateSeoRedirects(
+  rows: { fromPath: string; toPath: string; statusCode?: number; note?: string }[],
+): Promise<BulkImportResult> {
+  const { data } = await apiClient.post<{ data: BulkImportResult }>("/admin/seo/redirects/bulk", { rows });
+  return data.data;
+}
+
+export async function bulkSetSeoRedirectActive(ids: string[], isActive: boolean): Promise<{ updated: number }> {
+  const { data } = await apiClient.post<{ data: { updated: number } }>(
+    "/admin/seo/redirects/bulk/active", { ids, isActive },
+  );
+  return data.data;
+}
+
+export async function bulkDeleteSeoRedirects(ids: string[]): Promise<{ deleted: number }> {
+  const { data } = await apiClient.post<{ data: { deleted: number } }>(
+    "/admin/seo/redirects/bulk/delete", { ids },
+  );
+  return data.data;
+}
+
+export type NotFoundStatus = "NEW" | "FIXED" | "IGNORED";
+
+export interface SeoNotFound {
+  id: string;
+  path: string;
+  hits: number;
+  lastReferrer: string | null;
+  lastUserAgent: string | null;
+  status: NotFoundStatus;
+  firstSeenAt: string;
+  lastSeenAt: string;
+}
+
+export async function listSeoNotFound(params: {
+  status?: NotFoundStatus; search?: string; sort?: "hits" | "recent" | "oldest";
+  page?: number; limit?: number;
+} = {}): Promise<{ items: SeoNotFound[]; total: number; page: number; limit: number }> {
+  const qs = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== "") qs.set(k, String(v));
+  });
+  const { data } = await apiClient.get<{ data: any }>(`/admin/seo/not-found?${qs}`);
+  return data.data ?? { items: [], total: 0, page: 1, limit: 50 };
+}
+
+export interface NotFoundSummary {
+  unresolved: number; unresolvedHits: number; fixed: number; ignored: number;
+}
+
+export async function getSeoNotFoundSummary(): Promise<NotFoundSummary> {
+  const { data } = await apiClient.get<{ data: NotFoundSummary }>("/admin/seo/not-found/summary");
+  return data.data ?? { unresolved: 0, unresolvedHits: 0, fixed: 0, ignored: 0 };
+}
+
+export async function setSeoNotFoundStatus(id: string, status: NotFoundStatus): Promise<SeoNotFound> {
+  const { data } = await apiClient.patch<{ data: SeoNotFound }>(`/admin/seo/not-found/${id}`, { status });
+  return data.data;
+}
+
+export async function deleteSeoNotFound(id: string): Promise<void> {
+  await apiClient.delete(`/admin/seo/not-found/${id}`);
+}
+
+export async function clearResolvedSeoNotFound(): Promise<{ deleted: number }> {
+  const { data } = await apiClient.post<{ data: { deleted: number } }>("/admin/seo/not-found/clear-resolved");
+  return data.data;
 }
 
 export async function createSeoRedirect(payload: {

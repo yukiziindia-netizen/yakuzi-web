@@ -6,7 +6,12 @@ import {
   listSeoKeywords, createSeoKeyword, updateSeoKeyword, deleteSeoKeyword,
   getSeoKeywordLinks, linkSeoKeyword, unlinkSeoKeyword,
   getSeoProductSlug, updateSeoProductSlug,
+  resolveSeoRedirect, exportSeoRedirects, bulkCreateSeoRedirects,
+  bulkSetSeoRedirectActive, bulkDeleteSeoRedirects,
+  listSeoNotFound, getSeoNotFoundSummary, setSeoNotFoundStatus,
+  deleteSeoNotFound, clearResolvedSeoNotFound,
   type SeoEntityType, type KeywordType, type UpsertSeoMetaPayload,
+  type RedirectListParams, type NotFoundStatus,
 } from "@/api/seo.api";
 
 // ─── Product URL slug ────────────────────────────────
@@ -78,7 +83,7 @@ export function useRestoreSeoRevision() {
 
 // ─── Redirects ───────────────────────────────────────
 
-export function useSeoRedirects(params: { search?: string; page?: number; limit?: number } = {}) {
+export function useSeoRedirects(params: RedirectListParams = {}) {
   return useQuery({ queryKey: ["admin", "seo", "redirects", params], queryFn: () => listSeoRedirects(params), staleTime: 60_000, retry: 1 });
 }
 
@@ -86,7 +91,12 @@ export function useCreateSeoRedirect() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: createSeoRedirect,
-    onSuccess: () => void qc.invalidateQueries({ queryKey: ["admin", "seo", "redirects"] }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["admin", "seo", "redirects"] });
+      // Creating a redirect marks matching 404s FIXED server-side, so that
+      // list is stale too.
+      void qc.invalidateQueries({ queryKey: ["admin", "seo", "not-found"] });
+    },
   });
 }
 
@@ -104,6 +114,102 @@ export function useDeleteSeoRedirect() {
   return useMutation({
     mutationFn: deleteSeoRedirect,
     onSuccess: () => void qc.invalidateQueries({ queryKey: ["admin", "seo", "redirects"] }),
+  });
+}
+
+// ─── Redirect tool: tester, bulk, 404 log ────────────
+
+/**
+ * Creating or importing a redirect can flip a 404 to FIXED server-side, so
+ * every mutation here invalidates both lists rather than only its own.
+ */
+function invalidateRedirectTool(qc: ReturnType<typeof useQueryClient>) {
+  void qc.invalidateQueries({ queryKey: ["admin", "seo", "redirects"] });
+  void qc.invalidateQueries({ queryKey: ["admin", "seo", "not-found"] });
+}
+
+export function useResolveSeoRedirect(path: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ["admin", "seo", "redirects", "resolve", path],
+    queryFn: () => resolveSeoRedirect(path),
+    enabled: enabled && !!path.trim(),
+    retry: false,
+    staleTime: 0,
+  });
+}
+
+export function useBulkCreateSeoRedirects() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: bulkCreateSeoRedirects,
+    onSuccess: () => invalidateRedirectTool(qc),
+  });
+}
+
+export function useBulkSetSeoRedirectActive() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ids, isActive }: { ids: string[]; isActive: boolean }) =>
+      bulkSetSeoRedirectActive(ids, isActive),
+    onSuccess: () => invalidateRedirectTool(qc),
+  });
+}
+
+export function useBulkDeleteSeoRedirects() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: bulkDeleteSeoRedirects,
+    onSuccess: () => invalidateRedirectTool(qc),
+  });
+}
+
+export function useExportSeoRedirects() {
+  return useMutation({ mutationFn: exportSeoRedirects });
+}
+
+export function useSeoNotFound(params: {
+  status?: NotFoundStatus; search?: string; sort?: "hits" | "recent" | "oldest";
+  page?: number; limit?: number;
+} = {}) {
+  return useQuery({
+    queryKey: ["admin", "seo", "not-found", params],
+    queryFn: () => listSeoNotFound(params),
+    staleTime: 30_000,
+    retry: 1,
+  });
+}
+
+export function useSeoNotFoundSummary() {
+  return useQuery({
+    queryKey: ["admin", "seo", "not-found", "summary"],
+    queryFn: getSeoNotFoundSummary,
+    staleTime: 30_000,
+    retry: 1,
+  });
+}
+
+export function useSetSeoNotFoundStatus() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: NotFoundStatus }) =>
+      setSeoNotFoundStatus(id, status),
+    onSuccess: () => invalidateRedirectTool(qc),
+  });
+}
+
+export function useDeleteSeoNotFound() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: deleteSeoNotFound,
+    onSuccess: () => invalidateRedirectTool(qc),
+  });
+}
+
+export function useClearResolvedSeoNotFound() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: clearResolvedSeoNotFound,
+    onSuccess: () => invalidateRedirectTool(qc),
   });
 }
 

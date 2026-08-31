@@ -2,76 +2,20 @@
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft, Save, Package, Trash2 } from "lucide-react";
+import { ArrowLeft, Package, Trash2, PencilLine } from "lucide-react";
 import { AdminLayout } from "@/components/layout/admin-layout";
-import { Button, Badge, Input, Textarea, Select, Skeleton, Modal } from "@/components/ui";
+import { Button, Badge, Skeleton, Modal } from "@/components/ui";
 import { formatCurrency } from "@yukizi/utils";
 import { cn } from "@/lib/utils";
-import { useProductById, useUpdateProduct, useDeleteProduct, useCategories } from "@/hooks/useAdmin";
+import { useProductById, useDeleteProduct } from "@/hooks/useAdmin";
 import toast from "react-hot-toast";
-import { ProductSeoSection } from "@/components/seo/product-seo-fields";
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { data: product, isLoading } = useProductById(id);
-  const { data: categoriesData } = useCategories();
-  const updateProduct = useUpdateProduct();
   const deleteProduct = useDeleteProduct();
-  const [editing, setEditing] = useState(false);
-  // 301 old URL -> new URL when the slug changes. Default ON.
-  const [slugRedirect, setSlugRedirect] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [form, setForm] = useState<Record<string, any>>({});
-
-  const categories: any[] = Array.isArray(categoriesData) ? categoriesData : (categoriesData?.data ?? []);
-
-  const startEdit = () => {
-    setForm({
-      name: product?.name ?? "",
-      slug: product?.variant?.catalogProduct?.slug ?? "",
-      manufacturer: product?.manufacturer ?? "",
-      chemicalComposition: product?.chemicalComposition ?? "",
-      mrp: product?.mrp ?? "",
-      ptr: product?.ptr ?? "",
-      minimumOrderQuantity: product?.minimumOrderQuantity ?? 1,
-      maximumOrderQuantity: product?.maximumOrderQuantity ?? "",
-      categoryId: product?.category?.id ?? product?.categoryId ?? "",
-      description: product?.description ?? "",
-      hsnCode: product?.hsnCode ?? "",
-      gstPercent: product?.gstPercent ?? "",
-      isYukiziChoice: product?.isYukiziChoice ?? false,
-      isBestSeller: product?.isBestSeller ?? false,
-      isAd: product?.isAd ?? false,
-    });
-    setEditing(true);
-  };
-
-  const handleSave = async () => {
-    try {
-      // Only send meaningful values: empty numeric strings would otherwise
-      // coerce to 0 server-side, and an empty slug must not wipe the URL.
-      const payload: Record<string, any> = {};
-      for (const [k, v] of Object.entries(form)) {
-        if (v === "" || v === undefined || v === null) continue;
-        payload[k] = v;
-      }
-      const changingSlug =
-        payload.slug && payload.slug !== (product?.variant?.catalogProduct?.slug ?? "");
-      if (changingSlug) payload.slugRedirect = slugRedirect;
-      await updateProduct.mutateAsync({ productId: id, payload });
-      toast.success(
-        changingSlug
-          ? slugRedirect
-            ? "Product updated — old URL now 301-redirects to the new one"
-            : "Product updated — no redirect was created from the old URL"
-          : "Product updated"
-      );
-      setEditing(false);
-    } catch (e: any) {
-      toast.error(e?.response?.data?.message ?? "Failed to update product");
-    }
-  };
 
   const handleDelete = async () => {
     try {
@@ -128,17 +72,13 @@ export default function ProductDetailPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {editing ? (
-              <>
-                <Button variant="ghost" onClick={() => setEditing(false)}>Cancel</Button>
-                <Button onClick={handleSave} loading={updateProduct.isPending} leftIcon={<Save className="h-4 w-4" />}>Save</Button>
-              </>
-            ) : (
-              <>
-                <Button variant="outline" onClick={startEdit}>Edit Product</Button>
-                <Button variant="danger" size="icon" onClick={() => setShowDeleteModal(true)}><Trash2 className="h-4 w-4" /></Button>
-              </>
-            )}
+            {/* Products is a read-only overview of what sellers have listed —
+                the catalog itself (details, SEO, URL, images) is edited in
+                Suggestions, the single authoring surface. */}
+            <Button variant="outline" leftIcon={<PencilLine className="h-4 w-4" />} onClick={() => router.push("/suggestions")}>
+              Edit in Suggestions
+            </Button>
+            <Button variant="danger" size="icon" onClick={() => setShowDeleteModal(true)}><Trash2 className="h-4 w-4" /></Button>
           </div>
         </div>
 
@@ -147,61 +87,7 @@ export default function ProductDetailPage() {
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="glass-card rounded-2xl p-6 lg:col-span-2 space-y-6">
             <h2 className="font-semibold text-foreground">Product Information</h2>
 
-            {editing ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Input label="Product Name" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label className="block text-sm font-medium text-foreground">URL slug</label>
-                    <button
-                      type="button"
-                      className="text-xs text-primary hover:underline"
-                      onClick={() => setForm(f => ({
-                        ...f,
-                        slug: String(f.name ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, ""),
-                      }))}
-                    >
-                      Generate from name
-                    </button>
-                  </div>
-                  <Input
-                    value={form.slug}
-                    placeholder="e.g. dragon-ball-goku-figurine"
-                    onChange={e => setForm(f => ({ ...f, slug: e.target.value }))}
-                  />
-                  <p className="text-[11px] text-muted-foreground">
-                    yukizi.com/products/<span className="text-foreground">{form.slug || "…"}</span> — changing this
-                    auto-creates a 301 redirect from the old URL, so existing links keep working.
-                  </p>
-                  {form.slug !== (product?.variant?.catalogProduct?.slug ?? "") && form.slug && (
-                    <label className="mt-1.5 flex items-center gap-2 text-xs text-foreground cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={slugRedirect}
-                        onChange={(e) => setSlugRedirect(e.target.checked)}
-                        className="h-3.5 w-3.5 accent-primary"
-                      />
-                      Redirect the old URL to the new one (recommended — keeps Google results and shared links working)
-                    </label>
-                  )}
-                </div>
-                <Input label="Manufacturer" value={form.manufacturer} onChange={e => setForm(f => ({ ...f, manufacturer: e.target.value }))} />
-                <Input label="Chemical Composition" value={form.chemicalComposition} onChange={e => setForm(f => ({ ...f, chemicalComposition: e.target.value }))} />
-                <Input label="MRP (₹)" type="number" value={form.mrp} onChange={e => setForm(f => ({ ...f, mrp: e.target.value }))} />
-                <Input label="PTR (₹)" type="number" value={form.ptr} onChange={e => setForm(f => ({ ...f, ptr: e.target.value }))} />
-                <Input label="HSN Code" value={form.hsnCode} onChange={e => setForm(f => ({ ...f, hsnCode: e.target.value }))} />
-                <Input label="GST (%)" type="number" value={form.gstPercent} onChange={e => setForm(f => ({ ...f, gstPercent: e.target.value }))} />
-                <Select label="Category" value={form.categoryId} onChange={e => setForm(f => ({ ...f, categoryId: e.target.value }))}>
-                  <option value="">Select category</option>
-                  {categories.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </Select>
-                <Input label="Min Order Qty" type="number" value={form.minimumOrderQuantity} onChange={e => setForm(f => ({ ...f, minimumOrderQuantity: e.target.value }))} />
-                <Input label="Max Order Qty" type="number" value={form.maximumOrderQuantity} onChange={e => setForm(f => ({ ...f, maximumOrderQuantity: e.target.value }))} />
-                <div className="sm:col-span-2">
-                  <Textarea label="Description" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={3} />
-                </div>
-              </div>
-            ) : (
+            {(
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
                 <InfoRow label="Name" value={product.name} />
                 <InfoRow label="Manufacturer" value={product.manufacturer} />
@@ -262,22 +148,7 @@ export default function ProductDetailPage() {
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="glass-card rounded-2xl p-6">
               <h2 className="font-semibold text-foreground mb-4">Badges</h2>
               <div className="space-y-3">
-                {editing ? (
-                  <>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input type="checkbox" checked={form.isYukiziChoice} onChange={e => setForm(f => ({ ...f, isYukiziChoice: e.target.checked }))} className="h-4 w-4 rounded border-border bg-background text-primary focus:ring-primary" />
-                      <span className="text-sm text-foreground">Yukizi Choice</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input type="checkbox" checked={form.isBestSeller} onChange={e => setForm(f => ({ ...f, isBestSeller: e.target.checked }))} className="h-4 w-4 rounded border-border bg-background text-primary focus:ring-primary" />
-                      <span className="text-sm text-foreground">Best Seller</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input type="checkbox" checked={form.isAd} onChange={e => setForm(f => ({ ...f, isAd: e.target.checked }))} className="h-4 w-4 rounded border-border bg-background text-primary focus:ring-primary" />
-                      <span className="text-sm text-foreground">Ad</span>
-                    </label>
-                  </>
-                ) : (
+                {(
                   <>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground">Yukizi Choice</span>
@@ -328,15 +199,6 @@ export default function ProductDetailPage() {
             )}
           </div>
         </div>
-
-        {/* SEO — same record as the SEO tab */}
-        {product?.variant?.catalogProduct?.id && (
-          <ProductSeoSection
-            catalogProductId={product.variant.catalogProduct.id}
-            productName={product?.name}
-            slug={product?.variant?.catalogProduct?.slug}
-          />
-        )}
 
         {/* Batches */}
         {batches.length > 0 && (

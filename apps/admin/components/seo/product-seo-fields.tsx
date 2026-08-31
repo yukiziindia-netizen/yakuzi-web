@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Save } from "lucide-react";
 import toast from "react-hot-toast";
@@ -127,10 +127,12 @@ export function productSeoFormToPayload(
  * existing SeoMeta record (the one the SEO tab edits), saves with its own
  * button, shows the recomputed scores.
  */
-export function ProductSeoSection({ catalogProductId, productName, slug }: {
+export function ProductSeoSection({ catalogProductId, productName, slug, images }: {
   catalogProductId: string;
   productName?: string;
   slug?: string | null;
+  /** Current product image URLs — enables the per-image alt editor. */
+  images?: string[];
 }) {
   const { data: record, isLoading } = useSeoMetaOne("PRODUCT", catalogProductId);
   const upsert = useUpsertSeoMeta();
@@ -178,7 +180,7 @@ export function ProductSeoSection({ catalogProductId, productName, slug }: {
         </div>
       </div>
       {!seeded ? <Skeleton className="h-40 w-full" /> : (
-        <ProductSeoFields value={form} onChange={setForm} productName={productName} slug={slug ?? undefined} />
+        <ProductSeoFields value={form} onChange={setForm} productName={productName} slug={slug ?? undefined} images={images} />
       )}
     </motion.div>
   );
@@ -194,7 +196,7 @@ const TABS = [
 
 const ROBOTS_PRESETS = ["", "index,follow", "noindex,follow", "noindex,nofollow"];
 
-export function ProductSeoFields({ value, onChange, productName, slug, previewPath: previewPathProp, entityLabel = "product" }: {
+export function ProductSeoFields({ value, onChange, productName, slug, previewPath: previewPathProp, entityLabel = "product", images, onRenameImage }: {
   value: ProductSeoForm;
   onChange: (next: ProductSeoForm) => void;
   /** Used for preview fallbacks so the SERP card reflects the product being edited. */
@@ -204,10 +206,60 @@ export function ProductSeoFields({ value, onChange, productName, slug, previewPa
   previewPath?: string;
   /** Wording in hints; "product" keeps the original copy. */
   entityLabel?: string;
+  /** Image URLs for the per-image alt editor (Advanced tab). */
+  images?: string[];
+  /**
+   * When provided, each image row offers a filename rename. Must return the
+   * new URL on success (the row migrates its alt override to it) or null.
+   */
+  onRenameImage?: (url: string, newName: string) => Promise<string | null>;
 }) {
   const [tab, setTab] = useState("basic");
   const set = <K extends keyof ProductSeoForm>(key: K, v: ProductSeoForm[K]) => onChange({ ...value, [key]: v });
   const previewPath = previewPathProp ?? (slug ? `/products/${slug}` : "/products/…");
+
+  // Friendly per-image alt editing over the same imageAltJson the record
+  // stores — one source of truth, no drift with the raw JSON field.
+  const altMap = useMemo<Record<string, string>>(() => {
+    try {
+      const parsed = JSON.parse(value.imageAltJson || "{}");
+      return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+    } catch {
+      return {};
+    }
+  }, [value.imageAltJson]);
+  const setImageAlt = (url: string, alt: string) => {
+    const next: Record<string, string> = { ...altMap };
+    if (alt.trim()) next[url] = alt;
+    else delete next[url];
+    set("imageAltJson", Object.keys(next).length ? JSON.stringify(next, null, 2) : "");
+  };
+  const fileNameOf = (url: string) => {
+    try { return decodeURIComponent(url.split("/").pop() || url); } catch { return url; }
+  };
+  const [renameFor, setRenameFor] = useState<{ url: string; draft: string } | null>(null);
+  const [renameBusy, setRenameBusy] = useState(false);
+  const submitRename = async () => {
+    if (!renameFor || !onRenameImage || renameBusy) return;
+    setRenameBusy(true);
+    try {
+      const newUrl = await onRenameImage(renameFor.url, renameFor.draft);
+      if (newUrl && newUrl !== renameFor.url) {
+        // Follow the rename in the alt map in ONE write (two setImageAlt
+        // calls would race on the same value prop).
+        const alt = altMap[renameFor.url];
+        if (alt) {
+          const next = { ...altMap };
+          delete next[renameFor.url];
+          next[newUrl] = alt;
+          set("imageAltJson", JSON.stringify(next, null, 2));
+        }
+      }
+      if (newUrl) setRenameFor(null);
+    } finally {
+      setRenameBusy(false);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -302,9 +354,55 @@ export function ProductSeoFields({ value, onChange, productName, slug, previewPa
           <Textarea label="Structured data override (JSON object)" rows={5} className="font-mono text-xs"
             placeholder='{"brand": {"@type": "Brand", "name": "…"}} — merged over the generated product JSON-LD'
             value={value.structuredDataJson} onChange={(e) => set("structuredDataJson", e.target.value)} />
-          <Textarea label="Image ALT overrides (JSON object)" rows={4} className="font-mono text-xs"
-            placeholder='{"https://…/image1.jpg": "Descriptive alt text"}'
-            value={value.imageAltJson} onChange={(e) => set("imageAltJson", e.target.value)} />
+          {images && images.length > 0 ? (
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-foreground">Image alt text</label>
+              <p className="text-xs text-muted-foreground -mt-1">
+                Blank = automatic (&quot;{productName || "product name"} - Yukizi&quot;). Type to override per image.
+              </p>
+              {images.map((url) => (
+                <div key={url} className="flex items-center gap-3 rounded-xl border border-border p-2">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={url} alt="" className="h-12 w-12 rounded-lg object-contain bg-white shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <Input
+                      placeholder={`Automatic: ${productName ? `${productName} - Yukizi` : "<name> - Yukizi"}`}
+                      value={altMap[url] ?? ""}
+                      onChange={(e) => setImageAlt(url, e.target.value)}
+                    />
+                    {renameFor?.url === url ? (
+                      <div className="flex items-center gap-2 mt-1">
+                        <Input
+                          value={renameFor.draft}
+                          onChange={(e) => setRenameFor({ url, draft: e.target.value })}
+                          placeholder="new-file-name (extension is kept)"
+                        />
+                        <Button type="button" size="sm" loading={renameBusy} onClick={submitRename}>Rename</Button>
+                        <Button type="button" size="sm" variant="ghost" onClick={() => setRenameFor(null)}>Cancel</Button>
+                      </div>
+                    ) : (
+                      <p className="text-2xs text-muted-foreground truncate mt-1" title={url}>
+                        {fileNameOf(url)}
+                        {onRenameImage && (
+                          <button type="button" className="ml-2 text-primary hover:underline" onClick={() => {
+                            const base = fileNameOf(url);
+                            const dot = base.lastIndexOf(".");
+                            setRenameFor({ url, draft: dot > -1 ? base.slice(0, dot) : base });
+                          }}>
+                            Rename file
+                          </button>
+                        )}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <Textarea label="Image ALT overrides (JSON object)" rows={4} className="font-mono text-xs"
+              placeholder='{"https://…/image1.jpg": "Descriptive alt text"}'
+              value={value.imageAltJson} onChange={(e) => set("imageAltJson", e.target.value)} />
+          )}
         </div>
       )}
     </div>

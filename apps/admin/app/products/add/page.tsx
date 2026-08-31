@@ -267,7 +267,7 @@ export default function AddProductPage() {
                   Optional — everything here saves with the product and stays editable under the SEO tab. Blank fields fall back to sensible generated defaults.
                 </p>
               </div>
-              <ProductSeoFields value={seoForm} onChange={setSeoForm} productName={form.title} />
+              <ProductSeoFields value={seoForm} onChange={setSeoForm} productName={form.title} images={mediaItems.filter(m => !m.isLoading && m.url).map(m => m.url)} />
             </motion.div>
 
           </div>

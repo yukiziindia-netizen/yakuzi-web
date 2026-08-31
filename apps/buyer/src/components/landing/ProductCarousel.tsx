@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Loader2, Share2, Plus, Minus, RotateCw, Eye, Star, Truck, Bookmark, Bell } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getProducts, useAuth } from '@yukizi/api-client';
+import { trackProductImpression, trackProductClick } from '@/lib/analytics/tracker';
 import { generateProductSlug, calculatePricing } from '@yukizi/utils';
 import QuickReviewModal from './QuickReviewModal';
 import { useAddToCart, useCart, useUpdateCartItem, useRemoveCartItem } from '@/hooks/useCart';
@@ -130,6 +131,29 @@ export function GridProductCard({ product, index, onOpenReview, showFullTitle }:
   const [isNotifyEmailModalOpen, setIsNotifyEmailModalOpen] = useState(false);
 
   const currentProductId = product?.id || `prod-${index}`;
+
+  // Listing analytics: one impression per card per pageview (IntersectionObserver,
+  // idle-cost only, deduped in the tracker), and a click on every navigation
+  // into the product.
+  const impressionRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = impressionRef.current;
+    if (!el || !product?.id || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          trackProductImpression(product.id, index);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.4 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [product?.id, index]);
+  const handleCardNav = () => {
+    if (product?.id) trackProductClick(product.id, index);
+  };
   const targetProductId = product.bestListingId || currentProductId;
 
   // Find if this product is in the cart
@@ -295,7 +319,7 @@ export function GridProductCard({ product, index, onOpenReview, showFullTitle }:
 
   return (
     <>
-    <div className="relative mt-3 group flex flex-col h-auto w-full max-w-[210px] sm:max-w-none mx-auto">
+    <div ref={impressionRef} className="relative mt-3 group flex flex-col h-auto w-full max-w-[210px] sm:max-w-none mx-auto">
       {/* Yukizi Choice & Best Seller Tags */}
       <div className="absolute -top-[12px] left-1.5 sm:left-2 flex items-center gap-1.5 z-30">
         {isYukiziChoice && (
@@ -400,7 +424,7 @@ export function GridProductCard({ product, index, onOpenReview, showFullTitle }:
         </div>
 
         {/* Image Container - Fixed 190px/200px height matching Samplr */}
-        <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index, product?.slug)}`} className="relative w-full h-[160px] sm:h-[200px] bg-white overflow-hidden flex justify-center items-center shrink-0">
+        <Link onClick={handleCardNav} href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index, product?.slug)}`} className="relative w-full h-[160px] sm:h-[200px] bg-white overflow-hidden flex justify-center items-center shrink-0">
            {/* next/image so the ~1MB seller uploads are resized/re-encoded to
                the card's actual rendered width (the grid is 2-7 columns) —
                measured 65MB of card images on one homepage load without it. */}
@@ -411,7 +435,7 @@ export function GridProductCard({ product, index, onOpenReview, showFullTitle }:
             {/* Brand Subtitle & Title Line */}
             <div>
                <div className="flex items-start justify-between w-full gap-1.5">
-                  <Link href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index, product?.slug)}`} className="flex-1">
+                  <Link onClick={handleCardNav} href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index, product?.slug)}`} className="flex-1">
                     <h3 className={`text-xs sm:text-sm font-medium text-[#333333] leading-snug hover:text-[#7B2FBE] transition-colors ${showFullTitle ? '' : 'line-clamp-1'}`}>
                        {productName}
                     </h3>
@@ -426,6 +450,7 @@ export function GridProductCard({ product, index, onOpenReview, showFullTitle }:
                     </button>
                   ) : (
                     <Link
+                       onClick={handleCardNav}
                        href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index, product?.slug)}`}
                        className="flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform shrink-0"
                        title="Quick view"

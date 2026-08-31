@@ -41,6 +41,7 @@ import Navbar from '@/components/landing/Navbar';
 import { generateProductSlug, parseProductIdFromSlug, calculatePricing } from '@yukizi/utils';
 import { ShareButton } from '@/components/shared/ShareButton';
 import WishlistIcon from '@/components/shared/WishlistIcon';
+import { NotifyStockAlertModal } from '@/components/shared/NotifyStockAlertModal';
 import { useScrollLock } from '@/hooks/useScrollLock';
 import { renderBuyerOfferBadge, GridProductCard } from '@/components/landing/ProductCarousel';
 
@@ -371,10 +372,28 @@ function ComparisonOffersList({
 
   const isDesktop = variant === 'desktop';
 
+  // No sellers at all. The page still exists and still ranks — catalog products
+  // are never deleted, so a listing that earned its position keeps it while it
+  // waits for a seller to return. Give that traffic somewhere to go: joining the
+  // waitlist here notifies the buyer the moment any seller lists the product
+  // again (products.service notifies waitlisted users on new listing / restock).
   if (!comparisonListings || comparisonListings.length === 0) {
     return (
-      <div className="p-6 rounded-2xl bg-gray-50 border border-dashed border-gray-200 text-center text-xs font-semibold text-gray-400">
-        No active Sellers available for this product.
+      <div className="p-6 rounded-2xl bg-gray-50 border border-dashed border-gray-200 text-center flex flex-col items-center gap-3">
+        <p className="text-xs font-semibold text-gray-400">
+          No active Sellers available for this product.
+        </p>
+        <button
+          type="button"
+          onClick={() => setShowStockAlert(true)}
+          className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs sm:text-sm font-bold text-white transition-transform active:scale-95 hover:opacity-90"
+        >
+          <Bell className="w-4 h-4" strokeWidth={2.25} />
+          Notify me when available
+        </button>
+        <p className="text-2xs sm:text-xs text-gray-400 font-medium">
+          We&apos;ll email you as soon as a seller lists it again.
+        </p>
       </div>
     );
   }
@@ -834,6 +853,7 @@ export default function ProductPageClient({ productSlug, initialProduct, imageAl
   }, [product?.id]);
 
   const { data: userProfile } = useBuyerProfile();
+  const { isAuthenticated } = useAuth();
   const { data: reviewsData } = useProductReviews(product?.id || '');
   const { mutate: submitReview } = useCreateReview();
   const { data: reviewEligibility } = useReviewEligibility(product?.id || '');
@@ -847,6 +867,17 @@ export default function ProductPageClient({ productSlug, initialProduct, imageAl
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showStockAlert, setShowStockAlert] = useState(false);
+
+  // POST /products/:id/notify-me is buyer-authenticated, so a guest submitting
+  // the modal would just get a 401 toast. Send them to the login popup instead
+  // and let them come back to it.
+  const openStockAlert = (open: boolean) => {
+    if (open && !isAuthenticated) {
+      window.dispatchEvent(new Event('open-login'));
+      return;
+    }
+    setShowStockAlert(open);
+  };
 
   const handleFileUpload = async (files: FileList | File[]) => {
     if (!files || files.length === 0) return;
@@ -1241,7 +1272,7 @@ export default function ProductPageClient({ productSlug, initialProduct, imageAl
             productName={product.name}
             productMrp={displayMrp || displayPrice}
             toast={toast}
-            setShowStockAlert={setShowStockAlert}
+            setShowStockAlert={openStockAlert}
             productImage={displayImages[0]}
             productGstPercent={product.gstPercent}
             productShippingCharges={product.shippingCharges}
@@ -1527,7 +1558,7 @@ export default function ProductPageClient({ productSlug, initialProduct, imageAl
                 productName={product.name}
                 productMrp={displayMrp || displayPrice}
                 toast={toast}
-                setShowStockAlert={setShowStockAlert}
+                setShowStockAlert={openStockAlert}
                 productImage={displayImages[0]}
                 productGstPercent={product.gstPercent}
                 productShippingCharges={product.shippingCharges}
@@ -1640,6 +1671,17 @@ export default function ProductPageClient({ productSlug, initialProduct, imageAl
 
       </div>
       <Navbar />
+
+      {/* Stock alert. The bell on out-of-stock listings and the no-seller block
+          both set showStockAlert; until now nothing rendered the modal, so both
+          were dead clicks. The waitlist is keyed on the catalog product, not a
+          seller offer, so it works even with zero sellers. */}
+      <NotifyStockAlertModal
+        isOpen={showStockAlert}
+        productName={product?.name || 'This product'}
+        productId={product.id}
+        onClose={() => setShowStockAlert(false)}
+      />
     </main>
   );
 }

@@ -53,7 +53,7 @@ export default function SeoOverviewPage() {
   }, [settings, gscSeeded]);
   // Storefront-wide SEO defaults — the values that used to require a code
   // change (title template, fallback description/share image, twitter handle,
-  // theme colour, out-of-stock indexing).
+  // theme colour).
   const [defs, setDefs] = useState<Record<string, string | boolean>>({});
   const [defsSeeded, setDefsSeeded] = useState(false);
   const [defsSaving, setDefsSaving] = useState(false);
@@ -67,7 +67,6 @@ export default function SeoOverviewPage() {
         seoTwitterHandle: String(s.seoTwitterHandle ?? ""),
         seoThemeColor: String(s.seoThemeColor ?? ""),
         seoProductTitleSuffix: String(s.seoProductTitleSuffix ?? ""),
-        seoNoindexOutOfStock: Boolean(s.seoNoindexOutOfStock),
       });
       setDefsSeeded(true);
     }
@@ -263,12 +262,6 @@ export default function SeoOverviewPage() {
             <Input label="Browser theme colour" value={String(defs.seoThemeColor ?? "")} placeholder="#562996"
               onChange={(e) => setDefs((d) => ({ ...d, seoThemeColor: e.target.value }))} />
           </div>
-          <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
-            <input type="checkbox" className="h-4 w-4 accent-primary"
-              checked={Boolean(defs.seoNoindexOutOfStock)}
-              onChange={(e) => setDefs((d) => ({ ...d, seoNoindexOutOfStock: e.target.checked }))} />
-            Keep out-of-stock products out of Google&apos;s index (noindex until back in stock)
-          </label>
           <Button onClick={saveDefaults} loading={defsSaving} disabled={defsSaving}>Save defaults</Button>
         </motion.div>
 

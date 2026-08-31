@@ -6,7 +6,7 @@ import { ArrowRight, FileText, Globe, KeyRound, Route, Sparkles, Type as TypeIco
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { Badge, Button, Skeleton, StatCard } from "@/components/ui";
 import { useSeoKeywords, useSeoMetaList, useSeoRedirects } from "@/hooks/useSeo";
-import { SEO_ENTITY_TYPES, type SeoEntityType } from "@/api/seo.api";
+import { META_EDITOR_ENTITY_TYPES, type SeoEntityType } from "@/api/seo.api";
 import { apiClient } from "@/lib/apiClient";
 import toast from "react-hot-toast";
 import { ImageIcon } from "lucide-react";
@@ -120,7 +120,7 @@ export default function SeoOverviewPage() {
               <h2 className="font-semibold text-foreground text-sm">Records by page type</h2>
             </div>
             <div className="divide-y divide-border/40">
-              {SEO_ENTITY_TYPES.map((t) => <TypeRow key={t} type={t} />)}
+              {META_EDITOR_ENTITY_TYPES.map((t) => <TypeRow key={t} type={t} />)}
             </div>
           </motion.div>
 

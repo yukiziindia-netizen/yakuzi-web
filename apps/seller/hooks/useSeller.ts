@@ -11,7 +11,7 @@ import {
   getSellerNotifications, markNotificationRead, markAllNotificationsRead,
   getSellerFullProfile, getProductRequests, createProductRequest, getSellerAnalytics,
   searchSuggestions, getCategoriesWithSubs,
-  verifyGstOrPan, uploadKycDocument, uploadDrugLicense,
+  verifyGstOrPan, uploadKycDocument,
   getSellerOrderInvoices,
   getSellerWaitlist, getSellerReviews, type SellerReviewFilters } from "@/api/seller.api";
 import type { ProductPayload } from "@yukizi/utils";
@@ -330,11 +330,6 @@ export function useUploadKycDocument() {
   });
 }
 
-export function useUploadDrugLicense() {
-  return useMutation({
-    mutationFn: (formData: FormData) => uploadDrugLicense(formData),
-  });
-}
 
 /**
  * Reviews left by buyers who purchased from THIS seller.

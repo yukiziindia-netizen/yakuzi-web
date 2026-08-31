@@ -89,13 +89,11 @@ export async function getCategories() {
           .map(c => ({ id: c.id, name: c.name }))
       : [];
   } catch (error) {
-    console.warn("Failed to fetch categories, using fallback", error);
-    return [
-      { id: "cat-1", name: "Tablets" },
-      { id: "cat-2", name: "Syrups" },
-      { id: "cat-3", name: "Injections" },
-      { id: "cat-4", name: "Drops" },
-    ];
+    // Was a hardcoded pharma list — Tablets, Syrups, Injections, Drops —
+    // shown to sellers whenever the categories call failed. An empty list is
+    // honest; inventing categories from the forked codebase was not.
+    console.warn("Failed to fetch categories", error);
+    return [];
   }
 }
 
@@ -247,18 +245,6 @@ export async function getSellerNotifications() {
 
 // ─── Suggestion / Autocomplete Search ─────────────────
 
-const MOCK_SUGGESTIONS: Suggestion[] = [
-  { id: "sug-1", productName: "Paracetamol 500mg", companyName: "Cipla", chemicalCombination: "Paracetamol", category: "Tablets", categoryId: "cat-1", subCategoryId: "sub-1", mrp: 40, gstPercent: 12 },
-  { id: "sug-2", productName: "Amoxicillin 250mg", companyName: "Sun Pharma", chemicalCombination: "Amoxicillin", category: "Capsules", categoryId: "cat-5", mrp: 120, gstPercent: 12 },
-  { id: "sug-3", productName: "Cetirizine 10mg", companyName: "Dr. Reddy's", chemicalCombination: "Cetirizine Hydrochloride", category: "Tablets", categoryId: "cat-1", subCategoryId: "sub-1", mrp: 25, gstPercent: 12 },
-  { id: "sug-4", productName: "Azithromycin 500mg", companyName: "Zydus", chemicalCombination: "Azithromycin", category: "Tablets", categoryId: "cat-1", subCategoryId: "sub-2", mrp: 150, gstPercent: 12 },
-  { id: "sug-5", productName: "Dolo 650", companyName: "Micro Labs", chemicalCombination: "Paracetamol 650mg", category: "Tablets", categoryId: "cat-1", subCategoryId: "sub-1", mrp: 30, gstPercent: 12 },
-  { id: "sug-6", productName: "Pantoprazole 40mg", companyName: "Alkem", chemicalCombination: "Pantoprazole", category: "Tablets", categoryId: "cat-1", mrp: 110, gstPercent: 5 },
-  { id: "sug-7", productName: "Metformin 500mg", companyName: "USV", chemicalCombination: "Metformin Hydrochloride", category: "Tablets", categoryId: "cat-1", mrp: 60, gstPercent: 5 },
-  { id: "sug-8", productName: "Cough Syrup", companyName: "Dabur", chemicalCombination: "Honey, Tulsi, Mulethi", category: "Syrups", categoryId: "cat-2", subCategoryId: "sub-3", mrp: 95, gstPercent: 18 },
-  { id: "sug-9", productName: "ORS Powder", companyName: "Electral", chemicalCombination: "Sodium Chloride, Potassium Chloride", category: "Sachets", categoryId: "cat-6", mrp: 20, gstPercent: 0 },
-  { id: "sug-10", productName: "Vitamin D3 60K", companyName: "USV", chemicalCombination: "Cholecalciferol", category: "Capsules", categoryId: "cat-5", mrp: 85, gstPercent: 12 },
-];
 
 
 export async function searchSuggestions(query: string, type: 'product' | 'master' = 'master'): Promise<Suggestion[]> {
@@ -268,14 +254,11 @@ export async function searchSuggestions(query: string, type: 'product' | 'master
     });
     return data.data ?? [];
   } catch {
-    if (!query || query.length < 2) return [];
-    const q = query.toLowerCase();
-    return MOCK_SUGGESTIONS.filter(
-      (s) =>
-        s.productName.toLowerCase().includes(q) ||
-        s.companyName.toLowerCase().includes(q) ||
-        (s.chemicalCombination?.toLowerCase().includes(q) ?? false)
-    );
+    // Fell back to a hardcoded pharmaceutical list — Amoxicillin,
+    // Azithromycin, Dolo 650, ORS Powder — so a hiccup in the suggestions
+    // call showed sellers of an anime store a drug catalogue. No suggestions
+    // is the right answer when we have none.
+    return [];
   }
 }
 
@@ -322,15 +305,10 @@ export async function getCategoriesWithSubs(): Promise<CategoryItem[]> {
           })
       : [];
   } catch (error) {
-    console.warn("Failed to fetch categories with subs, using fallback", error);
-    return [
-      { id: "cat-1", name: "Tablets", subcategories: [{ id: "sub-1", name: "Pain Relief", categoryId: "cat-1" }, { id: "sub-2", name: "Antibiotics", categoryId: "cat-1" }] },
-      { id: "cat-2", name: "Syrups", subcategories: [{ id: "sub-3", name: "Cough", categoryId: "cat-2" }, { id: "sub-4", name: "Digestive", categoryId: "cat-2" }] },
-      { id: "cat-3", name: "Injections", subcategories: [] },
-      { id: "cat-4", name: "Drops", subcategories: [{ id: "sub-5", name: "Eye Drops", categoryId: "cat-4" }, { id: "sub-6", name: "Ear Drops", categoryId: "cat-4" }] },
-      { id: "cat-5", name: "Capsules", subcategories: [] },
-      { id: "cat-6", name: "Sachets", subcategories: [] },
-    ];
+    // Same pharma fallback as above, with sub-categories: Pain Relief,
+    // Antibiotics, Eye Drops. Removed for the same reason.
+    console.warn("Failed to fetch categories with subs", error);
+    return [];
   }
 }
 
@@ -499,14 +477,6 @@ export async function uploadProductImage(formData: FormData) {
   return data.data ?? data;
 }
 
-/**
- * Upload drug license document during seller onboarding
- */
-export async function uploadDrugLicense(formData: FormData) {
-  const { data } = await apiClient.post<any>('/storage/drug-license', formData);
-
-  return data.data ?? data;
-}
 
 // onboardBuyer / getSellerBuyers / getBuyerProfile removed with the
 // seller-side /buyers pages. They came from the pharma fork, where a

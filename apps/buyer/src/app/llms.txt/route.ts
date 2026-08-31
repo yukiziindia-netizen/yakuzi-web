@@ -1,6 +1,7 @@
 import { getCategories, getProducts } from '@yukizi/api-client';
 import { SITE_NAME, SITE_URL, SITE_DESCRIPTION, ORG_LEGAL_NAME } from '@/lib/seo/site';
 import { COMPANY } from '@/config/company';
+import { fetchSupportContact } from '@/lib/seo/support-contact';
 
 /**
  * llms.txt — the plain-text brief AI assistants read to understand this site.
@@ -20,6 +21,8 @@ export const revalidate = 3600;
 const MAX_PRODUCTS = 200;
 
 export async function GET() {
+  const support = await fetchSupportContact();
+
   let catLines = '';
   try {
     // getCategories() returns Category[] directly, not wrapped in { data }.
@@ -76,7 +79,7 @@ ${SITE_NAME} (${ORG_LEGAL_NAME}) is an online marketplace for anime, manga and p
 - Returns: accepted for damaged or incorrect deliveries, reported within 3 days of delivery with photographs. Change-of-mind returns are not accepted.
 - Seller verification: every seller is verified before they can list.
 - Payments: online payment at checkout.
-- Support: ${COMPANY.supportEmail}${COMPANY.supportPhone ? ` / ${COMPANY.supportPhone}` : ''}
+- Support: ${support.email}${support.phone ? ` / ${support.phone}` : ''}
 
 ## Categories
 ${catLines}

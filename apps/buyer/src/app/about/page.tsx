@@ -3,6 +3,7 @@ import { absoluteUrl } from '@/lib/seo/site';
 import { staticPageMetadata } from '@/lib/seo/overrides';
 import PolicyPage, { PolicySection } from '@/components/shared/PolicyPage';
 import { COMPANY } from '@/config/company';
+import { fetchSupportContact, type SupportContact } from '@/lib/seo/support-contact';
 import JsonLd from '@/components/seo/JsonLd';
 import { breadcrumbSchema, faqPageSchema } from '@/lib/seo/schema';
 
@@ -19,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 // Rendered as the visible FAQ below AND as FAQPage JSON-LD — one source, so
 // the structured data can never say something the page doesn't.
-const FAQS = [
+const buildFaqs = (support: SupportContact) => [
   {
     question: 'What is Yukizi?',
     answer: `Yukizi is an online marketplace for manga, anime figures, collectibles and accessories in India, operated by ${COMPANY.legalName}. Products are listed by sellers onboarded onto the platform; Yukizi handles ordering, payment and delivery coordination.`,
@@ -41,11 +42,13 @@ const FAQS = [
   },
   {
     question: 'How can I contact Yukizi?',
-    answer: `Email ${COMPANY.supportEmail} or call ${COMPANY.supportPhone} (${COMPANY.supportHours}). Full details are on the contact page at ${absoluteUrl('/contact')}.`,
+    answer: `Email ${support.email} or call ${support.phone} (${COMPANY.supportHours}). Full details are on the contact page at ${absoluteUrl('/contact')}.`,
   },
 ];
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const support = await fetchSupportContact();
+  const FAQS = buildFaqs(support);
   return (
     <PolicyPage
       title="About Yukizi"
@@ -90,10 +93,10 @@ export default function AboutPage() {
         <p>
           Questions about an order, a product or the platform are welcome at{' '}
           <a
-            href={`mailto:${COMPANY.supportEmail}`}
+            href={`mailto:${support.email}`}
             className="text-[#562996] underline underline-offset-4"
           >
-            {COMPANY.supportEmail}
+            {support.email}
           </a>
           . Our full contact details are on the{' '}
           <a href="/contact" className="text-[#562996] underline underline-offset-4">

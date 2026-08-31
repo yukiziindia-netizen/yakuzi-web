@@ -3,6 +3,7 @@ import { absoluteUrl } from '@/lib/seo/site';
 import { staticPageMetadata } from '@/lib/seo/overrides';
 import PolicyPage, { PolicySection } from '@/components/shared/PolicyPage';
 import { COMPANY } from '@/config/company';
+import { fetchSupportContact } from '@/lib/seo/support-contact';
 
 const derivedMetadata: Metadata = {
   title: 'Terms of Use',
@@ -15,7 +16,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return staticPageMetadata('/terms', derivedMetadata);
 }
 
-export default function TermsPage() {
+export default async function TermsPage() {
+  const support = await fetchSupportContact();
   return (
     <PolicyPage
       title="Terms of Use"
@@ -111,10 +113,10 @@ export default function TermsPage() {
           <br />
           Email:{' '}
           <a
-            href={`mailto:${COMPANY.supportEmail}`}
+            href={`mailto:${support.email}`}
             className="text-[#562996] underline underline-offset-4"
           >
-            {COMPANY.supportEmail}
+            {support.email}
           </a>
           <br />
           Website:{' '}

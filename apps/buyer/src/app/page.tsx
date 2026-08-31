@@ -12,6 +12,7 @@ import type { Metadata } from 'next';
 import JsonLd from '@/components/seo/JsonLd';
 import { organizationSchema, webSiteSchema, graph } from '@/lib/seo/schema';
 import { fetchSocialLinks, socialUrlList } from '@/lib/seo/social';
+import { fetchSupportContact } from '@/lib/seo/support-contact';
 import { absoluteUrl } from '@/lib/seo/site';
 import { applySeoOverride, fetchSeoOverride } from '@/lib/seo/overrides';
 
@@ -101,6 +102,7 @@ export default async function HomePage({
 
   const social = await fetchSocialLinks();
   const socialUrls = socialUrlList(social);
+  const support = await fetchSupportContact();
 
   if (isComingSoon) {
     return <ComingSoon />;
@@ -108,7 +110,7 @@ export default async function HomePage({
 
   return (
     <main className="w-full bg-gray-50 min-h-screen relative pb-24 sm:pb-32">
-      <JsonLd data={[graph(organizationSchema(socialUrls), webSiteSchema())]} />
+      <JsonLd data={[graph(organizationSchema(socialUrls, support), webSiteSchema())]} />
       {/* The hero is pure banner artwork, so the page's one H1 is screen-reader
           only — same pattern CategoryBanner already uses. Without it the
           homepage has NO h1 at all (only the category-row h2s). */}

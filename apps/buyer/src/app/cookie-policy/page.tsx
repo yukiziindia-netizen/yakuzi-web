@@ -3,6 +3,7 @@ import { absoluteUrl } from '@/lib/seo/site';
 import { staticPageMetadata } from '@/lib/seo/overrides';
 import PolicyPage, { PolicySection } from '@/components/shared/PolicyPage';
 import { COMPANY } from '@/config/company';
+import { fetchSupportContact } from '@/lib/seo/support-contact';
 
 const derivedMetadata: Metadata = {
   title: 'Cookie Policy',
@@ -15,7 +16,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return staticPageMetadata('/cookie-policy', derivedMetadata);
 }
 
-export default function CookiePolicyPage() {
+export default async function CookiePolicyPage() {
+  const support = await fetchSupportContact();
   return (
     <PolicyPage
       title="Cookie Policy"
@@ -156,13 +158,13 @@ export default function CookiePolicyPage() {
           <br />
           Email:{' '}
           <a
-            href={`mailto:${COMPANY.supportEmail}`}
+            href={`mailto:${support.email}`}
             className="text-[#562996] underline underline-offset-4"
           >
-            {COMPANY.supportEmail}
+            {support.email}
           </a>
           <br />
-          Phone: {COMPANY.supportPhone}
+          Phone: {support.phone}
           <br />
           Grievance Officer: {COMPANY.grievanceOfficer.name} —{' '}
           <a

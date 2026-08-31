@@ -11,7 +11,7 @@ const SECTIONS = [
   { label: "Behavior", href: "/analytics/behavior" },
   { label: "Audience", href: "/analytics/audience" },
   { label: "Real-Time", href: "/analytics/realtime" },
-  { label: "Business", href: "/analytics" },
+  { label: "Business", href: "/dashboard" },
   { label: "Health & Export", href: "/analytics/health" },
 ];
 

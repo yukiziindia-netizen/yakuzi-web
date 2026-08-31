@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Shield, Bell, Globe, Key } from "lucide-react";
+import { Bell, Key } from "lucide-react";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { Button, Input, Skeleton } from "@/components/ui";
 import toast from "react-hot-toast";
@@ -17,20 +17,10 @@ export default function AdminSettingsPage() {
     if (settingsData) {
       const s = typeof settingsData === "object" ? settingsData : {};
       setForm({
-        platformName: s.platformName ?? "Yukizi",
-        supportEmail: s.supportEmail ?? "support@yukizi.in",
-        supportPhone: s.supportPhone ?? "+91 1800-XXX-XXXX",
-        sessionTimeout: s.sessionTimeout ?? 60,
-        maxLoginAttempts: s.maxLoginAttempts ?? 5,
-        otpExpiry: s.otpExpiry ?? 120,
-        fraudAlertEmail: s.fraudAlertEmail ?? "",
         adminAlertEmail: s.adminAlertEmail ?? "",
         mailFromAddress: s.mailFromAddress ?? "",
-        allowSellerRegistration: s.allowSellerRegistration ?? true,
-        expressLogin: s.expressLogin ?? true,
-        creditLineOrders: s.creditLineOrders ?? true,
-        maintenanceMode: s.maintenanceMode ?? false,
         comingSoonMode: s.comingSoonMode ?? true,
+        // Owned by the SEO page — round-tripped so saving here never wipes them.
         googleSiteVerification: s.googleSiteVerification ?? "",
         bingSiteVerification: s.bingSiteVerification ?? "",
       });
@@ -65,29 +55,14 @@ export default function AdminSettingsPage() {
   }
 
   const SECTIONS: { id: string; icon: any; title: string; fields: { key: string; label: string; type?: string }[] }[] = [
-    { id: "platform", icon: Globe, title: "Platform Settings", fields: [
-      { key: "platformName", label: "Platform Name" },
-      { key: "supportEmail", label: "Support Email" },
-      { key: "supportPhone", label: "Support Phone" },
-    ]},
-    { id: "security", icon: Shield, title: "Security", fields: [
-      { key: "sessionTimeout", label: "Session Timeout (mins)", type: "number" },
-      { key: "maxLoginAttempts", label: "Max Login Attempts", type: "number" },
-      { key: "otpExpiry", label: "OTP Expiry (secs)", type: "number" },
-    ]},
     { id: "notifications", icon: Bell, title: "Notifications", fields: [
-      { key: "fraudAlertEmail", label: "Fraud Alert Email" },
-      { key: "adminAlertEmail", label: "Admin Alert Email" },
+      { key: "adminAlertEmail", label: "Admin Alert Email (receives new-seller signups and seller shipping-details submissions)" },
       { key: "mailFromAddress", label: "Sender Email (must be a verified alias on the mail account, else Gmail will reject it)" },
     ]},
   ];
 
   const FEATURE_FLAGS = [
-    { key: "comingSoonMode", label: "Buyer App Coming Soon Mode", desc: "Display Coming Soon section on buyer application (Active by default)" },
-    { key: "allowSellerRegistration", label: "New Seller Registrations", desc: "Allow new sellers to register" },
-    { key: "expressLogin", label: "Express Login", desc: "OTP-based login without signup" },
-    { key: "creditLineOrders", label: "Credit Line Orders", desc: "30-day credit for verified buyers" },
-    { key: "maintenanceMode", label: "Maintenance Mode", desc: "Take platform offline for maintenance" },
+    { key: "comingSoonMode", label: "Buyer App Coming Soon Mode", desc: "Replaces the storefront with the Coming Soon screen" },
   ];
 
 

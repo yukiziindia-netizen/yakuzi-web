@@ -54,6 +54,7 @@ import { useToast } from "@/components/shared/Toast";
 import NotificationDrawer from "@/components/notifications/NotificationDrawer";
 import SearchBar from "@/components/shared/SearchBar";
 import { SidebarSheet, type SidebarView } from "@/components/landing/SidebarSheet";
+import { FilterButton } from "@/components/filters/FilterButton";
 import WishlistIcon from "@/components/shared/WishlistIcon";
 
 import { useAuth, type Category, sendChatMessage, sendChatMessageFull, type ChatMessage, getProducts } from "@yukizi/api-client";
@@ -545,14 +546,12 @@ export default function Navbar({
     }
   };
 
-  const toggleFilters = () => {
-    const next: SidebarView = sidebarView === "filters" ? null : "filters";
-    setSidebarView(next);
-    if (next) {
-      setIsCartOpen(false);
-      setIsWishlistOpen(false);
-      setIsMobileMenuOpen(false);
-    }
+  /** Called when the filter drawer opens, so only one sheet is ever up. */
+  const closeOtherSheets = () => {
+    setSidebarView(null);
+    setIsCartOpen(false);
+    setIsWishlistOpen(false);
+    setIsMobileMenuOpen(false);
   };
 
   const toggleMenu = () => {
@@ -878,24 +877,15 @@ export default function Navbar({
               />
             </button>
 
-            <button
-              onClick={() => {
-                toggleFilters();
-                onFilterClick?.();
-              }}
-              className={`transition-all duration-200 hover:scale-110 ${
-                sidebarView === "filters"
-                  ? "text-[#562996] sm:text-white scale-110 opacity-100"
-                  : isAnyDrawerOpen
-                  ? "text-[#562996]/40 sm:text-white/40 opacity-50"
-                  : "text-[#562996] sm:text-white sm:hover:text-purple-300"
-              }`}
-            >
-              <Filter 
-                className="w-[18px] h-[18px] xs:w-[24px] xs:h-[24px] sm:w-[26px] sm:h-[26px] md:w-[28px] md:h-[28px] stroke-[2]" 
-                fill={sidebarView === "filters" ? "currentColor" : "none"}
+            {/* Contents depend on the page; renders nothing where there is
+                nothing to filter. Suspense because it reads search params. */}
+            <Suspense fallback={null}>
+              <FilterButton
+                isAnyDrawerOpen={isAnyDrawerOpen}
+                onOpen={() => { closeOtherSheets(); onFilterClick?.(); }}
+                isDesktop={isDesktop}
               />
-            </button>
+            </Suspense>
 
             <button
               onClick={toggleMenu}

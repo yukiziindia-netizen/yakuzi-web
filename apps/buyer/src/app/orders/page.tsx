@@ -43,14 +43,47 @@ function OrdersPageContent() {
   const uniqueStatuses = Array.from(new Set(ordersRaw.map((o: any) => (o.orderStatus || o.status || 'PLACED').toUpperCase())));
   const STATUS_FILTERS = ['ALL', ...(uniqueStatuses as string[])];
 
-  const orders = statusFilter === 'ALL' 
-    ? ordersRaw 
-    : ordersRaw.filter((o: any) => {
-        const os = (o.status || o.orderStatus || 'PLACED').toUpperCase();
-        // Handle aliases: PENDING is basically PLACED for the user
-        if (statusFilter === 'PLACED') return os === 'PLACED' || os === 'PENDING';
-        return os === statusFilter.toUpperCase();
-      });
+  // Filters set by the nav's filter button, which writes them to the query
+  // string. The status chips below stay as a quick one-tap shortcut and share
+  // the same param, so the two can never disagree about what is shown.
+  const orderStatusParam = searchParams.get('orderStatus') ?? 'All';
+  const paymentStatusParam = searchParams.get('paymentStatus') ?? 'All';
+  const dateFrom = searchParams.get('dateFrom');
+  const dateTo = searchParams.get('dateTo');
+  const minTotal = Number(searchParams.get('minTotal') ?? 0);
+  const maxTotalParam = searchParams.get('maxTotal');
+
+  const matchesStatus = (o: any, wanted: string) => {
+    if (wanted === 'All' || wanted === 'ALL') return true;
+    const os = (o.status || o.orderStatus || 'PLACED').toUpperCase();
+    // PENDING is PLACED as far as a buyer is concerned.
+    if (wanted.toUpperCase() === 'PLACED') return os === 'PLACED' || os === 'PENDING';
+    return os === wanted.toUpperCase();
+  };
+
+  const orders = ordersRaw.filter((o: any) => {
+    if (!matchesStatus(o, statusFilter === 'ALL' ? orderStatusParam : statusFilter)) return false;
+
+    if (paymentStatusParam !== 'All') {
+      const pm = (o.paymentStatus || o.payment?.status || '').toUpperCase();
+      if (pm !== paymentStatusParam.toUpperCase()) return false;
+    }
+
+    const placed = o.createdAt ? new Date(o.createdAt) : null;
+    if (dateFrom && placed && placed < new Date(dateFrom)) return false;
+    // Inclusive of the whole "to" day, which is what a date picker implies.
+    if (dateTo && placed) {
+      const end = new Date(dateTo);
+      end.setHours(23, 59, 59, 999);
+      if (placed > end) return false;
+    }
+
+    const amount = Number(o.totalAmount ?? o.total ?? 0);
+    if (minTotal && amount < minTotal) return false;
+    if (maxTotalParam && amount > Number(maxTotalParam)) return false;
+
+    return true;
+  });
     
   const total = orders.length;
   const paginatedOrders = orders.slice((page - 1) * LIMIT, page * LIMIT);

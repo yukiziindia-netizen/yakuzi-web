@@ -508,52 +508,10 @@ export async function uploadDrugLicense(formData: FormData) {
   return data.data ?? data;
 }
 
-/**
- * Seller onboards a buyer with complete profile
- */
-export async function onboardBuyer(payload: {
-  phone: string;
-  name: string;
-  email?: string;
-  legalName: string;
-  gstNumber?: string;
-  panNumber?: string;
-  licence?: any[];
-  bankAccount?: any;
-  cancelCheck?: string;
-  document?: string;
-  inviteCode?: string;
-  address?: any;
-  city?: string;
-  state?: string;
-  pincode?: string;
-  latitude?: number;
-  longitude?: number;
-  drugLicenseNumber?: string;
-  drugLicenseUrl?: string;
-  gstPanResponse: any; // Pre-verified via verifyGstOrPan
-}) {
-  const { data } = await apiClient.post<any>('/buyers/onboard', payload);
-  return data.data ?? data;
-}
-
-/**
- * Get all buyers onboarded by seller (for status tracking)
- */
-export async function getSellerBuyers(page = 1, limit = 20) {
-  const { data } = await apiClient.get<any>('/buyers/all', {
-    params: { page, limit },
-  });
-  return data.data ?? data;
-}
-
-/**
- * Get a specific buyer's profile details
- */
-export async function getBuyerProfile(buyerId: string) {
-  const { data } = await apiClient.get<any>(`/buyers/${buyerId}`);
-  return data.data ?? data;
-}
+// onboardBuyer / getSellerBuyers / getBuyerProfile removed with the
+// seller-side /buyers pages. They came from the pharma fork, where a
+// distributor onboarded pharmacies on credit terms; on Yukizi buyers sign
+// themselves up and no seller screen called any of these.
 
 /** Seller-facing review filters — no customer dimension by design. */
 export interface SellerReviewFilters {

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Share2,
@@ -855,7 +854,6 @@ export default function ProductPageClient({ productSlug, initialProduct, imageAl
 
   const { data: userProfile } = useBuyerProfile();
   const { isAuthenticated } = useAuth();
-  const productSearchParams = useSearchParams();
   const { data: reviewsData } = useProductReviews(product?.id || '');
   const { mutate: submitReview } = useCreateReview();
   const { data: reviewEligibility } = useReviewEligibility(product?.id || '');
@@ -990,39 +988,12 @@ export default function ProductPageClient({ productSlug, initialProduct, imageAl
   //
   // Copied before sorting: the source array is derived from the product query's
   // cached data, which must not be reordered in place.
-  //
-  // The nav's filter button writes seller filters to the query string on this
-  // page (see lib/filters/registry.ts). They narrow and reorder the seller
-  // list only — never the product itself.
-  const sellerInStockOnly = productSearchParams?.get('sellerInStock') === 'true';
-  const sellerMinPrice = Number(productSearchParams?.get('sellerMinPrice') ?? 0);
-  const sellerMaxPriceParam = productSearchParams?.get('sellerMaxPrice');
-  const sellerMinRating = Number(productSearchParams?.get('sellerRating') ?? 0);
-  const sellerSort = productSearchParams?.get('sellerSort') ?? '';
-
-  const priceOfListing = (l: any) => {
-    const value = Number(l?.price ?? l?.mrp);
-    return Number.isFinite(value) && value > 0 ? value : Infinity;
-  };
-  const shippingOfListing = (l: any) =>
-    Number(l?.finalShippingPrice ?? l?.shippingCharges ?? 0) || 0;
-
-  const narrowedListings = (filteredListings || []).filter((l: any) => {
-    if (sellerInStockOnly && (l?.stock ?? 0) <= 0) return false;
-    const price = priceOfListing(l);
-    if (sellerMinPrice && price < sellerMinPrice) return false;
-    if (sellerMaxPriceParam && price > Number(sellerMaxPriceParam)) return false;
-    if (sellerMinRating && (Number(l?.seller?.rating) || 0) < sellerMinRating) return false;
-    return true;
-  });
-
-  const comparisonListings = [...narrowedListings].sort((a: any, b: any) => {
+  const comparisonListings = [...(filteredListings || [])].sort((a: any, b: any) => {
     const ratingOf = (l: any) => Number(l?.seller?.rating) || 0;
-    const priceOf = priceOfListing;
-    if (sellerSort === 'price') return priceOf(a) - priceOf(b) || ratingOf(b) - ratingOf(a);
-    if (sellerSort === 'shipping') {
-      return shippingOfListing(a) - shippingOfListing(b) || priceOf(a) - priceOf(b);
-    }
+    const priceOf = (l: any) => {
+      const value = Number(l?.price ?? l?.mrp);
+      return Number.isFinite(value) && value > 0 ? value : Infinity;
+    };
     return ratingOf(b) - ratingOf(a) || priceOf(a) - priceOf(b);
   });
 

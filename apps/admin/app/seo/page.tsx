@@ -1,15 +1,16 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, FileText, Globe, KeyRound, Route, Sparkles, Type as TypeIcon } from "lucide-react";
 import { AdminLayout } from "@/components/layout/admin-layout";
-import { Badge, Button, Skeleton, StatCard } from "@/components/ui";
+import { Badge, Button, Input, Skeleton, StatCard } from "@/components/ui";
 import { useSeoKeywords, useSeoMetaList, useSeoRedirects } from "@/hooks/useSeo";
+import { usePlatformSettings, useUpdatePlatformSettings } from "@/hooks/useAdmin";
 import { META_EDITOR_ENTITY_TYPES, type SeoEntityType } from "@/api/seo.api";
 import { apiClient } from "@/lib/apiClient";
 import toast from "react-hot-toast";
-import { ImageIcon } from "lucide-react";
+import { ImageIcon, Search as SearchIcon } from "lucide-react";
 import { ENTITY_TYPE_LABELS } from "@/components/seo/entity-picker";
 
 const SECTIONS = [
@@ -34,6 +35,39 @@ export default function SeoOverviewPage() {
   // Batched, re-runnable SEO rename of EXISTING product images (copy-not-move
   // server-side, so old URLs never break). Loops until the API reports no
   // products left with un-renamed images.
+  // Search Console / Bing verification tokens. They live in platform
+  // settings (the storefront reads them per-request) but belong here, where
+  // an admin actually goes looking for search-engine connections.
+  const { data: settings } = usePlatformSettings();
+  const updateSettings = useUpdatePlatformSettings();
+  const [gsc, setGsc] = useState("");
+  const [bing, setBing] = useState("");
+  const [gscSeeded, setGscSeeded] = useState(false);
+  const [gscSaving, setGscSaving] = useState(false);
+  useEffect(() => {
+    if (!gscSeeded && settings) {
+      setGsc((settings as any).googleSiteVerification ?? "");
+      setBing((settings as any).bingSiteVerification ?? "");
+      setGscSeeded(true);
+    }
+  }, [settings, gscSeeded]);
+  const saveVerification = async () => {
+    setGscSaving(true);
+    try {
+      // Merge over current settings so this partial save can't clear others.
+      await updateSettings.mutateAsync({
+        ...(settings as Record<string, unknown> ?? {}),
+        googleSiteVerification: gsc.trim(),
+        bingSiteVerification: bing.trim(),
+      } as any);
+      toast.success("Saved — verify the property in Search Console, then submit sitemap.xml");
+    } catch {
+      toast.error("Could not save the verification tokens");
+    } finally {
+      setGscSaving(false);
+    }
+  };
+
   const [renaming, setRenaming] = useState(false);
   const [renameProgress, setRenameProgress] = useState<string | null>(null);
   const runImageRename = async () => {
@@ -99,6 +133,27 @@ export default function SeoOverviewPage() {
             </motion.div>
           ))}
         </div>
+
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28, duration: 0.4 }} className="glass-card rounded-2xl p-5 space-y-3">
+          <div className="flex items-start gap-4">
+            <div className="h-9 w-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0"><SearchIcon className="h-4.5 w-4.5" /></div>
+            <div className="flex-1">
+              <h2 className="font-semibold text-foreground text-sm">Search Console &amp; Bing connection</h2>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Paste the verification tokens to prove you own yukizi.com. Google: Search Console → Add property → URL prefix → HTML tag → copy the <code className="text-xs">content</code> value. Bing: Webmaster Tools → same flow (<code className="text-xs">msvalidate.01</code>). Saving publishes the meta tags on the storefront within ~5 minutes — no deploy. Then verify, and submit <code className="text-xs">sitemap.xml</code> in both.
+              </p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Input label="Google Search Console token" value={gsc} onChange={(e) => setGsc(e.target.value)} placeholder="e.g. AbCdEf1234…" />
+            <Input label="Bing Webmaster Tools token" value={bing} onChange={(e) => setBing(e.target.value)} placeholder="msvalidate.01 value" />
+          </div>
+          <div className="flex items-center gap-3">
+            <Button onClick={saveVerification} loading={gscSaving} disabled={gscSaving}>Save tokens</Button>
+            {(gsc.trim() || bing.trim()) && <Badge variant="success">Configured</Badge>}
+            {!gsc.trim() && !bing.trim() && <Badge variant="outline">Not connected</Badge>}
+          </div>
+        </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.4 }} className="glass-card rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4">
           <div className="h-9 w-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0"><ImageIcon className="h-4.5 w-4.5" /></div>

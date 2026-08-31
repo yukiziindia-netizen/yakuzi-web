@@ -3,6 +3,7 @@ import { absoluteUrl } from '@/lib/seo/site';
 import { staticPageMetadata } from '@/lib/seo/overrides';
 import PolicyPage, { PolicySection } from '@/components/shared/PolicyPage';
 import { COMPANY } from '@/config/company';
+import { fetchSupportContact } from '@/lib/seo/support-contact';
 
 const derivedMetadata: Metadata = {
   title: 'Privacy Policy',
@@ -15,7 +16,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return staticPageMetadata('/privacy', derivedMetadata);
 }
 
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  const support = await fetchSupportContact();
   return (
     <PolicyPage
       title="Privacy Policy"
@@ -122,10 +124,10 @@ export default function PrivacyPage() {
           <br />
           Email:{' '}
           <a
-            href={`mailto:${COMPANY.supportEmail}`}
+            href={`mailto:${support.email}`}
             className="text-[#562996] underline underline-offset-4"
           >
-            {COMPANY.supportEmail}
+            {support.email}
           </a>
         </p>
       </PolicySection>

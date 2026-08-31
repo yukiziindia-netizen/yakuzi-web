@@ -3,6 +3,7 @@ import { absoluteUrl } from '@/lib/seo/site';
 import { staticPageMetadata } from '@/lib/seo/overrides';
 import PolicyPage, { PolicySection } from '@/components/shared/PolicyPage';
 import { COMPANY } from '@/config/company';
+import { fetchSupportContact } from '@/lib/seo/support-contact';
 
 const derivedMetadata: Metadata = {
   title: 'Contact Us',
@@ -15,7 +16,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return staticPageMetadata('/contact', derivedMetadata);
 }
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const support = await fetchSupportContact();
   return (
     <PolicyPage
       title="Contact Us"
@@ -26,13 +28,13 @@ export default function ContactPage() {
         <p>
           Email:{' '}
           <a
-            href={`mailto:${COMPANY.supportEmail}`}
+            href={`mailto:${support.email}`}
             className="text-[#562996] underline underline-offset-4"
           >
-            {COMPANY.supportEmail}
+            {support.email}
           </a>
         </p>
-        <p>Phone: {COMPANY.supportPhone}</p>
+        <p>Phone: {support.phone}</p>
         <p>Hours: {COMPANY.supportHours}</p>
         <p>
           If your question is about an order you have already placed, please include

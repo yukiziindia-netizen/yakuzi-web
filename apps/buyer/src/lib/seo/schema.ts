@@ -1,7 +1,13 @@
 import { COMPANY } from '@/config/company';
 import { SITE_NAME, SITE_URL, ORG_LEGAL_NAME, SUPPORT_EMAIL, absoluteUrl } from './site';
 
-export function organizationSchema(sameAs: string[] = []) {
+// `contact` lets the homepage pass the admin-set support details through, so
+// the structured data and the contact page can never publish different
+// numbers. Defaults to the built-in constants for any caller that has none.
+export function organizationSchema(
+  sameAs: string[] = [],
+  contact: { email?: string; phone?: string } = {},
+) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
@@ -24,8 +30,8 @@ export function organizationSchema(sameAs: string[] = []) {
     contactPoint: {
       '@type': 'ContactPoint',
       contactType: 'customer support',
-      telephone: COMPANY.supportPhone,
-      email: SUPPORT_EMAIL,
+      telephone: contact.phone || COMPANY.supportPhone,
+      email: contact.email || SUPPORT_EMAIL,
       areaServed: 'IN',
       availableLanguage: ['en'],
     },

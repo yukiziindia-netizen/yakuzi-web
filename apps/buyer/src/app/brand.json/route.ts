@@ -2,6 +2,7 @@ import { getCategories } from '@yukizi/api-client';
 import { SITE_NAME, SITE_URL, SITE_DESCRIPTION, ORG_LEGAL_NAME, SUPPORT_EMAIL } from '@/lib/seo/site';
 import { COMPANY } from '@/config/company';
 import { fetchSocialLinks, socialUrlList } from '@/lib/seo/social';
+import { fetchSupportContact } from '@/lib/seo/support-contact';
 
 /**
  * Machine-readable brand and policy facts, in one fetch.
@@ -29,6 +30,8 @@ export async function GET(): Promise<Response> {
     /* fail-open */
   }
 
+  const support = await fetchSupportContact();
+
   let sameAs: string[] = [];
   try {
     sameAs = socialUrlList(await fetchSocialLinks());
@@ -44,8 +47,8 @@ export async function GET(): Promise<Response> {
     legalName: ORG_LEGAL_NAME,
     url: SITE_URL,
     description: SITE_DESCRIPTION,
-    email: SUPPORT_EMAIL,
-    ...(COMPANY.supportPhone ? { telephone: COMPANY.supportPhone } : {}),
+    email: support.email,
+    ...(support.phone ? { telephone: support.phone } : {}),
     areaServed: { '@type': 'Country', name: 'India' },
     ...(sameAs.length ? { sameAs } : {}),
     // Plain-language answers to what buyers actually ask an assistant before

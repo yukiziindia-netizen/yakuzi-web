@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Bell, Key } from "lucide-react";
+import { Bell, Key, LifeBuoy } from "lucide-react";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { Button, Input, Skeleton } from "@/components/ui";
 import toast from "react-hot-toast";
@@ -19,6 +19,8 @@ export default function AdminSettingsPage() {
       setForm({
         adminAlertEmail: s.adminAlertEmail ?? "",
         mailFromAddress: s.mailFromAddress ?? "",
+        supportEmail: s.supportEmail ?? "",
+        supportPhone: s.supportPhone ?? "",
         comingSoonMode: s.comingSoonMode ?? true,
         // Owned by the SEO page — round-tripped so saving here never wipes them.
         googleSiteVerification: s.googleSiteVerification ?? "",
@@ -58,6 +60,13 @@ export default function AdminSettingsPage() {
     { id: "notifications", icon: Bell, title: "Notifications", fields: [
       { key: "adminAlertEmail", label: "Admin Alert Email (receives new-seller signups and seller shipping-details submissions)" },
       { key: "mailFromAddress", label: "Sender Email (must be a verified alias on the mail account, else Gmail will reject it)" },
+    ]},
+    // Published to customers, so it is worth being explicit that these are
+    // public. Blank falls back to the storefront's built-in details rather
+    // than publishing an empty contact.
+    { id: "support", icon: LifeBuoy, title: "Public support contact", fields: [
+      { key: "supportEmail", label: "Support Email (shown on Contact, About and every policy page — leave blank to keep the current one)" },
+      { key: "supportPhone", label: "Support Phone (shown alongside the email and in the site's structured data)" },
     ]},
   ];
 

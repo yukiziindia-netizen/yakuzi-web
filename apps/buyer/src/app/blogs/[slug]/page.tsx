@@ -3,10 +3,11 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getBlogBySlug } from '@yukizi/api-client';
 import { absoluteUrl, metaTruncate } from '@/lib/seo/site';
-import { articleSchema, breadcrumbSchema, faqPageSchema } from '@/lib/seo/schema';
+import { articleSchema, breadcrumbSchema, blogSchema, faqPageSchema } from '@/lib/seo/schema';
 import { applySeoOverride, fetchSeoOverride, mergeStructuredData, validFaqs } from '@/lib/seo/overrides';
 import JsonLd from '@/components/seo/JsonLd';
 import SeoFaq from '@/components/seo/SeoFaq';
+import PostFooterLinks from '@/components/blog/PostFooterLinks';
 import BlogPostClient from './BlogPostClient';
 
 export const dynamic = 'force-dynamic';
@@ -65,6 +66,9 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
   const jsonLd: object[] = [
     mergeStructuredData(articleSchema(post), override?.structuredDataOverride),
     breadcrumbSchema([{ name: 'Home', path: '/' }, { name: 'Blog', path: '/blogs' }, { name: post.title }]),
+    // The Blog the post declares itself part of, so isPartOf resolves to a
+    // real node rather than dangling.
+    blogSchema(),
   ];
   if (faqs.length) jsonLd.push(faqPageSchema(faqs));
   return (
@@ -74,6 +78,13 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
       {/* Visible, server-rendered — the same entries the FAQPage JSON-LD
           advertises, so there is no hidden-content markup. */}
       <SeoFaq faqs={faqs} />
+      {/* Related reading and the products the post is about — the internal
+          links a post on a shop should carry and previously did not. */}
+      <PostFooterLinks
+        currentSlug={params.slug}
+        categoryName={post.category?.name}
+        tags={post.tags}
+      />
     </>
   );
 }

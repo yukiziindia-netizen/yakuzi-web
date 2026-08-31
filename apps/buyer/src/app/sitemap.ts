@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { getProducts, getCategories, getBlogs } from '@yukizi/api-client';
+import { authorSlug } from '@/lib/seo/schema';
 import { absoluteUrl } from '@/lib/seo/site';
 
 export const revalidate = 3600; // rebuild at most hourly
@@ -62,6 +63,8 @@ async function fetchBlogEntries(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = [];
   try {
     const blogs = await getBlogs({ limit: 100, status: 'PUBLISHED' });
+    // Authors get one entry each, not one per post they wrote.
+    const authors = new Set<string>();
     for (const b of blogs.data) {
       if ((b as any).status && (b as any).status !== 'PUBLISHED') continue;
       if (b?.slug) entries.push({
@@ -69,6 +72,14 @@ async function fetchBlogEntries(): Promise<MetadataRoute.Sitemap> {
         lastModified: b.publishedAt ? new Date(b.publishedAt) : b.createdAt ? new Date(b.createdAt) : undefined,
         changeFrequency: 'weekly',
         priority: 0.6,
+      });
+      if (b?.author?.name) authors.add(authorSlug(b.author.name));
+    }
+    for (const slug of authors) {
+      entries.push({
+        url: absoluteUrl(`/blogs/author/${slug}`),
+        changeFrequency: 'monthly',
+        priority: 0.3,
       });
     }
   } catch {

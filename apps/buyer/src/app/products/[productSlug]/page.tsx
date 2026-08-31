@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import { getProductById } from '@yukizi/api-client';
 import { parseProductIdFromSlug } from '@yukizi/utils';
 import { absoluteUrl, metaTruncate, SITE_NAME } from '@/lib/seo/site';
-import { productSchema, breadcrumbSchema, faqPageSchema } from '@/lib/seo/schema';
+import { productSchema, breadcrumbSchema, faqPageSchema, graph } from '@/lib/seo/schema';
 import { applySeoOverride, fetchSeoOverride, mergeStructuredData, validFaqs } from '@/lib/seo/overrides';
 import JsonLd from '@/components/seo/JsonLd';
 import SeoFaq from '@/components/seo/SeoFaq';
@@ -87,9 +87,14 @@ export async function generateMetadata({ params }: { params: { productSlug: stri
       description,
       url: absoluteUrl(canonicalPath),
       type: 'website',
+      siteName: SITE_NAME,
+      locale: 'en_IN',
       ...(images.length ? { images: [{ url: images[0] }] } : {}),
     },
-    twitter: { card: 'summary_large_image', title, description },
+    // NOTE: no `twitter` key here on purpose. Declaring one replaces the root
+    // layout's block wholesale, which dropped twitter:site/creator (the
+    // admin-set handle). Next inherits the root's card/site and fills
+    // title/description from this page's own values.
   };
   return applySeoOverride(derived, await fetchProductOverride(overrideKey(p)));
 }
@@ -106,11 +111,14 @@ export default async function ProductPage({ params }: { params: { productSlug: s
   crumbs.push({ name: p.name ?? 'Product' });
   const override = await fetchProductOverride(overrideKey(p));
   const faqs = validFaqs(override?.faq);
+  // ONE @graph rather than separate blocks — see graph() for why.
   const jsonLd: object[] = [
-    mergeStructuredData(productSchema(buildSchemaInput(p)), override?.structuredDataOverride),
-    breadcrumbSchema(crumbs),
+    graph(
+      mergeStructuredData(productSchema(buildSchemaInput(p)), override?.structuredDataOverride),
+      breadcrumbSchema(crumbs),
+      faqs.length ? faqPageSchema(faqs) : null,
+    ),
   ];
-  if (faqs.length) jsonLd.push(faqPageSchema(faqs));
   return (
     <>
       <JsonLd data={jsonLd} />

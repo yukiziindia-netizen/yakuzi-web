@@ -37,7 +37,20 @@ async function fetchCategoryEntries(): Promise<MetadataRoute.Sitemap> {
     // getCategories() returns Category[] directly, not wrapped in { data }.
     const cats = await getCategories();
     for (const c of Array.isArray(cats) ? cats : []) {
-      if (c?.slug) entries.push({ url: absoluteUrl(`/category/${c.slug}`), changeFrequency: 'weekly', priority: 0.7 });
+      if (!c?.slug) continue;
+      entries.push({ url: absoluteUrl(`/category/${c.slug}`), changeFrequency: 'weekly', priority: 0.7 });
+      // Sub-collection pages were missing entirely — they're the most
+      // commercially-targeted URLs on the site and were discoverable only by
+      // internal crawling.
+      for (const sub of Array.isArray((c as any).subCategories) ? (c as any).subCategories : []) {
+        if (sub?.slug) {
+          entries.push({
+            url: absoluteUrl(`/category/${c.slug}?sub=${sub.slug}`),
+            changeFrequency: 'weekly',
+            priority: 0.65,
+          });
+        }
+      }
     }
   } catch {
     /* fail-open */

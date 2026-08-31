@@ -51,6 +51,39 @@ export default function SeoOverviewPage() {
       setGscSeeded(true);
     }
   }, [settings, gscSeeded]);
+  // Storefront-wide SEO defaults — the values that used to require a code
+  // change (title template, fallback description/share image, twitter handle,
+  // theme colour, out-of-stock indexing).
+  const [defs, setDefs] = useState<Record<string, string | boolean>>({});
+  const [defsSeeded, setDefsSeeded] = useState(false);
+  const [defsSaving, setDefsSaving] = useState(false);
+  useEffect(() => {
+    if (!defsSeeded && settings) {
+      const s = settings as Record<string, unknown>;
+      setDefs({
+        seoTitleTemplate: String(s.seoTitleTemplate ?? ""),
+        seoDefaultDescription: String(s.seoDefaultDescription ?? ""),
+        seoDefaultOgImage: String(s.seoDefaultOgImage ?? ""),
+        seoTwitterHandle: String(s.seoTwitterHandle ?? ""),
+        seoThemeColor: String(s.seoThemeColor ?? ""),
+        seoProductTitleSuffix: String(s.seoProductTitleSuffix ?? ""),
+        seoNoindexOutOfStock: Boolean(s.seoNoindexOutOfStock),
+      });
+      setDefsSeeded(true);
+    }
+  }, [settings, defsSeeded]);
+  const saveDefaults = async () => {
+    setDefsSaving(true);
+    try {
+      await updateSettings.mutateAsync({ ...(settings as Record<string, unknown> ?? {}), ...defs } as any);
+      toast.success("Storefront defaults saved — live within ~5 minutes, no deploy");
+    } catch {
+      toast.error("Could not save the storefront defaults");
+    } finally {
+      setDefsSaving(false);
+    }
+  };
+
   const saveVerification = async () => {
     setGscSaving(true);
     try {
@@ -153,6 +186,36 @@ export default function SeoOverviewPage() {
             {(gsc.trim() || bing.trim()) && <Badge variant="success">Configured</Badge>}
             {!gsc.trim() && !bing.trim() && <Badge variant="outline">Not connected</Badge>}
           </div>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.29, duration: 0.4 }} className="glass-card rounded-2xl p-5 space-y-3">
+          <div>
+            <h2 className="font-semibold text-foreground text-sm">Storefront SEO defaults</h2>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Site-wide fallbacks used wherever a page has no override of its own. Blank = keep the built-in default. Saved changes are live within ~5 minutes with no deploy.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Input label="Title template" value={String(defs.seoTitleTemplate ?? "")} placeholder="%s | Yukizi"
+              onChange={(e) => setDefs((d) => ({ ...d, seoTitleTemplate: e.target.value }))} />
+            <Input label="Product title suffix" value={String(defs.seoProductTitleSuffix ?? "")} placeholder="e.g. — Buy Online in India"
+              onChange={(e) => setDefs((d) => ({ ...d, seoProductTitleSuffix: e.target.value }))} />
+            <Input label="Default meta description" value={String(defs.seoDefaultDescription ?? "")} placeholder="Used when a page has none of its own"
+              onChange={(e) => setDefs((d) => ({ ...d, seoDefaultDescription: e.target.value }))} />
+            <Input label="Default share image URL" value={String(defs.seoDefaultOgImage ?? "")} placeholder="https://yukizi.com/og-default.png"
+              onChange={(e) => setDefs((d) => ({ ...d, seoDefaultOgImage: e.target.value }))} />
+            <Input label="X / Twitter handle" value={String(defs.seoTwitterHandle ?? "")} placeholder="@yukizi"
+              onChange={(e) => setDefs((d) => ({ ...d, seoTwitterHandle: e.target.value }))} />
+            <Input label="Browser theme colour" value={String(defs.seoThemeColor ?? "")} placeholder="#562996"
+              onChange={(e) => setDefs((d) => ({ ...d, seoThemeColor: e.target.value }))} />
+          </div>
+          <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
+            <input type="checkbox" className="h-4 w-4 accent-primary"
+              checked={Boolean(defs.seoNoindexOutOfStock)}
+              onChange={(e) => setDefs((d) => ({ ...d, seoNoindexOutOfStock: e.target.checked }))} />
+            Keep out-of-stock products out of Google&apos;s index (noindex until back in stock)
+          </label>
+          <Button onClick={saveDefaults} loading={defsSaving} disabled={defsSaving}>Save defaults</Button>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.4 }} className="glass-card rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4">

@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import '../styles/globals.css';
 import { Providers } from './providers';
@@ -13,7 +13,15 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'sw
  * renders the same meta tags. Fetch is fail-open with a short timeout and
  * a 10-minute cache — an API blip just falls back to the env values.
  */
-async function fetchVerificationTokens(): Promise<{ google?: string; bing?: string }> {
+async function fetchVerificationTokens(): Promise<{
+  google?: string;
+  bing?: string;
+  titleTemplate?: string;
+  description?: string;
+  ogImage?: string;
+  twitter?: string;
+  themeColor?: string;
+}> {
   const base = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '');
   if (!base) return {};
   try {
@@ -23,23 +31,55 @@ async function fetchVerificationTokens(): Promise<{ google?: string; bing?: stri
     ]);
     if (!res || !res.ok) return {};
     const body = (await res.json().catch(() => null)) as {
-      data?: { googleSiteVerification?: string; bingSiteVerification?: string };
+      data?: Record<string, string | undefined>;
     } | null;
     return {
       google: body?.data?.googleSiteVerification?.trim() || undefined,
       bing: body?.data?.bingSiteVerification?.trim() || undefined,
+      titleTemplate: body?.data?.seoTitleTemplate?.trim() || undefined,
+      description: body?.data?.seoDefaultDescription?.trim() || undefined,
+      ogImage: body?.data?.seoDefaultOgImage?.trim() || undefined,
+      twitter: body?.data?.seoTwitterHandle?.trim() || undefined,
+      themeColor: body?.data?.seoThemeColor?.trim() || undefined,
     };
   } catch {
     return {};
   }
 }
 
+/**
+ * themeColor belongs to the viewport export in Next 14 — putting it on
+ * `metadata` is silently ignored (and warned about in dev).
+ */
+export async function generateViewport(): Promise<Viewport> {
+  const tokens = await fetchVerificationTokens();
+  return {
+    width: 'device-width',
+    initialScale: 1,
+    ...(tokens.themeColor ? { themeColor: tokens.themeColor } : {}),
+  };
+}
+
 export async function generateMetadata(): Promise<Metadata> {
   const tokens = await fetchVerificationTokens();
   const google = tokens.google || process.env.GOOGLE_SITE_VERIFICATION;
   const bing = tokens.bing || process.env.BING_SITE_VERIFICATION;
+  // Admin-set storefront defaults (Admin -> SEO -> Storefront defaults) win
+  // over the built-in values; blank means "keep the built-in".
+  const og = { ...(baseMetadata.openGraph as Record<string, unknown>) };
+  if (tokens.description) og.description = tokens.description;
+  if (tokens.ogImage) og.images = [{ url: tokens.ogImage }];
   return {
     ...baseMetadata,
+    ...(tokens.description ? { description: tokens.description } : {}),
+    ...(tokens.titleTemplate
+      ? { title: { default: `${SITE_NAME} — ${SITE_TAGLINE}`, template: tokens.titleTemplate } }
+      : {}),
+    openGraph: og as typeof baseMetadata.openGraph,
+    twitter: {
+      ...(baseMetadata.twitter as Record<string, unknown>),
+      ...(tokens.twitter ? { site: tokens.twitter, creator: tokens.twitter } : {}),
+    } as typeof baseMetadata.twitter,
     verification: {
       ...(google ? { google } : {}),
       ...(bing ? { other: { 'msvalidate.01': bing } } : {}),
@@ -55,9 +95,10 @@ const baseMetadata: Metadata = {
   openGraph: {
     type: 'website',
     siteName: SITE_NAME,
+    locale: 'en_IN',
     title: `${SITE_NAME} — ${SITE_TAGLINE}`,
     description: SITE_DESCRIPTION,
-    images: [{ url: DEFAULT_OG_IMAGE }],
+    images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630 }],
   },
   twitter: { card: 'summary_large_image' },
   // Animated mascot favicon (the tab previously had no icon at all).

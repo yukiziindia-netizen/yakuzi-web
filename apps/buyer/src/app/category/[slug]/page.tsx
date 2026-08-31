@@ -1,13 +1,14 @@
 import { cache, Suspense } from 'react';
 import { Loader2 } from 'lucide-react';
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import HomeNavbar from '@/components/landing/HomeNavbar';
 import CategoryBanner from '@/components/landing/CategoryBanner';
 import ProductCarousel from '@/components/landing/ProductCarousel';
 import { getCategories, getProducts } from '@yukizi/api-client';
 import { absoluteUrl, metaTruncate, SITE_NAME } from '@/lib/seo/site';
 import { applySeoOverride, fetchSeoOverride, validFaqs } from '@/lib/seo/overrides';
-import { breadcrumbSchema, faqPageSchema, itemListSchema } from '@/lib/seo/schema';
+import { breadcrumbSchema, faqPageSchema, collectionPageSchema } from '@/lib/seo/schema';
 import JsonLd from '@/components/seo/JsonLd';
 import SeoFaq from '@/components/seo/SeoFaq';
 
@@ -92,11 +93,13 @@ async function CategoryProducts({
   categoryId,
   subCategoryId,
   categoryName,
+  categorySlug,
   searchParams,
 }: {
   categoryId: string;
   subCategoryId?: string;
   categoryName: string;
+  categorySlug: string;
   searchParams?: { [key: string]: string | string[] | undefined };
 }) {
   let initialProducts: any[] = [];
@@ -128,7 +131,11 @@ async function CategoryProducts({
   }
   return (
     <>
-      <JsonLd data={[itemListSchema(categoryName, initialProducts.slice(0, 24))]} />
+      <JsonLd data={[collectionPageSchema({
+        name: categoryName,
+        path: `/category/${categorySlug}`,
+        items: initialProducts.slice(0, 24),
+      })]} />
       <ProductCarousel categoryId={categoryId} initialProducts={initialProducts} />
     </>
   );
@@ -149,10 +156,11 @@ export default async function CategoryPage({
   let categoryName = slug;
   let categoryId = slug;
   let bannerSlides: { id?: string; image: string; mobileImage?: string | null }[] = [];
-  // NOTE: unknown slugs intentionally do NOT 404 here — the page falls back to
-  // rendering the raw slug as the category name with an (empty) product list.
-  // Preserving that existing behavior.
   const categoryData: any = await findCategory(slug);
+  // Unknown slugs used to render an empty page at HTTP 200 — a soft-404 that
+  // Google counts against the whole category directory. Products already
+  // 404 correctly; categories now match.
+  if (!categoryData) notFound();
 
   let subCategoryId: string | undefined;
   let matchedSubName: string | undefined;
@@ -298,7 +306,7 @@ export default async function CategoryPage({
                 </div>
               }
             >
-              <CategoryProducts categoryId={categoryId} subCategoryId={subCategoryId} categoryName={categoryName} searchParams={resolvedSearchParams} />
+              <CategoryProducts categoryId={categoryId} subCategoryId={subCategoryId} categoryName={categoryName} categorySlug={slug} searchParams={resolvedSearchParams} />
             </Suspense>
           </div>
 

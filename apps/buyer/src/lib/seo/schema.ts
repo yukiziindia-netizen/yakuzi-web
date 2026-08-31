@@ -74,6 +74,7 @@ export function productSchema(p: {
   image?: string | null; images?: Array<{ url?: string } | string> | null;
   manufacturer?: string; price?: number | null; mrp?: number | null;
   stock?: number; hasSellers?: boolean; shippingPrice?: number | null;
+  sku?: string | null; mpn?: string | null; gtin?: string | null;
   category?: { name?: string } | null;
   reviewSummary?: { average?: number; count?: number } | null;
   listings?: unknown[] | null; sellerCount?: number; sellerName?: string;
@@ -97,6 +98,11 @@ export function productSchema(p: {
     ...(p.description ? { description: p.description } : {}),
     ...(p.manufacturer ? { brand: { '@type': 'Brand', name: p.manufacturer } } : {}),
     ...(p.category?.name ? { category: p.category.name } : {}),
+    // Identifiers let Google reconcile this page with the Merchant feed as
+    // ONE product instead of two unlinked descriptions of the same item.
+    ...(p.sku ? { sku: p.sku } : {}),
+    ...(p.mpn ? { mpn: p.mpn } : {}),
+    ...(p.gtin ? { gtin: p.gtin } : {}),
     ...(price != null && hasSellers
       ? {
           offers: {
@@ -104,6 +110,11 @@ export function productSchema(p: {
             url,
             priceCurrency: 'INR',
             price: String(price),
+            // Google treats an absent/stale price date as a soft warning and
+            // some surfaces then suppress the price entirely. Rolling 30 days.
+            priceValidUntil: new Date(Date.now() + 30 * 86_400_000)
+              .toISOString()
+              .slice(0, 10),
             availability:
               (p.stock ?? 0) > 0
                 ? 'https://schema.org/InStock'
@@ -196,4 +207,56 @@ export function faqPageSchema(faqs: Array<{ question: string; answer: string }>)
       acceptedAnswer: { '@type': 'Answer', text: f.answer },
     })),
   };
+}
+
+/**
+ * A category/collection page as a typed CollectionPage wrapping its ItemList —
+ * this is what tells Google "a curated set", not "a page that happens to have
+ * links". `mainEntity` keeps the list attached to the page entity.
+ */
+export function collectionPageSchema(opts: {
+  name: string;
+  path: string;
+  description?: string | null;
+  items: Array<{ name?: string; slug?: string; id: string }>;
+}) {
+  const url = absoluteUrl(opts.path);
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    '@id': `${url}#collection`,
+    name: opts.name,
+    url,
+    ...(opts.description ? { description: opts.description } : {}),
+    isPartOf: { '@id': `${SITE_URL}/#website` },
+    mainEntity: {
+      '@type': 'ItemList',
+      name: opts.name,
+      itemListElement: opts.items.map((p, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        url: absoluteUrl(`/products/${p.slug ?? p.id}`),
+        ...(p.name ? { name: p.name } : {}),
+      })),
+    },
+  };
+}
+
+/**
+ * Collapses the page's separate JSON-LD blocks into ONE @graph.
+ *
+ * Emitting Organization / WebSite / Product / Breadcrumb as disconnected
+ * blocks makes Google resolve four orphan facts; inside a @graph — where the
+ * nodes already carry stable @ids — it resolves a single connected entity.
+ * That connectedness is what entity-based search and LLM retrieval reason
+ * over, so this is the strongest on-page understanding lever available.
+ *
+ * Each node keeps whatever @id it declared; the wrapper drops the per-node
+ * @context (it belongs once, at the top).
+ */
+export function graph(...nodes: Array<object | null | undefined>) {
+  const cleaned = nodes
+    .filter((n): n is Record<string, unknown> => !!n)
+    .map(({ ['@context']: _ctx, ...rest }) => rest);
+  return { '@context': 'https://schema.org', '@graph': cleaned };
 }

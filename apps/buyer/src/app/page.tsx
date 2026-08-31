@@ -11,6 +11,7 @@ import { getProducts, getComingSoonStatus, getBanners, getHomepageSections, type
 import type { Metadata } from 'next';
 import JsonLd from '@/components/seo/JsonLd';
 import { organizationSchema, webSiteSchema, graph } from '@/lib/seo/schema';
+import { fetchSocialLinks, socialUrlList } from '@/lib/seo/social';
 import { absoluteUrl } from '@/lib/seo/site';
 import { applySeoOverride, fetchSeoOverride } from '@/lib/seo/overrides';
 
@@ -98,13 +99,16 @@ export default async function HomePage({
     console.error("[HomePage] Failed to fetch coming soon status, showing the storefront:", e);
   }
 
+  const social = await fetchSocialLinks();
+  const socialUrls = socialUrlList(social);
+
   if (isComingSoon) {
     return <ComingSoon />;
   }
 
   return (
     <main className="w-full bg-gray-50 min-h-screen relative pb-24 sm:pb-32">
-      <JsonLd data={[graph(organizationSchema(), webSiteSchema())]} />
+      <JsonLd data={[graph(organizationSchema(socialUrls), webSiteSchema())]} />
       {/* The hero is pure banner artwork, so the page's one H1 is screen-reader
           only — same pattern CategoryBanner already uses. Without it the
           homepage has NO h1 at all (only the category-row h2s). */}
@@ -138,7 +142,7 @@ export default async function HomePage({
           </div>
         </section>
       </div>
-      <Footer />
+      <Footer social={social} />
     </main>
   );
 }

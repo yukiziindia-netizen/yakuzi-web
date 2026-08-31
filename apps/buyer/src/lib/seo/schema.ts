@@ -1,7 +1,7 @@
 import { COMPANY } from '@/config/company';
 import { SITE_NAME, SITE_URL, ORG_LEGAL_NAME, SUPPORT_EMAIL, absoluteUrl } from './site';
 
-export function organizationSchema() {
+export function organizationSchema(sameAs: string[] = []) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
@@ -29,6 +29,10 @@ export function organizationSchema() {
       areaServed: 'IN',
       availableLanguage: ['en'],
     },
+    // The entity link: connects this site to the brand's profiles elsewhere,
+    // which is how Google and AI assistants corroborate they are the same
+    // organisation. Omitted entirely when none are configured.
+    ...(sameAs.length ? { sameAs } : {}),
   };
 }
 

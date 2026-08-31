@@ -1,5 +1,7 @@
 import Link from 'next/link';
+import { Instagram, Facebook, Youtube, Linkedin, MessageCircle } from 'lucide-react';
 import { COMPANY } from '@/config/company';
+import { fetchSocialLinks } from '@/lib/seo/social';
 
 const footerLinks = [
   { label: 'About', href: '/about' },
@@ -12,7 +14,15 @@ const footerLinks = [
   { label: 'Blog', href: '/blogs' },
 ];
 
-export default function SiteFooter() {
+export default async function SiteFooter() {
+  const social = await fetchSocialLinks();
+  const socialItems = [
+    { href: social.instagram, label: "Instagram", Icon: Instagram },
+    { href: social.facebook, label: "Facebook", Icon: Facebook },
+    { href: social.youtube, label: "YouTube", Icon: Youtube },
+    { href: social.linkedin, label: "LinkedIn", Icon: Linkedin },
+    { href: social.discord, label: "Discord", Icon: MessageCircle },
+  ].filter((i) => !!i.href);
   return (
     <footer className="border-t border-gray-100 bg-white">
       <div className="mx-auto max-w-6xl px-6 py-10">
@@ -35,6 +45,18 @@ export default function SiteFooter() {
             ))}
           </ul>
         </nav>
+
+        {socialItems.length > 0 && (
+          <div className="mt-6 flex items-center justify-center gap-5">
+            {socialItems.map(({ href, label, Icon }) => (
+              <a key={label} href={href} target="_blank" rel="noopener noreferrer me"
+                aria-label={label} title={label}
+                className="text-gray-400 transition-colors hover:text-[#562996]">
+                <Icon className="h-5 w-5" />
+              </a>
+            ))}
+          </div>
+        )}
 
         <p className="mt-8 text-center text-xs text-gray-400">
           &copy; {new Date().getFullYear()} {COMPANY.legalName}. All rights reserved.

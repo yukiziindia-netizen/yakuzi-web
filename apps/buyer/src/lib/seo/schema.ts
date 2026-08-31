@@ -176,28 +176,88 @@ export function productSchema(p: {
   };
 }
 
+/** "/blogs/author/jane-doe" — authors have no slug of their own. */
+export function authorSlug(name: string): string {
+  return name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+/**
+ * A named author with a page of their own, not a bare string.
+ *
+ * Google's guidance on who wrote a piece is not decoration: an anonymous
+ * byline on an article about spotting counterfeits is asking readers to
+ * trust authentication advice from nobody. The @id lets every post by the
+ * same person resolve to one entity rather than a fresh unknown each time.
+ */
+export function personSchema(author: { name: string; bio?: string; avatar?: string }) {
+  const url = absoluteUrl(`/blogs/author/${authorSlug(author.name)}`);
+  return {
+    '@type': 'Person',
+    '@id': `${url}#person`,
+    name: author.name,
+    url,
+    ...(author.bio ? { description: author.bio } : {}),
+    ...(author.avatar ? { image: absoluteUrl(author.avatar) } : {}),
+  };
+}
+
 export function articleSchema(post: {
   title: string; slug: string; excerpt?: string; featuredImage?: string;
   createdAt?: string; updatedAt?: string; publishedAt?: string;
-  author?: { name?: string } | null;
+  author?: { name?: string; bio?: string; avatar?: string } | null;
+  category?: { name?: string } | null;
+  tags?: string[];
+  content?: unknown;
 }) {
   const url = absoluteUrl(`/blogs/${post.slug}`);
+  // Rough but honest: strips tags, counts words. Google uses wordCount as one
+  // signal of whether a page is substantial; guessing it would be worse than
+  // omitting it, so it is only emitted when the content is really there.
+  const text = typeof post.content === 'string' ? post.content.replace(/<[^>]+>/g, ' ') : '';
+  const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+
   return {
     '@context': 'https://schema.org',
-    '@type': 'Article',
+    // BlogPosting rather than Article: it is the specific type for a blog
+    // entry, and it is what a blog's isPartOf Blog expects to contain.
+    '@type': 'BlogPosting',
     '@id': `${url}#article`,
     headline: post.title,
     url,
+    mainEntityOfPage: url,
+    inLanguage: 'en-IN',
+    isPartOf: { '@type': 'Blog', '@id': `${SITE_URL}/blogs#blog`, name: `${SITE_NAME} Blog` },
     ...(post.excerpt ? { description: post.excerpt } : {}),
     ...(post.featuredImage ? { image: [absoluteUrl(post.featuredImage)] } : {}),
     ...(post.publishedAt || post.createdAt ? { datePublished: post.publishedAt || post.createdAt } : {}),
     ...(post.updatedAt ? { dateModified: post.updatedAt } : {}),
-    ...(post.author?.name ? { author: { '@type': 'Person', name: post.author.name } } : {}),
+    ...(post.author?.name ? { author: personSchema({ name: post.author.name, bio: post.author.bio, avatar: post.author.avatar }) } : {}),
+    // What the piece is about, so a post sits in a topic rather than alone.
+    ...(post.category?.name ? { articleSection: post.category.name } : {}),
+    ...(post.tags?.length ? { keywords: post.tags.join(', ') } : {}),
+    ...(wordCount > 0 ? { wordCount } : {}),
     publisher: { '@id': `${SITE_URL}/#organization` },
   };
 }
 
-export function itemListSchema(name: string, items: Array<{ name?: string; slug?: string; id: string }>) {
+/** The blog itself, so posts have a parent to belong to. */
+export function blogSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Blog',
+    '@id': `${SITE_URL}/blogs#blog`,
+    name: `${SITE_NAME} Blog`,
+    url: absoluteUrl('/blogs'),
+    publisher: { '@id': `${SITE_URL}/#organization` },
+  };
+}
+
+/** `basePath` defaults to products; the blog index passes "/blogs". */
+export function itemListSchema(
+  name: string,
+  items: Array<{ name?: string; slug?: string; id: string }>,
+  basePath = '/products',
+) {
   return {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
@@ -205,7 +265,7 @@ export function itemListSchema(name: string, items: Array<{ name?: string; slug?
     itemListElement: items.map((p, i) => ({
       '@type': 'ListItem',
       position: i + 1,
-      url: absoluteUrl(`/products/${p.slug ?? p.id}`),
+      url: absoluteUrl(`${basePath}/${p.slug ?? p.id}`),
       ...(p.name ? { name: p.name } : {}),
     })),
   };

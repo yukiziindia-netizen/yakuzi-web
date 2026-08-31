@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Calendar, User, Tag } from 'lucide-react';
@@ -8,6 +9,7 @@ import Navbar from '@/components/landing/Navbar';
 import LoginModal from '@/components/landing/LoginModal';
 import { useBlogBySlug } from '@/hooks/useBlogs';
 import { sanitizeHtml } from '@/lib/sanitize';
+import { authorSlug } from '@/lib/seo/schema';
 
 export default function BlogDetailPage({
   slug,
@@ -100,12 +102,22 @@ export default function BlogDetailPage({
             </h1>
 
             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-6">
-              {blog.author && (
-                <span className="flex items-center gap-1.5">
-                  <User className="w-4 h-4" />
-                  {typeof blog.author === 'string' ? blog.author : blog.author?.name}
-                </span>
-              )}
+              {blog.author && (() => {
+                // A byline that goes somewhere. The author page carries the
+                // bio and their other posts, and is the URL the Person schema
+                // points at, so the two agree.
+                const name = typeof blog.author === 'string' ? blog.author : blog.author?.name;
+                if (!name) return null;
+                return (
+                  <Link
+                    href={`/blogs/author/${authorSlug(name)}`}
+                    className="flex items-center gap-1.5 hover:text-gray-900 hover:underline"
+                  >
+                    <User className="w-4 h-4" />
+                    {name}
+                  </Link>
+                );
+              })()}
               {blog.publishedAt && (
                 <span className="flex items-center gap-1.5">
                   <Calendar className="w-4 h-4" />

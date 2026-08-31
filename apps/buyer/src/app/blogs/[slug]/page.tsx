@@ -3,8 +3,10 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getBlogBySlug } from '@yukizi/api-client';
 import { absoluteUrl, metaTruncate } from '@/lib/seo/site';
-import { articleSchema, breadcrumbSchema } from '@/lib/seo/schema';
+import { articleSchema, breadcrumbSchema, faqPageSchema } from '@/lib/seo/schema';
+import { applySeoOverride, fetchSeoOverride, mergeStructuredData, validFaqs } from '@/lib/seo/overrides';
 import JsonLd from '@/components/seo/JsonLd';
+import SeoFaq from '@/components/seo/SeoFaq';
 import BlogPostClient from './BlogPostClient';
 
 export const dynamic = 'force-dynamic';
@@ -32,7 +34,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const description = metaTruncate(post.metaDescription || post.excerpt || post.title);
   const canonical = post.canonicalUrl || absoluteUrl(`/blogs/${post.slug}`);
   const ogImg = post.ogImage || post.featuredImage;
-  return {
+  const derived: Metadata = {
     title,
     description,
     alternates: { canonical },
@@ -45,20 +47,33 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     },
     twitter: { card: 'summary_large_image', title, description },
   };
+  // The blog editor's "Advanced SEO" modal writes a BLOG_POST SeoMeta record
+  // (keyed by post id). Those values — when set — win over the post's own
+  // CMS fields; both are edited from the same blog-editor surface.
+  return applySeoOverride(derived, await fetchSeoOverride('BLOG_POST', post.id));
 }
 
 export default async function BlogPostPage({ params }: { params: { slug: string } }) {
   const post = await fetchPost(params.slug);
   if (!post) notFound();
+  // Same Advanced-SEO record as generateMetadata (Next dedupes the fetch):
+  // admin-authored FAQs render visibly + as FAQPage JSON-LD, and any
+  // structured-data override merges into the Article schema — the exact
+  // contract product pages already have.
+  const override = await fetchSeoOverride('BLOG_POST', post.id);
+  const faqs = validFaqs(override?.faq);
+  const jsonLd: object[] = [
+    mergeStructuredData(articleSchema(post), override?.structuredDataOverride),
+    breadcrumbSchema([{ name: 'Home', path: '/' }, { name: 'Blog', path: '/blogs' }, { name: post.title }]),
+  ];
+  if (faqs.length) jsonLd.push(faqPageSchema(faqs));
   return (
     <>
-      <JsonLd
-        data={[
-          articleSchema(post),
-          breadcrumbSchema([{ name: 'Home', path: '/' }, { name: 'Blog', path: '/blogs' }, { name: post.title }]),
-        ]}
-      />
+      <JsonLd data={jsonLd} />
       <BlogPostClient slug={params.slug} initialPost={post} />
+      {/* Visible, server-rendered — the same entries the FAQPage JSON-LD
+          advertises, so there is no hidden-content markup. */}
+      <SeoFaq faqs={faqs} />
     </>
   );
 }

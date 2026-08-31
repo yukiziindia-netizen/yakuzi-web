@@ -42,6 +42,9 @@ export default function SellerDashboard() {
     avgRating: 0,
     lowStockItems: 0,
   };
+  // Listings that exist but aren't live — the only "pending" figure the
+  // dashboard payload actually supports.
+  const notLiveListings = Math.max(0, (stats.totalProducts ?? 0) - (stats.activeListings ?? 0));
 
   if (isLoading) {
     return <div className="min-h-screen p-6">Loading seller dashboard...</div>;
@@ -86,12 +89,19 @@ export default function SellerDashboard() {
         </div>
       </div>
 
-      {/* Stats grid */}
+      {/* Stats grid.
+          The sub-labels used to be hardcoded strings: Total Revenue always
+          read "+0% this month" (with an up arrow), Active Listings always
+          "0 pending approval", Pending Payouts always "Scheduled" — none of
+          them derived from anything. The dashboard payload carries no
+          period-over-period figures, so rather than invent a trend, a card
+          now shows a sub-label only when there is a real number behind it.
+          `change` is already optional on StatCard. */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <StatCard title="Total Revenue" value={formatCurrency(stats.totalRevenue)} change="+0% this month" up icon={TrendingUp} iconClass="bg-green-50 text-green-600 dark:bg-green-900/20" delay={0} href="/payouts" />
-        <StatCard title="Active Listings" value={`${stats.activeListings}/${stats.totalProducts}`} change="0 pending approval" icon={Package} iconClass="bg-blue-50 text-blue-600 dark:bg-blue-900/20" delay={0.07} href="/products" />
+        <StatCard title="Total Revenue" value={formatCurrency(stats.totalRevenue)} icon={TrendingUp} iconClass="bg-green-50 text-green-600 dark:bg-green-900/20" delay={0} href="/payouts" />
+        <StatCard title="Active Listings" value={`${stats.activeListings}/${stats.totalProducts}`} change={notLiveListings > 0 ? `${notLiveListings} not live` : undefined} icon={Package} iconClass="bg-blue-50 text-blue-600 dark:bg-blue-900/20" delay={0.07} href="/products" />
         <StatCard title="Orders" value={String(stats.totalOrders)} change={`${stats.pendingOrders} pending`} icon={ShoppingBag} iconClass="bg-purple-50 text-purple-600 dark:bg-purple-900/20" delay={0.14} href="/orders" />
-        <StatCard title="Pending Payouts" value={formatCurrency(stats.pendingPayouts)} change="Scheduled" up={false} icon={CreditCard} iconClass="bg-orange-50 text-orange-600 dark:bg-orange-900/20" delay={0.21} href="/payouts" />
+        <StatCard title="Pending Payouts" value={formatCurrency(stats.pendingPayouts)} icon={CreditCard} iconClass="bg-orange-50 text-orange-600 dark:bg-orange-900/20" delay={0.21} href="/payouts" />
       </div>
 
       {/* Low stock alert */}

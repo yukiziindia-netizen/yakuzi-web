@@ -130,11 +130,12 @@ export async function middleware(req: NextRequest, event: NextFetchEvent) {
     }
   }
   if (!entry) {
-    // Pass the requested path along so the not-found boundary can report it —
-    // a server component otherwise has no way to know which URL was asked for.
-    const headers = new Headers(req.headers);
-    headers.set('x-yukizi-path', path);
-    return NextResponse.next({ request: { headers } });
+    // A plain pass-through, deliberately. Setting a request header here —
+    // which is how the not-found boundary used to learn the requested path —
+    // marks every response dynamic, and the whole site was served
+    // `private, no-store` with a CDN miss on every single request as a
+    // result. The 404 report now comes from the client instead.
+    return NextResponse.next();
   }
 
   reportHit(event, matchedRule);

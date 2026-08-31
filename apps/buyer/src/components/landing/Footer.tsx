@@ -2,9 +2,22 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Instagram, Facebook, Linkedin } from 'lucide-react';
+import { Instagram, Facebook, Linkedin, Youtube, MessageCircle } from 'lucide-react';
 
-export default function Footer({ social }: { social?: { instagram?: string; facebook?: string; linkedin?: string; whatsapp?: string } } = {}) {
+// Mirrors SocialLinks in lib/seo/social.ts. Admin collects all seven and they
+// all appear in the Organization sameAs, so the footer should not silently
+// drop three of them.
+type FooterSocial = {
+  instagram?: string;
+  facebook?: string;
+  youtube?: string;
+  x?: string;
+  discord?: string;
+  linkedin?: string;
+  whatsapp?: string;
+};
+
+export default function Footer({ social }: { social?: FooterSocial } = {}) {
   const [isVisible, setIsVisible] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -100,6 +113,16 @@ export default function Footer({ social }: { social?: { instagram?: string; face
                   <Facebook className="w-5 h-5" />
                 </a>
               )}
+              {social?.youtube && (
+                <a href={social.youtube} target="_blank" rel="noopener noreferrer me" className="text-gray-400 hover:text-purple-500 transition-colors" title="YouTube" aria-label="YouTube">
+                  <Youtube className="w-5 h-5" />
+                </a>
+              )}
+              {social?.discord && (
+                <a href={social.discord} target="_blank" rel="noopener noreferrer me" className="text-gray-400 hover:text-purple-500 transition-colors" title="Discord" aria-label="Discord">
+                  <MessageCircle className="w-5 h-5" />
+                </a>
+              )}
               {social?.linkedin && (
                 <a href={social.linkedin} target="_blank" rel="noopener noreferrer me" className="text-gray-400 hover:text-purple-500 transition-colors" title="LinkedIn" aria-label="LinkedIn">
                   <Linkedin className="w-5 h-5" />
@@ -113,12 +136,16 @@ export default function Footer({ social }: { social?: { instagram?: string; face
                 </svg>
               </a>
               )}
-              {/* X Icon (Twitter) */}
-              <a href="#" className="text-gray-400 hover:text-purple-500 transition-colors" title="X (Twitter)">
+              {/* X Icon (Twitter). Was an unconditional href="#" — the one
+                  social icon missed when the rest were wired up, so it always
+                  rendered as a dead link. */}
+              {social?.x && (
+              <a href={social.x} target="_blank" rel="noopener noreferrer me" className="text-gray-400 hover:text-purple-500 transition-colors" title="X (Twitter)" aria-label="X (Twitter)">
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                 </svg>
               </a>
+              )}
             </div>
           </div>
 
@@ -151,7 +178,7 @@ export default function Footer({ social }: { social?: { instagram?: string; face
                 <Link href="/" className="hover:text-white transition-colors">Browse</Link>
               </li>
               <li>
-                <Link href="#" className="hover:text-white transition-colors">How it Works</Link>
+                <Link href="/about" className="hover:text-white transition-colors">How it Works</Link>
               </li>
             </ul>
           </div>
@@ -169,11 +196,15 @@ export default function Footer({ social }: { social?: { instagram?: string; face
               <li>
                 <Link href="/support" className="hover:text-white transition-colors">Contact</Link>
               </li>
+              {/* Community points at the real Discord when one is configured
+                  in Admin -> SEO, and is hidden rather than dead when it is not. */}
+              {social?.discord && (
+                <li>
+                  <a href={social.discord} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Join our Community</a>
+                </li>
+              )}
               <li>
-                <Link href="#" className="hover:text-white transition-colors">Join our Community</Link>
-              </li>
-              <li>
-                <Link href="#" className="hover:text-white transition-colors">For Brands</Link>
+                <Link href="/contact" className="hover:text-white transition-colors">For Brands</Link>
               </li>
             </ul>
           </div>

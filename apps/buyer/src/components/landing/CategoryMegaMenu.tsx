@@ -68,10 +68,28 @@ export default function CategoryMegaMenu({ category, isOpen, onMouseEnter, onMou
                   <div className="space-y-10">
                     <div>
                       <h4 className="text-base font-bold text-[#800080] mb-4 border-b border-gray-100 pb-2">Popular in {category.name}</h4>
+                      {/* These were href="#". The category page already reads
+                          isBestSelling / isNew / isYukiziChoice off the query
+                          string, so each now lands on a real filtered view.
+                          "Top Brands" is dropped — there is no brand listing to
+                          send anyone to, whereas Yukizi Choice is a filter that
+                          actually exists. */}
                       <ul className="space-y-3">
-                        <li><a href="#" className="text-sm text-gray-500 hover:text-sky-600 transition-colors">Best Sellers</a></li>
-                        <li><a href="#" className="text-sm text-gray-500 hover:text-sky-600 transition-colors">New Arrivals</a></li>
-                        <li><a href="#" className="text-sm text-gray-500 hover:text-sky-600 transition-colors">Top Brands</a></li>
+                        <li>
+                          <Link href={`/category/${category.slug || category.id}?isBestSelling=true`} className="text-sm text-gray-500 hover:text-sky-600 transition-colors">
+                            Best Sellers
+                          </Link>
+                        </li>
+                        <li>
+                          <Link href={`/category/${category.slug || category.id}?isNew=true`} className="text-sm text-gray-500 hover:text-sky-600 transition-colors">
+                            New Arrivals
+                          </Link>
+                        </li>
+                        <li>
+                          <Link href={`/category/${category.slug || category.id}?isYukiziChoice=true`} className="text-sm text-gray-500 hover:text-sky-600 transition-colors">
+                            Yukizi Choice
+                          </Link>
+                        </li>
                       </ul>
                     </div>
                   </div>

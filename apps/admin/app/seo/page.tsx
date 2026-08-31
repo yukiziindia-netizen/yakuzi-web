@@ -1,11 +1,15 @@
 "use client";
+import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, FileText, Globe, KeyRound, Route, Sparkles, Type as TypeIcon } from "lucide-react";
 import { AdminLayout } from "@/components/layout/admin-layout";
-import { Badge, Skeleton, StatCard } from "@/components/ui";
+import { Badge, Button, Skeleton, StatCard } from "@/components/ui";
 import { useSeoKeywords, useSeoMetaList, useSeoRedirects } from "@/hooks/useSeo";
 import { SEO_ENTITY_TYPES, type SeoEntityType } from "@/api/seo.api";
+import { apiClient } from "@/lib/apiClient";
+import toast from "react-hot-toast";
+import { ImageIcon } from "lucide-react";
 import { ENTITY_TYPE_LABELS } from "@/components/seo/entity-picker";
 
 const SECTIONS = [
@@ -27,6 +31,32 @@ function TypeRow({ type }: { type: SeoEntityType }) {
 }
 
 export default function SeoOverviewPage() {
+  // Batched, re-runnable SEO rename of EXISTING product images (copy-not-move
+  // server-side, so old URLs never break). Loops until the API reports no
+  // products left with un-renamed images.
+  const [renaming, setRenaming] = useState(false);
+  const [renameProgress, setRenameProgress] = useState<string | null>(null);
+  const runImageRename = async () => {
+    setRenaming(true);
+    setRenameProgress("Starting…");
+    let renamed = 0, failed = 0, guard = 0;
+    try {
+      for (;;) {
+        const { data } = await apiClient.post<{ data: { renamed: number; failed: number; remaining: number } }>(
+          "/admin/seo/rename-product-images", { limit: 20 });
+        renamed += data.data.renamed; failed += data.data.failed;
+        setRenameProgress(`${renamed} renamed so far — ${data.data.remaining} products left…`);
+        if (data.data.remaining === 0 || ++guard > 100) break;
+      }
+      setRenameProgress(null);
+      toast.success(failed ? `Done: ${renamed} images renamed, ${failed} failed (see server logs)` : `Done: ${renamed} images renamed for SEO`);
+    } catch (e: any) {
+      setRenameProgress(null);
+      toast.error(e?.response?.data?.message ?? "Image rename failed — try again");
+    } finally {
+      setRenaming(false);
+    }
+  };
   const all = useSeoMetaList({ limit: 1 });
   const missingTitle = useSeoMetaList({ missing: "title", limit: 1 });
   const missingDescription = useSeoMetaList({ missing: "description", limit: 1 });
@@ -69,6 +99,20 @@ export default function SeoOverviewPage() {
             </motion.div>
           ))}
         </div>
+
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.4 }} className="glass-card rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="h-9 w-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0"><ImageIcon className="h-4.5 w-4.5" /></div>
+          <div className="flex-1">
+            <h2 className="font-semibold text-foreground text-sm">Image SEO — rename existing product images</h2>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Copies every already-uploaded product image to an SEO filename ("product-name-yukizi-1.png") and points the product at it. Old URLs stay alive, so nothing breaks. Safe to run again anytime — already-renamed images are skipped. New uploads are named automatically.
+            </p>
+            {renameProgress && <p className="text-xs text-primary mt-1.5">{renameProgress}</p>}
+          </div>
+          <Button onClick={runImageRename} loading={renaming} disabled={renaming}>
+            {renaming ? "Renaming…" : "Rename images"}
+          </Button>
+        </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.4 }} className="glass-card rounded-2xl overflow-hidden">

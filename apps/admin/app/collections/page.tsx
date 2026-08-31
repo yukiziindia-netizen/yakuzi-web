@@ -1,7 +1,7 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Plus, Edit2, Trash2, FolderTree, ArrowRight, Loader2, ChevronDown, Layers, GripVertical, X } from "lucide-react";
+import { Search, Plus, Edit2, Trash2, FolderTree, ArrowRight, Loader2, ChevronDown, Layers, GripVertical, X, Sparkles } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -18,6 +18,8 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { AdminLayout } from "@/components/layout/admin-layout";
+import { MetaEditor } from "@/components/seo/meta-editor";
+import { useSeoMetaOne } from "@/hooks/useSeo";
 import { Button, Input, Badge } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
@@ -75,6 +77,15 @@ function SortableSlide({ id, disabled, children }: { id: string; disabled: boole
 
 export default function AdminCollectionsPage() {
   const [view, setView] = useState<"categories" | "subcategories">("categories");
+  // Per-collection Advanced SEO (meta/social/keywords/FAQ) — the same editor
+  // the SEO tab used to host, now opened from the source row. Sub-collections
+  // deliberately have none: their pages canonicalize to the parent URL, so
+  // the parent's SEO is their SEO.
+  const [seoTarget, setSeoTarget] = useState<{ id: string; name: string } | null>(null);
+  const { data: seoRecord, isLoading: seoLoading } = useSeoMetaOne(
+    seoTarget ? "CATEGORY" : undefined,
+    seoTarget?.id,
+  );
   const [search, setSearch] = useState("");
 
   const { data: categoriesData, isLoading: catLoading } = useCategories();
@@ -361,6 +372,11 @@ export default function AdminCollectionsPage() {
             <Input placeholder={`Search ${view === 'categories' ? 'collections' : 'sub-collections'}…`} value={search} onChange={e => setSearch(e.target.value)} leftIcon={<Search className="h-4 w-4" />} />
           </div>
         </div>
+        {view === "subcategories" && (
+          <p className="text-xs text-muted-foreground">
+            Sub-collection pages share their parent collection's SEO (they canonicalize to the parent URL) — edit SEO on the parent collection.
+          </p>
+        )}
 
         <div className="glass-card rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
@@ -395,6 +411,12 @@ export default function AdminCollectionsPage() {
                     </td>
                     <td className="px-5 py-4 text-right">
                       <div className="flex items-center justify-end gap-1">
+                        {view === "categories" && (
+                          <button onClick={() => setSeoTarget({ id: item.id, name: item.name })} aria-label="SEO" title="SEO (meta, FAQ, keywords)"
+                            className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors">
+                            <Sparkles className="h-4 w-4" />
+                          </button>
+                        )}
                         <button onClick={() => openEditModal(item)} aria-label="Edit" title="Edit"
                           className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors">
                           <Edit2 className="h-4 w-4" />
@@ -556,6 +578,15 @@ export default function AdminCollectionsPage() {
           </div>
         )}
       </AnimatePresence>
+      {seoTarget && (
+        <MetaEditor
+          open={!!seoTarget && !seoLoading}
+          onClose={() => setSeoTarget(null)}
+          record={seoRecord ?? null}
+          presetType="CATEGORY"
+          presetId={seoTarget.id}
+        />
+      )}
     </AdminLayout>
   );
 }

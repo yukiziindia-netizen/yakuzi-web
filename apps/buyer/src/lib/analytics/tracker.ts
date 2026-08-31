@@ -254,6 +254,41 @@ export function trackProductView(productId: string): void {
   track('product_view', undefined, productId);
 }
 
+// ─── Listing impressions & clicks ──────────────────────────────────────
+// Impressions dedupe per (path, product): a card scrolled past twice on the
+// same pageview counts once. The set resets on every pageView() so revisits
+// count again — matching how GA4's view_item_list dedupes.
+let impressionSeen = new Set<string>();
+
+/** 'home' | 'category' | 'search' | raw path — where the listing lives. */
+function listFromPath(): string {
+  const path = window.location.pathname;
+  if (path === '/') return 'home';
+  if (path.startsWith('/category/')) return 'category';
+  if (path.startsWith('/search')) return 'search';
+  return path;
+}
+
+export function trackProductImpression(productId: string, position: number): void {
+  if (!hasWindow() || disabled) return;
+  const key = `${window.location.pathname}|${productId}`;
+  if (impressionSeen.has(key)) return;
+  impressionSeen.add(key);
+  track('product_impression', { list: listFromPath(), position }, productId);
+}
+
+export function trackProductClick(
+  productId: string,
+  position?: number,
+  props?: Record<string, unknown>,
+): void {
+  track(
+    'product_click',
+    { list: listFromPath(), ...(position !== undefined && { position }), ...props },
+    productId,
+  );
+}
+
 export function trackSearch(query: string, results?: number): void {
   const q = query.trim().toLowerCase().slice(0, 100);
   if (!q) return;
@@ -262,6 +297,7 @@ export function trackSearch(query: string, results?: number): void {
 
 export function pageView(path: string): void {
   if (!hasWindow() || disabled) return;
+  impressionSeen = new Set();
   enqueue({ name: 'page_view', ts: Date.now(), page: path });
   engagedAccumulatedMs = 0;
   maxScrollPct = 0;

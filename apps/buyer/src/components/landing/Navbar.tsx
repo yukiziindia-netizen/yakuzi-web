@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 
 import Link from "next/link";
+import { track } from '@/lib/analytics/tracker';
 import Image from "next/image";
 import { useState, useRef, useEffect, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -1146,6 +1147,7 @@ export default function Navbar({
                             <li key={p.id}>
                               <button
                                 onClick={() => {
+                                  track('product_click', { from: 'search', query: searchInput.trim().toLowerCase().slice(0, 100) }, p.id);
                                   router.push(`/products/${p.slug}`);
                                   setIsSearchChatOpen(false);
                                   setSearchInput('');

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from 'next/link';
+import { track } from '@/lib/analytics/tracker';
 import Image from 'next/image';
 import { DeliveryTruckBadge } from '../shared/DeliveryTruckBadge';
 import { motion, AnimatePresence } from "framer-motion";
@@ -76,6 +77,9 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
     if (updated.manufacturer && updated.manufacturer !== 'All') params.set('manufacturer', updated.manufacturer); else params.delete('manufacturer');
     params.set('minPrice', String(updated.minPrice));
     params.set('maxPrice', String(updated.maxPrice));
+    // One event per apply, carrying the resulting filter state — compact and
+    // enough for Phase-B reports to answer "which filters get used".
+    track('filter_use', { query: params.toString().slice(0, 300) });
     router.push(`?${params.toString()}`, { scroll: false });
   };
 

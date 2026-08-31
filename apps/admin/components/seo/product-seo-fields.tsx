@@ -196,7 +196,7 @@ const TABS = [
 
 const ROBOTS_PRESETS = ["", "index,follow", "noindex,follow", "noindex,nofollow"];
 
-export function ProductSeoFields({ value, onChange, productName, slug, previewPath: previewPathProp, entityLabel = "product", images }: {
+export function ProductSeoFields({ value, onChange, productName, slug, previewPath: previewPathProp, entityLabel = "product", images, onRenameImage }: {
   value: ProductSeoForm;
   onChange: (next: ProductSeoForm) => void;
   /** Used for preview fallbacks so the SERP card reflects the product being edited. */
@@ -208,6 +208,11 @@ export function ProductSeoFields({ value, onChange, productName, slug, previewPa
   entityLabel?: string;
   /** Image URLs for the per-image alt editor (Advanced tab). */
   images?: string[];
+  /**
+   * When provided, each image row offers a filename rename. Must return the
+   * new URL on success (the row migrates its alt override to it) or null.
+   */
+  onRenameImage?: (url: string, newName: string) => Promise<string | null>;
 }) {
   const [tab, setTab] = useState("basic");
   const set = <K extends keyof ProductSeoForm>(key: K, v: ProductSeoForm[K]) => onChange({ ...value, [key]: v });
@@ -231,6 +236,29 @@ export function ProductSeoFields({ value, onChange, productName, slug, previewPa
   };
   const fileNameOf = (url: string) => {
     try { return decodeURIComponent(url.split("/").pop() || url); } catch { return url; }
+  };
+  const [renameFor, setRenameFor] = useState<{ url: string; draft: string } | null>(null);
+  const [renameBusy, setRenameBusy] = useState(false);
+  const submitRename = async () => {
+    if (!renameFor || !onRenameImage || renameBusy) return;
+    setRenameBusy(true);
+    try {
+      const newUrl = await onRenameImage(renameFor.url, renameFor.draft);
+      if (newUrl && newUrl !== renameFor.url) {
+        // Follow the rename in the alt map in ONE write (two setImageAlt
+        // calls would race on the same value prop).
+        const alt = altMap[renameFor.url];
+        if (alt) {
+          const next = { ...altMap };
+          delete next[renameFor.url];
+          next[newUrl] = alt;
+          set("imageAltJson", JSON.stringify(next, null, 2));
+        }
+      }
+      if (newUrl) setRenameFor(null);
+    } finally {
+      setRenameBusy(false);
+    }
   };
 
   return (
@@ -342,7 +370,30 @@ export function ProductSeoFields({ value, onChange, productName, slug, previewPa
                       value={altMap[url] ?? ""}
                       onChange={(e) => setImageAlt(url, e.target.value)}
                     />
-                    <p className="text-2xs text-muted-foreground truncate mt-1" title={url}>{fileNameOf(url)}</p>
+                    {renameFor?.url === url ? (
+                      <div className="flex items-center gap-2 mt-1">
+                        <Input
+                          value={renameFor.draft}
+                          onChange={(e) => setRenameFor({ url, draft: e.target.value })}
+                          placeholder="new-file-name (extension is kept)"
+                        />
+                        <Button type="button" size="sm" loading={renameBusy} onClick={submitRename}>Rename</Button>
+                        <Button type="button" size="sm" variant="ghost" onClick={() => setRenameFor(null)}>Cancel</Button>
+                      </div>
+                    ) : (
+                      <p className="text-2xs text-muted-foreground truncate mt-1" title={url}>
+                        {fileNameOf(url)}
+                        {onRenameImage && (
+                          <button type="button" className="ml-2 text-primary hover:underline" onClick={() => {
+                            const base = fileNameOf(url);
+                            const dot = base.lastIndexOf(".");
+                            setRenameFor({ url, draft: dot > -1 ? base.slice(0, dot) : base });
+                          }}>
+                            Rename file
+                          </button>
+                        )}
+                      </p>
+                    )}
                   </div>
                 </div>
               ))}

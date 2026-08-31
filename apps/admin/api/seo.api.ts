@@ -310,3 +310,15 @@ export async function getBlogPostsForPicker(): Promise<Array<{ id: string; title
   const body = data?.data ?? data;
   return Array.isArray(body) ? body : (Array.isArray(body?.items) ? body.items : []);
 }
+
+export async function renameProductImage(
+  catalogProductId: string,
+  imageUrl: string,
+  newName: string,
+): Promise<string | null> {
+  const { data } = await apiClient.post<{ data: { newUrl: string | null } }>(
+    "/admin/seo/rename-product-image",
+    { catalogProductId, imageUrl, newName },
+  );
+  return data.data?.newUrl ?? null;
+}

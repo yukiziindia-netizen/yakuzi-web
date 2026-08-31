@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { renameProductImage } from "@/api/seo.api";
 import { motion } from "framer-motion";
 import { ArrowLeft, Save } from "lucide-react";
 import { Button, Input, Textarea } from "@/components/ui";
@@ -34,6 +35,22 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
   const [slugDraft, setSlugDraft] = useState("");
   const [slugRedirect, setSlugRedirect] = useState(true);
   const [slugSeeded, setSlugSeeded] = useState(false);
+  // Manual per-image filename rename (saved products only — new uploads are
+  // named automatically from the title). Server copies, old URL stays alive.
+  const handleRenameImage = async (url: string, newName: string): Promise<string | null> => {
+    if (!initialData?.id) return null;
+    try {
+      const newUrl = await renameProductImage(initialData.id, url, newName);
+      if (newUrl) {
+        setMediaItems((items) => items.map((m) => (m.url === url ? { ...m, url: newUrl } : m)));
+        toast.success("Image renamed — old URL keeps working");
+      }
+      return newUrl;
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message ?? "Could not rename the image");
+      return null;
+    }
+  };
   useEffect(() => {
     if (!slugSeeded && slugInfo) {
       setSlugDraft(slugInfo.slug ?? "");
@@ -456,7 +473,7 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
                   )}
                 </div>
               )}
-              <ProductSeoFields value={seoForm} onChange={setSeoForm} productName={form.title} images={mediaItems.filter(m => !m.isLoading && m.url).map(m => m.url)} />
+              <ProductSeoFields value={seoForm} onChange={setSeoForm} productName={form.title} images={mediaItems.filter(m => !m.isLoading && m.url).map(m => m.url)} onRenameImage={initialData?.id ? handleRenameImage : undefined} />
               </>
             )}
           </motion.div>

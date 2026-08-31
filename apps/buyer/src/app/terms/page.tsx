@@ -1,14 +1,19 @@
 import type { Metadata } from 'next';
 import { absoluteUrl } from '@/lib/seo/site';
+import { staticPageMetadata } from '@/lib/seo/overrides';
 import PolicyPage, { PolicySection } from '@/components/shared/PolicyPage';
 import { COMPANY } from '@/config/company';
 
-export const metadata: Metadata = {
+const derivedMetadata: Metadata = {
   title: 'Terms of Use',
   alternates: { canonical: absoluteUrl('/terms') },
   description:
     'The terms you agree to when you access Yukizi, create an account or place an order.',
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  return staticPageMetadata('/terms', derivedMetadata);
+}
 
 export default function TermsPage() {
   return (

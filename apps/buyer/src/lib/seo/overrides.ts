@@ -151,3 +151,13 @@ export function validFaqs(faq: SeoOverride['faq']): SeoFaqEntry[] {
       f.answer.trim() !== '',
   );
 }
+
+/**
+ * Static pages (about/contact/policies): admin-set STATIC_PAGE overrides
+ * (SEO tab, keyed by path) win over the page's hardcoded defaults. Fail-open
+ * like everything here; the revalidating fetch means edits appear within
+ * ~5 minutes without a deploy.
+ */
+export async function staticPageMetadata(path: string, derived: Metadata): Promise<Metadata> {
+  return applySeoOverride(derived, await fetchSeoOverride('STATIC_PAGE', path));
+}

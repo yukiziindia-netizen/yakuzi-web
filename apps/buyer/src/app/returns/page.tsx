@@ -1,14 +1,19 @@
 import type { Metadata } from 'next';
 import { absoluteUrl } from '@/lib/seo/site';
+import { staticPageMetadata } from '@/lib/seo/overrides';
 import PolicyPage, { PolicySection } from '@/components/shared/PolicyPage';
 import { COMPANY } from '@/config/company';
 
-export const metadata: Metadata = {
+const derivedMetadata: Metadata = {
   title: 'Return & Refund Policy',
   alternates: { canonical: absoluteUrl('/returns') },
   description:
     'When Yukizi accepts a return, the proof required, how requests are verified and how refunds are processed.',
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  return staticPageMetadata('/returns', derivedMetadata);
+}
 
 export default function ReturnsPage() {
   return (

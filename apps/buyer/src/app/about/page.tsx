@@ -1,16 +1,21 @@
 import type { Metadata } from 'next';
 import { absoluteUrl } from '@/lib/seo/site';
+import { staticPageMetadata } from '@/lib/seo/overrides';
 import PolicyPage, { PolicySection } from '@/components/shared/PolicyPage';
 import { COMPANY } from '@/config/company';
 import JsonLd from '@/components/seo/JsonLd';
 import { breadcrumbSchema, faqPageSchema } from '@/lib/seo/schema';
 
-export const metadata: Metadata = {
+const derivedMetadata: Metadata = {
   title: 'About Us',
   alternates: { canonical: absoluteUrl('/about') },
   description:
     'Yukizi is an online store for manga, anime figures, collectibles and accessories, shipping across India.',
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  return staticPageMetadata('/about', derivedMetadata);
+}
 
 // Rendered as the visible FAQ below AND as FAQPage JSON-LD — one source, so
 // the structured data can never say something the page doesn't.

@@ -6,7 +6,7 @@ import { FileText, Pencil, Plus, Search } from "lucide-react";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { Badge, Button, EmptyState, Input, Pagination, Select, Skeleton } from "@/components/ui";
 import { useSeoMetaList } from "@/hooks/useSeo";
-import { SEO_ENTITY_TYPES, type SeoEntityType, type SeoMetaRecord } from "@/api/seo.api";
+import { META_EDITOR_ENTITY_TYPES, type SeoEntityType, type SeoMetaRecord } from "@/api/seo.api";
 import { ENTITY_TYPE_LABELS } from "@/components/seo/entity-picker";
 import { MetaEditor } from "@/components/seo/meta-editor";
 import { ScoreChip } from "@/components/seo/serp-preview";
@@ -63,7 +63,7 @@ function MetadataPageInner() {
             onChange={(e) => { setSearch(e.target.value); setPage(1); }} leftIcon={<Search className="h-4 w-4" />} />
           <Select value={type} onChange={(e) => { setType(e.target.value as SeoEntityType | ""); setPage(1); }}>
             <option value="">All page types</option>
-            {SEO_ENTITY_TYPES.map((t) => <option key={t} value={t}>{ENTITY_TYPE_LABELS[t]}</option>)}
+            {META_EDITOR_ENTITY_TYPES.map((t) => <option key={t} value={t}>{ENTITY_TYPE_LABELS[t]}</option>)}
           </Select>
           <Select value={missing} onChange={(e) => { setMissing(e.target.value); setPage(1); }}>
             {MISSING_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}

@@ -5,7 +5,8 @@ import { blogSchema, itemListSchema } from '@/lib/seo/schema';
 import JsonLd from '@/components/seo/JsonLd';
 import BlogListClient from './BlogListClient';
 
-export const dynamic = 'force-dynamic';
+// Posts change rarely; ten minutes is plenty. Was force-dynamic.
+export const revalidate = 600;
 
 export const metadata: Metadata = {
   title: 'Blog',

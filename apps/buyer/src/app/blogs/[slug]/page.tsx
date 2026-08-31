@@ -1,7 +1,7 @@
 import { cache } from 'react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getBlogBySlug } from '@yukizi/api-client';
+import { getBlogBySlug, getBlogs } from '@yukizi/api-client';
 import { absoluteUrl, metaTruncate } from '@/lib/seo/site';
 import { articleSchema, breadcrumbSchema, blogSchema, faqPageSchema } from '@/lib/seo/schema';
 import { applySeoOverride, fetchSeoOverride, mergeStructuredData, validFaqs } from '@/lib/seo/overrides';
@@ -10,7 +10,21 @@ import SeoFaq from '@/components/seo/SeoFaq';
 import PostFooterLinks from '@/components/blog/PostFooterLinks';
 import BlogPostClient from './BlogPostClient';
 
-export const dynamic = 'force-dynamic';
+// Was force-dynamic. A published post changes rarely, and an edit appears
+// within ten minutes without a deploy.
+export const revalidate = 600;
+
+/** Same reason as the product pages: without this the route is never cached. */
+export async function generateStaticParams() {
+  try {
+    const res = await getBlogs({ status: 'PUBLISHED' });
+    return (res.data ?? [])
+      .filter((b: { slug?: string }) => !!b.slug)
+      .map((b: { slug?: string }) => ({ slug: b.slug as string }));
+  } catch {
+    return [];
+  }
+}
 
 // React cache() dedupes the fetch between generateMetadata and the page render.
 const fetchPost = cache(async (slug: string) => {

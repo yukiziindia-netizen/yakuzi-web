@@ -428,7 +428,7 @@ export function GridProductCard({ product, index, onOpenReview, showFullTitle }:
            {/* next/image so the ~1MB seller uploads are resized/re-encoded to
                the card's actual rendered width (the grid is 2-7 columns) —
                measured 65MB of card images on one homepage load without it. */}
-           <Image src={imageUrl} alt={productName} fill sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 15vw" className="object-contain p-3 sm:p-2 group-hover:scale-105 transition-transform duration-300 ease-out" />
+           <Image src={imageUrl} alt={`${productName} - Yukizi`} fill sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 15vw" className="object-contain p-3 sm:p-2 group-hover:scale-105 transition-transform duration-300 ease-out" />
         </Link>
 
          <div className="flex flex-col gap-1 p-[8px] sm:p-[10px] bg-white w-full border-t border-gray-100">

@@ -36,6 +36,7 @@ export interface SeoOverride {
   aiSummary?: string | null;
   faq?: SeoFaqEntry[] | null;
   structuredDataOverride?: Record<string, unknown> | null;
+  imageAltOverrides?: Record<string, string> | null;
 }
 
 const OVERRIDE_TIMEOUT_MS = 2000;

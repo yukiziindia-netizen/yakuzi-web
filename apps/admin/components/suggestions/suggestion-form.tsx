@@ -14,7 +14,7 @@ import {
   productSeoFormHasContent,
   productSeoFormToPayload,
 } from "@/components/seo/product-seo-fields";
-import { useSeoMetaOne, useUpsertSeoMeta } from "@/hooks/useSeo";
+import { useSeoMetaOne, useUpsertSeoMeta, useSeoProductSlug, useUpdateSeoProductSlug } from "@/hooks/useSeo";
 
 export interface SuggestionFormProps {
   initialData?: any;
@@ -27,6 +27,19 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
   const createSuggestion = useCreateSuggestion();
   const updateSuggestion = useUpdateSuggestion();
   const upsertSeo = useUpsertSeoMeta();
+  // Product URL (slug) — same catalog-id-keyed record the Products edit page
+  // and the old SEO tab edit; changing it 301s the old URL unless opted out.
+  const { data: slugInfo } = useSeoProductSlug(initialData?.id);
+  const updateSlug = useUpdateSeoProductSlug();
+  const [slugDraft, setSlugDraft] = useState("");
+  const [slugRedirect, setSlugRedirect] = useState(true);
+  const [slugSeeded, setSlugSeeded] = useState(false);
+  useEffect(() => {
+    if (!slugSeeded && slugInfo) {
+      setSlugDraft(slugInfo.slug ?? "");
+      setSlugSeeded(true);
+    }
+  }, [slugInfo, slugSeeded]);
 
   // SEO lives in the same SeoMeta record the SEO tab edits (PRODUCT + catalog
   // id). Editing an existing entry loads that record; creating one writes it
@@ -310,6 +323,17 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
       let catalogId: string | undefined = initialData?.id;
       if (initialData?.id) {
         await updateSuggestion.mutateAsync({ id: initialData.id, payload });
+        // Product URL: separate endpoint, same save gesture. Only when
+        // actually changed; failures surface without failing the product save.
+        const nextSlug = slugDraft.trim().replace(/(^-|-$)+/g, "");
+        if (slugInfo && nextSlug && nextSlug !== (slugInfo.slug ?? "")) {
+          try {
+            await updateSlug.mutateAsync({ id: initialData.id, slug: nextSlug, createRedirect: slugRedirect });
+            toast.success(slugRedirect ? "Product URL updated — old URL redirects to the new one" : "Product URL updated — no redirect created");
+          } catch (e: any) {
+            toast.error(e?.response?.data?.message ?? "Could not update the product URL");
+          }
+        }
       } else {
         const created = await createSuggestion.mutateAsync(payload);
         catalogId = created?.id;
@@ -411,7 +435,29 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
             {!seoSeeded ? (
               <p className="text-sm text-muted-foreground">Loading SEO…</p>
             ) : (
-              <ProductSeoFields value={seoForm} onChange={setSeoForm} productName={form.title} />
+              <>
+              {initialData?.id && (
+                <div className="space-y-1.5 rounded-xl border border-border p-3">
+                  <label className="block text-sm font-medium text-foreground">Product URL</label>
+                  <Input
+                    value={slugDraft}
+                    onChange={(e) => setSlugDraft(e.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, "-"))}
+                    placeholder={slugInfo ? "" : "Loading current URL…"}
+                    disabled={!slugInfo}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    yukizi.com/products/<span className="text-foreground">{slugDraft || "…"}</span>
+                  </p>
+                  {slugInfo?.slug && slugDraft.replace(/(^-|-$)+/g, "") !== slugInfo.slug && (
+                    <label className="flex items-center gap-2 text-xs text-foreground cursor-pointer">
+                      <input type="checkbox" checked={slugRedirect} onChange={(e) => setSlugRedirect(e.target.checked)} className="h-3.5 w-3.5 accent-primary" />
+                      Redirect the old URL to the new one (recommended — keeps Google results and shared links working)
+                    </label>
+                  )}
+                </div>
+              )}
+              <ProductSeoFields value={seoForm} onChange={setSeoForm} productName={form.title} images={mediaItems.filter(m => !m.isLoading && m.url).map(m => m.url)} />
+              </>
             )}
           </motion.div>
 

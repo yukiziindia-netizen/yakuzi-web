@@ -335,6 +335,7 @@ export default function ProductDetailPage() {
             catalogProductId={product.variant.catalogProduct.id}
             productName={product?.name}
             slug={product?.variant?.catalogProduct?.slug}
+            images={Array.isArray(product?.images) ? product.images : []}
           />
         )}
 

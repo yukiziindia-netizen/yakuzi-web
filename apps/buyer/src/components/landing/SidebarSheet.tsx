@@ -27,6 +27,12 @@ function sortOptionFromParams(sortBy: string | null, sortOrder: string | null): 
   return "Relevance";
 }
 
+/**
+ * Top of the price slider. The track ends here, so a handle parked at this
+ * value means "no upper limit" rather than a literal 10,000 cap.
+ */
+const PRICE_CEILING = 10000;
+
 export type SidebarView = "cart" | "wishlist" | "filters" | null;
 
 interface SidebarSheetProps {
@@ -54,7 +60,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
     location: searchParams.get('location') || "All",
     manufacturer: searchParams.get('manufacturer') || "All",
     minPrice: Number(searchParams.get('minPrice') || 0),
-    maxPrice: Number(searchParams.get('maxPrice') || 10000),
+    maxPrice: Number(searchParams.get('maxPrice') || PRICE_CEILING),
   });
 
   const { data: cities } = useCities();
@@ -75,8 +81,17 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
     if (updated.discount && updated.discount !== 'All') params.set('discountRange', updated.discount); else params.delete('discountRange');
     if (updated.location && updated.location !== 'All') params.set('location', updated.location); else params.delete('location');
     if (updated.manufacturer && updated.manufacturer !== 'All') params.set('manufacturer', updated.manufacturer); else params.delete('manufacturer');
-    params.set('minPrice', String(updated.minPrice));
-    params.set('maxPrice', String(updated.maxPrice));
+    // Only send a price bound when the handle has actually been moved off its
+    // end of the track. These used to be written on every change, so choosing
+    // (say) New Items also sent maxPrice=10000 — the slider's ceiling, not a
+    // real ceiling — and silently dropped every product dearer than that.
+    // Sending nothing at the ends means "no limit", which is what the
+    // untouched slider means to the person looking at it.
+    if (updated.minPrice > 0) params.set('minPrice', String(updated.minPrice));
+    else params.delete('minPrice');
+
+    if (updated.maxPrice < PRICE_CEILING) params.set('maxPrice', String(updated.maxPrice));
+    else params.delete('maxPrice');
     // One event per apply, carrying the resulting filter state — compact and
     // enough for Phase-B reports to answer "which filters get used".
     track('filter_use', { query: params.toString().slice(0, 300) });
@@ -338,12 +353,12 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                         <div 
                           className="absolute h-full bg-[#854cbc] rounded-full pointer-events-none"
                           style={{ 
-                            left: `${((filters.minPrice - 0) / (10000 - 0)) * 100}%`, 
-                            width: `${((filters.maxPrice - filters.minPrice) / 10000) * 100}%` 
+                            left: `${((filters.minPrice - 0) / (PRICE_CEILING - 0)) * 100}%`, 
+                            width: `${((filters.maxPrice - filters.minPrice) / PRICE_CEILING) * 100}%` 
                           }}
                         />
                         <input 
-                          type="range" min={0} max={10000} step={100} value={filters.minPrice}
+                          type="range" min={0} max={PRICE_CEILING} step={100} value={filters.minPrice}
                           onChange={(e) => {
                             const val = Math.min(Number(e.target.value), filters.maxPrice - 100);
                             handleFilterChange('minPrice', val);
@@ -351,7 +366,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                           className="absolute w-full appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-[#854cbc] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:pointer-events-auto z-20"
                         />
                         <input 
-                          type="range" min={0} max={10000} step={100} value={filters.maxPrice}
+                          type="range" min={0} max={PRICE_CEILING} step={100} value={filters.maxPrice}
                           onChange={(e) => {
                             const val = Math.max(Number(e.target.value), filters.minPrice + 100);
                             handleFilterChange('maxPrice', val);
@@ -361,7 +376,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
                       </div>
                       <div className="flex justify-between mt-2 text-sm text-gray-500 font-medium">
                         <span>₹{filters.minPrice}</span>
-                        <span>₹{filters.maxPrice}</span>
+                        <span>₹{filters.maxPrice}{filters.maxPrice >= PRICE_CEILING ? '+' : ''}</span>
                       </div>
                     </div>
                 </motion.div>

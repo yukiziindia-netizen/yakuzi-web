@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { AnalyticsNav } from "@/components/analytics/analytics-nav";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -82,6 +83,9 @@ export default function AdminDashboardPage() {
           <h1 className="font-semibold text-2xl text-foreground">Platform Overview</h1>
           <p className="text-sm text-muted-foreground mt-0.5">Monitor the entire Yukizi ecosystem</p>
         </div>
+        {/* Analytics lives here now — this page IS the Business view, with the
+            deeper sections one click away. */}
+        <AnalyticsNav />
         <div className="flex items-center gap-3">
           <DateRangePicker value={dateRange} onChange={setDateRange} align="end" />
         </div>

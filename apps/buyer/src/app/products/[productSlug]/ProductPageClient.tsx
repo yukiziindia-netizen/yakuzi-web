@@ -1168,6 +1168,10 @@ export default function ProductPageClient({ productSlug, initialProduct, imageAl
 
   return (
     <main className="min-h-screen bg-gray-50 pb-32">
+      {/* The page's single heading. Rendered once and visually hidden so it
+          survives whichever layout CSS happens to show — Google indexes
+          mobile-first, and the desktop block is display:none there. */}
+      <h1 className="sr-only">{product.name}</h1>
       <style
         dangerouslySetInnerHTML={{
           __html: `
@@ -1228,10 +1232,13 @@ export default function ProductPageClient({ productSlug, initialProduct, imageAl
 
           <hr className="border-gray-100" />
 
-          {/* Product Title */}
-          <h1 className="text-xl font-medium text-gray-800 leading-tight">
+          {/* Product Title. A <p>, not an <h1>: the mobile and desktop layouts
+              are both in the DOM at every viewport with only CSS hiding one,
+              so two <h1> elements were served on every product page. The one
+              real heading is rendered once, screen-reader-only, above. */}
+          <p className="text-xl font-medium text-gray-800 leading-tight">
             {product.name}
-          </h1>
+          </p>
 
           {/* Variant Selector */}
           {productVariants.length > 0 && (
@@ -1479,9 +1486,9 @@ export default function ProductPageClient({ productSlug, initialProduct, imageAl
             <div className="flex flex-col">
               {/* Title Block */}
               <div className="flex items-start justify-between w-full mb-4">
-                <h1 className="text-2xl sm:text-2xl xl:text-3xl 2xl:text-4xl font-medium text-black tracking-tight leading-tight max-w-[95%]">
+                <p className="text-2xl sm:text-2xl xl:text-3xl 2xl:text-4xl font-medium text-black tracking-tight leading-tight max-w-[95%]">
                   {product.name}
-                </h1>
+                </p>
               </div>
 
               {/* Price & Details Row */}

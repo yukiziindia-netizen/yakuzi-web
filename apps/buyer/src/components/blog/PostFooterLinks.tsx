@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { getBlogs, getCategories, getProducts } from '@yukizi/api-client';
 import { productImageAlt } from '@/lib/seo/image-alt';
 
@@ -89,12 +90,12 @@ export default async function PostFooterLinks({ currentSlug, categoryName, tags 
                 <Link href={`/products/${p.slug ?? p.id}`} className="group block">
                   <div className="aspect-square overflow-hidden rounded-xl bg-gray-50">
                     {p.images?.[0]?.url && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
+                      <Image
                         src={p.images[0].url}
                         alt={productImageAlt(p.name)}
+                        width={240}
+                        height={240}
                         loading="lazy"
-                        decoding="async"
                         className="h-full w-full object-contain transition-transform group-hover:scale-105"
                       />
                     )}
@@ -120,12 +121,12 @@ export default async function PostFooterLinks({ currentSlug, categoryName, tags 
               <li key={post.id}>
                 <Link href={`/blogs/${post.slug}`} className="group block">
                   {post.featuredImage && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <Image
                       src={post.featuredImage}
                       alt={post.title}
+                      width={320}
+                      height={180}
                       loading="lazy"
-                      decoding="async"
                       className="mb-2 aspect-[16/9] w-full rounded-xl object-cover"
                     />
                   )}

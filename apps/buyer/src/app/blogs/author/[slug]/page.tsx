@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import type { Metadata } from 'next';
 import { getBlogs } from '@yukizi/api-client';
 import { absoluteUrl, SITE_NAME } from '@/lib/seo/site';
@@ -81,12 +82,12 @@ export default async function AuthorPage({ params }: { params: { slug: string } 
 
         <header className="mb-10 flex items-start gap-4">
           {author.avatar && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={author.avatar}
               alt={`${author.name} - ${SITE_NAME}`}
+              width={64}
+              height={64}
               loading="lazy"
-              decoding="async"
               className="h-16 w-16 flex-shrink-0 rounded-full object-cover"
             />
           )}

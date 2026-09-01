@@ -1258,8 +1258,11 @@ export default function ProductPageClient({ productSlug, initialProduct, imageAl
                         : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
                       }`}
                   >
+                    {/* Through the optimiser: this renders at 20px but was
+                        fetching the full-resolution source, which for some
+                        products is a 2 MB file for a swatch. */}
                     {v.image && (
-                      <img src={v.image} alt={v.name} loading="lazy" decoding="async" className="w-5 h-5 rounded-full object-cover" />
+                      <Image src={v.image} alt={v.name} width={20} height={20} loading="lazy" className="w-5 h-5 rounded-full object-cover" />
                     )}
                     <span>{v.name}</span>
                   </button>
@@ -1385,7 +1388,7 @@ export default function ProductPageClient({ productSlug, initialProduct, imageAl
                       <div className="flex gap-1.5 flex-wrap flex-shrink-0 self-center">
                         {reviewImagesList.map((imgUrl: string, idx: number) => (
                           <div key={idx} className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border border-gray-100 bg-white">
-                            <img src={imgUrl} alt={`Review photo ${idx + 1}`} loading="lazy" decoding="async" className="w-full h-full object-cover" />
+                            <Image src={imgUrl} alt={`Review photo ${idx + 1}`} width={80} height={80} loading="lazy" className="w-full h-full object-cover" />
                           </div>
                         ))}
                       </div>
@@ -1544,7 +1547,7 @@ export default function ProductPageClient({ productSlug, initialProduct, imageAl
                           }`}
                       >
                         {v.image && (
-                          <img src={v.image} alt={v.name} loading="lazy" decoding="async" className="w-6 h-6 rounded-full object-cover" />
+                          <Image src={v.image} alt={v.name} width={24} height={24} loading="lazy" className="w-6 h-6 rounded-full object-cover" />
                         )}
                         <span>{v.name}</span>
                       </button>
@@ -1648,7 +1651,7 @@ export default function ProductPageClient({ productSlug, initialProduct, imageAl
                           <div className="flex gap-1.5 flex-wrap flex-shrink-0 self-center">
                             {reviewImagesList.map((imgUrl: string, idx: number) => (
                               <div key={idx} className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border border-gray-100 bg-white">
-                                <img src={imgUrl} alt={`Review photo ${idx + 1}`} loading="lazy" decoding="async" className="w-full h-full object-cover" />
+                                <Image src={imgUrl} alt={`Review photo ${idx + 1}`} width={80} height={80} loading="lazy" className="w-full h-full object-cover" />
                               </div>
                             ))}
                           </div>

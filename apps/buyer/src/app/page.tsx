@@ -5,6 +5,7 @@ import HeroSection from '@/components/landing/HeroSection';
 import ProductCarousel from '@/components/landing/ProductCarousel';
 import CategoryScrollRow from '@/components/landing/CategoryScrollRow';
 import ComingSoon from '@/components/landing/ComingSoon';
+import InstagramFeed from '@/components/landing/InstagramFeed';
 import dynamicComponent from 'next/dynamic';
 import { getProducts, getComingSoonStatus, getBanners, getHomepageSections, type HomepageSection } from '@yukizi/api-client';
 import type { Metadata } from 'next';
@@ -141,6 +142,16 @@ export default async function HomePage({
               <CarouselSection searchParams={searchParams} />
             </Suspense>
           </div>
+          {/* Below the products, and only on the browse view — the same rule
+              the curated rows follow. Someone who arrived searching wants
+              results, not the social rail. Streamed so a slow Instagram never
+              holds up the page, and it renders nothing at all when no account
+              is connected. */}
+          {showCuratedSections && (
+            <Suspense fallback={null}>
+              <InstagramFeed profileUrl={social.instagram} />
+            </Suspense>
+          )}
         </section>
       </div>
     </main>

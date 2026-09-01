@@ -235,6 +235,12 @@ export {
   type Banner,
 } from './modules/banners.api';
 
+// Instagram
+export {
+  getInstagramFeed,
+  type InstagramPost,
+} from './modules/instagram.api';
+
 // Homepage Sections
 export {
   getHomepageSections,

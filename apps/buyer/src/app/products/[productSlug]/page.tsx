@@ -4,9 +4,10 @@ import { notFound } from 'next/navigation';
 import { getProductById, getProducts } from '@yukizi/api-client';
 import { parseProductIdFromSlug } from '@yukizi/utils';
 import { absoluteUrl, metaTruncate, SITE_NAME } from '@/lib/seo/site';
-import { productSchema, breadcrumbSchema, faqPageSchema, graph } from '@/lib/seo/schema';
+import { productSchema, breadcrumbSchema, faqPageSchema, graph, organizationSchema, webSiteSchema } from '@/lib/seo/schema';
 import { applySeoOverride, fetchSeoOverride, mergeStructuredData, validFaqs } from '@/lib/seo/overrides';
 import JsonLd from '@/components/seo/JsonLd';
+import RelatedProductsServer from '@/components/product/RelatedProductsServer';
 import SeoFaq from '@/components/seo/SeoFaq';
 import ProductPageClient from './ProductPageClient';
 
@@ -149,12 +150,26 @@ export default async function ProductPage({ params }: { params: { productSlug: s
       mergeStructuredData(productSchema(buildSchemaInput(p)), override?.structuredDataOverride),
       breadcrumbSchema(crumbs),
       faqs.length ? faqPageSchema(faqs) : null,
+      // The site's entity travels with every product page. Google does not
+      // resolve @id references across URLs, so a page that names the brand
+      // without defining it leaves the reference dangling.
+      organizationSchema(),
+      webSiteSchema(),
     ),
   ];
   return (
     <>
       <JsonLd data={jsonLd} />
       <ProductPageClient productSlug={params.productSlug} initialProduct={product} imageAltOverrides={override?.imageAltOverrides ?? undefined} />
+      {/* Server-rendered links to sibling products. The existing related rail
+          is client-only, so the served HTML had no product links at all. */}
+      <RelatedProductsServer
+        currentId={p.id}
+        currentSlug={params.productSlug}
+        categoryId={p.category?.id}
+        categoryName={p.category?.name}
+        categorySlug={p.category?.slug}
+      />
       {/* Visible, server-rendered — outside the client component, so the PDP's
           mobile/desktop dual JSX trees are not involved. */}
       <SeoFaq faqs={faqs} />

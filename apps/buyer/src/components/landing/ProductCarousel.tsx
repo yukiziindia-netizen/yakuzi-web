@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, Share2, Plus, Minus, RotateCw, Eye, Star, Truck, Bookmark, Bell } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -490,7 +491,17 @@ export function GridProductCard({ product, index, onOpenReview, showFullTitle }:
   );
 }
 
+/** Params the storefront filters on — used to tell "no results" apart from
+ *  "empty shop" when the grid comes back with nothing. */
+const filterKeys = [
+  'isNew', 'isBestSelling', 'isYukiziChoice', 'discountRange',
+  'location', 'manufacturer', 'minPrice', 'maxPrice', 'search',
+];
+
 export default function ProductCarousel({ slot = 'HOMEPAGE_CAROUSEL', categoryId, initialProducts }: ProductCarouselProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [products, setProducts] = useState<any[]>(initialProducts || []);
   const [loading, setLoading] = useState(!initialProducts);
   const [reviewProduct, setReviewProduct] = useState<any | null>(null);
@@ -520,9 +531,25 @@ export default function ProductCarousel({ slot = 'HOMEPAGE_CAROUSEL', categoryId
   if (loading) return <div className="h-40 flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-[#854cbc]" /></div>;
   
   if (!products || products.length === 0) {
+    // A filtered view with no matches is not the same as an empty shop, and
+    // it must never be a dead end. "Best Sellers" and "Yukizi Choice" filter
+    // on admin flags that may not be set on anything yet, so the honest
+    // message is "nothing matches these filters", with one tap back out.
+    const hasFilters = filterKeys.some((k) => searchParams.get(k));
     return (
-      <div className="w-full max-w-[1600px] 2xl:max-w-none mx-auto px-4 py-16 text-center text-gray-400 font-medium border border-dashed border-gray-200 rounded-2xl bg-gray-50/50">
-        No products available.
+      <div className="w-full max-w-[1600px] 2xl:max-w-none mx-auto px-4 py-16 text-center border border-dashed border-gray-200 rounded-2xl bg-gray-50/50">
+        <p className="text-gray-500 font-medium">
+          {hasFilters ? 'Nothing matches these filters.' : 'No products available.'}
+        </p>
+        {hasFilters && (
+          <button
+            type="button"
+            onClick={() => router.push(pathname, { scroll: false })}
+            className="mt-3 inline-flex rounded-full bg-[#854cbc] px-5 py-2 text-sm font-bold text-white transition-opacity hover:opacity-90"
+          >
+            Clear filters
+          </button>
+        )}
       </div>
     );
   }

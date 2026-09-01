@@ -141,6 +141,18 @@ export default async function ProductPage({ params }: { params: { productSlug: s
   if (p.category?.name) {
     crumbs.push({ name: p.category.name, ...(p.category.slug ? { path: `/category/${p.category.slug}` } : {}) });
   }
+  // The sub-collection was in the visible trail but missing from the
+  // structured data, so the page showed four steps and told Google three.
+  // Google's guidance is that BreadcrumbList should describe what is on the
+  // page; disagreeing is a reason to ignore the markup entirely.
+  if (p.subCategory?.name) {
+    crumbs.push({
+      name: p.subCategory.name,
+      ...(p.category?.slug && p.subCategory.slug
+        ? { path: `/category/${p.category.slug}?sub=${p.subCategory.slug}` }
+        : {}),
+    });
+  }
   crumbs.push({ name: p.name ?? 'Product' });
   const override = await fetchProductOverride(overrideKey(p));
   const faqs = validFaqs(override?.faq);

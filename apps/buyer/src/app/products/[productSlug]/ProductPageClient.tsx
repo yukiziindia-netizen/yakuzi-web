@@ -125,7 +125,20 @@ function ProductBreadcrumbs({
       {product?.subCategory?.name && (
         <>
           <span className="text-gray-400 mx-1">&gt;</span>
-          <span className="text-gray-600">{product.subCategory.name}</span>
+          {/* Was a plain span, so the middle of the trail was a dead step:
+              Home and the category linked, the sub-collection did not. The
+              category page reads ?sub= off the query string, so there is a
+              real page to point at. */}
+          {categoryHref && product.subCategory.slug ? (
+            <Link
+              href={`${categoryHref}?sub=${product.subCategory.slug}`}
+              className="transition-colors hover:text-[#854cbc] text-gray-600"
+            >
+              {product.subCategory.name}
+            </Link>
+          ) : (
+            <span className="text-gray-600">{product.subCategory.name}</span>
+          )}
         </>
       )}
       {product?.name && (

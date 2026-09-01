@@ -496,6 +496,11 @@ export function GridProductCard({ product, index, onOpenReview, showFullTitle }:
 const filterKeys = [
   'isNew', 'isBestSelling', 'isYukiziChoice', 'discountRange',
   'location', 'manufacturer', 'minPrice', 'maxPrice', 'search',
+  // A sub-collection narrows the view exactly like a filter does, and it is
+  // the commonest way to land on an empty page: seven of the eight Books
+  // sub-collections hold nothing, so picking Manga or Comics from the menu
+  // showed the Books banner over "No products available" with no way back.
+  'sub', 'subCategoryId',
 ];
 
 export default function ProductCarousel({ slot = 'HOMEPAGE_CAROUSEL', categoryId, initialProducts }: ProductCarouselProps) {
@@ -539,7 +544,7 @@ export default function ProductCarousel({ slot = 'HOMEPAGE_CAROUSEL', categoryId
     return (
       <div className="w-full max-w-[1600px] 2xl:max-w-none mx-auto px-4 py-16 text-center border border-dashed border-gray-200 rounded-2xl bg-gray-50/50">
         <p className="text-gray-500 font-medium">
-          {hasFilters ? 'Nothing matches these filters.' : 'No products available.'}
+          {hasFilters ? 'Nothing here yet.' : 'No products available.'}
         </p>
         {hasFilters && (
           <button
@@ -547,7 +552,7 @@ export default function ProductCarousel({ slot = 'HOMEPAGE_CAROUSEL', categoryId
             onClick={() => router.push(pathname, { scroll: false })}
             className="mt-3 inline-flex rounded-full bg-[#854cbc] px-5 py-2 text-sm font-bold text-white transition-opacity hover:opacity-90"
           >
-            Clear filters
+            View everything in this category
           </button>
         )}
       </div>

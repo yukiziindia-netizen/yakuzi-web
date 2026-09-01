@@ -227,7 +227,15 @@ export default function Navbar({
   const chatTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   const { data: categoriesData } = useCategories();
-  const categories = Array.isArray(categoriesData) ? categoriesData : (categoriesData as any)?.data ?? [];
+  // Categories a shopper can actually buy from. Four of seven currently hold
+  // nothing — Merch, Cosplay & Props, DIY Kits, Gaming — and each was a link
+  // from the main navigation to "No products available". productCount arrives
+  // with api#109; while it is undefined every category shows, so this is a
+  // no-op until that deploys.
+  const allCategories = Array.isArray(categoriesData) ? categoriesData : (categoriesData as any)?.data ?? [];
+  const categories = allCategories.filter(
+    (c: { productCount?: number }) => c?.productCount === undefined || c.productCount > 0,
+  );
 
   useEffect(() => {
     setIsMounted(true);

@@ -46,6 +46,23 @@ const nextConfig = {
       ],
     },
     {
+      // Public catalogue pages, cached at the edge.
+      //
+      // These were served `private, no-store` with a CDN miss on every single
+      // request, so every visitor and every crawler reached the origin. They
+      // hold nothing personal — cart and session are client-side — so a short
+      // shared cache is safe, and stale-while-revalidate means a visitor never
+      // waits for a refresh.
+      //
+      // Set here rather than per page because a dynamic segment that reads
+      // searchParams cannot use `revalidate`, and this applies whatever the
+      // render mode turns out to be.
+      source: '/:path((?!api|_next|admin).*)',
+      headers: [
+        { key: 'Cache-Control', value: 'public, s-maxage=120, stale-while-revalidate=600' },
+      ],
+    },
+    {
       // Images under /public are served with max-age=0 by default, so every
       // navigation revalidates each of them. An hour of caching plus a day of
       // stale-while-revalidate removes those round trips without risking a

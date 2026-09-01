@@ -14,13 +14,9 @@ interface CategoryMegaMenuProps {
 
 export default function CategoryMegaMenu({ category, isOpen, onMouseEnter, onMouseLeave }: CategoryMegaMenuProps) {
   // If no subcategories, we could show a default list or just not render
-  // Only sub-collections that actually hold something. 38 of 45 are empty,
-  // and every one of them was a link from primary navigation to "No products
-  // available". productCount comes from api#109; until that deploys the field
-  // is undefined and every sub-collection shows, exactly as it does today.
-  const subCategories = (category.subCategories || []).filter(
-    (sub: { productCount?: number }) => sub.productCount === undefined || sub.productCount > 0,
-  );
+  // Every sub-collection the admin has created. Filtering the empty ones out
+  // was tried and reverted for the same reason as the categories above.
+  const subCategories = category.subCategories || [];
 
   return (
     <AnimatePresence>

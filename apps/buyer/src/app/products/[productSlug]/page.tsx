@@ -119,10 +119,19 @@ export async function generateMetadata({ params }: { params: { productSlug: stri
       title,
       description,
       url: absoluteUrl(canonicalPath),
+      // Ideally 'product' — Facebook, WhatsApp and Pinterest treat that
+      // differently from a generic page. Next 14's metadata types only allow
+      // website/article/book/profile/music/video, and emitting a second raw
+      // og:type tag alongside Next's own would be worse than a generic one.
+      // Left as-is deliberately.
       type: 'website',
       siteName: SITE_NAME,
       locale: 'en_IN',
-      ...(images.length ? { images: [{ url: images[0] }] } : {}),
+      // alt on the share image: read aloud by screen readers on social, and
+      // one of the few og fields that was simply missing.
+      ...(images.length
+        ? { images: [{ url: images[0], alt: `${p.name ?? SITE_NAME} - ${SITE_NAME}` }] }
+        : {}),
     },
     // NOTE: no `twitter` key here on purpose. Declaring one replaces the root
     // layout's block wholesale, which dropped twitter:site/creator (the

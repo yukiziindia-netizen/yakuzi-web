@@ -267,9 +267,6 @@ export default async function CategoryPage({
       <HomeNavbar />
 
       <div className="w-full max-w-[1600px] 2xl:max-w-none mx-auto bg-white overflow-hidden flex flex-col relative min-h-screen">
-        {/* The trail the BreadcrumbList has always described but the page
-            never showed. */}
-        <Breadcrumbs items={crumbs} className="px-[4vw] pt-24 sm:pt-28 md:pt-32" />
         <section className="flex-1 flex flex-col w-full">
           {/* Banner slideshow. One responsive component rather than a
               desktop-only block: each slide picks the phone artwork itself
@@ -279,6 +276,10 @@ export default async function CategoryPage({
           <div className="w-full flex-shrink-0 flex flex-col">
             <CategoryBanner title={categoryName} banners={bannerSlides} />
           </div>
+          {/* Under the banner, not above it. Above, it needed enough top
+              padding to clear the fixed nav, which opened a band of empty
+              white across the top of the page before the artwork. */}
+          <Breadcrumbs items={crumbs} className="px-4 sm:px-6 pt-3 sm:pt-4" />
 
           {/* Admin-authored intro copy (Collections modal -> Description).
               Server-rendered, so crawlers finally get real words on what was

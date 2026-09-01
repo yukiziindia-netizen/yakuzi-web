@@ -6,6 +6,7 @@ import { absoluteUrl, metaTruncate } from '@/lib/seo/site';
 import { articleSchema, breadcrumbSchema, blogSchema, faqPageSchema } from '@/lib/seo/schema';
 import { applySeoOverride, fetchSeoOverride, mergeStructuredData, validFaqs } from '@/lib/seo/overrides';
 import JsonLd from '@/components/seo/JsonLd';
+import Breadcrumbs from '@/components/seo/Breadcrumbs';
 import SeoFaq from '@/components/seo/SeoFaq';
 import PostFooterLinks from '@/components/blog/PostFooterLinks';
 import BlogPostClient from './BlogPostClient';
@@ -77,9 +78,16 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
   // contract product pages already have.
   const override = await fetchSeoOverride('BLOG_POST', post.id);
   const faqs = validFaqs(override?.faq);
+  // Shared by the JSON-LD and the visible trail — see components/seo/Breadcrumbs.
+  const crumbs = [
+    { name: 'Home', path: '/' },
+    { name: 'Blog', path: '/blogs' },
+    { name: post.title },
+  ];
+
   const jsonLd: object[] = [
     mergeStructuredData(articleSchema(post), override?.structuredDataOverride),
-    breadcrumbSchema([{ name: 'Home', path: '/' }, { name: 'Blog', path: '/blogs' }, { name: post.title }]),
+    breadcrumbSchema(crumbs),
     // The Blog the post declares itself part of, so isPartOf resolves to a
     // real node rather than dangling.
     blogSchema(),
@@ -88,6 +96,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
   return (
     <>
       <JsonLd data={jsonLd} />
+      <Breadcrumbs items={crumbs} className="mx-auto max-w-3xl px-4 pt-24" />
       <BlogPostClient slug={params.slug} initialPost={post} />
       {/* Visible, server-rendered — the same entries the FAQPage JSON-LD
           advertises, so there is no hidden-content markup. */}

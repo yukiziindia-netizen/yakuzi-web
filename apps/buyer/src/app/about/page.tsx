@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Breadcrumbs from '@/components/seo/Breadcrumbs';
 import { absoluteUrl } from '@/lib/seo/site';
 import { staticPageMetadata } from '@/lib/seo/overrides';
 import PolicyPage, { PolicySection } from '@/components/shared/PolicyPage';
@@ -49,6 +50,7 @@ const buildFaqs = (support: SupportContact) => [
 export default async function AboutPage() {
   const support = await fetchSupportContact();
   const FAQS = buildFaqs(support);
+  const crumbs = [{ name: 'Home', path: '/' }, { name: 'About Yukizi' }];
   return (
     <PolicyPage
       title="About Yukizi"
@@ -115,9 +117,10 @@ export default async function AboutPage() {
         ))}
       </PolicySection>
 
+      <Breadcrumbs items={crumbs} className="mb-6" />
       <JsonLd
         data={[
-          breadcrumbSchema([{ name: 'Home', path: '/' }, { name: 'About Yukizi' }]),
+          breadcrumbSchema(crumbs),
           faqPageSchema(FAQS),
         ]}
       />

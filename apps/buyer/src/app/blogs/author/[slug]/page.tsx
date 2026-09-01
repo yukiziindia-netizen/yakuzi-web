@@ -7,6 +7,7 @@ import { absoluteUrl, SITE_NAME } from '@/lib/seo/site';
 import { authorSlug, personSchema, breadcrumbSchema } from '@/lib/seo/schema';
 import { graph } from '@/lib/seo/schema';
 import JsonLd from '@/components/seo/JsonLd';
+import Breadcrumbs from '@/components/seo/Breadcrumbs';
 import SiteFooter from '@/components/shared/SiteFooter';
 
 /**
@@ -62,23 +63,23 @@ export default async function AuthorPage({ params }: { params: { slug: string } 
   // an empty one, same rule the product and category pages follow.
   if (!found) notFound();
   const { author, posts } = found;
+  // Shared by the JSON-LD and the visible trail, so the two cannot disagree.
+  const crumbs = [
+    { name: 'Home', path: '/' },
+    { name: 'Blog', path: '/blogs' },
+    { name: author.name },
+  ];
 
   return (
     <>
       <JsonLd
         data={graph(
           personSchema({ name: author.name, bio: author.bio, avatar: author.avatar }),
-          breadcrumbSchema([
-            { name: 'Home', path: '/' },
-            { name: 'Blog', path: '/blogs' },
-            { name: author.name },
-          ]),
+          breadcrumbSchema(crumbs),
         )}
       />
       <main className="mx-auto max-w-3xl px-4 py-12">
-        <nav className="mb-6 text-sm text-gray-500">
-          <Link href="/blogs" className="hover:text-gray-900">← Back to the blog</Link>
-        </nav>
+        <Breadcrumbs items={crumbs} className="mb-6" />
 
         <header className="mb-10 flex items-start gap-4">
           {author.avatar && (

@@ -10,6 +10,7 @@ import { absoluteUrl, metaTruncate, SITE_NAME } from '@/lib/seo/site';
 import { applySeoOverride, fetchSeoOverride, validFaqs } from '@/lib/seo/overrides';
 import { breadcrumbSchema, faqPageSchema, collectionPageSchema } from '@/lib/seo/schema';
 import JsonLd from '@/components/seo/JsonLd';
+import Breadcrumbs from '@/components/seo/Breadcrumbs';
 import SeoFaq from '@/components/seo/SeoFaq';
 
 export const dynamic = 'force-dynamic';
@@ -251,8 +252,12 @@ export default async function CategoryPage({
       faqs = validFaqs((await fetchSeoOverride('CATEGORY', categoryData.id))?.faq);
     }
   }
+  // One array, used for both the JSON-LD and the visible trail below, so the
+  // two can never describe different navigation.
+  const crumbs = [{ name: 'Home', path: '/' }, { name: categoryName }];
+
   const jsonLd: object[] = [
-    breadcrumbSchema([{ name: 'Home', path: '/' }, { name: categoryName }]),
+    breadcrumbSchema(crumbs),
   ];
   if (faqs.length) jsonLd.push(faqPageSchema(faqs));
 
@@ -262,6 +267,9 @@ export default async function CategoryPage({
       <HomeNavbar />
 
       <div className="w-full max-w-[1600px] 2xl:max-w-none mx-auto bg-white overflow-hidden flex flex-col relative min-h-screen">
+        {/* The trail the BreadcrumbList has always described but the page
+            never showed. */}
+        <Breadcrumbs items={crumbs} className="px-[4vw] pt-24 sm:pt-28 md:pt-32" />
         <section className="flex-1 flex flex-col w-full">
           {/* Banner slideshow. One responsive component rather than a
               desktop-only block: each slide picks the phone artwork itself

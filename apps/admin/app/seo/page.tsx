@@ -5,7 +5,9 @@ import { motion } from "framer-motion";
 import { ArrowRight, FileText, Globe, KeyRound, Route, Sparkles, Type as TypeIcon } from "lucide-react";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { Badge, Button, Input, Skeleton, StatCard } from "@/components/ui";
+import { useQuery } from "@tanstack/react-query";
 import { useSeoKeywords, useSeoMetaList, useSeoRedirects } from "@/hooks/useSeo";
+import { getInstagramStatus, refreshInstagramToken } from "@/api/instagram.api";
 import { usePlatformSettings, useUpdatePlatformSettings } from "@/hooks/useAdmin";
 import { META_EDITOR_ENTITY_TYPES, type SeoEntityType } from "@/api/seo.api";
 import { apiClient } from "@/lib/apiClient";
@@ -105,6 +107,59 @@ export default function SeoOverviewPage() {
       toast.error("Could not save the social profiles");
     } finally {
       setSocialsSaving(false);
+    }
+  };
+
+  // Instagram live feed. The token is a credential, so it is written through
+  // the settings endpoint but never read back — the API returns a mask, and
+  // "is this connected" is answered by actually calling Instagram rather than
+  // by checking that some string is stored. A 60-day-expired token is still a
+  // stored string, and reporting that as connected would be a half-truth.
+  const [igToken, setIgToken] = useState("");
+  const [igSaving, setIgSaving] = useState(false);
+  const [igRefreshing, setIgRefreshing] = useState(false);
+  const igStatus = useQuery({
+    queryKey: ["admin", "instagram", "status"],
+    queryFn: getInstagramStatus,
+    staleTime: 60_000,
+    retry: 1,
+  });
+  const saveIgToken = async () => {
+    setIgSaving(true);
+    try {
+      // Merged over current settings like every other partial save here, so
+      // saving the token cannot clear an unrelated field.
+      await updateSettings.mutateAsync({
+        ...(settings as Record<string, unknown> ?? {}),
+        instagramAccessToken: igToken.trim(),
+      } as any);
+      setIgToken("");
+      const status = await igStatus.refetch();
+      if (status.data?.connected) {
+        toast.success(`Connected to @${status.data.username} — the feed appears within ~30 minutes`);
+      } else {
+        toast.error(status.data?.error ?? "Saved, but Instagram rejected the token");
+      }
+    } catch {
+      toast.error("Could not save the Instagram token");
+    } finally {
+      setIgSaving(false);
+    }
+  };
+  const refreshIg = async () => {
+    setIgRefreshing(true);
+    try {
+      const res = await refreshInstagramToken();
+      if (res.refreshed) {
+        toast.success("Token extended — good for another 60 days");
+        igStatus.refetch();
+      } else {
+        toast.error(res.error ?? "Instagram would not extend this token");
+      }
+    } catch {
+      toast.error("Could not reach Instagram");
+    } finally {
+      setIgRefreshing(false);
     }
   };
 
@@ -239,6 +294,53 @@ export default function SeoOverviewPage() {
             ))}
           </div>
           <Button onClick={saveSocials} loading={socialsSaving} disabled={socialsSaving}>Save social profiles</Button>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2965, duration: 0.4 }} className="glass-card rounded-2xl p-5 space-y-3">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h2 className="font-semibold text-foreground text-sm">Instagram live feed</h2>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Shows your latest 8 posts near the bottom of the homepage. Until a working token is saved the section simply does not appear — the homepage is unchanged.
+              </p>
+            </div>
+            <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${
+              igStatus.data?.connected
+                ? "bg-emerald-500/10 text-emerald-600"
+                : "bg-muted text-muted-foreground"
+            }`}>
+              {igStatus.isLoading ? "Checking…" : igStatus.data?.connected ? "Connected" : "Not connected"}
+            </span>
+          </div>
+
+          {igStatus.data?.connected && (
+            <p className="text-sm text-muted-foreground">
+              Pulling from <strong>@{igStatus.data.username}</strong> — {igStatus.data.postCount} posts on the account.
+            </p>
+          )}
+          {!igStatus.isLoading && !igStatus.data?.connected && igStatus.data?.error && (
+            <p className="text-sm text-amber-600">{igStatus.data.error}</p>
+          )}
+
+          <Input
+            label="Instagram access token"
+            type="password"
+            placeholder="IGQVJ…"
+            value={igToken}
+            onChange={(e) => setIgToken(e.target.value)}
+          />
+          <p className="text-xs text-muted-foreground">
+            Instagram retired the old Basic Display API in December 2024, so this needs a <strong>Business or Creator</strong> account linked to a Facebook Page, and a long-lived token from a Meta app. Tokens last 60 days — press Refresh before then and the clock resets, no dashboard trip needed.
+          </p>
+
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={saveIgToken} loading={igSaving} disabled={igSaving || !igToken.trim()}>
+              Save &amp; connect
+            </Button>
+            <Button variant="outline" onClick={refreshIg} loading={igRefreshing} disabled={igRefreshing || !igStatus.data?.connected}>
+              Refresh for 60 more days
+            </Button>
+          </div>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.29, duration: 0.4 }} className="glass-card rounded-2xl p-5 space-y-3">

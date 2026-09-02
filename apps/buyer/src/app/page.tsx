@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 import HomeNavbar from '@/components/landing/HomeNavbar';
 import HeroSection from '@/components/landing/HeroSection';
@@ -53,11 +54,27 @@ function hasSearchOrFilter(searchParams: any): boolean {
   return Object.values(buildProductQueryParams(searchParams)).some((v) => v !== undefined);
 }
 
+// How many products the browse view shows before handing off to /products.
+//
+// The homepage used to render the entire catalogue under the curated rows, so
+// "a selection" and "everything" were the same screen — including a dozen
+// products shown twice, once in a curated row and again below. That was
+// invisible at a handful of products and obvious at 67.
+const HOMEPAGE_GRID_LIMIT = 24;
+
 // The product grid streams in after the shell: the (slow) products query no
 // longer holds back TTFB, the hero, or the navbar. The grid is still fully
 // server-rendered into the (streamed) HTML, so crawlers see every product.
-async function CarouselSection({ searchParams }: { searchParams: any }) {
+async function CarouselSection({
+  searchParams,
+  capped,
+}: {
+  searchParams: any;
+  /** Browse view only. A filtered or searched view shows every match. */
+  capped: boolean;
+}) {
   let initialProducts: any[] = [];
+  let total = 0;
   try {
     const res = await getProducts({
       limit: 100,
@@ -65,11 +82,33 @@ async function CarouselSection({ searchParams }: { searchParams: any }) {
     });
     if (res && res.data && Array.isArray(res.data)) {
       initialProducts = res.data;
+      total = res.total ?? res.data.length;
     }
   } catch (error) {
     console.error("[HomePage] Failed to load initial products:", error);
   }
-  return <ProductCarousel initialProducts={initialProducts} />;
+
+  const shown = capped ? initialProducts.slice(0, HOMEPAGE_GRID_LIMIT) : initialProducts;
+  const hasMore = capped && total > shown.length;
+
+  return (
+    <>
+      <ProductCarousel initialProducts={shown} />
+      {/* A real link, not a button that fetches more: the rest of the
+          catalogue lives on its own indexable page, so this is a crawlable
+          path to it as well as a way for a shopper to keep browsing. */}
+      {hasMore && (
+        <div className="flex justify-center px-4 pb-2 pt-4">
+          <Link
+            href="/products"
+            className="rounded-full border border-gray-300 bg-white px-6 py-2.5 text-sm font-semibold text-gray-900 transition-colors hover:border-[#854cbc] hover:text-[#854cbc]"
+          >
+            View all {total} products
+          </Link>
+        </div>
+      )}
+    </>
+  );
 }
 
 export default async function HomePage({
@@ -139,7 +178,7 @@ export default async function HomePage({
                 </div>
               }
             >
-              <CarouselSection searchParams={searchParams} />
+              <CarouselSection searchParams={searchParams} capped={showCuratedSections} />
             </Suspense>
           </div>
           {/* Below the products, and only on the browse view — the same rule

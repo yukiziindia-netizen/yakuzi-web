@@ -5,7 +5,7 @@ import { absoluteUrl } from '@/lib/seo/site';
 
 export const revalidate = 3600; // rebuild at most hourly
 
-const STATIC_PATHS = ['/', '/blogs', '/about', '/contact', '/privacy', '/terms', '/returns', '/shipping', '/cookie-policy'];
+const STATIC_PATHS = ['/', '/products', '/blogs', '/about', '/contact', '/privacy', '/terms', '/returns', '/shipping', '/cookie-policy'];
 
 async function fetchProductEntries(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = [];

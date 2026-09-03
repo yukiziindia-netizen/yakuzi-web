@@ -11,8 +11,12 @@ export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
   const productId = params.id as string;
-  const { data: product, isLoading, error } = useSellerProduct(productId);
+  const { data: product, isLoading, error, refetch, isRefetching } = useSellerProduct(productId);
   const deleteProduct = useDeleteSellerProduct();
+  // Only a real 404 means the product doesn't exist. Anything else (429
+  // rate-limit, timeout, network) is temporary — telling the seller the
+  // product is missing or they lack permission would be wrong.
+  const isRealMiss = error ? (error as any)?.response?.status === 404 : !product;
 
   const handleDelete = async () => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
@@ -51,11 +55,22 @@ export default function ProductDetailPage() {
               <p>Loading product details...</p>
             </div>
           ) : error || !product ? (
-            <div className="text-center py-12 p-6 glass-card rounded-2xl max-w-lg mx-auto mt-20">
-              <h2 className="text-xl font-bold text-foreground mb-2">Product not found</h2>
-              <p className="text-muted-foreground mb-6">The product you are looking for does not exist or you lack permission.</p>
-              <Button onClick={() => router.push("/products")}>Go back to Products</Button>
-            </div>
+            isRealMiss ? (
+              <div className="text-center py-12 p-6 glass-card rounded-2xl max-w-lg mx-auto mt-20">
+                <h2 className="text-xl font-bold text-foreground mb-2">Product not found</h2>
+                <p className="text-muted-foreground mb-6">This product does not exist or has been removed.</p>
+                <Button onClick={() => router.push("/products")}>Go back to Products</Button>
+              </div>
+            ) : (
+              <div className="text-center py-12 p-6 glass-card rounded-2xl max-w-lg mx-auto mt-20">
+                <h2 className="text-xl font-bold text-foreground mb-2">Couldn&apos;t load this product</h2>
+                <p className="text-muted-foreground mb-6">This is usually temporary — the server may be busy or the connection dropped. Your product is safe; it just couldn&apos;t be fetched right now.</p>
+                <div className="flex justify-center gap-3">
+                  <Button variant="outline" onClick={() => router.push("/products")}>Back to Products</Button>
+                  <Button onClick={() => refetch()} loading={isRefetching}>Try again</Button>
+                </div>
+              </div>
+            )
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                <div className="md:col-span-2 space-y-6">

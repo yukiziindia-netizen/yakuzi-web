@@ -487,7 +487,7 @@ export function ProductForm({
         shippingCharges: data.is_tax_included ? payloadShipping : (payloadShipping / (1 + (platformFees.shippingGstPercent || 0) / 100)),
         finalShippingPrice: payloadShipping,
         ...(data.delivery_text && { deliveryText: `${data.delivery_text} ${Number(data.delivery_text) === 1 ? 'day' : 'days'}` }),
-        ...(realImages.length > 0 && { images: realImages }),
+        ...(adapter.uploadMedia && realImages.length > 0 && { images: realImages }),
         ...(Object.keys(mergedExtraFields).length > 0 && { extraFields: mergedExtraFields }),
         discountType: mappedDiscountType || null,
         discountMeta: payloadDiscountMeta,
@@ -685,32 +685,33 @@ export function ProductForm({
           )}
         </div>
 
-        {/* Product Images */}
-        <div className="glass-card rounded-2xl p-6 space-y-4">
-          <div>
-            <h3 className="font-semibold text-foreground">Product Images</h3>
-            <p className="text-sm text-muted-foreground">
-              Upload one or more photos — they show as a swipeable gallery on the product page.
-            </p>
+        {/* Product Images — only rendered when the adapter can upload media.
+            Portals whose adapter omits uploadMedia (the seller portal) cannot
+            author catalog images, so the section is hidden there entirely. */}
+        {adapter.uploadMedia && (
+          <div className="glass-card rounded-2xl p-6 space-y-4">
+            <div>
+              <h3 className="font-semibold text-foreground">Product Images</h3>
+              <p className="text-sm text-muted-foreground">
+                Upload one or more photos — they show as a swipeable gallery on the product page.
+              </p>
+            </div>
+            <MediaUploader
+              items={mediaItems}
+              onChange={(next) => {
+                setMediaItems((current) => {
+                  const resolved = typeof next === "function" ? (next as (prev: MediaItem[]) => MediaItem[])(current) : next;
+                  setValue("image_list", resolved.filter((i) => !i.isLoading).map((i) => i.url), { shouldDirty: true, shouldValidate: true });
+                  return resolved;
+                });
+              }}
+              onUpload={(file) => adapter.uploadMedia!(file)}
+            />
+            {errors.image_list && (
+              <p className="text-sm text-red-500">{errors.image_list.message as string}</p>
+            )}
           </div>
-          <MediaUploader
-            items={mediaItems}
-            onChange={(next) => {
-              setMediaItems((current) => {
-                const resolved = typeof next === "function" ? (next as (prev: MediaItem[]) => MediaItem[])(current) : next;
-                setValue("image_list", resolved.filter((i) => !i.isLoading).map((i) => i.url), { shouldDirty: true, shouldValidate: true });
-                return resolved;
-              });
-            }}
-            onUpload={(file) => {
-              if (!adapter.uploadMedia) return Promise.reject(new Error("This form does not support image uploads"));
-              return adapter.uploadMedia(file);
-            }}
-          />
-          {errors.image_list && (
-            <p className="text-sm text-red-500">{errors.image_list.message as string}</p>
-          )}
-        </div>
+        )}
 
         {/* Variants */}
         <div className="glass-card rounded-2xl p-6 space-y-4 relative z-[42] transition-opacity duration-300">

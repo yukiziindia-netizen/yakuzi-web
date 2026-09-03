@@ -50,12 +50,15 @@ export function DateRangePicker({
     setOpen(false);
   };
 
-  const quickRanges = [
+  const quickRanges: { label: string; getValue: () => DateRange | undefined }[] = [
     { label: "Today", getValue: () => ({ from: startOfDay(new Date()), to: endOfDay(new Date()) }) },
     { label: "Yesterday", getValue: () => ({ from: startOfYesterday(), to: endOfYesterday() }) },
     { label: "Last 7 Days", getValue: () => ({ from: startOfDay(subDays(new Date(), 6)), to: endOfDay(new Date()) }) },
     { label: "Last 30 Days", getValue: () => ({ from: startOfDay(subDays(new Date(), 29)), to: endOfDay(new Date()) }) },
+    { label: "Last 90 Days", getValue: () => ({ from: startOfDay(subDays(new Date(), 89)), to: endOfDay(new Date()) }) },
     { label: "This Month", getValue: () => ({ from: startOfMonth(new Date()), to: endOfMonth(new Date()) }) },
+    // undefined = no date filter at all — the callers omit dateFrom/dateTo
+    { label: "All Time", getValue: () => undefined },
   ];
 
   return (
@@ -79,7 +82,7 @@ export function DateRangePicker({
             format(range.from, "LLL dd, y")
           )
         ) : (
-          <span>Pick a date range</span>
+          <span>All time</span>
         )}
       </Button>
 
@@ -135,18 +138,22 @@ export function DateRangePicker({
                   selected={range}
                   onSelect={setRange}
                   numberOfMonths={2}
-                  className="p-0 border-none m-0"
+                  className="p-0 border-none m-0 relative"
                   classNames={{
                     months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
                     month: "space-y-4",
                     month_caption: "flex justify-center pt-1 relative items-center",
                     caption_label: "text-sm font-bold text-gray-900",
-                    nav: "space-x-1 flex items-center",
+                    // The nav strip overlays the caption row of the (relative)
+                    // DayPicker root, so the arrows sit at the calendar's own
+                    // top corners instead of anchoring to the popup and
+                    // landing over the date grid.
+                    nav: "absolute inset-x-0 top-0 flex items-center justify-between z-10 pointer-events-none",
                     button_previous: cn(
-                      "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 transition-opacity rounded-md border border-gray-200 flex items-center justify-center absolute left-1 z-10"
+                      "h-7 w-7 bg-white p-0 opacity-60 hover:opacity-100 transition-opacity rounded-md border border-gray-200 flex items-center justify-center pointer-events-auto"
                     ),
                     button_next: cn(
-                      "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 transition-opacity rounded-md border border-gray-200 flex items-center justify-center absolute right-1 z-10"
+                      "h-7 w-7 bg-white p-0 opacity-60 hover:opacity-100 transition-opacity rounded-md border border-gray-200 flex items-center justify-center pointer-events-auto"
                     ),
                     month_grid: "w-full border-collapse space-y-1",
                     weekdays: "flex",

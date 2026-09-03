@@ -6,6 +6,7 @@ export interface ProductFormAdapter {
   getCategories: () => Promise<any[]>;
   searchSuggestions: (query: string, type?: "product" | "master") => Promise<Suggestion[]>;
   getSuggestionDetails?: (id: string) => Promise<any>;
+  /** Omit to hide the Product Images section — the portal cannot author catalog images. */
   uploadMedia?: (file: File) => Promise<string>;
   onDone?: () => void;
 }

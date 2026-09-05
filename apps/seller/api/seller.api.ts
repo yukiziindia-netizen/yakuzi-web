@@ -43,7 +43,10 @@ export async function getSellerProducts(params: { page?: number; limit?: number;
     };
   });
 
-  return { ...data, data: products }; // Return standardized paginated object
+  // Spread the API's inner payload, not the { message, data } envelope —
+  // `meta` lives inside data.data, and losing it showed "Showing 2 of 0
+  // products" (total fell back to 0).
+  return { ...(data.data ?? data), data: products }; // Return standardized paginated object
 }
 
 export async function createSellerProduct(input: ProductPayload | Record<string, any>) {
@@ -339,15 +342,6 @@ export async function createProductRequest(payload: { productName: string; manuf
   return data.data ?? data;
 }
 
-// ─── Analytics ────────────────────────────────────────
-export async function getSellerAnalytics(params: { dateFrom?: string; dateTo?: string } = {}) {
-  const qs = new URLSearchParams();
-  if (params.dateFrom) qs.set("dateFrom", params.dateFrom);
-  if (params.dateTo) qs.set("dateTo", params.dateTo);
-  const { data } = await apiClient.get<any>(`/sellers/analytics?${qs}`);
-  return data.data ?? data;
-}
-
 // ─── Support Tickets ─────────────────────────────────
 const sellerTicketEndpoints = {
   list: "/sellers/tickets",
@@ -501,5 +495,9 @@ export interface SellerReviewFilters {
  */
 export async function getSellerReviews(params: SellerReviewFilters = {}) {
   const { data } = await apiClient.get<{ data: any }>("/reviews/seller", { params });
-  return data.data ?? data;
+  // This endpoint returns the paginated object itself ({ data: Review[],
+  // total, summary, ... }) with no { message, data } envelope, so the usual
+  // `data.data ?? data` unwrap would grab the inner reviews ARRAY and drop
+  // total/summary — which rendered "No reviews yet" over a non-empty response.
+  return Array.isArray(data?.data) ? data : (data.data ?? data);
 }

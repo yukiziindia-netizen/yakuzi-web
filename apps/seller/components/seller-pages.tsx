@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { formatCurrency, formatDate } from "@yukizi/utils";
-import { OrderStatusBadge, Button, Badge, StatCard, Input } from "@/components/ui";
+import { OrderStatusBadge, Button, Badge, StatCard, Input, Pagination } from "@/components/ui";
 import { Package, Warehouse, CreditCard, TrendingUp, AlertTriangle, CheckCircle, Clock, Eye, Loader2, ShoppingBag, Search, Star } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, LineChart, Line } from "recharts";
 import {
@@ -17,7 +17,6 @@ import {
   useSellerCustomOrders,
   useSellerCancelledOrders,
   useSellerDashboard,
-  useSellerAnalytics,
   useSellerWaitlist, useSellerReviews, useCategories } from "@/hooks/useSeller";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -226,8 +225,20 @@ export function OrdersContent() {
       }
     });
 
+  // The API returns every order in the date range in one response (the stat
+  // cards need the full list), so pagination is purely presentational.
+  const ORDERS_PAGE_SIZE = 10;
+  const [ordersPage, setOrdersPage] = useState(1);
+  useEffect(() => { setOrdersPage(1); }, [tab, dateRange]);
+  const ordersTotalPages = Math.max(1, Math.ceil(filtered.length / ORDERS_PAGE_SIZE));
+  const currentOrdersPage = Math.min(ordersPage, ordersTotalPages);
+  const pagedOrders = filtered.slice((currentOrdersPage - 1) * ORDERS_PAGE_SIZE, currentOrdersPage * ORDERS_PAGE_SIZE);
+
   const totalOrderAmount = useMemo(() => {
+    // Cancelled orders are money that never happened — they get their own
+    // card, not a share of Order Amount.
     return allOrders.reduce((sum, order) => {
+      if ((order.orderStatus || order.status || "").toString().toUpperCase() === "CANCELLED") return sum;
       const items = order.items || order.orderItems || [];
       const orderSellerSum = items.reduce((iSum: number, item: any) => {
         const itemTotal = item.totalPrice ? Number(item.totalPrice) : (Number(item.price || item.unitPrice || 0) * Number(item.quantity || 1));
@@ -317,7 +328,15 @@ export function OrdersContent() {
       </div>
 
       <div className="glass-card rounded-2xl overflow-hidden">
-        <OrderTable orders={filtered} settlements={recordedSettlements} showConfirm={tab === "all" || tab === "pending"} updateFn={updateOrderStatus} />
+        <OrderTable orders={pagedOrders} settlements={recordedSettlements} showConfirm={tab === "all" || tab === "pending"} updateFn={updateOrderStatus} />
+        {filtered.length > 0 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 px-6 py-3 border-t border-border/50">
+            <p className="text-xs text-muted-foreground">
+              Showing {(currentOrdersPage - 1) * ORDERS_PAGE_SIZE + 1}–{Math.min(currentOrdersPage * ORDERS_PAGE_SIZE, filtered.length)} of {filtered.length} orders
+            </p>
+            <Pagination page={currentOrdersPage} totalPages={ordersTotalPages} onPageChange={setOrdersPage} />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -440,13 +459,13 @@ function InventoryRow({ item, index }: { item: any, index: number }) {
 }
 
 export function AnalyticsContent() {
-  const { data: dashboardData, isLoading: loadingDashboard } = useSellerDashboard();
-  const { data: analyticsData, isLoading: loadingAnalytics } = useSellerAnalytics();
+  // Everything here comes from the dashboard payload. This page used to also
+  // call GET /sellers/analytics — an endpoint that has never existed on the
+  // API — purely as a fallback, guaranteeing a 404 on every visit.
+  const { data: dashboardData, isLoading } = useSellerDashboard();
 
-  const analytics = analyticsData ?? {};
-  const chartData: { month: string; revenue: number; orders: number }[] = dashboardData?.chartData ?? analytics?.chartData ?? [];
-  const stats = dashboardData?.stats ?? analytics?.stats ?? { totalRevenue: 0, totalOrders: 0, activeListings: 0, avgRating: 0 };
-  const isLoading = loadingDashboard || loadingAnalytics;
+  const chartData: { month: string; revenue: number; orders: number }[] = dashboardData?.chartData ?? [];
+  const stats = dashboardData?.stats ?? { totalRevenue: 0, totalOrders: 0, activeListings: 0, avgRating: 0 };
 
   if (isLoading) return <div className="p-6 text-center text-muted-foreground">Loading analytics...</div>;
 

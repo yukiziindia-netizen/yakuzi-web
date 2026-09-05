@@ -17,7 +17,8 @@ import {
   getIntegrations, getIntegration, getAmazonMarketplaces, connectShopify,
   checkWooCommerceStore, connectWooCommerce, connectAmazon,
   updateIntegrationSettings, completeIntegrationSetup, requestIntegrationSync,
-  getIntegrationMappings, mapIntegrationProduct, disconnectIntegration } from "@/api/seller.api";
+  getIntegrationMappings, mapIntegrationProduct, disconnectIntegration,
+  getMappingCandidates, resolveInventoryConflict } from "@/api/seller.api";
 import type { ProductPayload } from "@yukizi/utils";
 import { useSellerAuth } from "@/store";
 
@@ -368,6 +369,10 @@ export function useSellerIntegration(provider: string) {
     enabled: !!provider,
     staleTime: 30_000,
     retry: 1,
+    // While an import is running, poll so the seller sees progress instead of
+    // a stuck "Sync running". Stops the moment the job finishes.
+    refetchInterval: (query) =>
+      (query.state.data as any)?.activeJob ? 5_000 : false,
   });
 }
 
@@ -485,6 +490,37 @@ export function useDisconnectIntegration() {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["seller", "integrations"] });
       void qc.invalidateQueries({ queryKey: ["seller", "integration"] });
+    },
+  });
+}
+
+// ─── Integrations: product mapping (phase 2) ──────────
+
+export function useMappingCandidates(search: string, enabled = false) {
+  return useQuery({
+    queryKey: ["seller", "mapping-candidates", search],
+    queryFn: () => getMappingCandidates(search),
+    enabled,
+    staleTime: 60_000,
+    retry: 1,
+  });
+}
+
+export function useResolveInventoryConflict() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      integrationId,
+      mappingId,
+      choice,
+    }: {
+      integrationId: string;
+      mappingId: string;
+      choice: "YUKIZI" | "EXTERNAL";
+    }) => resolveInventoryConflict(integrationId, mappingId, choice),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["seller", "integration-mappings"] });
+      void qc.invalidateQueries({ queryKey: ["seller", "integrations"] });
     },
   });
 }

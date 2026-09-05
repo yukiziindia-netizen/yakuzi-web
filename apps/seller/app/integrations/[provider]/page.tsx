@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import {
   AlertTriangle,
   ArrowLeft,
+  ArrowRight,
   CheckCircle2,
   Clock,
   RefreshCw,
@@ -135,6 +136,40 @@ export default function IntegrationDetailPage() {
         <SetupWizard integration={integration} providerName={meta.name} />
       ) : (
         <SyncSettings integration={integration} />
+      )}
+
+      {/* Product mapping summary. Only meaningful once an import has run. */}
+      {integration.setupCompleted && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass-card rounded-2xl p-6"
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="font-semibold text-foreground">Product mapping</h2>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                {activeJob
+                  ? "Importing this channel's catalogue..."
+                  : "Match this channel's listings to your Yukizi products."}
+              </p>
+              {activeJob && activeJob.processedItems > 0 && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  {activeJob.processedItems} listings processed so far
+                </p>
+              )}
+            </div>
+            <Link href={`/integrations/${String(params?.provider ?? "")}/mappings`}>
+              <Button
+                variant="outline"
+                size="sm"
+                rightIcon={<ArrowRight className="h-3.5 w-3.5" />}
+              >
+                View mapping
+              </Button>
+            </Link>
+          </div>
+        </motion.div>
       )}
 
       {/* Connection facts */}

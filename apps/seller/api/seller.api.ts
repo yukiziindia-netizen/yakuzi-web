@@ -645,3 +645,64 @@ export async function disconnectIntegration(id: string) {
   const { data } = await apiClient.delete<any>(`/integrations/${id}`);
   return data.data ?? data;
 }
+
+// ─── Integrations: product mapping (phase 2) ──────────
+
+export interface IntegrationMappingRow {
+  id: string;
+  yukiziProductName: string | null;
+  yukiziProductId: string | null;
+  yukiziSku: string | null;
+  externalTitle: string | null;
+  externalSku: string | null;
+  externalProductId: string;
+  externalVariantId: string | null;
+  asin: string | null;
+  fulfillmentChannel: "MERCHANT" | "AMAZON_FBA";
+  status: "MAPPED" | "UNMAPPED" | "CONFLICT" | "MISSING_SKU";
+  conflictReason: string | null;
+  externalQuantity: number | null;
+  inventoryConflict: {
+    yukiziQuantity: number | null;
+    externalQuantity: number | null;
+    detectedAt: string;
+  } | null;
+  mappedManually: boolean;
+  lastSyncedAt: string | null;
+}
+
+export interface IntegrationMappingsResponse {
+  data: IntegrationMappingRow[];
+  counts: {
+    mapped: number;
+    unmapped: number;
+    conflict: number;
+    missingSku: number;
+    inventoryConflicts: number;
+    total: number;
+  };
+  total: number;
+  page: number;
+  limit: number;
+}
+
+/** Yukizi listings the seller can map an external listing onto. */
+export async function getMappingCandidates(search?: string) {
+  const { data } = await apiClient.get<any>("/integrations/mappings/candidates", {
+    params: search ? { search } : {},
+  });
+  return (data.data ?? data) as Array<{ id: string; name: string; sku: string | null }>;
+}
+
+/** Resolve one inventory difference in favour of Yukizi or the channel. */
+export async function resolveInventoryConflict(
+  integrationId: string,
+  mappingId: string,
+  choice: "YUKIZI" | "EXTERNAL",
+) {
+  const { data } = await apiClient.post<any>(
+    `/integrations/${integrationId}/mappings/${mappingId}/resolve-inventory`,
+    { choice },
+  );
+  return data.data ?? data;
+}

@@ -501,3 +501,147 @@ export async function getSellerReviews(params: SellerReviewFilters = {}) {
   // total/summary — which rendered "No reviews yet" over a non-empty response.
   return Array.isArray(data?.data) ? data : (data.data ?? data);
 }
+
+// ─── Integrations (sales channels) ────────────────────
+// The API wraps these in { message, data }. Nothing here ever receives a
+// credential — the backend's seller view omits those columns entirely.
+
+export type IntegrationProviderKey = "SHOPIFY" | "WOOCOMMERCE" | "AMAZON";
+
+export interface SellerIntegration {
+  id: string;
+  provider: IntegrationProviderKey;
+  status: string;
+  health: "CONNECTED" | "PAUSED" | "ACTION_REQUIRED" | "DISCONNECTED";
+  storeName: string | null;
+  storeUrl: string | null;
+  marketplaceId: string | null;
+  region: string | null;
+  scopes: string[];
+  syncEnabled: boolean;
+  syncProducts: boolean;
+  syncInventory: boolean;
+  syncPrices: boolean;
+  syncOrders: boolean;
+  inventoryDirection: "IMPORT_ONLY" | "EXPORT_ONLY" | "TWO_WAY";
+  sourceOfTruth: "YUKIZI" | "EXTERNAL";
+  setupCompleted: boolean;
+  lastSyncAt: string | null;
+  lastSuccessfulSyncAt: string | null;
+  lastError: string | null;
+  connectedAt: string;
+}
+
+export interface IntegrationsOverview {
+  providers: Array<{
+    provider: IntegrationProviderKey;
+    available: boolean;
+    integration: SellerIntegration | null;
+  }>;
+  summary: {
+    productsMonitored: number;
+    productsMapped: number;
+    productsNeedingAttention: number;
+    lastSyncAt: string | null;
+  };
+}
+
+export async function getIntegrations() {
+  const { data } = await apiClient.get<any>("/integrations");
+  return (data.data ?? data) as IntegrationsOverview;
+}
+
+export async function getIntegration(provider: string) {
+  const { data } = await apiClient.get<any>(`/integrations/${provider.toLowerCase()}`);
+  return data.data ?? data;
+}
+
+export async function getAmazonMarketplaces() {
+  const { data } = await apiClient.get<any>("/integrations/amazon/marketplaces");
+  return data.data ?? data;
+}
+
+/** Returns the provider consent URL for the browser to navigate to. */
+export async function connectShopify(shopDomain: string) {
+  const { data } = await apiClient.post<any>("/integrations/shopify/connect", { shopDomain });
+  return (data.data ?? data) as { authorizationUrl: string };
+}
+
+/** Pre-flight probe so the seller sees a useful error before being redirected. */
+export async function checkWooCommerceStore(storeUrl: string) {
+  const { data } = await apiClient.post<any>("/integrations/woocommerce/check", { storeUrl });
+  return (data.data ?? data) as { reachable: boolean; isWooCommerce: boolean; message?: string };
+}
+
+export async function connectWooCommerce(storeUrl: string) {
+  const { data } = await apiClient.post<any>("/integrations/woocommerce/connect", { storeUrl });
+  return (data.data ?? data) as { authorizationUrl: string };
+}
+
+export async function connectAmazon(marketplaceId: string) {
+  const { data } = await apiClient.post<any>("/integrations/amazon/connect", { marketplaceId });
+  return (data.data ?? data) as { authorizationUrl: string };
+}
+
+export async function updateIntegrationSettings(
+  id: string,
+  input: Partial<
+    Pick<
+      SellerIntegration,
+      "syncEnabled" | "syncProducts" | "syncInventory" | "inventoryDirection" | "sourceOfTruth"
+    >
+  >,
+) {
+  const { data } = await apiClient.patch<any>(`/integrations/${id}/settings`, input);
+  return data.data ?? data;
+}
+
+export async function completeIntegrationSetup(
+  id: string,
+  input: {
+    syncProducts: boolean;
+    syncInventory: boolean;
+    inventoryDirection: string;
+    sourceOfTruth: string;
+  },
+) {
+  const { data } = await apiClient.post<any>(`/integrations/${id}/setup`, input);
+  return data.data ?? data;
+}
+
+export async function requestIntegrationSync(id: string) {
+  const { data } = await apiClient.post<any>(`/integrations/${id}/sync`);
+  return (data.data ?? data) as { id: string; status: string; alreadyQueued: boolean };
+}
+
+export async function getIntegrationActivity(
+  id: string,
+  params: { page?: number; limit?: number } = {},
+) {
+  const { data } = await apiClient.get<any>(`/integrations/${id}/activity`, { params });
+  return data.data ?? data;
+}
+
+export async function getIntegrationMappings(
+  id: string,
+  params: { page?: number; limit?: number; status?: string; search?: string } = {},
+) {
+  const { data } = await apiClient.get<any>(`/integrations/${id}/mappings`, { params });
+  return data.data ?? data;
+}
+
+export async function mapIntegrationProduct(
+  id: string,
+  mappingId: string,
+  sellerOfferId: string,
+) {
+  const { data } = await apiClient.patch<any>(`/integrations/${id}/mappings/${mappingId}`, {
+    sellerOfferId,
+  });
+  return data.data ?? data;
+}
+
+export async function disconnectIntegration(id: string) {
+  const { data } = await apiClient.delete<any>(`/integrations/${id}`);
+  return data.data ?? data;
+}

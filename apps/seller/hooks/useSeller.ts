@@ -13,7 +13,11 @@ import {
   searchSuggestions, getCategoriesWithSubs,
   verifyGstOrPan, uploadKycDocument,
   getSellerOrderInvoices,
-  getSellerWaitlist, getSellerReviews, type SellerReviewFilters } from "@/api/seller.api";
+  getSellerWaitlist, getSellerReviews, type SellerReviewFilters,
+  getIntegrations, getIntegration, getAmazonMarketplaces, connectShopify,
+  checkWooCommerceStore, connectWooCommerce, connectAmazon,
+  updateIntegrationSettings, completeIntegrationSetup, requestIntegrationSync,
+  getIntegrationMappings, mapIntegrationProduct, disconnectIntegration } from "@/api/seller.api";
 import type { ProductPayload } from "@yukizi/utils";
 import { useSellerAuth } from "@/store";
 
@@ -341,5 +345,146 @@ export function useSellerReviews(params: SellerReviewFilters = {}) {
     queryFn: () => getSellerReviews(params),
     staleTime: 60_000,
     retry: 1,
+  });
+}
+
+// ─── Integrations ─────────────────────────────────────
+// Connection status is polled while a sync job is in flight; everything else
+// follows the usual 60s staleTime convention.
+
+export function useSellerIntegrations() {
+  return useQuery({
+    queryKey: ["seller", "integrations"],
+    queryFn: getIntegrations,
+    staleTime: 60_000,
+    retry: 1,
+  });
+}
+
+export function useSellerIntegration(provider: string) {
+  return useQuery({
+    queryKey: ["seller", "integration", provider],
+    queryFn: () => getIntegration(provider),
+    enabled: !!provider,
+    staleTime: 30_000,
+    retry: 1,
+  });
+}
+
+export function useAmazonMarketplaces(enabled = false) {
+  return useQuery({
+    queryKey: ["seller", "integrations", "amazon-marketplaces"],
+    queryFn: getAmazonMarketplaces,
+    enabled,
+    staleTime: 600_000,
+    retry: 1,
+  });
+}
+
+export function useIntegrationMappings(
+  id: string,
+  params: { page?: number; limit?: number; status?: string; search?: string } = {},
+) {
+  return useQuery({
+    queryKey: ["seller", "integration-mappings", id, params],
+    queryFn: () => getIntegrationMappings(id, params),
+    enabled: !!id,
+    staleTime: 30_000,
+    retry: 1,
+  });
+}
+
+/**
+ * Connect mutations return a provider consent URL rather than a connected
+ * state: the caller navigates the browser there, and the connection only
+ * exists once that platform redirects back to our callback.
+ */
+export function useConnectShopify() {
+  return useMutation({ mutationFn: (shopDomain: string) => connectShopify(shopDomain) });
+}
+
+export function useCheckWooCommerceStore() {
+  return useMutation({ mutationFn: (storeUrl: string) => checkWooCommerceStore(storeUrl) });
+}
+
+export function useConnectWooCommerce() {
+  return useMutation({ mutationFn: (storeUrl: string) => connectWooCommerce(storeUrl) });
+}
+
+export function useConnectAmazon() {
+  return useMutation({ mutationFn: (marketplaceId: string) => connectAmazon(marketplaceId) });
+}
+
+export function useUpdateIntegrationSettings() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: Record<string, unknown> }) =>
+      updateIntegrationSettings(id, input),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["seller", "integrations"] });
+      void qc.invalidateQueries({ queryKey: ["seller", "integration"] });
+    },
+  });
+}
+
+export function useCompleteIntegrationSetup() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      input,
+    }: {
+      id: string;
+      input: {
+        syncProducts: boolean;
+        syncInventory: boolean;
+        inventoryDirection: string;
+        sourceOfTruth: string;
+      };
+    }) => completeIntegrationSetup(id, input),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["seller", "integrations"] });
+      void qc.invalidateQueries({ queryKey: ["seller", "integration"] });
+    },
+  });
+}
+
+export function useRequestIntegrationSync() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => requestIntegrationSync(id),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["seller", "integration"] });
+    },
+  });
+}
+
+export function useMapIntegrationProduct() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      mappingId,
+      sellerOfferId,
+    }: {
+      id: string;
+      mappingId: string;
+      sellerOfferId: string;
+    }) => mapIntegrationProduct(id, mappingId, sellerOfferId),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["seller", "integration-mappings"] });
+      void qc.invalidateQueries({ queryKey: ["seller", "integrations"] });
+    },
+  });
+}
+
+export function useDisconnectIntegration() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => disconnectIntegration(id),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["seller", "integrations"] });
+      void qc.invalidateQueries({ queryKey: ["seller", "integration"] });
+    },
   });
 }

@@ -29,6 +29,14 @@ import {
   type ProviderKey,
 } from "@/components/integrations/provider-meta";
 
+/**
+ * Channels with a signature-verified inbound webhook path, which is what makes
+ * two-way sync safe: without it Yukizi cannot tell the echo of its own write
+ * from a real change. Mirrors `supportsTwoWaySync()` on the API, which refuses
+ * anything else regardless of what the UI offers.
+ */
+const SUPPORTS_TWO_WAY = new Set(["SHOPIFY", "WOOCOMMERCE"]);
+
 const DIRECTION_LABELS: Record<string, { title: string; help: string }> = {
   IMPORT_ONLY: {
     title: "Import only",
@@ -367,6 +375,7 @@ function SetupWizard({
   const [direction, setDirection] = useState("IMPORT_ONLY");
   const [sourceOfTruth, setSourceOfTruth] = useState("YUKIZI");
   const complete = useCompleteIntegrationSetup();
+  const supportsTwoWay = SUPPORTS_TWO_WAY.has(integration.provider);
 
   return (
     <motion.div
@@ -414,25 +423,29 @@ function SetupWizard({
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {(["IMPORT_ONLY", "EXPORT_ONLY", "TWO_WAY"] as const).map((value) => {
-            const twoWayLocked = value === "TWO_WAY";
+            // Two-way needs an inbound webhook path so Yukizi can recognise
+            // the echo of its own write. Amazon's only inbound path here is
+            // the periodic sweep, which cannot tell an echo from a real
+            // change — the API refuses it too.
+            const locked = value === "TWO_WAY" && !supportsTwoWay;
             return (
               <button
                 key={value}
                 type="button"
-                disabled={twoWayLocked}
+                disabled={locked}
                 onClick={() => setDirection(value)}
                 className={`text-left rounded-xl border p-3 transition-all ${
                   direction === value
                     ? "border-primary bg-primary/5"
                     : "border-border hover:bg-accent/40"
-                } ${twoWayLocked ? "opacity-50 cursor-not-allowed" : ""}`}
+                } ${locked ? "opacity-50 cursor-not-allowed" : ""}`}
               >
                 <p className="text-sm font-medium text-foreground">
                   {DIRECTION_LABELS[value].title}
                 </p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {twoWayLocked
-                    ? "Available once inventory sync is live."
+                  {locked
+                    ? "Not available for this channel — Yukizi can't reliably tell an Amazon echo from a real change."
                     : DIRECTION_LABELS[value].help}
                 </p>
               </button>
@@ -513,6 +526,7 @@ function SetupWizard({
 /** Post-setup controls. */
 function SyncSettings({ integration }: { integration: any }) {
   const update = useUpdateIntegrationSettings();
+  const supportsTwoWay = SUPPORTS_TWO_WAY.has(integration.provider);
 
   const save = (input: Record<string, unknown>) =>
     update.mutate(
@@ -551,11 +565,48 @@ function SyncSettings({ integration }: { integration: any }) {
         onChange={(v) => save({ syncInventory: v })}
       />
 
-      <div className="pt-2 border-t border-border/40">
-        <p className="text-sm font-medium text-foreground mb-1">Inventory direction</p>
+      <div className="pt-3 border-t border-border/40">
+        <p className="text-sm font-medium text-foreground mb-2">
+          Inventory direction
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {(["IMPORT_ONLY", "EXPORT_ONLY", "TWO_WAY"] as const).map((value) => {
+            const locked = value === "TWO_WAY" && !supportsTwoWay;
+            const selected = integration.inventoryDirection === value;
+            return (
+              <button
+                key={value}
+                type="button"
+                disabled={locked || update.isPending}
+                onClick={() => save({ inventoryDirection: value })}
+                className={`text-left rounded-xl border p-3 transition-all ${
+                  selected
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:bg-accent/40"
+                } ${locked ? "opacity-50 cursor-not-allowed" : ""}`}
+              >
+                <p className="text-sm font-medium text-foreground">
+                  {DIRECTION_LABELS[value].title}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {locked
+                    ? "Not available for this channel."
+                    : DIRECTION_LABELS[value].help}
+                </p>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="pt-3 border-t border-border/40">
+        <p className="text-sm font-medium text-foreground mb-1">
+          Inventory source of truth
+        </p>
         <p className="text-xs text-muted-foreground">
-          {DIRECTION_LABELS[integration.inventoryDirection]?.title} —{" "}
-          {DIRECTION_LABELS[integration.inventoryDirection]?.help}
+          {integration.sourceOfTruth === "YUKIZI"
+            ? "Yukizi is master — Yukizi quantities are sent to this channel."
+            : "This channel is master — its quantities overwrite Yukizi."}
         </p>
       </div>
     </motion.div>

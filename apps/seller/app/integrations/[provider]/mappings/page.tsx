@@ -339,7 +339,15 @@ function MappingRow({
                     resolve.mutate(
                       { integrationId, mappingId: row.id, choice: "YUKIZI" },
                       {
-                        onSuccess: () => toast.success("Kept the Yukizi quantity."),
+                        onSuccess: (result: any) =>
+                          toast.success(
+                            // Whether the channel actually gets corrected
+                            // depends on the sync direction, so say which
+                            // happened rather than implying either.
+                            result?.appliedTo === "YUKIZI"
+                              ? "Yukizi updated."
+                              : "Kept the Yukizi quantity.",
+                          ),
                         onError: (err: any) =>
                           toast.error(err?.response?.data?.message || "Couldn't resolve."),
                       },

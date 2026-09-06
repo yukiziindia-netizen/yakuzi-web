@@ -39,6 +39,18 @@ export const ProductListResponseSchema = z.object({
   total: z.number(),
   page: z.number(),
   limit: z.number(),
+  // Set only when the request failed and the empty list below is a stand-in
+  // for an answer, not an answer.
+  //
+  // getProducts() swallows its errors so a flaky API costs a page its grid
+  // rather than the whole page — right for the storefront, wrong for anything
+  // that has to tell "no products" apart from "could not ask". The sitemap
+  // could not, so a single failed fetch published a sitemap announcing that
+  // the catalogue did not exist.
+  //
+  // Optional, so every existing caller keeps ignoring it and behaves exactly
+  // as before.
+  failed: z.boolean().optional(),
 });
 
 export const CreateProductSchema = z.object({
@@ -147,6 +159,7 @@ export async function getProducts(params?: {
       total: 0,
       page: params?.page ?? 1,
       limit: params?.limit ?? 24,
+      failed: true,
     };
   }
 }

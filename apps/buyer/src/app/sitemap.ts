@@ -1,35 +1,26 @@
 import type { MetadataRoute } from 'next';
-import { getProducts, getCategories, getBlogs } from '@yukizi/api-client';
+import { getCategories, getBlogs } from '@yukizi/api-client';
 import { authorSlug } from '@/lib/seo/schema';
 import { absoluteUrl } from '@/lib/seo/site';
+import { fetchAllProducts, isBuildPhase } from '@/lib/seo/product-fetch';
 
 export const revalidate = 3600; // rebuild at most hourly
 
 const STATIC_PATHS = ['/', '/products', '/blogs', '/about', '/contact', '/privacy', '/terms', '/returns', '/shipping', '/cookie-policy'];
 
-async function fetchProductEntries(): Promise<MetadataRoute.Sitemap> {
+async function fetchProductEntries(): Promise<{ entries: MetadataRoute.Sitemap; failed: boolean }> {
+  const { products, failed } = await fetchAllProducts('sitemap');
   const entries: MetadataRoute.Sitemap = [];
-  try {
-    // catalog is small (~44); paginate defensively up to 5000
-    let page = 1;
-    for (;;) {
-      const res = await getProducts({ page, limit: 100 });
-      for (const p of res.data) {
-        if (!p.isActive && p.isActive !== undefined) continue;
-        entries.push({
-          url: absoluteUrl(`/products/${p.slug ?? p.id}`),
-          lastModified: p.updatedAt ? new Date(p.updatedAt) : undefined,
-          changeFrequency: 'daily',
-          priority: 0.8,
-        });
-      }
-      if (page * res.limit >= res.total || page >= 50) break;
-      page += 1;
-    }
-  } catch {
-    /* fail-open: ship the static entries rather than a 500 sitemap */
+  for (const p of products) {
+    if (!p.isActive && p.isActive !== undefined) continue;
+    entries.push({
+      url: absoluteUrl(`/products/${p.slug ?? p.id}`),
+      lastModified: p.updatedAt ? new Date(p.updatedAt) : undefined,
+      changeFrequency: 'daily',
+      priority: 0.8,
+    });
   }
-  return entries;
+  return { entries, failed };
 }
 
 async function fetchCategoryEntries(): Promise<MetadataRoute.Sitemap> {
@@ -109,7 +100,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     fetchCategoryEntries(),
     fetchBlogEntries(),
   ]);
-  entries.push(...products, ...categories, ...blogs);
+  entries.push(...products.entries, ...categories, ...blogs);
+
+  // Refuse to publish a sitemap that says the catalogue does not exist.
+  //
+  // A 200 with the static pages and no products is the worst outcome: it is a
+  // confident, cacheable statement that the shop has nothing in it, and Google
+  // acts on it by dropping product URLs it already knew. A 500 costs nothing —
+  // Search Console flags "couldn't fetch", the last good sitemap stays in
+  // effect, and Google retries.
+  //
+  // Not during a build, though. Failing there would block a deploy over a
+  // transient upstream blip, and the route regenerates hourly anyway, so the
+  // first revalidation after the build fixes it.
+  if (products.failed && !isBuildPhase()) {
+    throw new Error('[sitemap] product fetch failed after retries; refusing to publish a sitemap with no products');
+  }
 
   return entries;
 }

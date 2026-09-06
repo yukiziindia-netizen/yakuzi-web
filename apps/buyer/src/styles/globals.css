@@ -370,6 +370,17 @@
    hundred-scrolling-cards case that hurts INP.
    ───────────────────────────────────────────────────────────────────── */
 .nav-pill.nav-pill {
+  /* 12px -> 8px. The markup asks for `rounded-xl`, which is 0.75rem, and this
+     app's root font-size is fluid (16px up to 22.67px on very wide screens),
+     so that radius quietly grew with the viewport. Pinning it in px keeps the
+     corner identical at every width, which is what the rest of the radius
+     scale below already does.
+
+     Why it read as too round on phones specifically: the radius is absolute
+     but the bar is not. 12px was 24% of the 51px desktop bar and 33% of the
+     36px phone pill, so the same corner looked far heavier on a phone. At 8px
+     that becomes 16% / 22% — clearly softened, still nowhere near sharp. */
+  border-radius: 8px;
   /* Genuinely translucent, per Rishi's reference: the product artwork behind
      the bar should read THROUGH the purple, diffused by the blur, rather than
      being hidden by it. The previous 0.90-0.93 alpha was effectively a solid

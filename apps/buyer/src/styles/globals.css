@@ -883,3 +883,18 @@
       0 0 18px 6px rgba(12, 6, 22, 0.60);
   }
 }
+
+/* ─── Wishlist ribbon ink ────────────────────────────────────────────────
+   The save ribbon is a PNG recoloured with a mask, and its colour is applied
+   as an inline style — which no `dark:` utility can reach. It was therefore
+   pure black on dark product cards, i.e. invisible.
+
+   WishlistIcon reads `var(--wishlist-ink, #000)`, so light mode keeps the
+   exact black it had at every call site and only dark mode is remapped.
+   Slightly off pure white, matching how body text is handled here: a
+   full-strength white icon on a dark card reads as brighter than the product
+   title beside it.
+   ───────────────────────────────────────────────────────────────────────── */
+.dark {
+  --wishlist-ink: rgba(255, 255, 255, 0.92);
+}

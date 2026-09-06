@@ -359,7 +359,16 @@ export function GridProductCard({ product, index, onOpenReview, showFullTitle }:
           {showBellIcon ? (
             <button 
               onClick={handleToggleWaitlist}
-              className={`transition-colors p-1 rounded-full ${isWaitlisted ? 'bg-gray-900 text-white hover:bg-gray-800' : 'text-black hover:text-black/80 hover:bg-black/5'}`}
+              // Dark mode inverts both states rather than tinting them: the
+              // resting bell was `text-black` on a dark card, and the "on the
+              // waitlist" chip was near-black on a dark card, so neither was
+              // visible. The chip stays a filled chip — dark-on-light becomes
+              // light-on-dark — so the state still reads at a glance.
+              className={`transition-colors p-1 rounded-full ${
+                isWaitlisted
+                  ? 'bg-gray-900 text-white hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-white/90'
+                  : 'text-black hover:text-black/80 hover:bg-black/5 dark:text-white dark:hover:text-white/80 dark:hover:bg-white/10'
+              }`}
               title={isWaitlisted ? "Remove from notify me" : "Notify me when available"}
               aria-pressed={isWaitlisted}
             >
@@ -415,7 +424,10 @@ export function GridProductCard({ product, index, onOpenReview, showFullTitle }:
             // card stays as clean as it was.
             <button
               aria-label="Add to cart"
-              className="flex h-7 w-7 items-center justify-center rounded-full text-[#2f1b4d] transition-all hover:bg-[#854cbc]/12 hover:text-[#854cbc] active:scale-90 focus:outline-none"
+              // #2f1b4d is a near-black purple — correct on a light card,
+              // invisible on a dark one. The hover tint moves too: #854cbc is
+              // a mid purple that barely separates from the dark surface.
+              className="flex h-7 w-7 items-center justify-center rounded-full text-[#2f1b4d] transition-all hover:bg-[#854cbc]/12 hover:text-[#854cbc] active:scale-90 focus:outline-none dark:text-white dark:hover:bg-white/10 dark:hover:text-[#c9a6f0]"
               onClick={handlePlusClick}
             >
               <Plus className="w-5 h-5" strokeWidth={3} />

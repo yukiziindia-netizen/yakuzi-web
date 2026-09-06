@@ -2,10 +2,11 @@ import { Suspense } from 'react';
 import { Loader2 } from 'lucide-react';
 import type { Metadata } from 'next';
 import HomeNavbar from '@/components/landing/HomeNavbar';
+import CategoryBanner from '@/components/landing/CategoryBanner';
 import ProductCarousel from '@/components/landing/ProductCarousel';
 import Breadcrumbs from '@/components/seo/Breadcrumbs';
 import JsonLd from '@/components/seo/JsonLd';
-import { getProducts } from '@yukizi/api-client';
+import { getBanners, getProducts } from '@yukizi/api-client';
 import { absoluteUrl, metaTruncate, SITE_NAME } from '@/lib/seo/site';
 import { applySeoOverride, fetchSeoOverride } from '@/lib/seo/overrides';
 import { breadcrumbSchema, collectionPageSchema } from '@/lib/seo/schema';
@@ -88,16 +89,65 @@ export default async function AllProductsPage({ searchParams }: { searchParams?:
   const resolved = searchParams instanceof Promise ? await searchParams : searchParams;
   const crumbs = [{ name: 'Home', path: '/' }, { name: 'All Products' }];
 
+  // The same banners the homepage hero shows. Filtered and ordered exactly as
+  // HeroSection does it: the API sorts by `order`, but the admin form never
+  // sets it, so every banner comes back with the same value and Postgres
+  // breaks the tie arbitrarily — sort defensively or the sequence differs
+  // between the two pages showing the same artwork.
+  let bannerSlides: { id?: string; image: string; mobileImage?: string | null }[] = [];
+  try {
+    const banners = await getBanners();
+    bannerSlides = (Array.isArray(banners) ? banners : [])
+      .filter((b: any) => b?.isActive !== false && b?.imageUrl)
+      .sort((a: any, b: any) => {
+        const byOrder = (a.order ?? 0) - (b.order ?? 0);
+        if (byOrder !== 0) return byOrder;
+        return (
+          new Date(a.createdAt ?? 0).getTime() - new Date(b.createdAt ?? 0).getTime()
+        );
+      })
+      .map((b: any) => ({
+        id: b.id,
+        image: b.imageUrl,
+        mobileImage: b.mobileImageUrl ?? null,
+      }));
+  } catch (error) {
+    // A banner is decoration; the catalogue is the page. Render without it.
+    console.error('[AllProducts] Failed to load banners:', error);
+  }
+
   return (
-    <main className="w-full bg-gray-50 min-h-screen relative pb-24 sm:pb-32">
+    // No `bg-gray-50`. It was an opaque layer painted over the site's lavender
+    // field (`body::before`), which is why this page read as flat grey while
+    // the homepage and every category page read as glass over lavender —
+    // the glass surfaces had nothing to pick up.
+    //
+    // `--nav-clearance` instead of a hardcoded `pb-24 sm:pb-32`: the floating
+    // bar lifts as it approaches the footer, so a fixed value is always short
+    // and the last row of products ends up underneath it. The nav publishes
+    // its own clearance; home and the category pages already use it.
+    <main className="w-full min-h-screen relative pb-[var(--nav-clearance,150px)]">
       <JsonLd data={[breadcrumbSchema(crumbs)]} />
       <HomeNavbar />
 
-      <div className="w-full max-w-[1600px] 2xl:max-w-none mx-auto bg-gray-50 overflow-hidden flex flex-col relative min-h-screen">
-        <section className="flex-1 flex flex-col w-full pt-24 sm:pt-28 md:pt-32">
-          <Breadcrumbs items={crumbs} className="px-4 sm:px-6" />
+      <div className="w-full max-w-[1600px] 2xl:max-w-none mx-auto overflow-hidden flex flex-col relative min-h-screen">
+        <section className="flex-1 flex flex-col w-full">
+          {/* Same component the category pages use, so one banner behaves
+              identically everywhere: it picks the phone artwork itself and
+              falls back to the desktop image when there is no mobile upload.
+              It also replaces the page's old top padding — that padding
+              existed only to clear the fixed nav, and on its own it opened a
+              band of empty grey across the top of the page. */}
+          <div className="w-full flex-shrink-0 flex flex-col">
+            <CategoryBanner title="All Products" banners={bannerSlides} />
+          </div>
+
+          <Breadcrumbs items={crumbs} className="px-4 sm:px-6 pt-3 sm:pt-4" />
           <div className="px-4 sm:px-6 pt-2 pb-1">
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">All Products</h1>
+            {/* An h2, not an h1: CategoryBanner renders the page's single
+                sr-only h1. Two h1s is the exact bug the category pages
+                already carry a comment about. Visually unchanged. */}
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">All Products</h2>
             <p className="mt-1 text-sm text-gray-600">
               Every figure, book and collectible on {SITE_NAME}.
             </p>

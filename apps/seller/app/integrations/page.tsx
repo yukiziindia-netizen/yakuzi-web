@@ -3,10 +3,18 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { AlertTriangle, ArrowRight, CheckCircle2, Plug, RefreshCw } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowRight,
+  CheckCircle2,
+  Plug,
+  RefreshCw,
+  ShoppingBag,
+} from "lucide-react";
 import toast from "react-hot-toast";
-import { Button, Skeleton } from "@/components/ui";
-import { useSellerIntegrations } from "@/hooks/useSeller";
+import { Badge, Button, Skeleton } from "@/components/ui";
+import { useExternalOrders, useSellerIntegrations } from "@/hooks/useSeller";
+import type { ExternalOrderRow } from "@/api/seller.api";
 import {
   ConnectionStatusBadge,
   PROVIDER_META,
@@ -197,6 +205,8 @@ export default function IntegrationsPage() {
             </motion.div>
           )}
 
+          {connectedCount > 0 && <ChannelOrders />}
+
           {connectedCount === 0 && (
             <div className="rounded-2xl border border-dashed border-border p-8 text-center">
               <CheckCircle2
@@ -218,6 +228,107 @@ export default function IntegrationsPage() {
       )}
       {openModal === "AMAZON" && <AmazonConnectModal onClose={() => setOpenModal(null)} />}
     </div>
+  );
+}
+
+/**
+ * Sales that happened on connected channels.
+ *
+ * Shown separately from Yukizi orders on purpose: these are not Yukizi orders,
+ * carry no customer details, and are not part of payouts. The empty state says
+ * so rather than leaving a seller to wonder why the list is blank.
+ */
+function ChannelOrders() {
+  const { data, isLoading } = useExternalOrders({ limit: 10 });
+  const orders: ExternalOrderRow[] = data?.data ?? [];
+
+  if (isLoading) return <Skeleton className="h-40 w-full rounded-2xl" />;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.25 }}
+      className="glass-card rounded-2xl p-6"
+    >
+      <div className="flex items-center justify-between gap-3 mb-1">
+        <h2 className="font-semibold text-foreground">Channel orders</h2>
+        {orders.length > 0 && (
+          <span className="text-xs text-muted-foreground">
+            Showing the {orders.length} most recent
+          </span>
+        )}
+      </div>
+      <p className="text-xs text-muted-foreground mb-4">
+        Sales from your connected channels. These are not Yukizi orders and are
+        not included in your Yukizi payouts.
+      </p>
+
+      {orders.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-border p-8 text-center">
+          <ShoppingBag className="h-7 w-7 mx-auto text-muted-foreground/40" aria-hidden />
+          <p className="mt-3 text-sm text-muted-foreground">
+            No channel orders yet. Turn on Orders for a channel to import them.
+          </p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full" aria-label="Channel orders">
+            <thead>
+              <tr className="border-b border-border/50 bg-muted/20">
+                {["Order", "Channel", "Placed", "Items", "Total", "Status"].map((h) => (
+                  <th
+                    key={h}
+                    scope="col"
+                    className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap"
+                  >
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/30">
+              {orders.map((order, i) => (
+                <motion.tr
+                  key={order.id}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.03 }}
+                  className="hover:bg-accent/30 transition-colors"
+                >
+                  <td className="px-4 py-3">
+                    <span className="font-mono text-xs text-muted-foreground bg-muted/30 px-1.5 py-0.5 rounded">
+                      {order.orderNumber}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-foreground">
+                    {PROVIDER_META[order.provider as ProviderKey]?.name ?? order.provider}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">
+                    {timeAgo(order.placedAt)}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-muted-foreground">
+                    {order.itemCount}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-foreground whitespace-nowrap">
+                    {order.currency ? `${order.currency} ` : ""}
+                    {order.totalAmount.toFixed(2)}
+                  </td>
+                  <td className="px-4 py-3">
+                    <Badge
+                      variant={order.cancelled ? "error" : "default"}
+                      size="sm"
+                    >
+                      {order.cancelled ? "cancelled" : (order.status ?? "—")}
+                    </Badge>
+                  </td>
+                </motion.tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </motion.div>
   );
 }
 

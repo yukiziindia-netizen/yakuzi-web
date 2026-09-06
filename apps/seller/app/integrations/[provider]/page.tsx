@@ -37,6 +37,13 @@ import {
  */
 const SUPPORTS_TWO_WAY = new Set(["SHOPIFY", "WOOCOMMERCE"]);
 
+/**
+ * Channels Yukizi can safely set a price on. Amazon's offer structure carries
+ * currency, audience and date-ranged pricing, so it is not attempted — the API
+ * refuses it too rather than mis-pricing a live listing.
+ */
+const SUPPORTS_PRICE_SYNC = new Set(["SHOPIFY", "WOOCOMMERCE"]);
+
 const DIRECTION_LABELS: Record<string, { title: string; help: string }> = {
   IMPORT_ONLY: {
     title: "Import only",
@@ -527,6 +534,7 @@ function SetupWizard({
 function SyncSettings({ integration }: { integration: any }) {
   const update = useUpdateIntegrationSettings();
   const supportsTwoWay = SUPPORTS_TWO_WAY.has(integration.provider);
+  const supportsPriceSync = SUPPORTS_PRICE_SYNC.has(integration.provider);
 
   const save = (input: Record<string, unknown>) =>
     update.mutate(
@@ -564,6 +572,40 @@ function SyncSettings({ integration }: { integration: any }) {
         checked={integration.syncInventory}
         onChange={(v) => save({ syncInventory: v })}
       />
+      <ToggleRow
+        label="Orders"
+        help="Show orders placed on this channel. They are never added to your Yukizi orders or payouts, and never change stock."
+        checked={integration.syncOrders}
+        onChange={(v) => save({ syncOrders: v })}
+      />
+      <ToggleRow
+        label="Prices"
+        help={
+          supportsPriceSync
+            ? "Send your Yukizi prices to this channel. This changes what the channel charges."
+            : "Not available for this channel yet."
+        }
+        checked={integration.syncPrices}
+        disabled={!supportsPriceSync}
+        onChange={(v) => save({ syncPrices: v })}
+      />
+
+      {/* Scopes are granted at connect time, so switching a feature on later
+          cannot widen them — say so instead of leaving it silently inert. */}
+      {integration.needsReauthorization && (
+        <div className="flex items-start gap-3 p-3 rounded-xl bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
+          <AlertTriangle className="h-4 w-4 text-yellow-600 flex-shrink-0 mt-0.5" aria-hidden />
+          <div>
+            <p className="text-xs font-medium text-yellow-700 dark:text-yellow-400">
+              Reconnect needed for the features you just enabled
+            </p>
+            <p className="text-xs text-yellow-600 dark:text-yellow-500 mt-0.5">
+              This channel was connected before those permissions were needed.
+              Reconnect from the Integrations page to grant them.
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="pt-3 border-t border-border/40">
         <p className="text-sm font-medium text-foreground mb-2">
@@ -653,26 +695,29 @@ function ToggleRow({
   help,
   checked,
   onChange,
+  disabled,
 }: {
   label: string;
   help: string;
   checked: boolean;
   onChange: (value: boolean) => void;
+  disabled?: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between gap-4">
+    <div className={`flex items-center justify-between gap-4 ${disabled ? "opacity-60" : ""}`}>
       <div>
         <p className="text-sm font-medium text-foreground">{label}</p>
         <p className="text-xs text-muted-foreground">{help}</p>
       </div>
       <button
-        onClick={() => onChange(!checked)}
+        onClick={() => !disabled && onChange(!checked)}
+        disabled={disabled}
         role="switch"
         aria-checked={checked}
         aria-label={label}
         className={`relative h-6 w-11 rounded-full transition-colors flex-shrink-0 ${
           checked ? "bg-primary" : "bg-muted"
-        }`}
+        } ${disabled ? "cursor-not-allowed" : ""}`}
       >
         <div
           className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${

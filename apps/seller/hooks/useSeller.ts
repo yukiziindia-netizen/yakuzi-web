@@ -18,7 +18,8 @@ import {
   checkWooCommerceStore, connectWooCommerce, connectAmazon,
   updateIntegrationSettings, completeIntegrationSetup, requestIntegrationSync,
   getIntegrationMappings, mapIntegrationProduct, disconnectIntegration,
-  getMappingCandidates, resolveInventoryConflict } from "@/api/seller.api";
+  getMappingCandidates, resolveInventoryConflict,
+  getExternalOrders } from "@/api/seller.api";
 import type { ProductPayload } from "@yukizi/utils";
 import { useSellerAuth } from "@/store";
 
@@ -522,5 +523,16 @@ export function useResolveInventoryConflict() {
       void qc.invalidateQueries({ queryKey: ["seller", "integration-mappings"] });
       void qc.invalidateQueries({ queryKey: ["seller", "integrations"] });
     },
+  });
+}
+
+// ─── Integrations: channel orders (phase 4) ───────────
+
+export function useExternalOrders(params: { page?: number; limit?: number } = {}) {
+  return useQuery({
+    queryKey: ["seller", "external-orders", params],
+    queryFn: () => getExternalOrders(params),
+    staleTime: 60_000,
+    retry: 1,
   });
 }

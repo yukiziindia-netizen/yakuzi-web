@@ -787,3 +787,88 @@
     0 18px 42px -18px rgba(0, 0, 0, 0.85),
     0 0 34px 22px rgba(12, 6, 22, 0.75);
 }
+
+/* ─── Phone nav material ───────────────────────────────────────────────────
+   Below `sm` ONLY. The desktop bar is deliberately not touched.
+
+   The same material behaves differently at the two sizes, which is why the
+   phone bar looked wrong while the desktop one looked right:
+
+   1. The phone pill is 36px tall against 60-64px on desktop, so a 1px white
+      border is proportionally about twice as heavy — and on a 3x phone screen
+      it renders as a hard bright hairline rather than a lit edge. Dropped
+      from 0.34 to 0.16 alpha, with the light moved into a soft top-edge inset
+      instead, so the pill still catches light without being outlined.
+
+   2. At 36px there is barely any pill for the backdrop to show through, so a
+      0.80-alpha fill reads as solid paint. The tint here is thinner AND
+      darker: "deep tint buys transparency" — a darker purple at lower alpha
+      composites darker over a white product card than a lighter purple at
+      high alpha does, so it is both more see-through and no harder to read.
+
+   Why the phone can go where the desktop cannot: the desktop pills carry
+   small text labels, which are held to WCAG AA 4.5:1. The phone pills carry
+   only a logo image, a button with its own background, and icons — the
+   binding rule there is non-text contrast, 3:1. Measured against the worst
+   case (a white product card passing under the bar) this tint holds
+   3.55:1 at its thinnest point, with ~40% of the backdrop showing through
+   against ~20% before.
+
+   Geometry is untouched: no height, padding, radius, width or font here.
+   ─────────────────────────────────────────────────────────────────────── */
+@media (max-width: 639px) {
+  .nav-pill.nav-pill {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(62, 26, 120, 0.56) 0%,
+        rgba(56, 22, 110, 0.62) 48%,
+        rgba(48, 18, 96, 0.68) 100%
+      );
+    backdrop-filter: blur(28px) saturate(185%);
+    -webkit-backdrop-filter: blur(28px) saturate(185%);
+    /* The hairline the bar was wearing, softened to an edge. */
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.30),
+      inset 0 6px 14px -10px rgba(255, 255, 255, 0.35),
+      inset 0 -1px 0 rgba(40, 14, 88, 0.28),
+      0 10px 26px -12px rgba(58, 24, 120, 0.55),
+      /* The white separation glow is kept — it holds the bar apart from the
+         product grid — but a 22px spread around a 36px pill is proportionally
+         enormous and was washing out the product names just above the bar.
+         Scaled to the pill. */
+      0 0 18px 6px rgba(255, 255, 255, 0.42);
+  }
+
+  /* On a panel the light glow would sit on purple and read as a rim, so it
+     becomes a dark bloom — same swap the desktop bar already makes. */
+  .nav-pill.nav-pill.on-panel {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.30),
+      inset 0 6px 14px -10px rgba(255, 255, 255, 0.35),
+      inset 0 -1px 0 rgba(40, 14, 88, 0.28),
+      0 10px 26px -12px rgba(40, 12, 80, 0.70),
+      0 0 18px 6px rgba(48, 14, 96, 0.45);
+  }
+
+  /* Dark mode. Repeated here, and last in the file, because
+     `.dark .nav-pill.nav-pill:not(.on-panel)` above carries more specificity
+     and would otherwise keep its desktop-sized glow on phones. */
+  .dark .nav-pill.nav-pill,
+  .dark .nav-pill.nav-pill:not(.on-panel) {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(54, 24, 108, 0.58) 0%,
+        rgba(46, 20, 94, 0.64) 48%,
+        rgba(38, 16, 80, 0.70) 100%
+      );
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.18),
+      inset 0 6px 14px -10px rgba(255, 255, 255, 0.14),
+      0 10px 26px -12px rgba(0, 0, 0, 0.80),
+      0 0 18px 6px rgba(12, 6, 22, 0.60);
+  }
+}

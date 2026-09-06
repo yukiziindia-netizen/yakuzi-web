@@ -706,3 +706,38 @@ export async function resolveInventoryConflict(
   );
   return data.data ?? data;
 }
+
+// ─── Integrations: channel orders (phase 4) ───────────
+
+export interface ExternalOrderRow {
+  id: string;
+  provider: IntegrationProviderKey;
+  storeName: string | null;
+  orderNumber: string;
+  placedAt: string;
+  status: string | null;
+  financialStatus: string | null;
+  currency: string | null;
+  totalAmount: number;
+  itemCount: number;
+  cancelled: boolean;
+  items: Array<{
+    sku: string | null;
+    title: string | null;
+    quantity: number;
+    price: number;
+  }>;
+}
+
+/**
+ * Orders placed on connected channels. These are never Yukizi orders — they
+ * carry no customer details and are not counted in settlements.
+ */
+export async function getExternalOrders(
+  params: { page?: number; limit?: number } = {},
+) {
+  const { data } = await apiClient.get<any>("/integrations/orders/external", {
+    params,
+  });
+  return data.data ?? data;
+}

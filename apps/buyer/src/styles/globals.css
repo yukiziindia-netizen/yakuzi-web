@@ -394,38 +394,63 @@
       rgba(94, 48, 178, 0.80) 48%,
       rgba(78, 36, 148, 0.86) 100%
     );
-  backdrop-filter: blur(26px) saturate(190%);
-  -webkit-backdrop-filter: blur(26px) saturate(190%);
+  /* Blur raised 26 -> 30. Blur is contrast-neutral — it preserves the mean
+     luminance of whatever it samples and only softens the extremes — so it is
+     safe to push, unlike the tint alphas above, which are load-bearing for
+     white-text legibility and are deliberately left untouched. */
+  backdrop-filter: blur(30px) saturate(190%);
+  -webkit-backdrop-filter: blur(30px) saturate(190%);
   border: 1px solid rgba(255, 255, 255, 0.34);
   box-shadow:
-    /* brighter top rim + a soft inner sheen, so the glass has an edge to
-       catch light on now that the fill is thin enough to see through */
-    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    /* ── Edge lensing ───────────────────────────────────────────────────
+       What reads as glass is the EDGE, not the fill. A real lens is
+       brightest where it curves hardest, so light gathers in a thin rim
+       around the whole shape and falls away quickly towards the middle.
+       Only the top edge was lit before, which reads as a flat tinted plane
+       with a highlight on it rather than a solid piece of glass.
+
+       Every one of these is a rim inset: they sit in the pill's own padding,
+       not behind the labels, so none of them move text contrast. */
+    inset 0 1px 0 rgba(255, 255, 255, 0.58),
+    inset 1px 0 0 rgba(255, 255, 255, 0.22),
+    inset -1px 0 0 rgba(255, 255, 255, 0.22),
+    /* the soft gather just inside the top rim */
     inset 0 8px 18px -12px rgba(255, 255, 255, 0.45),
+    /* light bending back up through the bottom curve — small, but it is the
+       difference between "tinted panel" and "thick glass" */
+    inset 0 -10px 20px -14px rgba(255, 255, 255, 0.20),
     inset 0 -1px 0 rgba(70, 28, 140, 0.30),
-    0 18px 42px -18px rgba(84, 38, 165, 0.70),
-    0 4px 14px -6px rgba(84, 38, 165, 0.35),
-    /* White halo that FOLLOWS THE PILL'S OWN SHAPE, including underneath it.
-       A radial ellipse on a full-width box cannot do this — it is an oval, so
-       it is either too wide at the ends or too thin at the middle. A spread
-       shadow is offset-free and traces the rounded rectangle exactly, which
-       is what the live bar's backdrop looks like: near-solid white against
-       the bar, thinning out within about 40px. Painted last so it sits
-       behind the purple drop shadow above it. */
-    0 0 34px 22px rgba(255, 255, 255, 0.80);
+    /* ── Float ──────────────────────────────────────────────────────────
+       Apple's material floats on a soft shadow. This bar carried a
+       22px-spread, 0.80-alpha WHITE halo instead, which read as a glowing
+       sticker laid on the page rather than glass sitting above it — the one
+       thing here that could never blend into the site.
+
+       The halo did do a real job: separating the bar from busy product
+       artwork passing underneath. That job is kept at about a third of the
+       strength, so the separation survives without the glow. */
+    0 22px 48px -20px rgba(58, 24, 120, 0.55),
+    0 6px 18px -8px rgba(84, 38, 165, 0.38),
+    0 0 16px 4px rgba(255, 255, 255, 0.28);
 }
 
-/* When a panel (chat or search) is open behind the bar, the white halo is
-   sitting on purple instead of on the page, and it reads as a glowing rim
-   round the pills. Swap it for a dark purple bloom: same job — separating
-   the bar from what is behind it — but in a colour that belongs there. */
+/* When a panel (chat or search) is open behind the bar, a light bloom would
+   be sitting on purple rather than on the page and would read as a glowing
+   rim round the pills. It becomes a dark purple bloom instead: same job —
+   separating the bar from what is behind it — in a colour that belongs there.
+
+   The lens rim is repeated verbatim so the glass keeps its edge in this
+   state; only the outer bloom differs. */
 .nav-pill.nav-pill.on-panel {
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.58),
+    inset 1px 0 0 rgba(255, 255, 255, 0.22),
+    inset -1px 0 0 rgba(255, 255, 255, 0.22),
     inset 0 8px 18px -12px rgba(255, 255, 255, 0.45),
+    inset 0 -10px 20px -14px rgba(255, 255, 255, 0.20),
     inset 0 -1px 0 rgba(70, 28, 140, 0.30),
-    0 18px 42px -18px rgba(40, 12, 80, 0.75),
-    0 0 34px 20px rgba(48, 14, 96, 0.55);
+    0 22px 48px -20px rgba(40, 12, 80, 0.75),
+    0 0 26px 12px rgba(48, 14, 96, 0.50);
 }
 
 /* Save Icon Masks for Navbar */
@@ -566,18 +591,27 @@
   background:
     linear-gradient(180deg, rgba(92, 48, 172, 0.72) 0%, rgba(74, 34, 148, 0.78) 48%, rgba(58, 24, 120, 0.84) 100%);
   border: 1px solid rgba(255, 255, 255, 0.16);
+  /* Same lens rim as light mode, dimmer: on a dark ground a bright rim would
+     read as neon piping rather than as an edge catching light. The outer
+     bloom is already dark here, so it needs no rework. */
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.26),
+    inset 1px 0 0 rgba(255, 255, 255, 0.12),
+    inset -1px 0 0 rgba(255, 255, 255, 0.12),
     inset 0 8px 18px -12px rgba(255, 255, 255, 0.18),
-    0 18px 42px -18px rgba(0, 0, 0, 0.85),
-    0 0 34px 22px rgba(12, 6, 22, 0.75);
+    inset 0 -10px 20px -14px rgba(255, 255, 255, 0.12),
+    0 22px 48px -20px rgba(0, 0, 0, 0.85),
+    0 0 30px 16px rgba(12, 6, 22, 0.70);
 }
 
 .dark .nav-pill.nav-pill.on-panel {
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    0 18px 42px -18px rgba(0, 0, 0, 0.9),
-    0 0 34px 20px rgba(8, 4, 16, 0.85);
+    inset 0 1px 0 rgba(255, 255, 255, 0.26),
+    inset 1px 0 0 rgba(255, 255, 255, 0.12),
+    inset -1px 0 0 rgba(255, 255, 255, 0.12),
+    inset 0 -10px 20px -14px rgba(255, 255, 255, 0.12),
+    0 22px 48px -20px rgba(0, 0, 0, 0.9),
+    0 0 30px 16px rgba(8, 4, 16, 0.85);
 }
 
 /* ── Utility remap ──────────────────────────────────────────────────────── */
@@ -779,11 +813,17 @@
   );
 }
 
-/* Same rule for the pill glow: dark ground or purple panel -> dark bloom. */
+/* Same rule for the pill glow: dark ground or purple panel -> dark bloom.
+   This rule wins over the .dark .nav-pill.nav-pill block above (equal
+   specificity, later in the file), so it has to repeat the lens rim or dark
+   mode would silently lose the edge treatment. */
 .dark .nav-pill.nav-pill:not(.on-panel) {
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.26),
+    inset 1px 0 0 rgba(255, 255, 255, 0.12),
+    inset -1px 0 0 rgba(255, 255, 255, 0.12),
     inset 0 8px 18px -12px rgba(255, 255, 255, 0.18),
-    0 18px 42px -18px rgba(0, 0, 0, 0.85),
-    0 0 34px 22px rgba(12, 6, 22, 0.75);
+    inset 0 -10px 20px -14px rgba(255, 255, 255, 0.12),
+    0 22px 48px -20px rgba(0, 0, 0, 0.85),
+    0 0 30px 16px rgba(12, 6, 22, 0.70);
 }

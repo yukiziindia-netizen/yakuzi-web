@@ -28,7 +28,12 @@ export default function CategoryScrollRow({ section }: { section: HomepageSectio
         </Link>
       </div>
 
-      <div className="flex overflow-x-auto snap-x snap-mandatory gap-3.5 px-4 sm:px-8 pb-1 scrollbar-hide">
+      {/* scroll-pl-* must match px-*: scroll snapping aligns a snap-start item
+          with the edge of the SCROLLPORT, which ignores padding. Without it the
+          row rests at scrollLeft:16, cancelling its own left padding, and the
+          first card sits flush against the screen edge while the section
+          heading above it is indented 16px. */}
+      <div className="flex overflow-x-auto snap-x snap-mandatory gap-3.5 px-4 sm:px-8 scroll-pl-4 sm:scroll-pl-8 pb-1 scrollbar-hide">
         {section.products.map((product, index) => (
           // 200px on mobile (was 150px) - the card's own internal max-w-[210px]
           // cap (ProductCarousel.tsx) already allows this width, so this is a

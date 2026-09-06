@@ -343,13 +343,13 @@ export function GridProductCard({ product, index, onOpenReview, showFullTitle }:
       )}
 
       <div
-        className={`bg-white rounded-[6px] hover:shadow-md transition-shadow duration-200 group flex flex-col relative border ${
+ className={`glass-panel rounded-[18px] transition-shadow duration-200 group flex flex-col relative ${
           isWaitlisted
-            ? 'border-gray-900 ring-1 ring-gray-900 shadow-[0_2px_8px_rgba(0,0,0,0.06)]'
+            ? 'ring-1 ring-gray-900'
             : isYukiziChoice
-              ? 'border-[#7B2FBE]/40 shadow-[0_2px_8px_rgba(123,47,190,0.15)]'
-              : 'border-transparent shadow-[0_2px_8px_rgba(0,0,0,0.06)]'
-        } w-full h-auto overflow-hidden`}
+              ? 'ring-1 ring-[#7B2FBE]/40'
+              : ''
+        } w-full h-auto overflow-hidden hover:shadow-[0_10px_28px_-12px_rgba(88,54,150,0.38)]`}
       >
            {/* Top Right Plus / Cart Button / Waitlist Bell */}
         <div className="absolute top-1 right-0.5 z-20">
@@ -364,38 +364,55 @@ export function GridProductCard({ product, index, onOpenReview, showFullTitle }:
             </button>
           ) : cartQuantity > 0 ? (
             <div className="flex items-center gap-1" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-               {/* Reset Button */}
+               {/* Reset. Was a bare 14px glyph with no surface, so it read as a
+                   stray mark next to the stepper rather than a control. Now a
+                   glass chip matching the stepper's height. */}
                <button
                  onClick={handleResetClick}
                  title="Reset quantity"
-                 className="text-[#48286b] hover:text-purple-900 transition-all active:scale-90 focus:outline-none p-0.5"
+                 aria-label="Reset quantity"
+                 className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/70 bg-white/60 text-[#5b3391] shadow-[0_2px_8px_-3px_rgba(88,54,150,0.45)] backdrop-blur-md transition-all hover:bg-white/85 active:scale-90 focus:outline-none"
                >
-                 <RotateCw className="w-3.5 h-3.5" strokeWidth={3} />
+                 <RotateCw className="w-3 h-3" strokeWidth={2.75} />
                </button>
 
-               {/* Quantity Control Pill */}
-               <div className="flex items-center bg-[#48286b] rounded-[6px] overflow-hidden h-6 text-white shadow-sm select-none justify-between px-1 gap-1">
-                  <button 
-                    onClick={handleMinusClick} 
-                    className="text-white hover:bg-white/10 w-4.5 h-4.5 flex items-center justify-center rounded transition-colors"
+               {/* Quantity stepper.
+                   Was 24px tall with 10px icons on a flat #48286b block — the
+                   tap targets were under half the 44px guideline and it read as
+                   a tiny dark slab pasted onto a light card. Now 28px, pill
+                   shaped, on the same violet gradient as the nav bar, with an
+                   inner top highlight so it belongs to the same material. The
+                   quantity uses tabular figures so the pill does not resize as
+                   the number changes. Behaviour is untouched. */}
+               <div className="flex items-center h-7 select-none justify-between gap-0.5 rounded-full px-1 text-white bg-[linear-gradient(180deg,#8f5ad4_0%,#7745bd_48%,#5f2f9f_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.34),0_4px_12px_-4px_rgba(88,54,150,0.75)]">
+                  <button
+                    onClick={handleMinusClick}
+                    aria-label="Decrease quantity"
+                    className="text-white/90 hover:text-white hover:bg-white/20 w-5 h-5 flex items-center justify-center rounded-full transition-colors active:scale-90"
                   >
-                    <Minus className="w-2.5 h-2.5" strokeWidth={3} />
+                    <Minus className="w-3 h-3" strokeWidth={3} />
                   </button>
-                  <span className="text-2xs font-bold tracking-wide min-w-[12px] text-center">
+                  <span className="text-[11px] font-bold tabular-nums tracking-wide min-w-[16px] text-center">
                     {String(cartQuantity).padStart(2, '0')}
                   </span>
-                  <button 
-                    onClick={handlePlusClick} 
-                    className="text-white hover:bg-white/10 w-4.5 h-4.5 flex items-center justify-center rounded transition-colors"
+                  <button
+                    onClick={handlePlusClick}
+                    aria-label="Increase quantity"
+                    className="text-white/90 hover:text-white hover:bg-white/20 w-5 h-5 flex items-center justify-center rounded-full transition-colors active:scale-90 disabled:opacity-40 disabled:hover:bg-transparent"
                     disabled={cartQuantity >= (product?.stock ?? 9999)}
                   >
-                    <Plus className="w-2.5 h-2.5" strokeWidth={3} />
+                    <Plus className="w-3 h-3" strokeWidth={3} />
                   </button>
                </div>
             </div>
           ) : (
-            <button 
-              className="text-black hover:text-black/80 transition-all focus:outline-none p-1" 
+            // The resting state of the same control, so it gets the same
+            // 28px box as the stepper it turns into — the row no longer
+            // reflows when you tap it. Surface only appears on hover, so the
+            // card stays as clean as it was.
+            <button
+              aria-label="Add to cart"
+              className="flex h-7 w-7 items-center justify-center rounded-full text-[#2f1b4d] transition-all hover:bg-[#854cbc]/12 hover:text-[#854cbc] active:scale-90 focus:outline-none"
               onClick={handlePlusClick}
             >
               <Plus className="w-5 h-5" strokeWidth={3} />
@@ -425,14 +442,14 @@ export function GridProductCard({ product, index, onOpenReview, showFullTitle }:
         </div>
 
         {/* Image Container - Fixed 190px/200px height matching Samplr */}
-        <Link onClick={handleCardNav} href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index, product?.slug)}`} className="relative w-full h-[160px] sm:h-[200px] bg-white overflow-hidden flex justify-center items-center shrink-0">
+        <Link onClick={handleCardNav} href={`/products/${generateProductSlug(productName, product?.id || 'prod-' + index, product?.slug)}`} className="relative w-full h-[160px] sm:h-[200px] overflow-hidden flex justify-center items-center shrink-0">
            {/* next/image so the ~1MB seller uploads are resized/re-encoded to
                the card's actual rendered width (the grid is 2-7 columns) —
                measured 65MB of card images on one homepage load without it. */}
            <Image src={imageUrl} alt={`${productName} - Yukizi`} fill sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 15vw" className="object-contain p-3 sm:p-2 group-hover:scale-105 transition-transform duration-300 ease-out" />
         </Link>
 
-         <div className="flex flex-col gap-1 p-[8px] sm:p-[10px] bg-white w-full border-t border-gray-100">
+         <div className="flex flex-col gap-1 p-[8px] sm:p-[10px] w-full border-t border-white/70">
             {/* Brand Subtitle & Title Line */}
             <div>
                <div className="flex items-start justify-between w-full gap-1.5">
@@ -474,7 +491,7 @@ export function GridProductCard({ product, index, onOpenReview, showFullTitle }:
                  {renderBuyerOfferBadge(product, false, true)}
               </div>
               <div className="flex items-center gap-1 shrink-0">
-                 <Star className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-[#7B2FBE] fill-[#7B2FBE]" />
+                 <Star className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-[#f5a623] fill-[#f5a623]" />
                  <span className="text-2xs sm:text-sm font-medium leading-none text-[#333333]">{hasRating ? rating : 'NA'}</span>
               </div>
            </div>

@@ -54,7 +54,11 @@ export default function OrderCard({ orderId, date, status, total, itemCount, pro
     <motion.div
       whileHover={{ y: -5, scale: 1.01 }}
       transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-      className="bg-white/40 backdrop-blur-3xl border border-white/60 rounded-2xl sm:rounded-3xl p-4 sm:p-5 md:p-7 shadow-[0_10px_40px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_60px_rgba(0,0,0,0.08)] transition-all duration-500 cursor-pointer group"
+ // .glass-panel rather than the backdrop-blur-3xl this used to carry: an
+      // order list renders many of these, and a per-card backdrop blur is the
+      // one pattern that genuinely hurts scrolling on mid-range phones. Over
+      // the page gradient the translucent version looks the same.
+ className="glass-panel  p-4 sm:p-5 md:p-7 hover:shadow-[0_20px_60px_-24px_rgba(88,54,150,0.38)] transition-all duration-500 cursor-pointer group"
     >
       <div className="flex items-start sm:items-center justify-between gap-3">
         <div className="flex items-start sm:items-center gap-3 sm:gap-4 md:gap-6 flex-1 min-w-0">

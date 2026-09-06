@@ -102,6 +102,28 @@
     @apply text-foreground antialiased;
     overflow-x: hidden;
   }
+
+  /* The soft purple-to-white field the glass reads against.
+     Painted into a FIXED layer behind everything, so it is composited once
+     and scrolling never repaints it. Two very low-opacity purple pools plus
+     a near-white vertical wash — enough to give the frosted surfaces
+     something to pick up, not enough to tint product photography. */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      /* soft white bloom, kept to the right so the field never washes out
+         everywhere — the frosted surfaces need lavender to pick up, and a
+         centred bloom turned the brand strip into a plain white plank */
+      radial-gradient(760px 620px at 88% 40%, rgba(255, 255, 255, 0.75), transparent 62%),
+      radial-gradient(1200px 780px at 4% 2%, rgba(126, 66, 190, 0.30), transparent 58%),
+      radial-gradient(1100px 760px at 100% 4%, rgba(116, 44, 186, 0.26), transparent 55%),
+      radial-gradient(950px 900px at 42% 104%, rgba(126, 66, 190, 0.24), transparent 58%),
+      linear-gradient(180deg, #e8daf7 0%, #efe6fb 34%, #ece0f9 68%, #e6d7f6 100%);
+  }
 }
 
 /* ─── Responsive Container ─── */
@@ -112,6 +134,99 @@
   .section-padding {
     @apply py-12 sm:py-16 md:py-20 lg:py-24;
   }
+  /* ─── Frosted glass system ────────────────────────────────────────────
+     Two tiers, and the split is deliberate.
+
+     `.glass-chrome` uses a real backdrop-filter. It is for the handful of
+     persistent surfaces that sit ON TOP of moving content — the header, the
+     brand strip, the bottom bar. That is where the effect actually reads,
+     and only a few are on screen at once.
+
+     `.glass-panel` fakes it: translucent white plus a light border and a
+     soft shadow, with NO backdrop-filter. Over the soft page gradient it is
+     nearly indistinguishable from the real thing, and it costs nothing.
+
+     Why the split matters: backdrop-filter makes the compositor re-sample
+     and blur everything behind the element on every frame it changes. One
+     header is free. A hundred product cards each blurring the background
+     while the grid scrolls is the fastest way to wreck scrolling on a
+     mid-range Android — and INP is a Core Web Vitals ranking signal.
+     So content tiles get `.glass-panel`; only chrome gets `.glass-chrome`.
+     ───────────────────────────────────────────────────────────────────── */
+  .glass-chrome {
+    /* Deliberately thin — the reference bar lets the purple field read
+       through it. Anything above ~0.35 alpha turns it into a white plank
+       sitting on lavender, which is the opposite of the intended effect. */
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.34) 0%,
+      rgba(247, 240, 255, 0.22) 100%
+    );
+    backdrop-filter: blur(20px) saturate(170%);
+    -webkit-backdrop-filter: blur(20px) saturate(170%);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.85),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.35),
+      0 2px 4px rgba(88, 54, 150, 0.04),
+      0 14px 40px -18px rgba(88, 54, 150, 0.30);
+  }
+
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.50);
+    border: 1px solid rgba(255, 255, 255, 0.62);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.80),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+      0 1px 2px rgba(88, 54, 150, 0.04),
+      0 10px 26px -14px rgba(88, 54, 150, 0.30);
+  }
+
+  /* Drawers, sheets and modals: cart, wishlist, menu, notifications, support,
+     login, quick view. These sit ON TOP of the page, so they get a real
+     backdrop-filter — the content behind them blurs and the panel reads as
+     frosted rather than as a white slab dropped on the design.
+
+     Held at 0.86 alpha rather than the 0.5 used for content cards: these
+     panels carry forms, prices and body copy that must stay comfortably
+     readable over whatever happens to be behind them. The blur does the
+     visual work; the opacity protects the text.
+
+     Only one or two are ever open at a time, so the blur cost is trivial —
+     the same reasoning as `.glass-chrome`. */
+  .glass-overlay {
+    background: rgba(255, 255, 255, 0.86);
+    backdrop-filter: blur(24px) saturate(170%);
+    -webkit-backdrop-filter: blur(24px) saturate(170%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.75),
+      0 20px 60px -20px rgba(70, 30, 130, 0.35);
+  }
+
+  /* The chatbot panel. Same idea as .glass-overlay but purple, because the
+     panel is a purple surface — a white frosted sheet would read as a
+     different component bolted above the nav rather than part of it.
+
+     Deep purple at ~0.80 for the same reason the nav pills use a deep tint:
+     the panel carries white text, and a light purple at this transparency
+     composites towards white over pale product cards. */
+  .glass-purple {
+    background:
+      linear-gradient(
+        135deg,
+        rgba(120, 40, 180, 0.82) 0%,
+        rgba(150, 62, 214, 0.78) 50%,
+        rgba(118, 36, 176, 0.84) 100%
+      );
+    backdrop-filter: blur(26px) saturate(180%);
+    -webkit-backdrop-filter: blur(26px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      0 24px 70px -24px rgba(60, 20, 120, 0.55);
+  }
+
   /* Premium glass card — responsive radii + padding */
   .glass-card {
     @apply bg-white/40 backdrop-blur-xl border border-white/40 shadow-xl;
@@ -234,6 +349,85 @@
   scrollbar-color: #854cbc #f3f4f6;
 }
 
+/* ─── Bottom nav pills ─────────────────────────────────────────────────
+   Matches the reference crop: a violet gradient rather than the old flat
+   #562996, lightly translucent so the product row reads through it, with a
+   bright inner top edge (the Apple-glass tell) and a purple glow beneath.
+
+   Geometry is deliberately untouched — no height, padding, radius or font
+   change. Colour and material only.
+
+   Doubled class name (.nav-pill.nav-pill) is intentional: it raises
+   specificity above Tailwind's `bg-white`, which the element still carries
+   for the mobile bar.
+
+   Applied at EVERY width — phones get the same material as desktop. Only
+   the geometry differs between the two (the mobile bar keeps its own
+   rounded-full pills and 36px height), and none of that is touched here.
+
+   Real backdrop-filter is justified here — this is fixed chrome, two
+   elements, exactly the case `.glass-chrome` exists for. It is NOT the
+   hundred-scrolling-cards case that hurts INP.
+   ───────────────────────────────────────────────────────────────────── */
+.nav-pill.nav-pill {
+  /* Genuinely translucent, per Rishi's reference: the product artwork behind
+     the bar should read THROUGH the purple, diffused by the blur, rather than
+     being hidden by it. The previous 0.90-0.93 alpha was effectively a solid
+     bar with a blur nobody could see.
+
+     Alpha now runs ~0.60 at the top to ~0.72 at the bottom. The vertical ramp
+     matters: the top edge is where light would catch, so it stays thinner,
+     and the base is denser so the bar still feels grounded. Blur is raised to
+     22px to compensate — the lower the opacity, the more the blur has to do
+     to keep white text legible over whatever passes behind. */
+  /* The tint is DEEP purple rather than the light violet it used to be, and
+     that is what buys the transparency. White text has to stay legible when a
+     white product card passes behind the bar; a light violet at low alpha
+     composites to near-white and contrast collapses (measured 1.33:1 — the
+     text effectively disappears). The same alpha over a dark purple base
+     stays dark enough to read, so the bar can be genuinely see-through
+     without the labels washing out. */
+  background:
+    linear-gradient(
+      180deg,
+      rgba(112, 66, 202, 0.74) 0%,
+      rgba(94, 48, 178, 0.80) 48%,
+      rgba(78, 36, 148, 0.86) 100%
+    );
+  backdrop-filter: blur(26px) saturate(190%);
+  -webkit-backdrop-filter: blur(26px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  box-shadow:
+    /* brighter top rim + a soft inner sheen, so the glass has an edge to
+       catch light on now that the fill is thin enough to see through */
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 8px 18px -12px rgba(255, 255, 255, 0.45),
+    inset 0 -1px 0 rgba(70, 28, 140, 0.30),
+    0 18px 42px -18px rgba(84, 38, 165, 0.70),
+    0 4px 14px -6px rgba(84, 38, 165, 0.35),
+    /* White halo that FOLLOWS THE PILL'S OWN SHAPE, including underneath it.
+       A radial ellipse on a full-width box cannot do this — it is an oval, so
+       it is either too wide at the ends or too thin at the middle. A spread
+       shadow is offset-free and traces the rounded rectangle exactly, which
+       is what the live bar's backdrop looks like: near-solid white against
+       the bar, thinning out within about 40px. Painted last so it sits
+       behind the purple drop shadow above it. */
+    0 0 34px 22px rgba(255, 255, 255, 0.80);
+}
+
+/* When a panel (chat or search) is open behind the bar, the white halo is
+   sitting on purple instead of on the page, and it reads as a glowing rim
+   round the pills. Swap it for a dark purple bloom: same job — separating
+   the bar from what is behind it — but in a colour that belongs there. */
+.nav-pill.nav-pill.on-panel {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 8px 18px -12px rgba(255, 255, 255, 0.45),
+    inset 0 -1px 0 rgba(70, 28, 140, 0.30),
+    0 18px 42px -18px rgba(40, 12, 80, 0.75),
+    0 0 34px 20px rgba(48, 14, 96, 0.55);
+}
+
 /* Save Icon Masks for Navbar */
 .save-icon-mask {
   display: inline-block;
@@ -276,4 +470,320 @@
   .brand-marquee-track {
     animation: none;
   }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DARK MODE
+   ═══════════════════════════════════════════════════════════════════════════
+
+   Opt-in only: nothing here applies until `.dark` is on <html>, so the site
+   ships in the light theme exactly as before. The toggle writes the class and
+   persists the choice; an inline script in layout.tsx applies it before first
+   paint so there is no white flash on reload.
+
+   Two layers, deliberately:
+
+   1. TOKENS — the glass surfaces built earlier (.glass-panel, .glass-chrome,
+      .glass-overlay, .nav-pill, the page gradient) are re-tinted. Because
+      every surface in the redesign already routes through these, most of the
+      site flips from this block alone.
+
+   2. UTILITY REMAP — the parts of the app that still paint themselves with
+      hardcoded Tailwind classes (bg-white, text-gray-900, border-gray-100…).
+      Rewriting every component to carry `dark:` variants would touch hundreds
+      of files; remapping the utilities inside `.dark` gets full coverage in
+      one place and is trivially reversible. It is scoped under `.dark`, so
+      the light theme cannot be affected by any of it.
+
+   The palette is a deep aubergine rather than neutral black — black would
+   fight the purple brand and read as cheap. Surfaces are near-transparent
+   white over that ground, which is what gives the glass its lift.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.dark {
+  --ink: #f2eefa;          /* primary text */
+  --ink-soft: #bcb2cf;     /* secondary text */
+  --ink-faint: #8d84a0;    /* tertiary / placeholder */
+  --surface: rgba(255, 255, 255, 0.055);
+  --surface-strong: rgba(30, 20, 48, 0.88);
+  --edge: rgba(255, 255, 255, 0.10);
+  --edge-soft: rgba(255, 255, 255, 0.06);
+  --violet: #a877ff;
+}
+
+/* ── The ground ─────────────────────────────────────────────────────────── */
+
+.dark body::before {
+  background:
+    radial-gradient(900px 620px at 88% 38%, rgba(150, 96, 255, 0.10), transparent 62%),
+    radial-gradient(1200px 780px at 4% 0%, rgba(126, 66, 214, 0.22), transparent 58%),
+    radial-gradient(1100px 760px at 100% 6%, rgba(96, 40, 190, 0.20), transparent 55%),
+    radial-gradient(950px 900px at 42% 104%, rgba(120, 60, 210, 0.16), transparent 58%),
+    linear-gradient(180deg, #0d0715 0%, #130b20 40%, #100819 70%, #0b0512 100%);
+}
+
+.dark body {
+  color: var(--ink);
+}
+
+/* ── Glass tokens ───────────────────────────────────────────────────────── */
+
+.dark .glass-panel {
+  background: var(--surface);
+  border: 1px solid var(--edge);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 1px 2px rgba(0, 0, 0, 0.30),
+    0 12px 30px -16px rgba(0, 0, 0, 0.75);
+}
+
+.dark .glass-chrome {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.04) 100%);
+  border: 1px solid var(--edge);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 14px 40px -18px rgba(0, 0, 0, 0.8);
+}
+
+.dark .glass-overlay {
+  background: var(--surface-strong);
+  border: 1px solid var(--edge);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.10),
+    0 24px 70px -20px rgba(0, 0, 0, 0.85);
+}
+
+.dark .glass-purple {
+  background:
+    linear-gradient(135deg, rgba(86, 34, 150, 0.86) 0%, rgba(112, 48, 190, 0.82) 50%, rgba(78, 28, 140, 0.88) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+/* The bar stays purple in both themes — it is the brand anchor — but drops
+   deeper so it sits ON the dark ground rather than glowing off it. */
+.dark .nav-pill.nav-pill {
+  background:
+    linear-gradient(180deg, rgba(92, 48, 172, 0.72) 0%, rgba(74, 34, 148, 0.78) 48%, rgba(58, 24, 120, 0.84) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 8px 18px -12px rgba(255, 255, 255, 0.18),
+    0 18px 42px -18px rgba(0, 0, 0, 0.85),
+    0 0 34px 22px rgba(12, 6, 22, 0.75);
+}
+
+.dark .nav-pill.nav-pill.on-panel {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 18px 42px -18px rgba(0, 0, 0, 0.9),
+    0 0 34px 20px rgba(8, 4, 16, 0.85);
+}
+
+/* ── Utility remap ──────────────────────────────────────────────────────── */
+/* Everything below only ever matches inside `.dark`. */
+
+.dark .bg-white,
+.dark .bg-gray-50,
+.dark .bg-gray-100,
+.dark .bg-slate-50 {
+  background-color: var(--surface) !important;
+}
+
+/* translucent whites used for cards and chips */
+.dark .bg-white\/40,
+.dark .bg-white\/45,
+.dark .bg-white\/50,
+.dark .bg-white\/55,
+.dark .bg-white\/60,
+.dark .bg-white\/70,
+.dark .bg-white\/80 {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.dark .text-gray-900,
+.dark .text-gray-800,
+.dark .text-black,
+.dark .text-\[\#333333\] {
+  color: var(--ink) !important;
+}
+
+.dark .text-gray-700,
+.dark .text-gray-600 {
+  color: var(--ink-soft) !important;
+}
+
+.dark .text-gray-500,
+.dark .text-gray-400,
+.dark .placeholder-gray-400::placeholder {
+  color: var(--ink-faint) !important;
+}
+
+.dark .border-gray-100,
+.dark .border-gray-200,
+.dark .border-gray-300,
+.dark .border-white\/60,
+.dark .border-white\/70,
+.dark .border-white\/85 {
+  border-color: var(--edge) !important;
+}
+
+.dark .divide-gray-100 > * + *,
+.dark .divide-gray-200 > * + * {
+  border-color: var(--edge) !important;
+}
+
+/* Brand purple is too dark to read on an aubergine ground — lift it. */
+.dark .text-\[\#854cbc\],
+.dark .text-\[\#7B2FBE\],
+.dark .text-\[\#562996\],
+.dark .text-purple-600,
+.dark .text-purple-700 {
+  color: var(--violet) !important;
+}
+
+/* Product imagery sits on white in real life; keep a light plate behind it so
+   packshots with white backgrounds do not float in a dark void. */
+.dark .glass-panel img {
+  mix-blend-mode: normal;
+}
+
+/* Inputs */
+.dark input,
+.dark textarea,
+.dark select {
+  color: var(--ink);
+}
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: var(--ink-faint);
+}
+
+/* Scrollbars */
+.dark .purple-scrollbar::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
+.dark .purple-scrollbar::-webkit-scrollbar-thumb { background: var(--violet); }
+
+/* The hero and category banners are artwork with their own light backgrounds;
+   knock them back slightly so they do not glare against the dark page. */
+.dark .banner-artwork img {
+  filter: brightness(0.92) saturate(1.05);
+}
+
+/* Hardcoded text hexes the app uses instead of Tailwind's grey scale. Left
+   unmapped these render dark-on-dark and simply vanish (the "Menu" heading
+   did exactly that). Grouped by role rather than by value. */
+.dark .text-\[\#0f172a\],
+.dark .text-\[\#2d2d2d\],
+.dark .text-\[\#1a1a1a\],
+.dark .text-\[\#484848\],
+.dark .text-\[\#442f58\] {
+  color: var(--ink) !important;
+}
+
+.dark .text-\[\#475569\],
+.dark .text-\[\#64748b\],
+.dark .text-\[\#8c8c8c\],
+.dark .text-\[\#9a9a9a\] {
+  color: var(--ink-soft) !important;
+}
+
+.dark .text-\[\#94a3b8\],
+.dark .text-\[\#cbd5e1\] {
+  color: var(--ink-faint) !important;
+}
+
+/* Brand purples used as TEXT need lifting on a dark ground. */
+.dark .text-\[\#593696\],
+.dark .text-\[\#48286b\],
+.dark .text-\[\#800080\],
+.dark .text-\[\#8e44ad\],
+.dark .text-\[\#b165f1\] {
+  color: var(--violet) !important;
+}
+
+/* Form fields default to a white background in every browser, so they stay
+   white in dark mode unless given one explicitly - the utility remap above
+   cannot help where no bg class was set in the first place. */
+.dark input:not([type='checkbox']):not([type='radio']):not([type='range']),
+.dark textarea,
+.dark select {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  border-color: var(--edge) !important;
+  color: var(--ink) !important;
+}
+.dark input:not([type='checkbox']):not([type='radio']):focus,
+.dark textarea:focus {
+  background-color: rgba(255, 255, 255, 0.10) !important;
+  border-color: rgba(168, 119, 255, 0.55) !important;
+}
+
+/* ─── Corner radius, one scale for the whole site ─────────────────────────
+   The glass surfaces had SEVEN different radii between them (12/16/18/24/32px
+   plus Tailwind's xl/2xl/3xl), which is why nothing quite matched. The radius
+   now lives on the token instead of on each component, so every card, panel,
+   drawer and modal is in sync and there is one number to change.
+
+   Content surfaces are 14px: the previous 18px on product cards read as too
+   soft next to the 12px nav pills. 14px keeps them a family.
+   ───────────────────────────────────────────────────────────────────────── */
+:root {
+  --r-surface: 14px;   /* product cards, rows, content panels */
+  --r-chrome: 16px;    /* the brand strip and similar bars */
+  --r-overlay: 18px;   /* drawers, sheets, modals */
+}
+
+.glass-panel  { border-radius: var(--r-surface); }
+.glass-chrome { border-radius: var(--r-chrome); }
+.glass-overlay,
+.glass-purple { border-radius: var(--r-overlay); }
+
+/* ─── The halo behind the floating nav ───────────────────────────────────
+   It exists to separate the bar from whatever is behind it, so its colour
+   has to follow that surface rather than being fixed:
+
+     page (light)      -> white bloom
+     search panel      -> white, because that panel is white
+     chat panel        -> dark, because that panel is purple
+     anything in dark  -> dark, because the whole ground is dark
+
+   Geometry is identical in every case; only the colour changes.
+   ─────────────────────────────────────────────────────────────────────── */
+.nav-halo {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  top: -70px;
+  pointer-events: none;
+  transition: background 300ms ease;
+  background: radial-gradient(
+    ellipse 30% 44% at 50% 58%,
+    rgba(255, 255, 255, 0.34) 0%,
+    rgba(255, 255, 255, 0.20) 36%,
+    rgba(255, 255, 255, 0.06) 62%,
+    rgba(255, 255, 255, 0) 82%
+  );
+}
+
+@media (min-width: 640px) {
+  .nav-halo { top: -80px; }
+}
+
+.nav-halo.on-dark-surface,
+.dark .nav-halo {
+  background: radial-gradient(
+    ellipse 30% 44% at 50% 58%,
+    rgba(28, 8, 56, 0.60) 0%,
+    rgba(28, 8, 56, 0.38) 36%,
+    rgba(28, 8, 56, 0.14) 62%,
+    rgba(28, 8, 56, 0) 82%
+  );
+}
+
+/* Same rule for the pill glow: dark ground or purple panel -> dark bloom. */
+.dark .nav-pill.nav-pill:not(.on-panel) {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 8px 18px -12px rgba(255, 255, 255, 0.18),
+    0 18px 42px -18px rgba(0, 0, 0, 0.85),
+    0 0 34px 22px rgba(12, 6, 22, 0.75);
 }

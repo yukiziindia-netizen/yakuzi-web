@@ -79,7 +79,7 @@ export function NotifyStockAlertModal({
             exit={{ opacity: 0, scale: 0.92, y: 30 }}
             transition={{ type: 'spring', damping: 28, stiffness: 350 }}
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-[420px] bg-white rounded-3xl shadow-2xl border border-white/50 overflow-hidden"
+ className="relative w-full max-w-[420px] glass-overlay overflow-hidden"
           >
             {/* Header */}
             <div className="p-6 border-b border-gray-100 flex items-center justify-between">

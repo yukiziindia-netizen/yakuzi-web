@@ -2,8 +2,8 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trash2, Loader2, Star, Eye, Plus, RefreshCw } from 'lucide-react';
+import WishlistIcon from '@/components/shared/WishlistIcon';
 import { useWishlist, useRemoveFromWishlist } from '@/hooks/useWishlist';
-import { DeliveryTruckBadge } from '@/components/shared/DeliveryTruckBadge';
 import { useToast } from '@/components/shared/Toast';
 import { useAddToCart, useCart, useUpdateCartItem, useRemoveCartItem } from '@/hooks/useCart';
 import { useAuth } from '@yukizi/api-client';
@@ -85,7 +85,7 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
             animate={isDesktop ? { x: 0 } : { y: 0 }}
             exit={isDesktop ? { x: '100%' } : { y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed inset-0 lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[420px] lg:max-w-[90vw] bg-white shadow-2xl z-[86] flex flex-col overflow-hidden"
+ className="fixed inset-0 lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[420px] lg:max-w-[90vw] glass-overlay z-[86] flex flex-col overflow-hidden"
           >
             {/* Custom Scrollbar Styles */}
             <style dangerouslySetInnerHTML={{ __html: `
@@ -252,135 +252,123 @@ export default function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; o
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, x: -50 }}
-                        className="bg-white rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border-2 border-[#7B2FBE] p-2 sm:p-3 flex gap-2 sm:gap-3.5 relative overflow-visible mt-3 group transition-all"
+                        className="glass-panel relative mt-3 flex gap-3 p-3 transition-all hover:bg-white/70"
                       >
                         {isYukiziChoice && (
-                          <span className="absolute -top-[12px] left-3 bg-[#7B2FBE] text-white px-3 py-0.5 rounded-full font-semibold text-2xs sm:text-xs shadow-sm tracking-wide flex items-center justify-center z-20">
+                          <span className="absolute -top-[10px] left-3 z-20 flex items-center justify-center rounded-full bg-[#7B2FBE] px-2.5 py-0.5 text-2xs font-semibold tracking-wide text-white shadow-sm">
                             Yukizi Choice
                           </span>
                         )}
 
-                        {/* Left Image */}
-                        <div className="w-[90px] sm:w-[105px] bg-[#f8f5fd] rounded-xl flex items-center justify-center relative flex-shrink-0 overflow-hidden self-stretch my-1">
-                          <img src={itemImage} alt={itemName} loading="lazy" decoding="async" className="w-16 h-16 sm:w-20 sm:h-20 object-contain mix-blend-multiply" />
-                          <button 
+                        {/* Remove sits on the image here too, so both drawers
+                            read identically. */}
+                        <div className="relative flex h-[104px] w-[92px] flex-shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-white/70 bg-white/55">
+                          <img src={itemImage} alt={itemName} loading="lazy" decoding="async" className="h-[84px] w-[84px] object-contain mix-blend-multiply" />
+                          <button
                             onClick={() => removeFromWishlist.mutate(item.productId || item.product?.id || item.id, {
                               onSuccess: () => toast('Removed from saved items', 'info'),
                             })}
                             disabled={removeFromWishlist.isPending}
-                            className="absolute bottom-0 left-0 bg-[#f7941d] text-white p-1.5 sm:p-2 rounded-tr-2xl hover:bg-orange-500 transition-colors z-10 disabled:opacity-50"
+                            title="Remove"
+                            aria-label="Remove from saved items"
+                            className="absolute bottom-1 left-1 flex h-6 w-6 items-center justify-center rounded-full border border-white/70 bg-white/80 text-gray-500 shadow-sm backdrop-blur-md transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
                           >
-                            <Trash2 className="w-4 h-4 sm:w-[22px] sm:h-[22px]" />
+                            <Trash2 className="h-3 w-3" />
                           </button>
                         </div>
 
-                        {/* Middle Content */}
-                        <div className="flex-1 min-w-0 mt-1 flex flex-col gap-1.5 justify-between">
-                          {/* Row 1: Actions (right-aligned Plus/Quantity Controls) */}
-                          <div className="flex justify-end w-full pr-1.5 sm:pr-3">
-                            <div className="flex items-center gap-1.5 flex-shrink-0">
-                              {cartQty === 0 ? (
+                        <div className="flex min-w-0 flex-1 flex-col">
+                          <h3 className="line-clamp-2 text-sm font-bold leading-snug text-gray-900 sm:text-base">{itemName}</h3>
+
+                          <div className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                            <span className="text-lg font-bold leading-none text-gray-900">{displayPriceText}</span>
+                            {displayOriginalPriceText && (
+                              <span className="text-xs font-semibold leading-none text-gray-400 line-through">{displayOriginalPriceText}</span>
+                            )}
+                            {displayDiscountPercent > 0 && (
+                              <span className="text-xs font-bold leading-none text-emerald-600">{displayDiscountPercent}% off</span>
+                            )}
+                          </div>
+
+                          <div className="mt-1.5 flex items-center gap-1">
+                            <Star className="h-3.5 w-3.5 fill-[#f5a623] text-[#f5a623]" />
+                            <span className="text-xs font-bold text-gray-700">{itemRating}</span>
+                          </div>
+                        </div>
+
+                        {/* Quantity on top, reset beneath — the same column the
+                            cart drawer uses for quantity + save. */}
+                        <div className="flex flex-shrink-0 flex-col items-end gap-2">
+                          {cartQty === 0 ? (
+                            <button
+                              onClick={handleIncrement}
+                              aria-label="Add to cart"
+                              className="flex h-7 items-center gap-1 rounded-full bg-[linear-gradient(180deg,#8f5ad4_0%,#7745bd_48%,#5f2f9f_100%)] px-2.5 text-2xs font-bold tracking-wide text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.34),0_4px_12px_-4px_rgba(88,54,150,0.75)] transition-transform active:scale-95"
+                            >
+                              <Plus className="h-3.5 w-3.5" strokeWidth={3} />
+                              Add
+                            </button>
+                          ) : (
+                            <>
+                              <div className="flex h-7 select-none items-center justify-between gap-0.5 rounded-full bg-[linear-gradient(180deg,#8f5ad4_0%,#7745bd_48%,#5f2f9f_100%)] px-1 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.34),0_4px_12px_-4px_rgba(88,54,150,0.75)]">
+                                <button
+                                  onClick={handleDecrement}
+                                  aria-label="Decrease quantity"
+                                  className="flex h-5 w-5 items-center justify-center rounded-full text-sm font-bold text-white/90 transition-colors hover:bg-white/20 hover:text-white active:scale-90"
+                                >
+                                  −
+                                </button>
+                                <span className="min-w-[16px] text-center text-[11px] font-bold tabular-nums tracking-wide">
+                                  {cartQty.toString().padStart(2, '0')}
+                                </span>
                                 <button
                                   onClick={handleIncrement}
-                                  className="text-black hover:text-black/80 focus:outline-none transition-transform active:scale-90 p-1"
+                                  aria-label="Increase quantity"
+                                  className="flex h-5 w-5 items-center justify-center rounded-full text-sm font-bold text-white/90 transition-colors hover:bg-white/20 hover:text-white active:scale-90"
                                 >
-                                  <Plus className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={3} />
+                                  +
                                 </button>
-                              ) : (
-                                <div className="flex items-center gap-1.5">
-                                  {/* Reset count button */}
-                                  <button 
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      if (inCartItem) {
-                                        removeCartItem.mutate(inCartItem.id, {
-                                          onSuccess: () => {
-                                            toast('Quantity reset', 'success');
-                                          }
-                                        });
+                              </div>
+
+                              <button
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  if (inCartItem) {
+                                    removeCartItem.mutate(inCartItem.id, {
+                                      onSuccess: () => {
+                                        toast('Quantity reset', 'success');
                                       }
-                                    }}
-                                    className="text-[#48286b] hover:text-[#361e51] transition-colors p-1"
-                                    title="Reset quantity"
-                                    disabled={removeCartItem.isPending}
-                                  >
-                                    <RefreshCw className={`w-4 h-4 sm:w-4.5 sm:h-4.5 text-[#48286b] ${removeCartItem.isPending ? 'animate-spin' : ''}`} />
-                                  </button>
+                                    });
+                                  }
+                                }}
+                                title="Reset quantity"
+                                aria-label="Reset quantity"
+                                disabled={removeCartItem.isPending}
+                                className="flex h-7 w-7 items-center justify-center rounded-full border border-white/70 bg-white/55 text-[#5b3391] transition-colors hover:bg-white/85 disabled:opacity-50"
+                              >
+                                <RefreshCw className={`h-3.5 w-3.5 ${removeCartItem.isPending ? 'animate-spin' : ''}`} />
+                              </button>
+                            </>
+                          )}
 
-                                  {/* Purple Quantity Selector Pill */}
-                                  <div className="flex items-center bg-[#48286b] rounded-lg text-white shadow-sm h-7 sm:h-8 px-2 sm:px-2.5 gap-1.5 sm:gap-2 select-none">
-                                    <button 
-                                      onClick={handleDecrement}
-                                      className="px-1.5 py-0.5 sm:px-2 sm:py-0.5 text-white hover:bg-white/10 rounded font-bold text-xs sm:text-sm"
-                                    >
-                                      -
-                                    </button>
-                                    <span className="text-xs sm:text-xs font-bold px-0.5 sm:px-1 tracking-tighter min-w-[14px] sm:min-w-[16px] text-center">
-                                      {cartQty.toString().padStart(2, '0')}
-                                    </span>
-                                    <button 
-                                      onClick={handleIncrement}
-                                      className="px-1.5 py-0.5 sm:px-2 sm:py-0.5 text-white hover:bg-white/10 rounded font-bold text-xs sm:text-sm"
-                                    >
-                                      +
-                                    </button>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Row 2: Product Name (left) & Quickview/Eye Button (right) */}
-                          <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2">
-                            <h3 className="text-sm sm:text-sm font-medium text-gray-500 leading-snug truncate text-left flex-1">{itemName}</h3>
-                            
-                            {/* Quickview Button */}
-                            <button
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                setSelectedProduct(item.product || {
-                                  id: item.productId || item.id,
-                                  name: itemName,
-                                  price: finalPrice,
-                                  image: itemImage,
-                                });
-                              }}
-                              className="flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform"
-                              title="Quick view"
-                            >
-                              <Eye className="w-4 h-4 text-gray-400 hover:text-gray-600" />
-                            </button>
-                          </div>
-
-                          {/* Row 3: Price & Star Rating */}
-                          <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2">
-                            <div className="flex items-baseline gap-2 text-left">
-                              <span className="text-xl font-bold text-gray-900">{displayPriceText}</span>
-                              {displayOriginalPriceText && (
-                                <span className="text-sm font-bold text-gray-400 line-through">{displayOriginalPriceText}</span>
-                              )}
-                            </div>
-                            
-                            <div className="flex items-center gap-[3px] sm:gap-[4px]">
-                              <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-[#6342B4] text-[#6342B4]" />
-                              <span className="text-xs sm:text-sm font-bold text-gray-700">{itemRating}</span>
-                            </div>
-                          </div>
-
-                          {/* Row 4: Discount & Delivery */}
-                          <div className="flex items-center justify-between w-full pr-1.5 sm:pr-3 gap-2">
-                            <div className="text-left">
-                              {displayDiscountPercent > 0 && (
-                                <span className="text-xs sm:text-sm font-bold text-black">{displayDiscountPercent}% off</span>
-                              )}
-                            </div>
-                            
-                            <div className="-mr-[6px] sm:-mr-[8px]">
-                              <DeliveryTruckBadge text={deliveryTime} className="w-[52px] sm:w-[75px] h-auto text-[#8c8c8c]" />
-                            </div>
-                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setSelectedProduct(item.product || {
+                                id: item.productId || item.id,
+                                name: itemName,
+                                price: finalPrice,
+                                image: itemImage,
+                              });
+                            }}
+                            title="Quick view"
+                            aria-label="Quick view"
+                            className="flex h-7 w-7 items-center justify-center rounded-full border border-white/70 bg-white/55 text-gray-500 transition-colors hover:bg-white/85 hover:text-gray-700"
+                          >
+                            <Eye className="h-3.5 w-3.5" />
+                          </button>
                         </div>
                       </motion.div>
                     );

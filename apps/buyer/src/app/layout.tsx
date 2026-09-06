@@ -128,6 +128,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* dns-prefetch as the fallback for anything that ignores preconnect. */}
         {apiOrigin && <link rel="dns-prefetch" href={apiOrigin} />}
         <link rel="dns-prefetch" href="https://storage.googleapis.com" />
+        {/* Applies the saved theme BEFORE first paint. Without this, a reload
+            in dark mode renders the light page for a frame and flashes white.
+            Deliberately does not consult prefers-color-scheme: a visitor whose
+            OS is dark still gets the brand's light default until they opt in. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{if(localStorage.getItem('yukizi-theme')==='dark'){document.documentElement.classList.add('dark')}}catch(e){}",
+          }}
+        />
       </head>
       <body className={`${inter.className} font-sans`}>
         <Providers>

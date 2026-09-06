@@ -262,11 +262,11 @@ export default async function CategoryPage({
   if (faqs.length) jsonLd.push(faqPageSchema(faqs));
 
   return (
-    <main className="w-full bg-white min-h-screen relative pb-24 sm:pb-32">
+    <main className="w-full min-h-screen relative pb-[var(--nav-clearance,150px)]">
       <JsonLd data={jsonLd} />
       <HomeNavbar />
 
-      <div className="w-full max-w-[1600px] 2xl:max-w-none mx-auto bg-white overflow-hidden flex flex-col relative min-h-screen">
+      <div className="w-full max-w-[1600px] 2xl:max-w-none mx-auto overflow-hidden flex flex-col relative min-h-screen">
         <section className="flex-1 flex flex-col w-full">
           {/* Banner slideshow. One responsive component rather than a
               desktop-only block: each slide picks the phone artwork itself

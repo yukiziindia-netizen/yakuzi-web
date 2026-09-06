@@ -148,7 +148,7 @@ export default async function HomePage({
   }
 
   return (
-    <main className="w-full bg-gray-50 min-h-screen relative pb-24 sm:pb-32">
+    <main className="w-full min-h-screen relative pb-[var(--nav-clearance,150px)]">
       <JsonLd data={[graph(organizationSchema(socialUrls, support), webSiteSchema())]} />
       {/* The hero is pure banner artwork, so the page's one H1 is screen-reader
           only — same pattern CategoryBanner already uses. Without it the
@@ -158,7 +158,7 @@ export default async function HomePage({
       </h1>
       <HomeNavbar />
 
-      <div className="w-full max-w-[1600px] 2xl:max-w-none mx-auto bg-gray-50 overflow-hidden flex flex-col relative min-h-screen">
+      <div className="w-full max-w-[1600px] 2xl:max-w-none mx-auto overflow-hidden flex flex-col relative min-h-screen">
         <section className="flex-1 flex flex-col w-full">
           <div className="w-full flex-shrink-0 flex flex-col">
             <HeroSection initialBanners={initialBanners} />

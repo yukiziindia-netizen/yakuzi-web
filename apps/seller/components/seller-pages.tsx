@@ -631,7 +631,7 @@ export function ReviewsContent() {
           </p>
         </div>
         <div className="flex items-center gap-2 rounded-xl border border-white/20 px-4 py-2">
-          <Star className="h-4 w-4 text-yellow-500 fill-current" />
+          <Star className="h-4 w-4 text-[#f5a623] fill-current" />
           <span className="font-semibold text-foreground">
             {summary.average != null ? summary.average.toFixed(1) : "—"}
           </span>
@@ -689,7 +689,7 @@ export function ReviewsContent() {
                   <div className="flex items-center gap-0.5">
                     {[1, 2, 3, 4, 5].map((n) => (
                       <Star key={n}
-                        className={`h-3.5 w-3.5 ${n <= r.rating ? "text-yellow-500 fill-current" : "text-muted-foreground/30"}`} />
+                        className={`h-3.5 w-3.5 ${n <= r.rating ? "text-[#f5a623] fill-current" : "text-muted-foreground/30"}`} />
                     ))}
                   </div>
                   <span className="font-medium text-foreground">{r.productName}</span>

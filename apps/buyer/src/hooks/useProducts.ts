@@ -38,10 +38,17 @@ export function useProducts(params?: {
   isDiscounted?: boolean;
   isBestSelling?: boolean;
   isYukiziChoice?: boolean;
-}) {
-  return useQuery({
+}, options: any = {}) {
+  // `options` exists so a caller can seed the query with data the SERVER
+  // already fetched (initialData), exactly as useProductById is seeded with
+  // initialProduct below. Without it, a list rendered from this hook is empty
+  // during server rendering, so none of its links reach the served HTML.
+  // Explicit <any>: spreading `options` (which may carry initialData) otherwise
+  // widens the inferred TData to {} and every caller loses `.data`.
+  return useQuery<any>({
     queryKey: ['products', params],
     queryFn: () => getProducts(params),
+    ...options,
   });
 }
 

@@ -118,7 +118,7 @@ export default function OrderIdPage({ params }: { params: { orderId: string } })
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-gray-50/50">
+      <main className="min-h-screen">
         <Navbar showUserActions={true} />
         <div className="pt-32 pb-20 flex items-center justify-center">
           <Loader2 className="w-8 h-8 text-gray-300 animate-spin" />
@@ -129,7 +129,7 @@ export default function OrderIdPage({ params }: { params: { orderId: string } })
 
   if (isError || !order) {
     return (
-      <main className="min-h-screen bg-gray-50/50">
+      <main className="min-h-screen">
         <Navbar showUserActions={true} />
         <div className="pt-32 pb-20 flex flex-col items-center justify-center gap-4">
           <AlertCircle className="w-12 h-12 text-red-300" />
@@ -180,7 +180,7 @@ export default function OrderIdPage({ params }: { params: { orderId: string } })
 
   return (
     <AuthGuard>
-    <main className="min-h-screen bg-gray-50/50">
+    <main className="min-h-screen">
       <Navbar showUserActions={true} />
       
       <div className="pt-20 sm:pt-24 md:pt-28 lg:pt-32 pb-12 sm:pb-20 w-full px-[4vw]">

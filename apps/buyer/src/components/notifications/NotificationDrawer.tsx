@@ -121,7 +121,7 @@ export default function NotificationDrawer({ isOpen, onClose }: { isOpen: boolea
             animate={isDesktop ? { x: 0 } : { y: 0 }}
             exit={isDesktop ? { x: '100%' } : { y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed inset-0 lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[500px] lg:max-w-[90vw] bg-white shadow-2xl z-[86] flex flex-col overflow-hidden lg:rounded-l-3xl"
+ className="fixed inset-0 lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[500px] lg:max-w-[90vw] glass-overlay z-[86] flex flex-col overflow-hidden lg:rounded-l-3xl"
           >
             {/* Custom Scrollbar Styles */}
             <style dangerouslySetInnerHTML={{ __html: `
@@ -323,7 +323,7 @@ export default function NotificationDrawer({ isOpen, onClose }: { isOpen: boolea
                             )}
                           </div>
                           <div className="flex items-center gap-1 shrink-0">
-                            <Star className="w-3.5 h-3.5 text-[#7B2FBE] fill-[#7B2FBE]" />
+                            <Star className="w-3.5 h-3.5 text-[#f5a623] fill-[#f5a623]" />
                             <span className="text-[12px] font-bold text-gray-700 leading-none">
                               {product.rating || '4.5'}
                             </span>

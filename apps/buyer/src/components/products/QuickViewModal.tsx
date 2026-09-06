@@ -14,7 +14,6 @@ import {
   Package,
 } from 'lucide-react';
 import Image from 'next/image';
-import { DeliveryTruckBadge } from '@/components/shared/DeliveryTruckBadge';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -170,24 +169,29 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
             onClick={onClose}
           >
             {/* Ambient Backdrop */}
-            <div className="absolute inset-0 bg-black/50" />
+            {/* Blurred scrim rather than a flat 50% black: the modal is frosted,
+                so the page behind it needs to be genuinely out of focus or the
+                glass has nothing to be glass against. */}
+            <div className="absolute inset-0 bg-[#1b0f2e]/55 backdrop-blur-md" />
 
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="no-scrollbar relative flex max-h-[90vh] w-full max-w-[95%] xs:max-w-[500px] sm:max-w-[560px] md:max-w-[590px] flex-col gap-4 overflow-y-auto rounded-2xl border border-white/40 bg-white/95 p-4 shadow-[0_25px_60px_-12px_rgba(0,0,0,0.25),0_0_0_1px_rgba(255,255,255,0.1)] backdrop-blur-sm sm:gap-5 sm:p-6"
+              className="glass-overlay no-scrollbar relative flex max-h-[90vh] w-full max-w-[95%] xs:max-w-[500px] sm:max-w-[560px] md:max-w-[590px] flex-col gap-4 overflow-y-auto p-4 sm:gap-5 sm:p-6"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header section with Title & Share */}
               <div className="relative flex w-full flex-col gap-2 pt-3">
                 <div className="flex w-full items-start justify-between">
-                  <h2 className="max-w-[85%] text-xl font-bold leading-tight tracking-tight text-gray-500">
+                  {/* was text-gray-500 — the product name is the heading of this
+                      sheet and was rendering lighter than the prices under it */}
+                  <h2 className="max-w-[85%] text-xl font-bold leading-tight tracking-tight text-gray-900">
                     {displayProduct.name}
                   </h2>
                   <button
                     onClick={onClose}
-                    className="self-start rounded-full p-1 transition-colors hover:bg-gray-100"
+                    className="self-start rounded-full border border-white/60 bg-white/50 p-1.5 backdrop-blur-md transition-colors hover:bg-white/80"
                   >
                     <X className="h-5 w-5 text-gray-400" />
                   </button>
@@ -199,16 +203,19 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                     productName={displayProduct.name}
                     productId={displayProduct.id}
                     productPrice={displayProduct.mrp}
-                    className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white p-0 text-gray-400 shadow-none transition-transform hover:scale-105 focus:outline-none"
+                    className="flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-white/55 p-0 text-gray-500 backdrop-blur-md transition-transform hover:scale-105 hover:bg-white/75 focus:outline-none"
                     iconClassName="w-[18px] h-[18px]"
                   />
                 </div>
               </div>
 
-              {/* Product Banner Halftone Card */}
-              {/* Product Banner Card Container (custom purple background) */}
+              {/* The image stage. Was a solid #562996 slab, which fought the
+                  artwork it was supposed to present and was the one opaque
+                  block left in the sheet. Now a soft purple-tinted glass panel:
+                  it still frames the image, but the product is the brightest
+                  thing in the modal instead of the box around it. */}
               <div
-                className="relative flex aspect-[4/3.2] w-full items-center justify-center rounded-xl border border-[#562996]/20 bg-[#562996] shadow-sm"
+                className="relative flex aspect-[4/3.2] w-full items-center justify-center overflow-hidden rounded-[var(--r-surface)] border border-white/50 bg-[linear-gradient(160deg,rgba(133,76,188,0.16),rgba(86,41,150,0.10)_55%,rgba(255,255,255,0.35))] shadow-[inset_0_1px_0_rgba(255,255,255,0.6),0_10px_30px_-16px_rgba(88,54,150,0.45)]"
               >
                 {/* Interactive Thumbnail Gallery overlay on the left (aligned bottom-left) */}
                 <div className="absolute left-4 bottom-4 z-20 flex flex-col gap-2">
@@ -216,10 +223,13 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                     <button
                       key={idx}
                       onClick={() => setActiveImageIndex(idx)}
-                      className={`h-14 w-14 overflow-hidden rounded-lg border-2 bg-white/15 shadow-sm backdrop-blur-sm transition-all duration-200 ${
+                      // selected state was orange — the mascot's colour, not a
+                      // selection colour anywhere else on the site. Purple ring
+                      // matches every other active state.
+                      className={`h-14 w-14 overflow-hidden rounded-[10px] border bg-white/50 shadow-sm backdrop-blur-md transition-all duration-200 ${
                         activeImageIndex === idx
-                          ? 'scale-105 border-orange-500 shadow-md'
-                          : 'border-white/30 hover:border-white/60'
+                          ? 'scale-105 border-[#854cbc] ring-2 ring-[#854cbc]/45 shadow-md'
+                          : 'border-white/60 hover:border-white/90 hover:scale-[1.03]'
                       }`}
                     >
                       <Image
@@ -234,7 +244,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                 </div>
 
                 {/* Main Product Image (fills the card container exactly, with overflow-hidden to respect rounded corners) */}
-                <div className="absolute inset-0 z-10 rounded-xl overflow-hidden p-4 bg-white">
+                <div className="absolute inset-0 z-10 rounded-xl overflow-hidden p-4">
                   <div className="relative w-full h-full">
                     <Image
                       src={activeImage}
@@ -344,50 +354,42 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                     return (
                       <div
                         key={listing.id}
-                        className="flex w-full flex-row items-center justify-between gap-2.5 rounded-xl bg-gray-200 p-2.5 transition-colors hover:bg-gray-300/60 sm:p-3"
+                        className="glass-panel flex w-full flex-row items-center justify-between gap-2.5 p-2.5 transition-all duration-200 hover:bg-white/70 hover:shadow-[0_10px_26px_-14px_rgba(88,54,150,0.38)] sm:p-3"
                       >
-                        {/* 1. Offer Badge */}
-                        <div className="flex-shrink-0 select-none">
-                          <div className="rounded bg-[#864ac5] px-2 py-1 text-center text-2xs font-bold uppercase leading-none tracking-wider text-white sm:px-2.5 sm:py-1.5 sm:text-xs">
-                            {discountPercent > 0 
-                              ? `${discountPercent}% off` 
-                              : (listing.discountType === "SAME_PRODUCT_BONUS" 
-                                  ? `Buy ${discountMeta.buy || 0} Get ${discountMeta.get || 0} Free`
-                                  : (listing.discountType === "SPECIAL_PRICE"
-                                      ? `Special`
-                                      : `${discountPercent || 0}% off`
-                                    )
-                                )
-                            }
-                          </div>
-                        </div>
-
-                        {/* 2. Price */}
-                        <div className="flex flex-col min-w-0">
-                          <span className="truncate text-xs font-bold leading-none text-gray-800 sm:text-sm">
-                            ₹{Math.round(listing.price || 0)}
+                        {/* 1. Price - leads the row, as on the product page */}
+                        <div className="flex min-w-0 flex-col items-start justify-center">
+                          <span className="truncate text-sm font-medium leading-none tracking-tight text-gray-800 sm:text-base">
+                            ₹{Math.round(listing.price || 0).toLocaleString('en-IN')}
                           </span>
                           {listing.moq > 1 && (
-                            <span className="mt-1 truncate text-2xs font-bold leading-none text-gray-400 sm:mt-1.5 sm:text-2xs">
+                            <span className="mt-1 truncate text-2xs font-medium leading-none text-gray-500 sm:text-xs">
                               {listing.moq * 10}% off on purchase of {listing.moq}
                             </span>
                           )}
                         </div>
 
-                        {/* 3. Star Rating */}
-                        <div className="flex items-center gap-1 flex-shrink-0">
-                          <Star className="h-3 w-3 fill-[#864ac5] text-[#864ac5] sm:h-3.5 sm:w-3.5" />
-                          <span className="text-2xs font-bold leading-none text-gray-800 sm:text-xs">
+                        {/* 2. Seller rating */}
+                        <div className="flex flex-shrink-0 items-center gap-0.5 sm:gap-1">
+                          <Star className="h-3.5 w-3.5 flex-shrink-0 fill-[#f5a623] text-[#f5a623] sm:h-4 sm:w-4" />
+                          <span className="text-xs font-bold leading-none text-gray-800 sm:text-sm">
                             {listing.seller?.rating ? listing.seller.rating : 'NA'}
                           </span>
                         </div>
 
-                        {/* 4. Delivery badge */}
-                        <div className="flex-shrink-0">
-                          <DeliveryTruckBadge
-                            text={listing.deliveryText || listing.deliveryTime || '3 days'}
-                            className="h-auto w-[55px] text-gray-400 sm:w-[65px]"
-                          />
+                        {/* 3. Discount badge */}
+                        <div className="min-w-0 flex-shrink-0">
+                          <div className="flex items-center justify-center gap-0.5 whitespace-nowrap rounded bg-[#854cbc] px-1.5 py-0.5 font-bold tracking-wide text-white shadow-sm sm:gap-1 sm:px-2.5">
+                            <span className="text-2xs font-bold sm:text-sm">
+                              {discountPercent > 0
+                                ? `${discountPercent}%`
+                                : (listing.discountType === "SAME_PRODUCT_BONUS"
+                                    ? `Buy ${discountMeta.buy || 0} Get ${discountMeta.get || 0}`
+                                    : (listing.discountType === "SPECIAL_PRICE" ? `Special` : `${discountPercent || 0}%`))}
+                            </span>
+                            {(discountPercent > 0 || !listing.discountType) && (
+                              <span className="text-2xs font-medium opacity-90">off</span>
+                            )}
+                          </div>
                         </div>
 
                         {/* 5. Actions */}
@@ -417,7 +419,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                             ) : (
                               <button
                                 onClick={() => handleQtyChange(minQty)}
-                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-black text-white shadow-md transition-all hover:bg-black/80 focus:outline-none active:scale-95 sm:h-8 sm:w-8"
+                                className="flex h-7 w-7 items-center justify-center rounded-[9px] bg-[#854cbc] text-white shadow-[0_6px_16px_-8px_rgba(88,54,150,0.9)] transition-all hover:bg-[#743fa8] focus:outline-none active:scale-95 sm:h-8 sm:w-8"
                               >
                                 <Plus className="h-4 w-4 sm:h-4.5 sm:w-4.5 stroke-[3]" />
                               </button>

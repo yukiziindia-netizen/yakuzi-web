@@ -220,7 +220,7 @@ export default function LoginModal({ isOpen: isOpenProp, onClose: onCloseProp }:
     <div
       role="dialog"
       onClick={(e) => e.stopPropagation()}
-      className="relative w-full max-w-sm max-h-[90vh] overflow-y-auto overflow-x-hidden rounded-[28px] bg-white px-6 py-10 shadow-2xl font-sans select-none"
+ className="relative w-full max-w-sm max-h-[90vh] overflow-y-auto overflow-x-hidden rounded-[28px] glass-overlay px-6 py-10 font-sans select-none"
     >
       <style dangerouslySetInnerHTML={{__html: `
         .custom-scrollbar::-webkit-scrollbar {

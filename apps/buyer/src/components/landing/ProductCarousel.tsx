@@ -343,12 +343,15 @@ export function GridProductCard({ product, index, onOpenReview, showFullTitle }:
       )}
 
       <div
- className={`glass-panel rounded-[18px] transition-shadow duration-200 group flex flex-col relative ${
-          isWaitlisted
-            ? 'ring-1 ring-gray-900'
-            : isYukiziChoice
-              ? 'ring-1 ring-[#7B2FBE]/40'
-              : ''
+        // The purple ring that outlined every Yukizi Choice card is gone. The
+        // "Yukizi Choice" pill sitting on the card already says so in words,
+        // so the ring repeated it — and a hard tinted outline on a translucent
+        // panel reads as a border stuck onto the card rather than part of it.
+        //
+        // The waitlisted ring stays: that one carries state a shopper has no
+        // other way to see at a glance in the grid.
+        className={`glass-panel rounded-[18px] transition-shadow duration-200 group flex flex-col relative ${
+          isWaitlisted ? 'ring-1 ring-gray-900' : ''
         } w-full h-auto overflow-hidden hover:shadow-[0_10px_28px_-12px_rgba(88,54,150,0.38)]`}
       >
            {/* Top Right Plus / Cart Button / Waitlist Bell */}

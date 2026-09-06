@@ -2,7 +2,6 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trash2, Loader2, Star, Bookmark, ShoppingBag, ShoppingCart, Eye } from 'lucide-react';
-import { DeliveryTruckBadge } from '@/components/shared/DeliveryTruckBadge';
 import WishlistIcon from '@/components/shared/WishlistIcon';
 import { useCart, useUpdateCartItem, useRemoveCartItem, useSyncCart, useClearCart } from '@/hooks/useCart';
 import { usePlatformConfig } from '@/hooks/usePlatformConfig';
@@ -146,7 +145,7 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
             animate={isDesktop ? { x: 0 } : { y: 0 }}
             exit={isDesktop ? { x: '100%' } : { y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed inset-0 lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[420px] lg:max-w-[90vw] bg-white shadow-2xl z-[86] flex flex-col overflow-hidden"
+ className="fixed inset-0 lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[420px] lg:max-w-[90vw] glass-overlay z-[86] flex flex-col overflow-hidden"
           >
             {/* Custom Scrollbar Styles */}
             <style dangerouslySetInnerHTML={{ __html: `
@@ -243,18 +242,23 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                        initial={{ opacity: 0, y: 10 }}
                        animate={{ opacity: 1, y: 0 }}
                        exit={{ opacity: 0, x: -50 }}
-                       className="bg-white rounded-[14px] shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border-2 border-[#7B2FBE] p-2 sm:p-3 flex gap-2 sm:gap-3 relative overflow-visible mt-3 group transition-all"
+                       className="glass-panel relative mt-3 flex gap-3 p-3 transition-all hover:bg-white/70"
                      >
                        {isYukiziChoice && (
-                         <span className="absolute -top-[12px] left-3 bg-[#7B2FBE] text-white px-3 py-0.5 rounded-full font-semibold text-2xs sm:text-xs shadow-sm tracking-wide flex items-center justify-center z-20">
+                         <span className="absolute -top-[10px] left-3 z-20 flex items-center justify-center rounded-full bg-[#7B2FBE] px-2.5 py-0.5 text-2xs font-semibold tracking-wide text-white shadow-sm">
                            Yukizi Choice
                          </span>
                        )}
 
-                       {/* Left Image */}
-                       <div className="w-[100px] h-[110px] sm:w-[120px] sm:h-[130px] bg-[#f8f5fd] rounded-xl flex items-center justify-center relative flex-shrink-0 mt-1.5 overflow-hidden">
-                         <img src={itemImage} alt={itemName} loading="lazy" decoding="async" className="w-20 h-20 sm:w-24 sm:h-24 object-contain mix-blend-multiply" />
-                         <button 
+                       {/* Image, with remove sitting on it as Rishi asked. Kept
+                           as a small translucent chip rather than the original
+                           solid-orange square: it covers as little of the
+                           product as possible and only turns red on hover, so
+                           the destructive action is reachable without being the
+                           loudest thing in the drawer. */}
+                       <div className="group/img relative flex h-[104px] w-[92px] flex-shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-white/70 bg-white/55">
+                         <img src={itemImage} alt={itemName} loading="lazy" decoding="async" className="h-[84px] w-[84px] object-contain mix-blend-multiply" />
+                         <button
                            onClick={(e) => {
                              e.preventDefault();
                              removeItem.mutate(item.id, {
@@ -262,146 +266,110 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                              });
                            }}
                            disabled={removeItem.isPending || syncCart.isPending}
-                           className="absolute bottom-0 left-0 bg-[#f7941d] text-white p-1.5 sm:p-2 rounded-tr-2xl hover:bg-orange-500 transition-colors z-10 disabled:opacity-50"
+                           title="Remove"
+                           aria-label="Remove item"
+                           className="absolute bottom-1 left-1 flex h-6 w-6 items-center justify-center rounded-full border border-white/70 bg-white/80 text-gray-500 shadow-sm backdrop-blur-md transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
                          >
-                           <Trash2 className="w-4 h-4 sm:w-[22px] sm:h-[22px]" />
+                           <Trash2 className="h-3 w-3" />
                          </button>
                        </div>
 
-                       {/* Right Content */}
-                       <div className="flex-1 min-w-0 pr-1 mt-1 relative">
-                         {/* Top Row: Wishlist Badge & Quantity Pill (on mobile) */}
-                         <div className="flex items-center justify-between w-full mb-1.5 pr-1">
-                           {/* Wishlist Button Badge */}
-                           <div className="inline-block">
-                             <button 
-                               onClick={async (e) => {
-                                 e.preventDefault();
-                                 await addToWishlist.mutateAsync({
-                                   ...item,
-                                   id: item.product?.id || item.productId || item.id,
-                                   name: itemName,
-                                   price: itemPrice,
-                                   originalPrice: itemOriginalPrice,
-                                   image: itemImage,
-                                 });
-                                 toast('Added to wishlist', 'success');
-                               }}
-                               className="flex items-center gap-1 bg-[#562996] text-white px-2.5 sm:px-3.5 py-1.5 rounded-lg hover:bg-[#432075] transition-colors shadow-sm"
-                             >
-                               <span className="text-2xs sm:text-xs font-bold tracking-wider">Wishlist</span>
-                               <Bookmark className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white" />
-                             </button>
-                           </div>
+                       {/* Details */}
+                       <div className="flex min-w-0 flex-1 flex-col">
+                         <h3 className="line-clamp-2 text-sm font-bold leading-snug text-gray-900 sm:text-base">{itemName}</h3>
 
-                           {/* Quantity Pill (Mobile only) */}
-                           <div className="flex sm:hidden items-center bg-[#562996] rounded-lg text-white overflow-hidden shadow-sm h-7 px-1.5">
-                             <button 
-                               onClick={() => {
-                                 updateItem.mutate({ itemId: item.id, quantity: Math.max(minQuantity, quantity - 1) });
-                               }}
-                               disabled={updateItem.isPending || syncCart.isPending || quantity <= minQuantity}
-                               className="px-1.5 h-full hover:bg-black/20 flex items-center justify-center font-bold text-xs transition-colors disabled:opacity-50"
-                             >
-                               -
-                             </button>
-                             <span className="text-xs font-bold px-1 tracking-tighter">{quantity.toString().padStart(2, '0')}</span>
-                             <button
-                               onClick={() => {
-                                 if (quantity < maxQuantity) {
-                                   updateItem.mutate({ itemId: item.id, quantity: quantity + 1 });
-                                 } else {
-                                   toast(`Only ${maxQuantity} units available`, 'error');
-                                 }
-                               }}
-                               disabled={updateItem.isPending || syncCart.isPending || quantity >= maxQuantity}
-                               className="px-1.5 h-full hover:bg-black/20 flex items-center justify-center font-bold text-xs transition-colors disabled:opacity-50"
-                             >
-                               +
-                             </button>
-                           </div>
+                         <div className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                           <span className="text-lg font-bold leading-none text-gray-900">{displayPriceText}</span>
+                           {displayOriginalPriceText && (
+                             <span className="text-xs font-semibold leading-none text-gray-400 line-through">{displayOriginalPriceText}</span>
+                           )}
+                           {displayDiscountPercent > 0 && (
+                             <span className="text-xs font-bold leading-none text-emerald-600">{displayDiscountPercent}% off</span>
+                           )}
                          </div>
 
-                         {/* Product Name & Arrow Button */}
-                         <div className="flex items-center justify-between w-full pr-0.5 sm:pr-1 gap-2">
-                           <h3 className="text-base font-bold text-gray-800 leading-snug truncate flex-1">{itemName}</h3>
+                         <div className="mt-1.5 flex items-center gap-1">
+                           <Star className="h-3.5 w-3.5 fill-[#f5a623] text-[#f5a623]" />
+                           <span className="text-xs font-bold text-gray-700">{item.rating ? item.rating : 'NA'}</span>
+                         </div>
+
+                         {isOutOfStock && (
+                           <span className="mt-1 text-2xs font-bold uppercase tracking-wide text-red-600">Out of stock</span>
+                         )}
+                       </div>
+
+                       {/* Actions column: quantity on top, save beneath it —
+                           the product-card arrangement. Quick view is gone;
+                           tapping the row's product still reaches the page. */}
+                       <div className="flex flex-shrink-0 flex-col items-end gap-2">
+                         <div className="flex h-7 select-none items-center justify-between gap-0.5 rounded-full bg-[linear-gradient(180deg,#8f5ad4_0%,#7745bd_48%,#5f2f9f_100%)] px-1 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.34),0_4px_12px_-4px_rgba(88,54,150,0.75)]">
                            <button
-                             onClick={(e) => {
-                               e.preventDefault();
-                               e.stopPropagation();
-                               setSelectedProduct(item.product || {
-                                 id: item.productId || item.id,
-                                 name: itemName,
-                                 price: itemPrice,
-                                 image: itemImage,
-                               });
-                             }}
-                             className="flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform"
-                             title="Quick view"
+                             onClick={() => updateItem.mutate({ itemId: item.id, quantity: Math.max(minQuantity, quantity - 1) })}
+                             disabled={updateItem.isPending || syncCart.isPending || quantity <= minQuantity}
+                             aria-label="Decrease quantity"
+                             className="flex h-5 w-5 items-center justify-center rounded-full text-sm font-bold text-white/90 transition-colors hover:bg-white/20 hover:text-white active:scale-90 disabled:opacity-40"
                            >
-                             <Eye className="w-4 h-4 text-gray-400 hover:text-gray-600" />
+                             −
+                           </button>
+                           <span className="min-w-[16px] text-center text-[11px] font-bold tabular-nums tracking-wide">
+                             {quantity.toString().padStart(2, '0')}
+                           </span>
+                           <button
+                             onClick={() => {
+                               if (quantity < maxQuantity) {
+                                 updateItem.mutate({ itemId: item.id, quantity: quantity + 1 });
+                               } else {
+                                 toast(`Only ${maxQuantity} units available`, 'error');
+                               }
+                             }}
+                             disabled={updateItem.isPending || syncCart.isPending || quantity >= maxQuantity}
+                             aria-label="Increase quantity"
+                             className="flex h-5 w-5 items-center justify-center rounded-full text-sm font-bold text-white/90 transition-colors hover:bg-white/20 hover:text-white active:scale-90 disabled:opacity-40"
+                           >
+                             +
                            </button>
                          </div>
-                         {/* Price & Rating */}
-                         <div className="flex items-center justify-between w-full pr-0.5 sm:pr-1 gap-2">
-                           <div className="flex items-center gap-1.5 mt-0.5">
-                             <span className="text-xl font-bold text-gray-900">{displayPriceText}</span>
-                             <span className="text-sm font-bold text-gray-400 line-through">{displayOriginalPriceText}</span>
-                           </div>
-                           <div className="flex items-center gap-[3px] sm:gap-[4px]">
-                             <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-[#6342B4] text-[#6342B4]" />
-                             <span className="text-xs sm:text-sm font-bold text-gray-700">{item.rating ? item.rating : 'NA'}</span>
-                           </div>
-                         </div>
 
-                         {/* Stock notice (only shown if out of stock) */}
-                         {isOutOfStock && (
-                           <div className="w-full pr-0.5 sm:pr-1 mt-0.5 text-left">
-                             <span className="text-xs font-bold text-red-600 uppercase tracking-wide">Out of stock</span>
-                           </div>
-                         )}
+                         <button
+                           onClick={async (e) => {
+                             e.preventDefault();
+                             await addToWishlist.mutateAsync({
+                               ...item,
+                               id: item.product?.id || item.productId || item.id,
+                               name: itemName,
+                               price: itemPrice,
+                               originalPrice: itemOriginalPrice,
+                               image: itemImage,
+                             });
+                             toast('Added to wishlist', 'success');
+                           }}
+                           title="Save for later"
+                           aria-label="Save for later"
+                           className="flex h-7 w-7 items-center justify-center rounded-full border border-white/70 bg-white/55 transition-colors hover:bg-white/85"
+                         >
+                           {/* The product card's own save mark, not a lucide
+                               bookmark — one action should not have two
+                               different glyphs on the same site. */}
+                           <WishlistIcon preserveAspectRatio="none" className="h-[15px] w-[15px]" />
+                         </button>
 
-                         {/* Row 4: Discount & Delivery */}
-                         <div className="flex items-center justify-between w-full pr-0.5 sm:pr-1 gap-2 mt-1.5">
-                           <div className="text-left">
-                             {displayDiscountPercent > 0 && (
-                               <span className="text-xs sm:text-sm font-bold text-black">{displayDiscountPercent}% off</span>
-                             )}
-                           </div>
-                           <div className="-mr-1.5 sm:-mr-2.5">
-                             <DeliveryTruckBadge text={deliveryTime} className="w-[68px] sm:w-[85px] h-auto text-[#8c8c8c]" />
-                           </div>
-                         </div>
-
-                         {/* Top Right Actions */}
-                         <div className="absolute top-0 right-0 flex flex-col items-end gap-2">
-                           {/* Quantity Pill (Desktop/Tablet only) */}
-                           <div className="hidden sm:flex items-center bg-[#562996] rounded-lg text-white overflow-hidden shadow-sm h-7 sm:h-8 px-2 sm:px-2.5">
-                             <button 
-                               onClick={() => {
-                                 updateItem.mutate({ itemId: item.id, quantity: Math.max(minQuantity, quantity - 1) });
-                               }}
-                               disabled={updateItem.isPending || syncCart.isPending || quantity <= minQuantity}
-                               className="px-2 h-full hover:bg-black/20 flex items-center justify-center font-bold text-xs transition-colors disabled:opacity-50"
-                             >
-                               -
-                             </button>
-                             <span className="text-xs sm:text-xs font-bold px-1.5 sm:px-2 tracking-tighter">{quantity.toString().padStart(2, '0')}</span>
-                             <button
-                               onClick={() => {
-                                 if (quantity < maxQuantity) {
-                                   updateItem.mutate({ itemId: item.id, quantity: quantity + 1 });
-                                 } else {
-                                   toast(`Only ${maxQuantity} units available`, 'error');
-                                 }
-                               }}
-                               disabled={updateItem.isPending || syncCart.isPending || quantity >= maxQuantity}
-                               className="px-2 h-full hover:bg-black/20 flex items-center justify-center font-bold text-xs transition-colors disabled:opacity-50"
-                             >
-                               +
-                             </button>
-                           </div>
-                         </div>
+                         <button
+                           onClick={(e) => {
+                             e.preventDefault();
+                             e.stopPropagation();
+                             setSelectedProduct(item.product || {
+                               id: item.productId || item.id,
+                               name: itemName,
+                               price: itemPrice,
+                               image: itemImage,
+                             });
+                           }}
+                           title="Quick view"
+                           aria-label="Quick view"
+                           className="flex h-7 w-7 items-center justify-center rounded-full border border-white/70 bg-white/55 text-gray-500 transition-colors hover:bg-white/85 hover:text-gray-700"
+                         >
+                           <Eye className="h-3.5 w-3.5" />
+                         </button>
                        </div>
                      </motion.div>
                   );

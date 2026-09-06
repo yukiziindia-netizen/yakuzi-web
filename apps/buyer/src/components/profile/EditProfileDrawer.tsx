@@ -213,7 +213,7 @@ export default function EditProfileDrawer({ isOpen, onClose }: EditProfileDrawer
         animate={isDesktop ? { x: 0 } : { y: 0 }}
         exit={isDesktop ? { x: '100%' } : { y: '100%' }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="fixed inset-0 lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[500px] lg:max-w-[90vw] bg-white z-[86] shadow-2xl flex flex-col overflow-hidden lg:rounded-l-3xl p-6 md:p-8 font-sans"
+ className="fixed inset-0 lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[500px] lg:max-w-[90vw] glass-overlay z-[86] flex flex-col overflow-hidden lg:rounded-l-3xl p-6 md:p-8 font-sans"
       >
         {/* Header */}
         <div className="flex items-center justify-between mt-2 mb-8 relative">

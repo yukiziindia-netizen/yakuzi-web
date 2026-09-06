@@ -122,7 +122,7 @@ export default function MarketingPage() {
             className="relative w-full max-w-4xl bg-card glass-card rounded-2xl shadow-xl p-6 border border-border">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold flex items-center gap-2">
-                <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
+                <Star className="h-5 w-5 text-[#f5a623] fill-[#f5a623]" />
                 Add Product to {slot.replace("_", " ")}
               </h2>
               <button onClick={() => setShowAddModal(false)} className="text-muted-foreground hover:text-foreground transition-colors text-xl">&times;</button>

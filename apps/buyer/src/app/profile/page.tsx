@@ -15,7 +15,7 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-gray-50/50">
+      <main className="min-h-screen">
         <Navbar showUserActions={true} />
         <div className="pt-20 sm:pt-24 md:pt-28 lg:pt-32 pb-12 sm:pb-20 w-full max-w-7xl mx-auto px-[4vw] space-y-6 sm:space-y-8">
           <SkeletonProfileHeader />
@@ -39,7 +39,7 @@ export default function ProfilePage() {
 
   if (isError || !profile) {
     return (
-      <main className="min-h-screen bg-gray-50/50">
+      <main className="min-h-screen">
         <Navbar showUserActions={true} />
         <div className="pt-20 sm:pt-24 md:pt-28 lg:pt-32 pb-12 sm:pb-20 w-full max-w-7xl mx-auto px-[4vw]">
           <motion.div
@@ -71,7 +71,7 @@ export default function ProfilePage() {
 
   return (
     <AuthGuard>
-      <main className="min-h-screen bg-gray-50/50">
+      <main className="min-h-screen">
         <Navbar showUserActions={true} />
         
         <div className="pt-20 sm:pt-24 md:pt-28 lg:pt-32 pb-12 sm:pb-20 w-full max-w-7xl mx-auto px-[4vw]">

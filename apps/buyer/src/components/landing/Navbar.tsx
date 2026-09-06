@@ -55,6 +55,7 @@ import NotificationDrawer from "@/components/notifications/NotificationDrawer";
 import SearchBar from "@/components/shared/SearchBar";
 import { SidebarSheet, type SidebarView } from "@/components/landing/SidebarSheet";
 import WishlistIcon from "@/components/shared/WishlistIcon";
+import ThemeToggle from "@/components/shared/ThemeToggle";
 
 import { useAuth, type Category, sendChatMessage, sendChatMessageFull, type ChatMessage, getProducts } from "@yukizi/api-client";
 import { useCart } from "@/hooks/useCart";
@@ -125,6 +126,18 @@ export default function Navbar({
       const nav = navRef.current;
       if (!nav) return;
 
+      // Publish how much room the bar needs so pages can reserve exactly that
+      // much at the bottom instead of hardcoding a guess. Pages used a fixed
+      // pb-32, which was measured against the bar in its DOCKED position — but
+      // the footer-avoidance below LIFTS the bar into the content above it, so
+      // the guess was short by roughly the bar's own height and the bar sat on
+      // top of the last product row (measured 97px of overlap on the PDP).
+      // 24px of breathing room on top of the measured height.
+      document.documentElement.style.setProperty(
+        '--nav-clearance',
+        `${Math.round(nav.getBoundingClientRect().height) + 24}px`,
+      );
+
       const footer = document.querySelector('footer');
       if (!footer) {
         nav.style.transform = '';
@@ -163,6 +176,13 @@ export default function Navbar({
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isSearchChatOpen, setIsSearchChatOpen] = useState(false);
+
+  // Chat or search panel open: the bar is sitting on the purple panel
+  // rather than on the page, so its halo and pill glow switch to dark.
+  // Only the CHAT panel is a purple surface. The search panel is white in
+  // light mode, so the bar's halo must stay white there; in dark mode the
+  // dark block in globals.css darkens it regardless of which panel is open.
+  const isOnDarkSurface = isChatOpen;
 
   // Type-immediately: focus the search box as soon as the panel opens. The
   // panel mounts inside AnimatePresence, so wait a beat for it to exist
@@ -635,13 +655,28 @@ export default function Navbar({
         ref={navRef}
         className="fixed bottom-0 left-0 right-0 z-[90] flex justify-center items-end sm:items-center pointer-events-none px-2 pb-2 sm:pb-6 md:pb-4 sm:px-6 w-full will-change-transform"
       >
-        {/* Soft white glow behind the floating bar. Absolutely positioned so it
-            never affects layout, and painted before the z-10 panel so the bar
-            always sits on top of it. The whole <nav> is pointer-events-none, so
-            the page underneath stays clickable through it. */}
+        {/* Soft white halo behind the floating bar, so the bar separates from the
+            page instead of merging into it. Absolutely positioned so it never
+            affects layout, and painted before the z-10 panel so the bar always
+            sits on top of it. The whole <nav> is pointer-events-none, so the
+            page underneath stays clickable through it.
+
+            An ELLIPSE, not a linear wash. The previous version was
+            `linear-gradient(to top, #fff 45%, …)` — opaque white across the
+            bottom 45% of the band, with a hard horizontal edge where it ended.
+            Against the lavender page that read as a solid white block sitting
+            under the bar. A radial ellipse anchored to the bar's centre has no
+            edge anywhere: it is brightest right behind the pills and reaches
+            zero before it meets the page, so it separates the bar without ever
+            announcing itself. Peak alpha is 0.5, so it stays translucent —
+            product artwork behind it still shows through. */}
+        {/* Colour follows the surface behind the bar: white over the page and
+            over the WHITE search panel, dark over the PURPLE chat panel, and
+            dark throughout the dark theme (that last case is handled in CSS).
+            Geometry never changes — only the colour. See .nav-halo. */}
         <div
           aria-hidden="true"
-          className="absolute inset-x-0 bottom-0 -top-[60px] sm:-top-[70px] pointer-events-none bg-[linear-gradient(to_top,#fff_45%,rgba(255,255,255,0.85)_70%,rgba(255,255,255,0)_100%)] sm:[-webkit-mask-image:linear-gradient(to_right,#000,transparent_16%,transparent_84%,#000)] sm:[mask-image:linear-gradient(to_right,#000,transparent_16%,transparent_84%,#000)]"
+          className={`nav-halo ${isOnDarkSurface ? "on-dark-surface" : ""}`}
         />
         <div
           ref={navPanelRef}
@@ -656,7 +691,7 @@ export default function Navbar({
           className="flex items-center gap-1.5 xs:gap-2 sm:gap-6 md:gap-2 pointer-events-auto flex-nowrap justify-center w-full max-w-[1200px] px-1 sm:px-4 relative z-10 origin-bottom scale-100 sm:scale-[0.8]"
         >
           {/* Left Segment: Logo, Profile, Notifications, Search */}
-          <div className="flex items-center bg-white sm:bg-[#562996] rounded-full sm:rounded-xl pl-2.5 pr-1.5 xs:pl-3 xs:pr-2 sm:px-4 md:px-6 h-9 sm:h-[60px] md:h-[64px] shadow-[0_6px_20px_rgba(0,0,0,0.08)] sm:shadow-2xl flex-[1.08] sm:flex-1 max-w-[480px] justify-between overflow-hidden min-w-0">
+          <div className={`nav-pill ${isOnDarkSurface ? "on-panel" : ""} flex items-center bg-white sm:bg-[#562996] rounded-xl pl-2 pr-2 xs:pl-3 xs:pr-2 sm:px-4 md:px-6 h-9 sm:h-[60px] md:h-[64px] shadow-[0_6px_20px_rgba(0,0,0,0.08)] sm:shadow-2xl w-[calc((100%-56px)/2)] flex-none sm:w-auto sm:flex-1 max-w-[480px] justify-between overflow-hidden min-w-0`}>
             {/* DESKTOP VIEW (sm and up) */}
             <div className="hidden sm:flex items-center w-full justify-between">
                 <div className="flex items-center h-full">
@@ -708,9 +743,9 @@ export default function Navbar({
                     setIsSearchChatOpen(!isSearchChatOpen);
                     setIsChatOpen(false);
                   }}
-                  className="w-full h-[28px] md:h-[30px] bg-white rounded-md text-gray-800 text-[11px] md:text-[12px] pl-2 md:pl-3 pr-7 md:pr-9 focus:outline-none cursor-pointer placeholder-gray-400 shadow-sm font-medium"
+                  className="w-full h-[28px] md:h-[30px] bg-white/20 border border-white/25 backdrop-blur-sm rounded-full text-white text-[11px] md:text-[12px] pl-2 md:pl-3 pr-7 md:pr-9 focus:outline-none focus:bg-white/25 cursor-pointer placeholder-white/70 shadow-inner font-medium transition-colors"
                 />
-                <Search className="w-3.5 h-3.5 text-gray-400 absolute right-2.5 md:right-3.5 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2]" />
+                <Search className="w-3.5 h-3.5 text-white/70 absolute right-2.5 md:right-3.5 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2]" />
               </div>
             </div>
 
@@ -720,13 +755,13 @@ export default function Navbar({
                 // BEFORE LOGIN
                 <div className="flex items-center justify-between w-full h-full gap-1">
                   <Link href="/" className="shrink-0 flex items-center cursor-pointer">
-                    <Image src="/YukiziLogo.png" alt="YUKiZi" width={70} height={24} className="w-[38px] xs:w-[44px] object-contain" />
+                    <Image src="/yukizi-logo-new.png" alt="YUKiZi" width={70} height={24} className="w-[clamp(32px,10vw,38px)] xs:w-[44px] object-contain" />
                   </Link>
 
                   <button
                     type="button"
                     onClick={onLoginClick || (() => window.dispatchEvent(new CustomEvent('open-login')))}
-                    className="h-[26px] flex items-center justify-center bg-[#854cbc] px-2 xs:px-2.5 rounded-[10px] shrink-0 cursor-pointer"
+                    className="h-[26px] flex items-center justify-center bg-white/20 border border-white/25 px-1.5 xs:px-2.5 rounded-[10px] min-w-0 cursor-pointer"
                   >
                     <span className="text-[10px] font-medium text-white whitespace-nowrap">Start Now</span>
                   </button>
@@ -739,7 +774,7 @@ export default function Navbar({
                     className={`relative p-1 transition-all duration-200 shrink-0 ${
                       isSearchChatOpen
                         ? "text-[#562996] scale-110 opacity-100"
-                        : "text-[#442f58] hover:text-black"
+                        : "text-white/90 hover:text-white"
                     }`}
                   >
                     <Search className="w-[17px] h-[17px] xs:w-[18px] xs:h-[18px] stroke-[2.5]" />
@@ -749,7 +784,7 @@ export default function Navbar({
                 // AFTER LOGIN
                 <div className="flex items-center w-full h-full py-[6px] gap-2">
                   <Link href="/" className="shrink-0 flex items-center pl-1">
-                    <Image src="/YukiziLogo.png" alt="YUKiZi" width={70} height={24} className="w-[38px] xs:w-[45px] md:w-[65px] object-contain" />
+                    <Image src="/yukizi-logo-new.png" alt="YUKiZi" width={70} height={24} className="w-[32px] xs:w-[45px] md:w-[65px] object-contain" />
                   </Link>
 
                   <div className="flex items-center gap-1.5 xs:gap-2 h-full ml-2 xs:ml-3 mr-0.5 xs:mr-1">
@@ -823,16 +858,16 @@ export default function Navbar({
 
 
           {/* Right Segment: Cart, Wishlist, Filter, Menu */}
-          <div className="flex items-center justify-between bg-white sm:bg-[#562996] rounded-full sm:rounded-xl px-3.5 xs:px-4 sm:px-8 md:px-12 lg:px-16 h-9 sm:h-[60px] md:h-[64px] shadow-[0_6px_20px_rgba(0,0,0,0.08)] sm:shadow-2xl text-[#562996] sm:text-white sm:shrink-0 flex-[0.92] sm:flex-1 max-w-[480px] z-10 overflow-hidden min-w-0">
+          <div className={`nav-pill ${isOnDarkSurface ? "on-panel" : ""} flex items-center justify-between bg-white sm:bg-[#562996] rounded-xl px-2.5 xs:px-3 sm:px-8 md:px-12 lg:px-16 h-9 sm:h-[60px] md:h-[64px] shadow-[0_6px_20px_rgba(0,0,0,0.08)] sm:shadow-2xl text-white sm:shrink-0 w-[calc((100%-56px)/2)] flex-none sm:w-auto sm:flex-1 max-w-[480px] z-10 overflow-hidden min-w-0`}>
 
             <button
               onClick={toggleWishlist}
               className={`relative transition-all duration-200 hover:scale-110 flex items-center justify-center ${
                 isWishlistOpen
-                  ? "text-[#562996] sm:text-white scale-110 opacity-100"
+                  ? "text-white scale-110 opacity-100"
                   : isAnyDrawerOpen
-                  ? "text-[#562996]/40 sm:text-white/40 opacity-50"
-                  : "text-[#562996] sm:text-white sm:hover:text-purple-300"
+                  ? "text-white/40 opacity-50"
+                  : "text-white sm:hover:text-purple-300"
               }`}
             >
               <span 
@@ -841,7 +876,7 @@ export default function Navbar({
                 }`}
               />
               {wishlistCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 sm:text-[9px] bg-[#f7941d] text-white text-[8px] xs:text-[9px] font-bold rounded-full flex items-center justify-center border border-white sm:border-[#562996]">
+                <span className="absolute -top-1 -right-1 w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 sm:text-[9px] bg-[#f7941d] text-white text-[8px] xs:text-[9px] font-bold rounded-full flex items-center justify-center border border-[#6a3ec9]">
                   {wishlistCount}
                 </span>
               )}
@@ -851,10 +886,10 @@ export default function Navbar({
               onClick={toggleCart}
               className={`relative transition-all duration-200 hover:scale-110 ${
                 isCartOpen
-                  ? "text-[#562996] sm:text-white scale-110 opacity-100"
+                  ? "text-white scale-110 opacity-100"
                   : isAnyDrawerOpen
-                  ? "text-[#562996]/40 sm:text-white/40 opacity-50"
-                  : "text-[#562996] sm:text-white sm:hover:text-purple-300"
+                  ? "text-white/40 opacity-50"
+                  : "text-white sm:hover:text-purple-300"
               }`}
             >
               <ShoppingCart 
@@ -862,7 +897,7 @@ export default function Navbar({
                 fill={isCartOpen ? "currentColor" : "none"}
               />
               {cartData?.items && cartData.items.length > 0 && (
-                <span className="absolute -top-1 -right-1 w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 sm:text-[9px] bg-[#f7941d] text-white text-[8px] xs:text-[9px] font-bold rounded-full flex items-center justify-center border border-white sm:border-[#562996]">
+                <span className="absolute -top-1 -right-1 w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 sm:text-[9px] bg-[#f7941d] text-white text-[8px] xs:text-[9px] font-bold rounded-full flex items-center justify-center border border-[#6a3ec9]">
                   {cartData.items.length}
                 </span>
               )}
@@ -872,8 +907,8 @@ export default function Navbar({
               onClick={() => router.push('/orders')}
               className={`hidden sm:block relative transition-all duration-200 hover:scale-110 ${
                 isAnyDrawerOpen
-                  ? "text-[#562996]/40 sm:text-white/40 opacity-50"
-                  : "text-[#562996] sm:text-white sm:hover:text-purple-300"
+                  ? "text-white/40 opacity-50"
+                  : "text-white sm:hover:text-purple-300"
               }`}
             >
               <img
@@ -890,10 +925,10 @@ export default function Navbar({
               }}
               className={`transition-all duration-200 hover:scale-110 ${
                 sidebarView === "filters"
-                  ? "text-[#562996] sm:text-white scale-110 opacity-100"
+                  ? "text-white scale-110 opacity-100"
                   : isAnyDrawerOpen
-                  ? "text-[#562996]/40 sm:text-white/40 opacity-50"
-                  : "text-[#562996] sm:text-white sm:hover:text-purple-300"
+                  ? "text-white/40 opacity-50"
+                  : "text-white sm:hover:text-purple-300"
               }`}
             >
               <Filter 
@@ -906,10 +941,10 @@ export default function Navbar({
               onClick={toggleMenu}
               className={`transition-all duration-200 hover:scale-110 ${
                 isMobileMenuOpen
-                  ? "text-[#562996] sm:text-white scale-110 opacity-100"
+                  ? "text-white scale-110 opacity-100"
                   : isAnyDrawerOpen
-                  ? "text-[#562996]/40 sm:text-white/40 opacity-50"
-                  : "text-[#562996] sm:text-white sm:hover:text-purple-300"
+                  ? "text-white/40 opacity-50"
+                  : "text-white sm:hover:text-purple-300"
               }`}
             >
               {isMobileMenuOpen ? (
@@ -930,7 +965,7 @@ export default function Navbar({
                 exit={{ opacity: 0, y: 50, scale: 0.95 }}
                 className="absolute bottom-[-16px] md:bottom-[-24px] left-0 right-0 z-[-1] pointer-events-auto h-[75vh] max-h-[850px]"
               >
-                <div className="w-full h-full bg-gradient-to-r from-[#8527bf] via-[#ae44eb] to-[#8d2bcd] rounded-2xl md:rounded-3xl shadow-2xl p-6 sm:p-8 md:p-10 flex flex-col">
+ <div className="w-full h-full glass-purple  p-6 sm:p-8 md:p-10 flex flex-col">
                   {/* Chat Messages Area */}
                   {chatMessages.length > 0 && (
                     <div ref={chatContainerRef} className="flex-1 overflow-y-auto mb-4 flex flex-col gap-4 scrollbar-hide">
@@ -1117,7 +1152,7 @@ export default function Navbar({
                 exit={{ opacity: 0, y: 50, scale: 0.95 }}
                 className="absolute bottom-[-16px] md:bottom-[-24px] left-0 right-0 z-[-2] pointer-events-auto h-[50vh] max-h-[600px]"
               >
-                <div className="w-full h-full bg-white rounded-2xl md:rounded-3xl shadow-[0_0_40px_rgba(0,0,0,0.1)] border border-gray-100 p-6 sm:p-8 md:p-10 flex flex-col relative overflow-hidden">
+ <div className="w-full h-full glass-overlay  p-6 sm:p-8 md:p-10 flex flex-col relative overflow-hidden">
 
                   {/* Subtle pink/purple glow behind the mascot area */}
                   <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[300px] h-[150px] bg-pink-500/10 blur-[50px] pointer-events-none rounded-full" />
@@ -1239,7 +1274,7 @@ export default function Navbar({
             animate={isDesktop ? { x: 0 } : { y: 0 }}
             exit={isDesktop ? { x: "100%" } : { y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed inset-0 lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[420px] lg:max-w-[90vw] bg-white z-[86] shadow-2xl flex flex-col p-6 sm:p-8"
+ className="fixed inset-0 lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[420px] lg:max-w-[90vw] glass-overlay z-[86] flex flex-col p-6 sm:p-8"
           >
             {/* Hidden Close Button */}
             <button onClick={() => setIsMobileMenuOpen(false)} className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-900 bg-white/80 rounded-full z-[80] transition-colors">
@@ -1286,6 +1321,12 @@ export default function Navbar({
                   </button>
                 )}
               </div>
+            </div>
+
+            {/* Appearance. Lives in the menu rather than the bottom bar so the
+                nav's spacing and centring stay exactly as tuned. */}
+ <div className="glass-panel ">
+              <ThemeToggle />
             </div>
 
             {/* Links List */}

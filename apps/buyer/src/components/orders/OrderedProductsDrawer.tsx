@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Share2, Plus, Eye, ChevronRight, ChevronLeft, Trash2, Star, RefreshCw, Bookmark, Check, Truck, MapPin, Package, Bike, X, CreditCard, XCircle, FileText } from 'lucide-react';
-import { DeliveryTruckBadge } from '../shared/DeliveryTruckBadge';
 import Image from 'next/image';
 import { useOrders, useOrderTracking } from '@/hooks/useOrders';
 import Link from 'next/link';
@@ -298,7 +297,7 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
                        
                        <div className="flex flex-col items-end gap-1.5">
                          <div className="flex items-center gap-1 text-sm font-bold text-gray-700">
-                           <Star className="w-4 h-4 fill-[#8b3dcc] text-[#8b3dcc]" />
+                           <Star className="w-4 h-4 fill-[#f5a623] text-[#f5a623]" />
                            4.5
                          </div>
                          <div className="flex items-center gap-2 mt-1">
@@ -311,7 +310,6 @@ export function OrderedProductsDrawer({ isOpen, onClose, orderId }: OrderedProdu
                             >
                               Order details
                             </button>
-                            <DeliveryTruckBadge text="3 days" className="w-[85px] text-[#9a9a9a]" />
                          </div>
                          {/* Each card can belong to a different order, so the
                              invoice link lives on the card, not the header. */}

@@ -111,8 +111,12 @@ export default function HeroSection({ initialBanners }: { initialBanners?: any[]
   // speed whatever the brand count.
   const marqueeDuration = `${Math.max(marqueeHalfLength * 5, 20)}s`;
 
+  // bg-white removed from the wrapper below: it sat directly behind the
+  // frosted brand strip, so backdrop-filter was faithfully blurring solid
+  // white and the bar rendered as a white plank. Transparent lets the page's
+  // purple field through, which is what the glass is meant to pick up.
   return (
-    <div className="relative z-10 flex w-full flex-col bg-white">
+    <div className="relative z-10 flex w-full flex-col">
       {/* Top Main Section: full-width banner, cycling when there is more than one */}
       <div className="border-b border-gray-200">
         {/* The box keeps the banner art's own aspect ratio at every width
@@ -244,7 +248,7 @@ export default function HeroSection({ initialBanners }: { initialBanners?: any[]
           when no brands are configured — an empty grey bar is worse than no
           bar, and there is no longer a hardcoded fallback to fill it. */}
       {(isLoadingBrands || displayBrands.length > 0) && (
-      <div className="border-b border-gray-300 bg-[#e2e2e2] px-4 py-1.5 sm:py-2">
+ <div className="glass-chrome mx-2 my-2.5 rounded-[24px] px-4 py-2.5 sm:mx-3 sm:py-3.5">
         {isLoadingBrands ? (
           <div className="flex justify-center">
             <span className="text-sm italic text-gray-400">Loading brands...</span>

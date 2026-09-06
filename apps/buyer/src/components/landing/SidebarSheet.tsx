@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import Link from 'next/link';
 import { track } from '@/lib/analytics/tracker';
 import Image from 'next/image';
-import { DeliveryTruckBadge } from '../shared/DeliveryTruckBadge';
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   X, Trash2, ShoppingCart, Star, 
@@ -124,7 +123,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
     
     if (isCart && isLoading) {
       return (
-        <div className="flex flex-col h-full bg-white items-center justify-center">
+        <div className="flex flex-col h-full items-center justify-center">
           <Loader2 className="w-8 h-8 animate-spin text-gray-300" />
         </div>
       );
@@ -132,7 +131,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
     
     if (isCart && displayItems.length === 0) {
       return (
-        <div className="flex flex-col h-full bg-white p-6 pt-10">
+        <div className="flex flex-col h-full p-6 pt-10">
           <h2 className="text-2xl font-bold text-gray-800 mb-20">My Cart</h2>
           <div className="flex flex-col items-center justify-center flex-1 opacity-50 pb-20">
             <ShoppingBag className="w-16 h-16 text-gray-300 mb-4" />
@@ -143,7 +142,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
     }
 
     return (
-      <div className="flex flex-col h-full bg-white">
+      <div className="flex flex-col h-full">
         {/* Header */}
         <div className="p-6 pt-10 pb-4">
           <h2 className="text-2xl font-bold text-gray-800">
@@ -270,11 +269,10 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
 
                 <div className="flex flex-col items-end gap-0.5">
                   <div className="flex items-center gap-0.5">
-                    <Star className="w-3 h-3 fill-[#854cbc] text-[#854cbc]" />
+                    <Star className="w-3 h-3 fill-[#f5a623] text-[#f5a623]" />
                     <span className="text-xs font-bold text-gray-700">{rating}</span>
                   </div>
                   <div className="flex items-center mt-1">
-                    <DeliveryTruckBadge text="3 days" className="w-[75px] text-[#9a9a9a]" />
                   </div>
                 </div>
               </div>
@@ -557,7 +555,7 @@ export function SidebarSheet({ view, onClose, onViewChange }: SidebarSheetProps)
             animate={isDesktop ? { x: 0 } : { y: 0 }}
             exit={isDesktop ? { x: "100%" } : { y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed inset-0 lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[420px] lg:max-w-[90vw] bg-white z-[86] shadow-2xl flex flex-col overflow-hidden"
+ className="fixed inset-0 lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[420px] lg:max-w-[90vw] glass-overlay z-[86] flex flex-col overflow-hidden"
           >
             {/* Hidden Close Button */}
             <button onClick={onClose} className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-900 bg-white/80 rounded-full z-[80] transition-colors">

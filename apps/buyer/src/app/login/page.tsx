@@ -167,7 +167,7 @@ export default function LoginPage() {
   if (authLoading) return <main className="h-screen flex items-center justify-center bg-white"><Loader2 className="w-8 h-8 animate-spin text-[#593696]" /></main>;
 
   return (
-    <main className="min-h-screen w-full flex flex-col items-center justify-center bg-white relative overflow-hidden px-6 py-12 font-sans select-none">
+    <main className="min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden px-6 py-12 font-sans select-none">
       <style dangerouslySetInnerHTML={{__html: `
         .custom-scrollbar::-webkit-scrollbar {
           width: 6px;

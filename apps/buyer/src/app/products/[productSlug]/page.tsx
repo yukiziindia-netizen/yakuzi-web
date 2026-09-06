@@ -7,7 +7,6 @@ import { absoluteUrl, metaTruncate, SITE_NAME } from '@/lib/seo/site';
 import { productSchema, breadcrumbSchema, faqPageSchema, graph, organizationSchema, webSiteSchema } from '@/lib/seo/schema';
 import { applySeoOverride, fetchSeoOverride, mergeStructuredData, validFaqs } from '@/lib/seo/overrides';
 import JsonLd from '@/components/seo/JsonLd';
-import RelatedProductsServer from '@/components/product/RelatedProductsServer';
 import SeoFaq from '@/components/seo/SeoFaq';
 import ProductPageClient from './ProductPageClient';
 
@@ -165,6 +164,24 @@ export default async function ProductPage({ params }: { params: { productSlug: s
   crumbs.push({ name: p.name ?? 'Product' });
   const override = await fetchProductOverride(overrideKey(p));
   const faqs = validFaqs(override?.faq);
+
+  // Related products, fetched HERE rather than in the browser, so the strip
+  // renders with real links in the served HTML instead of empty markup.
+  //
+  // The params must match the client hook's exactly ({ categoryId, limit: 6 })
+  // — React Query keys on them, so any difference means the seed is ignored,
+  // the browser refetches and the strip flickers on load.
+  //
+  // Fail-open: if this throws, the client hook fetches as it always did. The
+  // page must never 500 because a secondary rail could not load.
+  let initialRelated: any = undefined;
+  if (p.category?.id) {
+    try {
+      initialRelated = await getProducts({ categoryId: p.category.id, limit: 20 });
+    } catch {
+      initialRelated = undefined;
+    }
+  }
   // ONE @graph rather than separate blocks — see graph() for why.
   const jsonLd: object[] = [
     graph(
@@ -181,16 +198,17 @@ export default async function ProductPage({ params }: { params: { productSlug: s
   return (
     <>
       <JsonLd data={jsonLd} />
-      <ProductPageClient productSlug={params.productSlug} initialProduct={product} imageAltOverrides={override?.imageAltOverrides ?? undefined} />
-      {/* Server-rendered links to sibling products. The existing related rail
-          is client-only, so the served HTML had no product links at all. */}
-      <RelatedProductsServer
-        currentId={p.id}
-        currentSlug={params.productSlug}
-        categoryId={p.category?.id}
-        categoryName={p.category?.name}
-        categorySlug={p.category?.slug}
-      />
+      <ProductPageClient productSlug={params.productSlug} initialProduct={product} initialRelated={initialRelated} imageAltOverrides={override?.imageAltOverrides ?? undefined} />
+      {/* "More from <category>" removed at Rishi's request — it duplicated the
+          Related Products strip above it.
+
+          ⚠️ It was NOT only decoration. It was the only SERVER-rendered set of
+          product links on this page: the Related Products strip is client-only,
+          so without this the served HTML links to no sibling products at all
+          and every product page becomes a dead end for crawlers. Measured on
+          this page: 4 product links in the served HTML with it, 0 without.
+          Fix properly by server-rendering the visible strip, not by restoring
+          a second row of the same products. */}
       {/* Visible, server-rendered — outside the client component, so the PDP's
           mobile/desktop dual JSX trees are not involved. */}
       <SeoFaq faqs={faqs} />

@@ -67,7 +67,7 @@ export function CustomOrderModal({ isOpen, onClose, productName, productId }: Cu
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="relative w-full max-w-md bg-white rounded-[32px] shadow-2xl overflow-hidden border border-white/20"
+ className="relative w-full max-w-md glass-overlay rounded-[32px] overflow-hidden"
           >
             {/* Header */}
             <div className="px-8 pt-8 pb-4">

@@ -6,7 +6,6 @@ import { Share2, Plus, Minus, Star, Truck, Loader2, ArrowUpRight, RotateCw } fro
 import { useState } from 'react';
 import { ShareButton } from './ShareButton';
 import WishlistIcon from '@/components/shared/WishlistIcon';
-import { DeliveryTruckBadge } from '@/components/shared/DeliveryTruckBadge';
 
 interface ProductCardProps {
   name: string;
@@ -224,7 +223,7 @@ export default function ProductCard({
               defaulted to 4.5, so every unrated product advertised a review score
               nobody had given it. */}
           <div className="flex items-center gap-1">
-            <Star className={`w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 ${hasRating ? 'text-[#7B2FBE] fill-[#7B2FBE]' : 'text-gray-300 fill-gray-300'}`} />
+            <Star className={`w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 ${hasRating ? 'text-[#f5a623] fill-[#f5a623]' : 'text-gray-300 fill-gray-300'}`} />
             <span className={`text-2xs sm:text-sm font-medium leading-none ${hasRating ? 'text-[#333333]' : 'text-gray-400'}`}>{hasRating ? rating : 'NA'}</span>
           </div>
         </div>
@@ -237,7 +236,6 @@ export default function ProductCard({
             </span>
           ) : <div></div>}
           <div className="-mr-[6px] sm:-mr-[8px]">
-            <DeliveryTruckBadge text={deliveryTime} className="w-[52px] sm:w-[75px] h-auto text-[#8c8c8c]" />
           </div>
         </div>
       </div>

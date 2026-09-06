@@ -226,7 +226,7 @@ function ProductBannerCard({
 
       {/* Main Image. Sits under the thumbnails/share/ribbon, which carry their own
           z-index, so clicking those never opens the zoom. */}
-      <div className="absolute inset-0 w-full h-full rounded-[24px] overflow-hidden p-4 sm:p-6 bg-white">
+ <div className="glass-panel absolute inset-0 w-full h-full rounded-[24px] overflow-hidden p-4 sm:p-6">
         {activeImage && (
           <button
             type="button"
@@ -392,7 +392,7 @@ function ComparisonOffersList({
   // again (products.service notifies waitlisted users on new listing / restock).
   if (!comparisonListings || comparisonListings.length === 0) {
     return (
-      <div className="p-6 rounded-2xl bg-gray-50 border border-dashed border-gray-200 text-center flex flex-col items-center gap-3">
+      <div className="p-6 rounded-2xl bg-white/40 border border-dashed border-white/70 text-center flex flex-col items-center gap-3">
         <p className="text-xs font-semibold text-gray-400">
           No active Sellers available for this product.
         </p>
@@ -521,7 +521,7 @@ function ComparisonOffersList({
         return (
           <div
             key={listing.id}
-            className="transition-colors w-full bg-[#eaeaea] border border-gray-200/60 hover:border-purple-200 shadow-sm flex items-center justify-between py-1 px-2.5 sm:py-1.5 sm:px-4 xl:py-2 xl:px-6 rounded-[6px]"
+ className="glass-panel transition-all duration-200 w-full hover:bg-white/70 hover:shadow-[0_10px_26px_-14px_rgba(88,54,150,0.38)] flex items-center justify-between py-1 px-2.5 sm:py-1.5 sm:px-4 xl:py-2 xl:px-6 rounded-[12px]"
           >
             {/* 1. Price & Subtext */}
             <div className="flex flex-col items-start justify-center min-w-[40px] sm:min-w-[56px] md:min-w-[64px] xl:min-w-[72px] 2xl:min-w-[80px] text-left">
@@ -537,7 +537,7 @@ function ComparisonOffersList({
 
             {/* 2. Star Rating */}
             <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
-              <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-4.5 md:h-4.5 xl:w-5 xl:h-5 2xl:w-5.5 2xl:h-5.5 fill-[#854cbc] text-[#854cbc] flex-shrink-0" />
+              <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-4.5 md:h-4.5 xl:w-5 xl:h-5 2xl:w-5.5 2xl:h-5.5 fill-[#f5a623] text-[#f5a623] flex-shrink-0" />
               <span className="text-gray-800 font-bold text-xs sm:text-sm md:text-base xl:text-lg 2xl:text-xl leading-none">
                 {listing.seller?.rating ? listing.seller.rating : 'NA'}
               </span>
@@ -701,7 +701,7 @@ function ReviewSubmissionForm({
   };
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-4 border border-gray-200 rounded-2xl bg-white p-5 shadow-sm mt-6">
+ <form onSubmit={onSubmit} className="glass-panel flex flex-col gap-4 p-5 mt-6">
       <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wide">Your overall rating</h3>
 
       {blockedMessage && (
@@ -721,7 +721,7 @@ function ReviewSubmissionForm({
           >
             <Star
               size={28}
-              className={`transition-colors ${starVal <= rating ? 'fill-[#854cbc] text-[#854cbc]' : 'text-gray-300'}`}
+              className={`transition-colors ${starVal <= rating ? 'fill-[#f5a623] text-[#f5a623]' : 'text-gray-300'}`}
             />
           </button>
         ))}
@@ -776,7 +776,7 @@ function ReviewSubmissionForm({
           className={`border border-dashed rounded-xl p-5 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors ${
             isDragging
               ? 'border-[#854cbc] bg-purple-50/80'
-              : 'border-gray-300 bg-gray-50 hover:bg-gray-100/70'
+              : 'border-white/80 bg-white/45 hover:bg-white/60'
           }`}
         >
           {isUploadingImage ? (
@@ -837,7 +837,7 @@ function ReviewSubmissionForm({
   );
 }
 
-export default function ProductPageClient({ productSlug, initialProduct, imageAltOverrides }: { productSlug: string; initialProduct?: any; imageAltOverrides?: Record<string, string> }) {
+export default function ProductPageClient({ productSlug, initialProduct, initialRelated, imageAltOverrides }: { productSlug: string; initialProduct?: any; initialRelated?: any; imageAltOverrides?: Record<string, string> }) {
   const [activeImage, setActiveImage] = useState(0);
   const [selectedVariantName, setSelectedVariantName] = useState<string>('');
 
@@ -920,10 +920,24 @@ export default function ProductPageClient({ productSlug, initialProduct, imageAl
     setReviewImages((prev) => prev.filter((_, idx) => idx !== indexToRemove));
   };
 
-  const { data: relatedProductsData } = useProducts({
-    categoryId: product?.category?.id,
-    limit: 6,
-  });
+  // Seeded with the server's own fetch (see page.tsx). This is what puts the
+  // Related Products links into the served HTML: the strip is a client
+  // component, and a client component still server-renders — but only with the
+  // data it has at that moment. Fetching in the browser meant the list was
+  // empty during SSR, so the page shipped with zero links to sibling products
+  // and every product page was a dead end for crawlers.
+  //
+  // The params here must stay identical to the server's, or the query key
+  // differs, initialData is ignored and the list refetches and flickers.
+  const { data: relatedProductsData } = useProducts(
+    {
+      // 20, not 6: with 6 the strip could not overflow its own width on a
+      // desktop viewport, so a horizontal rail never actually scrolled.
+      categoryId: product?.category?.id,
+      limit: 20,
+    },
+    initialRelated ? { initialData: initialRelated } : {},
+  );
 
   const productVariants = product?.variants || [];
 
@@ -943,7 +957,7 @@ export default function ProductPageClient({ productSlug, initialProduct, imageAl
 
   if (isLoading) {
     return (
-      <main className="flex min-h-screen flex-col bg-gray-50 pb-32">
+      <main className="flex min-h-screen flex-col pb-[var(--nav-clearance,150px)]">
         <Navbar />
         <div className="flex flex-1 items-center justify-center">
           <Loader2 className="h-10 w-10 animate-spin text-[#854cbc]" />
@@ -954,7 +968,7 @@ export default function ProductPageClient({ productSlug, initialProduct, imageAl
 
   if (isError || !product) {
     return (
-      <main className="flex min-h-screen flex-col bg-gray-50 pb-32">
+      <main className="flex min-h-screen flex-col pb-[var(--nav-clearance,150px)]">
         <Navbar />
         <div className="flex flex-1 items-center justify-center">
           <div className="text-center text-xl font-bold text-gray-500">Product not found</div>
@@ -981,7 +995,14 @@ export default function ProductPageClient({ productSlug, initialProduct, imageAl
 
   const listings = product.listings || product.sellerOffers || product.offers || [];
   const validListings = listings.filter((l: any) => l.price != null || l.mrp != null);
-  const relatedProducts = relatedProductsData?.data || [];
+  // Exclude the product being viewed. The category query has no idea which
+  // page it is feeding, so "Related Products" was listing the current product
+  // among its own related items — and the served HTML carried a link from the
+  // page to itself. Filtered here rather than in the query so the client and
+  // server params stay identical and initialData still applies.
+  const relatedProducts = (relatedProductsData?.data || []).filter(
+    (p: any) => p?.id !== product?.id && (p?.slug ?? p?.id) !== productSlug,
+  );
 
   // Filter listings based on the selected variant
   const filteredListings =
@@ -1180,7 +1201,7 @@ export default function ProductPageClient({ productSlug, initialProduct, imageAl
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 pb-32">
+    <main className="min-h-screen pb-[var(--nav-clearance,150px)]">
       {/* The page's single heading. Rendered once and visually hidden so it
           survives whichever layout CSS happens to show — Google indexes
           mobile-first, and the desktop block is display:none there. */}
@@ -1341,11 +1362,11 @@ export default function ProductPageClient({ productSlug, initialProduct, imageAl
                             size={24}
                             fill="none"
                             stroke="currentColor"
-                            className="absolute text-[#854cbc]"
+                            className="absolute text-[#f5a623]"
                           />
                           {fillPercent > 0 && (
                             <div className="absolute inset-0 overflow-hidden" style={{ width: `${fillPercent}%` }}>
-                              <Star size={24} fill="currentColor" className="text-[#854cbc]" />
+                              <Star size={24} fill="currentColor" className="text-[#f5a623]" />
                             </div>
                           )}
                         </div>
@@ -1381,7 +1402,7 @@ export default function ProductPageClient({ productSlug, initialProduct, imageAl
                   ? rev.images
                   : (rev.image ? [rev.image] : (rev.imageUrl ? [rev.imageUrl] : []));
                 return (
-                  <div key={rev.id} className="flex min-w-[280px] flex-1 flex-row justify-between gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+ <div key={rev.id} className="glass-panel flex min-w-[280px] flex-1 flex-row justify-between gap-4 p-4">
                     <div className="flex flex-col justify-between flex-1">
                       <p className="mb-4 text-xs font-medium leading-relaxed text-gray-500">
                         {rev.comment}
@@ -1389,7 +1410,7 @@ export default function ProductPageClient({ productSlug, initialProduct, imageAl
                       <div>
                         <div className="mb-1.5 flex gap-0.5 text-[#b165f1]">
                           {[1, 2, 3, 4, 5].map((i) => (
-                            <Star key={i} size={14} fill={i <= rev.rating ? "currentColor" : "none"} className={i <= rev.rating ? "text-[#b165f1]" : "text-gray-200"} />
+                            <Star key={i} size={14} fill={i <= rev.rating ? "currentColor" : "none"} className={i <= rev.rating ? "text-[#f5a623]" : "text-gray-200"} />
                           ))}
                         </div>
                         <p className="text-2xs font-semibold text-gray-400">
@@ -1487,15 +1508,6 @@ export default function ProductPageClient({ productSlug, initialProduct, imageAl
                 <Accordion title="SHIPPING & RETURN INFO" content={SHIPPING_RETURN_INFO} />
               </div>
 
-              {/* Related Products - moved inside left column to avoid XL height gaps */}
-              <div className="flex flex-col gap-4 border-t border-gray-100 pt-8 mt-6">
-                <h2 className="text-xl sm:text-2xl xl:text-2xl 2xl:text-2xl font-bold text-gray-500">Related Products</h2>
-                <div className="grid grid-cols-3 gap-5 pb-4">
-                  {relatedProducts.map((prod: any, idx: number) => (
-                    <GridProductCard key={prod.id} product={prod} index={idx} />
-                  ))}
-                </div>
-              </div>
             </div>
 
             {/* Right Column */}
@@ -1533,7 +1545,7 @@ export default function ProductPageClient({ productSlug, initialProduct, imageAl
                     </span>
                   ) : null}
                   <div className="flex items-center gap-1 xl:gap-1.5">
-                    <Star className={`w-5.5 h-5.5 xl:w-6.5 xl:h-6.5 2xl:w-7 2xl:h-7 flex-shrink-0 ${hasReviews ? 'fill-[#7B2FBE] text-[#7B2FBE]' : 'fill-gray-300 text-gray-300'}`} />
+                    <Star className={`w-5.5 h-5.5 xl:w-6.5 xl:h-6.5 2xl:w-7 2xl:h-7 flex-shrink-0 ${hasReviews ? 'fill-[#f5a623] text-[#f5a623]' : 'fill-gray-300 text-gray-300'}`} />
                     <span className="text-lg sm:text-xl xl:text-2xl 2xl:text-2xl font-bold text-gray-800 leading-none">
                       {hasReviews ? averageRating.toFixed(1) : 'NA'}
                     </span>
@@ -1604,11 +1616,11 @@ export default function ProductPageClient({ productSlug, initialProduct, imageAl
                                 size={24}
                                 fill="none"
                                 stroke="currentColor"
-                                className="absolute text-[#854cbc]"
+                                className="absolute text-[#f5a623]"
                               />
                               {fillPercent > 0 && (
                                 <div className="absolute inset-0 overflow-hidden" style={{ width: `${fillPercent}%` }}>
-                                  <Star size={24} fill="currentColor" className="text-[#854cbc]" />
+                                  <Star size={24} fill="currentColor" className="text-[#f5a623]" />
                                 </div>
                               )}
                             </div>
@@ -1644,7 +1656,7 @@ export default function ProductPageClient({ productSlug, initialProduct, imageAl
                       ? rev.images
                       : (rev.image ? [rev.image] : (rev.imageUrl ? [rev.imageUrl] : []));
                     return (
-                      <div key={rev.id} className="flex min-w-[280px] flex-1 flex-row justify-between gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+ <div key={rev.id} className="glass-panel flex min-w-[280px] flex-1 flex-row justify-between gap-4 p-4">
                         <div className="flex flex-col justify-between flex-1">
                           <p className="mb-4 text-xs font-medium leading-relaxed text-gray-500">
                             {rev.comment}
@@ -1652,7 +1664,7 @@ export default function ProductPageClient({ productSlug, initialProduct, imageAl
                           <div>
                             <div className="mb-1.5 flex gap-0.5 text-[#b165f1]">
                               {[1, 2, 3, 4, 5].map((i) => (
-                                <Star key={i} size={14} fill={i <= rev.rating ? "currentColor" : "none"} className={i <= rev.rating ? "text-[#b165f1]" : "text-gray-200"} />
+                                <Star key={i} size={14} fill={i <= rev.rating ? "currentColor" : "none"} className={i <= rev.rating ? "text-[#f5a623]" : "text-gray-200"} />
                               ))}
                             </div>
                             <p className="text-2xs font-semibold text-gray-400">
@@ -1690,6 +1702,27 @@ export default function ProductPageClient({ productSlug, initialProduct, imageAl
               </div>
             </div>
           </div>
+
+          {/* Related products, desktop.
+              This used to live inside the LEFT column of the two-column grid,
+              so it was boxed into roughly 44% of the page and wrapped onto a
+              second row while the space beside the review form sat empty.
+              It is now a full-width single-line strip that scrolls sideways —
+              the same pattern as the homepage rows, including scroll-pl to
+              match the padding (without it, snapping cancels the inset and the
+              first card sits flush against the edge). */}
+          {relatedProducts.length > 0 && (
+            <div className="mt-10 flex flex-col gap-4 border-t border-gray-100 pt-8">
+              <h2 className="text-xl font-bold text-gray-800 sm:text-2xl">Related Products</h2>
+              <div className="no-scrollbar flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-pl-1 pb-4">
+                {relatedProducts.map((prod: any, idx: number) => (
+                  <div key={prod.id} className="w-[210px] shrink-0 snap-start">
+                    <GridProductCard product={prod} index={idx} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
       </div>

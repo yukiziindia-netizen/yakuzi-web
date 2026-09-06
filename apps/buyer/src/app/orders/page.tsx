@@ -56,7 +56,7 @@ function OrdersPageContent() {
 
   return (
     <AuthGuard>
-    <main className="min-h-screen bg-gray-50/50">
+    <main className="min-h-screen">
       <Navbar showUserActions={true} />
 
       <div className="pt-20 sm:pt-24 md:pt-28 lg:pt-32 pb-12 sm:pb-20 w-full px-[4vw]">
@@ -68,7 +68,7 @@ function OrdersPageContent() {
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 sm:gap-4">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg border border-gray-100">
+ <div className="w-10 h-10 sm:w-12 sm:h-12 glass-panel  flex items-center justify-center">
                 <Package className="w-5 h-5 sm:w-6 sm:h-6 text-gray-800" />
               </div>
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">My Orders</h1>
@@ -86,7 +86,7 @@ function OrdersPageContent() {
                 className={`px-4 py-2 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
                   statusFilter === s
                     ? 'bg-gray-900 text-white shadow-lg'
-                    : 'bg-white text-gray-500 hover:bg-gray-100 border border-gray-100'
+                    : 'bg-white/55 text-gray-600 hover:bg-white/80 border border-white/70'
                 }`}
               >
                 {s === 'ALL' ? 'All Orders' : s}
@@ -160,7 +160,7 @@ function OrdersPageContent() {
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page <= 1}
-                className="px-6 py-2 bg-white border border-gray-100 rounded-2xl font-bold text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-30"
+                className="px-6 py-2 bg-white/55 border border-white/70 rounded-2xl font-bold text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-30"
               >
                 Previous
               </motion.button>
@@ -169,7 +169,7 @@ function OrdersPageContent() {
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setPage((p) => p + 1)}
                 disabled={page * LIMIT >= total}
-                className="px-6 py-2 bg-white border border-gray-100 rounded-2xl font-bold text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-30"
+                className="px-6 py-2 bg-white/55 border border-white/70 rounded-2xl font-bold text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-30"
               >
                 Next
               </motion.button>

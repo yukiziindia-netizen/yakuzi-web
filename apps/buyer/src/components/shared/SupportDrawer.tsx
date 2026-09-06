@@ -170,11 +170,11 @@ export default function SupportDrawer({ isOpen, onClose }: SupportDrawerProps) {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className={`fixed top-0 right-0 h-full w-[92%] sm:w-[500px] md:w-[520px] max-w-full bg-white shadow-2xl z-[110] flex flex-col overflow-hidden rounded-l-3xl ${outfit.className}`}
+ className={`fixed top-0 right-0 h-full w-[92%] sm:w-[500px] md:w-[520px] max-w-full glass-overlay z-[110] flex flex-col overflow-hidden rounded-l-3xl ${outfit.className}`}
           >
             {/* ── Signed out ─────────────────────────────── */}
             {!isAuthenticated && (
-              <div className="flex-1 flex flex-col h-full bg-white">
+              <div className="flex-1 flex flex-col h-full">
                 <div className="flex justify-between items-center px-6 pt-6 pb-2">
                   <h2 className="text-2xl font-bold text-gray-900">Customer Support</h2>
                   <button onClick={handleClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
@@ -198,7 +198,7 @@ export default function SupportDrawer({ isOpen, onClose }: SupportDrawerProps) {
 
             {/* ── Screen 1: ticket list ──────────────────── */}
             {isAuthenticated && screen === 'list' && (
-              <div className="flex-1 flex flex-col h-full bg-white relative">
+              <div className="flex-1 flex flex-col h-full relative">
                 <div className="flex justify-between items-center px-6 pt-6 pb-2">
                   <h2 className="text-2xl font-bold text-gray-900">Customer Support</h2>
                   <button onClick={handleClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
@@ -280,7 +280,7 @@ export default function SupportDrawer({ isOpen, onClose }: SupportDrawerProps) {
 
             {/* ── Screen 2: new ticket ───────────────────── */}
             {isAuthenticated && screen === 'new' && (
-              <div className="flex-1 flex flex-col h-full bg-white relative">
+              <div className="flex-1 flex flex-col h-full relative">
                 <div className="flex justify-between items-center px-6 pt-6 pb-2 border-b border-gray-50 shadow-sm shrink-0">
                   <button
                     onClick={() => setScreen('list')}
@@ -337,7 +337,7 @@ export default function SupportDrawer({ isOpen, onClose }: SupportDrawerProps) {
 
             {/* ── Screen 3: ticket thread ────────────────── */}
             {isAuthenticated && screen === 'thread' && (
-              <div className="flex-1 flex flex-col h-full bg-white relative">
+              <div className="flex-1 flex flex-col h-full relative">
                 <div className="flex justify-between items-center px-6 pt-6 pb-2 border-b border-gray-50 shadow-sm shrink-0 gap-2">
                   <button
                     onClick={resetToList}

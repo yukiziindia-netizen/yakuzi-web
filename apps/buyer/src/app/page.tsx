@@ -6,6 +6,7 @@ import HeroSection from '@/components/landing/HeroSection';
 import ProductCarousel from '@/components/landing/ProductCarousel';
 import CategoryScrollRow from '@/components/landing/CategoryScrollRow';
 import ComingSoon from '@/components/landing/ComingSoon';
+import ProductSectionBoundary from '@/components/shared/ProductSectionBoundary';
 import InstagramFeed from '@/components/landing/InstagramFeed';
 import dynamicComponent from 'next/dynamic';
 import { type HomepageSection } from '@yukizi/api-client';
@@ -88,15 +89,12 @@ async function CarouselSection({
       limit: 100,
       ...buildProductQueryParams(searchParams),
     });
-    // getProducts NEVER throws — it swallows errors into
-    // { data: [], failed: true }, so a plain catch here can never fire for
-    // an API failure. Check the flag and throw: a failure must surface as
-    // an error (error.tsx retry UI, noindexed by Next), never as a 200
+    // getProductsCached retries, then REJECTS on a failure (see
+    // fetchProductsOrThrow) — so the catch below now does fire for an API
+    // failure, and the failure is never cached. A failure must surface as an
+    // error (error.tsx retry UI, noindexed by Next), never as a 200
     // "No products available." shell — the soft-404 that reads to Google
     // as an empty shop. A GENUINELY empty fulfilled result renders as before.
-    if ((res as any)?.failed) {
-      throw new Error('[HomePage] products fetch failed');
-    }
     if (res && res.data && Array.isArray(res.data)) {
       initialProducts = res.data;
       total = res.total ?? res.data.length;
@@ -196,15 +194,19 @@ export default async function HomePage({
             </div>
           )}
           <div className="flex-1 min-h-[300px] overflow-hidden bg-transparent mt-0">
-            <Suspense
-              fallback={
-                <div className="h-40 flex items-center justify-center">
-                  <Loader2 className="w-6 h-6 animate-spin text-[#854cbc]" />
-                </div>
-              }
-            >
-              <CarouselSection searchParams={searchParams} capped={showCuratedSections} />
-            </Suspense>
+            {/* Scoped so a products failure costs the grid, not the hero,
+                the category rows and the footer with it. */}
+            <ProductSectionBoundary>
+              <Suspense
+                fallback={
+                  <div className="h-40 flex items-center justify-center">
+                    <Loader2 className="w-6 h-6 animate-spin text-[#854cbc]" />
+                  </div>
+                }
+              >
+                <CarouselSection searchParams={searchParams} capped={showCuratedSections} />
+              </Suspense>
+            </ProductSectionBoundary>
           </div>
           {/* Below the products, and only on the browse view — the same rule
               the curated rows follow. Someone who arrived searching wants

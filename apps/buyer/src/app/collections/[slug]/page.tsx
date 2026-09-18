@@ -16,7 +16,7 @@ import {
   type BreadcrumbItem,
 } from '@/lib/seo/schema';
 import { absoluteUrl } from '@/lib/seo/site';
-import { getProducts } from '@yukizi/api-client';
+import { fetchProductsOrThrow } from '@/lib/server-cache';
 import { COLLECTIONS, MIN_PRODUCTS, collectionBySlug, matchProducts } from '@/data/collections';
 
 // No searchParams here, so unlike /products and /category this page is real
@@ -36,13 +36,11 @@ async function fetchCollectionProducts(def: (typeof COLLECTIONS)[number]) {
   // hub with a permanently empty grid (observed live on 2026-09-16).
   // Errors intentionally NOT swallowed: an API outage must surface as a 500
   // (crawlers retry those), never as a thin 200 "empty collection" soft-404.
-  const res = await getProducts({ limit: 100 });
   // getProducts NEVER throws — it swallows errors and returns
-  // { data: [], failed: true }. Without this check a fetch failure renders
-  // as a calm empty collection (the soft-404 this page must never be).
-  if ((res as any)?.failed) {
-    throw new Error('[collections] products fetch failed');
-  }
+  // { data: [], failed: true }, which would render as a calm empty collection
+  // (the soft-404 this page must never be). fetchProductsOrThrow retries the
+  // transient case, then converts a real failure into a rejection.
+  const res = await fetchProductsOrThrow({ limit: 100 }, 'collections');
   const all = res && Array.isArray(res.data) ? res.data : [];
   return matchProducts(def, all);
 }

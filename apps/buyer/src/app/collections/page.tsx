@@ -11,7 +11,7 @@ import {
   type BreadcrumbItem,
 } from '@/lib/seo/schema';
 import { absoluteUrl, SITE_URL } from '@/lib/seo/site';
-import { getProducts } from '@yukizi/api-client';
+import { fetchProductsOrThrow } from '@/lib/server-cache';
 import { COLLECTIONS, matchProducts } from '@/data/collections';
 
 export const revalidate = 300;
@@ -36,10 +36,9 @@ export default async function CollectionsIndexPage() {
   // Same hard-fail rule as the hub pages: an API outage is a 500, not an
   // "every collection is empty" soft-404. Direct fetch, not unstable_cache —
   // this page is ISR; see the hub page's note on the build-poisoned cache.
-  const res = await getProducts({ limit: 100 });
-  if ((res as any)?.failed) {
-    throw new Error('[collections] products fetch failed');
-  }
+  // fetchProductsOrThrow retries a transient failure before giving up, then
+  // throws — the uncached path, so nothing here is stored either way.
+  const res = await fetchProductsOrThrow({ limit: 100 }, 'collections');
   const all = res && Array.isArray(res.data) ? res.data : [];
   const withCounts = COLLECTIONS.map((def) => ({ def, count: matchProducts(def, all).length }));
 

@@ -72,4 +72,11 @@ export type { ProductFormValues } from './validators';
 export { generateProductSlug, parseProductIdFromSlug } from './slugs';
 
 // Banner media — whether a banner slot holds a picture or a video
-export { isVideoUrl, isVideoFile, BANNER_ACCEPT } from './media';
+export {
+  isVideoUrl,
+  isVideoFile,
+  BANNER_ACCEPT,
+  checkBannerFile,
+  MAX_IMAGE_BYTES,
+  MAX_VIDEO_BYTES,
+} from './media';

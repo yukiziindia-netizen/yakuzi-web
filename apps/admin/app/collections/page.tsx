@@ -29,7 +29,7 @@ import {
   useReplaceCategoryBanners, useReplaceSubCategoryBanners,
 } from "@/hooks/useAdmin";
 import { uploadImage } from "@/api/admin.api";
-import { BANNER_ACCEPT, isVideoUrl } from "@yukizi/utils";
+import { BANNER_ACCEPT, isVideoUrl, isVideoFile, checkBannerFile } from "@yukizi/utils";
 
 const MAX_SLIDES = 10;
 
@@ -237,16 +237,34 @@ export default function AdminCollectionsPage() {
     // Allow re-picking the same file later.
     e.target.value = "";
     if (!f || !target) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const dataUrl = reader.result as string;
+
+    // Refused here rather than after a minute of uploading, which is what
+    // used to happen: the server rejects it, but only once the whole file has
+    // arrived.
+    const problem = checkBannerFile(f);
+    if (problem) {
+      toast.error(problem);
+      return;
+    }
+
+    const apply = (previewUrl: string) =>
       setSlides((prev) => prev.map((s) => {
         if (s.key !== target.key) return s;
         return target.field === "desktop"
-          ? { ...s, file: f, preview: dataUrl }
-          : { ...s, mobileFile: f, mobilePreview: dataUrl };
+          ? { ...s, file: f, preview: previewUrl }
+          : { ...s, mobileFile: f, mobilePreview: previewUrl };
       }));
-    };
+
+    // A 40 MB video read as a base64 data URL becomes a ~53 MB string held in
+    // React state, which visibly hangs the tab before anything is uploaded.
+    // An object URL is instant. Images keep the data URL — small, and it
+    // survives a re-render without needing to be revoked.
+    if (isVideoFile(f)) {
+      apply(URL.createObjectURL(f));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => apply(reader.result as string);
     reader.readAsDataURL(f);
   };
 
@@ -576,7 +594,7 @@ export default function AdminCollectionsPage() {
                                     <div className="flex-1 min-w-0">
                                       {slide.preview ? (
                                         <div className="relative aspect-[16/6] w-full rounded-lg overflow-hidden group/img">
-                                          {isVideoUrl(slide.preview) ? (
+                                          {isVideoUrl(slide.preview) || isVideoFile(slide.file) ? (
                                             <video src={slide.preview} className="w-full h-full object-cover" muted loop autoPlay playsInline />
                                           ) : (
                                             <img src={slide.preview} alt={`Banner ${index + 1} desktop`} className="w-full h-full object-cover" />
@@ -599,7 +617,7 @@ export default function AdminCollectionsPage() {
                                     <div className="w-24 shrink-0">
                                       {slide.mobilePreview ? (
                                         <div className="relative aspect-[3/4] w-full rounded-lg overflow-hidden group/img">
-                                          {isVideoUrl(slide.mobilePreview) ? (
+                                          {isVideoUrl(slide.mobilePreview) || isVideoFile(slide.mobileFile) ? (
                                             <video src={slide.mobilePreview} className="w-full h-full object-cover" muted loop autoPlay playsInline />
                                           ) : (
                                             <img src={slide.mobilePreview} alt={`Banner ${index + 1} mobile`} className="w-full h-full object-cover" />

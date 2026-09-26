@@ -21,6 +21,22 @@ import { disableMetaPixel, initMetaPixel } from '@/lib/analytics/meta-pixel';
 
 export const CONSENT_KEY = 'yz_cookie_consent';
 
+/**
+ * Reopening the consent bar. Once a choice is stored the bar never shows on
+ * its own again, so without this a visitor who declined marketing on their
+ * first visit could never change their mind — and a store that only offers
+ * "accept once, forever" is not a working consent flow. A footer link
+ * dispatches this event; the bar listens and reappears, pre-filled with the
+ * current choices.
+ */
+export const OPEN_PREFERENCES_EVENT = 'yz:cookie-preferences';
+
+export function openCookiePreferences(): void {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent(OPEN_PREFERENCES_EVENT));
+  }
+}
+
 export interface CookieConsentState {
   analytics: boolean;
   marketing: boolean;

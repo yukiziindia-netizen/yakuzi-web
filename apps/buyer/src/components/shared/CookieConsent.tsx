@@ -2,7 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { applyConsent, hasStoredConsent, saveConsent } from '@/lib/cookie-consent';
+import {
+  applyConsent,
+  getStoredConsent,
+  hasStoredConsent,
+  OPEN_PREFERENCES_EVENT,
+  saveConsent,
+} from '@/lib/cookie-consent';
 
 /**
  * Minimal cookie-consent bar, fixed to the TOP of the viewport.
@@ -27,6 +33,20 @@ export default function CookieConsent() {
 
   useEffect(() => {
     if (!hasStoredConsent()) setVisible(true);
+
+    // The footer's "Cookie preferences" link reopens the bar, pre-filled with
+    // the current choices and expanded so the toggles are right there.
+    const onReopen = () => {
+      const stored = getStoredConsent();
+      if (stored) {
+        setAnalyticsOn(stored.analytics);
+        setMarketingOn(stored.marketing);
+      }
+      setShowPrefs(true);
+      setVisible(true);
+    };
+    window.addEventListener(OPEN_PREFERENCES_EVENT, onReopen);
+    return () => window.removeEventListener(OPEN_PREFERENCES_EVENT, onReopen);
   }, []);
 
   if (!visible) return null;

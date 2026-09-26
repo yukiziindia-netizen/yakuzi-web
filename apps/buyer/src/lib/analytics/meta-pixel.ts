@@ -25,18 +25,35 @@ declare global {
 let started = false;
 let loadedPixelId: string | null = null;
 
+type FbqStub = ((...args: unknown[]) => void) & {
+  callMethod?: (...args: unknown[]) => void;
+  queue: unknown[];
+  push?: unknown;
+  loaded?: boolean;
+  version?: string;
+};
+
 function loadBaseCode(): void {
   if (typeof window === 'undefined' || window.fbq) return;
-  // Meta's standard base snippet, transcribed (no eval, no remote-built string).
-  const fbq: Window['fbq'] = function (...args: unknown[]) {
-    // eslint-disable-next-line prefer-rest-params
-    (fbq!.queue = fbq!.queue || []).push(args);
-  } as Window['fbq'];
-  fbq!.queue = [];
-  fbq!.loaded = true;
-  fbq!.version = '2.0';
-  window.fbq = fbq;
-  window._fbq = fbq;
+  // Meta's canonical base snippet, transcribed (no eval, no remote-built
+  // string). The callMethod check is LOAD-BEARING: once fbevents.js loads it
+  // sets fbq.callMethod and every subsequent call must route through it. A
+  // stub that only ever pushes to the queue sends the events queued before
+  // the script loads (the first PageView) and then silently drops everything
+  // fired afterwards — route changes, AddToCart, Purchase.
+  const n = function (...args: unknown[]) {
+    if (n.callMethod) {
+      n.callMethod.apply(n, args);
+    } else {
+      n.queue.push(args);
+    }
+  } as FbqStub;
+  n.push = n;
+  n.loaded = true;
+  n.version = '2.0';
+  n.queue = [];
+  window.fbq = n;
+  window._fbq = n;
 
   const script = document.createElement('script');
   script.async = true;

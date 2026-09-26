@@ -3,6 +3,7 @@ import { Instagram, Facebook, Youtube, Linkedin, MessageCircle, Twitter, Message
 import { COMPANY } from '@/config/company';
 import { fetchSocialLinks } from '@/lib/seo/social';
 import { COLLECTIONS } from '@/data/collections';
+import { CookiePreferencesLink } from './CookiePreferencesLink';
 import SiteLinkHub from '@/components/seo/SiteLinkHub';
 
 const footerLinks = [
@@ -88,6 +89,14 @@ export default async function SiteFooter() {
                 </Link>
               </li>
             ))}
+            {/* Reopens the consent bar so a visitor can change their cookie
+                choices at any time — required for a working opt-in flow. */}
+            <li className="flex items-center gap-2">
+              <span aria-hidden="true" className="text-gray-300">
+                &bull;
+              </span>
+              <CookiePreferencesLink />
+            </li>
           </ul>
         </nav>
 

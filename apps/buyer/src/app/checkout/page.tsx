@@ -13,6 +13,7 @@ import Link from 'next/link';
 import AuthGuard from '@/components/shared/AuthGuard';
 import { useAuth, createRazorpayOrder, verifyRazorpayPayment, cancelOrder } from '@yukizi/api-client';
 import { track } from '@/lib/analytics/tracker';
+import { metaPixelPurchase } from '@/lib/analytics/meta-pixel';
 
 type PaymentMethod = 'BANK_TRANSFER' | 'UPI' | 'COD' | 'CREDIT' | 'RAZORPAY';
 
@@ -246,6 +247,10 @@ export default function CheckoutPage() {
             razorpayPaymentId: response.razorpay_payment_id,
             razorpaySignature: response.razorpay_signature,
           });
+          // Browser-side Purchase for Meta, deduped with the server's
+          // Conversions API event by the order id. No-op unless the Pixel is
+          // on and the visitor consented to marketing.
+          metaPixelPurchase({ orderId, value: total });
           clearCart.mutate(undefined, {
             onSuccess: () => { window.location.href = `/orders?drawer=${orderId}&success=true`; },
             onError: () => { window.location.href = `/orders?drawer=${orderId}&success=true`; },
@@ -358,6 +363,7 @@ export default function CheckoutPage() {
               { orderId, amount: total, method: paymentMethod },
               {
                 onSuccess: () => {
+                  metaPixelPurchase({ orderId, value: total });
                   clearCart.mutate(undefined, {
                     onSuccess: () => { window.location.href = `/orders?drawer=${orderId}&success=true`; },
                     onError: () => { window.location.href = `/orders?drawer=${orderId}&success=true`; }

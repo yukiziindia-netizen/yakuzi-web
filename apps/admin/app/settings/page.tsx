@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Bell, Key, LifeBuoy, Building2, Hash, ShoppingBag } from "lucide-react";
+import { Bell, Key, LifeBuoy, Building2, Hash, ShoppingBag, Radio } from "lucide-react";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { Button, Input, Skeleton } from "@/components/ui";
 import toast from "react-hot-toast";
@@ -46,6 +46,9 @@ export default function AdminSettingsPage() {
         "merchant.enabled": s["merchant.enabled"] ?? false,
         "merchant.accountId": s["merchant.accountId"] ?? "",
         "merchant.dataSourceId": s["merchant.dataSourceId"] ?? "",
+        // Meta (Facebook) Pixel. The Conversions API token is a server env var.
+        "metaPixel.enabled": s["metaPixel.enabled"] ?? false,
+        "metaPixel.pixelId": s["metaPixel.pixelId"] ?? "",
         // Owned by the SEO page — round-tripped so saving here never wipes them.
         googleSiteVerification: s.googleSiteVerification ?? "",
         bingSiteVerification: s.bingSiteVerification ?? "",
@@ -126,12 +129,19 @@ export default function AdminSettingsPage() {
       { key: "merchant.accountId", label: "Merchant Center account ID (the number in Merchant Center → Settings)" },
       { key: "merchant.dataSourceId", label: "API data source ID (from Merchant Center → Add products → API)" },
     ]},
+    // The Conversions API access token is NOT here — it is a server secret
+    // (META_CAPI_ACCESS_TOKEN). The Pixel ID ships in the browser, so it is safe
+    // to hold here. The Pixel only loads once a visitor accepts Marketing cookies.
+    { id: "metaPixel", icon: Radio, title: "Meta (Facebook) Pixel", fields: [
+      { key: "metaPixel.pixelId", label: "Meta Pixel ID (Events Manager → Data sources → your pixel)" },
+    ]},
   ];
 
   const FEATURE_FLAGS = [
     { key: "comingSoonMode", label: "Buyer App Coming Soon Mode", desc: "Replaces the storefront with the Coming Soon screen" },
     { key: "invoiceNumbering.enabled", label: "Use my own invoice numbering", desc: "Off = invoices keep the automatic reference. On = use the numbers and yearly restart set above. Turning it on only affects invoices issued from now on." },
     { key: "merchant.enabled", label: "Sync products to Google Merchant Center", desc: "Off = nothing is sent to Google. On = the catalogue is pushed daily and whenever you press Sync now below. Needs the account and data source IDs above and the server credential." },
+    { key: "metaPixel.enabled", label: "Enable Meta (Facebook) Pixel", desc: "Off = no Pixel loads and no ad events are sent. On = the Pixel loads for visitors who accept Marketing cookies, and the server sends Purchase events to Meta's Conversions API. Needs the Pixel ID above and the server access token." },
   ];
 
 

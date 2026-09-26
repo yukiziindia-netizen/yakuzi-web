@@ -23,6 +23,8 @@
  *   disable()                      – consent hook: stops tracking + wipes ids
  */
 
+import { metaPixelForward } from './meta-pixel';
+
 const VISITOR_KEY = 'yz_vid';
 const SESSION_KEY = 'yz_sid';
 const SESSION_LAST_ACTIVE_KEY = 'yz_sla';
@@ -262,6 +264,11 @@ function safeTimezone(): string | undefined {
 // ─── Public tracking API ───────────────────────────────────────────────
 
 export function track(name: string, props?: Record<string, unknown>, productId?: string): void {
+  // Forwarded to the Meta Pixel FIRST, and before the analytics gate: the
+  // Pixel answers to the marketing consent category, which is independent of
+  // the analytics one this `disabled` flag reflects. metaPixelForward no-ops
+  // unless marketing consent started the Pixel.
+  metaPixelForward(name, props, productId);
   if (!hasWindow() || disabled) return;
   enqueue({ name, ts: Date.now(), page: window.location.pathname, productId, props });
   touchSession();

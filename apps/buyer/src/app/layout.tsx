@@ -4,6 +4,7 @@ import '../styles/globals.css';
 import { Providers } from './providers';
 import SiteFooter from '@/components/shared/SiteFooter';
 import CookieConsent from '@/components/shared/CookieConsent';
+import { MetaPixelProvider } from '@/components/analytics/MetaPixelProvider';
 import { SITE_URL, SITE_NAME, SITE_TAGLINE, SITE_DESCRIPTION, DEFAULT_OG_IMAGE } from '@/lib/seo/site';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
@@ -22,6 +23,7 @@ async function fetchVerificationTokens(): Promise<{
   ogImage?: string;
   twitter?: string;
   themeColor?: string;
+  metaPixelId?: string;
 }> {
   const base = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '');
   if (!base) return {};
@@ -42,6 +44,9 @@ async function fetchVerificationTokens(): Promise<{
       ogImage: body?.data?.seoDefaultOgImage?.trim() || undefined,
       twitter: body?.data?.seoTwitterHandle?.trim() || undefined,
       themeColor: body?.data?.seoThemeColor?.trim() || undefined,
+      // Present only when Meta is switched on in admin (the API blanks it
+      // otherwise), so the Pixel loads only when the store owner wants it.
+      metaPixelId: body?.data?.metaPixelId?.trim() || undefined,
     };
   } catch {
     return {};
@@ -107,7 +112,11 @@ const baseMetadata: Metadata = {
   icons: { icon: [{ url: '/favicon.gif', type: 'image/gif' }] },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Cached by Next's fetch (revalidate 600), so this shares the same request
+  // as generateMetadata/generateViewport rather than adding a round-trip.
+  const { metaPixelId } = await fetchVerificationTokens();
+
   // Where every page's data and imagery comes from. Without these the first
   // request to each host pays a full DNS lookup and TLS handshake before a
   // single byte of product data or a single image starts downloading — on a
@@ -150,6 +159,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
           {/* Fixed top overlay; renders nothing once a choice is stored. */}
           <CookieConsent />
+          {/* Meta Pixel — inert unless Meta is on AND marketing consent given. */}
+          <MetaPixelProvider pixelId={metaPixelId ?? ''} />
         </Providers>
       </body>
     </html>

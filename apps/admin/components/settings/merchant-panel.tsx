@@ -16,6 +16,27 @@ import {
  * credentials needed), or push for real. The account/data-source fields and
  * the on/off flag live in the main settings form; this panel drives the sync.
  */
+/**
+ * Turns whatever was thrown into one short line an admin can act on.
+ *
+ * Distinguishes the three cases that previously looked identical: the server
+ * refused (status + its own message), the server was unreachable, or the
+ * response arrived but was not the shape the client expected.
+ */
+function describeError(err: unknown): string {
+  const res = (err as { response?: { status?: number; data?: { message?: string } } })?.response;
+  if (res?.status) {
+    const detail = res.data?.message;
+    if (res.status === 401) return "not signed in (401)";
+    if (res.status === 403) return "your admin role lacks the Settings permission (403)";
+    if (res.status === 404) return "the endpoint is missing — the API may need deploying (404)";
+    return detail ? `server said ${res.status}: ${detail}` : `server returned ${res.status}`;
+  }
+  if ((err as { code?: string })?.code === "ERR_NETWORK") return "the API is unreachable";
+  const message = (err as Error)?.message;
+  return message ? message : "unexpected response from the API";
+}
+
 export function MerchantPanel({ enabled }: { enabled: boolean }) {
   const [busy, setBusy] = useState<null | "dry" | "live" | "status">(null);
   const [result, setResult] = useState<MerchantSyncSummary | null>(null);
@@ -28,8 +49,12 @@ export function MerchantPanel({ enabled }: { enabled: boolean }) {
       setProblems(s.problems);
       setResult(s.lastSync);
       toast.success(s.ready ? "Ready to sync" : "Not ready yet — see the checklist");
-    } catch {
-      toast.error("Could not read Merchant Center status");
+    } catch (err) {
+      // Show why. The bare `catch {}` here previously discarded the cause, so
+      // a permission error, an outage and a malformed response were all
+      // indistinguishable — which is what made a response-shape mismatch take
+      // so long to identify.
+      toast.error(`Could not read Merchant Center status — ${describeError(err)}`);
     } finally {
       setBusy(null);
     }
@@ -48,8 +73,8 @@ export function MerchantPanel({ enabled }: { enabled: boolean }) {
             (summary.failed ? `, ${summary.failed} failed` : ""),
         );
       }
-    } catch {
-      toast.error(dryRun ? "Dry run failed" : "Sync failed");
+    } catch (err) {
+      toast.error(`${dryRun ? "Dry run" : "Sync"} failed — ${describeError(err)}`);
     } finally {
       setBusy(null);
     }

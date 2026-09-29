@@ -6,7 +6,7 @@ import { AdminLayout } from "@/components/layout/admin-layout";
 import { Button, Badge, Input, Modal } from "@/components/ui";
 import toast from "react-hot-toast";
 import { useBanners, useCreateBanner, useUpdateBanner, useDeleteBanner } from "@/hooks/useAdmin";
-import { BANNER_ACCEPT, isVideoFile, isVideoUrl } from "@yukizi/utils";
+import { BANNER_ACCEPT, isVideoFile, isVideoUrl, checkBannerFile } from "@yukizi/utils";
 
 export default function BannersPage() {
   const { data: bannersData, isLoading } = useBanners();
@@ -46,10 +46,39 @@ export default function BannersPage() {
     setShowModal(true);
   };
 
+  /**
+   * Preview a picked banner file.
+   *
+   * Videos get an object URL rather than a base64 data URL. Reading a 40 MB
+   * video with readAsDataURL produces a ~53 MB string and holds it in React
+   * state, which visibly hangs the tab before anything has even been
+   * uploaded. createObjectURL is instant and costs nothing. Images keep the
+   * data URL, which is small and survives a re-render without needing to be
+   * revoked.
+   */
+  const previewFor = (f: File): string =>
+    isVideoFile(f) ? URL.createObjectURL(f) : "";
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
+    // Let the same file be picked again after a rejection.
+    e.target.value = "";
     if (!f) return;
+
+    // Refused here rather than after a minute of uploading, which is what
+    // used to happen: the server rejects it, but only once the whole file has
+    // arrived.
+    const problem = checkBannerFile(f);
+    if (problem) {
+      toast.error(problem);
+      return;
+    }
+
     setFile(f);
+    if (isVideoFile(f)) {
+      setPreview(previewFor(f));
+      return;
+    }
     const reader = new FileReader();
     reader.onloadend = () => setPreview(reader.result as string);
     reader.readAsDataURL(f);
@@ -57,9 +86,21 @@ export default function BannersPage() {
 
   const handleMobileFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
+    e.target.value = "";
     if (!f) return;
+
+    const problem = checkBannerFile(f);
+    if (problem) {
+      toast.error(problem);
+      return;
+    }
+
     setMobileFile(f);
     setRemoveMobile(false);
+    if (isVideoFile(f)) {
+      setMobilePreview(previewFor(f));
+      return;
+    }
     const reader = new FileReader();
     reader.onloadend = () => setMobilePreview(reader.result as string);
     reader.readAsDataURL(f);

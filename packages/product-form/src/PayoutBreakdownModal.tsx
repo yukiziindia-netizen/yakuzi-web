@@ -14,8 +14,14 @@ export interface PayoutBreakdownModalProps {
   gstPercent: number;
   shippingCharges: number;
   discountDetails: any;
-  
+
   variants: any[];
+  /**
+   * Whether the seller books their own courier. When they do, the shipping the
+   * buyer pays is theirs: it is not withheld, and no commission is charged on
+   * it. Mirrors calculateSellerPayout's sellerKeepsShipping on the API side.
+   */
+  selfShip?: boolean;
 }
 
 export function PayoutBreakdownModal({
@@ -28,7 +34,8 @@ export function PayoutBreakdownModal({
   gstPercent,
   shippingCharges,
   discountDetails,
-  variants
+  variants,
+  selfShip = false,
 }: PayoutBreakdownModalProps) {
   
   // Close on Escape key
@@ -69,8 +76,9 @@ export function PayoutBreakdownModal({
         const discountInput = {
           ...mappedDiscount,
           shippingCharges: vShipping,
-          shippingGstPercent: 0, 
-          isTaxIncluded
+          shippingGstPercent: 0,
+          isTaxIncluded,
+          sellerKeepsShipping: selfShip,
         };
 
         const pricing = calculatePricing(p, vGst, discountInput, platformFees);
@@ -91,7 +99,8 @@ export function PayoutBreakdownModal({
         ...mappedDiscount,
         shippingCharges,
         shippingGstPercent: 0, // Since product form handles shipping GST into finalShippingPrice (if we were using it), wait: for simple products, ProductForm doesn't calculate finalShippingPrice inline for UI, but it submits it. Actually, wait. Let's just use 0 here too because the user entered `shippingCharges` which they intend to be the final shipping cost.
-        isTaxIncluded
+        isTaxIncluded,
+        sellerKeepsShipping: selfShip,
       };
       const pricing = calculatePricing(mrp || 0, gstPercent || 0, discountInput, platformFees);
       return [{
@@ -100,7 +109,7 @@ export function PayoutBreakdownModal({
         pricing
       }];
     }
-  }, [variants, mrp, gstPercent, shippingCharges, discountDetails, isTaxIncluded, platformFees, productName]);
+  }, [variants, mrp, gstPercent, shippingCharges, discountDetails, isTaxIncluded, platformFees, productName, selfShip]);
 
   if (!isOpen) return null;
 
@@ -163,7 +172,9 @@ export function PayoutBreakdownModal({
                           <span>{isTaxIncluded ? `Included (${formatCurrency(Math.round((item.pricing.basePrice - (item.pricing.basePrice / (1 + item.pricing.productGstPercent / 100))) * 100) / 100)})` : `+${formatCurrency(Math.round((item.pricing.basePrice * (item.pricing.productGstPercent / 100)) * 100) / 100)}`}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">Shipping (Inc. GST)</span>
+                          <span className="text-muted-foreground">
+                            {selfShip ? "Your delivery charge" : "Shipping (Inc. GST)"}
+                          </span>
                           <span>+{formatCurrency(item.pricing.shippingTotal)}</span>
                         </div>
                         {item.pricing.discountPercent > 0 && (
@@ -198,10 +209,23 @@ export function PayoutBreakdownModal({
                           <span>-{formatCurrency(item.pricing.commissionGstAmount + item.pricing.fixedFeeGstAmount)}</span>
                         </div>
 
-                        <div className="flex justify-between text-red-500/80">
-                          <span title="Shipping handled by platform">Shipping (Deducted)</span>
-                          <span>-{formatCurrency(item.pricing.shippingTotal)}</span>
-                        </div>
+                        {/* Shipping is only deducted when Yukizi does the
+                            shipping — it is withheld to pay the courier. A
+                            self-shipping seller paid their own courier, so they
+                            keep it and no line appears here at all. */}
+                        {selfShip ? (
+                          <div className="flex justify-between text-green-600 dark:text-green-400">
+                            <span title="You ship this order yourself, so the delivery charge stays with you">
+                              Shipping (Kept — you ship)
+                            </span>
+                            <span>{formatCurrency(0)}</span>
+                          </div>
+                        ) : (
+                          <div className="flex justify-between text-red-500/80">
+                            <span title="Shipping handled by platform">Shipping (Deducted)</span>
+                            <span>-{formatCurrency(item.pricing.shippingTotal)}</span>
+                          </div>
+                        )}
                         <div className="flex justify-between font-bold text-primary pt-2 border-t border-border border-dashed text-base">
                           <span>Estimated Payout (Inc. Product GST)</span>
                           <span>{formatCurrency(item.pricing.sellerPayout)}</span>

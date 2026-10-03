@@ -382,6 +382,9 @@ export default function OrderDetailPage() {
                     isTaxIncluded: true,
                     shippingCharges: perUnitShipping,
                     shippingGstPercent: 0,
+                    // On a self-ship order the seller booked the courier, so the
+                    // shipping the buyer paid is not withheld from them.
+                    sellerKeepsShipping: isSelfShip,
                     buy: 1
                   },
                   {
@@ -407,7 +410,7 @@ export default function OrderDetailPage() {
 
                 const itemCommission = payout ? payout.commission : (pricing.commissionAmount * itemQty);
                 const itemCommissionGst = payout ? payout.commissionGst : (pricing.commissionGstAmount * itemQty);
-                const itemShipping = payout ? payout.finalShippingPrice : (perUnitShipping * itemQty);
+                const itemShipping = payout ? payout.finalShippingPrice : (isSelfShip ? 0 : perUnitShipping * itemQty);
                 const itemNetPayout = payout ? payout.netPayout : (pricing.sellerPayout * itemQty);
                 const commissionPercent = payout?.commissionPercent ?? fallbackCommPct;
                 const commissionGstPercent = payout?.commissionGstPercent ?? fallbackCommGstPct;
@@ -512,13 +515,14 @@ export default function OrderDetailPage() {
                   const pricing = calculatePricing(
                     baseSellingPrice,
                     productGstPercent,
-                    { type: 'none', isTaxIncluded: true, shippingCharges: perUnitShipping, shippingGstPercent: 0, buy: 1 },
+                    { type: 'none', isTaxIncluded: true, shippingCharges: perUnitShipping, shippingGstPercent: 0, sellerKeepsShipping: isSelfShip, buy: 1 },
                     { commissionPercent, commissionGstPercent, fixedFee, fixedFeeGstPercent, shippingGstPercent: 0 }
                   );
 
                   totalCommission += pricing.commissionAmount * itemQty;
                   totalCommissionGst += pricing.commissionGstAmount * itemQty;
-                  totalShipping += perUnitShipping * itemQty;
+                  // Nothing is withheld on a self-ship order: the seller paid the courier.
+                  totalShipping += isSelfShip ? 0 : perUnitShipping * itemQty;
                   totalNetPayout += pricing.sellerPayout * itemQty;
                 }
               });
@@ -529,9 +533,15 @@ export default function OrderDetailPage() {
                     <span>Platform Commission & Taxes</span>
                     <span className="font-semibold text-red-500">-{formatCurrency(totalCommission + totalCommissionGst)}</span>
                   </div>
+                  {/* Shipping is only withheld when Yukizi books the courier.
+                      A self-ship seller paid their own, so they keep it. */}
                   <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>Total Shipping (Deducted)</span>
-                    <span className="font-semibold text-red-500">-{formatCurrency(totalShipping)}</span>
+                    <span>{isSelfShip ? "Total Shipping (seller ships, kept)" : "Total Shipping (Deducted)"}</span>
+                    {isSelfShip ? (
+                      <span className="font-semibold text-emerald-600 dark:text-emerald-400">{formatCurrency(0)}</span>
+                    ) : (
+                      <span className="font-semibold text-red-500">-{formatCurrency(totalShipping)}</span>
+                    )}
                   </div>
                   <div className="flex items-center justify-between text-sm font-semibold text-emerald-600 dark:text-emerald-400">
                     <span>Total Estimated Seller Payout</span>

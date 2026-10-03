@@ -44,7 +44,19 @@ export default function AddProductForSellerPage() {
           </Select>
         </div>
 
-        {sellerId && <ProductForm key={sellerId} adapter={adapter} />}
+        {sellerId && (
+          <ProductForm
+            key={sellerId}
+            adapter={adapter}
+            // Whose shipping charge the new listing carries. Keyed on sellerId
+            // above, so switching seller remounts the form and the field
+            // re-locks or unlocks with them.
+            selfShip={
+              !!sellers.find((s: any) => s.id === sellerId)?.sellerProfile
+                ?.selfShipEnabled
+            }
+          />
+        )}
       </div>
     </AdminLayout>
   );

@@ -3,7 +3,7 @@ import React from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { ProductForm, buildProductFormPrefill } from "@yukizi/product-form";
 import { useSellerProductFormAdapter } from "@/lib/productFormAdapter";
-import { useSellerProduct } from "@/hooks/useSeller";
+import { useSellerProduct, useSellerProfile } from "@/hooks/useSeller";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui";
 import { ErrorBoundary } from "@/components/error-boundary";
@@ -21,6 +21,8 @@ export default function EditProductPage() {
   // product is missing or they lack permission would be wrong.
   const isRealMiss = error ? (error as any)?.response?.status === 404 : !product;
   const adapter = useSellerProductFormAdapter();
+  // Self-ship decides whether the shipping field is this seller's to set.
+  const { data: profile } = useSellerProfile();
   // The prefill mapping now lives in @yukizi/product-form so the admin's
   // "edit on behalf of a seller" screen opens a listing exactly the way its
   // own seller does. Behaviour is unchanged — the code moved.
@@ -76,6 +78,9 @@ export default function EditProductPage() {
               initialSubcategoryName={prefill!.initialSubcategoryName}
               initialMasterId={prefill!.initialMasterId}
               activeVariantId={prefill!.activeVariantId}
+              // Self-ship sellers set their own delivery charge; for everyone
+              // else Yukizi books the courier and the catalogue's charge stands.
+              selfShip={!!profile?.selfShipEnabled}
             />
           )}
         </div>

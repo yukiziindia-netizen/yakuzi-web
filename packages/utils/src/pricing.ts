@@ -30,6 +30,14 @@ export interface DiscountFormInput {
   shippingCharges?: number;
   shippingGstPercent?: number;
   isTaxIncluded?: boolean;
+  /**
+   * True when the SELLER books the courier rather than Yukizi. Shipping is
+   * normally a platform charge — the buyer pays it and it is taken straight back
+   * off the payout so Yukizi can pay Shiprocket — but a self-shipping seller
+   * paid for the delivery, so it stays with them. Mirrors the API's
+   * calculateSellerPayout({ sellerKeepsShipping }).
+   */
+  sellerKeepsShipping?: boolean;
 }
 
 export interface CategoryPlatformFees {
@@ -171,7 +179,10 @@ export function calculatePricing(
 
   // 9. Seller Payout
   // Seller receives Final Customer Payable minus Shipping (deduction), and Platform Fees.
-  const sellerPayout = round2(finalCustomerPayable - shippingTotal - totalPlatformFees);
+  // A self-shipping seller booked and paid for the courier themselves, so the
+  // shipping the buyer paid is not withheld from them.
+  const withheldShipping = discountInput.sellerKeepsShipping ? 0 : shippingTotal;
+  const sellerPayout = round2(finalCustomerPayable - withheldShipping - totalPlatformFees);
 
   const itemsToPayFor = buy;
   const finalUserBuy = round2(finalCustomerPayable * itemsToPayFor);

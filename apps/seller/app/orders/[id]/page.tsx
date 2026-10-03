@@ -243,6 +243,9 @@ export default function OrderDetailPage() {
                     isTaxIncluded: true,
                     shippingCharges: perUnitShipping,
                     shippingGstPercent: 0,
+                    // On a self-ship order the seller booked the courier, so the
+                    // shipping the buyer paid is not withheld from them.
+                    sellerKeepsShipping: isSelfShip,
                     buy: 1
                   },
                   {
@@ -268,7 +271,7 @@ export default function OrderDetailPage() {
 
                 const itemCommission = payout ? payout.commission : (pricing.commissionAmount * itemQty);
                 const itemCommissionGst = payout ? payout.commissionGst : (pricing.commissionGstAmount * itemQty);
-                const itemShipping = payout ? payout.finalShippingPrice : (perUnitShipping * itemQty);
+                const itemShipping = payout ? payout.finalShippingPrice : (isSelfShip ? 0 : perUnitShipping * itemQty);
                 const itemNetPayout = payout ? payout.netPayout : (pricing.sellerPayout * itemQty);
                 const commissionPercent = payout?.commissionPercent ?? fallbackCommPct;
                 const commissionGstPercent = payout?.commissionGstPercent ?? fallbackCommGstPct;
@@ -373,13 +376,14 @@ export default function OrderDetailPage() {
                   const pricing = calculatePricing(
                     baseSellingPrice,
                     productGstPercent,
-                    { type: 'none', isTaxIncluded: true, shippingCharges: perUnitShipping, shippingGstPercent: 0, buy: 1 },
+                    { type: 'none', isTaxIncluded: true, shippingCharges: perUnitShipping, shippingGstPercent: 0, sellerKeepsShipping: isSelfShip, buy: 1 },
                     { commissionPercent, commissionGstPercent, fixedFee, fixedFeeGstPercent, shippingGstPercent: 0 }
                   );
 
                   totalCommission += pricing.commissionAmount * itemQty;
                   totalCommissionGst += pricing.commissionGstAmount * itemQty;
-                  totalShipping += perUnitShipping * itemQty;
+                  // Nothing is withheld on a self-ship order: the seller paid the courier.
+                  totalShipping += isSelfShip ? 0 : perUnitShipping * itemQty;
                   totalNetPayout += pricing.sellerPayout * itemQty;
                 }
               });
@@ -392,7 +396,14 @@ export default function OrderDetailPage() {
                   <div className="flex justify-between text-sm"><span className="text-muted-foreground">Subtotal</span><span className="text-foreground">{formatCurrency(subtotal)}</span></div>
                   {mainOrder.gstAmount != null && <div className="flex justify-between text-sm"><span className="text-muted-foreground">GST</span><span className="text-foreground">{formatCurrency(Number(mainOrder.gstAmount))}</span></div>}
                   <div className="flex justify-between text-sm text-red-500"><span>Platform Fees & Taxes</span><span>-{formatCurrency(totalCommission + totalCommissionGst)}</span></div>
-                  <div className="flex justify-between text-sm text-red-500"><span>Total Shipping (Deducted)</span><span>-{formatCurrency(totalShipping)}</span></div>
+                  {/* Shipping is only withheld when Yukizi books the courier.
+                      This order was shipped by the seller, so the delivery
+                      charge the buyer paid stays with them. */}
+                  {isSelfShip ? (
+                    <div className="flex justify-between text-sm text-emerald-600 dark:text-emerald-400"><span>Total Shipping (you shipped, you keep it)</span><span>{formatCurrency(0)}</span></div>
+                  ) : (
+                    <div className="flex justify-between text-sm text-red-500"><span>Total Shipping (Deducted)</span><span>-{formatCurrency(totalShipping)}</span></div>
+                  )}
                   <div className="flex justify-between text-sm font-semibold text-emerald-600 dark:text-emerald-400"><span>Total Estimated Payout</span><span className="font-bold">{formatCurrency(totalNetPayout)}</span></div>
                   <div className="flex justify-between text-base font-semibold pt-2 border-t border-border/30"><span>Total Order Amount</span><span>{formatCurrency(grandTotal)}</span></div>
                 </div>

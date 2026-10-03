@@ -100,6 +100,10 @@ export default function EditForSellerPage() {
             initialSubcategoryName={prefill.initialSubcategoryName}
             initialMasterId={prefill.initialMasterId}
             activeVariantId={prefill.activeVariantId}
+            // Whose shipping charge this listing carries: its owner's if they
+            // self-ship, Yukizi's otherwise. Read off the listing's own seller,
+            // never chosen here — the API resolves the owner from the listing.
+            selfShip={!!product?.seller?.selfShipEnabled}
           />
         )}
       </div>

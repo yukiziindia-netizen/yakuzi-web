@@ -35,6 +35,7 @@ export function ProductForm({
   initialMasterId,
   activeVariantId,
   initialPlatformFees,
+  selfShip = false,
 }: {
   adapter: ProductFormAdapter;
   defaultValues?: Partial<FormValues>;
@@ -46,6 +47,18 @@ export function ProductForm({
   initialMasterId?: string;
   activeVariantId?: string;
   initialPlatformFees?: any;
+  /**
+   * Whether this seller ships their own orders (SellerProfile.selfShipEnabled).
+   *
+   * It decides who owns the shipping charge. Self-ship sellers book their own
+   * courier and name their own price; for everyone else Yukizi books it and the
+   * catalogue product's charge is authoritative, so the field is shown read-only
+   * and the API overwrites anything sent for it anyway.
+   *
+   * Defaults to false — a caller that cannot tell gets today's behaviour rather
+   * than an editable field whose value the API will silently discard.
+   */
+  selfShip?: boolean;
 }) {
   const router = useRouter();
   const isEditing = !!productId;
@@ -279,18 +292,18 @@ export function ProductForm({
     const finalShip = (suggestion as any).finalShippingPrice !== undefined && (suggestion as any).finalShippingPrice !== null 
       ? (suggestion as any).finalShippingPrice 
       : computedFinalShip;
-    // The catalogue supplies a DEFAULT shipping charge, it does not dictate
-    // one. Shipping is per-seller, and this used to overwrite whatever the
-    // seller had typed the moment they picked the product from the lookup --
-    // silently, with no indication. A seller who set 0 for free delivery got
-    // the catalogue's charge back, and every listing of a given product ended
-    // up with an identical shipping figure none of them chose.
+    // Who the catalogue's shipping charge applies to depends on who ships.
     //
-    // `shouldDirty: false` below is what makes this work: filling the field
-    // programmatically must not look like the seller typed it, so isDirty
-    // means a human set it and must be left alone.
-    const sellerSetTheirOwnShipping = getFieldState("shipping_charges", formState).isDirty;
-    if (finalShip !== undefined && !sellerSetTheirOwnShipping) {
+    // Yukizi ships: it is not a default, it is THE charge. Picking the master
+    // fills it in and the field stays read-only, so every listing of a product
+    // ships at the same platform rate. The API enforces the same thing on save,
+    // so nothing sent from here can get around it.
+    //
+    // The seller ships: they book their own courier and name their own price,
+    // so the catalogue figure must not be imposed at all. Leaving the field
+    // untouched is what makes a deliberate 0 — free delivery — survive picking
+    // a master, which is what it failed to do before.
+    if (!selfShip && finalShip !== undefined) {
       setValue("shipping_charges", finalShip, { shouldDirty: false });
     }
     if ((suggestion as any).isTaxIncluded !== undefined) {
@@ -740,6 +753,32 @@ export function ProductForm({
                 </div>
             </>
           )}
+
+          {/* Shipping. There was no field here at all, so the charge was
+              whatever the catalogue happened to carry — including for sellers
+              shipping with their own courier, who had no way to set or clear
+              it. Outside the variants check on purpose: the per-variant
+              Shipping column is read-only and inherits this one figure, so a
+              seller with variants needs it just as much. */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <div className="space-y-1">
+              <Input
+                label="Shipping Charges (₹)"
+                type="number"
+                min={0}
+                placeholder="0"
+                readOnly={!selfShip}
+                disabled={!selfShip}
+                error={errors.shipping_charges?.message}
+                {...register("shipping_charges", { valueAsNumber: true })}
+              />
+              <p className="text-xs text-muted-foreground">
+                {selfShip
+                  ? "You ship this product yourself, so this is your delivery charge and you keep it — enter 0 for free delivery."
+                  : "Yukizi ships this product, so its delivery charge is set on the catalogue product and cannot be changed here."}
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Product Images — only rendered when the adapter can upload media.
@@ -811,6 +850,7 @@ export function ProductForm({
         shippingCharges={watchShippingCharges}
         discountDetails={watchDiscount}
         variants={variants}
+        selfShip={selfShip}
       />
     </div>
   );

@@ -83,6 +83,24 @@ export function setBaseURL(url: string) {
   }
 }
 
+/**
+ * A file upload gets much longer than a normal request.
+ *
+ * Every request shared one 30-second timeout, uploads included. Media can be
+ * up to 40 MB; on a typical Indian broadband uplink that is well over a
+ * minute, so axios aborted the request long before the file finished going
+ * up. The user saw a generic network error, the server never saw a complete
+ * upload, and nothing in either log said "timeout" — which is why this looked
+ * like uploads being broken rather than slow.
+ *
+ * Keyed on the payload being FormData rather than on the URL, so every upload
+ * path is covered, including any added later.
+ *
+ * Reads and writes keep the 30 seconds. A slow JSON request is a problem worth
+ * surfacing quickly; a slow upload is just a big file.
+ */
+const UPLOAD_TIMEOUT_MS = 5 * 60 * 1000;
+
 // Create the Axios instance
 const api: AxiosInstance = axios.create({
   baseURL: getBaseURL(),
@@ -111,6 +129,11 @@ function processQueue(error: unknown, token: string | null = null) {
 // Request interceptor: inject Authorization header
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    // See UPLOAD_TIMEOUT_MS above: uploads are slow by nature, reads are not.
+    if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+      config.timeout = UPLOAD_TIMEOUT_MS;
+    }
+
     // Analytics: lets the API link server-side events (signup/login/purchase)
     // to the anonymous visitor. Absent outside the buyer app — harmless.
     try {

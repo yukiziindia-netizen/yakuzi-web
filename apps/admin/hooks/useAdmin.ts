@@ -5,7 +5,7 @@ import {
   getAdminDashboard, getAdminUsers, getUserById, approveUser, rejectUser, blockUser, unblockUser,
   getBuyers, getSellers, setSellerSelfShip, updateUser, deleteUser, updateUserStatus, updateGstPanStatus, updateSellerProfile,
   getAdminProducts, getAdminProductsFiltered, getProductById, disableProduct, enableProduct, deleteProduct, createProduct, updateProduct, approveProduct, rejectProduct,
-  getAdminOrders, getAdminOrdersFiltered, getOrderById, updateAdminOrderStatus, updateAdminShippingDocs, uploadAdminOrderDocument, cancelOrder, recordOrderRefund, getTestOrdersCount, cancelTestOrders, getOrderInvoices, getOrderTracking, classifyOrder,
+  getAdminOrders, getAdminOrdersFiltered, getAbandonedCheckouts, getOrderById, updateAdminOrderStatus, updateAdminShippingDocs, uploadAdminOrderDocument, cancelOrder, recordOrderRefund, getTestOrdersCount, cancelTestOrders, getOrderInvoices, getOrderTracking, classifyOrder,
   getPayments, confirmPayment, rejectPayment,
   getSettlements, getSettlementsSummary, markSettlementPaid, getSellerSettlements, createSettlement, syncSettlements,
   getTickets, getTicketById, replyToTicket, updateTicketStatus,
@@ -382,6 +382,12 @@ export function useRejectProduct() {
 
 export function useAdminOrdersFiltered(params: { page?: number; limit?: number; status?: string; search?: string; dateFrom?: string; dateTo?: string; includeTestOrders?: string } = {}) {
   return useQuery({ queryKey: ["admin", "orders", params], queryFn: () => getAdminOrdersFiltered(params), staleTime: 60_000, retry: 1 });
+}
+
+export function useAbandonedCheckouts(params: { state?: string; page?: number; limit?: number; search?: string; dateFrom?: string; dateTo?: string; includeTestOrders?: string } = {}) {
+  // placeholderData keeps the previous page on screen while the next loads, so
+  // switching tabs or pages does not blank the table and flash the empty state.
+  return useQuery({ queryKey: ["admin", "abandoned-checkouts", params], queryFn: () => getAbandonedCheckouts(params), staleTime: 60_000, retry: 1, placeholderData: (prev) => prev });
 }
 
 export function useOrderById(orderId: string) {

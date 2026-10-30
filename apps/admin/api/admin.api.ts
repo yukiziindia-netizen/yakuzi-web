@@ -400,6 +400,47 @@ export async function getAdminOrdersFiltered(params: { page?: number; limit?: nu
   return data?.data ?? { data: [], total: 0 };
 }
 
+export interface AbandonedCheckout {
+  id: string;
+  state: "abandoned" | "in_progress";
+  startedAt: string;
+  cancelledAt: string | null;
+  cancellationReason: string | null;
+  totalAmount: number;
+  orderIds: string[];
+  buyer: { id: string; phone: string | null; email: string | null; buyerProfile: { legalName: string | null } | null } | null;
+  address: { name: string; phone: string; city: string; state: string } | null;
+  items: { name: string; quantity: number; totalPrice: number }[];
+  boughtLater: boolean;
+}
+
+export interface AbandonedCheckoutsResponse {
+  data: AbandonedCheckout[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  summary: { abandonedCount: number; abandonedValue: number; inProgressCount: number; inProgressValue: number };
+  truncated: boolean;
+}
+
+/**
+ * Checkouts that reached payment and never completed it, one row per checkout.
+ *
+ * Throws on failure rather than returning an empty list: this screen exists to
+ * tell the owner how much revenue is being lost, and "could not load" must
+ * never read as "nothing was lost".
+ */
+export async function getAbandonedCheckouts(
+  params: { state?: string; page?: number; limit?: number; search?: string; dateFrom?: string; dateTo?: string; includeTestOrders?: string } = {},
+): Promise<AbandonedCheckoutsResponse> {
+  const qs = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => { if (v) qs.set(k, String(v)); });
+  const { data } = await apiClient.get<any>(`/admin/abandoned-checkouts?${qs}`);
+  // Backend responds { message, data: { data, total, page, limit, totalPages, summary, truncated } }.
+  return data.data;
+}
+
 /**
  * Cancels an order, restores its stock, and tells the buyer why.
  *

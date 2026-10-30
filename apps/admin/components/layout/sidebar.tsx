@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { LayoutDashboard, Users, Package, ClipboardList, Settings, LogOut, Shield, ChevronLeft, FolderTree, CreditCard, Banknote, Ticket, Bell, UserCog, FileSpreadsheet, Image, Gift, Layout, MessageSquare, PackagePlus, Bot, Layers, Tag, Star, Globe, LayoutGrid, Newspaper, Truck, SlidersHorizontal, Activity } from "lucide-react";
+import { LayoutDashboard, Users, Package, ClipboardList, Settings, LogOut, Shield, ChevronLeft, FolderTree, CreditCard, Banknote, Ticket, Bell, UserCog, FileSpreadsheet, Image, Gift, Layout, MessageSquare, PackagePlus, Bot, Layers, Tag, Star, Globe, LayoutGrid, Newspaper, Truck, SlidersHorizontal, Activity, ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { can, firstAccessibleRoute, TabKey } from "@/lib/access";
 import { useAdminAccess } from "@/hooks/useAccess";
@@ -28,6 +28,7 @@ const NAV: { icon: any; label: string; href: string; tab?: TabKey }[] = [
   { icon: Layers, label: "Categories", href: "/collections", tab: "categories" },
   { icon: LayoutGrid, label: "Homepage Sections", href: "/homepage-sections", tab: "homepageSections" },
   { icon: ClipboardList, label: "Orders", href: "/orders", tab: "orders" },
+  { icon: ShoppingCart, label: "Abandoned Checkouts", href: "/abandoned-checkouts", tab: "orders" },
   { icon: Truck, label: "Self Ship", href: "/self-ship", tab: "selfShip" },
   { icon: Layout, label: "Marketing", href: "/marketing", tab: "marketing" },
   { icon: Newspaper, label: "Blogs", href: "/blogs", tab: "blogs" },

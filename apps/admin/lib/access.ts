@@ -227,6 +227,7 @@ const ROUTE_TABS: [string, TabKey][] = [
   ["/categories", "categories"],
   ["/suggestions", "suggestions"],
   ["/orders", "orders"],
+  ["/abandoned-checkouts", "orders"],
   ["/payments", "orders"],
   ["/custom-orders", "orders"],
   ["/self-ship", "selfShip"],

@@ -20,7 +20,7 @@ export default function PaymentIdPage({ params }: { params: { orderId: string } 
   const [uploadError, setUploadError] = useState('');
 
   const { data: payment, isLoading: isPaymentLoading, isError: isPaymentError } = usePaymentByOrderId(params.orderId);
-  const { data: order, isLoading: isOrderLoading, isError: isOrderError } = useOrderById(params.orderId);
+  const { data: order, isLoading: isOrderLoading, isError: isOrderError } = useOrderById(params.orderId, 10_000);
   const uploadFileMutation = useUploadPaymentProofFile();
   const uploadProofByOrderMutation = useUploadPaymentProofByOrder();
   const { toast } = useToast();

@@ -1488,6 +1488,7 @@ export default function Navbar({
                     <div className="flex justify-between items-center py-4 group">
                       <Link
                         href={`/category/${category.slug || category.id}`}
+                        prefetch={false}
                         onClick={() => setIsMobileMenuOpen(false)}
                         className="flex-1 text-[16px] font-medium tracking-wide text-gray-700 hover:text-black transition-colors"
                       >
@@ -1507,6 +1508,7 @@ export default function Navbar({
                       ) : (
                         <Link
                           href={`/category/${category.slug || category.id}`}
+                          prefetch={false}
                           onClick={() => setIsMobileMenuOpen(false)}
                           className="p-1 -mr-1"
                         >
@@ -1528,6 +1530,7 @@ export default function Navbar({
                             {(category as any).subCategories.map((sub: any) => (
                               <Link
                                 key={sub.id}
+                                prefetch={false}
                                 href={`/category/${category.slug || category.id}?sub=${sub.slug || sub.id}`}
                                 onClick={() => setIsMobileMenuOpen(false)}
                                 className="text-[15px] text-gray-600 hover:text-black transition-colors block"

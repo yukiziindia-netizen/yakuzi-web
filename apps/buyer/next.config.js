@@ -18,8 +18,11 @@ const nextConfig = {
   reactStrictMode: true,
   compiler: { removeConsole: process.env.NODE_ENV === 'production' },
   images: {
-    formats: ['image/avif', 'image/webp'],
-    minimumCacheTTL: 3600,
+    // Vercel bills each resized variant and its storage. One format halves the
+    // variants, and a 30-day TTL stops processed images being re-made hourly.
+    // Replacing a photo uploads a new file name, so a long TTL never serves a stale one.
+    formats: ['image/webp'],
+    minimumCacheTTL: 60 * 60 * 24 * 30,
     remotePatterns: [
       { protocol: 'https', hostname: 'cdn.worldvectorlogo.com' },
       { protocol: 'https', hostname: '**' },

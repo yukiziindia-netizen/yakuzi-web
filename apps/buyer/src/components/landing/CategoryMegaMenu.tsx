@@ -39,7 +39,7 @@ export default function CategoryMegaMenu({ category, isOpen, onMouseEnter, onMou
                     Explore {category.name}
                     <span className="text-lg font-normal">›</span>
                   </h3>
-                  <Link href={`/category/${category.slug || category.id}`} className="text-xs font-bold text-sky-600 hover:text-sky-700 flex items-center gap-1">
+                  <Link prefetch={false} href={`/category/${category.slug || category.id}`} className="text-xs font-bold text-sky-600 hover:text-sky-700 flex items-center gap-1">
                     View All <ArrowRight className="w-3 h-3" />
                   </Link>
                 </div>
@@ -53,7 +53,7 @@ export default function CategoryMegaMenu({ category, isOpen, onMouseEnter, onMou
                     <ul className={`grid ${subCategories.length > 10 ? 'grid-cols-2' : 'grid-cols-1'} gap-x-8 gap-y-3`}>
                       {subCategories.map((sub) => (
                         <li key={sub.id}>
-                          <Link 
+                          <Link prefetch={false} 
                             href={`/category/${category.slug || category.id}?subCategoryId=${sub.id}`}
                             className="text-sm text-gray-500 hover:text-sky-600 transition-colors duration-200"
                           >
@@ -79,17 +79,17 @@ export default function CategoryMegaMenu({ category, isOpen, onMouseEnter, onMou
                           day products are actually flagged. */}
                       <ul className="space-y-3">
                         <li>
-                          <Link href={`/category/${category.slug || category.id}?isNew=true`} className="text-sm text-gray-500 hover:text-sky-600 transition-colors">
+                          <Link prefetch={false} href={`/category/${category.slug || category.id}?isNew=true`} className="text-sm text-gray-500 hover:text-sky-600 transition-colors">
                             New Arrivals
                           </Link>
                         </li>
                         <li>
-                          <Link href={`/category/${category.slug || category.id}?maxPrice=1000`} className="text-sm text-gray-500 hover:text-sky-600 transition-colors">
+                          <Link prefetch={false} href={`/category/${category.slug || category.id}?maxPrice=1000`} className="text-sm text-gray-500 hover:text-sky-600 transition-colors">
                             Under ₹1,000
                           </Link>
                         </li>
                         <li>
-                          <Link href={`/category/${category.slug || category.id}`} className="text-sm text-gray-500 hover:text-sky-600 transition-colors">
+                          <Link prefetch={false} href={`/category/${category.slug || category.id}`} className="text-sm text-gray-500 hover:text-sky-600 transition-colors">
                             Shop all {category.name}
                           </Link>
                         </li>

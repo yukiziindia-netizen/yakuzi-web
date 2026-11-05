@@ -12,13 +12,13 @@ export function useOrders(params?: { page?: number; limit?: number; status?: str
   });
 }
 
-export function useOrderById(id: string) {
+export function useOrderById(id: string, pollMs = 60_000) {
   const { isAuthenticated } = useAuth();
   return useQuery({
     queryKey: ['order', id],
     queryFn: () => getOrderById(id),
     enabled: isAuthenticated && !!id,
-    refetchInterval: 10000,
+    refetchInterval: pollMs,
   });
 }
 
@@ -80,6 +80,6 @@ export function useOrderTracking(orderId: string) {
     queryKey: ['order-tracking', orderId],
     queryFn: () => getOrderTracking(orderId),
     enabled: isAuthenticated && !!orderId,
-    refetchInterval: 30000,
+    refetchInterval: 60_000,
   });
 }

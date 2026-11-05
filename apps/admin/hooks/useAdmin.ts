@@ -391,7 +391,7 @@ export function useAbandonedCheckouts(params: { state?: string; page?: number; l
 }
 
 export function useOrderById(orderId: string) {
-  return useQuery({ queryKey: ["admin", "order", orderId], queryFn: () => getOrderById(orderId), enabled: !!orderId, staleTime: 60_000, refetchInterval: 10000, retry: 1 });
+  return useQuery({ queryKey: ["admin", "order", orderId], queryFn: () => getOrderById(orderId), enabled: !!orderId, staleTime: 60_000, refetchInterval: 60_000, retry: 1 });
 }
 
 export function useRecordOrderRefund() {

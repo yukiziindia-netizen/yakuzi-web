@@ -53,6 +53,7 @@ export default async function SiteFooter() {
                 )}
                 <Link
                   href={`/collections/${c.slug}`}
+                  prefetch={false}
                   className="transition-colors hover:text-[#562996] hover:underline underline-offset-4"
                 >
                   {c.name}
@@ -65,6 +66,7 @@ export default async function SiteFooter() {
               </span>
               <Link
                 href="/collections"
+                prefetch={false}
                 className="transition-colors hover:text-[#562996] hover:underline underline-offset-4"
               >
                 All collections
@@ -83,6 +85,7 @@ export default async function SiteFooter() {
                 )}
                 <Link
                   href={link.href}
+                  prefetch={false}
                   className="transition-colors hover:text-[#562996] hover:underline underline-offset-4"
                 >
                   {link.label}

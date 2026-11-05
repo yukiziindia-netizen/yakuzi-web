@@ -191,7 +191,7 @@ export function useAddTicketMessage() {
 
 // ─── Order Detail ─────────────────────────────────────
 export function useSellerOrder(orderId: string) {
-  return useQuery({ queryKey: ["seller", "order", orderId], queryFn: () => getSellerOrderById(orderId), enabled: !!orderId, staleTime: 10_000, refetchInterval: 10000, retry: 1 });
+  return useQuery({ queryKey: ["seller", "order", orderId], queryFn: () => getSellerOrderById(orderId), enabled: !!orderId, staleTime: 10_000, refetchInterval: 60_000, retry: 1 });
 }
 
 export function useSellerOrderInvoices(orderId: string) {

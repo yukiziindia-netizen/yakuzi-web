@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Search, HelpCircle, AlertCircle, Truck } from 'lucide-react';
+import { Search, HelpCircle, AlertCircle, Truck, ShieldCheck, PackageCheck, Video } from 'lucide-react';
 import { useCart, useSyncCart, useClearCart } from '@/hooks/useCart';
 import { useCreateOrder } from '@/hooks/useOrders';
 import { useCreatePayment } from '@/hooks/usePayments';
@@ -814,6 +814,41 @@ export default function CheckoutPage() {
                 </div>
               </div>
             )}
+
+            {/* Return promise, shown right before the buyer commits. The three
+                lines are the policy in the owner's wording; /returns holds the
+                full text. */}
+            <div
+              role="note"
+              aria-label="Return and refund policy"
+              style={{
+                marginBottom: 20, borderRadius: 14, overflow: 'hidden',
+                border: '1.5px solid #a7e3c1',
+                background: 'linear-gradient(135deg, #f0fbf5 0%, #e6f7ee 100%)',
+                boxShadow: '0 4px 16px rgba(22, 163, 74, 0.10)',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 18px 14px' }}>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 3px 8px rgba(22, 163, 74, 0.35)' }}>
+                  <ShieldCheck size={24} color="#fff" strokeWidth={2.2} />
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <p style={{ fontSize: 17, fontWeight: 800, color: '#14532d', letterSpacing: 0.2, lineHeight: 1.25, textTransform: 'uppercase' }}>
+                    No questions asked return &amp; refund
+                  </p>
+                  <p style={{ fontSize: 14, fontWeight: 600, color: '#166534', marginTop: 4, display: 'flex', alignItems: 'center', gap: 6, lineHeight: 1.4 }}>
+                    <PackageCheck size={16} style={{ flexShrink: 0 }} />
+                    Only if wrong or damaged products received
+                  </p>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 18px', background: '#fff7e0', borderTop: '1.5px dashed #f2c94c' }}>
+                <Video size={18} color="#b45309" style={{ flexShrink: 0 }} />
+                <span style={{ fontSize: 14, fontWeight: 800, color: '#78350f', letterSpacing: 0.3, textTransform: 'uppercase' }}>
+                  Unboxing video mandatory
+                </span>
+              </div>
+            </div>
 
             {/* PAY NOW */}
             <button

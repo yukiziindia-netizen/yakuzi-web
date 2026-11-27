@@ -24,7 +24,9 @@ import {
   Loader2,
   CheckCircle,
   X,
+  Play,
 } from 'lucide-react';
+import { isVideoUrl } from '@yukizi/utils';
 import Image from 'next/image';
 import { productImageAlt } from '@/lib/seo/image-alt';
 import { trackProductView } from '@/lib/analytics/tracker';
@@ -302,22 +304,38 @@ function ProductBannerCard({
       </div>
 
       {/* Vertical Thumbnails at bottom left side */}
-      <div className="absolute left-3 lg:left-6 bottom-3 lg:bottom-6 flex flex-col gap-2 z-20">
-        {images.slice(0, 3).map((img: string, idx: number) => (
+      <div className="absolute left-3 lg:left-6 bottom-3 lg:bottom-6 max-h-[calc(100%-5rem)] overflow-y-auto overflow-x-hidden p-1 flex flex-col gap-2 z-20 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {images.map((img: string, idx: number) => (
           <button
             key={idx}
             type="button"
             onClick={() => setActiveImageIndex(idx)}
-            className={`rounded-xl overflow-hidden border bg-white/20 backdrop-blur-md shadow-md transition-all duration-200 focus:outline-none w-10 h-10 sm:w-12 sm:h-12 lg:w-[72px] lg:h-[72px] ${activeImageIndex === idx ? 'border-white/90 scale-105 shadow-lg' : 'border-white/30 hover:border-white/60'
+            aria-label={isVideoUrl(img) ? `Play video ${idx + 1}` : `Show image ${idx + 1}`}
+            className={`relative shrink-0 rounded-xl overflow-hidden border bg-white/20 backdrop-blur-md shadow-md transition-all duration-200 focus:outline-none w-10 h-10 sm:w-12 sm:h-12 lg:w-[72px] lg:h-[72px] ${activeImageIndex === idx ? 'border-white/90 scale-105 shadow-lg' : 'border-white/30 hover:border-white/60'
               }`}
           >
-            <Image
-              src={img}
-              alt={productImageAlt(productName, altOverrides?.[img], idx)}
-              width={72}
-              height={72}
-              className="w-full h-full object-contain"
-            />
+            {isVideoUrl(img) ? (
+              <>
+                <video
+                  src={`${img}#t=0.1`}
+                  muted
+                  playsInline
+                  preload="metadata"
+                  className="w-full h-full object-cover pointer-events-none"
+                />
+                <span className="absolute inset-0 flex items-center justify-center bg-black/30">
+                  <Play className="w-4 h-4 lg:w-5 lg:h-5 text-white fill-white" />
+                </span>
+              </>
+            ) : (
+              <Image
+                src={img}
+                alt={productImageAlt(productName, altOverrides?.[img], idx)}
+                width={72}
+                height={72}
+                className="w-full h-full object-contain"
+              />
+            )}
           </button>
         ))}
       </div>
@@ -325,7 +343,18 @@ function ProductBannerCard({
       {/* Main Image. Sits under the thumbnails/share/ribbon, which carry their own
           z-index, so clicking those never opens the zoom. */}
  <div className="glass-panel absolute inset-0 w-full h-full rounded-[24px] overflow-hidden p-4 sm:p-6">
-        {activeImage && (
+        {activeImage && isVideoUrl(activeImage) && (
+          <video
+            key={activeImage}
+            src={activeImage}
+            controls
+            playsInline
+            preload="metadata"
+            aria-label={`${productName} video`}
+            className="relative w-full h-full object-contain rounded-[16px] bg-black/20"
+          />
+        )}
+        {activeImage && !isVideoUrl(activeImage) && (
           <button
             type="button"
             onClick={() => setIsZoomed(true)}
@@ -409,9 +438,9 @@ function ProductBannerCard({
             {images.length > 1 && (
               <div
                 onClick={(e) => e.stopPropagation()}
-                className="flex items-center gap-2 shrink-0"
+                className="flex flex-wrap items-center justify-center gap-2 shrink-0"
               >
-                {images.slice(0, 6).map((img: string, idx: number) => (
+                {images.map((img: string, idx: number) => isVideoUrl(img) ? null : (
                   <button
                     key={idx}
                     type="button"

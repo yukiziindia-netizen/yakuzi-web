@@ -7,6 +7,7 @@ import { Button, Input, Textarea } from "@/components/ui";
 import toast from "react-hot-toast";
 import { useCategories, useSubCategories, useCreateSuggestion, useUpdateSuggestion } from "@/hooks/useAdmin";
 import { MediaUploader, MediaItem } from "@/components/ui/media-uploader";
+import { isVideoUrl } from "@yukizi/utils";
 import { VariantBuilder, VariantOption, VariantCombination } from "@/components/ui/variant-builder";
 import {
   ProductSeoFields,
@@ -154,7 +155,7 @@ export function SuggestionForm({ initialData, onClose }: SuggestionFormProps) {
           initialData.images.map((img: any) => ({
             id: img.id || Math.random().toString(),
             url: img.url || img,
-            type: "image",
+            type: isVideoUrl(img.url || img) ? "video" : "image",
             file: null,
             isLoading: false
           }))
